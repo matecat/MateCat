@@ -4,6 +4,7 @@ namespace Matecat\Core\Controllers;
 
 use Controller\Abstracts\Authentication\CookieManager;
 use Controller\API\App\CreateProjectController;
+use DomainException;
 use Exception;
 use InvalidArgumentException;
 use Klein\Request;
@@ -978,6 +979,27 @@ class CreateProjectControllerTest extends AbstractTest
 
         $this->assertIsArray($result);
         $this->assertNotEmpty($result);
+    }
+
+    /**
+     * Inline xliff_parameters with a locked draft rule: the hydration refuses it with a 400.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateXliffParameters_throws_400_for_a_locked_draft_rule(): void
+    {
+        $xliff = [
+            'name'  => 'locked draft',
+            'uid'   => $this->user->uid,
+            'rules' => ['xliff12' => [['states' => ['translated'], 'analysis' => 'pre-translated', 'editor' => 'draft', 'lock' => true]]],
+        ];
+
+        $this->expectException(DomainException::class);
+        $this->expectExceptionCode(400);
+        $this->expectExceptionMessage('A rule with editor status DRAFT can not be locked.');
+
+        $this->invokePrivate('validateXliffParameters', [json_encode($xliff), null]);
     }
 
     // ─── setMetadataFromPostInput ───

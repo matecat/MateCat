@@ -45,6 +45,7 @@ use Model\Teams\TeamStruct;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserStruct;
+use Model\Xliff\DTO\XliffRulesModel;
 use Model\Xliff\XliffConfigTemplateDao;
 use Plugins\Features\ProjectCompletion;
 use ReflectionException;
@@ -1335,7 +1336,13 @@ class NewController extends KleinController
             $validator = new JSONValidator('xliff_parameters_rules_content.json', true);
             $validator->validate($validatorObject);
 
-            return $validatorObject->getValue(true);
+            $rules = $validatorObject->getValue(true);
+
+            // the schema can not see the rules that are invalid together (a locked draft, a state in two rules):
+            // building the model here refuses them with a 400, before the project is queued
+            XliffRulesModel::fromArray($rules);
+
+            return $rules;
         }
 
         if (!empty($xliff_parameters_template_id)) {

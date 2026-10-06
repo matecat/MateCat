@@ -10,6 +10,7 @@ use Model\Jobs\JobStruct;
 use Model\ProjectCreation\ProjectManagerModel;
 use Model\ProjectCreation\ProjectStructure;
 use Model\ProjectCreation\TranslationTuple;
+use Model\Xliff\DTO\Xliff12Rule;
 use Model\Xliff\DTO\XliffRuleInterface;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\Exception as MockException;
@@ -366,5 +367,120 @@ class InsertPreTranslationsTest extends AbstractTest
         $service = $this->buildService();
 
         $service->insertPreTranslations($this->job, $this->projectStructure);
+    }
+
+    // ── Test 8: the lock follows the matching XLIFF rule ─────────────────
+
+    /**
+     * Two rules with the same editor status: only the tuples matched by the rule with `lock` are locked.
+     *
+     * @throws MockException
+     * @throws Exception
+     */
+    #[Test]
+    public function locksOnlyTheTuplesMatchedByALockedRule(): void
+    {
+        $lockedRule   = new Xliff12Rule(['final'], 'pre-translated', 'approved', 'ice', true);
+        $unlockedRule = new Xliff12Rule(['translated'], 'pre-translated', 'approved', 'ice');
+
+        $this->projectStructure->translations = [
+            'tu-1' => [0 => $this->makeTuple(segmentId: 1, rule: $lockedRule, state: 'final')],
+            'tu-2' => [0 => $this->makeTuple(segmentId: 2, rule: $unlockedRule, state: 'translated')],
+            'tu-3' => [0 => $this->makeTuple(segmentId: 3, rule: $lockedRule, state: 'final')],
+        ];
+
+        $captured = [];
+
+        /** @var ProjectManagerModel&MockObject $pmModel */
+        $pmModel = $this->createMock(ProjectManagerModel::class);
+        $pmModel->expects($this->once())
+            ->method('insertPreTranslations')
+            ->with($this->callback(function (array $values) use (&$captured): bool {
+                $captured = $values;
+
+                return true;
+            }));
+
+        $this->buildService(pmModel: $pmModel)->insertPreTranslations($this->job, $this->projectStructure);
+
+        $this->assertSame([1, 0, 1], array_column($captured, 'locked'));
+        $this->assertSame(['APPROVED', 'APPROVED', 'APPROVED'], array_column($captured, 'status'));
+    }
+
+    /**
+     * A rule saved without `lock` imports its tuples unlocked.
+     *
+     * @throws MockException
+     * @throws Exception
+     */
+    #[Test]
+    public function aRuleWithoutLockImportsUnlocked(): void
+    {
+        $rule = Xliff12Rule::fromArray(['states' => ['translated'], 'analysis' => 'pre-translated', 'editor' => 'translated']);
+
+        $this->projectStructure->translations = [
+            'tu-1' => [0 => $this->makeTuple(rule: $rule, state: 'translated')],
+        ];
+
+        $captured = [];
+
+        /** @var ProjectManagerModel&MockObject $pmModel */
+        $pmModel = $this->createMock(ProjectManagerModel::class);
+        $pmModel->expects($this->once())
+            ->method('insertPreTranslations')
+            ->with($this->callback(function (array $values) use (&$captured): bool {
+                $captured = $values;
+
+                return true;
+            }));
+
+        $this->buildService(pmModel: $pmModel)->insertPreTranslations($this->job, $this->projectStructure);
+
+        $this->assertSame(0, $captured[0]['locked']);
+    }
+
+    /**
+     * The rows feed a positional bulk insert: the key order is part of the contract.
+     *
+     * @throws MockException
+     * @throws Exception
+     */
+    #[Test]
+    public function keepsTheOrderOfTheSqlValuesKeys(): void
+    {
+        $this->projectStructure->translations = [
+            'tu-1' => [0 => $this->makeTuple(rule: new Xliff12Rule(['final'], 'pre-translated', 'approved2', 'ice', true))],
+        ];
+
+        $captured = [];
+
+        /** @var ProjectManagerModel&MockObject $pmModel */
+        $pmModel = $this->createMock(ProjectManagerModel::class);
+        $pmModel->expects($this->once())
+            ->method('insertPreTranslations')
+            ->with($this->callback(function (array $values) use (&$captured): bool {
+                $captured = $values;
+
+                return true;
+            }));
+
+        $this->buildService(pmModel: $pmModel)->insertPreTranslations($this->job, $this->projectStructure);
+
+        $this->assertSame([
+            'id_segment',
+            'id_job',
+            'segment_hash',
+            'status',
+            'translation',
+            'suggestion',
+            'locked',
+            'match_type',
+            'eq_word_count',
+            'serialized_errors_list',
+            'warning',
+            'suggestion_match',
+            'standard_word_count',
+            'version_number',
+        ], array_keys($captured[0]));
     }
 }

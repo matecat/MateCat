@@ -272,7 +272,7 @@ class SegmentStorageService
                     'status'                 => $rule->asEditorStatus(),
                     'translation'            => $translationTuple->translationLayer0,
                     'suggestion'             => $translationTuple->suggestionLayer0,
-                    'locked'                 => 0,
+                    'locked'                 => (int)$rule->isLocked(),
                     'match_type'             => $rule->asMatchType(),
                     'eq_word_count'          => $rule->asEquivalentWordCount($translationTuple->rawWordCount, $payable_rates),
                     'serialized_errors_list' => $translationTuple->serializedErrors,

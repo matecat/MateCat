@@ -54,7 +54,7 @@ class XliffRulesModel implements JsonSerializable
     }
 
     /**
-     * @param array<string, array<int, array{states: string[], analysis: string, editor?: string|null, match_category?: string|null}>> $structure
+     * @param array<string, array<int, array{states: string[], analysis: string, editor?: string|null, match_category?: string|null, lock?: bool}>> $structure
      *
      * @return self
      * @throws Exception

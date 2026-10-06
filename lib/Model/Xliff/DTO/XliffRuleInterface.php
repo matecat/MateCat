@@ -21,6 +21,11 @@ interface XliffRuleInterface
     public function isNoStateRule(): bool;
 
     /**
+     * @return bool
+     */
+    public function isLocked(): bool;
+
+    /**
      * @return string
      * @throws Exception
      */

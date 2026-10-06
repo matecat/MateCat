@@ -83,7 +83,7 @@ class XliffConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonS
     }
 
     /**
-     * @param array<string, list<array{states: list<string>, analysis: string, editor?: string|null, match_category?: string|null}>> $rules
+     * @param array<string, list<array{states: list<string>, analysis: string, editor?: string|null, match_category?: string|null, lock?: bool}>> $rules
      *
      * @throws Exception
      */
@@ -94,7 +94,7 @@ class XliffConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonS
         // rules
         if (isset($rules[XliffRulesModel::XLIFF_12]) and is_array($rules[XliffRulesModel::XLIFF_12])) {
             foreach ($rules[XliffRulesModel::XLIFF_12] as $xliff12Rule) {
-                $rule = new Xliff12Rule($xliff12Rule['states'], $xliff12Rule['analysis'], $xliff12Rule['editor'] ?? null, $xliff12Rule['match_category'] ?? null);
+                $rule = new Xliff12Rule($xliff12Rule['states'], $xliff12Rule['analysis'], $xliff12Rule['editor'] ?? null, $xliff12Rule['match_category'] ?? null, $xliff12Rule['lock'] ?? false);
                 $this->rules->addRule($rule);
             }
         }
@@ -102,7 +102,7 @@ class XliffConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonS
         // xliff20
         if (isset($rules[XliffRulesModel::XLIFF_20]) and is_array($rules[XliffRulesModel::XLIFF_20])) {
             foreach ($rules[XliffRulesModel::XLIFF_20] as $xliff20Rule) {
-                $rule = new Xliff20Rule($xliff20Rule['states'], $xliff20Rule['analysis'], $xliff20Rule['editor'] ?? null, $xliff20Rule['match_category'] ?? null);
+                $rule = new Xliff20Rule($xliff20Rule['states'], $xliff20Rule['analysis'], $xliff20Rule['editor'] ?? null, $xliff20Rule['match_category'] ?? null, $xliff20Rule['lock'] ?? false);
                 $this->rules->addRule($rule);
             }
         }

@@ -64,20 +64,26 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
      * @var string
      */
     protected string $matchCategory = 'ice';
+    /**
+     * Whether the segments matched by this rule are imported as locked
+     */
+    protected bool $lock = false;
 
      /**
       * @param string[] $states
       * @param string $analysis
       * @param string|null $editor
       * @param string|null $matchCategory
+      * @param bool $lock
       * @throws DomainException
       */
-     public function __construct(array $states, string $analysis, ?string $editor = null, ?string $matchCategory = null)
+     public function __construct(array $states, string $analysis, ?string $editor = null, ?string $matchCategory = null, bool $lock = false)
     {
         // follow exact assignment order
         $this->setStates($states);
         $this->setAnalysis($analysis);
         $this->setEditor($editor);
+        $this->setLock($lock);
         $this->setMatchCategory($matchCategory);
     }
 
@@ -138,6 +144,22 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     }
 
      /**
+      * A segment left to translate, as NEW or DRAFT, can not be locked.
+      *
+      * @param bool $lock
+      * @throws DomainException
+      */
+     protected function setLock(bool $lock): void
+    {
+        $status = $this->asEditorStatus();
+        if ($lock && in_array($status, [TranslationStatus::STATUS_NEW, TranslationStatus::STATUS_DRAFT], true)) {
+            throw new DomainException("A rule with editor status $status can not be locked.", 400);
+        }
+
+        $this->lock = $lock;
+    }
+
+     /**
       * Accept null values and keep the default ICE
       *
       * @param string|null $matchCategory
@@ -157,14 +179,14 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     }
 
      /**
-      * @param array{states: string[], analysis: string, editor?: string|null, match_category?: string|null} $structure
+      * @param array{states: string[], analysis: string, editor?: string|null, match_category?: string|null, lock?: bool} $structure
       *
       * @return AbstractXliffRule
       * @throws DomainException
       */
      public static function fromArray(array $structure): AbstractXliffRule
     {
-        return new static($structure['states'], $structure['analysis'], $structure['editor'] ?? null, $structure['match_category'] ?? null);
+        return new static($structure['states'], $structure['analysis'], $structure['editor'] ?? null, $structure['match_category'] ?? null, $structure['lock'] ?? false);
     }
 
     /**
@@ -185,6 +207,11 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
             $result['match_category'] = $this->matchCategory;
         }
 
+        // only when set, so a template saved before the option existed serializes unchanged
+        if ($this->lock) {
+            $result['lock'] = true;
+        }
+
         return $result;
     }
 
@@ -200,6 +227,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
      * @param string|null $type
      *
      * @return list<string>
+     * @throws void
      */
     public function getStates(?string $type = null): array
     {
@@ -223,6 +251,16 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     }
 
     /**
+     * Whether the segments matched by this rule are imported as locked.
+     *
+     * @return bool
+     */
+    public function isLocked(): bool
+    {
+        return $this->lock;
+    }
+
+    /**
      * @return string
      */
     protected function getAnalysis(): string
@@ -240,6 +278,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
 
     /**
      * @return string
+     * @throws void
      */
     public function asEditorStatus(): string
     {

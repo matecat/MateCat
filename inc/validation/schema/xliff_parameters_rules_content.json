@@ -141,6 +141,9 @@
             },
             "match_category": {
               "$ref": "#/definitions/match_category"
+            },
+            "lock": {
+              "type": "boolean"
             }
           }
         },
@@ -201,6 +204,9 @@
             },
             "match_category": {
               "$ref": "#/definitions/match_category"
+            },
+            "lock": {
+              "type": "boolean"
             }
           }
         },
