@@ -9,6 +9,11 @@ import Trash from '../../../../../../img/icons/Trash'
 import {Select} from '../../../../common/Select'
 import {Controller, useForm} from 'react-hook-form'
 import {isEqual} from 'lodash'
+import {
+  fromStatusLockId,
+  getStatusLockOptions,
+  toStatusLockId,
+} from '../../../../../utils/editorStatusLock'
 
 const getMatchCategoryShortId = (id) => id.replace(/_match_category/, '')
 const getMatchCategoryExtendedId = (id) => `${id}_match_category`
@@ -42,11 +47,16 @@ export const XliffRulesRow = ({
   useEffect(() => {
     if (typeof formData === 'undefined') return
 
-    const {editor, match_category, ...restProps} = formData
+    const {editor, match_category, lock, ...restProps} = formData
 
+    // `lock` is written only when true, so a rule without it stays unchanged
     const propsValue = {
       ...restProps,
-      ...(formData.analysis !== 'new' && {editor, match_category}),
+      ...(formData.analysis !== 'new' && {
+        editor,
+        match_category,
+        ...(lock && {lock: true}),
+      }),
     }
 
     if (
@@ -60,6 +70,7 @@ export const XliffRulesRow = ({
   // set default values for current template
   useEffect(() => {
     Object.entries(value).forEach(([key, value]) => setValue(key, value))
+    setValue('lock', value.lock === true)
 
     if (value.analysis !== 'new' && typeof value.editor === 'undefined')
       setValue('editor', xliffOptions.editor[0])
@@ -103,6 +114,8 @@ export const XliffRulesRow = ({
     [],
   )
 
+  const editorOptions = getStatusLockOptions(xliffOptions.editor, getEditorName)
+
   const getAnalysisActiveOption = (id) =>
     optionsAnalysis.find(
       (option) =>
@@ -121,6 +134,7 @@ export const XliffRulesRow = ({
           name="states"
           render={({field: {onChange, value, name}}) => (
             <Select
+              isPortalDropdown={true}
               name={name}
               placeholder="Select state"
               options={statesOptions}
@@ -146,6 +160,7 @@ export const XliffRulesRow = ({
           name="analysis"
           render={({field: {onChange, value, name}}) => (
             <Select
+              isPortalDropdown={true}
               name={name}
               placeholder="Select analysis"
               options={optionsAnalysis}
@@ -166,18 +181,26 @@ export const XliffRulesRow = ({
           name="editor"
           render={({field: {onChange, value, name}}) => (
             <Select
+              isPortalDropdown={true}
               name={name}
               placeholder="Select editor"
-              options={xliffOptions.editor.map((value) => ({
-                id: value,
-                name: getEditorName(value),
-              }))}
+              options={editorOptions}
+              maxHeightDroplist={260}
               activeOption={
                 formData?.analysis === 'new'
                   ? {id: 'na', name: 'N/A (determined by TM)'}
-                  : value && {id: value, name: getEditorName(value)}
+                  : value &&
+                    editorOptions.find(
+                      ({id}) =>
+                        id ===
+                        toStatusLockId({status: value, lock: formData?.lock}),
+                    )
               }
-              onSelect={(option) => onChange(option.id)}
+              onSelect={(option) => {
+                const {status, lock} = fromStatusLockId(option.id)
+                onChange(status)
+                setValue('lock', lock)
+              }}
               isDisabled={
                 typeof value === 'undefined' || formData.analysis === 'new'
               }

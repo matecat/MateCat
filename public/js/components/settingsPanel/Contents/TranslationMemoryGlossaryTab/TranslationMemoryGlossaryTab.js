@@ -13,6 +13,13 @@ import {updateJobMetadata} from '../../../../api/updateJobMetadata/updateJobMeta
 import IconAdd from '../../../../../img/icons/IconAdd'
 import UsersPlus from '../../../../../img/icons/UsersPlus'
 import {Button, BUTTON_TYPE} from '../../../common/Button/Button'
+import Switch from '../../../common/Switch'
+import {Select} from '../../../common/Select'
+import {
+  fromStatusLockId,
+  PRETRANSLATE_STATUS_OPTIONS,
+  toStatusLockId,
+} from '../../../../utils/editorStatusLock'
 
 const COLUMNS_TABLE_ACTIVE = [
   {name: 'Lookup'},
@@ -29,6 +36,11 @@ const COLUMNS_TABLE_INACTIVE = [
   {name: 'Name'},
   {name: 'Key'},
   {name: ''},
+]
+
+const PRETRANSLATE_MATCHES = [
+  {key: 'match_101', label: '101% matches'},
+  {key: 'match_100', label: '100% matches'},
 ]
 
 export const SPECIAL_ROWS_ID = {
@@ -112,14 +124,13 @@ export const TranslationMemoryGlossaryTab = () => {
   const {userInfo} = useContext(ApplicationWrapperContext)
   const getPublicMatches = currentProjectTemplate.getPublicMatches
   const publicTmPenalty = currentProjectTemplate.publicTmPenalty
-  const isPretranslate100Active =
-    currentProjectTemplate.pretranslate.match_100.enabled
-  const setIsPretranslate100Active = (value) =>
+  const pretranslate = currentProjectTemplate.pretranslate
+  const setPretranslateMatch = (key, value) =>
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,
       pretranslate: {
         ...prevTemplate.pretranslate,
-        match_100: {...prevTemplate.pretranslate.match_100, enabled: value},
+        [key]: {...prevTemplate.pretranslate[key], ...value},
       },
     }))
   const isDialectStrictActive = currentProjectTemplate.dialectStrict
@@ -458,17 +469,42 @@ export const TranslationMemoryGlossaryTab = () => {
       >
         {!config.is_cattool && (
           <div className="translation-memory-glossary-checkbox-container">
-            <div className="translation-memory-glossary-checkbox-item">
-              <input
-                checked={isPretranslate100Active}
-                onChange={(e) =>
-                  setIsPretranslate100Active(e.currentTarget.checked)
-                }
-                type="checkbox"
-                data-testid="pretranslate-checkbox"
-              />
-              Pre-translate 100% matches from TM
-            </div>
+            {PRETRANSLATE_MATCHES.map(({key, label}) => (
+              <div
+                key={key}
+                className="translation-memory-glossary-checkbox-item"
+                data-testid={`pretranslate-${key}`}
+              >
+                <span className="translation-memory-glossary-pretranslate-label">
+                  {label}
+                </span>
+                <Switch
+                  active={pretranslate[key].enabled}
+                  onChange={(enabled) => setPretranslateMatch(key, {enabled})}
+                  testId={`pretranslate-${key}-switch`}
+                  showText={false}
+                />
+                Pre-confirm
+                <span className="translation-memory-glossary-pretranslate-status-label">
+                  State in editor
+                </span>
+                <div className="translation-memory-glossary-pretranslate-status">
+                  <Select
+                    isPortalDropdown={true}
+                    name={`pretranslate-${key}-status`}
+                    options={PRETRANSLATE_STATUS_OPTIONS}
+                    maxHeightDroplist={260}
+                    activeOption={PRETRANSLATE_STATUS_OPTIONS.find(
+                      ({id}) => id === toStatusLockId(pretranslate[key]),
+                    )}
+                    onSelect={(option) =>
+                      setPretranslateMatch(key, fromStatusLockId(option.id))
+                    }
+                    isDisabled={!pretranslate[key].enabled}
+                  />
+                </div>
+              </div>
+            ))}
             <div className="translation-memory-glossary-checkbox-item">
               <input
                 checked={isDialectStrictActive}

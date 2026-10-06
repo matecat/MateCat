@@ -32,7 +32,7 @@ export const STANDARD_TEMPLATE = {
   public_tm_penalty: 0,
   pretranslate: {
     match_101: {enabled: true, status: 'APPROVED', lock: true},
-    match_100: {enabled: true, status: 'TRANSLATED', lock: false},
+    match_100: {enabled: false, status: 'TRANSLATED', lock: false},
   },
   created_at: 'Fri, 02 Feb 24 16:48:34 +0100',
   modified_at: 'Fri, 02 Feb 24 16:48:34 +0100',

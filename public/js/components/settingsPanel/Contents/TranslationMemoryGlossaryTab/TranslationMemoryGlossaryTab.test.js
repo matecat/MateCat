@@ -502,7 +502,9 @@ test('Toggling pretranslate and dialect-strict checkboxes modifies the current t
 
   render(<WrapperComponent {...contextValues} />)
 
-  await act(async () => user.click(screen.getByTestId('pretranslate-checkbox')))
+  await act(async () =>
+    user.click(screen.getByTestId('pretranslate-match_100-switch')),
+  )
   await act(async () =>
     user.click(screen.getByTestId('dialect-strict-checkbox')),
   )
@@ -548,7 +550,73 @@ test('Pretranslate truthy', async () => {
 
   render(<WrapperComponent {...contextValues} />)
 
-  expect(screen.getByTestId('pretranslate-checkbox')).toBeChecked()
+  expect(screen.getByTestId('pretranslate-match_100-switch')).toBeChecked()
+})
+
+test('Pretranslate status select is disabled while pre-confirm is off', async () => {
+  const {currentProjectTemplate, ...rest} = contextMockValues()
+  const contextValues = {
+    ...rest,
+    currentProjectTemplate: {
+      ...currentProjectTemplate,
+      pretranslate: {
+        match_101: {enabled: true, status: 'APPROVED', lock: true},
+        match_100: {enabled: false, status: 'TRANSLATED', lock: false},
+      },
+    },
+  }
+
+  render(<WrapperComponent {...contextValues} />)
+
+  const row101 = screen.getByTestId('pretranslate-match_101')
+  const row100 = screen.getByTestId('pretranslate-match_100')
+
+  expect(row101.querySelector('.select--is-disabled')).toBeNull()
+  expect(row101).toHaveTextContent('Approved (locked)')
+  expect(row100.querySelector('.select--is-disabled')).not.toBeNull()
+  expect(row100).toHaveTextContent('Translated')
+})
+
+test('Selecting a pretranslate status writes status and lock', async () => {
+  const user = userEvent.setup()
+  const modifyingCurrentTemplate = jest.fn()
+  const {
+    currentProjectTemplate,
+    modifyingCurrentTemplate: _ignored, // eslint-disable-line no-unused-vars
+    ...rest
+  } = contextMockValues()
+  const contextValues = {
+    ...rest,
+    modifyingCurrentTemplate,
+    currentProjectTemplate: {
+      ...currentProjectTemplate,
+      pretranslate: {
+        match_101: {enabled: true, status: 'APPROVED', lock: true},
+        match_100: {enabled: false, status: 'TRANSLATED', lock: false},
+      },
+    },
+  }
+
+  render(<WrapperComponent {...contextValues} />)
+
+  const row101 = screen.getByTestId('pretranslate-match_101')
+  await act(async () => user.click(row101.querySelector('.select')))
+  await act(async () => user.click(screen.getByText('Approved 2')))
+
+  const updater = modifyingCurrentTemplate.mock.calls[0][0]
+  expect(
+    updater({
+      pretranslate: {
+        match_101: {enabled: true, status: 'APPROVED', lock: true},
+        match_100: {enabled: false, status: 'TRANSLATED', lock: false},
+      },
+    }),
+  ).toEqual({
+    pretranslate: {
+      match_101: {enabled: true, status: 'APPROVED2', lock: false},
+      match_100: {enabled: false, status: 'TRANSLATED', lock: false},
+    },
+  })
 })
 
 test('Get public matches falsy', async () => {

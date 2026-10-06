@@ -42,6 +42,7 @@ import {TemplateSelect} from '../components/settingsPanel/ProjectTemplate/Templa
 import {getMMTKeys} from '../api/getMMTKeys'
 import {AlertDeleteResourceProjectTemplates} from '../components/modals/AlertDeleteResourceProjectTemplates'
 import {handleCreationStatus} from '../utils/newProjectUtils'
+import {getPretranslateParams} from '../utils/editorStatusLock'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
 import {mountPage} from './mountPage'
 import {HomePageSection} from '../components/createProject/HomePageSection'
@@ -544,8 +545,7 @@ const NewProject = () => {
         anonymous: [],
       }),
       lang_detect_files: '',
-      pretranslate_100: pretranslate.match_100.enabled ? 1 : 0,
-      pretranslate_101: pretranslate.match_101.enabled ? 1 : 0,
+      ...getPretranslateParams(pretranslate),
       segmentation_rule: segmentationRule.id === '1' ? '' : segmentationRule.id,
       id_team: idTeam,
       ...(typeof qaModelTemplate !== 'undefined'
