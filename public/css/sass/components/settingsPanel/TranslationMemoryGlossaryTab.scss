@@ -46,17 +46,55 @@
   gap: 8px;
 }
 
-.translation-memory-glossary-pretranslate-label {
-  min-width: 100px;
+.translation-memory-glossary-pretranslate {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+
+  .translation-memory-glossary-tab-table-title {
+    margin-bottom: 0;
+
+    h2 {
+      margin: 0;
+      padding: 0 10px;
+    }
+  }
+
+  p {
+    margin: 0;
+    padding: 0 10px;
+    color: colors.$grey600;
+    text-align: left;
+  }
+}
+
+.translation-memory-glossary-pretranslate-cards {
+  display: flex;
+  gap: 8px;
+}
+
+.translation-memory-glossary-pretranslate-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-radius: variables.$border-radius-default;
+  border: 1px solid colors.$grey200;
+  padding: 12px;
+  background: colors.$white;
+}
+
+.translation-memory-glossary-pretranslate-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-weight: bold;
 }
 
 .translation-memory-glossary-pretranslate-status-label {
-  margin-left: 16px;
-}
-
-.translation-memory-glossary-pretranslate-status {
-  width: 220px;
+  color: colors.$grey600;
+  text-align: left;
 }
 
 .translation-memory-glossary-tab-table-title {
