@@ -10,6 +10,7 @@ use Model\FeaturesBase\Hook\Event\Run\ValidateProjectCreationEvent;
 use Model\Files\MetadataDao;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Utils\Logger\MatecatLogger;
 use Utils\TaskRunner\Exceptions\EndQueueException;
@@ -62,6 +63,51 @@ class ValidateBeforeCreationTest extends AbstractTest
         // Should not throw
         $this->pm->callValidateBeforeCreation();
         $this->assertTrue(true);
+    }
+
+    /**
+     * @return array<string, array{int, string, int, string, bool}>
+     */
+    public static function secondPassReviewCases(): array
+    {
+        return [
+            '101 on, approved2'               => [1, 'APPROVED2', 0, 'TRANSLATED', true],
+            '100 on, approved2'               => [0, 'APPROVED', 1, 'APPROVED2', true],
+            '101 off, approved2'              => [0, 'APPROVED2', 0, 'TRANSLATED', false],
+            '100 off, approved2'              => [1, 'APPROVED', 0, 'APPROVED2', false],
+            'both on, no approved2'           => [1, 'APPROVED', 1, 'TRANSLATED', false],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('secondPassReviewCases')]
+    public function raisesSecondPassReviewForApproved2PreTranslations(
+        int $pretranslate101,
+        string $status101,
+        int $pretranslate100,
+        string $status100,
+        bool $expected
+    ): void {
+        $this->pm->setProjectStructureValue('pretranslate_101', $pretranslate101);
+        $this->pm->setProjectStructureValue('pretranslate_101_status', $status101);
+        $this->pm->setProjectStructureValue('pretranslate_100', $pretranslate100);
+        $this->pm->setProjectStructureValue('pretranslate_100_status', $status100);
+
+        $this->pm->callValidateBeforeCreation();
+
+        $this->assertSame($expected, $this->pm->getTestProjectStructure()->create_2_pass_review);
+    }
+
+    #[Test]
+    public function neverLowersSecondPassReviewAlreadyRequested(): void
+    {
+        $this->pm->setProjectStructureValue('pretranslate_101', 0);
+        $this->pm->setProjectStructureValue('pretranslate_100', 0);
+        $this->pm->setProjectStructureValue('create_2_pass_review', true);
+
+        $this->pm->callValidateBeforeCreation();
+
+        $this->assertTrue($this->pm->getTestProjectStructure()->create_2_pass_review);
     }
 
     #[Test]

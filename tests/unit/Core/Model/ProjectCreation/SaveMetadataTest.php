@@ -151,14 +151,16 @@ class SaveMetadataTest extends AbstractTest
         // metadata is already empty by default in ProjectStructure
         $this->service->save($this->projectStructure, $this->features);
 
-        // pretranslate_101 and both lock options always exist (DTO defaults 1, 1, 0)
+        // pretranslate_101, both lock options and both status options always exist (DTO defaults)
         $metadata = $this->getSinglePersistedMetadataMap();
-        self::assertCount(3, $metadata);
+        self::assertCount(5, $metadata);
 
         $keys = array_keys($metadata);
         self::assertContains(ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value, $keys);
         self::assertSame('1', $metadata[ProjectsMetadataMarshaller::PRE_TRANSLATE_101_LOCK->value]);
         self::assertSame('0', $metadata[ProjectsMetadataMarshaller::PRE_TRANSLATE_100_LOCK->value]);
+        self::assertSame('APPROVED', $metadata[ProjectsMetadataMarshaller::PRE_TRANSLATE_101_STATUS->value]);
+        self::assertSame('TRANSLATED', $metadata[ProjectsMetadataMarshaller::PRE_TRANSLATE_100_STATUS->value]);
     }
 
     // =========================================================================
@@ -277,6 +279,18 @@ class SaveMetadataTest extends AbstractTest
         self::assertSame('1', $this->getPersistedValue(ProjectsMetadataMarshaller::PRE_TRANSLATE_100_LOCK->value));
     }
 
+    #[Test]
+    public function testPretranslateStatusOptionsArePersistedWhenSet(): void
+    {
+        $this->projectStructure->pretranslate_101_status = 'APPROVED2';
+        $this->projectStructure->pretranslate_100_status = 'APPROVED';
+
+        $this->service->save($this->projectStructure, $this->features);
+
+        self::assertSame('APPROVED2', $this->getPersistedValue(ProjectsMetadataMarshaller::PRE_TRANSLATE_101_STATUS->value));
+        self::assertSame('APPROVED', $this->getPersistedValue(ProjectsMetadataMarshaller::PRE_TRANSLATE_100_STATUS->value));
+    }
+
     // =========================================================================
     // MT QE workflow — JSON-encoding of parameters
     // =========================================================================
@@ -390,9 +404,9 @@ class SaveMetadataTest extends AbstractTest
 
         $this->service->save($this->projectStructure, $this->features);
 
-        // 3 metadata keys + pretranslate_101 and both lock options (DTO defaults) = 6 total
+        // 3 metadata keys + pretranslate_101, both lock and both status options (DTO defaults) = 8 total
         $metadata = $this->getSinglePersistedMetadataMap();
-        self::assertCount(6, $metadata);
+        self::assertCount(8, $metadata);
 
         self::assertSame('1', $this->getPersistedValue(ProjectsMetadataMarshaller::ICU_ENABLED->value));
         self::assertSame('0', $this->getPersistedValue(ProjectsMetadataMarshaller::MT_EVALUATION->value));

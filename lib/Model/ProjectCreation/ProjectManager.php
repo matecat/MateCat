@@ -44,6 +44,7 @@ use Utils\ActiveMQ\AMQHandler;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\ActivityLogWorker;
 use Utils\Constants\ProjectStatus;
+use Utils\Constants\TranslationStatus;
 use Utils\Logger\LoggerFactory;
 use Utils\LQA\ICUSourceSegmentDetector;
 use Utils\Registry\AppConfig;
@@ -460,6 +461,15 @@ class ProjectManager
     {
         // set creation date now
         $this->projectStructure->create_date = date('Y-m-d H:i:s');
+
+        // A pre-confirmed 100% or 101% match stored as APPROVED2 needs the second revision phase,
+        // whose chunk reviews are created only at project creation (PostProjectCreateEvent).
+        if (
+            ($this->projectStructure->pretranslate_101 && $this->projectStructure->pretranslate_101_status === TranslationStatus::STATUS_APPROVED2)
+            || ($this->projectStructure->pretranslate_100 && $this->projectStructure->pretranslate_100_status === TranslationStatus::STATUS_APPROVED2)
+        ) {
+            $this->projectStructure->create_2_pass_review = true;
+        }
 
         $this->checkForProjectAssignment();
 

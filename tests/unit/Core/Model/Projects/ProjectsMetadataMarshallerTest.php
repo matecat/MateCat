@@ -26,7 +26,7 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
     #[Test]
     public function enumHasExactlyThirtyCases(): void
     {
-        $this->assertCount(34, ProjectsMetadataMarshaller::cases());
+        $this->assertCount(36, ProjectsMetadataMarshaller::cases());
     }
 
     #[Test]
@@ -47,6 +47,8 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
             'PRE_TRANSLATE_101'             => [ProjectsMetadataMarshaller::PRE_TRANSLATE_101, 'pretranslate_101'],
             'PRE_TRANSLATE_101_LOCK'        => [ProjectsMetadataMarshaller::PRE_TRANSLATE_101_LOCK, 'pretranslate_101_lock'],
             'PRE_TRANSLATE_100_LOCK'        => [ProjectsMetadataMarshaller::PRE_TRANSLATE_100_LOCK, 'pretranslate_100_lock'],
+            'PRE_TRANSLATE_101_STATUS'      => [ProjectsMetadataMarshaller::PRE_TRANSLATE_101_STATUS, 'pretranslate_101_status'],
+            'PRE_TRANSLATE_100_STATUS'      => [ProjectsMetadataMarshaller::PRE_TRANSLATE_100_STATUS, 'pretranslate_100_status'],
             'PROJECT_COMPLETION'            => [ProjectsMetadataMarshaller::PROJECT_COMPLETION, 'project_completion'],
             'MMT_ACTIVATE_CONTEXT_ANALYZER' => [ProjectsMetadataMarshaller::MMT_ACTIVATE_CONTEXT_ANALYZER, 'mmt_activate_context_analyzer'],
             'MMT_IGNORE_GLOSSARY_CASE'      => [ProjectsMetadataMarshaller::MMT_IGNORE_GLOSSARY_CASE, 'mmt_ignore_glossary_case'],
@@ -364,7 +366,7 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
     }
 
     // =========================================================================
-    // unMarshall -- string-cast branch (9 keys)
+    // unMarshall -- string-cast branch (11 keys)
     // =========================================================================
 
     #[Test]
@@ -430,9 +432,17 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
             'deepl_formality'   => ['deepl_formality'],
             'deepl_id_glossary' => ['deepl_id_glossary'],
             'deepl_engine_type' => ['deepl_engine_type'],
+            'pretranslate_101_status' => ['pretranslate_101_status'],
+            'pretranslate_100_status' => ['pretranslate_100_status'],
             'segmentation_rule' => ['segmentation_rule'],
             'context-url'       => ['context-url'],
         ];
+    }
+
+    #[Test]
+    public function preTranslateStatusesAreTheThreeStoredStatuses(): void
+    {
+        $this->assertSame(['TRANSLATED', 'APPROVED', 'APPROVED2'], ProjectsMetadataMarshaller::PRE_TRANSLATE_STATUSES);
     }
 
     // =========================================================================

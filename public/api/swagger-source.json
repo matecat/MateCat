@@ -5829,11 +5829,8 @@
         "tm_prioritization": {
           "type": "boolean"
         },
-        "pretranslate_100": {
-          "type": "boolean"
-        },
-        "pretranslate_101": {
-          "type": "boolean"
+        "pretranslate": {
+          "$ref": "#/definitions/ProjectTemplateSchemaPretranslate"
         },
         "get_public_matches": {
           "type": "boolean"
@@ -5884,8 +5881,61 @@
       "required": [
         "name",
         "id_team",
-        "pretranslate_100",
+        "pretranslate",
         "get_public_matches"
+      ]
+    },
+    "ProjectTemplateSchemaPretranslate": {
+      "type": "object",
+      "description": "Pre-confirm options for 101% (in-context) and 100% TM matches.",
+      "properties": {
+        "match_101": {
+          "$ref": "#/definitions/ProjectTemplateSchemaPretranslateMatch"
+        },
+        "match_100": {
+          "$ref": "#/definitions/ProjectTemplateSchemaPretranslateMatch"
+        }
+      },
+      "required": [
+        "match_101",
+        "match_100"
+      ],
+      "example": {
+        "match_101": {
+          "enabled": true,
+          "status": "APPROVED",
+          "lock": true
+        },
+        "match_100": {
+          "enabled": false,
+          "status": "TRANSLATED",
+          "lock": false
+        }
+      }
+    },
+    "ProjectTemplateSchemaPretranslateMatch": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Pre-confirm the segments with a match of this kind."
+        },
+        "status": {
+          "type": "string",
+          "description": "Status given to a pre-confirmed segment. Defaults to APPROVED for 101% matches and TRANSLATED for 100% matches.",
+          "enum": [
+            "TRANSLATED",
+            "APPROVED",
+            "APPROVED2"
+          ]
+        },
+        "lock": {
+          "type": "boolean",
+          "description": "Lock a pre-confirmed segment. Defaults to true for 101% matches and false for 100% matches."
+        }
+      },
+      "required": [
+        "enabled"
       ]
     },
     "ProjectTemplateSchemaTM": {

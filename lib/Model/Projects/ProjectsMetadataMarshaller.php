@@ -10,6 +10,7 @@
 namespace Model\Projects;
 
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
+use Utils\Constants\TranslationStatus;
 
 enum ProjectsMetadataMarshaller: string
 {
@@ -21,6 +22,8 @@ enum ProjectsMetadataMarshaller: string
     case PRE_TRANSLATE_101 = 'pretranslate_101';
     case PRE_TRANSLATE_101_LOCK = 'pretranslate_101_lock';
     case PRE_TRANSLATE_100_LOCK = 'pretranslate_100_lock';
+    case PRE_TRANSLATE_101_STATUS = 'pretranslate_101_status';
+    case PRE_TRANSLATE_100_STATUS = 'pretranslate_100_status';
     case PROJECT_COMPLETION = 'project_completion';
     case MMT_ACTIVATE_CONTEXT_ANALYZER = 'mmt_activate_context_analyzer';
     case MMT_IGNORE_GLOSSARY_CASE = 'mmt_ignore_glossary_case';
@@ -51,6 +54,18 @@ enum ProjectsMetadataMarshaller: string
     case WPML = 'WPML';
     case CONTEXT_URL = 'context-url';
 
+    /**
+     * Statuses a pre-confirmed 100% or 101% match can be stored with,
+     * accepted by the pretranslate_101_status and pretranslate_100_status options.
+     *
+     * @var list<string>
+     */
+    public const array PRE_TRANSLATE_STATUSES = [
+        TranslationStatus::STATUS_TRANSLATED,
+        TranslationStatus::STATUS_APPROVED,
+        TranslationStatus::STATUS_APPROVED2,
+    ];
+
     public static function unMarshall(MetadataStruct $struct): mixed
     {
         return (match ($struct->key) {
@@ -77,6 +92,8 @@ enum ProjectsMetadataMarshaller: string
             ProjectsMetadataMarshaller::DEEPL_FORMALITY->value,
             ProjectsMetadataMarshaller::DEEPL_ID_GLOSSARY->value,
             ProjectsMetadataMarshaller::DEEPL_ENGINE_TYPE->value,
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_101_STATUS->value,
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_100_STATUS->value,
             ProjectsMetadataMarshaller::CONTEXT_URL->value => fn() => (string)$struct->value,
             // backward compatibility, old projects could have JSON glossaries encoded as HTML entities
             ProjectsMetadataMarshaller::LARA_GLOSSARIES->value => fn() => json_decode(html_entity_decode((string)$struct->value), true),

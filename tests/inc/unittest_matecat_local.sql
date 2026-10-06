@@ -610,6 +610,8 @@ CREATE TABLE `project_templates` (
   `mandatory_issues` varchar(255) DEFAULT NULL,
   `pretranslate_101_lock` tinyint(1) NOT NULL DEFAULT '1',
   `pretranslate_100_lock` tinyint(1) NOT NULL DEFAULT '0',
+  `pretranslate_101_status` varchar(16) NOT NULL DEFAULT 'APPROVED',
+  `pretranslate_100_status` varchar(16) NOT NULL DEFAULT 'TRANSLATED',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uid_name_idx` (`uid`,`name`),
   KEY `uid_idx` (`uid`)

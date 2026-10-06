@@ -9,6 +9,7 @@ use JsonSerializable;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
 use Model\Jobs\JobsMetadataMarshaller;
+use Utils\Constants\TranslationStatus;
 use stdClass;
 use TypeError;
 use Utils\Validation\UserSuppliedName;
@@ -21,8 +22,10 @@ use Utils\Validation\UserSuppliedName;
  *     is_default?: bool,
  *     id_team: int,
  *     segmentation_rule?: object|null,
- *     pretranslate_100: bool,
- *     pretranslate_101: bool,
+ *     pretranslate: object{
+ *         match_101: object{enabled: bool, status?: string, lock?: bool},
+ *         match_100: object{enabled: bool, status?: string, lock?: bool},
+ *     },
  *     tm_prioritization: bool,
  *     dialect_strict: bool,
  *     public_tm_penalty?: int,
@@ -42,8 +45,6 @@ use Utils\Validation\UserSuppliedName;
  *     mt_quality_value_in_editor?: int|null,
  *     icu_enabled?: bool,
  *     mandatory_issues?: list<string>|null,
- *     pretranslate_101_lock?: bool,
- *     pretranslate_100_lock?: bool,
  * }
  */
 class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable
@@ -63,7 +64,7 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
     public int $filters_template_id = 0;
     public int $xliff_config_template_id = 0;
     public bool $pretranslate_100 = false;
-    public bool $pretranslate_101 = false;
+    public bool $pretranslate_101 = true;
     public bool $tm_prioritization = false;
     public bool $dialect_strict = false;
     public bool $get_public_matches = true;
@@ -80,6 +81,8 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
     public ?string $mandatory_issues = null;
     public bool $pretranslate_101_lock = true;
     public bool $pretranslate_100_lock = false;
+    public string $pretranslate_101_status = TranslationStatus::STATUS_APPROVED;
+    public string $pretranslate_100_status = TranslationStatus::STATUS_TRANSLATED;
 
     /**
      * @phpstan-param HydrationInput $decodedObject
@@ -101,8 +104,6 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
         $this->is_default = (isset($decodedObject->is_default)) ? $decodedObject->is_default : false;
         $this->id_team = $decodedObject->id_team;
         $this->segmentation_rule = (!empty($decodedObject->segmentation_rule)) ? (json_encode($decodedObject->segmentation_rule) ?: null) : null;
-        $this->pretranslate_100 = $decodedObject->pretranslate_100;
-        $this->pretranslate_101 = $decodedObject->pretranslate_101;
         $this->tm_prioritization = $decodedObject->tm_prioritization;
         $this->dialect_strict = $decodedObject->dialect_strict;
         $this->public_tm_penalty = $decodedObject->public_tm_penalty ?? 0;
@@ -122,8 +123,16 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
         $this->mt_quality_value_in_editor = (!empty($decodedObject->mt_quality_value_in_editor)) ? (int)$decodedObject->mt_quality_value_in_editor : null;
         $this->icu_enabled = $decodedObject->icu_enabled ?? true;
         $this->mandatory_issues = (($decodedObject->mandatory_issues ?? null) !== null) ? (json_encode($decodedObject->mandatory_issues) ?: null) : null;
-        $this->pretranslate_101_lock = $decodedObject->pretranslate_101_lock ?? true;
-        $this->pretranslate_100_lock = $decodedObject->pretranslate_100_lock ?? false;
+
+        // The JSON groups the pre-confirm options by match; the struct keeps one flat property per column.
+        $match101 = $decodedObject->pretranslate->match_101;
+        $match100 = $decodedObject->pretranslate->match_100;
+        $this->pretranslate_101 = $match101->enabled;
+        $this->pretranslate_101_status = $match101->status ?? TranslationStatus::STATUS_APPROVED;
+        $this->pretranslate_101_lock = $match101->lock ?? true;
+        $this->pretranslate_100 = $match100->enabled;
+        $this->pretranslate_100_status = $match100->status ?? TranslationStatus::STATUS_TRANSLATED;
+        $this->pretranslate_100_lock = $match100->lock ?? false;
 
         return $this;
     }
@@ -221,8 +230,18 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
             'xliff_config_template_id' => $this->xliff_config_template_id ?: 0,
             'get_public_matches' => $this->get_public_matches,
             'public_tm_penalty' => $this->public_tm_penalty ?: 0,
-            'pretranslate_100' => $this->pretranslate_100,
-            'pretranslate_101' => $this->pretranslate_101,
+            'pretranslate' => [
+                'match_101' => [
+                    'enabled' => $this->pretranslate_101,
+                    'status' => $this->pretranslate_101_status,
+                    'lock' => $this->pretranslate_101_lock,
+                ],
+                'match_100' => [
+                    'enabled' => $this->pretranslate_100,
+                    'status' => $this->pretranslate_100_status,
+                    'lock' => $this->pretranslate_100_lock,
+                ],
+            ],
             'tm_prioritization' => $this->tm_prioritization,
             'dialect_strict' => $this->dialect_strict,
             'mt_quality_value_in_editor' => $this->mt_quality_value_in_editor,
@@ -236,8 +255,6 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
             'modified_at' => $this->modified_at !== null ? (new DateTime($this->modified_at))->format(DATE_RFC822) : null,
             'icu_enabled' => $this->icu_enabled,
             'mandatory_issues' => $this->getMandatoryIssues(),
-            'pretranslate_101_lock' => $this->pretranslate_101_lock,
-            'pretranslate_100_lock' => $this->pretranslate_100_lock,
         ];
     }
 }

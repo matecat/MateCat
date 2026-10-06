@@ -6,6 +6,7 @@ use JsonSerializable;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Xliff\DTO\XliffRulesModel;
+use Utils\Constants\TranslationStatus;
 
 /**
  * Typed, closed-schema DTO used as the canonical state container for project creation.
@@ -56,6 +57,8 @@ class ProjectStructure extends AbstractDaoObjectStruct implements JsonSerializab
     public int $pretranslate_101 = 1;
     public int $pretranslate_101_lock = 1;
     public int $pretranslate_100_lock = 0;
+    public string $pretranslate_101_status = TranslationStatus::STATUS_APPROVED;
+    public string $pretranslate_100_status = TranslationStatus::STATUS_TRANSLATED;
     public int $only_private = 0;
     public ?string $tm_prioritization = null;
     public mixed $public_tm_penalty = null;

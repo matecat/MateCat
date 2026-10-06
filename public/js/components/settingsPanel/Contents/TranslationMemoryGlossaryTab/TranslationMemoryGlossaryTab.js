@@ -112,11 +112,15 @@ export const TranslationMemoryGlossaryTab = () => {
   const {userInfo} = useContext(ApplicationWrapperContext)
   const getPublicMatches = currentProjectTemplate.getPublicMatches
   const publicTmPenalty = currentProjectTemplate.publicTmPenalty
-  const isPretranslate100Active = currentProjectTemplate.pretranslate100
+  const isPretranslate100Active =
+    currentProjectTemplate.pretranslate.match_100.enabled
   const setIsPretranslate100Active = (value) =>
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,
-      pretranslate100: value,
+      pretranslate: {
+        ...prevTemplate.pretranslate,
+        match_100: {...prevTemplate.pretranslate.match_100, enabled: value},
+      },
     }))
   const isDialectStrictActive = currentProjectTemplate.dialectStrict
   const setIsDialectStrictActive = (value) =>

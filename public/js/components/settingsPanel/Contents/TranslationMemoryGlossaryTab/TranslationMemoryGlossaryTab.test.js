@@ -502,9 +502,7 @@ test('Toggling pretranslate and dialect-strict checkboxes modifies the current t
 
   render(<WrapperComponent {...contextValues} />)
 
-  await act(async () =>
-    user.click(screen.getByTestId('pretranslate-checkbox')),
-  )
+  await act(async () => user.click(screen.getByTestId('pretranslate-checkbox')))
   await act(async () =>
     user.click(screen.getByTestId('dialect-strict-checkbox')),
   )
@@ -512,9 +510,19 @@ test('Toggling pretranslate and dialect-strict checkboxes modifies the current t
   expect(modifyingCurrentTemplate).toHaveBeenCalledTimes(2)
 
   const pretranslateUpdater = modifyingCurrentTemplate.mock.calls[0][0]
-  expect(pretranslateUpdater({pretranslate100: false})).toEqual(
-    expect.objectContaining({pretranslate100: true}),
-  )
+  expect(
+    pretranslateUpdater({
+      pretranslate: {
+        match_101: {enabled: true, status: 'APPROVED', lock: true},
+        match_100: {enabled: false, status: 'TRANSLATED', lock: false},
+      },
+    }),
+  ).toEqual({
+    pretranslate: {
+      match_101: {enabled: true, status: 'APPROVED', lock: true},
+      match_100: {enabled: true, status: 'TRANSLATED', lock: false},
+    },
+  })
 
   const dialectUpdater = modifyingCurrentTemplate.mock.calls[1][0]
   expect(dialectUpdater({dialectStrict: false})).toEqual(
@@ -528,7 +536,13 @@ test('Pretranslate truthy', async () => {
     ...rest,
     currentProjectTemplate: {
       ...currentProjectTemplate,
-      pretranslate100: true,
+      pretranslate: {
+        ...currentProjectTemplate.pretranslate,
+        match_100: {
+          ...currentProjectTemplate.pretranslate.match_100,
+          enabled: true,
+        },
+      },
     },
   }
 

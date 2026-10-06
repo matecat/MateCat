@@ -466,8 +466,7 @@ const NewProject = () => {
     const {
       mt,
       tm,
-      pretranslate100,
-      pretranslate101,
+      pretranslate,
       segmentationRule,
       idTeam,
       getPublicMatches,
@@ -545,8 +544,8 @@ const NewProject = () => {
         anonymous: [],
       }),
       lang_detect_files: '',
-      pretranslate_100: pretranslate100 ? 1 : 0,
-      pretranslate_101: pretranslate101 ? 1 : 0,
+      pretranslate_100: pretranslate.match_100.enabled ? 1 : 0,
+      pretranslate_101: pretranslate.match_101.enabled ? 1 : 0,
       segmentation_rule: segmentationRule.id === '1' ? '' : segmentationRule.id,
       id_team: idTeam,
       ...(typeof qaModelTemplate !== 'undefined'

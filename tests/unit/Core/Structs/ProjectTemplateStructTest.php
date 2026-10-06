@@ -20,8 +20,10 @@ class ProjectTemplateStructTest extends AbstractTest
         $obj->is_default                 = true;
         $obj->id_team                    = 99;
         $obj->segmentation_rule          = (object) ['name' => 'custom', 'value' => 'abc'];
-        $obj->pretranslate_100           = true;
-        $obj->pretranslate_101           = false;
+        $obj->pretranslate                = (object) [
+            'match_101' => (object) ['enabled' => false],
+            'match_100' => (object) ['enabled' => true],
+        ];
         $obj->tm_prioritization          = true;
         $obj->dialect_strict             = false;
         $obj->public_tm_penalty          = 5;
@@ -317,13 +319,12 @@ class ProjectTemplateStructTest extends AbstractTest
             'payable_rate_template_id', 'qa_model_template_id',
             'filters_template_id', 'xliff_config_template_id',
             'get_public_matches', 'public_tm_penalty',
-            'pretranslate_100', 'pretranslate_101',
+            'pretranslate',
             'tm_prioritization', 'dialect_strict',
             'mt_quality_value_in_editor',
             'character_counter_count_tags', 'character_counter_mode',
             'subject', 'source_language', 'target_language',
             'created_at', 'modified_at', 'icu_enabled', 'mandatory_issues',
-            'pretranslate_101_lock', 'pretranslate_100_lock',
         ];
 
         foreach ($expectedKeys as $key) {

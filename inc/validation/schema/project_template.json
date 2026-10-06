@@ -16,17 +16,18 @@
     "tm_prioritization": {
       "type": "boolean"
     },
-    "pretranslate_100": {
-      "type": "boolean"
-    },
-    "pretranslate_101": {
-      "type": "boolean"
-    },
-    "pretranslate_101_lock": {
-      "type": "boolean"
-    },
-    "pretranslate_100_lock": {
-      "type": "boolean"
+    "pretranslate": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "match_101": {
+          "$ref": "#/definitions/pretranslate_match"
+        },
+        "match_100": {
+          "$ref": "#/definitions/pretranslate_match"
+        }
+      },
+      "required": ["match_101", "match_100"]
     },
     "get_public_matches": {
       "type": "boolean"
@@ -110,10 +111,27 @@
   "required": [
     "name",
     "id_team",
-    "pretranslate_100",
+    "pretranslate",
     "get_public_matches"
   ],
   "definitions": {
+    "pretranslate_match": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["TRANSLATED", "APPROVED", "APPROVED2"]
+        },
+        "lock": {
+          "type": "boolean"
+        }
+      },
+      "required": ["enabled"]
+    },
     "tm": {
       "type": "object",
       "properties": {
