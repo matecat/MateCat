@@ -4,6 +4,7 @@ namespace Controller\API\V2;
 
 use Controller\Abstracts\AbstractDownloadController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\ExternalServiceException;
 use Controller\Views\TemplateDecorator\DownloadOmegaTOutputDecorator;
 use Exception;
 use Google_Service_Drive_DriveFile;
@@ -35,6 +36,7 @@ use Model\Projects\ProjectDao;
 use Model\RemoteFiles\RemoteFileDao;
 use Model\Segments\SegmentDao;
 use PDOException;
+use Psr\Log\InvalidArgumentException;
 use ReflectionException;
 use TypeError;
 use Utils\Logger\LoggerFactory;
@@ -382,10 +384,15 @@ class DownloadController extends AbstractDownloadController
                 }
             }
 
+            $failedConversions = [];
+
             foreach (array_keys($files_to_be_converted) as $pos => $fileID) {
                 $filters->logConversionToTarget($convertResult[$fileID], $files_to_be_converted[$fileID]['out_xliff_name'], $jobData, $chunk[$pos]);
 
+                // output_content still holds the intermediate XLIFF under the original
+                // filename: it must never reach the user as if it were the target file
                 if (empty($convertResult[$fileID] ['document_content'])) {
+                    $failedConversions[] = $files_to_be_converted[$fileID]['output_filename'] ?? (string)$fileID;
                     continue;
                 }
 
@@ -415,6 +422,8 @@ class DownloadController extends AbstractDownloadController
             }
 
             unset($convertResult);
+
+            $this->abortOnFailedConversions($failedConversions);
         }
 
         foreach ($output_content as $idFile => $fileInformation) {
@@ -779,6 +788,40 @@ class DownloadController extends AbstractDownloadController
             }
             $this->remoteFiles[$remoteFile->id] = $this->remoteFileService->updateFile($remoteFile, $output_file->getContent() ?? '');
         }
+    }
+
+    /**
+     * Fails the whole download when Filters could not convert a file back to its original format.
+     *
+     * Without this, the intermediate XLIFF would be served under the target filename.
+     * The filenames go to the log only: the token message is rendered as HTML by the client.
+     *
+     * @param list<string> $failedConversions output filenames of the files that failed
+     *
+     * @throws ExternalServiceException
+     * @throws InvalidArgumentException
+     */
+    private function abortOnFailedConversions(array $failedConversions): void
+    {
+        if (empty($failedConversions)) {
+            return;
+        }
+
+        LoggerFactory::getLogger('conversion')->debug(
+            "Conversion to target failed for job {$this->id_job}: " . implode(', ', $failedConversions)
+        );
+
+        $message = "Download failed: a file could not be converted back to its original format. Please try again in 5 minutes. If it still fails, contact " . AppConfig::$SUPPORT_MAIL;
+
+        $this->unlockToken(["code" => -110, "message" => $message]);
+
+        try {
+            Utils::deleteDir(AppConfig::$TMP_DOWNLOAD . '/' . $this->id_job . '/');
+        } catch (Exception) {
+            LoggerFactory::getLogger('conversion')->debug('Failed to delete temporary directory ' . AppConfig::$TMP_DOWNLOAD . '/' . $this->id_job . '/');
+        }
+
+        throw new ExternalServiceException($message);
     }
 
     /**
