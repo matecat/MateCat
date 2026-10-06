@@ -6,11 +6,13 @@ use Matecat\TestHelpers\AbstractTest;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\MatchProcessorService;
 use Utils\AsyncTasks\Workers\Service\MatchSorter;
 use Utils\Constants\Ices;
 use Utils\Constants\TranslationStatus;
+use Utils\TaskRunner\Commons\Params;
 
 
 class MatchProcessorServiceTest extends AbstractTest
@@ -21,6 +23,12 @@ class MatchProcessorServiceTest extends AbstractTest
     {
         parent::setUp();
         $this->service = new MatchProcessorService(new MatchSorter(), obtainTestDatabase());
+    }
+
+    protected function tearDown(): void
+    {
+        Ices::$iceLockDisabledForTargetLangs = [];
+        parent::tearDown();
     }
 
     #[Test]
@@ -618,5 +626,226 @@ class MatchProcessorServiceTest extends AbstractTest
 
         $this->assertSame(1, $result['warning']);
         $this->assertNotEmpty($result['serialized_errors_list']);
+    }
+
+    /**
+     * Builds the analysis data as TMAnalysisWorker does: no `status` or `locked` key, so a segment
+     * the method leaves untouched has neither key and the update does not write those columns.
+     *
+     * @return array<string, mixed>
+     */
+    private function preConfirmTmData(string $matchType): array
+    {
+        return [
+            'suggestion_match' => '100%',
+            'match_type'       => $matchType,
+        ];
+    }
+
+    /**
+     * {ICE, 100%} x {pre-confirm on, off} x {3 statuses} x {lock on, off}.
+     *
+     * The options of the other match class are set to the opposite values, so each case also proves
+     * that a 101% option never drives a 100% match and vice versa.
+     *
+     * @return array<string, array{string, bool, string, bool}>
+     */
+    public static function preConfirmMatrixProvider(): array
+    {
+        $cases = [];
+        foreach ([InternalMatchesConstants::TM_ICE, InternalMatchesConstants::TM_100] as $matchType) {
+            foreach ([true, false] as $preConfirm) {
+                foreach ([
+                             TranslationStatus::STATUS_TRANSLATED,
+                             TranslationStatus::STATUS_APPROVED,
+                             TranslationStatus::STATUS_APPROVED2,
+                         ] as $status) {
+                    foreach ([true, false] as $lock) {
+                        $name = sprintf(
+                            '%s, pre-confirm %s, %s, lock %s',
+                            $matchType,
+                            $preConfirm ? 'on' : 'off',
+                            $status,
+                            $lock ? 'on' : 'off'
+                        );
+                        $cases[$name] = [$matchType, $preConfirm, $status, $lock];
+                    }
+                }
+            }
+        }
+
+        return $cases;
+    }
+
+    #[Test]
+    #[DataProvider('preConfirmMatrixProvider')]
+    public function determinePreTranslateStatus_applies_the_pre_confirm_options(string $matchType, bool $preConfirm, string $status, bool $lock): void
+    {
+        $isIce = $matchType === InternalMatchesConstants::TM_ICE;
+        $otherStatus = $status === TranslationStatus::STATUS_APPROVED2 ? TranslationStatus::STATUS_TRANSLATED : TranslationStatus::STATUS_APPROVED2;
+
+        $params = (object)[
+            'target'                  => 'it-IT',
+            'mt_qe_workflow_enabled'  => false,
+            'pretranslate_101'        => $isIce ? $preConfirm : !$preConfirm,
+            'pretranslate_101_status' => $isIce ? $status : $otherStatus,
+            'pretranslate_101_lock'   => $isIce ? $lock : !$lock,
+            'pretranslate_100'        => $isIce ? !$preConfirm : $preConfirm,
+            'pretranslate_100_status' => $isIce ? $otherStatus : $status,
+            'pretranslate_100_lock'   => $isIce ? !$lock : $lock,
+        ];
+
+        $result = $this->service->determinePreTranslateStatus($this->preConfirmTmData($matchType), $params);
+
+        if ($preConfirm) {
+            $this->assertSame($status, $result['status']);
+            $this->assertSame($lock, $result['locked']);
+        } else {
+            $this->assertArrayNotHasKey('status', $result);
+            $this->assertArrayNotHasKey('locked', $result);
+        }
+    }
+
+    /**
+     * Legacy elements: queued before the options existed (no keys at all), or built for a project
+     * that predates them (keys present, all null). Expected values are the output of the method
+     * before the options were introduced.
+     *
+     * @return array<string, array{array<string, mixed>, string, bool, ?string, ?bool}>
+     */
+    public static function legacyElementProvider(): array
+    {
+        $withoutKeys = [];
+        $withNullKeys = [
+            'pretranslate_101'        => null,
+            'pretranslate_101_status' => null,
+            'pretranslate_101_lock'   => null,
+            'pretranslate_100_status' => null,
+            'pretranslate_100_lock'   => null,
+        ];
+
+        return [
+            'no keys, ICE'                       => [$withoutKeys, InternalMatchesConstants::TM_ICE, false, TranslationStatus::STATUS_APPROVED, true],
+            'no keys, ICE, pretranslate_100 on'  => [$withoutKeys, InternalMatchesConstants::TM_ICE, true, TranslationStatus::STATUS_APPROVED, true],
+            'no keys, 100% pretranslate_100 on'  => [$withoutKeys, InternalMatchesConstants::TM_100, true, TranslationStatus::STATUS_TRANSLATED, false],
+            'no keys, 100% pretranslate_100 off' => [$withoutKeys, InternalMatchesConstants::TM_100, false, null, null],
+            'null keys, ICE'                       => [$withNullKeys, InternalMatchesConstants::TM_ICE, false, TranslationStatus::STATUS_APPROVED, true],
+            'null keys, ICE, pretranslate_100 on'  => [$withNullKeys, InternalMatchesConstants::TM_ICE, true, TranslationStatus::STATUS_APPROVED, true],
+            'null keys, 100% pretranslate_100 on'  => [$withNullKeys, InternalMatchesConstants::TM_100, true, TranslationStatus::STATUS_TRANSLATED, false],
+            'null keys, 100% pretranslate_100 off' => [$withNullKeys, InternalMatchesConstants::TM_100, false, null, null],
+            // a null status marks a legacy element even when the other 101% options are set
+            'null status, ICE, 101% off and unlocked' => [
+                ['pretranslate_101' => false, 'pretranslate_101_status' => null, 'pretranslate_101_lock' => false],
+                InternalMatchesConstants::TM_ICE,
+                false,
+                TranslationStatus::STATUS_APPROVED,
+                true,
+            ],
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $options
+     */
+    #[Test]
+    #[DataProvider('legacyElementProvider')]
+    public function determinePreTranslateStatus_keeps_the_legacy_output_for_elements_without_options(
+        array $options,
+        string $matchType,
+        bool $pretranslate100,
+        ?string $expectedStatus,
+        ?bool $expectedLocked
+    ): void {
+        // the real queue Params has no __get: a missing key must be read without a warning
+        $params = new Params(array_merge([
+            'target'                 => 'it-IT',
+            'pretranslate_100'       => $pretranslate100,
+            'mt_qe_workflow_enabled' => false,
+        ], $options));
+
+        $result = $this->service->determinePreTranslateStatus($this->preConfirmTmData($matchType), $params);
+
+        if ($expectedStatus === null) {
+            $this->assertArrayNotHasKey('status', $result);
+            $this->assertArrayNotHasKey('locked', $result);
+        } else {
+            $this->assertSame($expectedStatus, $result['status']);
+            $this->assertSame($expectedLocked, $result['locked']);
+        }
+    }
+
+    /**
+     * @return array<string, array{bool|string}>
+     */
+    public static function pretranslate101OffProvider(): array
+    {
+        return [
+            'false' => [false],
+            '"0"'   => ['0'],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('pretranslate101OffProvider')]
+    public function determinePreTranslateStatus_leaves_ice_untouched_when_pretranslate_101_is_off(bool|string $pretranslate101): void
+    {
+        $params = (object)[
+            'target'                  => 'it-IT',
+            'pretranslate_100'        => true,
+            'mt_qe_workflow_enabled'  => false,
+            'pretranslate_101'        => $pretranslate101,
+            'pretranslate_101_status' => TranslationStatus::STATUS_APPROVED,
+            'pretranslate_101_lock'   => true,
+        ];
+
+        $result = $this->service->determinePreTranslateStatus($this->preConfirmTmData(InternalMatchesConstants::TM_ICE), $params);
+
+        $this->assertArrayNotHasKey('status', $result);
+        $this->assertArrayNotHasKey('locked', $result);
+    }
+
+    #[Test]
+    public function determinePreTranslateStatus_applies_the_lock_and_status_defaults_when_only_the_101_status_is_set(): void
+    {
+        $params = (object)[
+            'target'                  => 'it-IT',
+            'pretranslate_100'        => true,
+            'mt_qe_workflow_enabled'  => false,
+            'pretranslate_101_status' => TranslationStatus::STATUS_TRANSLATED,
+        ];
+
+        $ice = $this->service->determinePreTranslateStatus($this->preConfirmTmData(InternalMatchesConstants::TM_ICE), $params);
+        $this->assertSame(TranslationStatus::STATUS_TRANSLATED, $ice['status']);
+        $this->assertTrue($ice['locked']);
+
+        $tm100 = $this->service->determinePreTranslateStatus($this->preConfirmTmData(InternalMatchesConstants::TM_100), $params);
+        $this->assertSame(TranslationStatus::STATUS_TRANSLATED, $tm100['status']);
+        $this->assertFalse($tm100['locked']);
+    }
+
+    #[Test]
+    public function determinePreTranslateStatus_skips_option_driven_ice_for_a_disabled_target_language(): void
+    {
+        Ices::$iceLockDisabledForTargetLangs = ['zh'];
+
+        $params = (object)[
+            'target'                  => 'zh-CN',
+            'pretranslate_100'        => true,
+            'mt_qe_workflow_enabled'  => false,
+            'pretranslate_101'        => true,
+            'pretranslate_101_status' => TranslationStatus::STATUS_APPROVED2,
+            'pretranslate_101_lock'   => true,
+            'pretranslate_100_status' => TranslationStatus::STATUS_APPROVED,
+            'pretranslate_100_lock'   => true,
+        ];
+
+        $ice = $this->service->determinePreTranslateStatus($this->preConfirmTmData(InternalMatchesConstants::TM_ICE), $params);
+        $this->assertArrayNotHasKey('status', $ice);
+        $this->assertArrayNotHasKey('locked', $ice);
+
+        // the disabled-language list never applied to 100% matches
+        $tm100 = $this->service->determinePreTranslateStatus($this->preConfirmTmData(InternalMatchesConstants::TM_100), $params);
+        $this->assertSame(TranslationStatus::STATUS_APPROVED, $tm100['status']);
+        $this->assertTrue($tm100['locked']);
     }
 }

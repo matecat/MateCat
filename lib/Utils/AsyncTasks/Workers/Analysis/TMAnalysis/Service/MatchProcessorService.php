@@ -276,28 +276,50 @@ class MatchProcessorService implements MatchProcessorServiceInterface
     /**
      * Check match percentage and set locked/status fields for pre-translate and ICE scenarios.
      *
+     * The pre-confirm options are optional keys: a project created before they existed queues them as
+     * null, and an element queued before they were introduced does not carry them at all.
+     * A null `pretranslate_101_status` marks such a legacy element, which keeps the fixed ICE behaviour.
+     * A segment no branch applies to keeps `status` and `locked` as they are: the TM analysis worker
+     * builds `$tmData` without them, so the update leaves both columns unchanged.
+     *
      * @param array<string, mixed> $tmData translation data array
      * @param object $params queue element params (must expose: target, pretranslate_100, mt_qe_workflow_enabled)
-     * @phpstan-param object&object{target: string, pretranslate_100: mixed, mt_qe_workflow_enabled: mixed} $params
+     * @phpstan-param object&object{
+     *     target: string,
+     *     pretranslate_100: mixed,
+     *     mt_qe_workflow_enabled: mixed,
+     *     pretranslate_101?: bool|string|null,
+     *     pretranslate_101_status?: string|null,
+     *     pretranslate_101_lock?: bool|string|null,
+     *     pretranslate_100_status?: string|null,
+     *     pretranslate_100_lock?: bool|string|null
+     * } $params
      *
      * @return array<string, mixed>
      */
     public function determinePreTranslateStatus(array $tmData, object $params): array
     {
+        $status101 = $params->pretranslate_101_status ?? null;
+
         //Separates if branches to make the conditions more readable
         if (stripos($tmData['suggestion_match'], InternalMatchesConstants::TM_100) !== false) {
             if ($tmData['match_type'] == InternalMatchesConstants::TM_ICE) {
                 [$lang,] = explode('-', $params->target);
 
-                //I found this language in the list of disabled target languages??
+                // Target languages listed in Ices::$iceLockDisabledForTargetLangs are never pre-confirmed
                 if (!in_array($lang, Ices::$iceLockDisabledForTargetLangs)) {
-                    //ice lock enabled, language not found
-                    $tmData['status'] = TranslationStatus::STATUS_APPROVED;
-                    $tmData['locked'] = true;
+                    if ($status101 === null) {
+                        // legacy element: fixed ICE behaviour
+                        $tmData['status'] = TranslationStatus::STATUS_APPROVED;
+                        $tmData['locked'] = true;
+                    } elseif ($params->pretranslate_101 ?? true) {
+                        $tmData['status'] = $status101;
+                        $tmData['locked'] = (bool)($params->pretranslate_101_lock ?? true);
+                    }
                 }
             } elseif ($params->pretranslate_100) {
-                $tmData['status'] = TranslationStatus::STATUS_TRANSLATED;
-                $tmData['locked'] = false;
+                $tmData['status'] = $params->pretranslate_100_status ?? TranslationStatus::STATUS_TRANSLATED;
+                $tmData['locked'] = (bool)($params->pretranslate_100_lock ?? false);
             }
         }
 
