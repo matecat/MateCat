@@ -10,6 +10,7 @@ use Model\FeaturesBase\Hook\Event\Run\ValidateProjectCreationEvent;
 use Model\Files\MetadataDao;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
+use Model\Xliff\DTO\XliffRulesModel;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Utils\Logger\MatecatLogger;
@@ -92,6 +93,41 @@ class ValidateBeforeCreationTest extends AbstractTest
         $this->pm->setProjectStructureValue('pretranslate_101_status', $status101);
         $this->pm->setProjectStructureValue('pretranslate_100', $pretranslate100);
         $this->pm->setProjectStructureValue('pretranslate_100_status', $status100);
+
+        $this->pm->callValidateBeforeCreation();
+
+        $this->assertSame($expected, $this->pm->getTestProjectStructure()->create_2_pass_review);
+    }
+
+    /**
+     * @return array<string, array{array<string, list<array{states: string[], analysis: string, editor?: string}>>, bool}>
+     */
+    public static function xliffRuleSecondPassReviewCases(): array
+    {
+        return [
+            'no custom rules'                     => [[], false],
+            'xliff12 approved2 rule, final state' => [['xliff12' => [['states' => ['final'], 'analysis' => 'pre-translated', 'editor' => 'approved2']]], true],
+            'xliff12 approved2 rule, non-final'   => [['xliff12' => [['states' => ['translated'], 'analysis' => 'pre-translated', 'editor' => 'approved2']]], true],
+            'xliff20 approved2 rule'              => [['xliff20' => [['states' => ['reviewed'], 'analysis' => 'pre-translated', 'editor' => 'approved2']]], true],
+            'final mapped to translated'          => [['xliff12' => [['states' => ['final'], 'analysis' => 'pre-translated', 'editor' => 'translated']]], false],
+            'final left new'                      => [['xliff12' => [['states' => ['final'], 'analysis' => 'new']]], false],
+        ];
+    }
+
+    /**
+     * The rules are checked on their own: no file is read, so none of them needs a matching unit.
+     *
+     * @param array<string, list<array{states: string[], analysis: string, editor?: string}>> $rules
+     *
+     * @throws \Exception
+     */
+    #[Test]
+    #[DataProvider('xliffRuleSecondPassReviewCases')]
+    public function raisesSecondPassReviewForAnApproved2XliffRule(array $rules, bool $expected): void
+    {
+        $this->pm->setProjectStructureValue('pretranslate_101', 0);
+        $this->pm->setProjectStructureValue('pretranslate_100', 0);
+        $this->pm->setProjectStructureValue('xliff_parameters', XliffRulesModel::fromArray($rules));
 
         $this->pm->callValidateBeforeCreation();
 

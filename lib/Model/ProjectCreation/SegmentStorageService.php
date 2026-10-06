@@ -20,7 +20,7 @@ use Model\Segments\SegmentMetadataDao;
 use Model\Segments\SegmentMetadataStruct;
 use Model\Segments\SegmentOriginalDataDao;
 use Model\Segments\SegmentOriginalDataStruct;
-use Utils\Constants\XliffTranslationStatus;
+use Utils\Constants\TranslationStatus;
 use Utils\Logger\MatecatLogger;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
@@ -260,7 +260,7 @@ class SegmentStorageService
             foreach ($struct as $translationTuple) {
                 $rule = $translationTuple->rule;
 
-                if (XliffTranslationStatus::isFinalState($translationTuple->state)) {
+                if ($rule->asEditorStatus() === TranslationStatus::STATUS_APPROVED2) {
                     $createSecondPassReview = true;
                 }
 

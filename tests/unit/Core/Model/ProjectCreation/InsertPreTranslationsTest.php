@@ -10,6 +10,7 @@ use Model\Jobs\JobStruct;
 use Model\ProjectCreation\ProjectManagerModel;
 use Model\ProjectCreation\ProjectStructure;
 use Model\ProjectCreation\TranslationTuple;
+use Model\Xliff\DTO\DefaultRule;
 use Model\Xliff\DTO\Xliff12Rule;
 use Model\Xliff\DTO\XliffRuleInterface;
 use PHPUnit\Framework\Attributes\Test;
@@ -24,8 +25,8 @@ use Utils\Logger\MatecatLogger;
  * - Empty translation structs are skipped
  * - Happy path: builds correct SQL values from pre-computed QA scalars on tuples
  * - QA error scalars map correctly to SQL values
- * - Final state sets create_2_pass_review
- * - Non-final state does not set create_2_pass_review
+ * - An APPROVED2 row sets create_2_pass_review, whatever its XLIFF state
+ * - A row with any other status does not set create_2_pass_review
  * - Multiple translation tuples are all processed
  * - JSON-encoded payable rates are decoded
  */
@@ -246,16 +247,18 @@ class InsertPreTranslationsTest extends AbstractTest
         $service->insertPreTranslations($this->job, $this->projectStructure);
     }
 
-    // ── Test 4: Final state → create_2_pass_review = true ───────────
+    // ── Test 4: Final state under the default rule → create_2_pass_review = true ──
 
     /**
+     * No custom rule matched: the default rule imports `final` as APPROVED2.
+     *
      * @throws MockException
      * @throws Exception
      */
     #[Test]
     public function setsCreateSecondPassReviewWhenStateFinal(): void
     {
-        $rule = $this->buildRuleStub();
+        $rule = new DefaultRule(['final'], 'pre-translated');
 
         $tuple = $this->makeTuple(rule: $rule, state: 'final');
 
@@ -292,6 +295,66 @@ class InsertPreTranslationsTest extends AbstractTest
         $service = $this->buildService();
 
         $service->insertPreTranslations($this->job, $this->projectStructure);
+
+        $this->assertFalse($this->projectStructure->create_2_pass_review);
+    }
+
+    /**
+     * A custom rule importing a non-final state as APPROVED2 needs the second revision phase.
+     *
+     * @throws MockException
+     * @throws Exception
+     */
+    #[Test]
+    public function setsCreateSecondPassReviewForAnApproved2RuleOnANonFinalState(): void
+    {
+        $rule = new Xliff12Rule(['translated'], 'pre-translated', 'approved2');
+
+        $this->projectStructure->translations = [
+            'tu-1' => [0 => $this->makeTuple(rule: $rule, state: 'translated')],
+        ];
+
+        $this->buildService()->insertPreTranslations($this->job, $this->projectStructure);
+
+        $this->assertTrue($this->projectStructure->create_2_pass_review);
+    }
+
+    /**
+     * A custom rule importing `final` as TRANSLATED produces no APPROVED2 row, so no second revision phase.
+     *
+     * @throws MockException
+     * @throws Exception
+     */
+    #[Test]
+    public function doesNotSetCreateSecondPassReviewForAFinalStateMappedToTranslated(): void
+    {
+        $rule = new Xliff12Rule(['final'], 'pre-translated', 'translated');
+
+        $this->projectStructure->translations = [
+            'tu-1' => [0 => $this->makeTuple(rule: $rule, state: 'final')],
+        ];
+
+        $this->buildService()->insertPreTranslations($this->job, $this->projectStructure);
+
+        $this->assertFalse($this->projectStructure->create_2_pass_review);
+    }
+
+    /**
+     * A tuple whose rule leaves it NEW does not raise the second revision phase, even when its state is `final`.
+     *
+     * @throws MockException
+     * @throws Exception
+     */
+    #[Test]
+    public function doesNotSetCreateSecondPassReviewForAFinalStateLeftNew(): void
+    {
+        $rule = $this->buildRuleStub(editorStatus: 'NEW');
+
+        $this->projectStructure->translations = [
+            'tu-1' => [0 => $this->makeTuple(rule: $rule, state: 'final')],
+        ];
+
+        $this->buildService()->insertPreTranslations($this->job, $this->projectStructure);
 
         $this->assertFalse($this->projectStructure->create_2_pass_review);
     }
