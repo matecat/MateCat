@@ -3,7 +3,6 @@
 namespace Model\Translations;
 
 use ArrayAccess;
-use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\ArrayAccessTrait;
 use Model\DataAccess\IDaoStruct;
@@ -47,13 +46,6 @@ class SegmentTranslationStruct extends AbstractDaoSilentStruct implements IDaoSt
     public function isReviewedStatus(): bool
     {
         return in_array($this->status, TranslationStatus::$REVISION_STATUSES);
-    }
-
-    public function isICE(): bool
-    {
-        // ICE is the match type alone. Whether the segment is locked is a separate matter, and an
-        // XLIFF pre-translation whose rule category is ICE is an ICE too.
-        return $this->match_type == InternalMatchesConstants::TM_ICE;
     }
 
     public function isLocked(): bool

@@ -597,8 +597,8 @@ class GetSearchController extends AbstractStatefulKleinController
 
             // A replace event only stores what an undo has to put back: the text and the status the
             // segment had before the replacement. Everything else the writer and the event consumers
-            // read off this struct still has to be the live one - version_number and isICE() for
-            // TranslationEvent, time_to_edit and the QA fields for the update - so the historical
+            // read off this struct still has to be the live one - version_number and the locked flag
+            // for TranslationEvent, time_to_edit and the QA fields for the update - so the historical
             // values are hydrated on top of the current row instead of replacing it.
             $result[] = new SegmentTranslationStruct(
                 array_merge(
