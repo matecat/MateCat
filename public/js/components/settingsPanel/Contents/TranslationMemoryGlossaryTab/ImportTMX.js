@@ -23,8 +23,8 @@ export const ImportTMX = ({row, onClose}) => {
 
   const formRef = useRef()
 
-  const isFormDisabled = files.length && Array.isArray(uuids)
-  const isErrorUpload = status.length && status.some(({uuid}) => !uuid)
+  const isFormDisabled = files.length > 0 && Array.isArray(uuids)
+  const isErrorUpload = status.length > 0 && status.some(({uuid}) => !uuid)
 
   const isCompletedAll = status
     .filter(({errors}) => !errors)
