@@ -45,9 +45,12 @@ final class UserSuppliedName
 
     /**
      * The width shared by `project_templates`.`name`, `xliff_config_templates`.`name`,
-     * `filters_config_templates`.`name`, `payable_rate_templates`.`name` and `qa_model_templates`.`label`.
+     * `filters_config_templates`.`name` and `payable_rate_templates`.`name`.
      */
     public const int TEMPLATE_NAME_MAX_LENGTH = 255;
+
+    /** `qa_model_templates`.`label`, the one template name column called `label`, at the same width. */
+    public const int QA_MODEL_LABEL_MAX_LENGTH = 255;
 
     /**
      * The flags the email templates escape with, so a value is decoded the way the reader's mail

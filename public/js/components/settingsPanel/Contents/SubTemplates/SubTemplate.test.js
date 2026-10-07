@@ -1,5 +1,5 @@
 import React from 'react'
-import {render, screen, fireEvent, act} from '@testing-library/react'
+import {render, screen, fireEvent, act, waitFor} from '@testing-library/react'
 import {SubTemplates} from './SubTemplate'
 import CatToolActions from '../../../../actions/CatToolActions'
 
@@ -297,6 +297,31 @@ describe('SubTemplates', () => {
   })
 
   describe('updateNameBehaviour.current.confirm', () => {
+    test('calls saveErrorCallback when the rename is refused', async () => {
+      const saveErrorCallback = jest.fn()
+      const setTemplates = jest.fn()
+      const error = new Error('boom')
+      const updateApi = jest.fn(() => Promise.reject(error))
+      renderSubTemplate({
+        templates: [
+          {id: 1, name: 'Template One', isSelected: true},
+          {id: 1, name: 'Draft', isTemporary: true},
+        ],
+        currentTemplate: {id: 1, name: 'Template One'},
+        setTemplates,
+        updateApi,
+        saveErrorCallback,
+      })
+
+      fireEvent.click(screen.getByTestId('save-as-new-template'))
+      fireEvent.click(screen.getByTestId('set-name'))
+
+      fireEvent.click(screen.getByTestId('trigger-confirm'))
+
+      await waitFor(() => expect(saveErrorCallback).toHaveBeenCalledWith(error))
+      expect(setTemplates).not.toHaveBeenCalled()
+    })
+
     test('shows a duplicated name notification when another template already uses the name', () => {
       const updateApi = jest.fn(() => Promise.resolve({id: 1}))
       renderSubTemplate({

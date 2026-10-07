@@ -62,7 +62,7 @@ class QAModelTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
         $QAModelTemplateStruct->label = UserSuppliedName::validated(
             $jsonModel->label,
             'label',
-            UserSuppliedName::TEMPLATE_NAME_MAX_LENGTH
+            UserSuppliedName::QA_MODEL_LABEL_MAX_LENGTH
         );
         $QAModelTemplateStruct->categories = [];
 
