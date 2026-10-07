@@ -1,5 +1,5 @@
 import React from 'react'
-import {render, screen, fireEvent, act} from '@testing-library/react'
+import {render, screen, fireEvent, act, waitFor} from '@testing-library/react'
 import {SubTemplates} from './SubTemplate'
 import CatToolActions from '../../../../actions/CatToolActions'
 
@@ -316,11 +316,9 @@ describe('SubTemplates', () => {
       fireEvent.click(screen.getByTestId('save-as-new-template'))
       fireEvent.click(screen.getByTestId('set-name'))
 
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('trigger-confirm'))
-      })
+      fireEvent.click(screen.getByTestId('trigger-confirm'))
 
-      expect(saveErrorCallback).toHaveBeenCalledWith(error)
+      await waitFor(() => expect(saveErrorCallback).toHaveBeenCalledWith(error))
       expect(setTemplates).not.toHaveBeenCalled()
     })
 
