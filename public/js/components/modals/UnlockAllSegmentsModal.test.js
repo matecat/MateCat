@@ -19,7 +19,7 @@ afterEach(() => {
   SegmentStore.consecutiveUnlockSegments = undefined
 })
 
-test('confirming unlocks the ice segments, persists the checkbox and closes the modal', async () => {
+test('confirming unlocks the locked segments, persists the checkbox and closes the modal', async () => {
   getFilteredSegments.mockResolvedValue({segment_ids: [1, 2, 3]})
   render(<UnlockAllSegmentsModal />)
 
@@ -28,6 +28,12 @@ test('confirming unlocks the ice segments, persists the checkbox and closes the 
 
   await waitFor(() =>
     expect(SegmentActions.unlockSegments).toHaveBeenCalledWith([1, 2, 3]),
+  )
+  // Every unmodified locked segment, whatever its match type: not only the 101% ones.
+  expect(getFilteredSegments).toHaveBeenCalledWith(
+    config.id_job,
+    config.currentPassword,
+    {sample: {type: 'locked'}},
   )
   expect(localStorage.getItem(HIDE_UNLOCK_ALL_SEGMENTS_MODAL_STORAGE)).toBe('1')
   expect(ModalsActions.onCloseModal).toHaveBeenCalledTimes(1)

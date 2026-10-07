@@ -292,7 +292,7 @@ describe('SegmentActions.handleClickOnReadOnly', () => {
       expect.objectContaining({
         text: expect.stringContaining('Segment is locked'),
       }),
-      'Ice Matches',
+      'Locked segment',
     )
   })
 
@@ -1773,7 +1773,7 @@ describe('SegmentActions lock/unlock', () => {
     expect(ModalsActions.showModalComponent).toHaveBeenCalledWith(
       'UnlockAllSegments',
       {},
-      'Unlock all 101% segments',
+      'Unlock all locked segments',
     )
   })
 
