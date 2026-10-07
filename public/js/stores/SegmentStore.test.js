@@ -726,10 +726,7 @@ describe('SegmentStore', () => {
     })
 
     test('SET_BULK_SELECTION_SEGMENTS sets flags and skips locked', () => {
-      SegmentStore._segments = SegmentStore._segments.setIn(
-        [1, 'locked'],
-        true,
-      )
+      SegmentStore._segments = SegmentStore._segments.setIn([1, 'locked'], true)
       dispatch({
         actionType: SegmentConstants.SET_BULK_SELECTION_SEGMENTS,
         segmentsArray: ['1', '2'],

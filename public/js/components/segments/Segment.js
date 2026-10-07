@@ -503,7 +503,10 @@ const SegmentComponent = ({
 
     if (readonly) classes.push('readonly')
 
-    if ((SegmentUtils.isLockedSegment(segment) && !readonly) || secondPassLocked) {
+    if (
+      (SegmentUtils.isLockedSegment(segment) && !readonly) ||
+      secondPassLocked
+    ) {
       if (segment.unlocked) {
         classes.push('ice-unlocked')
       } else {
@@ -626,7 +629,10 @@ const SegmentComponent = ({
   }
 
   const onClickEvent = () => {
-    if (readonly || (!segment.unlocked && SegmentUtils.isLockedSegment(segment))) {
+    if (
+      readonly ||
+      (!segment.unlocked && SegmentUtils.isLockedSegment(segment))
+    ) {
       SegmentActions.handleClickOnReadOnly(segment)
     } else if (segment.muted) {
       return
@@ -723,9 +729,7 @@ const SegmentComponent = ({
             />
           </div>
 
-          {!segment.locked &&
-          config.splitSegmentEnabled &&
-          segment.opened ? (
+          {!segment.locked && config.splitSegmentEnabled && segment.opened ? (
             !segment.openSplit ? (
               <div className="actions">
                 <Button
