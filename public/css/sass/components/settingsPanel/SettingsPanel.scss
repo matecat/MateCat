@@ -15,6 +15,10 @@
   &.visible {
     display: block;
   }
+
+  p:not(:last-child) {
+    margin: 0 0 16px;
+  }
 }
 
 .settings-panel-overlay {
@@ -123,6 +127,7 @@
     padding: 15px 10px;
     font-size: variables.$font-size-big;
     margin: 0;
+    line-height: 1;
   }
   .buttonWide {
     padding: 0 16px;
@@ -147,6 +152,7 @@
   h3 {
     font-size: 24px;
     margin-bottom: 4px;
+    line-height: 1;
   }
 
   span {
@@ -424,6 +430,7 @@
 
   h2 {
     padding: 10px 0 10px 0;
+    line-height: 1;
   }
 
   .settings-panel-contentwrapper-tab-background {
