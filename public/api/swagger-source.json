@@ -178,7 +178,43 @@
             "description": "Pre-translate 101% matches from TM",
             "required": false,
             "type": "integer",
-            "default": 0
+            "default": 1
+          },
+          {
+            "name": "pretranslate_101_status",
+            "in": "formData",
+            "description": "Status given to pre-translated 101% matches: TRANSLATED, APPROVED or APPROVED2, in any letter case",
+            "required": false,
+            "type": "string",
+            "default": "APPROVED",
+            "enum": ["TRANSLATED", "APPROVED", "APPROVED2"]
+          },
+          {
+            "name": "pretranslate_101_lock",
+            "in": "formData",
+            "description": "1 locks pre-translated 101% matches, which takes them out of scope; 0 leaves them editable",
+            "required": false,
+            "type": "integer",
+            "default": 1,
+            "enum": [0, 1]
+          },
+          {
+            "name": "pretranslate_100_status",
+            "in": "formData",
+            "description": "Status given to pre-translated 100% matches: TRANSLATED, APPROVED or APPROVED2, in any letter case",
+            "required": false,
+            "type": "string",
+            "default": "TRANSLATED",
+            "enum": ["TRANSLATED", "APPROVED", "APPROVED2"]
+          },
+          {
+            "name": "pretranslate_100_lock",
+            "in": "formData",
+            "description": "1 locks pre-translated 100% matches, which takes them out of scope; 0 leaves them editable",
+            "required": false,
+            "type": "integer",
+            "default": 0,
+            "enum": [0, 1]
           },
           {
             "name": "dialect_strict",
@@ -5800,6 +5836,11 @@
         "editor": {
           "type": "string",
           "example": "translated"
+        },
+        "lock": {
+          "type": "boolean",
+          "default": false,
+          "description": "Lock the segments the rule matches, which takes them out of scope. Refused for the new and draft editor states"
         },
         "matchCategory": {
           "type": "string"
