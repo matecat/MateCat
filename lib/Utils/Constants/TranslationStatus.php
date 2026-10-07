@@ -59,6 +59,34 @@ class TranslationStatus
         self::STATUS_REJECTED
     ];
 
+    /**
+     * Statuses a pre-confirmed 100% or 101% match can be stored with,
+     * accepted by the pretranslate_101_status and pretranslate_100_status options.
+     *
+     * @var list<string>
+     */
+    private const array PRE_TRANSLATE_STATUSES = [
+        self::STATUS_TRANSLATED,
+        self::STATUS_APPROVED,
+        self::STATUS_APPROVED2,
+    ];
+
+    /**
+     * Maps a pre-confirm status option, in any letter case, to its constant.
+     *
+     * @return string|null the constant, or null when the value is not a pre-confirm status
+     */
+    public static function preTranslateStatus(mixed $value): ?string
+    {
+        if (!is_string($value)) {
+            return null;
+        }
+
+        $status = strtoupper($value);
+
+        return in_array($status, self::PRE_TRANSLATE_STATUSES, true) ? $status : null;
+    }
+
     public static function isReviewedStatus(string $status): bool
     {
         return in_array($status, TranslationStatus::$REVISION_STATUSES);

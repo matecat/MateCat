@@ -209,10 +209,10 @@ class CreateProjectController extends AbstractStatefulKleinController
         if ($pretranslate_100_lock === null) {
             throw new InvalidArgumentException("Invalid pretranslate_100_lock value", -6);
         }
-        $pretranslate_101_status = ProjectsMetadataMarshaller::preTranslateStatus(
+        $pretranslate_101_status = TranslationStatus::preTranslateStatus(
             $this->request->param('pretranslate_101_status') ?? TranslationStatus::STATUS_APPROVED
         ) ?? throw new InvalidArgumentException("Invalid pretranslate_101_status value", -6);
-        $pretranslate_100_status = ProjectsMetadataMarshaller::preTranslateStatus(
+        $pretranslate_100_status = TranslationStatus::preTranslateStatus(
             $this->request->param('pretranslate_100_status') ?? TranslationStatus::STATUS_TRANSLATED
         ) ?? throw new InvalidArgumentException("Invalid pretranslate_100_status value", -6);
         $tm_prioritization = filter_var($this->request->param('tm_prioritization'), FILTER_SANITIZE_NUMBER_INT);

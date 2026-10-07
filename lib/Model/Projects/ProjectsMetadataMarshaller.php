@@ -10,7 +10,6 @@
 namespace Model\Projects;
 
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
-use Utils\Constants\TranslationStatus;
 
 enum ProjectsMetadataMarshaller: string
 {
@@ -53,34 +52,6 @@ enum ProjectsMetadataMarshaller: string
     case SEGMENTATION_RULE = 'segmentation_rule';
     case WPML = 'WPML';
     case CONTEXT_URL = 'context-url';
-
-    /**
-     * Statuses a pre-confirmed 100% or 101% match can be stored with,
-     * accepted by the pretranslate_101_status and pretranslate_100_status options.
-     *
-     * @var list<string>
-     */
-    public const array PRE_TRANSLATE_STATUSES = [
-        TranslationStatus::STATUS_TRANSLATED,
-        TranslationStatus::STATUS_APPROVED,
-        TranslationStatus::STATUS_APPROVED2,
-    ];
-
-    /**
-     * Maps a pre-translate status option, in any letter case, to its TranslationStatus constant.
-     *
-     * @return string|null the constant, or null when the value is not one of PRE_TRANSLATE_STATUSES
-     */
-    public static function preTranslateStatus(mixed $value): ?string
-    {
-        if (!is_string($value)) {
-            return null;
-        }
-
-        $status = strtoupper($value);
-
-        return in_array($status, self::PRE_TRANSLATE_STATUSES, true) ? $status : null;
-    }
 
     public static function unMarshall(MetadataStruct $struct): mixed
     {

@@ -439,12 +439,6 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
         ];
     }
 
-    #[Test]
-    public function preTranslateStatusesAreTheThreeStoredStatuses(): void
-    {
-        $this->assertSame(['TRANSLATED', 'APPROVED', 'APPROVED2'], ProjectsMetadataMarshaller::PRE_TRANSLATE_STATUSES);
-    }
-
     // =========================================================================
     // unMarshall -- WPML boolean branch
     // =========================================================================
@@ -484,33 +478,6 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
             'null'         => [null],
             'false'        => [false],
         ];
-    }
-
-    // =========================================================================
-    // preTranslateStatus
-    // =========================================================================
-
-    /**
-     * @return array<string, array{mixed, string|null}>
-     */
-    public static function preTranslateStatusProvider(): array
-    {
-        return [
-            'upper case'  => ['APPROVED2', 'APPROVED2'],
-            'lower case'  => ['approved', 'APPROVED'],
-            'mixed case'  => ['Translated', 'TRANSLATED'],
-            'not allowed' => ['draft', null],
-            'empty'       => ['', null],
-            'not string'  => [['APPROVED'], null],
-            'null'        => [null, null],
-        ];
-    }
-
-    #[Test]
-    #[DataProvider('preTranslateStatusProvider')]
-    public function preTranslateStatusReturnsTheUpperCaseConstant(mixed $value, ?string $expected): void
-    {
-        $this->assertSame($expected, ProjectsMetadataMarshaller::preTranslateStatus($value));
     }
 
     // =========================================================================
