@@ -65,22 +65,28 @@ export const SubTemplates = ({
     updateApi({
       id: originalTemplate.id,
       template: modifiedTemplate,
-    }).then(() => {
-      flushSync(() =>
-        setTemplates((prevState) =>
-          prevState.map((templateItem) =>
-            templateItem.id === originalTemplate.id
-              ? {...templateItem, [schema.name]: templateName}
-              : templateItem,
-          ),
-        ),
-      )
-
-      modifyingCurrentTemplate((prevTemplate) => ({
-        ...prevTemplate,
-        name: templateName,
-      }))
     })
+      .then(() => {
+        flushSync(() =>
+          setTemplates((prevState) =>
+            prevState.map((templateItem) =>
+              templateItem.id === originalTemplate.id
+                ? {...templateItem, [schema.name]: templateName}
+                : templateItem,
+            ),
+          ),
+        )
+
+        modifyingCurrentTemplate((prevTemplate) => ({
+          ...prevTemplate,
+          name: templateName,
+        }))
+      })
+      .catch((error) => {
+        if (saveErrorCallback) {
+          saveErrorCallback(error)
+        }
+      })
   }
   updateNameBehaviour.current.cancel = () => {
     setTemplateModifier()

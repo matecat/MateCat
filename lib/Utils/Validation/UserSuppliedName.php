@@ -49,8 +49,8 @@ final class UserSuppliedName
      */
     public const int TEMPLATE_NAME_MAX_LENGTH = 255;
 
-    /** `qa_model_templates`.`label` is narrower than the rest, at varchar(45). */
-    public const int QA_MODEL_LABEL_MAX_LENGTH = 45;
+    /** `qa_model_templates`.`label`, the one template name column called `label`, at the same width. */
+    public const int QA_MODEL_LABEL_MAX_LENGTH = 255;
 
     /**
      * The flags the email templates escape with, so a value is decoded the way the reader's mail
