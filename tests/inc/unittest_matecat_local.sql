@@ -827,7 +827,7 @@ CREATE TABLE `qa_model_templates` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `uid` bigint(20) NOT NULL,
   `version` int(11) NOT NULL,
-  `label` varchar(45) NOT NULL,
+  `label` varchar(255) NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `modified_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `deleted_at` timestamp NULL DEFAULT NULL,
