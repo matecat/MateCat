@@ -143,16 +143,16 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
         $this->editor = strtolower($editor ?? '');
     }
 
-     /**
-      * A segment left to translate, as NEW or DRAFT, can not be locked.
-      *
-      * @param bool $lock
-      * @throws DomainException
-      */
-     protected function setLock(bool $lock): void
+    /**
+     * A segment left to translate, as NEW or DRAFT, can not be locked.
+     *
+     * @param bool $lock
+     * @throws DomainException
+     */
+    protected function setLock(bool $lock): void
     {
         $status = $this->asEditorStatus();
-        if ($lock && in_array($status, [TranslationStatus::STATUS_NEW, TranslationStatus::STATUS_DRAFT], true)) {
+        if ($lock && !TranslationStatus::isLockable($status)) {
             throw new DomainException("A rule with editor status $status can not be locked.", 400);
         }
 

@@ -72,6 +72,16 @@ class TranslationStatus
     ];
 
     /**
+     * Statuses of a segment left to translate, which can not be locked.
+     *
+     * @var list<string>
+     */
+    private const array UNLOCKABLE_STATUSES = [
+        self::STATUS_NEW,
+        self::STATUS_DRAFT,
+    ];
+
+    /**
      * Maps a pre-confirm status option, in any letter case, to its constant.
      *
      * @return string|null the constant, or null when the value is not a pre-confirm status
@@ -85,6 +95,11 @@ class TranslationStatus
         $status = strtoupper($value);
 
         return in_array($status, self::PRE_TRANSLATE_STATUSES, true) ? $status : null;
+    }
+
+    public static function isLockable(string $status): bool
+    {
+        return !in_array($status, self::UNLOCKABLE_STATUSES, true);
     }
 
     public static function isReviewedStatus(string $status): bool

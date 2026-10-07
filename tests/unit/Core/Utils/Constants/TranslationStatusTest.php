@@ -35,4 +35,26 @@ class TranslationStatusTest extends AbstractTest
     {
         $this->assertSame($expected, TranslationStatus::preTranslateStatus($value));
     }
+
+    /**
+     * @return array<string, array{string, bool}>
+     */
+    public static function isLockableProvider(): array
+    {
+        return [
+            'new'        => [TranslationStatus::STATUS_NEW, false],
+            'draft'      => [TranslationStatus::STATUS_DRAFT, false],
+            'translated' => [TranslationStatus::STATUS_TRANSLATED, true],
+            'approved'   => [TranslationStatus::STATUS_APPROVED, true],
+            'approved2'  => [TranslationStatus::STATUS_APPROVED2, true],
+            'rejected'   => [TranslationStatus::STATUS_REJECTED, true],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('isLockableProvider')]
+    public function isLockableRefusesOnlyTheStatusesLeftToTranslate(string $status, bool $expected): void
+    {
+        $this->assertSame($expected, TranslationStatus::isLockable($status));
+    }
 }
