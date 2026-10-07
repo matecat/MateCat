@@ -218,7 +218,6 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
             'analysis_ignore_101'           => true,
             'confirm_best_quality_mt'       => false,
             'lock_best_quality_mt'          => true,
-            'best_quality_mt_analysis_status' => 'TRANSLATED',
             'qe_model_version'              => 2,
         ];
         $json   = json_encode($params);
@@ -229,7 +228,6 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
         $this->assertTrue($result->analysis_ignore_101);
         $this->assertFalse($result->confirm_best_quality_mt);
         $this->assertTrue($result->lock_best_quality_mt);
-        $this->assertSame('TRANSLATED', $result->best_quality_mt_analysis_status);
         $this->assertSame(2, $result->qe_model_version);
     }
 
@@ -244,7 +242,6 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
         $this->assertFalse($result->analysis_ignore_101);
         $this->assertTrue($result->confirm_best_quality_mt);
         $this->assertFalse($result->lock_best_quality_mt);
-        $this->assertSame('APPROVED', $result->best_quality_mt_analysis_status);
         $this->assertSame(3, $result->qe_model_version);
     }
 

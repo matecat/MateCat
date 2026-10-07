@@ -5,7 +5,6 @@ namespace Matecat\Core\Model\MTQE;
 use Matecat\TestHelpers\AbstractTest;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use PHPUnit\Framework\Attributes\Test;
-use Utils\Constants\TranslationStatus;
 use Utils\TaskRunner\Commons\Params;
 use Utils\TaskRunner\Commons\QueueElement;
 
@@ -19,7 +18,6 @@ class MTQEWorkflowParamsTest extends AbstractTest
         $this->assertFalse($p->analysis_ignore_101);
         $this->assertTrue($p->confirm_best_quality_mt);
         $this->assertFalse($p->lock_best_quality_mt);
-        $this->assertSame(TranslationStatus::STATUS_APPROVED, $p->best_quality_mt_analysis_status);
         $this->assertSame(3, $p->qe_model_version);
     }
 

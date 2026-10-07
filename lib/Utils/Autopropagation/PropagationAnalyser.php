@@ -41,7 +41,7 @@ class PropagationAnalyser
                     if ($parentSegmentTranslation->translation != ($segmentTranslation->translation ?? '')) {
                         $propagation->addPropagatedIdToUpdateVersion((string) $segmentTranslation->id_segment);
                     }
-                } else { // ??? Why locked segments can not propagate to normal segments?
+                } else { // a locked translation reaches only the locked segments with the same hash
                     $propagation->addNotPropagatedNotIce($segmentTranslation);
                 }
             }

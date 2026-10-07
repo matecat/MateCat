@@ -613,7 +613,7 @@ class SegmentDao extends AbstractDao
                 TO_BASE64(CONCAT(s.id_file_part, '_', s.internal_id)) as internal_id,
                 s.segment_hash,
                 IF ( st.status='NEW', NULL, st.translation ) AS translation,
-                st.locked,
+                COALESCE( st.locked, 0 ) AS locked,
                 st.status,
                 COALESCE( time_to_edit, 0 ) AS time_to_edit,
                 st.warning,
