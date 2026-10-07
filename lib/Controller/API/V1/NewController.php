@@ -393,14 +393,12 @@ class NewController extends KleinController
         if ($pretranslate_100_lock === null) {
             throw new InvalidArgumentException("Invalid pretranslate_100_lock value", -6);
         }
-        $pretranslate_101_status = $this->request->param('pretranslate_101_status') ?? TranslationStatus::STATUS_APPROVED;
-        if (!in_array($pretranslate_101_status, ProjectsMetadataMarshaller::PRE_TRANSLATE_STATUSES, true)) {
-            throw new InvalidArgumentException("Invalid pretranslate_101_status value", -6);
-        }
-        $pretranslate_100_status = $this->request->param('pretranslate_100_status') ?? TranslationStatus::STATUS_TRANSLATED;
-        if (!in_array($pretranslate_100_status, ProjectsMetadataMarshaller::PRE_TRANSLATE_STATUSES, true)) {
-            throw new InvalidArgumentException("Invalid pretranslate_100_status value", -6);
-        }
+        $pretranslate_101_status = ProjectsMetadataMarshaller::preTranslateStatus(
+            $this->request->param('pretranslate_101_status') ?? TranslationStatus::STATUS_APPROVED
+        ) ?? throw new InvalidArgumentException("Invalid pretranslate_101_status value", -6);
+        $pretranslate_100_status = ProjectsMetadataMarshaller::preTranslateStatus(
+            $this->request->param('pretranslate_100_status') ?? TranslationStatus::STATUS_TRANSLATED
+        ) ?? throw new InvalidArgumentException("Invalid pretranslate_100_status value", -6);
         $private_tm_key = filter_var($this->request->param('private_tm_key'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $private_tm_key_json = filter_var($this->request->param('private_tm_key_json'), FILTER_SANITIZE_FULL_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES]);
         $project_completion = filter_var($this->request->param('project_completion'), FILTER_VALIDATE_BOOLEAN);

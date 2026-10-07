@@ -487,6 +487,33 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
     }
 
     // =========================================================================
+    // preTranslateStatus
+    // =========================================================================
+
+    /**
+     * @return array<string, array{mixed, string|null}>
+     */
+    public static function preTranslateStatusProvider(): array
+    {
+        return [
+            'upper case'  => ['APPROVED2', 'APPROVED2'],
+            'lower case'  => ['approved', 'APPROVED'],
+            'mixed case'  => ['Translated', 'TRANSLATED'],
+            'not allowed' => ['draft', null],
+            'empty'       => ['', null],
+            'not string'  => [['APPROVED'], null],
+            'null'        => [null, null],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('preTranslateStatusProvider')]
+    public function preTranslateStatusReturnsTheUpperCaseConstant(mixed $value, ?string $expected): void
+    {
+        $this->assertSame($expected, ProjectsMetadataMarshaller::preTranslateStatus($value));
+    }
+
+    // =========================================================================
     // Helper
     // =========================================================================
 

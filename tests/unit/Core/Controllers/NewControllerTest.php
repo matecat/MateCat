@@ -715,14 +715,18 @@ class NewControllerTest extends AbstractTest
     }
 
     /**
-     * @return array<string, array{string}>
+     * The option is case-insensitive; it is stored as the upper-case TranslationStatus constant.
+     *
+     * @return array<string, array{string, string}>
      */
     public static function validPretranslateStatusValues(): array
     {
         return [
-            'TRANSLATED' => ['TRANSLATED'],
-            'APPROVED'   => ['APPROVED'],
-            'APPROVED2'  => ['APPROVED2'],
+            'TRANSLATED' => ['TRANSLATED', 'TRANSLATED'],
+            'APPROVED'   => ['APPROVED', 'APPROVED'],
+            'APPROVED2'  => ['APPROVED2', 'APPROVED2'],
+            'lower case' => ['approved2', 'APPROVED2'],
+            'mixed case' => ['Translated', 'TRANSLATED'],
         ];
     }
 
@@ -732,15 +736,15 @@ class NewControllerTest extends AbstractTest
      */
     #[Test]
     #[DataProvider('validPretranslateStatusValues')]
-    public function testBuildProjectStructureReadsPretranslateStatusOptions(string $status): void
+    public function testBuildProjectStructureReadsPretranslateStatusOptions(string $status, string $expected): void
     {
         [$request, $controller, $user] = $this->buildValidatedRequest([
             'pretranslate_101_status' => $status,
             'pretranslate_100_status' => $status,
         ]);
 
-        $this->assertSame($status, $request['pretranslate_101_status']);
-        $this->assertSame($status, $request['pretranslate_100_status']);
+        $this->assertSame($expected, $request['pretranslate_101_status']);
+        $this->assertSame($expected, $request['pretranslate_100_status']);
 
         $engine = (new ReflectionClass(MyMemory::class))->newInstanceWithoutConstructor();
         $projectStructure = $controller->callBuildProjectStructure(
@@ -751,8 +755,8 @@ class NewControllerTest extends AbstractTest
             $engine
         );
 
-        $this->assertSame($status, $projectStructure->pretranslate_101_status);
-        $this->assertSame($status, $projectStructure->pretranslate_100_status);
+        $this->assertSame($expected, $projectStructure->pretranslate_101_status);
+        $this->assertSame($expected, $projectStructure->pretranslate_100_status);
     }
 
     /**
@@ -762,7 +766,6 @@ class NewControllerTest extends AbstractTest
     {
         return [
             '101 unknown'    => ['pretranslate_101_status', 'rejected'],
-            '101 lower case' => ['pretranslate_101_status', 'approved'],
             '100 empty'      => ['pretranslate_100_status', ''],
             '100 draft'      => ['pretranslate_100_status', 'draft'],
         ];

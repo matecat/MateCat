@@ -543,14 +543,18 @@ class CreateProjectControllerTest extends AbstractTest
     }
 
     /**
-     * @return array<string, array{string}>
+     * The option is case-insensitive; it is stored as the upper-case TranslationStatus constant.
+     *
+     * @return array<string, array{string, string}>
      */
     public static function validPretranslateStatusValues(): array
     {
         return [
-            'TRANSLATED' => ['TRANSLATED'],
-            'APPROVED'   => ['APPROVED'],
-            'APPROVED2'  => ['APPROVED2'],
+            'TRANSLATED' => ['TRANSLATED', 'TRANSLATED'],
+            'APPROVED'   => ['APPROVED', 'APPROVED'],
+            'APPROVED2'  => ['APPROVED2', 'APPROVED2'],
+            'lower case' => ['approved2', 'APPROVED2'],
+            'mixed case' => ['Translated', 'TRANSLATED'],
         ];
     }
 
@@ -559,7 +563,7 @@ class CreateProjectControllerTest extends AbstractTest
      */
     #[Test]
     #[DataProvider('validPretranslateStatusValues')]
-    public function validateTheRequest_reads_pretranslate_status_options(string $status): void
+    public function validateTheRequest_reads_pretranslate_status_options(string $status, string $expected): void
     {
         $_COOKIE['upload_token'] = '88888888-8888-8888-8888-888888888888';
         $params = $this->validRequestParams();
@@ -570,8 +574,8 @@ class CreateProjectControllerTest extends AbstractTest
         /** @var array<string, mixed> $data */
         $data = $this->invokePrivate('validateTheRequest');
 
-        $this->assertSame($status, $data['pretranslate_101_status']);
-        $this->assertSame($status, $data['pretranslate_100_status']);
+        $this->assertSame($expected, $data['pretranslate_101_status']);
+        $this->assertSame($expected, $data['pretranslate_100_status']);
     }
 
     /**
@@ -581,7 +585,6 @@ class CreateProjectControllerTest extends AbstractTest
     {
         return [
             '101 unknown'    => ['pretranslate_101_status', 'rejected'],
-            '101 lower case' => ['pretranslate_101_status', 'approved'],
             '100 empty'      => ['pretranslate_100_status', ''],
             '100 draft'      => ['pretranslate_100_status', 'draft'],
         ];

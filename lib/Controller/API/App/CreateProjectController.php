@@ -209,14 +209,12 @@ class CreateProjectController extends AbstractStatefulKleinController
         if ($pretranslate_100_lock === null) {
             throw new InvalidArgumentException("Invalid pretranslate_100_lock value", -6);
         }
-        $pretranslate_101_status = $this->request->param('pretranslate_101_status') ?? TranslationStatus::STATUS_APPROVED;
-        if (!in_array($pretranslate_101_status, ProjectsMetadataMarshaller::PRE_TRANSLATE_STATUSES, true)) {
-            throw new InvalidArgumentException("Invalid pretranslate_101_status value", -6);
-        }
-        $pretranslate_100_status = $this->request->param('pretranslate_100_status') ?? TranslationStatus::STATUS_TRANSLATED;
-        if (!in_array($pretranslate_100_status, ProjectsMetadataMarshaller::PRE_TRANSLATE_STATUSES, true)) {
-            throw new InvalidArgumentException("Invalid pretranslate_100_status value", -6);
-        }
+        $pretranslate_101_status = ProjectsMetadataMarshaller::preTranslateStatus(
+            $this->request->param('pretranslate_101_status') ?? TranslationStatus::STATUS_APPROVED
+        ) ?? throw new InvalidArgumentException("Invalid pretranslate_101_status value", -6);
+        $pretranslate_100_status = ProjectsMetadataMarshaller::preTranslateStatus(
+            $this->request->param('pretranslate_100_status') ?? TranslationStatus::STATUS_TRANSLATED
+        ) ?? throw new InvalidArgumentException("Invalid pretranslate_100_status value", -6);
         $tm_prioritization = filter_var($this->request->param('tm_prioritization'), FILTER_SANITIZE_NUMBER_INT);
         $id_team = filter_var($this->request->param('id_team'), FILTER_SANITIZE_NUMBER_INT, ['flags' => FILTER_REQUIRE_SCALAR]);
         $get_public_matches = filter_var($this->request->param('get_public_matches'), FILTER_VALIDATE_BOOLEAN);

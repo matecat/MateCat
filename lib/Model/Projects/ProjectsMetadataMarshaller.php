@@ -66,6 +66,22 @@ enum ProjectsMetadataMarshaller: string
         TranslationStatus::STATUS_APPROVED2,
     ];
 
+    /**
+     * Maps a pre-translate status option, in any letter case, to its TranslationStatus constant.
+     *
+     * @return string|null the constant, or null when the value is not one of PRE_TRANSLATE_STATUSES
+     */
+    public static function preTranslateStatus(mixed $value): ?string
+    {
+        if (!is_string($value)) {
+            return null;
+        }
+
+        $status = strtoupper($value);
+
+        return in_array($status, self::PRE_TRANSLATE_STATUSES, true) ? $status : null;
+    }
+
     public static function unMarshall(MetadataStruct $struct): mixed
     {
         return (match ($struct->key) {
