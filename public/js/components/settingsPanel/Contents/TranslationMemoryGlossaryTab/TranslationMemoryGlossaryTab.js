@@ -17,6 +17,7 @@ import Switch from '../../../common/Switch'
 import {Select} from '../../../common/Select'
 import {
   fromStatusLockId,
+  PRETRANSLATE_ENABLED_DEFAULT,
   PRETRANSLATE_STATUS_OPTIONS,
   toStatusLockId,
 } from '../../../../utils/editorStatusLock'
@@ -492,7 +493,12 @@ export const TranslationMemoryGlossaryTab = () => {
                       <Switch
                         active={pretranslate[key].enabled}
                         onChange={(enabled) =>
-                          setPretranslateMatch(key, {enabled})
+                          setPretranslateMatch(
+                            key,
+                            enabled
+                              ? PRETRANSLATE_ENABLED_DEFAULT
+                              : {enabled: false},
+                          )
                         }
                         testId={`pretranslate-${key}-switch`}
                         showText={false}
@@ -508,7 +514,13 @@ export const TranslationMemoryGlossaryTab = () => {
                       options={PRETRANSLATE_STATUS_OPTIONS}
                       maxHeightDroplist={260}
                       activeOption={PRETRANSLATE_STATUS_OPTIONS.find(
-                        ({id}) => id === toStatusLockId(pretranslate[key]),
+                        ({id}) =>
+                          id ===
+                          toStatusLockId(
+                            pretranslate[key].enabled
+                              ? pretranslate[key]
+                              : PRETRANSLATE_ENABLED_DEFAULT,
+                          ),
                       )}
                       onSelect={(option) =>
                         setPretranslateMatch(key, fromStatusLockId(option.id))

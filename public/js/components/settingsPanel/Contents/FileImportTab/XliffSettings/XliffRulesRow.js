@@ -12,6 +12,7 @@ import {isEqual} from 'lodash'
 import {
   fromStatusLockId,
   getStatusLockOptions,
+  getStatusName,
   toStatusLockId,
 } from '../../../../../utils/editorStatusLock'
 
@@ -19,7 +20,7 @@ const getMatchCategoryShortId = (id) => id.replace(/_match_category/, '')
 const getMatchCategoryExtendedId = (id) => `${id}_match_category`
 const getStateName = (value) =>
   value === 'no-state' ? 'No state' : `'${value}'`
-const getEditorName = (value) => getStateName(value)
+const getEditorName = (value) => `'${getStatusName(value)}'`
 
 export const XliffRulesRow = ({
   value,

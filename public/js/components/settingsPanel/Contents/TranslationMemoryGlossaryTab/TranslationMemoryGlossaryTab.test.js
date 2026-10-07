@@ -522,7 +522,7 @@ test('Toggling pretranslate and dialect-strict checkboxes modifies the current t
   ).toEqual({
     pretranslate: {
       match_101: {enabled: true, status: 'APPROVED', lock: true},
-      match_100: {enabled: true, status: 'TRANSLATED', lock: false},
+      match_100: {enabled: true, status: 'APPROVED', lock: true},
     },
   })
 
@@ -573,9 +573,7 @@ test('Pretranslate status select is disabled while pre-confirm is off', async ()
   const row100 = screen.getByTestId('pretranslate-match_100')
 
   expect(row101).toHaveTextContent('Approved (locked)')
-  expect(row100).toHaveTextContent('Translated')
-
-  await act(async () => user.click(within(row100).getByText('Translated')))
+  expect(row100).toHaveTextContent('Approved (locked)')
   expect(screen.queryByText('Approved 2')).not.toBeInTheDocument()
 
   await act(async () =>

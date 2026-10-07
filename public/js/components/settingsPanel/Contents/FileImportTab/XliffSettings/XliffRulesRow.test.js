@@ -87,16 +87,16 @@ describe('XliffRulesRow', () => {
     expect(screen.getByText('N/A (determined by TM)')).toBeInTheDocument()
   })
 
-  test('lists the editor states with their locked variants, draft without one', async () => {
+  test('lists the editor states by name with their locked variants, draft without one', async () => {
     const user = userEvent.setup()
     setup()
 
-    await act(async () => user.click(screen.getByText("'translated'")))
+    await act(async () => user.click(screen.getByText("'Translated'")))
 
-    expect(screen.getByText("'draft'")).toBeInTheDocument()
-    expect(screen.queryByText("'draft' (locked)")).not.toBeInTheDocument()
-    ;['translated', 'approved', 'approved2'].forEach((status) =>
-      expect(screen.getByText(`'${status}' (locked)`)).toBeInTheDocument(),
+    expect(screen.getByText("'Draft'")).toBeInTheDocument()
+    expect(screen.queryByText("'Draft' (locked)")).not.toBeInTheDocument()
+    ;['Translated', 'Approved', 'Approved 2'].forEach((name) =>
+      expect(screen.getByText(`'${name}' (locked)`)).toBeInTheDocument(),
     )
   })
 
@@ -104,8 +104,8 @@ describe('XliffRulesRow', () => {
     const user = userEvent.setup()
     const {onChange} = setup()
 
-    await act(async () => user.click(screen.getByText("'translated'")))
-    await act(async () => user.click(screen.getByText("'approved' (locked)")))
+    await act(async () => user.click(screen.getByText("'Translated'")))
+    await act(async () => user.click(screen.getByText("'Approved' (locked)")))
 
     expect(onChange).toHaveBeenLastCalledWith({
       ...preTranslatedRow,
@@ -118,7 +118,7 @@ describe('XliffRulesRow', () => {
     const lockedRow = {...preTranslatedRow, editor: 'approved', lock: true}
     setup({value: lockedRow, currentXliffData: [lockedRow]})
 
-    expect(screen.getByText("'approved' (locked)")).toBeInTheDocument()
+    expect(screen.getByText("'Approved' (locked)")).toBeInTheDocument()
   })
 
   test('an unlocked editor value removes lock', async () => {
@@ -129,8 +129,8 @@ describe('XliffRulesRow', () => {
       currentXliffData: [lockedRow],
     })
 
-    await act(async () => user.click(screen.getByText("'approved' (locked)")))
-    await act(async () => user.click(screen.getByText("'approved2'")))
+    await act(async () => user.click(screen.getByText("'Approved' (locked)")))
+    await act(async () => user.click(screen.getByText("'Approved 2'")))
 
     const lastValue = onChange.mock.calls.at(-1)[0]
     expect(lastValue).toEqual({...preTranslatedRow, editor: 'approved2'})
@@ -145,8 +145,8 @@ describe('XliffRulesRow', () => {
       currentXliffData: [lockedRow],
     })
 
-    await act(async () => user.click(screen.getByText("'approved' (locked)")))
-    await act(async () => user.click(screen.getByText("'draft'")))
+    await act(async () => user.click(screen.getByText("'Approved' (locked)")))
+    await act(async () => user.click(screen.getByText("'Draft'")))
 
     const lastValue = onChange.mock.calls.at(-1)[0]
     expect(lastValue).toEqual({...preTranslatedRow, editor: 'draft'})

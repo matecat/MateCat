@@ -43,15 +43,32 @@ export const getStatusLockOptions = (statuses, getName) =>
 
 export const PRETRANSLATE_STATUSES = ['TRANSLATED', 'APPROVED', 'APPROVED2']
 
-const PRETRANSLATE_STATUS_NAMES = {
+const STATUS_NAMES = {
+  DRAFT: 'Draft',
   TRANSLATED: 'Translated',
   APPROVED: 'Approved',
   APPROVED2: 'Approved 2',
 }
 
+/**
+ * Display name of an editor status, in either letter case.
+ *
+ * @param {string} status
+ * @returns {string}
+ */
+export const getStatusName = (status) =>
+  STATUS_NAMES[status.toUpperCase()] ?? status
+
+// The state a 100% or 101% match takes when its pre-confirm toggle is switched on
+export const PRETRANSLATE_ENABLED_DEFAULT = {
+  enabled: true,
+  status: 'APPROVED',
+  lock: true,
+}
+
 export const PRETRANSLATE_STATUS_OPTIONS = getStatusLockOptions(
   PRETRANSLATE_STATUSES,
-  (status) => PRETRANSLATE_STATUS_NAMES[status],
+  getStatusName,
 )
 
 /**
