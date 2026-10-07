@@ -49,7 +49,7 @@ class NameLengthSchemaTest extends AbstractTest
             'xliff template name' => [UserSuppliedName::TEMPLATE_NAME_MAX_LENGTH, 'xliff_config_templates', 'name'],
             'filters template name' => [UserSuppliedName::TEMPLATE_NAME_MAX_LENGTH, 'filters_config_templates', 'name'],
             'payable rate template name' => [UserSuppliedName::TEMPLATE_NAME_MAX_LENGTH, 'payable_rate_templates', 'name'],
-            'qa model label' => [UserSuppliedName::QA_MODEL_LABEL_MAX_LENGTH, 'qa_model_templates', 'label'],
+            'qa model label' => [UserSuppliedName::TEMPLATE_NAME_MAX_LENGTH, 'qa_model_templates', 'label'],
             'commenter name' => [self::privateConstant(CommentController::class, 'COMMENTER_NAME_MAX_LENGTH'), 'comments', 'full_name'],
             'engine name' => [self::privateConstant(EngineController::class, 'ENGINE_NAME_MAX_LENGTH'), 'engines', 'name'],
             'team name' => [self::privateConstant(TeamsController::class, 'NAME_MAX_STORED_LENGTH'), 'teams', 'name'],
