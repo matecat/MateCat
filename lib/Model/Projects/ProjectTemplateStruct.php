@@ -22,22 +22,22 @@ use Utils\Validation\UserSuppliedName;
  *     id_team: int,
  *     segmentation_rule?: object|null,
  *     pretranslate_100: bool,
- *     pretranslate_101: bool,
- *     tm_prioritization: bool,
- *     dialect_strict: bool,
+ *     pretranslate_101?: bool,
+ *     tm_prioritization?: bool,
+ *     dialect_strict?: bool|null,
  *     public_tm_penalty?: int,
  *     get_public_matches: bool,
- *     mt: mixed,
+ *     mt?: mixed,
  *     tm?: list<object>|null,
- *     payable_rate_template_id: int,
- *     qa_model_template_id: int,
- *     filters_template_id: int,
- *     xliff_config_template_id: int,
- *     character_counter_count_tags: bool,
- *     character_counter_mode: string|null,
- *     subject: string|null,
- *     subfiltering_handlers: mixed,
- *     source_language: string|null,
+ *     payable_rate_template_id?: int|null,
+ *     qa_model_template_id?: int|null,
+ *     filters_template_id?: int|null,
+ *     xliff_config_template_id?: int|null,
+ *     character_counter_count_tags?: bool,
+ *     character_counter_mode?: string|null,
+ *     subject?: string|null,
+ *     subfiltering_handlers?: mixed,
+ *     source_language?: string|null,
  *     target_language?: list<string>|null,
  *     mt_quality_value_in_editor?: int|null,
  *     icu_enabled?: bool,
@@ -98,22 +98,23 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
         $this->id_team = $decodedObject->id_team;
         $this->segmentation_rule = (!empty($decodedObject->segmentation_rule)) ? (json_encode($decodedObject->segmentation_rule) ?: null) : null;
         $this->pretranslate_100 = $decodedObject->pretranslate_100;
-        $this->pretranslate_101 = $decodedObject->pretranslate_101;
-        $this->tm_prioritization = $decodedObject->tm_prioritization;
-        $this->dialect_strict = $decodedObject->dialect_strict;
+        $this->pretranslate_101 = $decodedObject->pretranslate_101 ?? false;
+        $this->tm_prioritization = $decodedObject->tm_prioritization ?? false;
+        $this->dialect_strict = $decodedObject->dialect_strict ?? false;
         $this->public_tm_penalty = $decodedObject->public_tm_penalty ?? 0;
         $this->get_public_matches = $decodedObject->get_public_matches;
-        $this->mt = json_encode($decodedObject->mt) ?: null;
+        // json_encode(null) is the string "null", which getMt() would decode back to null
+        $this->mt = isset($decodedObject->mt) ? (json_encode($decodedObject->mt) ?: null) : null;
         $this->tm = (!empty($decodedObject->tm)) ? (json_encode($decodedObject->tm) ?: null) : null;
-        $this->payable_rate_template_id = $decodedObject->payable_rate_template_id;
-        $this->qa_model_template_id = $decodedObject->qa_model_template_id;
-        $this->filters_template_id = $decodedObject->filters_template_id;
-        $this->xliff_config_template_id = $decodedObject->xliff_config_template_id;
-        $this->character_counter_count_tags = $decodedObject->character_counter_count_tags;
-        $this->character_counter_mode = $decodedObject->character_counter_mode;
-        $this->subject = $decodedObject->subject;
-        $this->subfiltering_handlers = json_encode($decodedObject->subfiltering_handlers) ?: null;
-        $this->source_language = $decodedObject->source_language;
+        $this->payable_rate_template_id = $decodedObject->payable_rate_template_id ?? 0;
+        $this->qa_model_template_id = $decodedObject->qa_model_template_id ?? 0;
+        $this->filters_template_id = $decodedObject->filters_template_id ?? 0;
+        $this->xliff_config_template_id = $decodedObject->xliff_config_template_id ?? 0;
+        $this->character_counter_count_tags = $decodedObject->character_counter_count_tags ?? false;
+        $this->character_counter_mode = $decodedObject->character_counter_mode ?? null;
+        $this->subject = $decodedObject->subject ?? null;
+        $this->subfiltering_handlers = json_encode($decodedObject->subfiltering_handlers ?? null) ?: null;
+        $this->source_language = $decodedObject->source_language ?? null;
         $this->target_language = (!empty($decodedObject->target_language)) ? serialize($decodedObject->target_language) : null;
         $this->mt_quality_value_in_editor = (!empty($decodedObject->mt_quality_value_in_editor)) ? (int)$decodedObject->mt_quality_value_in_editor : null;
         $this->icu_enabled = $decodedObject->icu_enabled ?? true;
