@@ -11,7 +11,15 @@ export const ReplaceAllModal = ({search}) => {
   const checkbox = useRef()
   const successCallback = () => {
     SearchUtils.execReplaceAll(search, checkbox.current.checked)
-      .then(() => {
+      .then((response) => {
+        // The unlock lives in localStorage; the reload below rebuilds
+        // segment.unlocked from it, so it has to be written first.
+        const replacedLocked = (response?.replaced_locked_segments ?? []).map(
+          String,
+        )
+        if (replacedLocked.length > 0) {
+          SegmentActions.unlockSegments(replacedLocked)
+        }
         const currentId = SegmentStore.getCurrentSegmentId()
         SegmentActions.removeAllSegments()
         CatToolActions.onRender({
