@@ -9,9 +9,12 @@ use InvalidArgumentException;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
+use Model\Analysis\PayableRates;
 use Model\Filters\FiltersConfigTemplateStruct;
 use Model\MTQE\PayableRate\DTO\MTQEPayableRateBreakdowns;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
+use Model\PayableRates\CustomPayableRateDao;
+use Model\PayableRates\CustomPayableRateStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
@@ -498,26 +501,46 @@ class NewControllerValidationMethodsTest extends AbstractTest
     // ──────────────── validatePayableRateTemplate() ────────────────
 
     #[Test]
-    public function validatePayableRateTemplate_both_null_returns_null(): void
+    public function validatePayableRateTemplate_null_returns_null(): void
     {
-        $result = $this->invokeMethod('validatePayableRateTemplate', [null, null]);
+        $result = $this->invokeMethod('validatePayableRateTemplate', [null]);
         $this->assertNull($result);
     }
 
+    /**
+     * Regression: the id alone used to be refused with "`payable_rate_template_name` param is
+     * missing", although the API docs no longer list the name.
+     */
     #[Test]
-    public function validatePayableRateTemplate_name_without_id_throws(): void
+    public function validatePayableRateTemplate_id_alone_resolves_the_users_template(): void
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('`payable_rate_template_id` param is missing');
-        $this->invokeMethod('validatePayableRateTemplate', ['My Rate', null]);
+        $db = obtainTestDatabase();
+        $db->begin();
+        $this->reflector->getProperty('database')->setValue($this->controller, $db);
+
+        $template = new CustomPayableRateStruct();
+        $template->uid = 42;
+        $template->name = 'v1/new id-only ' . uniqid();
+        $template->breakdowns = ['default' => PayableRates::$DEFAULT_PAYABLE_RATES];
+        $saved = (new CustomPayableRateDao($db))->save($template);
+
+        $result = $this->invokeMethod('validatePayableRateTemplate', [(string)$saved->id]);
+
+        $this->assertInstanceOf(CustomPayableRateStruct::class, $result);
+        $this->assertSame($saved->id, $result->id);
+        $this->assertSame($template->name, $result->name);
     }
 
     #[Test]
-    public function validatePayableRateTemplate_id_without_name_throws(): void
+    public function validatePayableRateTemplate_unknown_id_throws(): void
     {
+        $db = obtainTestDatabase();
+        $db->begin();
+        $this->reflector->getProperty('database')->setValue($this->controller, $db);
+
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('`payable_rate_template_name` param is missing');
-        $this->invokeMethod('validatePayableRateTemplate', [null, '42']);
+        $this->expectExceptionMessage('Payable rate model id not valid');
+        $this->invokeMethod('validatePayableRateTemplate', ['999999999']);
     }
 
     // ──────────────── validateQaModelTemplate() ────────────────

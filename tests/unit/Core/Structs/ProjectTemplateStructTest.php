@@ -117,6 +117,58 @@ class ProjectTemplateStructTest extends AbstractTest
         self::assertTrue($struct->icu_enabled);
     }
 
+    #[Test]
+    public function hydrateFromJsonFallsBackToDefaultsWhenOnlySchemaRequiredFieldsAreSent(): void
+    {
+        $obj                     = new stdClass();
+        $obj->name               = 'Minimal';
+        $obj->id_team            = 99;
+        $obj->pretranslate       = (object)[
+            'match_101' => (object)['enabled' => true],
+            'match_100' => (object)['enabled' => false],
+        ];
+        $obj->get_public_matches = true;
+
+        $struct = new ProjectTemplateStruct();
+        $struct->hydrateFromJSON($obj, 7);
+
+        self::assertFalse($struct->tm_prioritization);
+        self::assertFalse($struct->dialect_strict);
+        self::assertSame(0, $struct->payable_rate_template_id);
+        self::assertSame(0, $struct->qa_model_template_id);
+        self::assertSame(0, $struct->filters_template_id);
+        self::assertSame(0, $struct->xliff_config_template_id);
+        self::assertFalse($struct->character_counter_count_tags);
+        self::assertNull($struct->character_counter_mode);
+        self::assertNull($struct->subject);
+        self::assertNull($struct->source_language);
+        self::assertNull($struct->mt);
+        self::assertEquals(new stdClass(), $struct->getMt());
+    }
+
+    #[Test]
+    public function hydrateFromJsonFallsBackToDefaultsWhenNullableFieldsAreNull(): void
+    {
+        $obj                           = $this->createFullInputObject();
+        $obj->dialect_strict           = null;
+        $obj->payable_rate_template_id = null;
+        $obj->qa_model_template_id     = null;
+        $obj->filters_template_id      = null;
+        $obj->xliff_config_template_id = null;
+        $obj->mt                       = null;
+
+        $struct = new ProjectTemplateStruct();
+        $struct->hydrateFromJSON($obj, 7);
+
+        self::assertFalse($struct->dialect_strict);
+        self::assertSame(0, $struct->payable_rate_template_id);
+        self::assertSame(0, $struct->qa_model_template_id);
+        self::assertSame(0, $struct->filters_template_id);
+        self::assertSame(0, $struct->xliff_config_template_id);
+        self::assertNull($struct->mt);
+        self::assertEquals(new stdClass(), $struct->getMt());
+    }
+
     // ── Phase 2 — json_encode false → null ───────────────────────
 
     #[Test]

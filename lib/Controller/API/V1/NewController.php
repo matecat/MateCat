@@ -75,7 +75,6 @@ use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
 use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
-use Utils\Validation\UserSuppliedName;
 
 class NewController extends KleinController
 {
@@ -361,18 +360,6 @@ class NewController extends KleinController
 
         $mt_qe_workflow_payable_rate_template_id = filter_var($this->request->param('mt_qe_workflow_payable_rate_template_id'), FILTER_SANITIZE_NUMBER_INT) ?: null; // QE workflow parameters
         $payable_rate_template_id = filter_var($this->request->param('payable_rate_template_id'), FILTER_SANITIZE_NUMBER_INT);
-        // Compared against the stored template name further down, in
-        // validatePayableRateTemplateOrDefault(). FILTER_SANITIZE_SPECIAL_CHARS entity-encoded this
-        // copy while the column holds the name as typed, so the two could never match for a template
-        // whose name contains & < > " ' — the request was refused with "Payable rate model name not
-        // matching" for a name the caller had copied correctly. Normalised the same way the name was
-        // normalised on the way in, so the comparison is between two like forms.
-        $rawPayableRateTemplateName = $this->request->param('payable_rate_template_name');
-        $payable_rate_template_name = UserSuppliedName::normalize(
-            is_string($rawPayableRateTemplateName) ? $rawPayableRateTemplateName : null
-        );
-        // `!== ''` rather than `?:`, which reads a template named "0" as "not provided".
-        $payable_rate_template_name = $payable_rate_template_name !== '' ? $payable_rate_template_name : null;
         $public_tm_penalty = filter_var($this->request->param('public_tm_penalty'), FILTER_SANITIZE_NUMBER_INT);
         $pretranslate_100 = filter_var($this->request->param('pretranslate_100'), FILTER_VALIDATE_BOOLEAN);
         $pretranslate_101 = filter_var($this->request->param('pretranslate_101') ?? true, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
@@ -402,7 +389,6 @@ class NewController extends KleinController
         $private_tm_key = filter_var($this->request->param('private_tm_key'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $private_tm_key_json = filter_var($this->request->param('private_tm_key_json'), FILTER_SANITIZE_FULL_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES]);
         $project_completion = filter_var($this->request->param('project_completion'), FILTER_VALIDATE_BOOLEAN);
-        $qa_model_template_id = filter_var($this->request->param('qa_model_template_id'), FILTER_SANITIZE_NUMBER_INT);
         $segmentation_rule = filter_var($this->request->param('segmentation_rule'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
         $source_lang = filter_var($this->request->param('source_lang'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $subject = filter_var($this->request->param('subject'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
@@ -494,10 +480,7 @@ class NewController extends KleinController
         );
         $team = $this->validateTeam($id_team ?: null);
         $qaModelTemplate = $this->validateQaModelTemplate($id_qa_model_template ?: null);
-        $payableRateModelTemplate = $this->validatePayableRateTemplate(
-            $payable_rate_template_name,
-            $payable_rate_template_id
-        );
+        $payableRateModelTemplate = $this->validatePayableRateTemplate($payable_rate_template_id);
         $qaModel = $this->validateQaModel($id_qa_model ?: null);
         $mmt_glossaries = $this->validateMMTGlossaries($mmt_glossaries);
 
@@ -620,7 +603,6 @@ class NewController extends KleinController
             'filters_extraction_parameters' => $filters_extraction_parameters,
             'xliff_parameters' => $xliff_parameters,
             'filters_extraction_parameters_template_id' => $filters_extraction_parameters_template_id,
-            'qa_model_template_id' => $qa_model_template_id,
             'payable_rate_template_id' => $payable_rate_template_id,
             'tms_engine' => $tms_engine,
             'mt_engine' => $mt_engine,
@@ -1077,42 +1059,26 @@ class NewController extends KleinController
     }
 
     /**
-     * @param string|false|null $payable_rate_template_name
+     * The template is resolved from its id alone, scoped to the calling user. A
+     * `payable_rate_template_name` sent by older integrations is ignored.
+     *
      * @param string|false|null $payable_rate_template_id
      *
      * @return CustomPayableRateStruct|null
      * @throws Exception
      * @throws TypeError
      */
-    private function validatePayableRateTemplate(
-        string|false|null $payable_rate_template_name = null,
-        string|false|null $payable_rate_template_id = null
-    ): ?CustomPayableRateStruct {
-        $payableRateModelTemplate = null;
-
-        if (!empty($payable_rate_template_name)) {
-            if (empty($payable_rate_template_id)) {
-                throw new InvalidArgumentException('`payable_rate_template_id` param is missing');
-            }
+    private function validatePayableRateTemplate(string|false|null $payable_rate_template_id = null): ?CustomPayableRateStruct
+    {
+        if (empty($payable_rate_template_id)) {
+            return null;
         }
 
-        if (!empty($payable_rate_template_id)) {
-            if (empty($payable_rate_template_name)) {
-                throw new InvalidArgumentException('`payable_rate_template_name` param is missing');
-            }
-        }
+        $userId = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
+        $payableRateModelTemplate = (new CustomPayableRateDao($this->getDatabase()))->getByIdAndUser((int)$payable_rate_template_id, $userId);
 
-        if (!empty($payable_rate_template_name) and !empty($payable_rate_template_id)) {
-            $userId = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
-            $payableRateModelTemplate = (new CustomPayableRateDao($this->getDatabase()))->getByIdAndUser((int)$payable_rate_template_id, $userId);
-
-            if (null === $payableRateModelTemplate) {
-                throw new InvalidArgumentException('Payable rate model id not valid');
-            }
-
-            if ($payableRateModelTemplate->name !== $payable_rate_template_name) {
-                throw new InvalidArgumentException('Payable rate model name not matching');
-            }
+        if (null === $payableRateModelTemplate) {
+            throw new InvalidArgumentException('Payable rate model id not valid');
         }
 
         return $payableRateModelTemplate;

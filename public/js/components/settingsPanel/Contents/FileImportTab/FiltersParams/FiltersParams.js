@@ -166,7 +166,6 @@ export const FiltersParams = () => {
                 >
                   More details
                 </a>
-                .
               </p>
               <SubTemplates
                 {...{
