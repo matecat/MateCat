@@ -7,6 +7,7 @@ use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ScanDirectoryForConvertedFiles;
 use Controller\Traits\ValidatesDialectStrictTrait;
+use Controller\Traits\ValidatesPretranslateMatchTrait;
 use DomainException;
 use Exception;
 use InvalidArgumentException;
@@ -81,6 +82,7 @@ class NewController extends KleinController
 
     use ScanDirectoryForConvertedFiles;
     use ValidatesDialectStrictTrait;
+    use ValidatesPretranslateMatchTrait;
 
     const int MAX_NUM_KEYS = 15;
 
@@ -366,26 +368,16 @@ class NewController extends KleinController
         if ($pretranslate_101 === null) {
             throw new InvalidArgumentException("Invalid pretranslate_101 value", -6);
         }
-        $pretranslate_101_lock = filter_var($this->request->param('pretranslate_101_lock') ?? 1, FILTER_VALIDATE_INT, [
-            'options' => ['min_range' => 0, 'max_range' => 1],
-            'flags' => FILTER_NULL_ON_FAILURE,
-        ]);
-        if ($pretranslate_101_lock === null) {
-            throw new InvalidArgumentException("Invalid pretranslate_101_lock value", -6);
-        }
-        $pretranslate_100_lock = filter_var($this->request->param('pretranslate_100_lock') ?? 0, FILTER_VALIDATE_INT, [
-            'options' => ['min_range' => 0, 'max_range' => 1],
-            'flags' => FILTER_NULL_ON_FAILURE,
-        ]);
-        if ($pretranslate_100_lock === null) {
-            throw new InvalidArgumentException("Invalid pretranslate_100_lock value", -6);
-        }
-        $pretranslate_101_status = TranslationStatus::preTranslateStatus(
-            $this->request->param('pretranslate_101_status') ?? TranslationStatus::STATUS_APPROVED
-        ) ?? throw new InvalidArgumentException("Invalid pretranslate_101_status value", -6);
-        $pretranslate_100_status = TranslationStatus::preTranslateStatus(
-            $this->request->param('pretranslate_100_status') ?? TranslationStatus::STATUS_TRANSLATED
-        ) ?? throw new InvalidArgumentException("Invalid pretranslate_100_status value", -6);
+        ['lock' => $pretranslate_101_lock, 'status' => $pretranslate_101_status] = $this->validatePretranslateMatchParams(
+            '101',
+            $this->request->param('pretranslate_101_lock'),
+            $this->request->param('pretranslate_101_status')
+        );
+        ['lock' => $pretranslate_100_lock, 'status' => $pretranslate_100_status] = $this->validatePretranslateMatchParams(
+            '100',
+            $this->request->param('pretranslate_100_lock'),
+            $this->request->param('pretranslate_100_status')
+        );
         $private_tm_key = filter_var($this->request->param('private_tm_key'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $private_tm_key_json = filter_var($this->request->param('private_tm_key_json'), FILTER_SANITIZE_FULL_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES]);
         $project_completion = filter_var($this->request->param('project_completion'), FILTER_VALIDATE_BOOLEAN);

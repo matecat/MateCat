@@ -7,6 +7,7 @@ use Controller\Abstracts\Authentication\CookieManager;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ScanDirectoryForConvertedFiles;
 use Controller\Traits\ValidatesDialectStrictTrait;
+use Controller\Traits\ValidatesPretranslateMatchTrait;
 use DomainException;
 use Exception;
 use InvalidArgumentException;
@@ -58,6 +59,7 @@ class CreateProjectController extends AbstractStatefulKleinController
 
     use ScanDirectoryForConvertedFiles;
     use ValidatesDialectStrictTrait;
+    use ValidatesPretranslateMatchTrait;
 
     /** @var array<string, mixed> */
     private array $data = [];
@@ -195,26 +197,16 @@ class CreateProjectController extends AbstractStatefulKleinController
         $disable_tms_engine_flag = filter_var($this->request->param('disable_tms_engine'), FILTER_VALIDATE_BOOLEAN);
         $pretranslate_100 = filter_var($this->request->param('pretranslate_100'), FILTER_SANITIZE_NUMBER_INT);
         $pretranslate_101 = filter_var($this->request->param('pretranslate_101') ?? 1, FILTER_SANITIZE_NUMBER_INT);
-        $pretranslate_101_lock = filter_var($this->request->param('pretranslate_101_lock') ?? 1, FILTER_VALIDATE_INT, [
-            'options' => ['min_range' => 0, 'max_range' => 1],
-            'flags' => FILTER_NULL_ON_FAILURE,
-        ]);
-        if ($pretranslate_101_lock === null) {
-            throw new InvalidArgumentException("Invalid pretranslate_101_lock value", -6);
-        }
-        $pretranslate_100_lock = filter_var($this->request->param('pretranslate_100_lock') ?? 0, FILTER_VALIDATE_INT, [
-            'options' => ['min_range' => 0, 'max_range' => 1],
-            'flags' => FILTER_NULL_ON_FAILURE,
-        ]);
-        if ($pretranslate_100_lock === null) {
-            throw new InvalidArgumentException("Invalid pretranslate_100_lock value", -6);
-        }
-        $pretranslate_101_status = TranslationStatus::preTranslateStatus(
-            $this->request->param('pretranslate_101_status') ?? TranslationStatus::STATUS_APPROVED
-        ) ?? throw new InvalidArgumentException("Invalid pretranslate_101_status value", -6);
-        $pretranslate_100_status = TranslationStatus::preTranslateStatus(
-            $this->request->param('pretranslate_100_status') ?? TranslationStatus::STATUS_TRANSLATED
-        ) ?? throw new InvalidArgumentException("Invalid pretranslate_100_status value", -6);
+        ['lock' => $pretranslate_101_lock, 'status' => $pretranslate_101_status] = $this->validatePretranslateMatchParams(
+            '101',
+            $this->request->param('pretranslate_101_lock'),
+            $this->request->param('pretranslate_101_status')
+        );
+        ['lock' => $pretranslate_100_lock, 'status' => $pretranslate_100_status] = $this->validatePretranslateMatchParams(
+            '100',
+            $this->request->param('pretranslate_100_lock'),
+            $this->request->param('pretranslate_100_status')
+        );
         $tm_prioritization = filter_var($this->request->param('tm_prioritization'), FILTER_SANITIZE_NUMBER_INT);
         $id_team = filter_var($this->request->param('id_team'), FILTER_SANITIZE_NUMBER_INT, ['flags' => FILTER_REQUIRE_SCALAR]);
         $get_public_matches = filter_var($this->request->param('get_public_matches'), FILTER_VALIDATE_BOOLEAN);
