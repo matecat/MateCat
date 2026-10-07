@@ -471,15 +471,6 @@ class ProjectManager
             $this->projectStructure->create_2_pass_review = true;
         }
 
-        // A custom XLIFF rule importing its segments as APPROVED2 needs the second revision phase too,
-        // whether or not the uploaded files contain a unit that the rule matches.
-        if (
-            $this->projectStructure->xliff_parameters instanceof XliffRulesModel
-            && $this->projectStructure->xliff_parameters->hasRuleWithEditorStatus(TranslationStatus::STATUS_APPROVED2)
-        ) {
-            $this->projectStructure->create_2_pass_review = true;
-        }
-
         $this->checkForProjectAssignment();
 
         SecondPassReview::loadAndValidateQualityFramework($this->projectStructure);

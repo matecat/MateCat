@@ -132,27 +132,6 @@ class XliffRulesModel implements JsonSerializable
     }
 
     /**
-     * Whether any custom rule, of either XLIFF version, imports its segments with the given editor status.
-     *
-     * @param string $status
-     *
-     * @return bool
-     * @throws Exception
-     */
-    public function hasRuleWithEditorStatus(string $status): bool
-    {
-        foreach ($this->ruleSets as $rules) {
-            foreach ($rules as $rule) {
-                if ($rule->asEditorStatus() === $status) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /**
      * @return array<string, list<XliffRuleInterface>>
      */
     public function jsonSerialize(): array

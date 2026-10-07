@@ -100,30 +100,28 @@ class ValidateBeforeCreationTest extends AbstractTest
     }
 
     /**
-     * @return array<string, array{array<string, list<array{states: string[], analysis: string, editor?: string}>>, bool}>
+     * @return array<string, array{array<string, list<array{states: string[], analysis: string, editor?: string}>>}>
      */
-    public static function xliffRuleSecondPassReviewCases(): array
+    public static function approved2XliffRuleCases(): array
     {
         return [
-            'no custom rules'                     => [[], false],
-            'xliff12 approved2 rule, final state' => [['xliff12' => [['states' => ['final'], 'analysis' => 'pre-translated', 'editor' => 'approved2']]], true],
-            'xliff12 approved2 rule, non-final'   => [['xliff12' => [['states' => ['translated'], 'analysis' => 'pre-translated', 'editor' => 'approved2']]], true],
-            'xliff20 approved2 rule'              => [['xliff20' => [['states' => ['reviewed'], 'analysis' => 'pre-translated', 'editor' => 'approved2']]], true],
-            'final mapped to translated'          => [['xliff12' => [['states' => ['final'], 'analysis' => 'pre-translated', 'editor' => 'translated']]], false],
-            'final left new'                      => [['xliff12' => [['states' => ['final'], 'analysis' => 'new']]], false],
+            'xliff12 approved2 rule, final state' => [['xliff12' => [['states' => ['final'], 'analysis' => 'pre-translated', 'editor' => 'approved2']]]],
+            'xliff12 approved2 rule, non-final'   => [['xliff12' => [['states' => ['translated'], 'analysis' => 'pre-translated', 'editor' => 'approved2']]]],
+            'xliff20 approved2 rule'              => [['xliff20' => [['states' => ['reviewed'], 'analysis' => 'pre-translated', 'editor' => 'approved2']]]],
         ];
     }
 
     /**
-     * The rules are checked on their own: no file is read, so none of them needs a matching unit.
+     * An APPROVED2 rule alone does not raise the second revision phase: only a segment the uploaded files
+     * actually import as APPROVED2 does, when the pre-translations are stored.
      *
      * @param array<string, list<array{states: string[], analysis: string, editor?: string}>> $rules
      *
      * @throws \Exception
      */
     #[Test]
-    #[DataProvider('xliffRuleSecondPassReviewCases')]
-    public function raisesSecondPassReviewForAnApproved2XliffRule(array $rules, bool $expected): void
+    #[DataProvider('approved2XliffRuleCases')]
+    public function doesNotRaiseSecondPassReviewForAnApproved2XliffRuleAlone(array $rules): void
     {
         $this->pm->setProjectStructureValue('pretranslate_101', 0);
         $this->pm->setProjectStructureValue('pretranslate_100', 0);
@@ -131,7 +129,7 @@ class ValidateBeforeCreationTest extends AbstractTest
 
         $this->pm->callValidateBeforeCreation();
 
-        $this->assertSame($expected, $this->pm->getTestProjectStructure()->create_2_pass_review);
+        $this->assertFalse($this->pm->getTestProjectStructure()->create_2_pass_review);
     }
 
     #[Test]
