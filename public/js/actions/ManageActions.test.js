@@ -668,6 +668,19 @@ describe('ManageActions', () => {
     })
   })
 
+  test('getSecondPassReview notifies on failure', async () => {
+    getSecondPassReview.mockRejectedValueOnce(new Error('fail'))
+
+    await ManageActions.getSecondPassReview(1, 'pp', 2, 'pj')
+
+    expect(CatToolActions.addNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'error',
+        text: expect.stringContaining('Revise 2 link could not be generated'),
+      }),
+    )
+  })
+
   test('openModifyTeamModal fetches members and dispatches modal action', async () => {
     getTeamMembers.mockResolvedValueOnce({
       members: ['m1'],
