@@ -269,14 +269,13 @@ class CattoolController extends BaseKleinViewController
         ]);
 
         // Set unconditionally. The template used to supply the unlicensed defaults itself
-        // (`${lexiqa_languages || string:[]}` and friends); now that the page is built from the
-        // variables the view holds, a variable left unset is a key the page never receives, and
-        // lxq.main.js reads lexiqa_languages before it consults the licence.
+        // (`${lxq_license || string:}` and friends); now that the page is built from the
+        // variables the view holds, a variable left unset is a key the page never receives.
+        // The accepted languages are not among them: lxq.main.js asks lexiqaServer for them.
         $licensed = (bool)AppConfig::$LXQ_LICENSE;
         $this->addParamsToView([
                 'lxq_license' => $licensed ? AppConfig::$LXQ_LICENSE : '',
                 'lxq_partnerid' => $licensed ? AppConfig::$LXQ_PARTNERID : '',
-                'lexiqa_languages' => new PHPTalMap($licensed ? LexiQaAndTagProjectionLanguages::$lexiQaAllowedLanguages : []),
                 'lexiqaServer' => $licensed ? AppConfig::$LXQ_SERVER : '',
             ]
         );
