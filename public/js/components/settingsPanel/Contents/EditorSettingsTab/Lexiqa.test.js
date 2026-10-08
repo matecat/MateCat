@@ -10,14 +10,17 @@ jest.mock('../../../../stores/ApplicationStore', () => ({
   getLanguageNameFromLocale: jest.fn((code) => code),
 }))
 
+const mockAcceptedLanguages = ['en-US', 'it-IT']
+
 jest.mock('../../../../utils/lxq.main', () => ({
   enable: jest.fn(),
   disable: jest.fn(),
+  getSupportedLocales: jest.fn(() => mockAcceptedLanguages),
 }))
 
 const sourceLang = {code: 'en-US', name: 'English'}
 const targetLangs = [{code: 'it-IT', name: 'Italian'}]
-const acceptedLanguages = ['en-US', 'it-IT']
+const acceptedLanguages = mockAcceptedLanguages
 
 const renderComponent = ({
   metadata = {},

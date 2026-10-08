@@ -6,7 +6,6 @@ window.config = {
   password: 'pw',
   source_code: 'en-US',
   target_code: 'fr-FR',
-  lexiqa_languages: ['en-US', 'fr-FR'],
 }
 
 jest.mock('../actions/segmentDispatchActions', () => ({
@@ -26,6 +25,9 @@ jest.mock('../api/lexiqaTooltipwarnings', () => ({
 }))
 jest.mock('../api/getLexiqaQa', () => ({
   getLexiqaQa: jest.fn(() => Promise.resolve({qaData: []})),
+}))
+jest.mock('../api/getLexiqaSupportedLocales/getLexiqaSupportedLocales', () => ({
+  getLexiqaSupportedLocales: jest.fn(() => Promise.resolve([])),
 }))
 jest.mock('../stores/SegmentStore', () => ({
   __esModule: true,
@@ -51,6 +53,7 @@ import {getLexiqaWarnings as getLexiqaWarningsApi} from '../api/getLexiqaWarning
 import {lexiqaIgnoreError} from '../api/lexiqaIgnoreError'
 import {lexiqaTooltipwarnings} from '../api/lexiqaTooltipwarnings'
 import {getLexiqaQa} from '../api/getLexiqaQa'
+import {getLexiqaSupportedLocales} from '../api/getLexiqaSupportedLocales/getLexiqaSupportedLocales'
 import SegmentStore from '../stores/SegmentStore'
 import UserStore from '../stores/UserStore'
 
@@ -79,6 +82,7 @@ beforeEach(() => {
   LXQ.canActivate = undefined
   LXQ.initialized = false
   LXQ.notCheckedSegments = []
+  LXQ._supportedLocales = ['en-US', 'fr-FR']
   LXQ.lexiqaData = {
     lexiqaWarnings: {},
     enableHighlighting: true,
@@ -169,9 +173,15 @@ describe('activation', () => {
 
   test('checkCanActivate is false when a language is unsupported', () => {
     LXQ.canActivate = undefined
-    window.config.lexiqa_languages = ['en-US']
+    LXQ._supportedLocales = ['en-US']
     expect(LXQ.checkCanActivate()).toBe(false)
-    window.config.lexiqa_languages = ['en-US', 'fr-FR']
+  })
+
+  test('checkCanActivate memoizes its result and ignores later locale changes', () => {
+    LXQ.canActivate = undefined
+    expect(LXQ.checkCanActivate()).toBe(true)
+    LXQ._supportedLocales = []
+    expect(LXQ.checkCanActivate()).toBe(true)
   })
 
   test('enabled reflects user metadata', () => {
@@ -201,6 +211,130 @@ describe('activation', () => {
     await Promise.resolve()
     expect(toggleTagLexica).toHaveBeenCalledWith({enabled: false})
     expect(qaComponentsetLxqIssues).toHaveBeenCalledWith([])
+  })
+})
+
+// ---------------------------------------------------------------------------
+// getSupportedLocales (language mapping)
+// ---------------------------------------------------------------------------
+describe('getSupportedLocales', () => {
+  test('returns an empty array when no locales were retrieved', () => {
+    LXQ._supportedLocales = []
+    expect(LXQ.getSupportedLocales()).toEqual([])
+  })
+
+  test('passes through locales that need no mapping', () => {
+    LXQ._supportedLocales = ['en-US', 'fr-FR', 'it-IT']
+    expect(LXQ.getSupportedLocales()).toEqual(['en-US', 'fr-FR', 'it-IT'])
+  })
+
+  test.each([
+    ['de-LU', 'de-DE'],
+    ['ar-DZ', 'ar-MA'],
+    ['ar-BH', 'ar-SA'],
+    ['ar-IQ', 'ar-EG'],
+    ['ar-KW', 'ar-SA'],
+    ['ar-LB', 'ar-JO'],
+    ['ar-LY', 'ar-TN'],
+    ['ar-OM', 'ar-AE'],
+    ['ar-QA', 'ar-SA'],
+    ['ar-SY', 'ar-JO'],
+    ['ar-YE', 'ar-SA'],
+    ['sw-CD', 'sw-KE'],
+    ['sw-TZ', 'sw-KE'],
+    ['sw-UG', 'sw-KE'],
+    ['ha-GH', 'ha-NG'],
+    ['ha-Latn-GH', 'ha-NG'],
+    ['ha-Latn-NE', 'ha-NE'],
+    ['ha-Latn-NG', 'ha-NG'],
+    ['ta-MY', 'ta-IN'],
+    ['ta-SG', 'ta-IN'],
+    ['af-NA', 'af-ZA'],
+    ['sr-BA', 'sr-Cyrl-BA'],
+    ['sr-Latn-BA', 'sr-Cyrl-BA'],
+    ['sr-Latn-ME', 'sr-ME'],
+    ['sr-RS', 'sr-Cyrl-RS'],
+    ['sr-XK', 'sr-Cyrl-RS'],
+    ['sr-Latn-XK', 'sr-Latn-RS'],
+    ['sr-Cyrl-XK', 'sr-Cyrl-RS'],
+    ['hr-BA', 'hr-HR'],
+    ['ku-TR', 'kmr-TR'],
+    ['cb-IQ', 'ckb-IQ'],
+    ['pau', 'pau-PW'],
+  ])('maps unsupported locale %s to %s', (from, to) => {
+    LXQ._supportedLocales = [from]
+    expect(LXQ.getSupportedLocales()).toEqual([to])
+  })
+
+  test('collapses a mapped locale with its target when both are returned by the server', () => {
+    LXQ._supportedLocales = ['de-LU', 'de-DE']
+    expect(LXQ.getSupportedLocales()).toEqual(['de-DE'])
+  })
+
+  test('collapses several locales that map to the same fallback', () => {
+    LXQ._supportedLocales = ['ar-BH', 'ar-KW', 'ar-QA', 'ar-YE', 'ar-SA']
+    expect(LXQ.getSupportedLocales()).toEqual(['ar-SA'])
+  })
+
+  test('keeps the first-seen order while mapping only the locales that need it', () => {
+    LXQ._supportedLocales = ['fr-FR', 'ku-TR', 'en-US', 'de-LU']
+    expect(LXQ.getSupportedLocales()).toEqual([
+      'fr-FR',
+      'kmr-TR',
+      'en-US',
+      'de-DE',
+    ])
+  })
+})
+
+// ---------------------------------------------------------------------------
+// retrieveSupportedLocales
+// ---------------------------------------------------------------------------
+describe('retrieveSupportedLocales', () => {
+  let initSpy
+
+  beforeEach(() => {
+    initSpy = jest.spyOn(LXQ, 'init').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    initSpy.mockRestore()
+  })
+
+  test('stores the fetched locales and initializes lexiQA when enabled', async () => {
+    getLexiqaSupportedLocales.mockResolvedValueOnce(['en-US', 'fr-FR'])
+    LXQ.canActivate = undefined
+    LXQ._supportedLocales = []
+
+    LXQ.retrieveSupportedLocales({lexiqa: 1})
+    await Promise.resolve()
+    await Promise.resolve()
+
+    expect(LXQ._supportedLocales).toEqual(['en-US', 'fr-FR'])
+    expect(initSpy).toHaveBeenCalled()
+  })
+
+  test('does not initialize lexiQA when disabled for the user', async () => {
+    UserStore.getUserMetadata.mockReturnValue({lexiqa: 0})
+    getLexiqaSupportedLocales.mockResolvedValueOnce(['en-US', 'fr-FR'])
+    LXQ.canActivate = undefined
+    LXQ._supportedLocales = []
+
+    LXQ.retrieveSupportedLocales({lexiqa: 0})
+    await Promise.resolve()
+    await Promise.resolve()
+
+    expect(LXQ._supportedLocales).toEqual(['en-US', 'fr-FR'])
+    expect(initSpy).not.toHaveBeenCalled()
+  })
+
+  test('the stored locales go through the language mapping afterwards', async () => {
+    getLexiqaSupportedLocales.mockResolvedValueOnce(['de-LU', 'ku-TR'])
+    LXQ.retrieveSupportedLocales({})
+    await Promise.resolve()
+    await Promise.resolve()
+
+    expect(LXQ.getSupportedLocales()).toEqual(['de-DE', 'kmr-TR'])
   })
 })
 

@@ -6,6 +6,7 @@ import projectTemplatesMock from '../../../../../mocks/projectTemplateMock'
 import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
 import mockLanguages from '../../../../../mocks/languagesMock'
 import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper/ApplicationWrapperContext'
+import LXQ from '../../../../utils/lxq.main'
 
 global.config = {
   basepath: 'http://localhost/',
@@ -171,6 +172,9 @@ global.UI = {
 
 beforeEach(() => {
   config.show_tag_projection = 1
+  // lxq.main is not mocked here, so give it the list of lexiQA-supported
+  // locales it would otherwise fetch from the lexiQA server at runtime.
+  LXQ._supportedLocales = config.lexiqa_languages
 })
 
 afterAll(() => (global.UI = originalUI))

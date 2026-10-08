@@ -167,6 +167,7 @@ jest.mock('../utils/offlineUtils', () => ({
 jest.mock('../utils/lxq.main', () => ({
   enabled: jest.fn(() => false),
   init: jest.fn(),
+  retrieveSupportedLocales: jest.fn(),
 }))
 jest.mock('../utils/speech2text', () => ({
   __esModule: true,
@@ -632,16 +633,25 @@ describe('CatTool', () => {
   })
 
   describe('metadata dependent init', () => {
-    test('initializes Speech2Text and LXQ when enabled', async () => {
+    test('initializes Speech2Text and fetches lexiQA supported locales when enabled', async () => {
       Speech2Text.enabled.mockReturnValueOnce(true)
-      LXQ.enabled.mockReturnValueOnce(true)
+      const metadata = {some: 'meta', lexiqa: 1}
       await act(async () =>
         renderCatTool({
-          userInfo: {user: {uid: 1}, metadata: {some: 'meta'}},
+          userInfo: {user: {uid: 1}, metadata},
         }),
       )
       expect(Speech2Text.init).toHaveBeenCalled()
-      expect(LXQ.init).toHaveBeenCalled()
+      expect(LXQ.retrieveSupportedLocales).toHaveBeenCalledWith(metadata)
+    })
+
+    test('does not fetch lexiQA supported locales when disabled', async () => {
+      await act(async () =>
+        renderCatTool({
+          userInfo: {user: {uid: 1}, metadata: {some: 'meta', lexiqa: 0}},
+        }),
+      )
+      expect(LXQ.retrieveSupportedLocales).not.toHaveBeenCalled()
     })
   })
 

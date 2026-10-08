@@ -56,6 +56,7 @@ import {
   BUTTON_MODE,
   BUTTON_SIZE,
 } from '../components/common/Button/Button'
+import UserStore from '../stores/UserStore'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -593,7 +594,9 @@ function CatTool() {
     if (metadata) {
       if (Speech2Text.enabled(metadata)) Speech2Text.init()
       initTagSignature(metadata)
-      if (LXQ.enabled(metadata)) LXQ.init()
+
+      if (metadata.lexiqa === 1 || UserStore.getUserMetadata()?.lexiqa === 1)
+        LXQ.retrieveSupportedLocales(metadata)
     }
   }, [userInfo?.metadata])
 

@@ -16,6 +16,7 @@ import SegmentStore from '../stores/SegmentStore'
 import {lexiqaTooltipwarnings} from '../api/lexiqaTooltipwarnings'
 import UserStore from '../stores/UserStore'
 import {getLexiqaQa} from '../api/getLexiqaQa'
+import {getLexiqaSupportedLocales} from '../api/getLexiqaSupportedLocales/getLexiqaSupportedLocales'
 
 const LXQ = {
   partnerid: config.lxq_partnerid,
@@ -78,6 +79,7 @@ const LXQ = {
     default: {t: 'not found in source', s: 'missing from target'},
   },
   modulesNoHighlight: ['b1g', 'g1g', 'g2g', 'g3g'],
+  _supportedLocales: [],
   init: () => {
     LXQ.initialized = true
     let globalReceived = false
@@ -142,6 +144,69 @@ const LXQ = {
         .map(([key]) => key)
     })
   },
+  retrieveSupportedLocales: function (metadata) {
+    getLexiqaSupportedLocales().then((languages) => {
+      LXQ._supportedLocales = languages
+      if (LXQ.enabled(metadata)) LXQ.init()
+    })
+  },
+  getSupportedLocales: function () {
+    const languageMapping = {
+      'de-LU': 'de-DE',
+
+      'ar-DZ': 'ar-MA',
+      'ar-BH': 'ar-SA',
+      'ar-IQ': 'ar-EG',
+      'ar-KW': 'ar-SA',
+      'ar-LB': 'ar-JO',
+      'ar-LY': 'ar-TN',
+      'ar-OM': 'ar-AE',
+      'ar-QA': 'ar-SA',
+      'ar-SY': 'ar-JO',
+      'ar-YE': 'ar-SA',
+
+      'sw-CD': 'sw-KE',
+      'sw-TZ': 'sw-KE',
+      'sw-UG': 'sw-KE',
+
+      'ha-GH': 'ha-NG',
+      'ha-Latn-GH': 'ha-NG',
+      'ha-Latn-NE': 'ha-NE',
+      'ha-Latn-NG': 'ha-NG',
+
+      'ta-MY': 'ta-IN',
+      'ta-SG': 'ta-IN',
+
+      'af-NA': 'af-ZA',
+
+      'sr-BA': 'sr-Cyrl-BA',
+      'sr-Latn-BA': 'sr-Cyrl-BA',
+      'sr-Latn-ME': 'sr-ME',
+      'sr-RS': 'sr-Cyrl-RS',
+      'sr-XK': 'sr-Cyrl-RS',
+      'sr-Latn-XK': 'sr-Latn-RS',
+      'sr-Cyrl-XK': 'sr-Cyrl-RS',
+
+      'hr-BA': 'hr-HR',
+
+      'ku-TR': 'kmr-TR',
+
+      'cb-IQ': 'ckb-IQ',
+
+      pau: 'pau-PW',
+    }
+
+    return (
+      LXQ._supportedLocales
+        .map((code) => (languageMapping[code] ? languageMapping[code] : code))
+        // remove duplicates
+        .reduce(
+          (acc, cur) =>
+            acc.some((code) => code === cur) ? acc : [...acc, cur],
+          [],
+        )
+    )
+  },
   enabled: function ({lexiqa} = {}) {
     return (
       LXQ.checkCanActivate() &&
@@ -166,8 +231,8 @@ const LXQ = {
   checkCanActivate: function () {
     if (isUndefined(this.canActivate)) {
       this.canActivate =
-        config.lexiqa_languages.indexOf(config.source_code) > -1 &&
-        config.lexiqa_languages.indexOf(config.target_code) > -1
+        LXQ.getSupportedLocales().indexOf(config.source_code) > -1 &&
+        LXQ.getSupportedLocales().indexOf(config.target_code) > -1
     }
     return this.canActivate
   },
