@@ -20,7 +20,6 @@ jest.mock('../../../../utils/lxq.main', () => ({
 
 const sourceLang = {code: 'en-US', name: 'English'}
 const targetLangs = [{code: 'it-IT', name: 'Italian'}]
-const acceptedLanguages = mockAcceptedLanguages
 
 const renderComponent = ({
   metadata = {},
@@ -31,7 +30,6 @@ const renderComponent = ({
 } = {}) => {
   global.config = {
     ...global.config,
-    lexiqa_languages: acceptedLanguages,
     lxq_license: license,
   }
   return render(
