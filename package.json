@@ -100,6 +100,7 @@
     "whatwg-fetch": "^3.6.20"
   },
   "resolutions": {
+    "draft-js/immutable": "^3.8.4",
     "wrap-ansi": "^7.0.0"
   },
   "version": "4.1.6"
