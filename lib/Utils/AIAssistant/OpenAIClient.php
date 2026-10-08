@@ -73,7 +73,7 @@ Return your classification and a brief explanation (2–3 lines) in JSON format.
         ];
 
         $prompt = strtr($promptTemplate, $vars);
-        $model = AppConfig::$OPEN_AI_MODEL ?: 'gpt-3.5-turbo';
+        $model = AppConfig::$OPEN_AI_MODEL ?: 'gpt-5.6-luna';
         $maxTokens = (int)(AppConfig::$OPEN_AI_MAX_TOKENS ?: 500);
         $realMaxTokens = (4000 - $maxTokens);
 
@@ -145,7 +145,7 @@ Return your classification and a brief explanation (2–3 lines) in JSON format.
     {
         $phrase = strip_tags($phrase);
         $content = "Explain, in " . $target . ", the meaning of '" . $word . "' when used in this context : '" . $phrase . "'";
-        $model = AppConfig::$OPEN_AI_MODEL ?: 'gpt-3.5-turbo';
+        $model = AppConfig::$OPEN_AI_MODEL ?: 'gpt-5.6-luna';
         $maxTokens = (int)(AppConfig::$OPEN_AI_MAX_TOKENS ?: 500);
         $realMaxTokens = (4000 - $maxTokens);
 
