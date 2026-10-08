@@ -655,9 +655,9 @@ class NewControllerTest extends AbstractTest
         $this->assertSame(1, $projectStructure->tms_engine);
         $this->assertSame(20, $projectStructure->public_tm_penalty);
         $this->assertSame(1, $projectStructure->pretranslate_101_lock);
-        $this->assertSame(0, $projectStructure->pretranslate_100_lock);
+        $this->assertSame(1, $projectStructure->pretranslate_100_lock);
         $this->assertSame('APPROVED', $projectStructure->pretranslate_101_status);
-        $this->assertSame('TRANSLATED', $projectStructure->pretranslate_100_status);
+        $this->assertSame('APPROVED', $projectStructure->pretranslate_100_status);
         // pretranslate_101 is not in the request: it defaults to on
         $this->assertTrue($request['pretranslate_101']);
         $this->assertSame(1, $projectStructure->pretranslate_101);

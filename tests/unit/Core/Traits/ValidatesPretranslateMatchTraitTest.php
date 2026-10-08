@@ -40,9 +40,9 @@ class ValidatesPretranslateMatchTraitTest extends AbstractTest
     }
 
     #[Test]
-    public function a100MatchDefaultsToTranslatedAndEditable(): void
+    public function a100MatchDefaultsToApprovedAndLocked(): void
     {
-        $this->assertSame(['lock' => 0, 'status' => 'TRANSLATED'], $this->validator->validate('100', null, null));
+        $this->assertSame(['lock' => 1, 'status' => 'APPROVED'], $this->validator->validate('100', null, null));
     }
 
     #[Test]

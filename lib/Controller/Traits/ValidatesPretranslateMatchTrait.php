@@ -8,11 +8,11 @@ use Utils\Constants\TranslationStatus;
 trait ValidatesPretranslateMatchTrait
 {
     /**
-     * The options a request leaves out: a 101% match is approved and locked, a 100% match translated and editable.
+     * The options a request leaves out: a 101% and a 100% match are both approved and locked.
      */
     private const array PRETRANSLATE_MATCH_DEFAULTS = [
         '101' => ['lock' => 1, 'status' => TranslationStatus::STATUS_APPROVED],
-        '100' => ['lock' => 0, 'status' => TranslationStatus::STATUS_TRANSLATED],
+        '100' => ['lock' => 1, 'status' => TranslationStatus::STATUS_APPROVED],
     ];
 
     /**

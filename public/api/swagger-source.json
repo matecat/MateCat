@@ -204,7 +204,7 @@
             "description": "Status given to pre-translated 100% matches: TRANSLATED, APPROVED or APPROVED2, in any letter case",
             "required": false,
             "type": "string",
-            "default": "TRANSLATED",
+            "default": "APPROVED",
             "enum": ["TRANSLATED", "APPROVED", "APPROVED2"]
           },
           {
@@ -213,7 +213,7 @@
             "description": "1 locks pre-translated 100% matches, which takes them out of scope; 0 leaves them editable",
             "required": false,
             "type": "integer",
-            "default": 0,
+            "default": 1,
             "enum": [0, 1]
           },
           {

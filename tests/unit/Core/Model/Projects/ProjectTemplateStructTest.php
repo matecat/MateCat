@@ -94,9 +94,9 @@ class ProjectTemplateStructTest extends AbstractTest
         $this->assertTrue($struct->icu_enabled);
         $this->assertNull($struct->mandatory_issues);
         $this->assertTrue($struct->pretranslate_101_lock);
-        $this->assertFalse($struct->pretranslate_100_lock);
+        $this->assertTrue($struct->pretranslate_100_lock);
         $this->assertSame('APPROVED', $struct->pretranslate_101_status);
-        $this->assertSame('TRANSLATED', $struct->pretranslate_100_status);
+        $this->assertSame('APPROVED', $struct->pretranslate_100_status);
     }
 
     #[Test]

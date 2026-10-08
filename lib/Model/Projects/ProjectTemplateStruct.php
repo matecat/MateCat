@@ -80,9 +80,9 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
     public bool $icu_enabled = true;
     public ?string $mandatory_issues = null;
     public bool $pretranslate_101_lock = true;
-    public bool $pretranslate_100_lock = false;
+    public bool $pretranslate_100_lock = true;
     public string $pretranslate_101_status = TranslationStatus::STATUS_APPROVED;
-    public string $pretranslate_100_status = TranslationStatus::STATUS_TRANSLATED;
+    public string $pretranslate_100_status = TranslationStatus::STATUS_APPROVED;
 
     /**
      * @phpstan-param HydrationInput $decodedObject
@@ -132,8 +132,8 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
         $this->pretranslate_101_status = $match101->status ?? TranslationStatus::STATUS_APPROVED;
         $this->pretranslate_101_lock = $match101->lock ?? true;
         $this->pretranslate_100 = $match100->enabled;
-        $this->pretranslate_100_status = $match100->status ?? TranslationStatus::STATUS_TRANSLATED;
-        $this->pretranslate_100_lock = $match100->lock ?? false;
+        $this->pretranslate_100_status = $match100->status ?? TranslationStatus::STATUS_APPROVED;
+        $this->pretranslate_100_lock = $match100->lock ?? true;
 
         return $this;
     }

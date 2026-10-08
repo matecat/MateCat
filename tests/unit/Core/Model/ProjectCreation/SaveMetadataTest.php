@@ -158,9 +158,9 @@ class SaveMetadataTest extends AbstractTest
         $keys = array_keys($metadata);
         self::assertContains(ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value, $keys);
         self::assertSame('1', $metadata[ProjectsMetadataMarshaller::PRE_TRANSLATE_101_LOCK->value]);
-        self::assertSame('0', $metadata[ProjectsMetadataMarshaller::PRE_TRANSLATE_100_LOCK->value]);
+        self::assertSame('1', $metadata[ProjectsMetadataMarshaller::PRE_TRANSLATE_100_LOCK->value]);
         self::assertSame('APPROVED', $metadata[ProjectsMetadataMarshaller::PRE_TRANSLATE_101_STATUS->value]);
-        self::assertSame('TRANSLATED', $metadata[ProjectsMetadataMarshaller::PRE_TRANSLATE_100_STATUS->value]);
+        self::assertSame('APPROVED', $metadata[ProjectsMetadataMarshaller::PRE_TRANSLATE_100_STATUS->value]);
     }
 
     // =========================================================================

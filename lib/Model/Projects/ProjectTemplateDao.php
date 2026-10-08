@@ -107,9 +107,9 @@ class ProjectTemplateDao extends AbstractDao
         ) ?: null;
         $default->icu_enabled = true;
         $default->pretranslate_101_lock = true;
-        $default->pretranslate_100_lock = false;
+        $default->pretranslate_100_lock = true;
         $default->pretranslate_101_status = TranslationStatus::STATUS_APPROVED;
-        $default->pretranslate_100_status = TranslationStatus::STATUS_TRANSLATED;
+        $default->pretranslate_100_status = TranslationStatus::STATUS_APPROVED;
 
         return $default;
     }

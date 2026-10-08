@@ -609,9 +609,9 @@ CREATE TABLE `project_templates` (
   `icu_enabled` tinyint(1) DEFAULT '1',
   `mandatory_issues` varchar(255) DEFAULT NULL,
   `pretranslate_101_lock` tinyint(1) NOT NULL DEFAULT '1',
-  `pretranslate_100_lock` tinyint(1) NOT NULL DEFAULT '0',
+  `pretranslate_100_lock` tinyint(1) NOT NULL DEFAULT '1',
   `pretranslate_101_status` varchar(16) NOT NULL DEFAULT 'APPROVED',
-  `pretranslate_100_status` varchar(16) NOT NULL DEFAULT 'TRANSLATED',
+  `pretranslate_100_status` varchar(16) NOT NULL DEFAULT 'APPROVED',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uid_name_idx` (`uid`,`name`),
   KEY `uid_idx` (`uid`)

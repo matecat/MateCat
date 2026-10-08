@@ -472,7 +472,7 @@ class CreateProjectControllerTest extends AbstractTest
         $data = $this->invokePrivate('validateTheRequest');
 
         $this->assertSame(1, $data['pretranslate_101_lock']);
-        $this->assertSame(0, $data['pretranslate_100_lock']);
+        $this->assertSame(1, $data['pretranslate_100_lock']);
     }
 
     /**
@@ -539,7 +539,7 @@ class CreateProjectControllerTest extends AbstractTest
         $data = $this->invokePrivate('validateTheRequest');
 
         $this->assertSame('APPROVED', $data['pretranslate_101_status']);
-        $this->assertSame('TRANSLATED', $data['pretranslate_100_status']);
+        $this->assertSame('APPROVED', $data['pretranslate_100_status']);
     }
 
     /**
