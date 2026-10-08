@@ -94,7 +94,7 @@
     "stylelint": "^17.13.0",
     "stylelint-config-standard-scss": "^17.0.0",
     "stylelint-selector-bem-pattern": "^5.0.0",
-    "undici": "^5.28.2",
+    "undici": "^6.28.1",
     "vite": "^8.0.9",
     "web-streams-polyfill": "^4.1.0",
     "whatwg-fetch": "^3.6.20"
