@@ -645,12 +645,10 @@ describe('CatTool', () => {
       expect(LXQ.retrieveSupportedLocales).toHaveBeenCalledWith(metadata)
     })
 
-    test('does not fetch lexiQA supported locales when disabled', async () => {
-      await act(async () =>
-        renderCatTool({
-          userInfo: {user: {uid: 1}, metadata: {some: 'meta', lexiqa: 0}},
-        }),
-      )
+    test('does not fetch lexiQA supported locales when disabled', () => {
+      renderCatTool({
+        userInfo: {user: {uid: 1}, metadata: {some: 'meta', lexiqa: 0}},
+      })
       expect(LXQ.retrieveSupportedLocales).not.toHaveBeenCalled()
     })
   })
