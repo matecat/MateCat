@@ -30,10 +30,10 @@ class LastInsertTest extends AbstractTest
         parent::setUp();
         $this->databaseInstance = obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
 
-        $this->sql_create = "CREATE TABLE Persons( PersonID INT )";
+        $this->sql_create = "CREATE TEMPORARY TABLE Persons( PersonID INT )";
         $this->sql_insert_first_value = "INSERT INTO Persons VALUES (475144 )";
         $this->sql_insert_second_value = "INSERT INTO Persons VALUES (890788 )";
-        $this->sql_drop = "DROP TABLE Persons";
+        $this->sql_drop = "DROP TEMPORARY TABLE IF EXISTS Persons";
     }
 
     public function tearDown(): void

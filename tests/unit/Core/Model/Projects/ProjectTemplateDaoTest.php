@@ -25,48 +25,6 @@ class ProjectTemplateDaoTest extends AbstractTest
         $this->dao = new ProjectTemplateDao(obtainTestDatabase());
 
         $conn = obtainTestDatabase()->getConnection();
-        $conn->exec("DROP TABLE IF EXISTS project_templates");
-        $conn->exec(
-            "CREATE TABLE project_templates (
-                id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-                name VARCHAR(255) NOT NULL,
-                is_default TINYINT(1) NOT NULL DEFAULT 0,
-                uid BIGINT(20) NOT NULL,
-                id_team INT(11) NOT NULL,
-                pretranslate_100 TINYINT(1) NOT NULL DEFAULT 0,
-                pretranslate_101 TINYINT(1) NOT NULL DEFAULT 1,
-                get_public_matches TINYINT(1) NOT NULL DEFAULT 0,
-                segmentation_rule VARCHAR(255) DEFAULT NULL,
-                tm TEXT,
-                mt TEXT,
-                payable_rate_template_id INT(11) DEFAULT 0,
-                qa_model_template_id INT(11) DEFAULT 0,
-                filters_template_id INT(11) DEFAULT 0,
-                xliff_config_template_id INT(11) DEFAULT 0,
-                created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-                modified_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-                subject VARCHAR(255) DEFAULT NULL,
-                source_language VARCHAR(45) DEFAULT NULL,
-                target_language VARCHAR(2048) DEFAULT NULL,
-                subfiltering_handlers TEXT,
-                character_counter_count_tags TINYINT(1) NOT NULL DEFAULT 0,
-                character_counter_mode VARCHAR(255) DEFAULT NULL,
-                mt_quality_value_in_editor INT(11) DEFAULT NULL,
-                icu_enabled TINYINT(1) NOT NULL DEFAULT 1,
-                tm_prioritization TINYINT(1) NOT NULL DEFAULT 0,
-                dialect_strict TINYINT(1) NOT NULL DEFAULT 0,
-                public_tm_penalty INT(11) NOT NULL DEFAULT 0,
-                mandatory_issues TEXT DEFAULT NULL,
-                pretranslate_101_lock TINYINT(1) NOT NULL DEFAULT 1,
-                pretranslate_100_lock TINYINT(1) NOT NULL DEFAULT 0,
-                pretranslate_101_status VARCHAR(16) NOT NULL DEFAULT 'APPROVED',
-                pretranslate_100_status VARCHAR(16) NOT NULL DEFAULT 'TRANSLATED',
-                PRIMARY KEY (id),
-                UNIQUE KEY uid_name_idx (uid, name),
-                KEY uid_idx (uid)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
-        );
-
         $conn->beginTransaction();
 
         $conn->exec(
