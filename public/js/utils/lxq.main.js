@@ -18,6 +18,26 @@ import UserStore from '../stores/UserStore'
 import {getLexiqaQa} from '../api/getLexiqaQa'
 import {getLexiqaSupportedLocales} from '../api/getLexiqaSupportedLocales/getLexiqaSupportedLocales'
 
+// lexiQA and MateCat name a handful of languages differently for the same locale.
+// Keyed by lexiQA's code, valued by MateCat's code for that same language.
+const languageMapping = {
+  'ku-TR': 'kmr-TR',
+  'cb-IQ': 'ckb-IQ',
+  pau: 'pau-PW',
+  'or-IN': 'ory-IN',
+}
+
+// lexiQA's /supportedLocales response speaks lexiQA's code-space, matching these keys;
+// config.source_code/target_code and the outgoing QA request speak MateCat's, matching
+// these values. These two convert between the two, in opposite directions.
+const getLexiqaLanguageCodeFromMatecat = (matecatCode) =>
+  Object.entries(languageMapping).find(
+    ([, value]) => value === matecatCode,
+  )?.[0] ?? matecatCode
+
+const getMatecatLanguageCodeFromLexiqa = (lexiqaCode) =>
+  languageMapping[lexiqaCode] ?? lexiqaCode
+
 const LXQ = {
   partnerid: config.lxq_partnerid,
   colors: {
@@ -151,61 +171,11 @@ const LXQ = {
     })
   },
   getSupportedLocales: function () {
-    const languageMapping = {
-      'de-LU': 'de-DE',
-
-      'ar-DZ': 'ar-MA',
-      'ar-BH': 'ar-SA',
-      'ar-IQ': 'ar-EG',
-      'ar-KW': 'ar-SA',
-      'ar-LB': 'ar-JO',
-      'ar-LY': 'ar-TN',
-      'ar-OM': 'ar-AE',
-      'ar-QA': 'ar-SA',
-      'ar-SY': 'ar-JO',
-      'ar-YE': 'ar-SA',
-
-      'sw-CD': 'sw-KE',
-      'sw-TZ': 'sw-KE',
-      'sw-UG': 'sw-KE',
-
-      'ha-GH': 'ha-NG',
-      'ha-Latn-GH': 'ha-NG',
-      'ha-Latn-NE': 'ha-NE',
-      'ha-Latn-NG': 'ha-NG',
-
-      'ta-MY': 'ta-IN',
-      'ta-SG': 'ta-IN',
-
-      'af-NA': 'af-ZA',
-
-      'sr-BA': 'sr-Cyrl-BA',
-      'sr-Latn-BA': 'sr-Cyrl-BA',
-      'sr-Latn-ME': 'sr-ME',
-      'sr-RS': 'sr-Cyrl-RS',
-      'sr-XK': 'sr-Cyrl-RS',
-      'sr-Latn-XK': 'sr-Latn-RS',
-      'sr-Cyrl-XK': 'sr-Cyrl-RS',
-
-      'hr-BA': 'hr-HR',
-
-      'ku-TR': 'kmr-TR',
-
-      'cb-IQ': 'ckb-IQ',
-
-      pau: 'pau-PW',
-    }
-
-    return (
-      LXQ._supportedLocales
-        .map((code) => (languageMapping[code] ? languageMapping[code] : code))
-        // remove duplicates
-        .reduce(
-          (acc, cur) =>
-            acc.some((code) => code === cur) ? acc : [...acc, cur],
-          [],
-        )
-    )
+    return [
+      ...new Set(
+        LXQ._supportedLocales.map((code) => getMatecatLanguageCodeFromLexiqa(code)),
+      ),
+    ]
   },
   enabled: function ({lexiqa} = {}) {
     return (
@@ -262,8 +232,8 @@ const LXQ = {
 
     const returnUrl = window.location.href.split('#')[0] + '#' + id_segment
     const data = {
-      sourcelanguage: config.source_code,
-      targetlanguage: config.target_code,
+      sourcelanguage: getLexiqaLanguageCodeFromMatecat(config.source_code),
+      targetlanguage: getLexiqaLanguageCodeFromMatecat(config.target_code),
       sourcetext: sourcetext,
       targettext: translation,
       returnUrl: returnUrl,

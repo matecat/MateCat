@@ -102,7 +102,7 @@ export const Lexiqa = ({sourceLang, targetLangs}) => {
           symbols, etc.
           <a
             className="tooltip-options"
-            href="https://guides.matecat.com/matecat-qa-with-lexiqa?hs_preview=ZjhRGTNW-10067295048"
+            href="https://guides.matecat.com/matecat-qa-with-lexiqa"
             target="_blank"
             rel="noreferrer"
           >

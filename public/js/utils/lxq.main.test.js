@@ -228,61 +228,31 @@ describe('getSupportedLocales', () => {
     expect(LXQ.getSupportedLocales()).toEqual(['en-US', 'fr-FR', 'it-IT'])
   })
 
+  // _supportedLocales holds lexiQA's own codes (as returned by its /supportedLocales
+  // endpoint), so the mapping here must translate lexiQA -> MateCat, the opposite
+  // direction from the one used to build the outgoing QA request (see 'doLexiQA' below).
   test.each([
-    ['de-LU', 'de-DE'],
-    ['ar-DZ', 'ar-MA'],
-    ['ar-BH', 'ar-SA'],
-    ['ar-IQ', 'ar-EG'],
-    ['ar-KW', 'ar-SA'],
-    ['ar-LB', 'ar-JO'],
-    ['ar-LY', 'ar-TN'],
-    ['ar-OM', 'ar-AE'],
-    ['ar-QA', 'ar-SA'],
-    ['ar-SY', 'ar-JO'],
-    ['ar-YE', 'ar-SA'],
-    ['sw-CD', 'sw-KE'],
-    ['sw-TZ', 'sw-KE'],
-    ['sw-UG', 'sw-KE'],
-    ['ha-GH', 'ha-NG'],
-    ['ha-Latn-GH', 'ha-NG'],
-    ['ha-Latn-NE', 'ha-NE'],
-    ['ha-Latn-NG', 'ha-NG'],
-    ['ta-MY', 'ta-IN'],
-    ['ta-SG', 'ta-IN'],
-    ['af-NA', 'af-ZA'],
-    ['sr-BA', 'sr-Cyrl-BA'],
-    ['sr-Latn-BA', 'sr-Cyrl-BA'],
-    ['sr-Latn-ME', 'sr-ME'],
-    ['sr-RS', 'sr-Cyrl-RS'],
-    ['sr-XK', 'sr-Cyrl-RS'],
-    ['sr-Latn-XK', 'sr-Latn-RS'],
-    ['sr-Cyrl-XK', 'sr-Cyrl-RS'],
-    ['hr-BA', 'hr-HR'],
     ['ku-TR', 'kmr-TR'],
     ['cb-IQ', 'ckb-IQ'],
     ['pau', 'pau-PW'],
-  ])('maps unsupported locale %s to %s', (from, to) => {
-    LXQ._supportedLocales = [from]
-    expect(LXQ.getSupportedLocales()).toEqual([to])
+    ['or-IN', 'ory-IN'],
+  ])('maps lexiQA code %s to the MateCat code %s', (lexiqaCode, matecatCode) => {
+    LXQ._supportedLocales = [lexiqaCode]
+    expect(LXQ.getSupportedLocales()).toEqual([matecatCode])
   })
 
-  test('collapses a mapped locale with its target when both are returned by the server', () => {
-    LXQ._supportedLocales = ['de-LU', 'de-DE']
-    expect(LXQ.getSupportedLocales()).toEqual(['de-DE'])
-  })
-
-  test('collapses several locales that map to the same fallback', () => {
-    LXQ._supportedLocales = ['ar-BH', 'ar-KW', 'ar-QA', 'ar-YE', 'ar-SA']
-    expect(LXQ.getSupportedLocales()).toEqual(['ar-SA'])
+  test('collapses duplicates when the server returns both the lexiQA and MateCat-shaped code', () => {
+    LXQ._supportedLocales = ['ku-TR', 'kmr-TR']
+    expect(LXQ.getSupportedLocales()).toEqual(['kmr-TR'])
   })
 
   test('keeps the first-seen order while mapping only the locales that need it', () => {
-    LXQ._supportedLocales = ['fr-FR', 'ku-TR', 'en-US', 'de-LU']
+    LXQ._supportedLocales = ['fr-FR', 'ku-TR', 'en-US', 'cb-IQ']
     expect(LXQ.getSupportedLocales()).toEqual([
       'fr-FR',
       'kmr-TR',
       'en-US',
-      'de-DE',
+      'ckb-IQ',
     ])
   })
 })
@@ -329,12 +299,12 @@ describe('retrieveSupportedLocales', () => {
   })
 
   test('the stored locales go through the language mapping afterwards', async () => {
-    getLexiqaSupportedLocales.mockResolvedValueOnce(['de-LU', 'ku-TR'])
+    getLexiqaSupportedLocales.mockResolvedValueOnce(['ku-TR', 'cb-IQ'])
     LXQ.retrieveSupportedLocales({})
     await Promise.resolve()
     await Promise.resolve()
 
-    expect(LXQ.getSupportedLocales()).toEqual(['de-DE', 'kmr-TR'])
+    expect(LXQ.getSupportedLocales()).toEqual(['kmr-TR', 'ckb-IQ'])
   })
 })
 
@@ -528,6 +498,37 @@ describe('doLexiQA', () => {
       )
     })
     expect(addLexiqaHighlight).toHaveBeenCalledWith(21, {})
+  })
+
+  test('translates MateCat source/target codes to lexiQA codes in the outgoing request', async () => {
+    const originalSource = config.source_code
+    const originalTarget = config.target_code
+    config.source_code = 'kmr-TR'
+    config.target_code = 'ckb-IQ'
+    // the raw lexiQA-side codes, so checkCanActivate() finds them through the
+    // lexiQA -> MateCat mapping in getSupportedLocales()
+    LXQ._supportedLocales = ['ku-TR', 'cb-IQ']
+    getLexiqaQa.mockResolvedValueOnce({qaData: []})
+
+    await new Promise((resolve) => {
+      LXQ.doLexiQA(
+        {sid: 22, lxqDecodedSource: 's', lxqDecodedTranslation: 't'},
+        false,
+        resolve,
+      )
+    })
+
+    expect(getLexiqaQa).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({
+          sourcelanguage: 'ku-TR',
+          targetlanguage: 'cb-IQ',
+        }),
+      }),
+    )
+
+    config.source_code = originalSource
+    config.target_code = originalTarget
   })
 })
 
