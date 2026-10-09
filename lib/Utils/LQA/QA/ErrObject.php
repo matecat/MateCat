@@ -24,7 +24,17 @@ class ErrObject implements Stringable
 {
 
     public ?int $outcome = null;
+
+    /**
+     * The message, as an HTML fragment: the editor injects it with `dangerouslySetInnerHTML`
+     * (public/js/components/segments/SegmentWarnings.js). Literal angle brackets must arrive escaped.
+     */
     public ?string $debug = null;
+
+    /**
+     * The suggestion, as plain text: the editor renders it as a JSX child, so an entity here would be
+     * shown to the user verbatim. Write angle brackets raw.
+     */
     public string $tip = "";
 
     protected string $orig_debug;
