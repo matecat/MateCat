@@ -243,7 +243,6 @@ class SegmentDao extends AbstractDao
             (isset($options['filter']['severity']) && $options['filter']['severity'] != '')
         ) {
             $options_join_query .= " LEFT JOIN qa_entries e ON e.id_segment = st.id_segment AND e.id_job = st.id_job AND e.deleted_at IS NULL ";
-            $options_join_query .= " LEFT JOIN segment_revisions sr ON sr.id_segment = st.id_segment AND sr.id_job = st.id_job ";
 
             if (
                 isset($options['filter']['issue_category']) &&
@@ -407,7 +406,6 @@ class SegmentDao extends AbstractDao
                 s.raw_word_count,
                 IF (st.status='NEW',NULL,st.translation) AS translation,
                 UNIX_TIMESTAMP(st.translation_date) AS version,
-                IF( st.locked AND match_type = 'ICE', 1, 0 ) AS ice_locked,
                 st.status,
                 COALESCE(time_to_edit, 0) AS time_to_edit,
                 st.warning,
@@ -615,7 +613,7 @@ class SegmentDao extends AbstractDao
                 TO_BASE64(CONCAT(s.id_file_part, '_', s.internal_id)) as internal_id,
                 s.segment_hash,
                 IF ( st.status='NEW', NULL, st.translation ) AS translation,
-                IF( st.locked AND match_type = 'ICE', 1, 0 ) AS ice_locked,
+                COALESCE( st.locked, 0 ) AS locked,
                 st.status,
                 COALESCE( time_to_edit, 0 ) AS time_to_edit,
                 st.warning,

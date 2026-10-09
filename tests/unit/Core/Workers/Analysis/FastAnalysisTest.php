@@ -14,6 +14,7 @@ use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use Model\Projects\ProjectsMetadataMarshaller;
 use PDO;
 use PDOStatement;
 use PDOException;
@@ -24,9 +25,12 @@ use Predis\Client as PredisClient;
 use ReflectionClass;
 use RuntimeException;
 use Stomp\Exception\ConnectionException;
+use Stomp\Transport\Message;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\Analysis\FastAnalysis;
 use Utils\Constants\ProjectStatus;
+use Utils\Constants\TranslationStatus;
+use Utils\TaskRunner\Commons\Context;
 use Utils\Engines\Results\MyMemory\AnalyzeResponse;
 use Utils\Logger\MatecatLogger;
 
@@ -1493,6 +1497,175 @@ class FastAnalysisTest extends AbstractTest
         }
     }
 
+    /**
+     * The five pre-translation options as stored in project metadata (string values, as the
+     * metadata table holds them).
+     *
+     * @return array<string, string>
+     */
+    private function pretranslateMetadata(): array
+    {
+        return [
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value => '1',
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_101_STATUS->value => TranslationStatus::STATUS_APPROVED2,
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_101_LOCK->value => '0',
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_100_STATUS->value => TranslationStatus::STATUS_APPROVED,
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_100_LOCK->value => '1',
+        ];
+    }
+
+    #[Test]
+    public function main_threadsThePretranslateOptionsFromProjectMetadata(): void
+    {
+        [$probe, $redis] = $this->wireMainProbe();
+        $probe->metadataDaoStub  = $this->makeMetadataDaoStub($this->pretranslateMetadata());
+        $redis->sismemberReturns = [true, false];
+        $probe->lockBatches      = [[$this->projectRow(1607)]];
+        $probe->fetchScript      = [new AnalyzeResponse(['data' => []])];
+        $probe->insertResults    = [0];
+
+        $this->runMain($probe);
+
+        $this->assertSame([
+            [
+                'pretranslate_101' => true,
+                'pretranslate_101_status' => TranslationStatus::STATUS_APPROVED2,
+                'pretranslate_101_lock' => false,
+                'pretranslate_100_status' => TranslationStatus::STATUS_APPROVED,
+                'pretranslate_100_lock' => true,
+            ],
+        ], $probe->pretranslateArgs);
+    }
+
+    #[Test]
+    public function main_leavesThePretranslateOptionsNullWhenTheProjectHasNoSuchMetadata(): void
+    {
+        [$probe, $redis] = $this->wireMainProbe();
+        $redis->sismemberReturns = [true, false];
+        $probe->lockBatches      = [[$this->projectRow(1608)]];
+        $probe->fetchScript      = [new AnalyzeResponse(['data' => []])];
+        $probe->insertResults    = [0];
+
+        $this->runMain($probe);
+
+        $this->assertSame([
+            [
+                'pretranslate_101' => null,
+                'pretranslate_101_status' => null,
+                'pretranslate_101_lock' => null,
+                'pretranslate_100_status' => null,
+                'pretranslate_100_lock' => null,
+            ],
+        ], $probe->pretranslateArgs);
+    }
+
+    /**
+     * Run the real _insertFastAnalysis() over one segment for one job and return the params of
+     * every message it publishes. The engine lookup reads engine 0 (NONE) from the test database;
+     * the insert, the queue-total bookkeeping and the queue routing are stubbed by the probe.
+     *
+     * @param array<int, mixed> $pretranslateArgs
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function publishedParams(array $pretranslateArgs): array
+    {
+        $ref    = new ReflectionClass(FastAnalysisPublishProbe::class);
+        $daemon = $ref->newInstanceWithoutConstructor();
+        $this->setProp($daemon, 'db', obtainTestDatabase());
+        $this->setProp($daemon, 'logger', $this->createStub(MatecatLogger::class));
+        $this->setProp($daemon, 'projectDao', $this->createStub(ProjectDao::class));
+
+        $published = [];
+        $amq       = $this->createStub(AMQHandler::class);
+        $amq->method('getRedisClient')->willReturn(new FastAnalysisFakeRedis());
+        $amq->method('publishToQueues')->willReturnCallback(
+            function (string $queue, Message $message) use (&$published): bool {
+                $published[] = json_decode($message->getBody(), true)['params'];
+
+                return true;
+            }
+        );
+        $this->setProp($daemon, 'queueHandler', $amq);
+
+        $this->setProp($daemon, 'actual_project_row', [
+            'id_mt_engine' => 0,
+            'pretranslate_100' => 1,
+            'tm_keys' => '[]',
+            'id_tms' => 1,
+            'only_private_tm' => 0,
+        ]);
+        $this->setProp($daemon, 'segments', [[
+            'id' => 4711,
+            'jsid' => '4711-99999991:pw1',
+            'segment' => 'Hello world',
+            'segment_hash' => 'abc',
+            'raw_word_count' => 2,
+            'match_type' => 'NO_MATCH',
+            'wc' => 2,
+            'source' => 'en-US',
+            'target' => '99999991:it-IT',
+            'payable_rates' => ['99999991' => '{"NO_MATCH":100}'],
+        ]]);
+
+        $project           = new ProjectStruct();
+        $project->id       = 99999990;
+        $project->password = 'ppw';
+
+        $this->invoke(
+            $daemon,
+            '_insertFastAnalysis',
+            $project,
+            '',
+            ['NO_MATCH' => 100],
+            $this->createStub(FeatureSet::class),
+            true,
+            false,
+            false,
+            null,
+            85,
+            [],
+            false,
+            ...$pretranslateArgs
+        );
+
+        return $published;
+    }
+
+    #[Test]
+    public function insertFastAnalysisPublishesThePretranslateOptionsOnTheQueueElement(): void
+    {
+        $published = $this->publishedParams([true, TranslationStatus::STATUS_APPROVED2, false, TranslationStatus::STATUS_APPROVED, true]);
+
+        $this->assertCount(1, $published);
+        $params = $published[0];
+        $this->assertSame(1, $params['pretranslate_100'], 'pretranslate_100 still comes from the project row');
+        $this->assertTrue($params[ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value]);
+        $this->assertSame(TranslationStatus::STATUS_APPROVED2, $params[ProjectsMetadataMarshaller::PRE_TRANSLATE_101_STATUS->value]);
+        $this->assertFalse($params[ProjectsMetadataMarshaller::PRE_TRANSLATE_101_LOCK->value]);
+        $this->assertSame(TranslationStatus::STATUS_APPROVED, $params[ProjectsMetadataMarshaller::PRE_TRANSLATE_100_STATUS->value]);
+        $this->assertTrue($params[ProjectsMetadataMarshaller::PRE_TRANSLATE_100_LOCK->value]);
+    }
+
+    #[Test]
+    public function insertFastAnalysisPublishesNullPretranslateOptionsWhenTheProjectHasNone(): void
+    {
+        $published = $this->publishedParams([]);
+
+        $this->assertCount(1, $published);
+        $params = $published[0];
+        foreach ([
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_101,
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_101_STATUS,
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_101_LOCK,
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_100_STATUS,
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_100_LOCK,
+        ] as $key) {
+            $this->assertArrayHasKey($key->value, $params);
+            $this->assertNull($params[$key->value], $key->value . ' must stay null for the worker to default it');
+        }
+    }
+
     private function stubDatabase(): IDatabase
     {
         $stmt = $this->createStub(PDOStatement::class);
@@ -1599,6 +1772,26 @@ class FastAnalysisPdoFailingProbe extends FastAnalysis
 }
 
 /**
+ * Lets _insertFastAnalysis() reach the publish loop without a broker: the segment_translations
+ * insert and the queue-total bookkeeping do nothing, and every segment routes to one fixed queue.
+ */
+class FastAnalysisPublishProbe extends FastAnalysis
+{
+    protected function _executeInsert(array $tuple_list, array $bind_values): void
+    {
+    }
+
+    protected function _setTotal(array $config = []): void
+    {
+    }
+
+    protected function _getQueueAddressesByPriority(int $queueLen, int $id_mt_engine): ?Context
+    {
+        return Context::buildFromArray(['queue_name' => 'fast_analysis_test_queue', 'max_executors' => 1]);
+    }
+}
+
+/**
  * Probe subclass that overrides the _newQueueHandler() seam so _rebuildQueueHandler can be
  * unit-tested without the real broker-connecting factory (AMQHandler::getNewInstanceForDaemons).
  */
@@ -1674,6 +1867,9 @@ class FastAnalysisMainProbe extends FastAnalysis
 
     public int $insertCallCount = 0;
 
+    /** @var list<array<string, bool|string|null>> pre-translation options of each _insertFastAnalysis() call */
+    public array $pretranslateArgs = [];
+
     public int $featureSetCallCount = 0;
 
     public int $rebuildCount = 0;
@@ -1725,9 +1921,21 @@ class FastAnalysisMainProbe extends FastAnalysis
         ?MTQEWorkflowParams $mt_qe_workflow_parameters = null,
         ?int                $mt_quality_value_in_editor = 85,
         ?array              $subfiltering_handlers = [],
-        bool                $icu_enabled = false
+        bool                $icu_enabled = false,
+        ?bool               $pretranslate_101 = null,
+        ?string             $pretranslate_101_status = null,
+        ?bool               $pretranslate_101_lock = null,
+        ?string             $pretranslate_100_status = null,
+        ?bool               $pretranslate_100_lock = null
     ): int {
         $this->insertCallCount++;
+        $this->pretranslateArgs[] = [
+            'pretranslate_101' => $pretranslate_101,
+            'pretranslate_101_status' => $pretranslate_101_status,
+            'pretranslate_101_lock' => $pretranslate_101_lock,
+            'pretranslate_100_status' => $pretranslate_100_status,
+            'pretranslate_100_lock' => $pretranslate_100_lock,
+        ];
         if ($this->insertThrows !== null) {
             throw $this->insertThrows;
         }

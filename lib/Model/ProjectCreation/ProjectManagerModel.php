@@ -307,7 +307,7 @@ class ProjectManagerModel
      *   segments (batched)
      *
      * Phase 3 — File/project-scoped + root records:
-     *   files_parts, files, file_references, file_metadata,
+     *   files_parts, files, file_metadata,
      *   context_groups, project_metadata, projects, jobs
      *
      * @param int $idProject
@@ -449,7 +449,7 @@ class ProjectManagerModel
      * rows and prevent row-lock spikes.  A subquery scopes the DELETE to
      * only rows belonging to this project's files.
      *
-     * Tables: files_parts, files, file_references, file_metadata,
+     * Tables: files_parts, files, file_metadata,
      * context_groups, project_metadata, projects, jobs.
      *
      * @param PDO $conn
@@ -485,9 +485,6 @@ class ProjectManagerModel
         }
 
         $stmt = $conn->prepare("DELETE FROM files WHERE id_project = :id_project");
-        $stmt->execute(['id_project' => $idProject]);
-
-        $stmt = $conn->prepare("DELETE FROM file_references WHERE id_project = :id_project");
         $stmt->execute(['id_project' => $idProject]);
 
         $stmt = $conn->prepare("DELETE FROM file_metadata WHERE id_project = :id_project");

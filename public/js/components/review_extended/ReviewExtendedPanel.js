@@ -169,7 +169,9 @@ const ReviewExtendedPanel = (props) => {
       ) : null}
 
       {props.isReview &&
-      !(SegmentUtils.isIceSegment(props.segment) && !props.segment.unlocked) ? (
+      !(
+        SegmentUtils.isLockedSegment(props.segment) && !props.segment.unlocked
+      ) ? (
         <ReviewExtendedIssuePanel
           selection={props.selectionObj}
           segmentVersion={versionNumber}

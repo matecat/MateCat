@@ -140,6 +140,9 @@
 }
 
 .xliff-settings-column-name-state {
+  display: flex;
+  align-items: center;
+  gap: 5px;
   grid-column: 2;
 }
 

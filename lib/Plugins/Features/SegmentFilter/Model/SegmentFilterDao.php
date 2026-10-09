@@ -75,6 +75,8 @@ class SegmentFilterDao extends AbstractDao
             'unlocked' => $this->getSqlForUnlocked($where),
             'ice' => $this->getSqlForIce($where),
             'modified_ice' => $this->getSqlForModifiedIce($where),
+            'locked' => $this->getSqlForLocked($where),
+            'modified_locked' => $this->getSqlForModifiedLocked($where),
             'repetitions' => $this->getSqlForRepetition($where),
             'matches' => $this->getSqlForMatches($where),
             'mt', 'fuzzies_50_74', 'fuzzies_75_84', 'fuzzies_85_94', 'fuzzies_95_99' => $this->getSqlForMatchType($where),
@@ -234,8 +236,7 @@ class SegmentFilterDao extends AbstractDao
            BETWEEN :job_first_segment AND :job_last_segment
 
            AND st.match_type = 'ICE'
-           AND locked = 1
-           AND version_number = 0
+           AND st.version_number = 0
            JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
            WHERE 1
            {$where['sql']}
@@ -259,8 +260,53 @@ class SegmentFilterDao extends AbstractDao
            BETWEEN :job_first_segment AND :job_last_segment
 
            AND st.match_type = 'ICE'
-           AND locked = 1
-           AND version_number > 0
+           AND st.version_number > 0
+           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
+           WHERE 1
+           {$where['sql']}
+           ORDER BY st.id_segment
+        ";
+    }
+
+    /**
+     * @param array{sql: string, data: array<string, string>} $where
+     */
+    public function getSqlForLocked(array $where): string
+    {
+        return "
+          SELECT st.id_segment AS id
+          FROM
+           segment_translations st JOIN jobs
+           ON jobs.id = st.id_job
+           AND jobs.id = :id_job
+           AND jobs.password = :password
+           AND st.id_segment
+           BETWEEN :job_first_segment AND :job_last_segment
+           AND st.locked = 1
+           AND st.version_number = 0
+           JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
+           WHERE 1
+           {$where['sql']}
+           ORDER BY st.id_segment
+        ";
+    }
+
+    /**
+     * @param array{sql: string, data: array<string, string>} $where
+     */
+    public function getSqlForModifiedLocked(array $where): string
+    {
+        return "
+          SELECT st.id_segment AS id
+          FROM
+           segment_translations st JOIN jobs
+           ON jobs.id = st.id_job
+           AND jobs.id = :id_job
+           AND jobs.password = :password
+           AND st.id_segment
+           BETWEEN :job_first_segment AND :job_last_segment
+           AND st.locked = 1
+           AND st.version_number > 0
            JOIN segments s ON s.id = st.id_segment AND s.show_in_cattool = 1
            WHERE 1
            {$where['sql']}

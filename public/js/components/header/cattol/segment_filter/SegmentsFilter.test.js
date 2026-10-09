@@ -487,3 +487,29 @@ test('move up/down arrows are inert with a single result but active with several
   expect(SegmentFilterUtils.gotoPreviousSegment).toHaveBeenCalledTimes(1)
   expect(SegmentActions.gotoNextSegment).toHaveBeenCalledTimes(1)
 })
+
+test('lists the locked filters first, then the 101% ones', () => {
+  renderFilter()
+
+  fireEvent.click(screen.getByText('Others'))
+
+  const labels = [
+    ['locked', 'Locked'],
+    ['modified_locked', 'Locked, modified'],
+    ['unlocked', 'Not locked'],
+    ['ice', '101% matches'],
+    ['modified_ice', 'Modified 101%'],
+  ]
+  labels.forEach(([value, label]) =>
+    expect(screen.getByTestId(`option-${value}`)).toHaveTextContent(label),
+  )
+  const order = labels.map(([value]) => screen.getByTestId(`option-${value}`))
+  order
+    .slice(1)
+    .forEach((option, i) =>
+      expect(
+        order[i].compareDocumentPosition(option) &
+          Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy(),
+    )
+})

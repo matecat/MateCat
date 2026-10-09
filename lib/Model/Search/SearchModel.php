@@ -12,7 +12,6 @@ namespace Model\Search;
 use Exception;
 use Matecat\Finder\WholeTextFinder;
 use Matecat\SubFiltering\MateCatFilter;
-use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\DataAccess\IDatabase;
 use PDO;
 use PDOException;
@@ -253,7 +252,7 @@ class SearchModel
         $this->_loadParams();
         $params = ['job' => $this->queryParams->job];
         $password_where = '';
-        $search_in_ices = '';
+        $exclude_locked = '';
         if ($inCurrentChunkOnly) {
             $password_where = ' AND st.id_segment BETWEEN j.job_first_segment AND j.job_last_segment AND j.password = :password';
             $params['password'] = $this->queryParams->password;
@@ -264,7 +263,7 @@ class SearchModel
         }
 
         if ($this->queryParams->includeLocked === false) {
-            $search_in_ices = " AND COALESCE(st.match_type,'') != '" . InternalMatchesConstants::TM_ICE . "' ";
+            $exclude_locked = " AND COALESCE(st.locked, 0) = 0 ";
         }
 
         $sql = "
@@ -276,7 +275,7 @@ class SearchModel
 			{$password_where}
 			AND st.status != 'NEW'
 			{$this->queryParams->where_status}
-			{$search_in_ices}
+			{$exclude_locked}
 			GROUP BY st.id_segment";
 
         return [$sql, $params];
@@ -293,7 +292,7 @@ class SearchModel
         $this->_loadParams();
         $params = ['job' => $this->queryParams->job];
         $password_where = '';
-        $search_in_ices = '';
+        $exclude_locked = '';
         if ($inCurrentChunkOnly) {
             $password_where = ' AND s.id BETWEEN j.job_first_segment AND j.job_last_segment AND j.password = :password';
             $params['password'] = $this->queryParams->password;
@@ -304,7 +303,7 @@ class SearchModel
         }
 
         if ($this->queryParams->includeLocked === false) {
-            $search_in_ices = " AND COALESCE(st.match_type,'') != '" . InternalMatchesConstants::TM_ICE . "' ";
+            $exclude_locked = " AND COALESCE(st.locked, 0) = 0 ";
         }
 
         $sql = "
@@ -318,7 +317,7 @@ class SearchModel
 			{$password_where}
 			AND show_in_cattool = 1
 			{$this->queryParams->where_status}
-			{$search_in_ices}
+			{$exclude_locked}
 			GROUP BY s.id";
 
         return [$sql, $params];
@@ -332,14 +331,14 @@ class SearchModel
     {
         $this->_loadParams();
         $params = ['job' => $this->queryParams->job];
-        $search_in_ices = '';
+        $exclude_locked = '';
 
         if ($this->queryParams->status != 'all') {
             $params['status'] = $this->queryParams->status;
         }
 
         if ($this->queryParams->includeLocked === false) {
-            $search_in_ices = " AND COALESCE(st.match_type,'') != '" . InternalMatchesConstants::TM_ICE . "' ";
+            $exclude_locked = " AND COALESCE(st.locked, 0) = 0 ";
         }
 
         $sql = "
@@ -347,7 +346,7 @@ class SearchModel
 			FROM segment_translations as st
 			WHERE st.id_job = :job
 		    {$this->queryParams->where_status}
-		    {$search_in_ices}
+		    {$exclude_locked}
 		";
 
         return [$sql, $params];

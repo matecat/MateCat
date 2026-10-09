@@ -21,7 +21,6 @@ class QualityReportSegmentStructTest extends AbstractTest
             'raw_word_count' => 2,
             'translation' => 'Ciao mondo',
             'version' => 1,
-            'ice_locked' => false,
             'status' => 'TRANSLATED',
             'time_to_edit' => 5000,
             'filename' => 'test.xliff',
@@ -104,10 +103,21 @@ class QualityReportSegmentStructTest extends AbstractTest
     }
 
     #[Test]
-    public function IsICEReturnsFalseWhenNotLocked(): void
+    public function IsICEReturnsTrueForUnlockedIce(): void
     {
         $struct = $this->createStruct([
             'match_type' => 'ICE',
+            'locked' => false,
+        ]);
+
+        $this->assertTrue($struct->isICE());
+    }
+
+    #[Test]
+    public function IsICEReturnsFalseForIceMt(): void
+    {
+        $struct = $this->createStruct([
+            'match_type' => 'ICE_MT',
             'locked' => false,
         ]);
 
@@ -155,6 +165,30 @@ class QualityReportSegmentStructTest extends AbstractTest
         $struct = $this->createStruct([
             'match_type' => '100%',
             'locked' => false,
+            'version_number' => 2,
+        ]);
+
+        $this->assertFalse($struct->isICEModified());
+    }
+
+    #[Test]
+    public function IsICEModifiedReturnsTrueForEditedUnlockedIce(): void
+    {
+        $struct = $this->createStruct([
+            'match_type' => 'ICE',
+            'locked' => false,
+            'version_number' => 1,
+        ]);
+
+        $this->assertTrue($struct->isICEModified());
+    }
+
+    #[Test]
+    public function IsICEModifiedReturnsFalseForEditedLockedNonIce(): void
+    {
+        $struct = $this->createStruct([
+            'match_type' => '100%',
+            'locked' => true,
             'version_number' => 2,
         ]);
 
