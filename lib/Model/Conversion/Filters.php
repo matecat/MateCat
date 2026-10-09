@@ -83,7 +83,7 @@ class Filters
 
             // Compute response
             if ($info['http_code'] != 200 || $response === false) {
-                $errResponse = ["isSuccess" => false, "curlInfo" => $info];
+                $errResponse = ["successful" => false, "curlInfo" => $info];
                 if ($response === '{"message":"Invalid RapidAPI Key"}') {
                     $errResponse['errorMessage'] = "Failed RapidAPI authentication. Check FILTERS_RAPIDAPI_KEY in config.ini";
                 } elseif (isset($originalResponse->errorMessage)) {
@@ -311,7 +311,7 @@ class Filters
             'filters_version' => $response['instanceVersion'] ?? null,
             'client_ip' => Utils::getRealIpAddr(),
             'to_xliff' => $toXliff,
-            'success' => ($response['successful'] === true),
+            'success' => (($response['successful'] ?? false) === true),
             'error_message' => $response['errorMessage'] ?? null,
             'conversion_time' => $response['time'],
             'sent_file_size' => filesize($sentFile),
