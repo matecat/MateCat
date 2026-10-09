@@ -1087,7 +1087,7 @@ const NewProject = () => {
                     SupportedFilesModal,
                     {supportedFiles: supportedFiles},
                     'Supported file formats',
-                    {minWidth: '80%', height: '80%'},
+                    {width: '80%', maxWidth: '1400px'},
                   )
                 }}
               >

@@ -1,40 +1,60 @@
 @use '../tokens/colors';
-
-.supported-formats {
-  height: 100%;
-}
+@use 'commons/variables';
 
 .supported-formats .fileformat {
   display: flex;
-  flex-direction: row;
-  height: calc(100% - 50px);
+  flex-direction: column;
+  max-height: calc(100vh - 94px);
   padding: 24px;
-  gap: 8px;
-  justify-content: space-between;
+  gap: 16px;
   overflow: auto;
 }
 
 .supported-formats .fileformat h4 {
-  padding: 0 24px;
-  background-color: colors.$grey75;
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 6px 16px;
+  font-size: variables.$font-size-small;
+  line-height: 24px;
+  background-color: colors.$grey100;
 }
 
 .supported-formats .fileformat .format-box {
+  display: grid;
+  grid-template-columns: 180px 1fr;
   float: none;
-  flex: 1 1 auto;
-  max-width: 300px;
 }
 
 .supported-formats .fileformat .format-box .file-list {
   display: grid;
   align-items: center;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  padding: 16px;
+  align-content: center;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: 2px 8px;
+  padding: 4px 0 4px 16px;
 }
 
 .supported-formats .fileformat .format-box .file-list > div {
   display: flex;
-  gap: 8px;
-  padding: 5px;
+  align-items: center;
+  gap: 6px;
+  padding: 2px;
+  font-size: variables.$font-size-xsmall;
+
+  > svg {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+  }
+
+  > span {
+    white-space: nowrap;
+  }
+}
+
+.supported-formats .fileformat .zip-note {
+  margin: 0;
+  font-size: variables.$font-size-xsmall;
+  color: colors.$grey600;
 }
