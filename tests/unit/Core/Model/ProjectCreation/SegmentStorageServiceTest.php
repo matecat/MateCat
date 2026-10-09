@@ -21,6 +21,7 @@ use Model\Xliff\DTO\XliffRuleInterface;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
+use TypeError;
 use Utils\Logger\MatecatLogger;
 
 /**
@@ -97,9 +98,10 @@ class SegmentStorageServiceTest extends AbstractTest
     /**
      * Create a basic ProjectStructure with all keys needed by storeSegments.
      */
-    private function makeProjectStructure(int $fid, array $segments, array $originalData = [], array $metaData = []): ProjectStructure
+    private function makeProjectStructure(int $fid, array $segments, array $originalData = [], array $metaData = [], ?int $idProject = 77): ProjectStructure
     {
         return new ProjectStructure([
+            'id_project'            => $idProject,
             'segments'              => [$fid => $segments],
             'segments_original_data' => array_key_exists($fid, $originalData) ? $originalData : [$fid => $originalData],
             'segments_meta_data'    => array_key_exists($fid, $metaData) ? $metaData : [$fid => $metaData],
@@ -325,6 +327,28 @@ class SegmentStorageServiceTest extends AbstractTest
         self::assertCount(1, $persisted);
         self::assertEquals(500, $persisted[0]->id_segment);
         self::assertSame('char_count', $persisted[0]->meta_key);
+        self::assertSame([77], $this->service->getPersistedSegmentMetadataProjectIds());
+    }
+
+    #[Test]
+    public function storeSegmentsRefusesToSaveMetadataWithoutAProjectId(): void
+    {
+        $fid = 1;
+        $seg = $this->makeSegment($fid, 'u1');
+
+        $meta = new SegmentMetadataStruct();
+        $meta->meta_key = 'char_count';
+        $meta->meta_value = '42';
+
+        $this->stubSequence(1, 500);
+        $this->stubFeaturesPassThrough();
+
+        $ps = $this->makeProjectStructure($fid, [$seg], [], [$fid => [0 => new SegmentMetadataCollection([$meta])]], null);
+
+        $this->expectException(TypeError::class);
+        $this->expectExceptionMessage('Segment metadata cannot be stored before the project has an id.');
+
+        $this->service->storeSegments($fid, $ps);
     }
 
     #[Test]
