@@ -450,7 +450,7 @@ class TMAnalysisWorker extends AbstractWorker
         $_config['mt_qe_workflow_enabled'] = (bool)($params->mt_qe_workflow_enabled ?? false);
 
         if ($_config['mt_qe_workflow_enabled']) {
-            $_config['mt_qe_config'] = new MTQEWorkflowParams(json_decode($params->mt_qe_workflow_parameters ?? '', true) ?? []);
+            $_config['mt_qe_config'] = MTQEWorkflowParams::fromQueueValue($params->mt_qe_workflow_parameters ?? null);
         }
 
         $mtEngine = EnginesFactory::getInstance((int)$params->id_mt_engine, $this->database, AbstractEngine::class);

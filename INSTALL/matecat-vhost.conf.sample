@@ -40,16 +40,17 @@
         ServerSignature Off
 
         # Configuration for Nodejs proxy
-        ProxyRequests off
-
-        <Proxy *>
-          Order deny,allow
-          Allow from all
-        </Proxy>
-
         <Location /sse/ >
-          ProxyPass http://0.0.0.0:7788/
-          ProxyPassReverse http://0.0.0.0:7788/
+
+                Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
         </Location>
+
+        ProxyPass "/sse/" "http://127.0.0.1:7788/"
+        RewriteEngine On
+        RewriteCond %{HTTP:Upgrade} websocket [NC]
+        RewriteCond %{HTTP:Connection} upgrade [NC]
+        RewriteRule ^/sse/(.*) "ws://127.0.0.1:7788/$1" [P,L]
+        ProxyTimeout 3
 
     </VirtualHost>

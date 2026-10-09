@@ -495,7 +495,6 @@ class ProjectManagerModelTest extends AbstractTest
             'files_parts',                   // SELECT MIN/MAX + batched DELETE
             'files_parts',                   // batched DELETE (range 1-50 fits in 1 batch)
             'files',                         // DELETE files
-            'file_references',               // by id_project
             'file_metadata',
             'context_groups',                // by id_project
             'project_metadata',
@@ -572,7 +571,6 @@ class ProjectManagerModelTest extends AbstractTest
             'files_parts',                   // SELECT MIN/MAX
             'files_parts',                   // batched DELETE (range 10-30 fits in 1 batch)
             'files',                         // DELETE files
-            'file_references',
             'file_metadata',
             'context_groups',
             'project_metadata',
@@ -773,23 +771,6 @@ class ProjectManagerModelTest extends AbstractTest
         self::assertStringContainsString('id_project', $query, 'context_groups must be deleted by id_project');
         self::assertStringNotContainsString('BETWEEN', $query, 'context_groups must NOT use BETWEEN segment range');
 
-        self::assertSame(['id_project' => 42], $this->executedValues[$indices[0]]);
-    }
-
-    public function testDeleteProjectDeletesFileReferences(): void
-    {
-        $model = $this->createModelForDelete(
-            jobRows: [['id' => 10, 'job_first_segment' => 1, 'job_last_segment' => 50]],
-            filesPartsRange: [1, 5],
-        );
-
-        $model->deleteProject(42);
-
-        $indices = $this->queryIndicesForTable('file_references');
-        self::assertCount(1, $indices, 'file_references should appear exactly once');
-
-        $query = $this->preparedQueries[$indices[0]];
-        self::assertStringContainsString('DELETE FROM file_references', $query);
         self::assertSame(['id_project' => 42], $this->executedValues[$indices[0]]);
     }
 

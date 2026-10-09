@@ -61,8 +61,22 @@ describe('Xliff20', () => {
     expect(screen.getByText('Add rule')).toBeInTheDocument()
   })
 
-  test('does not show the add rule button when every state is already used', () => {
+  test('offers no-state as a rule state', () => {
     setup()
+
+    expect(screen.getByText('Add rule')).toBeInTheDocument()
+  })
+
+  test('does not show the add rule button when every state is already used', () => {
+    setup({
+      rules: {
+        ...defaultXliffSettings.rules,
+        xliff20: [
+          ...defaultXliffSettings.rules.xliff20,
+          {states: ['no-state'], analysis: 'new'},
+        ],
+      },
+    })
 
     expect(screen.queryByText('Add rule')).not.toBeInTheDocument()
   })

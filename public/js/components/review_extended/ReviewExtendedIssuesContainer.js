@@ -116,8 +116,8 @@ const ReviewExtendedIssuesContainer = (props) => {
             key={item.id}
             changeVisibility={changeVisibility}
             actions={
-              !SegmentUtils.isIceSegment(context.segment) ||
-              (SegmentUtils.isIceSegment(context.segment) &&
+              !SegmentUtils.isLockedSegment(context.segment) ||
+              (SegmentUtils.isLockedSegment(context.segment) &&
                 context.segment.unlocked)
             }
             issueEditing={props.issueEditing}
@@ -137,8 +137,8 @@ const ReviewExtendedIssuesContainer = (props) => {
             key={item.id}
             changeVisibility={changeVisibility}
             actions={
-              !SegmentUtils.isIceSegment(context.segment) ||
-              (SegmentUtils.isIceSegment(context.segment) &&
+              !SegmentUtils.isLockedSegment(context.segment) ||
+              (SegmentUtils.isLockedSegment(context.segment) &&
                 context.segment.unlocked)
             }
             issueEditing={props.issueEditing}

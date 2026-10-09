@@ -31,7 +31,7 @@ jest.mock('../header/cattol/segment_filter/segment_filter', () => ({
 
 jest.mock('../../utils/segmentUtils', () => ({
   checkCurrentSegmentTPEnabled: jest.fn(() => false),
-  isIceSegment: jest.fn(() => false),
+  isLockedSegment: jest.fn(() => false),
 }))
 
 jest.mock('../../constants/CatToolConstants', () => ({
@@ -86,7 +86,7 @@ describe('SegmentButtons', () => {
     }
     SegmentStore.getNextSegment.mockReturnValue(undefined)
     SegmentUtils.checkCurrentSegmentTPEnabled.mockReturnValue(false)
-    SegmentUtils.isIceSegment.mockReturnValue(false)
+    SegmentUtils.isLockedSegment.mockReturnValue(false)
     SegmentFilter.enabled.mockReturnValue(false)
     SegmentFilter.filtering.mockReturnValue(false)
     SegmentFilter.open = false

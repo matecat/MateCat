@@ -32,6 +32,16 @@ class DefaultRule extends AbstractXliffRule
         parent::setAnalysis($analysis);
     }
 
+    /**
+     * The fallback for a segment no rule matched: nobody asked to lock it.
+     *
+     * @return bool
+     */
+    public function isLocked(): bool
+    {
+        return false;
+    }
+
     public function asEditorStatus(): string
     {
         // default behavior

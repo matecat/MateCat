@@ -7,6 +7,7 @@ use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ScanDirectoryForConvertedFiles;
 use Controller\Traits\ValidatesDialectStrictTrait;
+use Controller\Traits\ValidatesPretranslateMatchTrait;
 use DomainException;
 use Exception;
 use InvalidArgumentException;
@@ -45,6 +46,7 @@ use Model\Teams\TeamStruct;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserStruct;
+use Model\Xliff\DTO\XliffRulesModel;
 use Model\Xliff\XliffConfigTemplateDao;
 use Plugins\Features\ProjectCompletion;
 use ReflectionException;
@@ -54,6 +56,7 @@ use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
 use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
 use Utils\Constants\TmKeyPermissions;
+use Utils\Constants\TranslationStatus;
 use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\Lara;
@@ -79,6 +82,7 @@ class NewController extends KleinController
 
     use ScanDirectoryForConvertedFiles;
     use ValidatesDialectStrictTrait;
+    use ValidatesPretranslateMatchTrait;
 
     const int MAX_NUM_KEYS = 15;
 
@@ -238,6 +242,10 @@ class NewController extends KleinController
         $projectStructure->public_tm_penalty = $request['public_tm_penalty'];
         $projectStructure->pretranslate_100 = (int)!!$request['pretranslate_100'];
         $projectStructure->pretranslate_101 = isset($request['pretranslate_101']) ? (int)$request['pretranslate_101'] : 1;
+        $projectStructure->pretranslate_101_lock = $request['pretranslate_101_lock'];
+        $projectStructure->pretranslate_100_lock = $request['pretranslate_100_lock'];
+        $projectStructure->pretranslate_101_status = $request['pretranslate_101_status'];
+        $projectStructure->pretranslate_100_status = $request['pretranslate_100_status'];
 
         //default gets all public matches from TM
         $projectStructure->only_private = (int)(isset($request['get_public_matches']) && !$request['get_public_matches']);
@@ -356,7 +364,20 @@ class NewController extends KleinController
         $payable_rate_template_id = filter_var($this->request->param('payable_rate_template_id'), FILTER_SANITIZE_NUMBER_INT);
         $public_tm_penalty = filter_var($this->request->param('public_tm_penalty'), FILTER_SANITIZE_NUMBER_INT);
         $pretranslate_100 = filter_var($this->request->param('pretranslate_100'), FILTER_VALIDATE_BOOLEAN);
-        $pretranslate_101 = filter_var($this->request->param('pretranslate_101'), FILTER_VALIDATE_BOOLEAN);
+        $pretranslate_101 = filter_var($this->request->param('pretranslate_101') ?? true, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+        if ($pretranslate_101 === null) {
+            throw new InvalidArgumentException("Invalid pretranslate_101 value", -6);
+        }
+        ['lock' => $pretranslate_101_lock, 'status' => $pretranslate_101_status] = $this->validatePretranslateMatchParams(
+            '101',
+            $this->request->param('pretranslate_101_lock'),
+            $this->request->param('pretranslate_101_status')
+        );
+        ['lock' => $pretranslate_100_lock, 'status' => $pretranslate_100_status] = $this->validatePretranslateMatchParams(
+            '100',
+            $this->request->param('pretranslate_100_lock'),
+            $this->request->param('pretranslate_100_status')
+        );
         $private_tm_key = filter_var($this->request->param('private_tm_key'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $private_tm_key_json = filter_var($this->request->param('private_tm_key_json'), FILTER_SANITIZE_FULL_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES]);
         $project_completion = filter_var($this->request->param('project_completion'), FILTER_VALIDATE_BOOLEAN);
@@ -550,6 +571,10 @@ class NewController extends KleinController
             'public_tm_penalty' => $public_tm_penalty,
             'pretranslate_100' => $pretranslate_100,
             'pretranslate_101' => $pretranslate_101,
+            'pretranslate_101_lock' => $pretranslate_101_lock,
+            'pretranslate_100_lock' => $pretranslate_100_lock,
+            'pretranslate_101_status' => $pretranslate_101_status,
+            'pretranslate_100_status' => $pretranslate_100_status,
             'id_team' => $id_team,
             'team' => $team,
             'enable_mt_analysis' => $enable_mt_analysis,
@@ -1267,7 +1292,13 @@ class NewController extends KleinController
             $validator = new JSONValidator('xliff_parameters_rules_content.json', true);
             $validator->validate($validatorObject);
 
-            return $validatorObject->getValue(true);
+            $rules = $validatorObject->getValue(true);
+
+            // the schema can not see the rules that are invalid together (a locked draft, a state in two rules):
+            // building the model here refuses them with a 400, before the project is queued
+            XliffRulesModel::fromArray($rules);
+
+            return $rules;
         }
 
         if (!empty($xliff_parameters_template_id)) {

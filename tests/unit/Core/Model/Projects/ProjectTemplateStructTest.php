@@ -57,6 +57,10 @@ class ProjectTemplateStructTest extends AbstractTest
         $this->assertSame(42, $struct->mt_quality_value_in_editor);
         $this->assertTrue($struct->icu_enabled);
         $this->assertSame('["r1","r2"]', $struct->mandatory_issues);
+        $this->assertFalse($struct->pretranslate_101_lock);
+        $this->assertTrue($struct->pretranslate_100_lock);
+        $this->assertSame('APPROVED2', $struct->pretranslate_101_status);
+        $this->assertSame('APPROVED', $struct->pretranslate_100_status);
     }
 
     #[Test]
@@ -64,6 +68,8 @@ class ProjectTemplateStructTest extends AbstractTest
     {
         $input = $this->makeHydrationInput();
         unset($input->id, $input->uid, $input->is_default, $input->public_tm_penalty, $input->icu_enabled);
+        unset($input->pretranslate->match_101->lock, $input->pretranslate->match_100->lock);
+        unset($input->pretranslate->match_101->status, $input->pretranslate->match_100->status);
         $input->segmentation_rule = null;
         $input->tm = [];
         $input->target_language = [];
@@ -87,6 +93,10 @@ class ProjectTemplateStructTest extends AbstractTest
         $this->assertNull($struct->mt_quality_value_in_editor);
         $this->assertTrue($struct->icu_enabled);
         $this->assertNull($struct->mandatory_issues);
+        $this->assertTrue($struct->pretranslate_101_lock);
+        $this->assertTrue($struct->pretranslate_100_lock);
+        $this->assertSame('APPROVED', $struct->pretranslate_101_status);
+        $this->assertSame('APPROVED', $struct->pretranslate_100_status);
     }
 
     #[Test]
@@ -255,6 +265,10 @@ class ProjectTemplateStructTest extends AbstractTest
         $struct->modified_at = '2026-05-03 11:22:33';
         $struct->icu_enabled = true;
         $struct->mandatory_issues = '["r1","r2"]';
+        $struct->pretranslate_101_lock = false;
+        $struct->pretranslate_100_lock = true;
+        $struct->pretranslate_101_status = 'APPROVED2';
+        $struct->pretranslate_100_status = 'APPROVED';
 
         $payload = $struct->jsonSerialize();
 
@@ -279,6 +293,30 @@ class ProjectTemplateStructTest extends AbstractTest
         $this->assertSame((new DateTime('2026-05-03 11:22:33'))->format(DATE_RFC822), $payload['modified_at']);
         $this->assertTrue($payload['icu_enabled']);
         $this->assertSame(['r1', 'r2'], $payload['mandatory_issues']);
+        $this->assertSame(
+            [
+                'match_101' => ['enabled' => false, 'status' => 'APPROVED2', 'lock' => false],
+                'match_100' => ['enabled' => true, 'status' => 'APPROVED', 'lock' => true],
+            ],
+            $payload['pretranslate']
+        );
+        foreach (['pretranslate_100', 'pretranslate_101', 'pretranslate_101_lock', 'pretranslate_100_lock', 'pretranslate_101_status', 'pretranslate_100_status'] as $flatKey) {
+            $this->assertArrayNotHasKey($flatKey, $payload);
+        }
+    }
+
+    #[Test]
+    public function pretranslateObjectRoundTripsThroughHydrationAndSerialization(): void
+    {
+        $input = $this->makeHydrationInput();
+
+        $struct = new ProjectTemplateStruct();
+        $struct->hydrateFromJSON($input, 1, 2);
+        $struct->created_at = '2026-05-01 10:20:30';
+
+        $payload = json_decode(json_encode($struct->jsonSerialize(), JSON_THROW_ON_ERROR));
+
+        $this->assertEquals($input->pretranslate, $payload->pretranslate);
     }
 
     #[Test]
@@ -299,8 +337,10 @@ class ProjectTemplateStructTest extends AbstractTest
             'name' => 'Template Name',
             'id_team' => 10,
             'segmentation_rule' => (object)['rules' => ['split_on_newline'], 'version' => 1],
-            'pretranslate_100' => true,
-            'pretranslate_101' => false,
+            'pretranslate' => (object)[
+                'match_101' => (object)['enabled' => false, 'status' => 'APPROVED2', 'lock' => false],
+                'match_100' => (object)['enabled' => true, 'status' => 'APPROVED', 'lock' => true],
+            ],
             'tm_prioritization' => true,
             'dialect_strict' => false,
             'get_public_matches' => true,

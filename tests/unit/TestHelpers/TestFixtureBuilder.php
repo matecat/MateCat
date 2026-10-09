@@ -1024,53 +1024,6 @@ class TestFixtureBuilder
     }
 
     // ---------------------------------------------------------------------------------------
-    // notifications (assignable PK `id` — NOT AUTO_INCREMENT; keyed by id_comment)
-    // ---------------------------------------------------------------------------------------
-
-    /**
-     * @param array<string,int|string|null> $overrides
-     * @return array{id:int,id_comment:int}
-     */
-    public function makeNotification(int $idComment, array $overrides = []): array
-    {
-        $id = (int)($overrides['id'] ?? $this->nextAssignableId());
-        $idTranslator = (string)($overrides['id_translator'] ?? ('rsq_translator_' . bin2hex(random_bytes(4))));
-        $status = (string)($overrides['status'] ?? 'UNREAD');
-        $this->insertAssignable(
-            'notifications',
-            ['id' => $id, 'id_comment' => $idComment, 'id_translator' => $idTranslator, 'status' => $status],
-            ['id' => $id]
-        );
-
-        return ['id' => $id, 'id_comment' => $idComment];
-    }
-
-    // ---------------------------------------------------------------------------------------
-    // qa_archived_reports (AUTO_INCREMENT id)
-    // ---------------------------------------------------------------------------------------
-
-    /**
-     * @param array<string,int|string|null> $overrides
-     * @return array{id:int}
-     */
-    public function makeQaArchivedReport(int $idProject, int $idJob, string $password, int $firstSegment, int $lastSegment, int $createdBy, array $overrides = []): array
-    {
-        $id = $this->insertAi('qa_archived_reports', 'id', [
-            'created_by'        => $createdBy,
-            'id_project'        => $idProject,
-            'id_job'            => $idJob,
-            'password'          => $password,
-            'job_first_segment' => $firstSegment,
-            'job_last_segment'  => $lastSegment,
-            'create_date'       => $this->now(),
-            'quality_report'    => (string)($overrides['quality_report'] ?? '{}'),
-            'version'           => (int)($overrides['version'] ?? 0),
-        ]);
-
-        return ['id' => $id];
-    }
-
-    // ---------------------------------------------------------------------------------------
     // chunk_completion_events (AUTO_INCREMENT id)
     // ---------------------------------------------------------------------------------------
 
@@ -1129,30 +1082,6 @@ class TestFixtureBuilder
     }
 
     // ---------------------------------------------------------------------------------------
-    // segment_revisions (assignable composite PK id_job,id_segment)
-    // ---------------------------------------------------------------------------------------
-
-    /**
-     * @param array<string,int|string|null> $overrides
-     */
-    public function makeSegmentRevision(int $idJob, int $idSegment, array $overrides = []): void
-    {
-        $values = [
-            'id_job'          => $idJob,
-            'id_segment'      => $idSegment,
-            'err_typing'      => (string)($overrides['err_typing'] ?? ''),
-            'err_translation' => (string)($overrides['err_translation'] ?? ''),
-            'err_terminology' => (string)($overrides['err_terminology'] ?? ''),
-            'err_language'    => (string)($overrides['err_language'] ?? ''),
-            'err_style'       => (string)($overrides['err_style'] ?? ''),
-        ];
-        if (array_key_exists('original_translation', $overrides)) {
-            $values['original_translation'] = $overrides['original_translation'];
-        }
-        $this->insertAssignable('segment_revisions', $values, ['id_job' => $idJob, 'id_segment' => $idSegment]);
-    }
-
-    // ---------------------------------------------------------------------------------------
     // jobs_translators (assignable composite PK id_job,job_password)
     // ---------------------------------------------------------------------------------------
 
@@ -1171,56 +1100,6 @@ class TestFixtureBuilder
             'target'                => $target,
         ];
         $this->insertAssignable('jobs_translators', $values, ['id_job' => $idJob, 'job_password' => $jobPassword]);
-    }
-
-    // ---------------------------------------------------------------------------------------
-    // jobs_stats (assignable composite PK id_job,password,fuzzy_band)
-    // ---------------------------------------------------------------------------------------
-
-    /**
-     * @param array<string,int|string|null> $overrides
-     */
-    public function makeJobsStat(int $idJob, string $password, string $fuzzyBand = 'NO_MATCH', string $source = 'en-US', string $target = 'it-IT', array $overrides = []): void
-    {
-        $values = [
-            'id_job'     => $idJob,
-            'password'   => $password,
-            'fuzzy_band' => $fuzzyBand,
-            'source'     => $source,
-            'target'     => $target,
-        ];
-        if (array_key_exists('total_time_to_edit', $overrides)) {
-            $values['total_time_to_edit'] = $overrides['total_time_to_edit'];
-        }
-        if (array_key_exists('avg_post_editing_effort', $overrides)) {
-            $values['avg_post_editing_effort'] = $overrides['avg_post_editing_effort'];
-        }
-        if (array_key_exists('total_raw_wc', $overrides)) {
-            $values['total_raw_wc'] = $overrides['total_raw_wc'];
-        }
-        $this->insertAssignable('jobs_stats', $values, ['id_job' => $idJob, 'password' => $password, 'fuzzy_band' => $fuzzyBand]);
-    }
-
-    // ---------------------------------------------------------------------------------------
-    // blacklist_files (AUTO_INCREMENT id)
-    // ---------------------------------------------------------------------------------------
-
-    /**
-     * @param array<string,int|string|null> $overrides
-     * @return array{id:int}
-     */
-    public function makeBlacklistFile(int $idJob, string $password, int $uid, array $overrides = []): array
-    {
-        $id = $this->insertAi('blacklist_files', 'id', [
-            'id_job'    => $idJob,
-            'password'  => $password,
-            'file_path' => (string)($overrides['file_path'] ?? '/tmp/rsq'),
-            'file_name' => (string)($overrides['file_name'] ?? ('rsq_' . bin2hex(random_bytes(4)) . '.txt')),
-            'target'    => (string)($overrides['target'] ?? 'it-IT'),
-            'uid'       => $uid,
-        ]);
-
-        return ['id' => $id];
     }
 
     // ---------------------------------------------------------------------------------------
@@ -1308,29 +1187,6 @@ class TestFixtureBuilder
     }
 
     // ---------------------------------------------------------------------------------------
-    // file_references (AUTO_INCREMENT id) — project/file-scoped, NOT per-job.
-    // ---------------------------------------------------------------------------------------
-
-    /**
-     * @param array<string,int|string|null> $overrides
-     * @return array{id:int}
-     */
-    public function makeFileReference(int $idProject, int $idFile, array $overrides = []): array
-    {
-        $values = [
-            'id_project'    => $idProject,
-            'id_file'       => $idFile,
-            'part_filename' => (string)($overrides['part_filename'] ?? ('rsq_part_' . bin2hex(random_bytes(4)) . '.xml')),
-        ];
-        if (array_key_exists('serialized_reference_meta', $overrides)) {
-            $values['serialized_reference_meta'] = $overrides['serialized_reference_meta'];
-        }
-        $id = $this->insertAi('file_references', 'id', $values);
-
-        return ['id' => $id];
-    }
-
-    // ---------------------------------------------------------------------------------------
     // segment_metadata (NO PRIMARY KEY; assignable, unique on id_segment,meta_key) —
     // segment-scoped, shared across every job/language translating that segment.
     // ---------------------------------------------------------------------------------------
@@ -1390,17 +1246,16 @@ class TestFixtureBuilder
     // that share that SAME id but differ by password and cover a DISJOINT sub-range of the
     // shared segment ids (see makeJobChunk()). Every dependent table added for T4 is seeded at
     // the scope its own schema dictates:
-    //   - project-scoped (no id_job column): context_groups, project_metadata, file_references
+    //   - project-scoped (no id_job column): context_groups, project_metadata
     //   - segment-scoped (no id_job column): segment_metadata, segment_notes,
     //     segment_original_data
     //   - job-scoped, shared across a job's chunks (no password column): segment_translation(s),
-    //     segment_translation_versions, segment_translations_splits, segment_revisions,
+    //     segment_translation_versions, segment_translations_splits,
     //     job_custom_payable_rates, qa_entries/qa_entry_comments, segment_translation_events,
-    //     comments (+ a notifications row keyed to the comment)
+    //     comments
     //   - job+password (per-chunk) scoped: job_metadata, qa_chunk_reviews,
-    //     chunk_completion_events, chunk_completion_updates, qa_archived_reports,
-    //     jobs_translators, jobs_stats, blacklist_files, outsource_confirmation,
-    //     revision_feedbacks
+    //     chunk_completion_events, chunk_completion_updates, jobs_translators,
+    //     outsource_confirmation, revision_feedbacks
     // ---------------------------------------------------------------------------------------
 
     /**
@@ -1451,7 +1306,6 @@ class TestFixtureBuilder
         // reaches this row — a NULL id_segment would never match the range window.
         $this->makeContextGroup($idProject, ['id_file' => $idFile, 'id_segment' => $segmentIds[0]]);
         $this->makeProjectMetadata($idProject, 'rsq_project_key', 'rsq_project_value');
-        $this->makeFileReference($idProject, $idFile);
 
         $jobs = [];
         for ($l = 0; $l < $languages; $l++) {
@@ -1489,10 +1343,7 @@ class TestFixtureBuilder
                 $this->makeQaChunkReview($idProject, $idJob, $password);
                 $this->makeChunkCompletionEvent($idProject, $idJob, $password, $first, $last);
                 $this->makeChunkCompletionUpdate($idProject, $idJob, $password, $first, $last);
-                $this->makeQaArchivedReport($idProject, $idJob, $password, $first, $last, 1);
                 $this->makeJobsTranslator($idJob, $password, 1, 'rsq_translator_' . $l . '_' . $c . '@example.test', 'en-US', $targetLang);
-                $this->makeJobsStat($idJob, $password, 'NO_MATCH', 'en-US', $targetLang);
-                $this->makeBlacklistFile($idJob, $password, 1);
                 $this->makeOutsourceConfirmation($idJob, $password);
                 $this->makeRevisionFeedback($idJob, $password);
             }
@@ -1503,15 +1354,13 @@ class TestFixtureBuilder
                 $this->makeSegmentTranslation($idSegment, $idJob);
                 $this->makeSegmentTranslationVersion($idSegment, $idJob, 0);
                 $this->makeSegmentTranslationsSplit($idSegment, $idJob);
-                $this->makeSegmentRevision($idJob, $idSegment);
             }
 
             $category = $this->makeQaCategory('RsqEraseCat');
             $entry = $this->makeQaEntry($segmentIds[0], $idJob, $category['id']);
             $this->makeQaEntryComment($entry['id']);
             $this->makeSegmentTranslationEvent($idJob, $segmentIds[0]);
-            $comment = $this->makeComment($idJob, $segmentIds[0]);
-            $this->makeNotification($comment['id']);
+            $this->makeComment($idJob, $segmentIds[0]);
 
             $jobs[] = ['id_job' => $idJob, 'target' => $targetLang, 'chunks' => $chunks];
         }

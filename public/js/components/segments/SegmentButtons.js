@@ -163,7 +163,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
         nextSegment.status,
       ) &&
         nextSegment.autopropagated_from == 0) || //Approved and propagation confirmed
-        (SegmentUtils.isIceSegment(nextSegment) && !nextSegment.unlocked) || //Ice
+        (SegmentUtils.isLockedSegment(nextSegment) && !nextSegment.unlocked) || //Locked
         nextSegment.status === 'NEW' ||
         nextSegment.status === 'DRAFT')
     const filtering = SegmentFilter.enabled() && SegmentFilter.filtering()
@@ -182,7 +182,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
           (nextSegment.revision_number === config.revisionNumber ||
             (nextSegment.revision_number === 2 &&
               config.revisionNumber === 1))) || //Not Same Rev
-        (SegmentUtils.isIceSegment(nextSegment) && !nextSegment.unlocked)) // Ice Locked
+        (SegmentUtils.isLockedSegment(nextSegment) && !nextSegment.unlocked)) // Locked
 
     nextButton = enableGoToNext ? (
       <Button
@@ -256,7 +256,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
       ((nextSegment.status !== 'NEW' &&
         nextSegment.status !== 'DRAFT' &&
         nextSegment.autopropagated_from == 0) ||
-        (SegmentUtils.isIceSegment(nextSegment) && !nextSegment.unlocked))
+        (SegmentUtils.isLockedSegment(nextSegment) && !nextSegment.unlocked))
     //TODO Store TP Information in the SegmentsStore
     const currentSegmentTPEnabled =
       SegmentUtils.checkCurrentSegmentTPEnabled(segment)
