@@ -244,14 +244,14 @@ class UploadPageViewControllerTest extends AbstractTest
             $this->assertArrayHasKey('subject_array', $this->controller->lastViewData);
             $this->assertSame(200, $this->controller->lastViewCode);
 
-            // The four LexiQA keys are supplied even with no licence: the page is built from the
-            // variables the view holds, so an unset variable is a key the page never receives, and
-            // lxq.main.js reads lexiqa_languages before it looks at the licence.
+            // The three LexiQA keys are supplied even with no licence: the page is built from the
+            // variables the view holds, so an unset variable is a key the page never receives.
             $this->assertSame(1, $this->controller->addParamsCallCount);
             $this->assertSame('', $this->controller->addedParams['lxq_license']);
             $this->assertSame('', $this->controller->addedParams['lxq_partnerid']);
             $this->assertSame('', $this->controller->addedParams['lexiqaServer']);
-            $this->assertSame([], $this->controller->addedParams['lexiqa_languages']->jsonSerialize());
+            // The accepted languages come from lexiqaServer now, not from a static list on the page.
+            $this->assertArrayNotHasKey('lexiqa_languages', $this->controller->addedParams);
         } finally {
             AppConfig::$LXQ_LICENSE = $previousLicense;
             $restoreCache();
@@ -283,6 +283,7 @@ class UploadPageViewControllerTest extends AbstractTest
             $this->assertSame('test-license', $this->controller->addedParams['lxq_license']);
             $this->assertSame('test-partner', $this->controller->addedParams['lxq_partnerid']);
             $this->assertSame('https://example.test', $this->controller->addedParams['lexiqaServer']);
+            $this->assertArrayNotHasKey('lexiqa_languages', $this->controller->addedParams);
         } finally {
             AppConfig::$LXQ_LICENSE = $previousLicense;
             AppConfig::$LXQ_PARTNERID = $previousPartnerId;
