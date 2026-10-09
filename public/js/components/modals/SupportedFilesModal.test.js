@@ -1,6 +1,15 @@
 import React from 'react'
 import {render, screen} from '@testing-library/react'
 import SupportedFilesModal from './SupportedFilesModal'
+import {getSupportedFiles} from '../../api/getSupportedFiles'
+
+jest.mock('../../api/getSupportedFiles', () => ({
+  getSupportedFiles: jest.fn(),
+}))
+
+beforeEach(() => {
+  getSupportedFiles.mockReset()
+})
 
 test('renders a format box with icon and extension for every supported file group', () => {
   const supportedFiles = {
@@ -61,4 +70,21 @@ test('lists the groups with the most formats first', () => {
   expect(
     screen.getAllByRole('heading', {level: 4}).map((h) => h.textContent),
   ).toEqual(['Documents', 'Subtitling', 'Images'])
+})
+
+test('fetches the list itself when opened before the page has loaded it', async () => {
+  getSupportedFiles.mockResolvedValue({Documents: [[{ext: 'docx'}]]})
+
+  render(<SupportedFilesModal supportedFiles={undefined} />)
+
+  expect(await screen.findByText('docx')).toBeInTheDocument()
+  expect(getSupportedFiles).toHaveBeenCalledTimes(1)
+})
+
+test('does not fetch the list when the page passes it in', () => {
+  render(
+    <SupportedFilesModal supportedFiles={{Documents: [[{ext: 'docx'}]]}} />,
+  )
+
+  expect(getSupportedFiles).not.toHaveBeenCalled()
 })

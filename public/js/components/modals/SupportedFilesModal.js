@@ -1,9 +1,26 @@
-import React from 'react'
+import React, {useEffect, useState} from 'react'
 import CommonUtils from '../../utils/commonUtils'
+import {getSupportedFiles} from '../../api/getSupportedFiles'
 
 const isZip = (item) => item[0].ext === 'zip'
 
-const SupportedFilesModal = ({supportedFiles}) => {
+const SupportedFilesModal = ({supportedFiles: preloaded}) => {
+  // The page passes the list it preloaded; if the modal is opened before that
+  // request settles, it receives nothing and fetches the list itself.
+  const [fetched, setFetched] = useState()
+  const supportedFiles = preloaded ?? fetched ?? {}
+
+  useEffect(() => {
+    if (preloaded) return
+    let active = true
+    getSupportedFiles()
+      .then((data) => active && setFetched(data))
+      .catch((error) => console.log('Error retrieving supported files', error))
+    return () => {
+      active = false
+    }
+  }, [preloaded])
+
   const keys = Object.keys(supportedFiles)
   // A ZIP is a container for other formats, not a format of its own: it gets a
   // note instead of a section.
