@@ -78,13 +78,18 @@
   border-top-color: colors.$grey150;
 }
 
+#file .virtual-list > :first-child .sticky-project-bar + div .projectbar {
+  padding-bottom: 23px;
+}
+
 .sticky-project-bar {
   position: sticky;
   top: 0;
   z-index: 2;
   width: 100%;
   padding-left: 5%;
-  background-color: colors.$grey50;
+  background-color: colors.$grey100;
+  border-bottom: 1px colors.$grey150 solid;
 
   @media screen and (max-width: 1180px) {
     padding-left: 6%;
