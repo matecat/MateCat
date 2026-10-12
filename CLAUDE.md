@@ -57,13 +57,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Matecat is an enterprise-level web-based Computer-Assisted Translation (CAT) tool. PHP 8.3+ backend with a React/Vite frontend. Uses Redis for caching, MySQL for persistence, and ActiveMQ for async job processing.
+Matecat is an enterprise-level web-based Computer-Assisted Translation (CAT) tool.
 
 ## Architecture
-
-### PHP Autoloading
-
-PSR-4 root is `lib/` with empty namespace prefix. Classes in `lib/Controller/API/App/FooController.php` have namespace `Controller\API\App`. Plugin classes in `plugins/*/lib/` follow the same pattern (e.g., `Features\Translated`).
 
 ### Features and events
 
@@ -110,22 +106,6 @@ nested five calls deep, so it defers and lets the owner's commit drain the queue
 statement after `transaction()` returns instead — same effect, and you get the exception if it fails, where a queued
 callback only logs it.
 
-### Cache eviction method names
-
-A cache key is `md5(query . bind params)`, so the query is half the address: two reads can bind the
-same values and differ only in their SQL. Name an eviction after the **read** it deletes — that
-read's name, `find`/`get` prefix dropped — never after the parameters.
-
-| tier    | name                     | takes          | clears               | visibility                      |
-|---------|--------------------------|----------------|----------------------|---------------------------------|
-| door    | `destroyCache`           | the struct     | every address        | public, one per DAO             |
-| fan-out | `destroyCaches<Address>` | key components | one address, N reads | public only with a named caller |
-| leaf    | `destroyCache<ReadName>` | bind values    | one read             | private by default              |
-
-The door is the only tier taking a struct, which is what separates it from a leaf at a call site.
-Leaves return `bool`, a door `void`. Never add a `For`, never keep the read's `find`. A DAO binding
-a caller-supplied key (both `MetadataDao`) cannot have a door.
-
 ### Database character set
 
 The character set of the database, its tables and the connection is infrastructure. Never set, change or work around it
@@ -162,14 +142,8 @@ a charset.
 # Full test suite (excludes tests needing external services)
 vendor/bin/phpunit --exclude-group=ExternalServices --no-coverage
 
-# Single test file
-vendor/bin/phpunit tests/unit/Path/To/TestFile.php --no-coverage
-
-# Single test method
-vendor/bin/phpunit --filter testMethodName --no-coverage
-
 # With coverage (requires XDEBUG_MODE=coverage)
-XDEBUG_MODE=coverage vendor/bin/phpunit tests/unit/Path/To/TestFile.php --coverage-clover /tmp/coverage.xml
+XDEBUG_MODE=coverage vendor/bin/phpunit tests/unit/Path/To/TestFile.php --exclude-group=ExternalServices --coverage-clover /tmp/coverage.xml
 ```
 
 - Tests mirror source structure: `lib/Utils/Foo/Bar.php` → `tests/unit/Utils/Foo/BarTest.php`
@@ -188,10 +162,7 @@ vendor/bin/phpstan analyse path/to/File.php --configuration=phpstan.neon --no-pr
 
 ### PHPStan Configuration
 
-- Level 8, no baseline — every reported error must be fixed (there is no `phpstan-baseline.neon`)
-- `checkTooWideThrowTypesInProtectedAndPublicMethods: true` — must use precise exception types in `@throws`
-- `missingCheckedExceptionInThrows: true` — all thrown exceptions must be declared
-- `UnknownPropertyException` is unchecked (used by struct `ArrayAccessTrait`)
+- No baseline — every reported error must be fixed (there is no `phpstan-baseline.neon`)
 - When adding exceptions to PHPDoc, prefer `use` imports over FQCN
 
 ## User-Facing Copy: Sentence Case
@@ -275,23 +246,3 @@ scanning cannot.
 - **Architecture questions**: `get_architecture_overview_tool` + `list_communities_tool`
 
 Fall back to Grep/Glob/Read **only** when the graph doesn't cover what you need.
-
-### Key Tools
-
-| Tool | Use when |
-| ------ | ---------- |
-| `detect_changes_tool` | Reviewing code changes — gives risk-scored analysis |
-| `get_review_context_tool` | Need source snippets for review — token-efficient |
-| `get_impact_radius_tool` | Understanding blast radius of a change |
-| `get_affected_flows_tool` | Finding which execution paths are impacted |
-| `query_graph_tool` | Tracing callers, callees, imports, tests, dependencies |
-| `semantic_search_nodes_tool` | Finding functions/classes by name or keyword |
-| `get_architecture_overview_tool` | Understanding high-level codebase structure |
-| `refactor_tool` | Planning renames, finding dead code |
-
-### Workflow
-
-1. The graph auto-updates on file changes (via hooks).
-2. Use `detect_changes_tool` for code review.
-3. Use `get_affected_flows_tool` to understand impact.
-4. Use `query_graph_tool` pattern="tests_for" to check coverage.
