@@ -93,7 +93,7 @@ describe('JobMetadataModal', () => {
   // by another client — has to be neutralised here.
   describe('escapes stored instructions', () => {
     test('strips event handler attributes', () => {
-      const {container} = render(
+      render(
         <JobMetadataModal
           showCurrent={true}
           currentFile={1}
@@ -103,13 +103,12 @@ describe('JobMetadataModal', () => {
         />,
       )
 
-      expect(container.querySelector('[onerror]')).toBeNull()
-      expect(container.innerHTML).not.toContain('onerror')
-      expect(container.textContent).toContain('caption')
+      expect(screen.getByRole('img')).not.toHaveAttribute('onerror')
+      expect(screen.getByText('caption')).toBeInTheDocument()
     })
 
     test('strips javascript: hrefs', () => {
-      const {container} = render(
+      render(
         <JobMetadataModal
           showCurrent={true}
           currentFile={1}
@@ -121,11 +120,12 @@ describe('JobMetadataModal', () => {
         />,
       )
 
-      expect(container.innerHTML).not.toContain('javascript:')
+      expect(screen.queryByRole('link')).not.toBeInTheDocument()
+      expect(screen.queryByText(/javascript:/)).not.toBeInTheDocument()
     })
 
     test('escapes script tags', () => {
-      const {container} = render(
+      render(
         <JobMetadataModal
           showCurrent={true}
           currentFile={1}
@@ -133,22 +133,25 @@ describe('JobMetadataModal', () => {
         />,
       )
 
-      expect(container.querySelector('script')).toBeNull()
+      // Escaped, the tag is shown as text instead of becoming an element.
+      expect(
+        screen.getByText('<script>alert(1)</script>hello'),
+      ).toBeInTheDocument()
     })
 
     test('applies the same filtering to the project instructions', () => {
-      const {container} = render(
+      render(
         <JobMetadataModal
           projectInfo='<img src="x" onerror="alert(1)">'
           files={[fileWith({instructions: null})]}
         />,
       )
 
-      expect(container.innerHTML).not.toContain('onerror')
+      expect(screen.getByRole('img')).not.toHaveAttribute('onerror')
     })
 
     test('keeps benign markup', () => {
-      const {container} = render(
+      render(
         <JobMetadataModal
           showCurrent={true}
           currentFile={1}
@@ -156,8 +159,10 @@ describe('JobMetadataModal', () => {
         />,
       )
 
-      expect(container.querySelector('b')).not.toBeNull()
-      expect(container.textContent).toContain('and plain text')
+      // An element of its own holds `Bold`: escaped, it would be part of one text with `<b>`.
+      expect(screen.getByText('Bold')).toBeInTheDocument()
+      expect(screen.queryByText(/<b>/)).not.toBeInTheDocument()
+      expect(screen.getByText(/and plain text/)).toBeInTheDocument()
     })
   })
 
@@ -165,7 +170,7 @@ describe('JobMetadataModal', () => {
   // here, and core decides none of them (isAllowedLinkRedirect is `() => false`).
   describe('gates stored links through isAllowedLinkRedirect', () => {
     test('flattens instruction anchors to markdown text', () => {
-      const {container} = render(
+      render(
         <JobMetadataModal
           showCurrent={true}
           currentFile={1}
@@ -178,22 +183,27 @@ describe('JobMetadataModal', () => {
         />,
       )
 
-      expect(container.querySelector('a')).toBeNull()
-      expect(container.textContent).toContain(
-        '[Tsit](https://cloud.memsource.com/web/job/Tsit/translate)',
-      )
+      expect(screen.queryByRole('link')).not.toBeInTheDocument()
+      expect(
+        screen.getByText(
+          '[Tsit](https://cloud.memsource.com/web/job/Tsit/translate)',
+          {exact: false},
+        ),
+      ).toBeInTheDocument()
     })
 
     test('gates the project instructions too', () => {
-      const {container} = render(
+      render(
         <JobMetadataModal
           projectInfo='read <a href="https://example.com">this</a>'
           files={[fileWith({instructions: null})]}
         />,
       )
 
-      expect(container.querySelector('a')).toBeNull()
-      expect(container.textContent).toContain('[this](https://example.com)')
+      expect(screen.queryByRole('link')).not.toBeInTheDocument()
+      expect(
+        screen.getByText('[this](https://example.com)', {exact: false}),
+      ).toBeInTheDocument()
     })
   })
 
@@ -218,7 +228,7 @@ describe('JobMetadataModal', () => {
   })
 
   test('flattens references with duplicated hrefs', () => {
-    const {container} = render(
+    render(
       <JobMetadataModal
         showCurrent={true}
         currentFile={1}
@@ -233,7 +243,10 @@ describe('JobMetadataModal', () => {
     )
 
     // isAllowedLinkRedirect is false in core, so both anchors are flattened to markdown text.
-    expect(container.textContent).toContain('[one](https://dup.com)')
-    expect(container.textContent).toContain('[two](https://dup.com)')
+    expect(
+      screen.getByText('[one](https://dup.com) and [two](https://dup.com)', {
+        exact: false,
+      }),
+    ).toBeInTheDocument()
   })
 })
