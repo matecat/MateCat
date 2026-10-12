@@ -2429,7 +2429,12 @@
           "200": {
             "description": "Translation issues",
             "schema": {
-              "$ref": "#/definitions/TranslationIssues"
+              "type": "object",
+              "properties": {
+                "issues": {
+                  "$ref": "#/definitions/TranslationIssues"
+                }
+              }
             }
           },
           "default": {
@@ -6946,6 +6951,10 @@
     "Issue": {
       "type": "object",
       "properties": {
+        "uid": {
+          "type": "integer",
+          "x-nullable": true
+        },
         "comment": {
           "type": "string"
         },
@@ -6964,22 +6973,7 @@
         "id_segment": {
           "type": "string"
         },
-        "is_full_segment": {
-          "type": "string"
-        },
         "severity": {
-          "type": "string"
-        },
-        "start_node": {
-          "type": "string"
-        },
-        "start_offset": {
-          "type": "string"
-        },
-        "end_node": {
-          "type": "string"
-        },
-        "end_offset": {
           "type": "string"
         },
         "translation_version": {
@@ -6988,11 +6982,47 @@
         "target_text": {
           "type": "string"
         },
-        "rebutted_at": {
-          "type": "string"
-        },
         "penalty_points": {
           "type": "string"
+        },
+        "diff": {
+          "type": "object",
+          "x-nullable": true
+        },
+        "comments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/IssueComment"
+          }
+        },
+        "revision_number": {
+          "type": "integer",
+          "description": "The revision phase the issue was raised in (1 or 2), null for issues raised in translation",
+          "x-nullable": true
+        }
+      }
+    },
+    "IssueComment": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "uid": {
+          "type": "integer"
+        },
+        "id_qa_entry": {
+          "type": "integer",
+          "description": "The id of the issue the comment belongs to"
+        },
+        "create_date": {
+          "type": "string"
+        },
+        "comment": {
+          "type": "string"
+        },
+        "source_page": {
+          "type": "integer"
         }
       }
     },
