@@ -58,7 +58,8 @@
       margin-bottom: variables.$border-radius-default;
     }
 
-    section:not(.editor) {
+    section:not(.editor),
+    section.readonly.editor {
       .body {
         border-bottom-left-radius: variables.$border-radius-default;
         border-bottom-right-radius: variables.$border-radius-default;

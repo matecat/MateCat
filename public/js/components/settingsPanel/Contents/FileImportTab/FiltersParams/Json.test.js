@@ -139,7 +139,7 @@ describe('Json', () => {
     const updated = updater(currentTemplate)
     // the space bar must not split a JSON key
     expect(updated.json.context_keys).toEqual([' my key '])
-    expect(screen.getAllByText('·')).toHaveLength(2)
+    expect(screen.getAllByText('•')).toHaveLength(2)
   })
 
   test('does not call modifyingCurrentTemplate when nothing changed', () => {

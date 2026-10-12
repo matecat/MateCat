@@ -32,7 +32,7 @@ const splitEmailsBySeparators = (value, separators) => {
  * Everything is optional, so a value made only of spaces lands entirely in the first group.
  */
 const EDGE_WHITESPACE_PATTERN = /^(\s*)([\s\S]*?)(\s*)$/
-const WHITESPACE_MARKER = '·'
+const WHITESPACE_MARKER = '•'
 
 const isMeaningful = (value) => value.trim() !== ''
 
@@ -274,7 +274,14 @@ export const EmailsBadge = ({
     )
   }
   return (
-    <div className={[styles['email-badge'], disabled && styles['email-badge-disabled']].filter(Boolean).join(' ')}>
+    <div
+      className={[
+        styles['email-badge'],
+        disabled && styles['email-badge-disabled'],
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <div
         ref={areaRef}
         className={styles['email-badge-fakeInput']}
