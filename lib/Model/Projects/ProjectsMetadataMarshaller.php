@@ -19,6 +19,10 @@ enum ProjectsMetadataMarshaller: string
     case ICU_ENABLED = 'icu_enabled';
     case ENABLE_MT_ANALYSIS = 'enable_mt_analysis';
     case PRE_TRANSLATE_101 = 'pretranslate_101';
+    case PRE_TRANSLATE_101_LOCK = 'pretranslate_101_lock';
+    case PRE_TRANSLATE_100_LOCK = 'pretranslate_100_lock';
+    case PRE_TRANSLATE_101_STATUS = 'pretranslate_101_status';
+    case PRE_TRANSLATE_100_STATUS = 'pretranslate_100_status';
     case PROJECT_COMPLETION = 'project_completion';
     case MMT_ACTIVATE_CONTEXT_ANALYZER = 'mmt_activate_context_analyzer';
     case MMT_IGNORE_GLOSSARY_CASE = 'mmt_ignore_glossary_case';
@@ -56,6 +60,8 @@ enum ProjectsMetadataMarshaller: string
             ProjectsMetadataMarshaller::MT_EVALUATION->value,
             ProjectsMetadataMarshaller::ENABLE_MT_ANALYSIS->value,
             ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value,
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_101_LOCK->value,
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_100_LOCK->value,
             ProjectsMetadataMarshaller::PROJECT_COMPLETION->value,
             ProjectsMetadataMarshaller::MMT_ACTIVATE_CONTEXT_ANALYZER->value,
             ProjectsMetadataMarshaller::MMT_IGNORE_GLOSSARY_CASE->value,
@@ -73,6 +79,8 @@ enum ProjectsMetadataMarshaller: string
             ProjectsMetadataMarshaller::DEEPL_FORMALITY->value,
             ProjectsMetadataMarshaller::DEEPL_ID_GLOSSARY->value,
             ProjectsMetadataMarshaller::DEEPL_ENGINE_TYPE->value,
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_101_STATUS->value,
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_100_STATUS->value,
             ProjectsMetadataMarshaller::CONTEXT_URL->value => fn() => (string)$struct->value,
             // backward compatibility, old projects could have JSON glossaries encoded as HTML entities
             ProjectsMetadataMarshaller::LARA_GLOSSARIES->value => fn() => json_decode(html_entity_decode((string)$struct->value), true),

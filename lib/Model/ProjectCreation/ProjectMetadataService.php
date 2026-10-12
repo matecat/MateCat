@@ -53,6 +53,10 @@ readonly class ProjectMetadataService
 
         // pretranslate_101
         $options[ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value] = (string)$projectStructure->pretranslate_101;
+        $options[ProjectsMetadataMarshaller::PRE_TRANSLATE_101_LOCK->value] = (string)$projectStructure->pretranslate_101_lock;
+        $options[ProjectsMetadataMarshaller::PRE_TRANSLATE_100_LOCK->value] = (string)$projectStructure->pretranslate_100_lock;
+        $options[ProjectsMetadataMarshaller::PRE_TRANSLATE_101_STATUS->value] = $projectStructure->pretranslate_101_status;
+        $options[ProjectsMetadataMarshaller::PRE_TRANSLATE_100_STATUS->value] = $projectStructure->pretranslate_100_status;
 
         // mt evaluation => ice_mt already in metadata
         // adds JSON parameters to the project metadata as JSON string

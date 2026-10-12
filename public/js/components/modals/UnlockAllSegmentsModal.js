@@ -11,10 +11,10 @@ export const UnlockAllSegmentsModal = () => {
   const checkbox = useRef()
   const successCallback = () => {
     // currentPassword, not password: in a revision the job password names the translate phase, and
-    // the server reads the phase off the credential it is given, so asking with it returns the ICE
+    // the server reads the phase off the credential it is given, so asking with it returns the locked
     // segments of a phase this editor is not on.
     getFilteredSegments(config.id_job, config.currentPassword, {
-      sample: {type: 'ice'},
+      sample: {type: 'locked'},
     }).then((data) => {
       SegmentActions.unlockSegments(data.segment_ids)
       SegmentStore.consecutiveUnlockSegments = []
@@ -34,7 +34,7 @@ export const UnlockAllSegmentsModal = () => {
       <div className="matecat-modal-middle">
         <div className={'modal-grid'}>
           <div className="modal-grid__body" style={{fontSize: '18px'}}>
-            Would you like to unlock all 101% segments?
+            Would you like to unlock all locked segments?
           </div>
           <div className="modal-buttons">
             <Button

@@ -13,6 +13,14 @@ import {updateJobMetadata} from '../../../../api/updateJobMetadata/updateJobMeta
 import IconAdd from '../../../../../img/icons/IconAdd'
 import UsersPlus from '../../../../../img/icons/UsersPlus'
 import {Button, BUTTON_TYPE} from '../../../common/Button/Button'
+import Switch from '../../../common/Switch'
+import {Select} from '../../../common/Select'
+import {
+  fromStatusLockId,
+  PRETRANSLATE_ENABLED_DEFAULT,
+  PRETRANSLATE_STATUS_OPTIONS,
+  toStatusLockId,
+} from '../../../../utils/editorStatusLock'
 
 const COLUMNS_TABLE_ACTIVE = [
   {name: 'Lookup'},
@@ -29,6 +37,11 @@ const COLUMNS_TABLE_INACTIVE = [
   {name: 'Name'},
   {name: 'Key'},
   {name: ''},
+]
+
+const PRETRANSLATE_MATCHES = [
+  {key: 'match_100', label: 'Pre-confirm 100% matches'},
+  {key: 'match_101', label: 'Pre-confirm 101% matches'},
 ]
 
 export const SPECIAL_ROWS_ID = {
@@ -112,11 +125,14 @@ export const TranslationMemoryGlossaryTab = () => {
   const {userInfo} = useContext(ApplicationWrapperContext)
   const getPublicMatches = currentProjectTemplate.getPublicMatches
   const publicTmPenalty = currentProjectTemplate.publicTmPenalty
-  const isPretranslate100Active = currentProjectTemplate.pretranslate100
-  const setIsPretranslate100Active = (value) =>
+  const pretranslate = currentProjectTemplate.pretranslate
+  const setPretranslateMatch = (key, value) =>
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,
-      pretranslate100: value,
+      pretranslate: {
+        ...prevTemplate.pretranslate,
+        [key]: {...prevTemplate.pretranslate[key], ...value},
+      },
     }))
   const isDialectStrictActive = currentProjectTemplate.dialectStrict
   const setIsDialectStrictActive = (value) =>
@@ -453,30 +469,82 @@ export const TranslationMemoryGlossaryTab = () => {
         className="translation-memory-glossary-tab settings-panel-contentwrapper-tab-background"
       >
         {!config.is_cattool && (
-          <div className="translation-memory-glossary-checkbox-container">
-            <div className="translation-memory-glossary-checkbox-item">
-              <input
-                checked={isPretranslate100Active}
-                onChange={(e) =>
-                  setIsPretranslate100Active(e.currentTarget.checked)
-                }
-                type="checkbox"
-                data-testid="pretranslate-checkbox"
-              />
-              Pre-translate 100% matches from TM
+          <>
+            <div className="translation-memory-glossary-pretranslate">
+              <div className="translation-memory-glossary-tab-table-title">
+                <h2>Pre-confirmation</h2>
+              </div>
+              <p>
+                Choose if 100% and 101% matches should be pre-confirmed when
+                creating a project.
+                <br />
+                By default, pre-confirmed segments are displayed as approved and
+                locked. You can customize these settings using the options below
+                to suit your project&apos;s needs.
+              </p>
+              <div className="translation-memory-glossary-pretranslate-cards">
+                {PRETRANSLATE_MATCHES.map(({key, label}) => (
+                  <div
+                    key={key}
+                    className="translation-memory-glossary-pretranslate-card"
+                    data-testid={`pretranslate-${key}`}
+                  >
+                    <div className="translation-memory-glossary-pretranslate-toggle">
+                      <Switch
+                        active={pretranslate[key].enabled}
+                        onChange={(enabled) =>
+                          setPretranslateMatch(
+                            key,
+                            enabled
+                              ? PRETRANSLATE_ENABLED_DEFAULT
+                              : {enabled: false},
+                          )
+                        }
+                        testId={`pretranslate-${key}-switch`}
+                        showText={false}
+                      />
+                      {label}
+                    </div>
+                    <span className="translation-memory-glossary-pretranslate-status-label">
+                      State in editor
+                    </span>
+                    <Select
+                      isPortalDropdown={true}
+                      name={`pretranslate-${key}-status`}
+                      options={PRETRANSLATE_STATUS_OPTIONS}
+                      maxHeightDroplist={260}
+                      activeOption={PRETRANSLATE_STATUS_OPTIONS.find(
+                        ({id}) =>
+                          id ===
+                          toStatusLockId(
+                            pretranslate[key].enabled
+                              ? pretranslate[key]
+                              : PRETRANSLATE_ENABLED_DEFAULT,
+                          ),
+                      )}
+                      onSelect={(option) =>
+                        setPretranslateMatch(key, fromStatusLockId(option.id))
+                      }
+                      isDisabled={!pretranslate[key].enabled}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="translation-memory-glossary-checkbox-item">
-              <input
-                checked={isDialectStrictActive}
-                onChange={(e) =>
-                  setIsDialectStrictActive(e.currentTarget.checked)
-                }
-                type="checkbox"
-                data-testid="dialect-strict-checkbox"
-              />
-              Activate variant-strict matching
+            <div className="translation-memory-glossary-checkbox-container">
+              <div className="translation-memory-glossary-checkbox-item">
+                <input
+                  checked={isDialectStrictActive}
+                  onChange={(e) =>
+                    setIsDialectStrictActive(e.currentTarget.checked)
+                  }
+                  type="checkbox"
+                  data-testid="dialect-strict-checkbox"
+                />
+                Activate variant-strict matching
+              </div>
             </div>
-          </div>
+          </>
         )}
         <div className="translation-memory-glossary-tab-active-resources">
           <div className="translation-memory-glossary-tab-table-title">

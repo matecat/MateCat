@@ -318,8 +318,8 @@ const SegmentComponent = ({
     const seg = segmentRef.current
     if (
       parseInt(data.sid) === parseInt(seg.sid) &&
-      (!SegmentUtils.isIceSegment(seg) ||
-        (SegmentUtils.isIceSegment(seg) && seg.unlocked))
+      (!SegmentUtils.isLockedSegment(seg) ||
+        (SegmentUtils.isLockedSegment(seg) && seg.unlocked))
     ) {
       setSelectedTextObj(data.selection)
     } else {
@@ -503,7 +503,10 @@ const SegmentComponent = ({
 
     if (readonly) classes.push('readonly')
 
-    if ((SegmentUtils.isIceSegment(segment) && !readonly) || secondPassLocked) {
+    if (
+      (SegmentUtils.isLockedSegment(segment) && !readonly) ||
+      secondPassLocked
+    ) {
       if (segment.unlocked) {
         classes.push('ice-unlocked')
       } else {
@@ -626,7 +629,10 @@ const SegmentComponent = ({
   }
 
   const onClickEvent = () => {
-    if (readonly || (!segment.unlocked && SegmentUtils.isIceSegment(segment))) {
+    if (
+      readonly ||
+      (!segment.unlocked && SegmentUtils.isLockedSegment(segment))
+    ) {
       SegmentActions.handleClickOnReadOnly(segment)
     } else if (segment.muted) {
       return
@@ -642,7 +648,7 @@ const SegmentComponent = ({
   // Render
   // ------------------------------------------------------------------
 
-  const showLockIcon = SegmentUtils.isIceSegment(segment) || secondPassLocked
+  const showLockIcon = SegmentUtils.isLockedSegment(segment) || secondPassLocked
   const segment_classes = checkSegmentClasses()
   const split_group = segment.split_group || []
   const autoPropagable = segment.repetitions_in_chunk !== 1
@@ -650,7 +656,7 @@ const SegmentComponent = ({
   const translationIssues = getTranslationIssues()
   const locked =
     !segment.unlocked &&
-    (SegmentUtils.isIceSegment(segment) || secondPassLocked)
+    (SegmentUtils.isLockedSegment(segment) || secondPassLocked)
   const segmentHasIssues = SegmentStore.segmentHasIssues(segment)
 
   const contextValue = {
@@ -723,9 +729,7 @@ const SegmentComponent = ({
             />
           </div>
 
-          {!segment.ice_locked &&
-          config.splitSegmentEnabled &&
-          segment.opened ? (
+          {!segment.locked && config.splitSegmentEnabled && segment.opened ? (
             !segment.openSplit ? (
               <div className="actions">
                 <Button

@@ -10,7 +10,6 @@ use Exception;
 use InvalidArgumentException;
 use Matecat\Finder\WholeTextFinder;
 use Matecat\SubFiltering\MateCatFilter;
-use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\Hook\Event\Run\PostAddSegmentTranslationEvent;
 use Model\FeaturesBase\Hook\Event\Run\SetTranslationCommittedEvent;
@@ -120,12 +119,21 @@ class GetSearchController extends AbstractStatefulKleinController
             $srh->updateIndex((int)$replace_version);
         }
 
+        // The locked segments this replace-all actually rewrote. The UI keeps the unlock client-side
+        // and cannot tell them apart in `segments`, which lists every search hit, skipped ones included.
+        // Read from the pre-update rows: the write leaves locked as it was.
+        $replacedLockedSegments = array_values(array_map(
+            static fn(SegmentTranslationStruct $translation): int => (int)$translation->id_segment,
+            array_filter($committed, static fn(SegmentTranslationStruct $translation): bool => $translation->isLocked())
+        ));
+
         $this->response->json([
             "errors" => [],
             "data" => [],
             "token" => $request['token'] ?? null,
             "total" => $res['count'] ?? 0,
-            "segments" => $res['sid_list']
+            "segments" => $res['sid_list'],
+            "replaced_locked_segments" => $replacedLockedSegments,
         ]);
     }
 
@@ -431,7 +439,7 @@ class GetSearchController extends AbstractStatefulKleinController
                 if (
                     $old_translation === null ||
                     $segment === null ||
-                    ($queryParams->includeLocked === false && $old_translation->match_type === InternalMatchesConstants::TM_ICE)) {
+                    ($queryParams->includeLocked === false && $old_translation->isLocked())) {
                     // Nothing written yet, so there is nothing to undo: leaving the scope normally is
                     // the same empty transaction the rollback used to end.
                     return null;
@@ -598,8 +606,8 @@ class GetSearchController extends AbstractStatefulKleinController
 
             // A replace event only stores what an undo has to put back: the text and the status the
             // segment had before the replacement. Everything else the writer and the event consumers
-            // read off this struct still has to be the live one - version_number and isICE() for
-            // TranslationEvent, time_to_edit and the QA fields for the update - so the historical
+            // read off this struct still has to be the live one - version_number and the locked flag
+            // for TranslationEvent, time_to_edit and the QA fields for the update - so the historical
             // values are hydrated on top of the current row instead of replacing it.
             $result[] = new SegmentTranslationStruct(
                 array_merge(

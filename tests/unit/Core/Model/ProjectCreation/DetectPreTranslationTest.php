@@ -9,9 +9,11 @@ use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Filter\PopulatePreTranslationsEvent;
 use Model\Files\MetadataDao;
 use Model\ProjectCreation\ProjectStructure;
+use Model\Xliff\DTO\Xliff12Rule;
 use Model\Xliff\DTO\XliffRuleInterface;
 use Model\Xliff\DTO\XliffRulesModel;
 use PHPUnit\Framework\Attributes\Test;
+use Utils\Constants\TranslationStatus;
 use Utils\Logger\MatecatLogger;
 
 /**
@@ -294,6 +296,97 @@ class DetectPreTranslationTest extends AbstractTest
         self::assertSame('translated', $result['state']);
     }
 
+    /**
+     * @return void
+     * @throws Exception
+     */
+    #[Test]
+    public function ignoresATargetEqualToTheSourceWithoutStateEvenUnderAPreTranslatedNoStateRule(): void
+    {
+        $extractor = $this->buildExtractor(xliffRulesModel: $this->buildNoStateRulesModel());
+
+        $result = $extractor->callDetectPreTranslation(
+            'same text',
+            ' <g id="1">same text</g> ',
+            $this->makeTransUnit(),
+            1,
+            null,
+            $this->projectStructure,
+        );
+
+        self::assertNull($result);
+    }
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    #[Test]
+    public function appliesTheNoStateRuleToASegmentWithoutState(): void
+    {
+        $extractor = $this->buildExtractor(xliffRulesModel: $this->buildNoStateRulesModel());
+
+        $result = $extractor->callDetectPreTranslation(
+            'source text',
+            'target text',
+            $this->makeTransUnit(),
+            1,
+            null,
+            $this->projectStructure,
+        );
+
+        self::assertNotNull($result);
+        self::assertTrue($result['rule']->isNoStateRule());
+        self::assertSame(TranslationStatus::STATUS_TRANSLATED, $result['rule']->asEditorStatus());
+        self::assertSame('ICE', $result['rule']->asMatchType());
+    }
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    #[Test]
+    public function appliesTheNoStateRuleAsFallbackEvenWhenTargetEqualsSource(): void
+    {
+        $extractor = $this->buildExtractor(xliffRulesModel: $this->buildNoStateRulesModel());
+
+        $result = $extractor->callDetectPreTranslation(
+            'same text',
+            'same text',
+            $this->makeTransUnit(state: 'signed-off'),
+            1,
+            null,
+            $this->projectStructure,
+        );
+
+        self::assertNotNull($result);
+        self::assertTrue($result['rule']->isNoStateRule());
+        self::assertSame('signed-off', $result['state']);
+    }
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    #[Test]
+    public function skipsTheNoStateRuleWhenItsAnalysisIsNew(): void
+    {
+        $rulesModel = new XliffRulesModel();
+        $rulesModel->addRule(new Xliff12Rule(['no-state'], 'new'));
+        $extractor = $this->buildExtractor(xliffRulesModel: $rulesModel);
+
+        $result = $extractor->callDetectPreTranslation(
+            'source text',
+            'target text',
+            $this->makeTransUnit(),
+            1,
+            null,
+            $this->projectStructure,
+        );
+
+        self::assertNull($result);
+    }
+
     // ── Helper methods ──────────────────────────────────────────────
 
     private function buildExtractor(
@@ -347,6 +440,15 @@ class DetectPreTranslationTest extends AbstractTest
         $rulesModel->method('getMatchingRule')->willReturn($rule);
 
         return [$rulesModel, $rule];
+    }
+
+    private function buildNoStateRulesModel(): XliffRulesModel
+    {
+        $rulesModel = new XliffRulesModel();
+        $rulesModel->addRule(new Xliff12Rule(['translated'], 'pre-translated', 'approved', 'ice'));
+        $rulesModel->addRule(new Xliff12Rule(['no-state'], 'pre-translated', 'translated', 'ice'));
+
+        return $rulesModel;
     }
 
     private function makeTransUnit(?string $state = null, ?string $stateQualifier = null): array

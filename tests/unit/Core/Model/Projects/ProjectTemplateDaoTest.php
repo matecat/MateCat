@@ -25,44 +25,6 @@ class ProjectTemplateDaoTest extends AbstractTest
         $this->dao = new ProjectTemplateDao(obtainTestDatabase());
 
         $conn = obtainTestDatabase()->getConnection();
-        $conn->exec("DROP TABLE IF EXISTS project_templates");
-        $conn->exec(
-            "CREATE TABLE project_templates (
-                id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-                name VARCHAR(255) NOT NULL,
-                is_default TINYINT(1) NOT NULL DEFAULT 0,
-                uid BIGINT(20) NOT NULL,
-                id_team INT(11) NOT NULL,
-                pretranslate_100 TINYINT(1) NOT NULL DEFAULT 0,
-                pretranslate_101 TINYINT(1) NOT NULL DEFAULT 1,
-                get_public_matches TINYINT(1) NOT NULL DEFAULT 0,
-                segmentation_rule VARCHAR(255) DEFAULT NULL,
-                tm TEXT,
-                mt TEXT,
-                payable_rate_template_id INT(11) DEFAULT 0,
-                qa_model_template_id INT(11) DEFAULT 0,
-                filters_template_id INT(11) DEFAULT 0,
-                xliff_config_template_id INT(11) DEFAULT 0,
-                created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-                modified_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-                subject VARCHAR(255) DEFAULT NULL,
-                source_language VARCHAR(45) DEFAULT NULL,
-                target_language VARCHAR(2048) DEFAULT NULL,
-                subfiltering_handlers TEXT,
-                character_counter_count_tags TINYINT(1) NOT NULL DEFAULT 0,
-                character_counter_mode VARCHAR(255) DEFAULT NULL,
-                mt_quality_value_in_editor INT(11) DEFAULT NULL,
-                icu_enabled TINYINT(1) NOT NULL DEFAULT 1,
-                tm_prioritization TINYINT(1) NOT NULL DEFAULT 0,
-                dialect_strict TINYINT(1) NOT NULL DEFAULT 0,
-                public_tm_penalty INT(11) NOT NULL DEFAULT 0,
-                mandatory_issues TEXT DEFAULT NULL,
-                PRIMARY KEY (id),
-                UNIQUE KEY uid_name_idx (uid, name),
-                KEY uid_idx (uid)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
-        );
-
         $conn->beginTransaction();
 
         $conn->exec(
@@ -113,6 +75,10 @@ class ProjectTemplateDaoTest extends AbstractTest
         $this->assertSame(self::TEST_UID, $default->uid);
         $this->assertFalse($default->pretranslate_100);
         $this->assertTrue($default->pretranslate_101);
+        $this->assertTrue($default->pretranslate_101_lock);
+        $this->assertTrue($default->pretranslate_100_lock);
+        $this->assertSame('APPROVED', $default->pretranslate_101_status);
+        $this->assertSame('APPROVED', $default->pretranslate_100_status);
         $this->assertTrue($default->get_public_matches);
         $this->assertTrue($default->icu_enabled);
         $this->assertSame('en-US', $default->source_language);
@@ -132,6 +98,10 @@ class ProjectTemplateDaoTest extends AbstractTest
 
         $byId = $this->dao->fetchById($saved->id, ProjectTemplateStruct::class);
         $this->assertNotNull($byId);
+        $this->assertTrue($byId->pretranslate_101_lock);
+        $this->assertTrue($byId->pretranslate_100_lock);
+        $this->assertSame('APPROVED', $byId->pretranslate_101_status);
+        $this->assertSame('APPROVED', $byId->pretranslate_100_status);
         $this->assertStringStartsWith('lifecycle-template-', $byId->name);
 
         $byIdAndUser = $this->dao->getByIdAndUser($saved->id, self::TEST_UID);
@@ -141,6 +111,10 @@ class ProjectTemplateDaoTest extends AbstractTest
 
         $saved->name = 'lifecycle-template-updated-' . uniqid('', true);
         $saved->pretranslate_100 = true;
+        $saved->pretranslate_101_lock = false;
+        $saved->pretranslate_100_lock = false;
+        $saved->pretranslate_101_status = 'APPROVED2';
+        $saved->pretranslate_100_status = 'TRANSLATED';
         $saved->source_language = 'it-IT';
         $saved->target_language = serialize(['de-DE']);
         $saved->is_default = true;
@@ -150,6 +124,10 @@ class ProjectTemplateDaoTest extends AbstractTest
         $this->assertNotNull($updated);
         $this->assertStringStartsWith('lifecycle-template-updated-', $updated->name);
         $this->assertTrue($updated->pretranslate_100);
+        $this->assertFalse($updated->pretranslate_101_lock);
+        $this->assertFalse($updated->pretranslate_100_lock);
+        $this->assertSame('APPROVED2', $updated->pretranslate_101_status);
+        $this->assertSame('TRANSLATED', $updated->pretranslate_100_status);
         $this->assertSame('it-IT', $updated->source_language);
         $this->assertSame(['de-DE'], $updated->getTargetLanguage());
 
@@ -232,7 +210,9 @@ class ProjectTemplateDaoTest extends AbstractTest
         $this->assertSame(['r1'], $created->getMandatoryIssues());
 
         $editPayload = $this->makePayload('edited-json-template');
-        $editPayload->pretranslate_100 = true;
+        $editPayload->pretranslate->match_100->enabled = true;
+        $editPayload->pretranslate->match_100->lock = true;
+        $editPayload->pretranslate->match_101->status = 'APPROVED2';
         $editPayload->target_language = ['fr-FR', 'it-IT'];
         $editPayload->mandatory_issues = ['r1', 'r2'];
 
@@ -242,6 +222,15 @@ class ProjectTemplateDaoTest extends AbstractTest
         $this->assertNotNull($reloaded);
         $this->assertStringStartsWith('edited-json-template-', $reloaded->name);
         $this->assertTrue($reloaded->pretranslate_100);
+        $this->assertTrue($reloaded->pretranslate_100_lock);
+        $this->assertSame('APPROVED2', $reloaded->pretranslate_101_status);
+        $this->assertSame(
+            [
+                'match_101' => ['enabled' => true, 'status' => 'APPROVED2', 'lock' => true],
+                'match_100' => ['enabled' => true, 'status' => 'TRANSLATED', 'lock' => true],
+            ],
+            $reloaded->jsonSerialize()['pretranslate']
+        );
         $this->assertSame(['fr-FR', 'it-IT'], $reloaded->getTargetLanguage());
         $this->assertSame(['r1', 'r2'], $reloaded->getMandatoryIssues());
     }
@@ -310,8 +299,10 @@ class ProjectTemplateDaoTest extends AbstractTest
             'name' => $name . '-' . uniqid('', true),
             'id_team' => self::SHARED_TEAM_ID,
             'segmentation_rule' => (object)['name' => 'General', 'id' => 'standard'],
-            'pretranslate_100' => false,
-            'pretranslate_101' => true,
+            'pretranslate' => (object)[
+                'match_101' => (object)['enabled' => true, 'status' => 'APPROVED', 'lock' => true],
+                'match_100' => (object)['enabled' => false, 'status' => 'TRANSLATED', 'lock' => false],
+            ],
             'tm_prioritization' => false,
             'dialect_strict' => false,
             'public_tm_penalty' => 0,

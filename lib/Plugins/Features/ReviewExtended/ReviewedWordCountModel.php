@@ -188,7 +188,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
      * 1. Based on the change of status
      * 2. Upon pressing the "APPROVE" button, when modifying a segment in the same status or accepting the segment without changes
      *    - After the first modification or acceptance, the count does not increase further unless there is a change of status
-     * 3. For unmodified ICE segments, the progress is not counted unless there is a change of status (no acceptance counts)
+     * 3. For unmodified locked segments, the progress is not counted unless there is a change of status (no acceptance counts)
      *
      * @throws Exception
      */
@@ -237,22 +237,22 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
                     // reviewed words are discounted from R1
                     $this->decreaseCounters($chunkReview);
                 }
-            } elseif ($this->_event->isIce()) {
+            } elseif ($this->_event->isLocked()) {
                 if (
-                    // This case happens because we have the same status for ICEs and Approved segments.
-                    // All can pass except unmodified ices
+                    // This case happens because a locked segment can already carry the status its acceptance sets.
+                    // All can pass except unmodified locked segments
                     // Rule 3:
-                    //   3. For unmodified ICE segments, the progress is not counted unless there is a change of status (acceptance doesn't count)
-                    !$this->_event->isUnModifiedIce() &&
+                    //   3. For unmodified locked segments, the progress is not counted unless there is a change of status (acceptance doesn't count)
+                    !$this->_event->isUnModifiedLocked() &&
                     $this->_event->currentEventIsOnThisChunk($chunkReview)
                 ) {
-                    // There is an ICE segment acceptance with or without modifications in the same revision phase.
+                    // There is a locked segment acceptance with or without modifications in the same revision phase.
                     // - If it is the first time it's happened, we must add the reviewed word count.
                     // - If it is not the first modification, we will find a revision flag, will not increase the reviewed word count but will unset the previous final flag
                     $this->increaseCountersButCheckForFinalRevision($chunkReview);
                 } elseif ($this->_event->currentEventIsOnThisChunk($chunkReview)) {
                     /*
-                     * R1/R2 Accept (without modifications) an ICE revision on the same level; we want not to flag them as final revision (only track the acceptance)
+                     * R1/R2 Accept (without modifications) a locked segment on the same level; we want not to flag them as final revision (only track the acceptance)
                      */
                     $this->_event->setRevisionFlagAllowed(false);
                 }
@@ -414,7 +414,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel
                 ]
             );
         } else {
-            // handle the case when an ICE OR a pre-translated segment (no previous events) changes its status to a lower status
+            // handle the case when a locked OR a pre-translated segment (no previous events) changes its status to a lower status
             // use the event chunk to generate the link.
             $url = CanonicalRoutes::translate(
                 $this->_chunk->getProject(new ProjectDao($this->_database))->name,

@@ -42,7 +42,7 @@ class CounterModel
     public function __construct(IDatabase $database, ?WordCountStruct $oldWCount = null, ?WordCounterDao $wordCounterDao = null)
     {
         $reflect = new ReflectionClass(TranslationStatus::class);
-        self::$constCache = array_flip($reflect->getConstants());
+        self::$constCache = array_flip(array_filter($reflect->getConstants(), is_string(...)));
         $this->wordCounterDao = $wordCounterDao ?? new WordCounterDao($database);
 
         if ($oldWCount !== null) {

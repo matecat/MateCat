@@ -6015,10 +6015,13 @@ var spec = {
           $ref: '#/definitions/QualityReportFile',
         },
         ice_locked: {
-          type: 'integer',
+          type: 'boolean',
+          deprecated: true,
+          description: 'Deprecated alias of locked, kept for existing consumers. Use locked.',
         },
         ice_modified: {
           type: 'boolean',
+          description: 'The segment is an ICE match and its translation has been edited.',
         },
         id: {
           type: 'integer',
@@ -6042,7 +6045,7 @@ var spec = {
           type: 'string',
         },
         locked: {
-          type: 'integer',
+          type: 'boolean',
         },
         match_type: {
           type: 'string',

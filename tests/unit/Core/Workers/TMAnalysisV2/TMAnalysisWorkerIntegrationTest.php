@@ -866,7 +866,7 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
             }
         };
 
-        $mtqeParams = json_encode(['analysis_ignore_100' => true, 'analysis_ignore_101' => false]);
+        $mtqeParams = new MTQEWorkflowParams(['analysis_ignore_100' => true, 'analysis_ignore_101' => false]);
 
         $element = $this->makeQueueElement([
             'id_tms'                    => 900,
@@ -880,6 +880,7 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
 
         $this->assertTrue($config['mt_qe_workflow_enabled']);
         $this->assertInstanceOf(MTQEWorkflowParams::class, $config['mt_qe_config']);
+        $this->assertTrue($config['mt_qe_config']->analysis_ignore_100);
     }
 
     #[Test]

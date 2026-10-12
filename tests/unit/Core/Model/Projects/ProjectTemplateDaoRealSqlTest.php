@@ -96,8 +96,10 @@ class ProjectTemplateDaoRealSqlTest extends AbstractTest
             'name'                         => $name,
             'is_default'                   => $default,
             'id_team'                      => $this->idTeam,
-            'pretranslate_100'             => false,
-            'pretranslate_101'             => true,
+            'pretranslate'                 => (object)[
+                'match_101' => (object)['enabled' => true, 'status' => 'APPROVED', 'lock' => true],
+                'match_100' => (object)['enabled' => false, 'status' => 'TRANSLATED', 'lock' => false],
+            ],
             'tm_prioritization'            => false,
             'dialect_strict'               => false,
             'get_public_matches'           => true,

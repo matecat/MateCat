@@ -181,4 +181,39 @@ class XliffRulesTest extends AbstractTest
         $this->assertEquals(['needs-l10n', 'exact-match'], $rule->getStates());
     }
 
+    #[Test]
+    public function testNoStateIsKeptApartFromRealStatesFor12()
+    {
+        $rule = new Xliff12Rule(['needs-l10n', 'no-state', 'exact-match'], 'pre-translated', 'translated', 'ice');
+        $this->assertTrue($rule->isNoStateRule());
+        $this->assertEquals(['needs-l10n'], $rule->getStates('states'));
+        $this->assertEquals(['exact-match'], $rule->getStates('state-qualifiers'));
+        $this->assertEquals(['no-state'], $rule->getStates('no-state'));
+        $this->assertEquals(['no-state', 'needs-l10n', 'exact-match'], $rule->getStates());
+    }
+
+    #[Test]
+    public function testNoStateIsAcceptedFor20()
+    {
+        $rule = new Xliff20Rule(['no-state'], 'new');
+        $this->assertTrue($rule->isNoStateRule());
+        $this->assertEquals([], $rule->getStates('states'));
+        $this->assertEquals(['states' => ['no-state'], 'analysis' => 'new'], $rule->jsonSerialize());
+    }
+
+    #[Test]
+    public function testNoStateRoundTripsThroughJson()
+    {
+        $rule = Xliff12Rule::fromArray(['states' => ['translated', 'no-state'], 'analysis' => 'pre-translated', 'editor' => 'approved', 'match_category' => 'ice']);
+        $copy = Xliff12Rule::fromArray(json_decode(json_encode($rule), true));
+        $this->assertEquals($rule, $copy);
+        $this->assertEquals(['no-state', 'translated'], $copy->jsonSerialize()['states']);
+    }
+
+    #[Test]
+    public function testARuleWithoutNoStateIsNotANoStateRule()
+    {
+        $this->assertFalse((new Xliff12Rule(['translated'], 'pre-translated', 'translated'))->isNoStateRule());
+    }
+
 }

@@ -22,6 +22,16 @@ header {
   margin-top: 0;
 }
 
+/* Undoes the centred body for the page content; the header has its own rule above */
+#contentBox {
+  position: relative;
+  width: 92%;
+  min-width: 910px;
+  margin: 0 auto;
+  padding-top: 5px;
+  text-align: left;
+}
+
 h1 {
   font-size: 40px;
 }
@@ -164,6 +174,8 @@ section {
 
 .api {
   padding-top: 0;
+  // Sets the line height the Swagger rows inherit, so the global body size cannot win here
+  font-size: variables.$font-size-xsmall;
 }
 
 .api header {

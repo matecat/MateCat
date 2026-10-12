@@ -177,14 +177,14 @@ class TranslationEvent
         return $this->old_translation->status !== $this->wanted_translation->status;
     }
 
-    public function isIce(): bool
+    public function isLocked(): bool
     {
-        return $this->old_translation->isICE();
+        return $this->old_translation->isLocked();
     }
 
-    public function isUnModifiedIce(): bool
+    public function isUnModifiedLocked(): bool
     {
-        return $this->isIce() &&
+        return $this->isLocked() &&
             $this->old_translation->version_number == 0 &&
             $this->wanted_translation->version_number == 0;
     }
@@ -398,7 +398,7 @@ class TranslationEvent
 
     /**
      * This flag is meant to force setting the final_revision flag to 0
-     * For events like a "GREEN" ICE acceptance without modification in the R1 phase.
+     * For events like a "GREEN" acceptance of an unmodified locked segment in the R1 phase.
      * These events by definition should be registered but not set as final_revision (no modification means any revision)
      *
      * @return bool

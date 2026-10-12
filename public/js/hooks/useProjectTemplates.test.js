@@ -133,7 +133,10 @@ test('Check is modified specific property', async () => {
   act(() =>
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,
-      pretranslate100: true,
+      pretranslate: {
+        ...prevTemplate.pretranslate,
+        match_100: {...prevTemplate.pretranslate.match_100, enabled: true},
+      },
     })),
   )
 
@@ -141,9 +144,7 @@ test('Check is modified specific property', async () => {
     checkSpecificTemplatePropsAreModified(['get_public_matches']),
   ).toBeFalsy()
 
-  expect(
-    checkSpecificTemplatePropsAreModified(['pretranslate_100']),
-  ).toBeTruthy()
+  expect(checkSpecificTemplatePropsAreModified(['pretranslate'])).toBeTruthy()
 })
 
 test('Cattool page', async () => {

@@ -1,11 +1,24 @@
-import React, {useCallback, useContext, useMemo, useState} from 'react'
+import React, {
+  createRef,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from 'react'
 import {XliffSettingsContext} from './XliffSettingsContext'
 import {XliffRulesRow} from './XliffRulesRow'
 import {Accordion} from '../../../../common/Accordion/Accordion'
 import xliffOptions from '../../defaultTemplates/xliffOptions.json'
-import {Button, BUTTON_TYPE} from '../../../../common/Button/Button'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../../../../common/Button/Button'
 import IconAdd from '../../../../../../img/icons/IconAdd'
 import {isEqual} from 'lodash'
+import InfoIcon from '../../../../../../img/icons/InfoIcon'
+import Tooltip from '../../../../common/Tooltip'
 
 export const Xliff12 = () => {
   const {currentTemplate, modifyingCurrentTemplate, templates} =
@@ -105,6 +118,26 @@ export const Xliff12 = () => {
         <div className="xliff-settings-table">
           <span className="xliff-settings-column-name xliff-settings-column-name-state">
             State / State qualifier
+            <Tooltip
+              content={
+                <>
+                  Matches segment attributes in the XLIFF file. <b>No state</b>{' '}
+                  applies to segments without a state attribute where target
+                  content differs from source.
+                  <br />
+                  It also acts as the fallback rule for any state not explicitly
+                  defined above.
+                </>
+              }
+            >
+              <Button
+                ref={createRef()}
+                mode={BUTTON_MODE.GHOST}
+                size={BUTTON_SIZE.ICON_SMALL}
+              >
+                <InfoIcon size={16} />
+              </Button>
+            </Tooltip>
           </span>
           <span className="xliff-settings-column-name">Analysis behavior</span>
           <span className="xliff-settings-column-name xliff-settings-column-name-editor">

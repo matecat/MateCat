@@ -281,7 +281,7 @@ const SegmentActions = {
       !segment.splitted &&
       segment.modified &&
       issues.length === 0 &&
-      !segment.ice_locked &&
+      !segment.locked &&
       isMandatoryRevisionIssues
     ) {
       SegmentActions.openIssuesPanel({sid: segment.sid}, true)
@@ -612,8 +612,8 @@ const SegmentActions = {
         position: 'tc',
         text: (
           <>
-            All segments are in <b>read-only mode</b> because this job is
-            under review.
+            All segments are in <b>read-only mode</b> because this job is under
+            review.
             {showUndo && (
               <p className="warning-call-to">
                 <a
@@ -632,17 +632,17 @@ const SegmentActions = {
     }
     if (TextUtils.justSelecting('readonly')) return
 
-    const locked = !segment.unlocked && SegmentUtils.isIceSegment(segment)
+    const locked = !segment.unlocked && SegmentUtils.isLockedSegment(segment)
     if (locked) {
       ModalsActions.showModalComponent(
         MODAL_KEY.ALERT,
         {
           text:
-            "Segment is locked (in-context exact match) and shouldn't be edited. " +
+            "Segment is locked and shouldn't be edited. " +
             'If you must edit it, click on the padlock icon to the left of the segment. ' +
             'The owner of the project will be notified of any edits.',
         },
-        'Ice Matches',
+        'Locked segment',
       )
       return
     }
@@ -1487,7 +1487,7 @@ const SegmentActions = {
         ModalsActions.showModalComponent(
           MODAL_KEY.UNLOCK_ALL_SEGMENTS,
           {},
-          'Unlock all 101% segments',
+          'Unlock all locked segments',
         )
       }
     }
