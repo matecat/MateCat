@@ -1,0 +1,43 @@
+@use '../../tokens/colors';
+@use 'commons/variables';
+
+/* Maintenance and configuration-missing pages (body.offline) */
+
+.offline .claim {
+  margin: 0 auto;
+  padding-top: 70px;
+  text-align: center;
+
+  h1,
+  h2,
+  h3 {
+    line-height: 1.3;
+  }
+
+  h1 {
+    margin: 0.67em 0;
+    font-size: 35px;
+  }
+
+  h2 {
+    margin: 0.83em 0;
+    font-size: 30px;
+    font-weight: normal;
+    color: colors.$grey400;
+  }
+
+  h3 {
+    margin-top: 1em;
+    font-size: variables.$font-size-base;
+  }
+
+  span {
+    font-weight: bold;
+    color: colors.$blue800;
+  }
+}
+
+.offline .cat {
+  height: 215px;
+  background: url(/public/img/offline.png) no-repeat center center;
+}

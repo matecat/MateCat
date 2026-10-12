@@ -286,7 +286,7 @@ class Filters
     /**
      * Logs every conversion made. In order to make this method work, ensure
      * you have the matecat_conversions_log database properly configured.
-     * See /lib/Model/matecat_conversions_log.sql
+     * See /INSTALL/matecat_conversions_log.sql
      *
      * @param array<string, mixed> $response The response array returned by sendToFilters().
      * @param bool $toXliff True if the conversion was the source→XLIFF, false for XLIFF→target.

@@ -15,6 +15,7 @@ use Model\Projects\ProjectTemplateDao;
 use Model\Projects\ProjectTemplateStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
@@ -67,7 +68,7 @@ class ProjectTemplateControllerTest extends AbstractTest
         $this->setControllerUser(99);
     }
 
-    private const VALID_JSON = '{"name":"Test","id_team":1,"pretranslate_100":true,"get_public_matches":true}';
+    private const VALID_JSON = '{"name":"Test","id_team":1,"pretranslate":{"match_101":{"enabled":true,"status":"APPROVED","lock":true},"match_100":{"enabled":true,"status":"TRANSLATED","lock":false}},"get_public_matches":true}';
 
     private function setControllerUser(?int $uid): void
     {
@@ -454,7 +455,7 @@ class ProjectTemplateControllerTest extends AbstractTest
     {
         $this->setJsonContentType();
         // Pass JSON with an unknown property — schema has additionalProperties:false
-        $this->requestStub->method('body')->willReturn('{"name":"Test","id_team":1,"pretranslate_100":true,"get_public_matches":true,"__invalid_extra__":true}');
+        $this->requestStub->method('body')->willReturn('{"name":"Test","id_team":1,"pretranslate":{"match_101":{"enabled":true,"status":"APPROVED","lock":true},"match_100":{"enabled":true,"status":"TRANSLATED","lock":false}},"get_public_matches":true,"__invalid_extra__":true}');
 
         $this->responseMock->expects($this->once())
             ->method('code')
@@ -468,12 +469,66 @@ class ProjectTemplateControllerTest extends AbstractTest
     }
 
     #[Test]
+    public function createPassesTheNestedPretranslateObjectToTheDao(): void
+    {
+        $this->setJsonContentType();
+        $this->requestStub->method('body')->willReturn(self::VALID_JSON);
+
+        $this->daoMock->expects($this->once())
+            ->method('createFromJSON')
+            ->with($this->callback(static fn(object $decoded): bool => $decoded->pretranslate->match_101->enabled === true
+                && $decoded->pretranslate->match_101->status === 'APPROVED'
+                && $decoded->pretranslate->match_101->lock === true
+                && $decoded->pretranslate->match_100->enabled === true
+                && $decoded->pretranslate->match_100->status === 'TRANSLATED'
+                && $decoded->pretranslate->match_100->lock === false))
+            ->willReturn(new ProjectTemplateStruct());
+
+        $this->controller->create();
+    }
+
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function invalidPretranslateBodies(): array
+    {
+        $head = '{"name":"Test","id_team":1,"get_public_matches":true,';
+
+        return [
+            'flat pretranslate_100 key' => [$head . '"pretranslate_100":true}'],
+            'flat key beside the nested object' => [$head . '"pretranslate":{"match_101":{"enabled":true,"status":"APPROVED","lock":true},"match_100":{"enabled":true,"status":"TRANSLATED","lock":false}},"pretranslate_101_lock":true}'],
+            'pretranslate missing' => [$head . '"tm_prioritization":true}'],
+            'match_100 missing' => [$head . '"pretranslate":{"match_101":{"enabled":true}}}'],
+            'enabled missing' => [$head . '"pretranslate":{"match_101":{"lock":true},"match_100":{"enabled":false}}}'],
+            'unknown member in a match' => [$head . '"pretranslate":{"match_101":{"enabled":true,"locked":true},"match_100":{"enabled":false}}}'],
+            'unknown match' => [$head . '"pretranslate":{"match_101":{"enabled":true},"match_100":{"enabled":false},"match_99":{"enabled":true}}}'],
+            'status out of enum' => [$head . '"pretranslate":{"match_101":{"enabled":true,"status":"draft"},"match_100":{"enabled":false}}}'],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('invalidPretranslateBodies')]
+    public function createReturns400ForAnInvalidPretranslateShape(string $body): void
+    {
+        $this->setJsonContentType();
+        $this->requestStub->method('body')->willReturn($body);
+
+        $this->daoMock->expects($this->never())->method('createFromJSON');
+
+        $this->responseMock->expects($this->once())
+            ->method('code')
+            ->with(400);
+
+        $this->controller->create();
+    }
+
+    #[Test]
     public function updateReturns400WhenJsonFailsSchemaValidation(): void
     {
         $this->setJsonContentType();
         $this->requestStub->method('param')->willReturn('5');
         // Pass JSON with an unknown property — schema has additionalProperties:false
-        $this->requestStub->method('body')->willReturn('{"name":"Test","id_team":1,"pretranslate_100":true,"get_public_matches":true,"__invalid_extra__":true}');
+        $this->requestStub->method('body')->willReturn('{"name":"Test","id_team":1,"pretranslate":{"match_101":{"enabled":true,"status":"APPROVED","lock":true},"match_100":{"enabled":true,"status":"TRANSLATED","lock":false}},"get_public_matches":true,"__invalid_extra__":true}');
 
         $this->responseMock->expects($this->once())
             ->method('code')

@@ -20,8 +20,10 @@ class ProjectTemplateStructTest extends AbstractTest
         $obj->is_default                 = true;
         $obj->id_team                    = 99;
         $obj->segmentation_rule          = (object) ['name' => 'custom', 'value' => 'abc'];
-        $obj->pretranslate_100           = true;
-        $obj->pretranslate_101           = false;
+        $obj->pretranslate                = (object) [
+            'match_101' => (object) ['enabled' => false],
+            'match_100' => (object) ['enabled' => true],
+        ];
         $obj->tm_prioritization          = true;
         $obj->dialect_strict             = false;
         $obj->public_tm_penalty          = 5;
@@ -121,13 +123,15 @@ class ProjectTemplateStructTest extends AbstractTest
         $obj                     = new stdClass();
         $obj->name               = 'Minimal';
         $obj->id_team            = 99;
-        $obj->pretranslate_100   = true;
+        $obj->pretranslate       = (object)[
+            'match_101' => (object)['enabled' => true],
+            'match_100' => (object)['enabled' => false],
+        ];
         $obj->get_public_matches = true;
 
         $struct = new ProjectTemplateStruct();
         $struct->hydrateFromJSON($obj, 7);
 
-        self::assertFalse($struct->pretranslate_101);
         self::assertFalse($struct->tm_prioritization);
         self::assertFalse($struct->dialect_strict);
         self::assertSame(0, $struct->payable_rate_template_id);
@@ -367,7 +371,7 @@ class ProjectTemplateStructTest extends AbstractTest
             'payable_rate_template_id', 'qa_model_template_id',
             'filters_template_id', 'xliff_config_template_id',
             'get_public_matches', 'public_tm_penalty',
-            'pretranslate_100', 'pretranslate_101',
+            'pretranslate',
             'tm_prioritization', 'dialect_strict',
             'mt_quality_value_in_editor',
             'character_counter_count_tags', 'character_counter_mode',

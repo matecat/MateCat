@@ -200,27 +200,27 @@ $csp = str_replace('${x_self_ajax_location_hosts}', $x_self_ajax_location_hosts,
       $(document).ready(function() {
         var hash = location.hash;
 
-        window.onload = () => {
-          window.ui = SwaggerUIBundle({
-            spec: location.host,
-            url: '/public/api/swagger-source.json',
-            dom_id: '#swagger-ui-container',
-            supportedSubmitMethods: ['get', 'post', 'put', 'delete'],
-            docExpansion: 'none',
-            deepLinking: true,
-            presets: [
-              SwaggerUIBundle.presets.apis,
-              SwaggerUIStandalonePreset,
-            ],
-            plugins: [
-              SwaggerUIBundle.plugins.DownloadUrl,
-            ],
-            onComplete: function() {
-              generateSwaggerMenu();
-              bindMenuEvents(hash);
-            },
-          });
-        };
+        // Not deferred to window.onload: jQuery 3 runs ready callbacks asynchronously, so
+        // the load event can fire first and the handler would never run.
+        window.ui = SwaggerUIBundle({
+          spec: location.host,
+          url: '/public/api/swagger-source.json',
+          dom_id: '#swagger-ui-container',
+          supportedSubmitMethods: ['get', 'post', 'put', 'delete'],
+          docExpansion: 'none',
+          deepLinking: true,
+          presets: [
+            SwaggerUIBundle.presets.apis,
+            SwaggerUIStandalonePreset,
+          ],
+          plugins: [
+            SwaggerUIBundle.plugins.DownloadUrl,
+          ],
+          onComplete: function() {
+            generateSwaggerMenu();
+            bindMenuEvents(hash);
+          },
+        });
       });
 
       /*]]>*/

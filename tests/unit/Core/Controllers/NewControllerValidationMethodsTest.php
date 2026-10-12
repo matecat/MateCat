@@ -3,6 +3,7 @@
 namespace Matecat\Core\Controllers;
 
 use Controller\API\V1\NewController;
+use DomainException;
 use Exception;
 use InvalidArgumentException;
 use Klein\Request;
@@ -17,6 +18,7 @@ use Model\PayableRates\CustomPayableRateStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
+use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
 
 class NewControllerValidationMethodsTest extends AbstractTest
 {
@@ -613,6 +615,21 @@ class NewControllerValidationMethodsTest extends AbstractTest
         $this->assertInstanceOf(MTQEWorkflowParams::class, $result);
     }
 
+    #[Test]
+    public function validateMTQEParametersOrDefault_accepts_lock_best_quality_mt(): void
+    {
+        $result = $this->invokeMethod('validateMTQEParametersOrDefault', [null, '{"lock_best_quality_mt":true}']);
+        $this->assertInstanceOf(MTQEWorkflowParams::class, $result);
+        $this->assertTrue($result->lock_best_quality_mt);
+    }
+
+    #[Test]
+    public function validateMTQEParametersOrDefault_rejects_a_non_boolean_lock_best_quality_mt(): void
+    {
+        $this->expectException(JSONValidatorException::class);
+        $this->invokeMethod('validateMTQEParametersOrDefault', [null, '{"lock_best_quality_mt":"yes"}']);
+    }
+
     // ──────────────── validateMTQEPayableRateBreakdownsOrDefault() ────────────────
 
     #[Test]
@@ -644,5 +661,28 @@ class NewControllerValidationMethodsTest extends AbstractTest
     {
         $result = $this->invokeMethod('validateXliffParameters', ['{}', null]);
         $this->assertIsArray($result);
+    }
+
+    #[Test]
+    public function validateXliffParameters_locked_draft_rule_throws_400(): void
+    {
+        $this->expectException(DomainException::class);
+        $this->expectExceptionCode(400);
+        $this->expectExceptionMessage('A rule with editor status DRAFT can not be locked.');
+        $this->invokeMethod('validateXliffParameters', [
+            json_encode(['xliff20' => [['states' => ['translated'], 'analysis' => 'pre-translated', 'editor' => 'draft', 'lock' => true]]]),
+            null,
+        ]);
+    }
+
+    #[Test]
+    public function validateXliffParameters_keeps_a_locked_rule(): void
+    {
+        $result = $this->invokeMethod('validateXliffParameters', [
+            json_encode(['xliff12' => [['states' => ['final'], 'analysis' => 'pre-translated', 'editor' => 'approved2', 'lock' => true]]]),
+            null,
+        ]);
+
+        $this->assertTrue($result['xliff12'][0]['lock']);
     }
 }

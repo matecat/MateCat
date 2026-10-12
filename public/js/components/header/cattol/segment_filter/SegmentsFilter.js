@@ -14,8 +14,10 @@ import ChevronLeft from '../../../../../img/icons/ChevronLeft'
 import ChevronRight from '../../../../../img/icons/ChevronRight'
 
 const MORE_FILTERS = [
-  {value: 'ice', label: '101%'},
-  {value: 'unlocked', label: 'Not 101%'},
+  {value: 'locked', label: 'Locked'},
+  {value: 'modified_locked', label: 'Locked, modified'},
+  {value: 'unlocked', label: 'Not locked'},
+  {value: 'ice', label: '101% matches'},
   {value: 'modified_ice', label: 'Modified 101%'},
   {value: 'repetitions', label: 'Repetitions'},
   {value: 'mt', label: 'MT'},
@@ -40,22 +42,52 @@ const DEFAULT_STATE = {
 }
 
 const SegmentsFilter = ({active}) => {
-  const [selectedStatus, setSelectedStatus] = useState(DEFAULT_STATE.selectedStatus)
+  const [selectedStatus, setSelectedStatus] = useState(
+    DEFAULT_STATE.selectedStatus,
+  )
   const [samplingType, setSamplingType] = useState(DEFAULT_STATE.samplingType)
   const [samplingSize, setSamplingSize] = useState(DEFAULT_STATE.samplingSize)
   const [filtering, setFiltering] = useState(DEFAULT_STATE.filtering)
-  const [filteredCount, setFilteredCount] = useState(DEFAULT_STATE.filteredCount)
-  const [segmentsArray, setSegmentsArray] = useState(DEFAULT_STATE.segmentsArray)
-  const [dataSampleEnabled, setDataSampleEnabled] = useState(DEFAULT_STATE.dataSampleEnabled)
-  const [filterSubmitted, setFilterSubmitted] = useState(DEFAULT_STATE.filterSubmitted)
-  const [revisionNumber, setRevisionNumber] = useState(DEFAULT_STATE.revisionNumber)
+  const [filteredCount, setFilteredCount] = useState(
+    DEFAULT_STATE.filteredCount,
+  )
+  const [segmentsArray, setSegmentsArray] = useState(
+    DEFAULT_STATE.segmentsArray,
+  )
+  const [dataSampleEnabled, setDataSampleEnabled] = useState(
+    DEFAULT_STATE.dataSampleEnabled,
+  )
+  const [filterSubmitted, setFilterSubmitted] = useState(
+    DEFAULT_STATE.filterSubmitted,
+  )
+  const [revisionNumber, setRevisionNumber] = useState(
+    DEFAULT_STATE.revisionNumber,
+  )
 
   const filterWrapperRef = useRef(null)
-  const stateRef = useRef({selectedStatus, samplingType, samplingSize, dataSampleEnabled, revisionNumber})
+  const stateRef = useRef({
+    selectedStatus,
+    samplingType,
+    samplingSize,
+    dataSampleEnabled,
+    revisionNumber,
+  })
 
   useEffect(() => {
-    stateRef.current = {selectedStatus, samplingType, samplingSize, dataSampleEnabled, revisionNumber}
-  }, [selectedStatus, samplingType, samplingSize, dataSampleEnabled, revisionNumber])
+    stateRef.current = {
+      selectedStatus,
+      samplingType,
+      samplingSize,
+      dataSampleEnabled,
+      revisionNumber,
+    }
+  }, [
+    selectedStatus,
+    samplingType,
+    samplingSize,
+    dataSampleEnabled,
+    revisionNumber,
+  ])
 
   const resetState = useCallback(() => {
     setSelectedStatus(DEFAULT_STATE.selectedStatus)
@@ -70,7 +102,13 @@ const SegmentsFilter = ({active}) => {
   }, [])
 
   const doSubmitFilter = useCallback(() => {
-    const {selectedStatus: status, samplingType: type, samplingSize: size, dataSampleEnabled: sampleEnabled, revisionNumber: revNum} = stateRef.current
+    const {
+      selectedStatus: status,
+      samplingType: type,
+      samplingSize: size,
+      dataSampleEnabled: sampleEnabled,
+      revisionNumber: revNum,
+    } = stateRef.current
     let sample
     if (type) {
       sample = sampleEnabled ? {type, size} : {type}
@@ -78,7 +116,12 @@ const SegmentsFilter = ({active}) => {
     if (sample || status) {
       SegmentFilterUtils.filterSubmit(
         {status, sample, revision_number: revNum},
-        {samplingType: type, samplingSize: size, selectedStatus: status, dataSampleEnabled: sampleEnabled},
+        {
+          samplingType: type,
+          samplingSize: size,
+          selectedStatus: status,
+          dataSampleEnabled: sampleEnabled,
+        },
       )
       setFilterSubmitted(true)
     } else {
@@ -87,24 +130,31 @@ const SegmentsFilter = ({active}) => {
     }
   }, [])
 
-  const setFilter = useCallback((data, state) => {
-    if (isUndefined(state)) {
-      setFilteredCount(data.count)
-      setFiltering(true)
-      setSegmentsArray(data.segment_ids)
-      setFilterSubmitted(false)
-    } else {
-      setFilteredCount(data.count)
-      setFiltering(true)
-      setSegmentsArray(data.segment_ids)
-      setFilterSubmitted(false)
-      if (state.selectedStatus !== undefined) setSelectedStatus(state.selectedStatus)
-      if (state.samplingType !== undefined) setSamplingType(state.samplingType)
-      if (state.samplingSize !== undefined) setSamplingSize(state.samplingSize)
-      if (state.dataSampleEnabled !== undefined) setDataSampleEnabled(state.dataSampleEnabled)
-      setTimeout(doSubmitFilter, 100)
-    }
-  }, [doSubmitFilter])
+  const setFilter = useCallback(
+    (data, state) => {
+      if (isUndefined(state)) {
+        setFilteredCount(data.count)
+        setFiltering(true)
+        setSegmentsArray(data.segment_ids)
+        setFilterSubmitted(false)
+      } else {
+        setFilteredCount(data.count)
+        setFiltering(true)
+        setSegmentsArray(data.segment_ids)
+        setFilterSubmitted(false)
+        if (state.selectedStatus !== undefined)
+          setSelectedStatus(state.selectedStatus)
+        if (state.samplingType !== undefined)
+          setSamplingType(state.samplingType)
+        if (state.samplingSize !== undefined)
+          setSamplingSize(state.samplingSize)
+        if (state.dataSampleEnabled !== undefined)
+          setDataSampleEnabled(state.dataSampleEnabled)
+        setTimeout(doSubmitFilter, 100)
+      }
+    },
+    [doSubmitFilter],
+  )
 
   const filterSegmentsError = useCallback(() => {
     setFilterSubmitted(false)
@@ -112,16 +162,35 @@ const SegmentsFilter = ({active}) => {
 
   useEffect(() => {
     const segmentFilterData = SegmentFilterUtils.getStoredState()
-    if (SegmentFilterUtils.enabled() && segmentFilterData.reactState && segmentFilterData.open) {
+    if (
+      SegmentFilterUtils.enabled() &&
+      segmentFilterData.reactState &&
+      segmentFilterData.open
+    ) {
       SegmentFilterUtils.openFilter()
     }
     CatToolStore.addListener(CatToolConstants.SET_SEGMENT_FILTER, setFilter)
-    CatToolStore.addListener(CatToolConstants.SEGMENT_FILTER_ERROR, filterSegmentsError)
-    CatToolStore.addListener(CatToolConstants.RELOAD_SEGMENT_FILTER, doSubmitFilter)
+    CatToolStore.addListener(
+      CatToolConstants.SEGMENT_FILTER_ERROR,
+      filterSegmentsError,
+    )
+    CatToolStore.addListener(
+      CatToolConstants.RELOAD_SEGMENT_FILTER,
+      doSubmitFilter,
+    )
     return () => {
-      CatToolStore.removeListener(CatToolConstants.SET_SEGMENT_FILTER, setFilter)
-      CatToolStore.removeListener(CatToolConstants.SEGMENT_FILTER_ERROR, filterSegmentsError)
-      CatToolStore.removeListener(CatToolConstants.RELOAD_SEGMENT_FILTER, doSubmitFilter)
+      CatToolStore.removeListener(
+        CatToolConstants.SET_SEGMENT_FILTER,
+        setFilter,
+      )
+      CatToolStore.removeListener(
+        CatToolConstants.SEGMENT_FILTER_ERROR,
+        filterSegmentsError,
+      )
+      CatToolStore.removeListener(
+        CatToolConstants.RELOAD_SEGMENT_FILTER,
+        doSubmitFilter,
+      )
     }
   }, [setFilter, filterSegmentsError, doSubmitFilter])
 
@@ -134,49 +203,69 @@ const SegmentsFilter = ({active}) => {
     }
   }, [active])
 
-  const handleFilterSelectChanged = useCallback((value) => {
-    let revNum = null
-    if (value === 'APPROVED-2') {
-      revNum = 2
-      value = SEGMENTS_STATUS.APPROVED2
-    }
+  const handleFilterSelectChanged = useCallback(
+    (value) => {
+      let revNum = null
+      if (value === 'APPROVED-2') {
+        revNum = 2
+        value = SEGMENTS_STATUS.APPROVED2
+      }
 
-    const isTodoConflict =
-      (!config.isReview && value === 'TRANSLATED' && stateRef.current.samplingType === 'todo') ||
-      (config.isReview && value === 'APPROVED' && stateRef.current.samplingType === 'todo')
+      const isTodoConflict =
+        (!config.isReview &&
+          value === 'TRANSLATED' &&
+          stateRef.current.samplingType === 'todo') ||
+        (config.isReview &&
+          value === 'APPROVED' &&
+          stateRef.current.samplingType === 'todo')
 
-    if (isTodoConflict) {
-      setSamplingType(undefined)
-    }
+      if (isTodoConflict) {
+        setSamplingType(undefined)
+      }
 
-    setSelectedStatus(value)
-    setRevisionNumber(revNum)
-    setTimeout(doSubmitFilter, 100)
-  }, [doSubmitFilter])
+      setSelectedStatus(value)
+      setRevisionNumber(revNum)
+      setTimeout(doSubmitFilter, 100)
+    },
+    [doSubmitFilter],
+  )
 
-  const handleMoreFilterSelectChanged = useCallback((value) => {
-    const isTodoConflict =
-      (!config.isReview && stateRef.current.selectedStatus === 'TRANSLATED' && value === 'todo') ||
-      (config.isReview && stateRef.current.selectedStatus === 'APPROVED' && value === 'todo')
+  const handleMoreFilterSelectChanged = useCallback(
+    (value) => {
+      const isTodoConflict =
+        (!config.isReview &&
+          stateRef.current.selectedStatus === 'TRANSLATED' &&
+          value === 'todo') ||
+        (config.isReview &&
+          stateRef.current.selectedStatus === 'APPROVED' &&
+          value === 'todo')
 
-    if (isTodoConflict) {
-      setSelectedStatus('')
-    }
+      if (isTodoConflict) {
+        setSelectedStatus('')
+      }
 
-    setSamplingType(value)
-    setTimeout(doSubmitFilter, 100)
-  }, [doSubmitFilter])
+      setSamplingType(value)
+      setTimeout(doSubmitFilter, 100)
+    },
+    [doSubmitFilter],
+  )
 
-  const handleDataSampleChange = useCallback((value) => {
-    setSamplingType(value)
-    setTimeout(doSubmitFilter, 100)
-  }, [doSubmitFilter])
+  const handleDataSampleChange = useCallback(
+    (value) => {
+      setSamplingType(value)
+      setTimeout(doSubmitFilter, 100)
+    },
+    [doSubmitFilter],
+  )
 
-  const handleClearClick = useCallback((e) => {
-    e.preventDefault()
-    SegmentFilterUtils.clearFilter()
-    resetState()
-  }, [resetState])
+  const handleClearClick = useCallback(
+    (e) => {
+      e.preventDefault()
+      SegmentFilterUtils.clearFilter()
+      resetState()
+    },
+    [resetState],
+  )
 
   const handleToggleChange = useCallback((checked) => {
     setDataSampleEnabled(checked)
@@ -195,15 +284,21 @@ const SegmentsFilter = ({active}) => {
     }
   }, [filtering, filteredCount])
 
-  const handleSelectAll = useCallback((event) => {
-    event.stopPropagation()
-    SegmentActions.setBulkSelectionSegments(segmentsArray.slice(0))
-  }, [segmentsArray])
+  const handleSelectAll = useCallback(
+    (event) => {
+      event.stopPropagation()
+      SegmentActions.setBulkSelectionSegments(segmentsArray.slice(0))
+    },
+    [segmentsArray],
+  )
 
-  const handleUnlockAll = useCallback((event) => {
-    event.stopPropagation()
-    SegmentActions.unlockSegments(segmentsArray.slice(0))
-  }, [segmentsArray])
+  const handleUnlockAll = useCallback(
+    (event) => {
+      event.stopPropagation()
+      SegmentActions.unlockSegments(segmentsArray.slice(0))
+    },
+    [segmentsArray],
+  )
 
   if (!active) return null
 
@@ -234,7 +329,8 @@ const SegmentsFilter = ({active}) => {
     id: item.value,
   }))
 
-  const buttonArrowsClass = filtering && filteredCount > 1 ? 'qa-arrows-enabled' : 'qa-arrows-disbled'
+  const buttonArrowsClass =
+    filtering && filteredCount > 1 ? 'qa-arrows-enabled' : 'qa-arrows-disbled'
   const statusFilterClass = selectedStatus !== '' ? 'filtered' : 'not-filtered'
   const filterClassEnabled = dataSampleEnabled
     ? 'disabled'
@@ -252,7 +348,10 @@ const SegmentsFilter = ({active}) => {
                 className={'filter-status ' + statusFilterClass}
                 options={statusOptions}
                 onSelect={(value) => handleFilterSelectChanged(value.id)}
-                activeOption={statusOptions.find((item) => item.id === selectedStatus) || undefined}
+                activeOption={
+                  statusOptions.find((item) => item.id === selectedStatus) ||
+                  undefined
+                }
                 placeholder="Segment status"
                 checkSpaceToReverse={false}
                 showResetButton={true}
@@ -265,7 +364,10 @@ const SegmentsFilter = ({active}) => {
                 className={'filter-activities ' + filterClassEnabled}
                 options={moreOptions}
                 onSelect={(value) => handleMoreFilterSelectChanged(value.id)}
-                activeOption={moreOptions.find((item) => item.id === samplingType) || undefined}
+                activeOption={
+                  moreOptions.find((item) => item.id === samplingType) ||
+                  undefined
+                }
                 placeholder="Others"
                 checkSpaceToReverse={false}
                 showResetButton={true}
@@ -303,12 +405,16 @@ const SegmentsFilter = ({active}) => {
                 </div>
                 {filteredCount > 0 && (
                   <div className="select-all-filter">
-                    <button onClick={handleSelectAll}>Select all filtered segments</button>
+                    <button onClick={handleSelectAll}>
+                      Select all filtered segments
+                    </button>
                   </div>
                 )}
                 {filteredCount > 0 && samplingType === 'ice' && (
                   <div className="select-all-filter">
-                    <button onClick={handleUnlockAll}>Unlock all filtered segments</button>
+                    <button onClick={handleUnlockAll}>
+                      Unlock all filtered segments
+                    </button>
                   </div>
                 )}
               </div>
@@ -318,20 +424,36 @@ const SegmentsFilter = ({active}) => {
           <div className="filter-navigator">
             <div className="filter-actions">
               {filtering && filteredCount > 0 && !filterSubmitted && (
-                <div className={'filter-arrows filter-arrows-enabled ' + buttonArrowsClass}>
+                <div
+                  className={
+                    'filter-arrows filter-arrows-enabled ' + buttonArrowsClass
+                  }
+                >
                   <div className="label-filters labl">
                     <b>{filteredCount}</b> Filtered segments
                   </div>
-                  <Button size={BUTTON_SIZE.ICON_STANDARD} mode={BUTTON_MODE.OUTLINE} onClick={handleMoveUp}>
+                  <Button
+                    size={BUTTON_SIZE.ICON_STANDARD}
+                    mode={BUTTON_MODE.OUTLINE}
+                    onClick={handleMoveUp}
+                  >
                     <ChevronLeft />
                   </Button>
-                  <Button onClick={handleMoveDown} mode={BUTTON_MODE.OUTLINE} size={BUTTON_SIZE.ICON_STANDARD}>
+                  <Button
+                    onClick={handleMoveDown}
+                    mode={BUTTON_MODE.OUTLINE}
+                    size={BUTTON_SIZE.ICON_STANDARD}
+                  >
                     <ChevronRight />
                   </Button>
                 </div>
               )}
               {filtering && !filterSubmitted && filteredCount === 0 && (
-                <div className={'filter-arrows filter-arrows-enabled ' + buttonArrowsClass}>
+                <div
+                  className={
+                    'filter-arrows filter-arrows-enabled ' + buttonArrowsClass
+                  }
+                >
                   <div className="label-filters labl">No segments found</div>
                 </div>
               )}

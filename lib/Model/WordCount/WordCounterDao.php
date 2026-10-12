@@ -126,7 +126,7 @@ class WordCounterDao extends AbstractDao
          *
          * In the segment_translations table we always have the correct value for eq_word_count, such value is taken by multiplying the raw word count value by the payable rate discount ( / 100 )
          *
-         * In the case of pre-translation, the rows in this table are marked as ICEs, set as locked = 0,  and the equivalent word count is set as previous described.
+         * In the case of pre-translation, the rows in this table are marked as ICEs, locked only when the matching XLIFF rule asks for it, and the equivalent word count is set as previous described.
          *
          * But the pre-translations must be shown in the UI as part of the TOTAL ( this does not apply to the true ICEs because they will set everytime as equivalent even if their values is Zero ).
          *

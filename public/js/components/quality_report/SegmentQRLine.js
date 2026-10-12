@@ -94,12 +94,13 @@ const SegmentQRLine = ({
         <a className="segment-content qr-segment-title">
           <b onClick={onClickLabel}>{label}</b>
           {showDiffButton ? (
-            <Button size={BUTTON_SIZE.SMALL}
+            <Button
+              size={BUTTON_SIZE.SMALL}
               className={diffActive ? 'active' : ''}
               onClick={onClickDiff}
               title="Show diff"
             >
-              {diffActive?  <EyeOn size={16} /> : <EyeOff size={16} />}
+              {diffActive ? <EyeOn size={16} /> : <EyeOff size={16} />}
             </Button>
           ) : null}
         </a>
@@ -162,12 +163,14 @@ const SegmentQRLine = ({
           </div>
         </div>
       ) : null}
-      {!(showIceMatchInfo && segment.get('ice_locked')) &&
+      {!(
+        showIceMatchInfo && segment.get('match_type').toUpperCase() === 'ICE'
+      ) &&
       !showSuggestionSource &&
       !showSegmentWords &&
       !tte &&
       !showIsPretranslated ? (
-        <div className="segment-content qr-spec" />
+        <div className="segment-content qr-spec" data-testid="qr-spacer" />
       ) : null}
     </div>
   )

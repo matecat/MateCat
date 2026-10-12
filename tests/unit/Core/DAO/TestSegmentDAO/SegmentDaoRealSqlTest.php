@@ -27,7 +27,7 @@ use Utils\Constants\TranslationStatus;
  * A rich FK graph is built per test: project -> job (with password + first/last segment bounds)
  * -> file -> files_job -> segments -> segment_translations (varied status/match_type/locked) ->
  * segment_translation_events (varied source_page) -> qa_entries (varied category/severity) plus
- * segment_revisions / segment_translations_splits / segment_original_data / files_parts.
+ * segment_translations_splits / segment_original_data / files_parts.
  *
  * All allocated ids for assignable / direct-insert rows live >= ASSIGNABLE_ID_FLOOR (M-2);
  * AUTO_INCREMENT rows created via the builder are auto-cleaned. Rows the test inserts directly
@@ -70,7 +70,6 @@ class SegmentDaoRealSqlTest extends AbstractTest
             'segment_translation_events',
             'segment_translations_splits',
             'segment_original_data',
-            'segment_revisions',
             'qa_categories',
             'qa_entries',
         ];
@@ -96,7 +95,6 @@ class SegmentDaoRealSqlTest extends AbstractTest
             // Direct-insert rows (rows the builder did not track) — scoped to this job/segments.
             // Delete child rows first, then let the builder remove its tracked parents in
             // reverse insertion order.
-            $conn->exec("DELETE FROM segment_revisions WHERE id_job = {$this->idJob}");
             $conn->exec("DELETE FROM segment_original_data WHERE id_segment >= " . self::ASSIGNABLE_ID_FLOOR);
             $conn->exec("DELETE FROM segment_translations WHERE id_job = {$this->idJob}");
             $conn->exec("DELETE FROM segment_translation_events WHERE id_job = {$this->idJob}");
@@ -529,6 +527,47 @@ class SegmentDaoRealSqlTest extends AbstractTest
         $this->assertContains($this->segIds[0], $sids);
     }
 
+    /**
+     * Four rows crossing the locked flag with the ICE match type, so a check that still
+     * required both columns shows up as a wrong `locked` on the 100% or the unlocked ICE row.
+     */
+    private function seedLockedMatrix(): void
+    {
+        $this->insertTranslation($this->segIds[0], TranslationStatus::STATUS_APPROVED, ['match_type' => 'ICE', 'locked' => 1]);
+        $this->insertTranslation($this->segIds[1], TranslationStatus::STATUS_TRANSLATED, ['match_type' => '100%', 'locked' => 1]);
+        $this->insertTranslation($this->segIds[2], TranslationStatus::STATUS_TRANSLATED, ['match_type' => 'ICE', 'locked' => 0]);
+        $this->insertTranslation($this->segIds[3], TranslationStatus::STATUS_TRANSLATED, ['match_type' => 'TM', 'locked' => 0]);
+    }
+
+    /**
+     * @return array<int, bool> expected `locked` keyed by segment id
+     */
+    private function expectedLockedMatrix(): array
+    {
+        return [
+            $this->segIds[0] => true,
+            $this->segIds[1] => true,
+            $this->segIds[2] => false,
+            $this->segIds[3] => false,
+        ];
+    }
+
+    #[Test]
+    public function getSegmentsForQr_locked_reflects_the_locked_column_alone(): void
+    {
+        $this->seedLockedMatrix();
+
+        $rows = $this->dao->getSegmentsForQr(array_slice($this->segIds, 0, 4), $this->idJob, $this->password);
+
+        $locked = [];
+        foreach ($rows as $row) {
+            $locked[(int)$row->sid] = $row->locked;
+        }
+        ksort($locked);
+
+        $this->assertSame($this->expectedLockedMatrix(), $locked);
+    }
+
     // =========================================================================================
     // createList
     // =========================================================================================
@@ -652,6 +691,22 @@ class SegmentDaoRealSqlTest extends AbstractTest
         ]);
 
         $this->assertNotEmpty($rows);
+    }
+
+    #[Test]
+    public function getPaginationSegments_locked_reflects_the_locked_column_alone(): void
+    {
+        $this->seedLockedMatrix();
+
+        $rows = $this->dao->getPaginationSegments($this->jobStruct, 50, $this->segIds[0], 'center');
+
+        $locked = [];
+        foreach ($rows as $row) {
+            $locked[(int)$row->sid] = $row->locked;
+        }
+        ksort($locked);
+
+        $this->assertSame($this->expectedLockedMatrix(), $locked);
     }
 
     // =========================================================================================

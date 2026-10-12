@@ -49,7 +49,7 @@ export const TEMPLATE_PROPS_BY_TAB = {
     SCHEMA_KEYS.tm,
     SCHEMA_KEYS.getPublicMatches,
     SCHEMA_KEYS.publicTmPenalty,
-    SCHEMA_KEYS.pretranslate100,
+    SCHEMA_KEYS.pretranslate,
     SCHEMA_KEYS.tmPrioritization,
   ],
   [SETTINGS_PANEL_TABS.machineTranslation]: [SCHEMA_KEYS.mt],
@@ -143,8 +143,6 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
       : []),
   ]
 }
-
-
 
 export const SettingsPanel = ({
   onClose,

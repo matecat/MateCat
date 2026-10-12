@@ -196,7 +196,7 @@ class TranslationEventTest extends AbstractTest
     }
 
     #[Test]
-    public function isUnModifiedIceReturnsTrueWhenBothVersionZero(): void
+    public function isUnModifiedLockedReturnsTrueForLockedIceWhenBothVersionZero(): void
     {
         $old = $this->makeTranslation(TranslationStatus::STATUS_TRANSLATED, 0);
         $old->locked = true;
@@ -205,8 +205,50 @@ class TranslationEventTest extends AbstractTest
 
         $event = $this->makeEvent(old: $old, wanted: $wanted);
 
-        $this->assertTrue($event->isIce());
-        $this->assertTrue($event->isUnModifiedIce());
+        $this->assertTrue($event->isLocked());
+        $this->assertTrue($event->isUnModifiedLocked());
+    }
+
+    #[Test]
+    public function isUnModifiedLockedReturnsTrueForLockedNonIceWhenBothVersionZero(): void
+    {
+        $old = $this->makeTranslation(TranslationStatus::STATUS_TRANSLATED, 0);
+        $old->locked = true;
+        $old->match_type = '100%';
+        $wanted = $this->makeTranslation(TranslationStatus::STATUS_TRANSLATED, 0);
+
+        $event = $this->makeEvent(old: $old, wanted: $wanted);
+
+        $this->assertTrue($event->isLocked());
+        $this->assertTrue($event->isUnModifiedLocked());
+    }
+
+    #[Test]
+    public function isUnModifiedLockedReturnsFalseForLockedNonIceOnceModified(): void
+    {
+        $old = $this->makeTranslation(TranslationStatus::STATUS_TRANSLATED, 0);
+        $old->locked = true;
+        $old->match_type = '100%';
+        $wanted = $this->makeTranslation(TranslationStatus::STATUS_TRANSLATED, 1);
+
+        $event = $this->makeEvent(old: $old, wanted: $wanted);
+
+        $this->assertTrue($event->isLocked());
+        $this->assertFalse($event->isUnModifiedLocked());
+    }
+
+    #[Test]
+    public function isLockedReturnsFalseForUnlockedIce(): void
+    {
+        $old = $this->makeTranslation(TranslationStatus::STATUS_TRANSLATED, 0);
+        $old->locked = false;
+        $old->match_type = 'ICE';
+        $wanted = $this->makeTranslation(TranslationStatus::STATUS_TRANSLATED, 0);
+
+        $event = $this->makeEvent(old: $old, wanted: $wanted);
+
+        $this->assertFalse($event->isLocked());
+        $this->assertFalse($event->isUnModifiedLocked());
     }
 
     #[Test]

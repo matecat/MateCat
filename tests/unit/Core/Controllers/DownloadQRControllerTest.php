@@ -415,6 +415,23 @@ class DownloadQRControllerTest extends AbstractTest
         self::assertArrayHasKey('Accuracy [minor]', $result[0][31]); // comments map
     }
 
+    #[Test]
+    public function buildFileContent_fills_deprecated_ice_locked_column_from_locked(): void
+    {
+        $segment = $this->makeSegmentStruct();
+        $segment->locked = true;
+        $segment->match_type = '100%';
+
+        $model = $this->createStub(QualityReportSegmentModel::class);
+        $model->method('getSegmentsForQR')->willReturn([$segment]);
+
+        /** @var array<int, array<int, mixed>> $result */
+        $result = $this->invoke('buildFileContentFromArrayOfSegmentIds', [$model, [1]]);
+
+        self::assertTrue($result[0][16]); // locked
+        self::assertTrue($result[0][6]); // ice_locked, deprecated alias of locked
+    }
+
     // ── composeFileContent (DI: injected model + chunk) ──────────────────
 
     #[Test]
@@ -540,7 +557,6 @@ class DownloadQRControllerTest extends AbstractTest
         $s->raw_word_count            = 2;
         $s->translation               = 'ciao';
         $s->version                   = 123456;
-        $s->ice_locked                = false;
         $s->status                    = 'TRANSLATED';
         $s->time_to_edit              = 5000;
         $s->filename                  = 'file.txt';

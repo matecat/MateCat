@@ -18,7 +18,10 @@ export default {
       payable_rate_template_id: 0,
       qa_model_template_id: 0,
       get_public_matches: true,
-      pretranslate_100: false,
+      pretranslate: {
+        match_101: {enabled: true, status: 'APPROVED', lock: true},
+        match_100: {enabled: false, status: 'TRANSLATED', lock: false},
+      },
       created_at: 'Fri, 02 Feb 24 16:48:34 +0100',
       modified_at: 'Fri, 02 Feb 24 16:48:34 +0100',
     },
@@ -62,7 +65,10 @@ export default {
         },
       ],
       get_public_matches: false,
-      pretranslate_100: true,
+      pretranslate: {
+        match_101: {enabled: true, status: 'APPROVED', lock: true},
+        match_100: {enabled: true, status: 'TRANSLATED', lock: false},
+      },
     },
   ],
 }
