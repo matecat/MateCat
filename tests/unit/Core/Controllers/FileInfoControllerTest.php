@@ -259,8 +259,7 @@ class FileInfoControllerTest extends AbstractTest
     }
 
     /**
-     * The plugin hook (Uber's html_entity_decode) has to run before the sanitizer: reversing the
-     * order would let it decode already sanitized output, i.e. a double decode.
+     * The sanitizer runs on the value returned by the plugin hook.
      */
     #[Test]
     public function setInstructions_dispatches_the_decode_hook_before_sanitizing(): void

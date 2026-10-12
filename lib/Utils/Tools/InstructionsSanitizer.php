@@ -16,29 +16,22 @@ use DOMNode;
  *    `This is a nested <a href="http://test.com" target="_blank" onclick="…">link</a>` becomes
  *    `This is a nested <a href="http://test.com" target="_blank">link</a>`
  *  - markdown is left untouched, hyperlinks included: `This is a nested [link](http://test.com)`
- *    is stored verbatim so that the URL stays visible
+ *    is stored verbatim so that the URL stays visible, and so are markdown autolinks
+ *    (`<https://…>`, `<name@example.com>`).
+ *  - characters outside the Basic Multilingual Plane (emoji and other four-byte characters) and
+ *    control characters other than tab and line breaks are removed.
  *
- * The anchor is *kept*, not flattened to `label (url)`: which links a translator may actually
- * follow is a rendering decision, and the front end already owns it — `isAllowedLinkRedirect()`
- * plus `removeNotAllowedLinksFromHtml()` flatten whatever the current deployment disallows (core
- * disallows everything, `plugins/translated` allows its own domains). Flattening here would take
- * that decision away from the only layer that can make it, and would also diverge from the shape
- * every stored row has had so far.
+ * Which of the kept links a translator may follow is decided by the front end, through
+ * `isAllowedLinkRedirect()` and `removeNotAllowedLinksFromHtml()`.
  *
- * Text nodes are never re-encoded: the stored value is deliberately neither strict HTML nor strict
- * plain text. `Tom & Jerry` stays `Tom & Jerry`, because the value is also read as plain text —
- * `Uber::filterContributionStructOnSetTranslation()` regex-scrapes `**Client:**` out of it — while
- * every renderer injecting it as HTML runs `filterXSS` first. Escaping belongs to the rendering
- * layer, not to the storage layer.
+ * Text nodes are never re-encoded: `Tom & Jerry` stays `Tom & Jerry`, because the value is also
+ * read as plain text — `Uber::filterContributionStructOnSetTranslation()` regex-scrapes
+ * `**Client:**` out of it — while every renderer injecting it as HTML runs `filterXSS` first.
  *
  * Because escaped markup has to be un-escaped before it can be stripped, entities are resolved
  * down to a fixed point: text that merely *looks* like a tag (`&amp;lt;script&amp;gt;`) is
  * stripped rather than stored, and a caller cannot smuggle markup through by escaping it twice.
- * Text meant to display a literal tag is therefore lost — consistent with the contract, which is
- * to strip HTML.
- *
- * This is deliberately separate from {@see Utils::stripTagsPreservingHrefs()}, which keeps serving
- * XLIFF segment notes with its own (markdown-link shaped) output format.
+ * Text meant to display a literal tag is therefore lost.
  */
 class InstructionsSanitizer
 {
@@ -65,11 +58,35 @@ class InstructionsSanitizer
     private const DROPPED_SUBTREES = ['script', 'style'];
 
     /**
-     * The only values a surviving `target` may hold. An allowlist of values rather than escaping:
-     * it rejects both `target="_blank" onclick="…"` breakout attempts and the stray backslash that
-     * payloads delivering their attributes as `target=\"_blank\"` would otherwise leave behind.
+     * The only values a surviving `target` may hold, which rejects `target="_blank" onclick="…"`
+     * breakout attempts.
      */
     private const ALLOWED_TARGETS = ['_blank', '_self', '_parent', '_top'];
+
+    /**
+     * Characters that make a `<` the start of markup for an HTML5 parser: a tag name, an end tag,
+     * a comment or doctype (`!`) and a bogus comment (`?`).
+     */
+    private const MARKUP_START = '[a-zA-Z\/!?]';
+
+    /**
+     * Control characters except tab, line feed and carriage return.
+     */
+    private const CONTROL_CHARACTERS = '/[\x{0}-\x{8}\x{B}\x{C}\x{E}-\x{1F}\x{7F}]/u';
+
+    private const ASTRAL_CHARACTERS = '/[\x{10000}-\x{10FFFF}]/u';
+
+    /**
+     * A markdown autolink (`<https://…>`, `<name@example.com>`): a scheme of two to 32 characters
+     * or an email address, and no whitespace before the `>`. Word's `<o:p>` is not one.
+     */
+    private const AUTOLINK = '/<((?:[a-zA-Z][a-zA-Z0-9+.\-]{1,31}:|[^\s<>@\/]+@)[^\s<>]*)>/';
+
+    /**
+     * A browser reads an autolink as a tag, and each `/` in it as the start of an attribute. With
+     * no `=` and no quote none of those attributes can carry a value.
+     */
+    private const ATTRIBUTE_VALUE = '/[=\'"]/';
 
     /**
      * @param string $raw
@@ -89,9 +106,7 @@ class InstructionsSanitizer
         // Run to a fixed point. One pass is not enough: decoding `&amp;lt;script&amp;gt;` yields
         // the text `<script>…`, which is markup a later pass — or any consumer injecting the
         // stored value as HTML — would act on. Looping until nothing changes leaves text that is
-        // inert by construction, and makes sanitize() idempotent. Note this is not the classic
-        // decode-until-stable bypass: that one decodes *after* filtering, resurrecting the markup
-        // that was just removed, whereas here every pass re-filters what it decodes.
+        // inert by construction, and makes sanitize() idempotent.
         while ($sanitized !== $previous && $passes < self::MAX_PASSES) {
             $previous = $sanitized;
             $sanitized = self::stripOnce($sanitized);
@@ -100,7 +115,7 @@ class InstructionsSanitizer
 
         if ($sanitized !== $previous) {
             // Hit the cap without converging, so the last pass may have just decoded one more
-            // level into something tag shaped. Never hand that back — at this point the anchors go
+            // level into something tag shaped. Never hand that back: at this point the anchors go
             // too, which is the right trade for a payload this pathological.
             $sanitized = strip_tags($sanitized);
         }
@@ -119,12 +134,18 @@ class InstructionsSanitizer
     {
         // Resolve the entities the integrations send: connectors such as TOS/Phrase deliver their
         // anchors HTML escaped (`&lt;a href="..."&gt;`), and without this they would never be
-        // recognized as markup at all — the reported bug.
+        // recognized as markup at all.
         $html = html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        // Removed before parsing, so that a character removed from between `<` and a tag name
+        // cannot join them into markup after the parser has run.
+        $html = (string)preg_replace([self::CONTROL_CHARACTERS, self::ASTRAL_CHARACTERS], '', $html);
 
         if (trim($html) === '') {
             return '';
         }
+
+        $html = self::alignWithHtml5($html);
 
         $htmlDom = new DOMDocument('1.0', 'UTF-8');
         $htmlDom->formatOutput = false;
@@ -134,20 +155,49 @@ class InstructionsSanitizer
         $documentElement = $htmlDom->documentElement;
 
         if ($documentElement === null) {
-            return $html;
+            // Nothing the parser recognized as an element, e.g. a lone comment. Strip every tag and
+            // give back the `<` that alignWithHtml5() escaped.
+            return str_replace('&lt;', '<', strip_tags($html));
         }
 
-        // Walk the DOM rather than calling saveHtml() and running strip_tags() over the result:
-        // saveHtml() re-encodes every entity, so `Tom & Jerry` would come back as `Tom &amp; Jerry`
-        // and corrupt every text consumer of the stored value.
+        // Serialize the DOM by hand so that text nodes keep their characters as they are:
+        // `Tom & Jerry` stays `Tom & Jerry`.
         return self::serialize($documentElement);
     }
 
     /**
+     * Rewrite the input so that libxml reads it the way a browser does:
+     *
+     *  - a `<` that cannot start markup is escaped: libxml up to 2.9.13 would otherwise drop
+     *    the text up to the next `>` (`5 < 6 > 2`)
+     *  - a markdown autolink is kept as text; one that could carry an attribute value loses its
+     *    brackets, so that its URL stays readable but is no longer tag shaped
+     *  - comments an HTML5 parser closes early (`<!-->`, `<!--->`, `--!>`) are closed early here
+     *    too, so that what follows them is parsed, and stripped, as markup
+     *
+     * @param string $html
+     *
+     * @return string
+     */
+    private static function alignWithHtml5(string $html): string
+    {
+        $html = str_replace(['<!--->', '<!-->', '--!>'], ['<!---->', '<!---->', '-->'], $html);
+
+        $html = (string)preg_replace_callback(
+            self::AUTOLINK,
+            fn(array $autolink): string => preg_match(self::ATTRIBUTE_VALUE, $autolink[1]) === 1
+                ? $autolink[1]
+                : '&lt;' . $autolink[1] . '>',
+            $html
+        );
+
+        return (string)preg_replace('/<(?!' . self::MARKUP_START . ')/', '&lt;', $html);
+    }
+
+    /**
      * Emit the subtree keeping only what the contract allows: text verbatim, anchors as anchors,
-     * `<img>` as its bare src, `<script>`/`<style>` bodies dropped whole — stripping those two tags
-     * alone would leave their body behind as visible text — and every other element unwrapped to
-     * its children.
+     * `<img>` as its bare src, `<script>`/`<style>` bodies dropped whole, and every other element
+     * unwrapped to its children.
      *
      * @param DOMNode $node
      *
@@ -214,7 +264,7 @@ class InstructionsSanitizer
 
         $attributes = ' href="' . self::escapeAttribute($href) . '"';
 
-        $target = strtolower(trim($anchor->getAttribute('target')));
+        $target = strtolower(self::removeQuoting($anchor->getAttribute('target')));
 
         if (in_array($target, self::ALLOWED_TARGETS, true)) {
             $attributes .= ' target="' . $target . '"';
@@ -245,6 +295,20 @@ class InstructionsSanitizer
     }
 
     /**
+     * Remove the quotes and backslashes glued to an attribute value by payloads that deliver
+     * their attributes JSON escaped (`href=\"…\"`), see StripTagsPreservingHrefsTest. A URL and a
+     * target never need either.
+     *
+     * @param string $value
+     *
+     * @return string
+     */
+    private static function removeQuoting(string $value): string
+    {
+        return trim(str_replace(['\\', '"', "'"], '', $value));
+    }
+
+    /**
      * Normalize to UTF-8 declaring the source encoding, so that accented characters are converted
      * instead of being replaced by `?`.
      *
@@ -266,14 +330,12 @@ class InstructionsSanitizer
     /**
      * @param string $url
      *
-     * @return string|null the URL, or null when its scheme is not allowed
+     * @return string|null the URL without userinfo, or null when its scheme is not allowed or no
+     *                     host is left
      */
     private static function sanitizeUrl(string $url): ?string
     {
-        // Historically hrefs arrive with escaped quotes glued to them, see the JSON payloads in
-        // StripTagsPreservingHrefsTest. Backslashes go whole: a URL never needs one, they are the
-        // residue those payloads leave behind, and browsers normalize them to a slash.
-        $url = trim(str_replace(['\\', '"', "'"], '', $url));
+        $url = self::removeQuoting($url);
 
         if ($url === '') {
             return null;
@@ -282,6 +344,18 @@ class InstructionsSanitizer
         $scheme = parse_url($url, PHP_URL_SCHEME);
 
         if (!is_string($scheme) || !in_array(strtolower($scheme), self::ALLOWED_SCHEMES, true)) {
+            return null;
+        }
+
+        if (strtolower($scheme) === 'mailto') {
+            return $url;
+        }
+
+        // The front end allows a link by its host, and in `https://trusted.example@other.example/`
+        // the host is the part after the last `@` of the authority.
+        $url = (string)preg_replace('#^([a-zA-Z][a-zA-Z0-9+.\-]*://)[^/?\#]*@#', '$1', $url);
+
+        if (preg_match('#^[a-zA-Z][a-zA-Z0-9+.\-]*://[^/?\#]#', $url) !== 1) {
             return null;
         }
 

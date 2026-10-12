@@ -135,7 +135,7 @@ Product: content sent to MTPE with Leverage + Translate en-US source';
             'name' => ['<a href="https://x.com" name="anchor">y</a>'],
             'data attribute' => ['<a href="https://x.com" data-payload="alert(1)">y</a>'],
             // The quote closes the attribute, so the parser reads the rest as further attributes.
-            'target breakout' => ['<a href="https://x.com" target="_blank\" onclick=\"alert(1)">y</a>'],
+            'invalid target breakout' => ['<a href="https://x.com" target="x\" onclick=\"alert(1)">y</a>'],
         ];
     }
 
@@ -144,6 +144,15 @@ Product: content sent to MTPE with Leverage + Translate en-US source';
     public function everyAttributeOutsideTheAllowlistIsDropped(string $raw): void
     {
         $this->assertEquals('<a href="https://x.com">y</a>', InstructionsSanitizer::sanitize($raw));
+    }
+
+    #[Test]
+    public function aTargetBreakoutKeepsTheTargetAndDropsTheHandler(): void
+    {
+        $this->assertEquals(
+            '<a href="https://x.com" target="_blank">y</a>',
+            InstructionsSanitizer::sanitize('<a href="https://x.com" target="_blank\\" onclick=\\"alert(1)">y</a>')
+        );
     }
 
     #[Test]
@@ -393,7 +402,7 @@ Product: content sent to MTPE with Leverage + Translate en-US source';
     public function jsonPayloadsKeepTheirStructure(): void
     {
         $json = '{"AdditionalInfo":"{}","DynamicValueExample":"<span>Example</span>","KeyName":"<a href=\"https://text.com\" target=\"_blank\">Test</a><br>","Repo":"<a href =\"https://test2.com\" target=\"_blank\">test2</a>"}';
-        $expected = '{"AdditionalInfo":"{}","DynamicValueExample":"Example","KeyName":"<a href="https://text.com">Test</a>","Repo":"<a href="https://test2.com">test2</a>"}';
+        $expected = '{"AdditionalInfo":"{}","DynamicValueExample":"Example","KeyName":"<a href="https://text.com" target="_blank">Test</a>","Repo":"<a href="https://test2.com" target="_blank">test2</a>"}';
 
         $this->assertEquals($expected, InstructionsSanitizer::sanitize($json));
     }
@@ -454,5 +463,192 @@ Product: content sent to MTPE with Leverage + Translate en-US source';
         $viaV3Endpoint = InstructionsSanitizer::sanitize(html_entity_decode($raw));
 
         $this->assertEquals($viaProjectCreation, $viaV3Endpoint);
+    }
+
+    // ── Input the parser cannot turn into a document ─────────────────────────────────────
+
+    #[Test]
+    #[DataProvider('unparseableInputProvider')]
+    public function inputWithoutADocumentNeverComesBackAsMarkup(string $raw): void
+    {
+        $sanitized = InstructionsSanitizer::sanitize($raw);
+
+        $this->assertStringNotContainsString('<img', $sanitized);
+        $this->assertStringNotContainsString('onerror', $sanitized);
+    }
+
+    public static function unparseableInputProvider(): array
+    {
+        return [
+            'NUL prefix'                 => ["\0<img src=x onerror=alert(1)>"],
+            'NUL prefix, escaped markup' => ["\0&lt;img src=x onerror=alert(1)&gt;"],
+            'comment only'               => ['<!-- <img src=x onerror=alert(1)> -->'],
+        ];
+    }
+
+    #[Test]
+    public function controlCharactersAreRemovedAndLineBreaksKept(): void
+    {
+        $this->assertEquals("a\tb\nc\r\nd", InstructionsSanitizer::sanitize("a\x01\tb\nc\x1F\r\nd\x7F"));
+    }
+
+    // ── Comments the browser closes earlier than libxml ──────────────────────────────────
+
+    #[Test]
+    #[DataProvider('commentDifferentialProvider')]
+    public function commentContentNeverBecomesMarkup(string $raw): void
+    {
+        $sanitized = InstructionsSanitizer::sanitize($raw);
+
+        $this->assertStringNotContainsString('<img', $sanitized);
+        $this->assertStringNotContainsString('onerror', $sanitized);
+    }
+
+    public static function commentDifferentialProvider(): array
+    {
+        return [
+            'abrupt <!-->'         => ['<!--><img src=x onerror=alert(1)>-->'],
+            'abrupt <!--->'        => ['<!---><img src=x onerror=alert(1)>-->'],
+            'escaped abrupt <!-->' => ['&lt;!--&gt;&lt;img src=x onerror=alert(1)&gt;--&gt;'],
+            'closed by --!>'       => ['<!-- --!><img src=x onerror=alert(1)> -->'],
+        ];
+    }
+
+    // ── URLs with userinfo ───────────────────────────────────────────────────────────────
+
+    #[Test]
+    #[DataProvider('userinfoProvider')]
+    public function userinfoIsRemovedFromKeptUrls(string $href, string $expected): void
+    {
+        $this->assertEquals(
+            '<a href="' . $expected . '">link</a>',
+            InstructionsSanitizer::sanitize('<a href="' . $href . '">link</a>')
+        );
+    }
+
+    public static function userinfoProvider(): array
+    {
+        return [
+            'user'              => ['https://www.translated.net@evil.example/', 'https://evil.example/'],
+            'user and password' => ['https://user:pass@evil.example/path?q=1', 'https://evil.example/path?q=1'],
+            'two at signs'      => ['http://a@trusted.example@evil.example/', 'http://evil.example/'],
+            'at in the path'    => ['https://example.com/@user', 'https://example.com/@user'],
+        ];
+    }
+
+    #[Test]
+    public function aUrlLeftWithoutAHostIsDropped(): void
+    {
+        $this->assertEquals('link', InstructionsSanitizer::sanitize('<a href="https://user@/">link</a>'));
+    }
+
+    #[Test]
+    public function userinfoIsRemovedFromImgSrc(): void
+    {
+        $this->assertEquals(
+            'https://evil.example/a.png',
+            InstructionsSanitizer::sanitize('<img src="https://trusted.example@evil.example/a.png">')
+        );
+    }
+
+    // ── Attributes delivered with escaped quotes ─────────────────────────────────────────
+
+    #[Test]
+    public function targetSurvivesBackslashQuotedAttributes(): void
+    {
+        $this->assertEquals(
+            '<a href="http://test.com" target="_blank">link</a>',
+            InstructionsSanitizer::sanitize('<a href=\"http://test.com\" target=\"_blank\">link</a>')
+        );
+    }
+
+    // ── Markdown autolinks and stray angle brackets ──────────────────────────────────────
+
+    #[Test]
+    #[DataProvider('autolinkProvider')]
+    public function markdownAutolinksAreKeptAsText(string $raw): void
+    {
+        $this->assertEquals($raw, InstructionsSanitizer::sanitize($raw));
+    }
+
+    public static function autolinkProvider(): array
+    {
+        return [
+            'url'         => ['See <https://example.com/guide> now'],
+            'email'       => ['Write to <name@example.com>'],
+            'mailto'      => ['<mailto:name@example.com>'],
+            'not allowed' => ['Run <javascript:alert(1)>'],
+            'no host'     => ['<https:/x/autofocus/tabindex>'],
+        ];
+    }
+
+    #[Test]
+    public function wordNamespaceTagsAreNotAutolinks(): void
+    {
+        $this->assertEquals('Text', InstructionsSanitizer::sanitize('<o:p></o:p>Text'));
+    }
+
+    #[Test]
+    #[DataProvider('autolinkWithAttributesProvider')]
+    public function anAutolinkThatCouldCarryAttributeValuesLosesItsBrackets(string $raw, string $expected): void
+    {
+        $this->assertEquals($expected, InstructionsSanitizer::sanitize($raw));
+    }
+
+    public static function autolinkWithAttributesProvider(): array
+    {
+        return [
+            'query string'   => ['See <https://example.com/a?b=1&c=2> now', 'See https://example.com/a?b=1&c=2 now'],
+            'unquoted value' => ['<https:/onfocus=alert(1)/autofocus/tabindex=1>', 'https:/onfocus=alert(1)/autofocus/tabindex=1'],
+            'quoted value'   => ['<https://x.com/"onmouseover="alert(1)>', 'https://x.com/"onmouseover="alert(1)'],
+            'single quotes'  => ["<https:/style='x'/onmouseover=alert(1)>", "https:/style='x'/onmouseover=alert(1)"],
+        ];
+    }
+
+    #[Test]
+    public function aTagWithAttributesIsNotAnAutolink(): void
+    {
+        $this->assertEquals(
+            'https://x.com/a.png ok',
+            InstructionsSanitizer::sanitize('<img src="https://x.com/a.png" onerror=alert(1)> ok')
+        );
+    }
+
+    #[Test]
+    #[DataProvider('strayAngleBracketProvider')]
+    public function strayAngleBracketsAreKept(string $raw): void
+    {
+        $this->assertEquals($raw, InstructionsSanitizer::sanitize($raw));
+    }
+
+    public static function strayAngleBracketProvider(): array
+    {
+        return [
+            'comparison'   => ['5 < 6 > 2'],
+            'heart'        => ['I <3 this'],
+            'arrow'        => ['a <- b -> c'],
+            'trailing'     => ['a <'],
+            'with a space' => ['x < y and y > z'],
+        ];
+    }
+
+    // ── Four-byte characters ─────────────────────────────────────────────────────────────
+
+    #[Test]
+    #[DataProvider('astralProvider')]
+    public function fourByteCharactersAreRemoved(string $raw, string $expected): void
+    {
+        $this->assertEquals($expected, InstructionsSanitizer::sanitize($raw));
+    }
+
+    public static function astralProvider(): array
+    {
+        return [
+            'emoji'              => ["Ship it \u{1F680} today", 'Ship it  today'],
+            'escaped emoji'      => ['Ship it &#x1F680; today', 'Ship it  today'],
+            'inside an anchor'   => ['<a href="https://x.com">go &#128640;</a>', '<a href="https://x.com">go </a>'],
+            'splitting a tag'    => ["<\u{1F680}img src=x onerror=alert(1)>ok", 'ok'],
+            'three-byte is kept' => ['Prix : 10 €, 東京', 'Prix : 10 €, 東京'],
+        ];
     }
 }
