@@ -1015,7 +1015,10 @@ const SegmentActions = {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
       sid: sid,
-      message: 'A termbase item has been deleted',
+      message: {
+        title: 'Termbase',
+        text: 'A termbase item has been deleted',
+      },
     })
     AppDispatcher.dispatch({
       actionType: SegmentConstants.DELETE_FROM_GLOSSARY,
@@ -1027,7 +1030,11 @@ const SegmentActions = {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
       sid: sid,
-      message: error.message ? error.message : `Error code: ${error.code}`,
+      message: {
+        title: 'Termbase',
+        text: error.message ? error.message : `Error code: ${error.code}`,
+        type: 'error',
+      },
     })
     AppDispatcher.dispatch({
       actionType: SegmentConstants.ERROR_DELETE_FROM_GLOSSARY,
@@ -1043,14 +1050,14 @@ const SegmentActions = {
       .catch((errors) => {
         if (errors.status === 403) {
           const notification = {
-            title: 'Glossary edit failed',
+            title: 'Termbase edit failed',
             text: (
               <span>
-                This glossary is part of a resource that isn’t enabled for
+                This Termbase is part of a resource that isn’t enabled for
                 updates.
                 <br />
                 To edit it, open the <b>Settings</b> panel, go to the{' '}
-                <b>Translation memory & glossary</b> tab, and enable the{' '}
+                <b>Translation memory & Termbase</b> tab, and enable the{' '}
                 <b>“Update”</b> checkbox next to the resource name.
               </span>
             ),
@@ -1062,7 +1069,11 @@ const SegmentActions = {
           AppDispatcher.dispatch({
             actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
             sid: sid,
-            message: errors[0].message,
+            message: {
+              title: 'Termbase',
+              text: errors[0].message,
+              type: 'error',
+            },
           })
         } else {
           OfflineUtils.failedConnection()
@@ -1084,7 +1095,11 @@ const SegmentActions = {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
       sid: sid,
-      message: error.message ? error.message : `Error code: ${error.code}`,
+      message: {
+        title: 'Termbase',
+        text: error.message ? error.message : `Error code: ${error.code}`,
+        type: 'error',
+      },
     })
     AppDispatcher.dispatch({
       actionType: SegmentConstants.ERROR_ADD_GLOSSARY_ITEM,
@@ -1134,7 +1149,11 @@ const SegmentActions = {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
       sid: sid,
-      message: error.message ? error.message : `Error code: ${error.code}`,
+      message: {
+        title: 'Termbase',
+        text: error.message ? error.message : `Error code: ${error.code}`,
+        type: 'error',
+      },
     })
     AppDispatcher.dispatch({
       actionType: SegmentConstants.ERROR_CHANGE_GLOSSARY,

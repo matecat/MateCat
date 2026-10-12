@@ -214,9 +214,12 @@ export const SegmentFooterTabGlossary = ({
       AppDispatcher.dispatch({
         actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
         sid: segment.sid,
-        message: update
-          ? 'A termbase entry has been updated'
-          : 'A termbase entry has been added',
+        message: {
+          title: 'Termbase',
+          text: update
+            ? 'A termbase entry has been updated'
+            : 'A termbase entry has been added',
+        },
       })
     }
     const addGlossaryItem = (payload, update) => {
@@ -582,4 +585,3 @@ SegmentFooterTabGlossary.propTypes = {
   segment: PropTypes.object,
   notifyLoadingStatus: PropTypes.func,
 }
-

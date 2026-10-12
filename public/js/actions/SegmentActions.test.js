@@ -1494,7 +1494,9 @@ describe('SegmentActions glossary flows', () => {
     SegmentActions.addGlossaryItem({id_segment: '1'})
     await flushDynamicImports()
     expect(AppDispatcher.dispatch).toHaveBeenCalledWith(
-      expect.objectContaining({message: 'bad'}),
+      expect.objectContaining({
+        message: expect.objectContaining({title: 'Termbase', text: 'bad'}),
+      }),
     )
   })
 

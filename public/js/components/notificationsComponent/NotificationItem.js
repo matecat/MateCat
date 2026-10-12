@@ -26,7 +26,7 @@ const NotificationItem = ({
 }) => {
   const [visible, setVisible] = useState(false)
   const [removed, setRemoved] = useState(false)
-  
+
   let _isMounted = useRef()
 
   const styleNameContainer = 'notification-type-' + type

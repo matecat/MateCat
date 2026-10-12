@@ -225,7 +225,10 @@ describe('SegmentFooterTabGlossary', () => {
           expect.objectContaining({
             actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
             sid: segment.sid,
-            message: 'A termbase entry has been added',
+            message: expect.objectContaining({
+              title: 'Termbase',
+              text: 'A termbase entry has been added',
+            }),
           }),
         ),
       {timeout: 3000},
