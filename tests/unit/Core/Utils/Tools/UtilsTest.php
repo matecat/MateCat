@@ -923,6 +923,12 @@ class UtilsTest extends AbstractTest
         $this->assertFalse(Utils::isTokenValid('a1b2c3d4-e5f6-7890-abcd'));
     }
 
+    #[Test]
+    public function testIsTokenValidReturnsFalseForTrailingNewline(): void
+    {
+        $this->assertFalse(Utils::isTokenValid("a1b2c3d4-e5f6-7890-abcd-ef1234567890\n"));
+    }
+
     // =========================================================================
     // Tests for fixFileName()
     // =========================================================================
@@ -1474,7 +1480,7 @@ class UtilsTest extends AbstractTest
     #[Test]
     public function testUploadDirFromSessionCookieReturnsCorrectPath(): void
     {
-        $guid = 'test-guid-123';
+        $guid = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890';
         $result = Utils::uploadDirFromSessionCookie($guid);
         $this->assertStringContainsString($guid, $result);
     }
@@ -1482,11 +1488,29 @@ class UtilsTest extends AbstractTest
     #[Test]
     public function testUploadDirFromSessionCookieIncludesFileName(): void
     {
-        $guid = 'test-guid-123';
+        $guid = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890';
         $fileName = 'test.txt';
         $result = Utils::uploadDirFromSessionCookie($guid, $fileName);
         $this->assertStringContainsString($fileName, $result);
         $this->assertStringContainsString($guid, $result);
+    }
+
+    #[Test]
+    #[DataProvider('invalidUploadGuidProvider')]
+    public function testUploadDirFromSessionCookieThrowsForAnInvalidGuid(string $guid): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        Utils::uploadDirFromSessionCookie($guid);
+    }
+
+    public static function invalidUploadGuidProvider(): array
+    {
+        return [
+            'traversal'        => ['../../inc'],
+            'empty'            => [''],
+            'trailing newline' => ["a1b2c3d4-e5f6-7890-abcd-ef1234567890\n"],
+        ];
     }
 
     // =========================================================================
