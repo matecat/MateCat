@@ -3,10 +3,10 @@
  * @author: Domenico <ostico@gmail.com>, <domenico@translated.net>
  * Date: 11/11/2024
  */
-const {logger} = require('../utils');
-const {Client} = require('@stomp/stompjs');
+import {Client} from '@stomp/stompjs';
+import {logger} from '../utils.js';
 
-module.exports.Reader = class {
+export class Reader {
 
   constructor(queue_name, connectOptions, handler) {
     this.queue_name = queue_name;
@@ -56,4 +56,4 @@ module.exports.Reader = class {
     }
   }
 
-};
+}

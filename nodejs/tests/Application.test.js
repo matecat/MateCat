@@ -1,14 +1,15 @@
-jest.mock('../src/utils', () => ({
-  logger: {
-    info: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
-  },
-  getWebSocketClientAddress: jest.fn(() => '1.2.3.4'),
-}));
+import jwt from 'jsonwebtoken';
+import {describe, test, expect, beforeEach, vi} from 'vitest';
+import {createAuthMiddleware, Application} from '../src/Application.js';
 
-const jwt = require('jsonwebtoken');
-const {createAuthMiddleware, Application} = require('../src/Application');
+vi.mock('../src/utils.js', () => ({
+  logger: {
+    info: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+  },
+  getWebSocketClientAddress: vi.fn(() => '1.2.3.4'),
+}));
 
 const SECRET = 'test-secret-key';
 
@@ -28,15 +29,16 @@ function mockSocket(overrides = {}) {
 }
 
 describe('createAuthMiddleware', () => {
-  const log = {error: jest.fn(), info: jest.fn(), debug: jest.fn()};
+  const log = {error: vi.fn(), info: vi.fn(), debug: vi.fn()};
   let middleware;
+  const runMiddleware = (socket) => new Promise((resolve) => middleware(socket, resolve));
 
   beforeEach(() => {
     log.error.mockClear();
     middleware = createAuthMiddleware(SECRET, log);
   });
 
-  test('authenticates from headers', (done) => {
+  test('authenticates from headers', async () => {
     const token = signToken({iss: 'matecat', matecat: {uid: 42}});
     const socket = mockSocket({
       handshake: {
@@ -46,15 +48,13 @@ describe('createAuthMiddleware', () => {
       },
     });
 
-    middleware(socket, (err) => {
-      expect(err).toBeUndefined();
-      expect(socket.user_id).toBe('42');
-      expect(socket.uuid).toBe('abc-123');
-      done();
-    });
+    const err = await runMiddleware(socket);
+    expect(err).toBeUndefined();
+    expect(socket.user_id).toBe('42');
+    expect(socket.uuid).toBe('abc-123');
   });
 
-  test('authenticates from handshake.auth fallback', (done) => {
+  test('authenticates from handshake.auth fallback', async () => {
     const token = signToken({iss: 'matecat', matecat: {uid: 7}});
     const socket = mockSocket({
       handshake: {
@@ -64,25 +64,21 @@ describe('createAuthMiddleware', () => {
       },
     });
 
-    middleware(socket, (err) => {
-      expect(err).toBeUndefined();
-      expect(socket.user_id).toBe('7');
-      expect(socket.uuid).toBe('def-456');
-      done();
-    });
+    const err = await runMiddleware(socket);
+    expect(err).toBeUndefined();
+    expect(socket.user_id).toBe('7');
+    expect(socket.uuid).toBe('def-456');
   });
 
-  test('rejects missing auth', (done) => {
+  test('rejects missing auth', async () => {
     const socket = mockSocket();
 
-    middleware(socket, (err) => {
-      expect(err).toBeInstanceOf(Error);
-      expect(err.message).toBe('Authentication not provided');
-      done();
-    });
+    const err = await runMiddleware(socket);
+    expect(err).toBeInstanceOf(Error);
+    expect(err.message).toBe('Authentication not provided');
   });
 
-  test('rejects invalid JWT', (done) => {
+  test('rejects invalid JWT', async () => {
     const socket = mockSocket({
       handshake: {
         headers: {'x-token': 'bad-token', 'x-userid': '1', 'x-uuid': 'x'},
@@ -91,14 +87,12 @@ describe('createAuthMiddleware', () => {
       },
     });
 
-    middleware(socket, (err) => {
-      expect(err).toBeInstanceOf(Error);
-      expect(err.message).toBe('Authentication error invalid JWT');
-      done();
-    });
+    const err = await runMiddleware(socket);
+    expect(err).toBeInstanceOf(Error);
+    expect(err.message).toBe('Authentication error invalid JWT');
   });
 
-  test('rejects invalid iss claim', (done) => {
+  test('rejects invalid iss claim', async () => {
     const token = signToken({iss: 'bogus', matecat: {uid: 1}});
     const socket = mockSocket({
       handshake: {
@@ -108,14 +102,12 @@ describe('createAuthMiddleware', () => {
       },
     });
 
-    middleware(socket, (err) => {
-      expect(err).toBeInstanceOf(Error);
-      expect(err.message).toBe('Authentication error invalid iss claim');
-      done();
-    });
+    const err = await runMiddleware(socket);
+    expect(err).toBeInstanceOf(Error);
+    expect(err.message).toBe('Authentication error invalid iss claim');
   });
 
-  test('rejects uid mismatch', (done) => {
+  test('rejects uid mismatch', async () => {
     const token = signToken({iss: 'matecat', matecat: {uid: 42}});
     const socket = mockSocket({
       handshake: {
@@ -125,14 +117,12 @@ describe('createAuthMiddleware', () => {
       },
     });
 
-    middleware(socket, (err) => {
-      expect(err).toBeInstanceOf(Error);
-      expect(err.message).toBe('Authentication error invalid user id');
-      done();
-    });
+    const err = await runMiddleware(socket);
+    expect(err).toBeInstanceOf(Error);
+    expect(err.message).toBe('Authentication error invalid user id');
   });
 
-  test('sets jobId when x-jobid present', (done) => {
+  test('sets jobId when x-jobid present', async () => {
     const token = signToken({iss: 'matecat', matecat: {uid: 1}});
     const socket = mockSocket({
       handshake: {
@@ -147,14 +137,12 @@ describe('createAuthMiddleware', () => {
       },
     });
 
-    middleware(socket, (err) => {
-      expect(err).toBeUndefined();
-      expect(socket.jobId).toBe('55');
-      done();
-    });
+    const err = await runMiddleware(socket);
+    expect(err).toBeUndefined();
+    expect(socket.jobId).toBe('55');
   });
 
-  test('does not set jobId when x-jobid absent', (done) => {
+  test('does not set jobId when x-jobid absent', async () => {
     const token = signToken({iss: 'matecat', matecat: {uid: 1}});
     const socket = mockSocket({
       handshake: {
@@ -164,14 +152,12 @@ describe('createAuthMiddleware', () => {
       },
     });
 
-    middleware(socket, (err) => {
-      expect(err).toBeUndefined();
-      expect(socket.jobId).toBeUndefined();
-      done();
-    });
+    const err = await runMiddleware(socket);
+    expect(err).toBeUndefined();
+    expect(socket.jobId).toBeUndefined();
   });
 
-  test('sets projectId when x-projectid present', (done) => {
+  test('sets projectId when x-projectid present', async () => {
     const token = signToken({iss: 'matecat', matecat: {uid: 1}});
     const socket = mockSocket({
       handshake: {
@@ -186,14 +172,12 @@ describe('createAuthMiddleware', () => {
       },
     });
 
-    middleware(socket, (err) => {
-      expect(err).toBeUndefined();
-      expect(socket.projectId).toBe('123');
-      done();
-    });
+    const err = await runMiddleware(socket);
+    expect(err).toBeUndefined();
+    expect(socket.projectId).toBe('123');
   });
 
-  test('does not set projectId when x-projectid absent', (done) => {
+  test('does not set projectId when x-projectid absent', async () => {
     const token = signToken({iss: 'matecat', matecat: {uid: 1}});
     const socket = mockSocket({
       handshake: {
@@ -203,11 +187,9 @@ describe('createAuthMiddleware', () => {
       },
     });
 
-    middleware(socket, (err) => {
-      expect(err).toBeUndefined();
-      expect(socket.projectId).toBeUndefined();
-      done();
-    });
+    const err = await runMiddleware(socket);
+    expect(err).toBeUndefined();
+    expect(socket.projectId).toBeUndefined();
   });
 });
 
@@ -215,37 +197,43 @@ describe('createAuthMiddleware', () => {
 
 function createMockRedis() {
   const instance = {
-    on: jest.fn(),
-    duplicate: jest.fn(),
-    smembers: jest.fn(),
-    get: jest.fn(),
-    srem: jest.fn(),
+    on: vi.fn(),
+    duplicate: vi.fn(),
+    smembers: vi.fn(),
+    get: vi.fn(),
+    srem: vi.fn(),
   };
   instance.duplicate.mockReturnValue(instance);
-  return jest.fn(() => instance);
+  return vi.fn(function () {
+    return instance;
+  });
 }
 
 function createMockSocketIO() {
   const server = {
-    use: jest.fn(),
-    on: jest.fn(),
-    emit: jest.fn(),
-    to: jest.fn(() => ({emit: jest.fn()})),
+    use: vi.fn(),
+    on: vi.fn(),
+    emit: vi.fn(),
+    to: vi.fn(() => ({emit: vi.fn()})),
   };
-  return {factory: jest.fn(() => server), server};
+  return {Server: vi.fn(function () {
+    return server;
+  }), server};
 }
 
 function createMockDeps() {
   const RedisMock = createMockRedis();
-  const {factory: ioMock, server: ioServer} = createMockSocketIO();
+  const {Server: ServerMock, server: ioServer} = createMockSocketIO();
   return {
     Redis: RedisMock,
-    io: ioMock,
-    setupWorker: jest.fn(),
-    createAdapter: jest.fn(),
-    Reader: jest.fn(),
-    MessageHandler: jest.fn().mockImplementation(() => ({onReceive: jest.fn()})),
-    logger: {info: jest.fn(), error: jest.fn(), debug: jest.fn()},
+    Server: ServerMock,
+    setupWorker: vi.fn(),
+    createAdapter: vi.fn(),
+    Reader: vi.fn(),
+    MessageHandler: vi.fn(function () {
+      return {onReceive: vi.fn()};
+    }),
+    logger: {info: vi.fn(), error: vi.fn(), debug: vi.fn()},
     _ioServer: ioServer,
     _redisInstance: new RedisMock(),
   };
@@ -277,7 +265,7 @@ describe('Application constructor', () => {
 
   test('creates socket.io server with correct options', () => {
     const {deps} = buildApp();
-    expect(deps.io).toHaveBeenCalledWith(
+    expect(deps.Server).toHaveBeenCalledWith(
         {},
         expect.objectContaining({path: '/ws', pingTimeout: 5000}),
     );
@@ -328,9 +316,9 @@ describe('Application.start', () => {
       jobId: '99',
       projectId: '123',
       clientAddress: null,
-      join: jest.fn(),
-      emit: jest.fn(),
-      on: jest.fn(),
+      join: vi.fn(),
+      emit: vi.fn(),
+      on: vi.fn(),
     };
 
     connectionHandler(socket);
@@ -353,9 +341,9 @@ describe('Application.start', () => {
       user_id: '1',
       uuid: 'u-x',
       clientAddress: null,
-      join: jest.fn(),
-      emit: jest.fn(),
-      on: jest.fn(),
+      join: vi.fn(),
+      emit: vi.fn(),
+      on: vi.fn(),
     };
 
     connectionHandler(socket);
@@ -374,9 +362,9 @@ describe('Application.start', () => {
       uuid: 'u-y',
       jobId: '99',
       clientAddress: null,
-      join: jest.fn(),
-      emit: jest.fn(),
-      on: jest.fn(),
+      join: vi.fn(),
+      emit: vi.fn(),
+      on: vi.fn(),
     };
 
     connectionHandler(socket);
@@ -389,8 +377,8 @@ describe('Application.start', () => {
 describe('Application.dispatchGlobalMessages', () => {
   test('dispatches valid messages to room', () => {
     const {app} = buildApp();
-    const emitMock = jest.fn();
-    app._socketIOServer.to = jest.fn(() => ({emit: emitMock}));
+    const emitMock = vi.fn();
+    app._socketIOServer.to = vi.fn(() => ({emit: emitMock}));
 
     app.pubGlobalMessageClient.smembers.mockImplementation((key, cb) => {
       cb(null, ['msg-1']);
