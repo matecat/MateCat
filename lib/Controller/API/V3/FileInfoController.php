@@ -29,6 +29,7 @@ use RuntimeException;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use TypeError;
+use Utils\Tools\InstructionsSanitizer;
 
 
 class FileInfoController extends KleinController
@@ -137,9 +138,10 @@ class FileInfoController extends KleinController
         $instructions = $this->request->param('instructions');
         $filesInfoUtility = $this->createFilesInfoUtility($this->chunk);
 
+        // Sanitize what the plugin hook returns, so that its output is sanitized too.
         $decodeInstructionsEvent = new DecodeInstructionsEvent($instructions);
         $this->featureSet->dispatch($decodeInstructionsEvent);
-        $instructions = $decodeInstructionsEvent->getValue();
+        $instructions = InstructionsSanitizer::sanitize((string)$decodeInstructionsEvent->getValue());
 
         if (empty($instructions)) {
             throw new InvalidArgumentException("Empty instructions provided");

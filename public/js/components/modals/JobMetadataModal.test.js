@@ -80,3 +80,173 @@ test('expanding a file accordion toggles the currentFile state', () => {
 
   expect(screen.getByText('Follow these steps')).toBeInTheDocument()
 })
+
+const fileWith = (metadata) => ({
+  id: 1,
+  file_name: 'foo.docx',
+  metadata,
+})
+
+describe('JobMetadataModal', () => {
+  // Instructions reach the modal from file_metadata and are injected with
+  // dangerouslySetInnerHTML, so anything stored before the write path was sanitized — or written
+  // by another client — has to be neutralised here.
+  describe('escapes stored instructions', () => {
+    test('strips event handler attributes', () => {
+      render(
+        <JobMetadataModal
+          showCurrent={true}
+          currentFile={1}
+          files={[
+            fileWith({instructions: '<img src="x" onerror="alert(1)">caption'}),
+          ]}
+        />,
+      )
+
+      expect(screen.getByRole('img')).not.toHaveAttribute('onerror')
+      expect(screen.getByText('caption')).toBeInTheDocument()
+    })
+
+    test('strips javascript: hrefs', () => {
+      render(
+        <JobMetadataModal
+          showCurrent={true}
+          currentFile={1}
+          files={[
+            fileWith({
+              instructions: '<a href="javascript:alert(1)">click</a>',
+            }),
+          ]}
+        />,
+      )
+
+      expect(screen.queryByRole('link')).not.toBeInTheDocument()
+      expect(screen.queryByText(/javascript:/)).not.toBeInTheDocument()
+    })
+
+    test('escapes script tags', () => {
+      render(
+        <JobMetadataModal
+          showCurrent={true}
+          currentFile={1}
+          files={[fileWith({instructions: '<script>alert(1)</script>hello'})]}
+        />,
+      )
+
+      // Escaped, the tag is shown as text instead of becoming an element.
+      expect(
+        screen.getByText('<script>alert(1)</script>hello'),
+      ).toBeInTheDocument()
+    })
+
+    test('applies the same filtering to the project instructions', () => {
+      render(
+        <JobMetadataModal
+          projectInfo='<img src="x" onerror="alert(1)">'
+          files={[fileWith({instructions: null})]}
+        />,
+      )
+
+      expect(screen.getByRole('img')).not.toHaveAttribute('onerror')
+    })
+
+    test('keeps benign markup', () => {
+      render(
+        <JobMetadataModal
+          showCurrent={true}
+          currentFile={1}
+          files={[fileWith({instructions: '<b>Bold</b> and plain text'})]}
+        />,
+      )
+
+      // An element of its own holds `Bold`: escaped, it would be part of one text with `<b>`.
+      expect(screen.getByText('Bold')).toBeInTheDocument()
+      expect(screen.queryByText(/<b>/)).not.toBeInTheDocument()
+      expect(screen.getByText(/and plain text/)).toBeInTheDocument()
+    })
+  })
+
+  // The write path stores anchors as anchors — which of them a translator may follow is decided
+  // here, and core decides none of them (isAllowedLinkRedirect is `() => false`).
+  describe('gates stored links through isAllowedLinkRedirect', () => {
+    test('flattens instruction anchors to markdown text', () => {
+      render(
+        <JobMetadataModal
+          showCurrent={true}
+          currentFile={1}
+          files={[
+            fileWith({
+              instructions:
+                '**Job number**: <a href="https://cloud.memsource.com/web/job/Tsit/translate" target="_blank">Tsit</a>',
+            }),
+          ]}
+        />,
+      )
+
+      expect(screen.queryByRole('link')).not.toBeInTheDocument()
+      expect(
+        screen.getByText(
+          '[Tsit](https://cloud.memsource.com/web/job/Tsit/translate)',
+          {exact: false},
+        ),
+      ).toBeInTheDocument()
+    })
+
+    test('gates the project instructions too', () => {
+      render(
+        <JobMetadataModal
+          projectInfo='read <a href="https://example.com">this</a>'
+          files={[fileWith({instructions: null})]}
+        />,
+      )
+
+      expect(screen.queryByRole('link')).not.toBeInTheDocument()
+      expect(
+        screen.getByText('[this](https://example.com)', {exact: false}),
+      ).toBeInTheDocument()
+    })
+  })
+
+  // Regression: removeNotAllowedLinksFromHtml used to re-query the anchor by its href
+  // (`[href="..."]`), so an href containing a quote produced an invalid selector and
+  // querySelector threw "is not a valid selector", taking the whole modal down.
+  test('renders references whose href contains a quote', () => {
+    expect(() =>
+      render(
+        <JobMetadataModal
+          showCurrent={true}
+          currentFile={1}
+          files={[
+            fileWith({
+              instructions: null,
+              'mtc:references': "<a href='https://x.com/a\"b'>quoted</a>",
+            }),
+          ]}
+        />,
+      ),
+    ).not.toThrow()
+  })
+
+  test('flattens references with duplicated hrefs', () => {
+    render(
+      <JobMetadataModal
+        showCurrent={true}
+        currentFile={1}
+        files={[
+          fileWith({
+            instructions: null,
+            'mtc:references':
+              '<a href="https://dup.com">one</a> and <a href="https://dup.com">two</a>',
+          }),
+        ]}
+      />,
+    )
+
+    // isAllowedLinkRedirect is false in core, so both anchors are flattened to markdown text.
+    expect(
+      screen.getByText('[one](https://dup.com) and [two](https://dup.com)', {
+        exact: false,
+      }),
+    ).toBeInTheDocument()
+  })
+})

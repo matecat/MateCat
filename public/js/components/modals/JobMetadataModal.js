@@ -3,40 +3,43 @@ import CommonUtils from '../../utils/commonUtils'
 import {Accordion} from '../common/Accordion/Accordion'
 import {filterXSS} from 'xss'
 
+// Links the deployment does not allow are flattened to inert markdown text. Core allows none
+// (isAllowedLinkRedirect is `() => false`); plugins override it.
+const removeNotAllowedLinksFromHtml = (html) => {
+  const div = document.createElement('div')
+  div.innerHTML = html
+  const links = div.getElementsByTagName('a')
+  const linksArray = Array.from(links)
+  for (var i = 0; i < linksArray.length; i++) {
+    const linkElement = linksArray[i]
+    const link = linkElement.getAttribute('href')
+    if (!CommonUtils.isAllowedLinkRedirect(link)) {
+      const text = '[' + linkElement.textContent + '](' + link + ')'
+      // Replace the node we already hold: re-querying by href breaks on an anchor with no
+      // href and on any href containing a quote.
+      linkElement.parentNode &&
+        linkElement.parentNode.replaceChild(
+          document.createTextNode(text),
+          linkElement,
+        )
+    }
+  }
+  return div.innerHTML
+}
+
 const JobMetadataModal = (props) => {
   const [currentFile, setCurrentFile] = useState(props.currentFile)
 
   const isMtcReferenceValued = ({metadata}) =>
     typeof metadata?.['mtc:references'] === 'string'
 
-  // Instructions are stored as plain text and injected with dangerouslySetInnerHTML, so the
-  // escaping has to happen here. Plugins override this method to add markdown rendering; they
-  // filter too, and filterXSS is idempotent.
-  const getHtml = (text) => (text ? filterXSS(text) : text)
+  // Instructions keep their anchors and are injected with dangerouslySetInnerHTML, so the
+  // escaping and the link decision happen here. Plugins render markdown over the same value
+  // first; filterXSS and the link check are both idempotent.
+  const getHtml = (text) =>
+    text ? removeNotAllowedLinksFromHtml(filterXSS(text)) : text
 
   const getMTCReferences = ({metadata}) => {
-    const removeNotAllowedLinksFromHtml = (html) => {
-      const div = document.createElement('div')
-      div.innerHTML = html
-      const links = div.getElementsByTagName('a')
-      const linksArray = Array.from(links)
-      for (var i = 0; i < linksArray.length; i++) {
-        const linkElement = linksArray[i]
-        const link = linkElement.getAttribute('href')
-        if (!CommonUtils.isAllowedLinkRedirect(link)) {
-          const text = '[' + linkElement.textContent + '](' + link + ')'
-          // Replace the node we already hold: re-querying by href breaks on an anchor with no
-          // href and on any href containing a quote.
-          linkElement.parentNode &&
-            linkElement.parentNode.replaceChild(
-              document.createTextNode(text),
-              linkElement,
-            )
-        }
-      }
-      return div.innerHTML
-    }
-
     return (
       isMtcReferenceValued({metadata}) && (
         <p
