@@ -16,6 +16,27 @@ import SegmentStore from '../stores/SegmentStore'
 import {lexiqaTooltipwarnings} from '../api/lexiqaTooltipwarnings'
 import UserStore from '../stores/UserStore'
 import {getLexiqaQa} from '../api/getLexiqaQa'
+import {getLexiqaSupportedLocales} from '../api/getLexiqaSupportedLocales/getLexiqaSupportedLocales'
+
+// lexiQA and MateCat name a handful of languages differently for the same locale.
+// Keyed by lexiQA's code, valued by MateCat's code for that same language.
+const languageMapping = {
+  'ku-TR': 'kmr-TR',
+  'cb-IQ': 'ckb-IQ',
+  pau: 'pau-PW',
+  'or-IN': 'ory-IN',
+}
+
+// lexiQA's /supportedLocales response speaks lexiQA's code-space, matching these keys;
+// config.source_code/target_code and the outgoing QA request speak MateCat's, matching
+// these values. These two convert between the two, in opposite directions.
+const getLexiqaLanguageCodeFromMatecat = (matecatCode) =>
+  Object.entries(languageMapping).find(
+    ([, value]) => value === matecatCode,
+  )?.[0] ?? matecatCode
+
+const getMatecatLanguageCodeFromLexiqa = (lexiqaCode) =>
+  languageMapping[lexiqaCode] ?? lexiqaCode
 
 const LXQ = {
   partnerid: config.lxq_partnerid,
@@ -78,6 +99,7 @@ const LXQ = {
     default: {t: 'not found in source', s: 'missing from target'},
   },
   modulesNoHighlight: ['b1g', 'g1g', 'g2g', 'g3g'],
+  _supportedLocales: [],
   init: () => {
     LXQ.initialized = true
     let globalReceived = false
@@ -142,6 +164,19 @@ const LXQ = {
         .map(([key]) => key)
     })
   },
+  retrieveSupportedLocales: function (metadata) {
+    getLexiqaSupportedLocales().then((languages) => {
+      LXQ._supportedLocales = languages
+      if (LXQ.enabled(metadata)) LXQ.init()
+    })
+  },
+  getSupportedLocales: function () {
+    return [
+      ...new Set(
+        LXQ._supportedLocales.map((code) => getMatecatLanguageCodeFromLexiqa(code)),
+      ),
+    ]
+  },
   enabled: function ({lexiqa} = {}) {
     return (
       LXQ.checkCanActivate() &&
@@ -166,8 +201,8 @@ const LXQ = {
   checkCanActivate: function () {
     if (isUndefined(this.canActivate)) {
       this.canActivate =
-        config.lexiqa_languages.indexOf(config.source_rfc) > -1 &&
-        config.lexiqa_languages.indexOf(config.target_rfc) > -1
+        LXQ.getSupportedLocales().indexOf(config.source_code) > -1 &&
+        LXQ.getSupportedLocales().indexOf(config.target_code) > -1
     }
     return this.canActivate
   },
@@ -197,8 +232,8 @@ const LXQ = {
 
     const returnUrl = window.location.href.split('#')[0] + '#' + id_segment
     const data = {
-      sourcelanguage: config.source_rfc,
-      targetlanguage: config.target_rfc,
+      sourcelanguage: getLexiqaLanguageCodeFromMatecat(config.source_code),
+      targetlanguage: getLexiqaLanguageCodeFromMatecat(config.target_code),
       sourcetext: sourcetext,
       targettext: translation,
       returnUrl: returnUrl,
@@ -298,70 +333,76 @@ const LXQ = {
     }
     //FOTD
     LXQ.lexiqaData.lexiqaFetching = true
-    getLexiqaWarningsApi({partnerId: LXQ.partnerid}).then((results) => {
-      if (results.errors !== 0) {
-        //only do something if there are errors in lexiqa server
-        LXQ.lexiqaData.lexiqaWarnings = {}
+    getLexiqaWarningsApi({partnerId: LXQ.partnerid})
+      .then((results) => {
+        if (results.errors !== 0) {
+          //only do something if there are errors in lexiqa server
+          LXQ.lexiqaData.lexiqaWarnings = {}
 
-        results.segments.forEach(function (element) {
-          LXQ.lexiqaData.segments.push(element.segid)
-          if (element.errornum === 0) {
-            return
-          }
-
-          //highlight the respective segments here
-          const highlights = {}
-          const errorsMap = {
-            numbers: [],
-            punctuation: [],
-            spaces: [],
-            urls: [],
-            spelling: [],
-            specialchardetect: [],
-            mspolicheck: [],
-            glossary: [],
-            blacklist: [],
-          }
-
-          let seg = SegmentStore.getSegmentByIdToJS(element.segid)
-          if (!seg) return
-
-          LXQ.lexiqaData.lexiqaWarnings[element.segid] = {}
-          results.results[element.segid].forEach(function (qadata) {
-            LXQ.lexiqaData.lexiqaWarnings[element.segid][qadata.errorid] =
-              qadata
-
-            if (!qadata.ignored) {
-              qadata.color = LXQ.colors[qadata.category]
-              if (qadata.insource) {
-                highlights.source = highlights.source
-                  ? highlights.source
-                  : cloneDeep(errorsMap)
-                highlights.source[qadata.category].push(qadata)
-              } else {
-                highlights.target = highlights.target
-                  ? highlights.target
-                  : cloneDeep(errorsMap)
-                highlights.target[qadata.category].push(qadata)
-              }
+          results.segments.forEach(function (element) {
+            LXQ.lexiqaData.segments.push(element.segid)
+            if (element.errornum === 0) {
+              return
             }
+
+            //highlight the respective segments here
+            const highlights = {}
+            const errorsMap = {
+              numbers: [],
+              punctuation: [],
+              spaces: [],
+              urls: [],
+              spelling: [],
+              specialchardetect: [],
+              mspolicheck: [],
+              glossary: [],
+              blacklist: [],
+            }
+
+            let seg = SegmentStore.getSegmentByIdToJS(element.segid)
+            if (!seg) return
+
+            LXQ.lexiqaData.lexiqaWarnings[element.segid] = {}
+            results.results[element.segid].forEach(function (qadata) {
+              LXQ.lexiqaData.lexiqaWarnings[element.segid][qadata.errorid] =
+                qadata
+
+              if (!qadata.ignored) {
+                qadata.color = LXQ.colors[qadata.category]
+                if (qadata.insource) {
+                  highlights.source = highlights.source
+                    ? highlights.source
+                    : cloneDeep(errorsMap)
+                  highlights.source[qadata.category].push(qadata)
+                } else {
+                  highlights.target = highlights.target
+                    ? highlights.target
+                    : cloneDeep(errorsMap)
+                  highlights.target[qadata.category].push(qadata)
+                }
+              }
+            })
+            if (!LXQ.getVisibleWarningsCountForSegment(element.segid) > 0) {
+              LXQ.removeSegmentWarning(element.segid)
+            }
+            addLexiqaHighlight(element.segid, highlights)
           })
-          if (!LXQ.getVisibleWarningsCountForSegment(element.segid) > 0) {
-            LXQ.removeSegmentWarning(element.segid)
-          }
-          addLexiqaHighlight(element.segid, highlights)
-        })
 
-        LXQ.updateWarningsUI()
-      }
+          LXQ.updateWarningsUI()
+        }
 
-      if (LXQ.enabled()) {
-        LXQ.doQAallSegments()
-        //LXQ.refreshElements();
-      }
-      LXQ.lexiqaData.lexiqaFetching = false
-      if (callback) callback()
-    })
+        if (LXQ.enabled()) {
+          LXQ.doQAallSegments()
+          //LXQ.refreshElements();
+        }
+        LXQ.lexiqaData.lexiqaFetching = false
+        if (callback) callback()
+      })
+      .catch(() => {
+        // A dropped connection ("Load failed") must not leave fetching stuck on.
+        LXQ.lexiqaData.lexiqaFetching = false
+        if (callback) callback()
+      })
   },
   updateWarningsUI: function () {
     LXQ.lexiqaData.segments.sort()

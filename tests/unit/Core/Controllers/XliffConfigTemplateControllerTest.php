@@ -235,7 +235,7 @@ class XliffConfigTemplateControllerTest extends AbstractTest
 
         $this->responseMock->expects($this->once())
             ->method('json')
-            ->with(['error' => 'Bad Get']);
+            ->with(['error' => 'Bad get']);
 
         $this->controller->create();
     }
@@ -289,6 +289,31 @@ class XliffConfigTemplateControllerTest extends AbstractTest
         $this->responseMock->expects($this->once())
             ->method('json')
             ->with(['error' => 'Invalid unique template name']);
+
+        $this->controller->create();
+    }
+
+    #[Test]
+    public function createReturns400WhenARuleLocksADraft(): void
+    {
+        $this->setJsonContentType();
+        $this->requestStub->method('body')->willReturn(json_encode([
+            'name'  => 'locked draft',
+            'rules' => ['xliff12' => [['states' => ['translated'], 'analysis' => 'pre-translated', 'editor' => 'draft', 'lock' => true]]],
+        ]));
+
+        // the real hydration, which builds the rules the DAO would save
+        $this->daoMock->method('createFromJSON')->willReturnCallback(
+            fn(string $json, int $uid) => (new XliffConfigTemplateStruct())->hydrateFromJSON($json, $uid)
+        );
+
+        $this->responseMock->expects($this->once())
+            ->method('code')
+            ->with(400);
+
+        $this->responseMock->expects($this->once())
+            ->method('json')
+            ->with(['error' => 'A rule with editor status DRAFT can not be locked.']);
 
         $this->controller->create();
     }
@@ -374,7 +399,7 @@ class XliffConfigTemplateControllerTest extends AbstractTest
 
         $this->responseMock->expects($this->once())
             ->method('json')
-            ->with(['error' => 'Bad Get']);
+            ->with(['error' => 'Bad get']);
 
         $this->controller->update();
     }

@@ -10,10 +10,12 @@
 namespace Model\MTQE\PayableRate;
 
 use DomainException;
+use InvalidArgumentException;
 use JsonSerializable;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\MTQE\PayableRate\DTO\MTQEPayableRateBreakdowns;
 use TypeError;
+use Utils\Validation\UserSuppliedName;
 
 class MTQEPayableRateStruct extends AbstractDaoSilentStruct implements JsonSerializable
 {
@@ -38,6 +40,8 @@ class MTQEPayableRateStruct extends AbstractDaoSilentStruct implements JsonSeria
      * @return $this
      * @throws DomainException
      * @throws TypeError
+     * @throws InvalidArgumentException when the name is empty, holds a character the connection
+     *                                  cannot carry, or will not fit the column
      */
     public function hydrateFromJSON(string $json, $uid = null): MTQEPayableRateStruct
     {
@@ -52,7 +56,14 @@ class MTQEPayableRateStruct extends AbstractDaoSilentStruct implements JsonSeria
         }
 
         $this->uid = $decoded_json['uid'] ?? $uid;
-        $this->name = $decoded_json['name'];
+        // Normalised like every other template name. The column here is a latin1 varchar(255),
+        // so a name in a non-Latin-1 script still cannot be stored — that is a separate schema
+        // problem, not a reason to leave a control character or a decomposed form in the value.
+        $this->name = UserSuppliedName::validated(
+            $decoded_json['name'],
+            'name',
+            UserSuppliedName::TEMPLATE_NAME_MAX_LENGTH
+        );
 
         if (isset($decoded_json['id'])) {
             $this->id = $decoded_json['id'];

@@ -2,6 +2,7 @@
 
 namespace Utils\Templating;
 
+use JsonSerializable;
 use Stringable;
 
 /**
@@ -25,7 +26,7 @@ use Stringable;
  *
  * @see PHPTalMap for the same contract over an array, and PHPTalBoolean over a bool.
  */
-class PHPTalString implements Stringable
+class PHPTalString implements Stringable, JsonSerializable
 {
 
     private const int FLAGS = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP;
@@ -44,6 +45,18 @@ class PHPTalString implements Stringable
         // json_encode only fails here on malformed UTF-8; an empty literal is a safe
         // fallback because the template relies on this value carrying its own quotes.
         return is_string($encoded) ? $encoded : '""';
+    }
+
+    /**
+     * Handed back unwrapped, so the value can go into a whole-payload json_encode() without the
+     * quotes this class supplies when it stands alone. Without this the encoder would serialise the
+     * object, and a private property serialises to {}, silently dropping the value.
+     *
+     * @return string
+     */
+    public function jsonSerialize(): string
+    {
+        return $this->value;
     }
 
 }

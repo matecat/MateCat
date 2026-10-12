@@ -60,7 +60,7 @@ describe('TagEntityLite', () => {
       </TagEntityLite>,
     )
     expect(container.querySelector('.index-counter')).toBeTruthy()
-    expect(container.querySelector('.index-counter').textContent).toBe('1')
+    expect(container.querySelector('.index-counter')).toHaveTextContent('1')
   })
 
   test('renders ph tag index as 1-based (index 0 -> display 1)', () => {
@@ -74,7 +74,7 @@ describe('TagEntityLite', () => {
         <span>text</span>
       </TagEntityLite>,
     )
-    expect(container.querySelector('.index-counter').textContent).toBe('3')
+    expect(container.querySelector('.index-counter')).toHaveTextContent('3')
   })
 
   test('does not render index counter for non-ph tags', () => {
@@ -103,8 +103,8 @@ describe('TagEntityLite', () => {
       </TagEntityLite>,
     )
     const tagSpan = container.querySelector('.tag')
-    expect(tagSpan.textContent).toContain('1')
-    expect(tagSpan.textContent).toContain('<p>')
+    expect(tagSpan).toHaveTextContent(/1/)
+    expect(tagSpan).toHaveTextContent(/<p>/)
   })
 
   test('hides children content when compressed', () => {
@@ -120,8 +120,8 @@ describe('TagEntityLite', () => {
       </TagEntityLite>,
     )
     const tagSpan = container.querySelector('.tag')
-    expect(tagSpan.textContent).toBe('1')
-    expect(tagSpan.classList.contains('tag-compressed')).toBe(true)
+    expect(tagSpan).toHaveTextContent('1')
+    expect(tagSpan).toHaveClass('tag-compressed')
   })
 
   test('applies tag-compressed class when compressed and ph', () => {
@@ -137,8 +137,8 @@ describe('TagEntityLite', () => {
       </TagEntityLite>,
     )
     expect(
-      container.querySelector('.tag').classList.contains('tag-compressed'),
-    ).toBe(true)
+      container.querySelector('.tag'),
+    ).toHaveClass('tag-compressed')
   })
 
   test('does not apply tag-compressed class for non-ph tags', () => {
@@ -154,8 +154,8 @@ describe('TagEntityLite', () => {
       </TagEntityLite>,
     )
     expect(
-      container.querySelector('.tag').classList.contains('tag-compressed'),
-    ).toBe(false)
+      container.querySelector('.tag'),
+    ).not.toHaveClass('tag-compressed')
   })
 
   test('reacts to store toggle event', () => {
@@ -171,8 +171,8 @@ describe('TagEntityLite', () => {
     )
 
     expect(
-      container.querySelector('.tag').classList.contains('tag-compressed'),
-    ).toBe(false)
+      container.querySelector('.tag'),
+    ).not.toHaveClass('tag-compressed')
 
     mockCompressed = true
     act(() => {
@@ -180,8 +180,8 @@ describe('TagEntityLite', () => {
     })
 
     expect(
-      container.querySelector('.tag').classList.contains('tag-compressed'),
-    ).toBe(true)
+      container.querySelector('.tag'),
+    ).toHaveClass('tag-compressed')
   })
 
   test('applies correct style class', () => {
@@ -196,10 +196,10 @@ describe('TagEntityLite', () => {
       </TagEntityLite>,
     )
     expect(
-      container.querySelector('.tag').classList.contains('tag-selfclosed'),
-    ).toBe(true)
-    expect(container.querySelector('.tag').classList.contains('tag-ph')).toBe(
-      true,
+      container.querySelector('.tag'),
+    ).toHaveClass('tag-selfclosed')
+    expect(container.querySelector('.tag')).toHaveClass(
+      'tag-ph',
     )
   })
 
@@ -231,7 +231,7 @@ describe('TagEntityLite', () => {
     )
     expect(container.querySelector('[data-testid="tooltip-wrapper"]')).toBeTruthy()
     const tooltipContent = container.querySelector('[data-testid="tooltip-content"]')
-    expect(tooltipContent.textContent).toContain('test')
+    expect(tooltipContent).toHaveTextContent(/test/)
   })
 
   test('shows tooltip on hover when ph has a placeholder (even if not compressed)', () => {
@@ -278,8 +278,8 @@ describe('TagEntityLite', () => {
     )
     expect(container.querySelector('.tag-text-lite')).toBeTruthy()
     expect(
-      container.querySelector('.tag').classList.contains('tag-pc-open'),
-    ).toBe(true)
+      container.querySelector('.tag'),
+    ).toHaveClass('tag-pc-open')
     expect(
       container.querySelector('[data-testid="tooltip-wrapper"]'),
     ).toBeTruthy()
@@ -296,11 +296,11 @@ describe('TagEntityLite', () => {
         <span>content</span>
       </TagEntityLite>,
     )
-    expect(container.querySelector('.index-counter').textContent).toBe('1')
+    expect(container.querySelector('.index-counter')).toHaveTextContent('1')
     expect(container.querySelector('.tag-text-lite')).toBeNull()
     expect(
-      container.querySelector('.tag').classList.contains('tag-pc-close'),
-    ).toBe(true)
+      container.querySelector('.tag'),
+    ).toHaveClass('tag-pc-close')
     expect(container.querySelector('[data-testid="tooltip-wrapper"]')).toBeNull()
   })
 })

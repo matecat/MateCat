@@ -1,3 +1,4 @@
+import React from 'react'
 import SegmentUtils from './utils/segmentUtils'
 import {SEGMENTS_STATUS} from './constants/Constants'
 import {isUndefined} from 'lodash'
@@ -212,14 +213,14 @@ export const execSetTranslationTail = () => {
     status,
     propagate,
   )
-  if (callback) {
-    callback.call(this)
-  }
   setTranslation(translateRequest)
     .then((data) => {
       SegmentActions.setChoosenSuggestion(idSegment, null)
       SegmentActions.setSegmentSaving(idSegment, false)
       setTranslation_success(data, item)
+      if (callback) {
+        callback.call(this)
+      }
       //Review
       if (config.isReview) {
         SegmentActions.getSegmentVersionsIssues(idSegment)
@@ -240,7 +241,7 @@ export const execSetTranslationTail = () => {
         OfflineUtils.changeStatusOffline(idSegment)
         OfflineUtils.startOfflineMode()
       }
-      SegmentActions.setSegmentSaving(idSegment, true)
+      SegmentActions.setSegmentSaving(idSegment, false)
     })
 }
 const setTranslation_success = (response, item) => {
@@ -272,25 +273,39 @@ const checkSegmentsPropagation = (item, propagationData) => {
       )
     }
     if (!autoPropagate && propagationData.segments_for_propagation) {
-      let text =
-        'The segment translation has been propagated to the other repetitions.'
+      let text = (
+        <>The segment translation has been propagated to the other repetitions.</>
+      )
       if (
         propagationData.segments_for_propagation.not_propagated &&
         propagationData.segments_for_propagation.not_propagated.ice.id &&
         propagationData.segments_for_propagation.not_propagated.ice.id.length >
           0
       ) {
-        text =
-          'The segment translation has been <b>propagated to the other repetitions</b>.</br> Repetitions in <b>locked segments have been excluded</b> from the propagation.'
+        text = (
+          <>
+            The segment translation has been{' '}
+            <b>propagated to the other repetitions</b>.
+            <br />
+            Repetitions in <b>locked segments have been excluded</b> from the
+            propagation.
+          </>
+        )
       } else if (
         propagationData.segments_for_propagation.not_propagated &&
         propagationData.segments_for_propagation.not_propagated.not_ice.id &&
         propagationData.segments_for_propagation.not_propagated.not_ice.id
           .length > 0
       ) {
-        text =
-          'The segment translation has been <b>propagated to the other repetitions in locked segments</b>. </br> Repetitions in <b>non-locked segments have been excluded</b> from the' +
-          ' propagation.'
+        text = (
+          <>
+            The segment translation has been{' '}
+            <b>propagated to the other repetitions in locked segments</b>.
+            <br />
+            Repetitions in <b>non-locked segments have been excluded</b> from
+            the propagation.
+          </>
+        )
       }
 
       const notification = {
@@ -299,7 +314,6 @@ const checkSegmentsPropagation = (item, propagationData) => {
         type: 'info',
         autoDismiss: true,
         timer: 5000,
-        allowHtml: true,
         position: 'bl',
       }
       CatToolActions.removeAllNotifications()

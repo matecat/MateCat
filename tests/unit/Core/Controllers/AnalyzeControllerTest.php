@@ -14,6 +14,7 @@ use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Filter\IsAnInternalUserEvent;
 use Model\Teams\MembershipDao;
+use Model\Teams\MembershipStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
@@ -28,6 +29,7 @@ use Utils\Registry\AppConfig;
  *
  * Reserved ID block base = 9_062_000 (Wave 9 task N=62).
  *   base+1 project, base+2 job, base+3 segment, base+4 file.
+ *   base+11 foreign project (FOREIGN_BASE block).
  * Owner email: ctrltest_9062000@example.org (per-suite unique, §4).
  * Clean ONLY by reserved id.
  */
@@ -83,6 +85,8 @@ class AnalyzeControllerTest extends AbstractTest
     use ControllerSeedFragments;
 
     private const int BASE = 9_062_000;
+    /** Second project, used as the foreign `pid` in the project-binding test. */
+    private const int FOREIGN_BASE = 9_062_010;
     private const string JOB_PASSWORD = 'jobpw';
     private const string PROJECT_PASSWORD = 'projpw';
 
@@ -98,6 +102,7 @@ class AnalyzeControllerTest extends AbstractTest
         parent::setUp();
 
         $this->cleanFragments(self::BASE);
+        $this->cleanFragments(self::FOREIGN_BASE);
         $this->seedFixtures();
 
         $this->reflector = new ReflectionClass(TestableAnalyzeViewController::class);
@@ -123,6 +128,7 @@ class AnalyzeControllerTest extends AbstractTest
 
     protected function tearDown(): void
     {
+        $this->cleanFragments(self::FOREIGN_BASE);
         $this->cleanFragments(self::BASE);
         parent::tearDown();
     }
@@ -242,6 +248,28 @@ class AnalyzeControllerTest extends AbstractTest
 
     /** @throws ReflectionException */
     #[Test]
+    public function renderViewSetsJobNotFound404WhenJobBelongsToAnotherProject(): void
+    {
+        $this->seedProject(self::FOREIGN_BASE, $this->ownerEmail(self::FOREIGN_BASE), 'foreignpw');
+
+        $this->setNamedParams([
+            'pid' => (string)$this->projectId(self::FOREIGN_BASE),
+            'jid' => (string)$this->jobId(self::BASE),
+            'password' => self::JOB_PASSWORD,
+        ]);
+
+        try {
+            $this->controller->renderView();
+            $this->fail('Expected RenderTerminatedException');
+        } catch (RenderTerminatedException) {
+            $this->assertSame('job_not_found.html', $this->controller->lastTemplate);
+            $this->assertSame(404, $this->controller->lastViewCode);
+            $this->assertArrayNotHasKey('project_access_token', $this->controller->lastViewData);
+        }
+    }
+
+    /** @throws ReflectionException */
+    #[Test]
     public function renderViewSetsProjectNotFound404WhenProjectPasswordMismatchAndNoJob(): void
     {
         $this->setNamedParams([
@@ -279,11 +307,11 @@ class AnalyzeControllerTest extends AbstractTest
             $this->fail('Expected RenderTerminatedException');
         } catch (RenderTerminatedException) {
             $this->assertSame('jobAnalysis.html', $this->controller->lastTemplate);
-            $this->assertSame((string)$this->jobId(self::BASE), $this->controller->lastViewData['jid']);
+            $this->assertSame((string)$this->jobId(self::BASE), $this->controller->lastViewData['id_job']);
             $this->assertSame(self::JOB_PASSWORD, $this->controller->lastViewData['job_password']);
             $this->assertArrayHasKey('project_access_token', $this->controller->lastViewData);
-            $this->assertSame($this->projectId(self::BASE), $this->controller->addedParams['pid']);
-            $this->assertArrayHasKey('num_segments', $this->controller->addedParams);
+            $this->assertSame($this->projectId(self::BASE), $this->controller->addedParams['id_project']);
+            $this->assertArrayHasKey('totalSegments', $this->controller->addedParams);
             $this->assertTrue($this->controller->rendered);
         } finally {
             AppConfig::$ENV = $previousEnv;
@@ -310,9 +338,9 @@ class AnalyzeControllerTest extends AbstractTest
             $this->fail('Expected RenderTerminatedException');
         } catch (RenderTerminatedException) {
             $this->assertSame('analyze.html', $this->controller->lastTemplate);
-            $this->assertSame(self::PROJECT_PASSWORD, $this->controller->lastViewData['project_password']);
-            $this->assertSame($this->projectId(self::BASE), $this->controller->addedParams['pid']);
-            $this->assertSame('DONE', $this->controller->addedParams['project_status']);
+            $this->assertSame(self::PROJECT_PASSWORD, $this->controller->lastViewData['password']);
+            $this->assertSame($this->projectId(self::BASE), $this->controller->addedParams['id_project']);
+            $this->assertSame('DONE', $this->controller->addedParams['status']);
             $this->assertTrue($this->controller->rendered);
         } finally {
             AppConfig::$ENV = $previousEnv;
@@ -352,7 +380,7 @@ class AnalyzeControllerTest extends AbstractTest
         // split_feature_available says the affordance exists on this page, split_enabled is the button
         // state for this caller. Collapsing them back into one would either take the split entry away
         // from everybody or leave it clickable for a caller the endpoints refuse.
-        $this->assertSame('true', (string)$this->controller->addedParams['split_feature_available']);
+        $this->assertSame('true', (string)$this->controller->addedParams['splitFeatureAvailable']);
     }
 
     /**
@@ -371,7 +399,9 @@ class AnalyzeControllerTest extends AbstractTest
         // The rows were just written, so drop the cached view of them. Without this the test depends on
         // whatever a previous run left in Redis for this (uid, id_team) — the membership read is cached
         // for 10 minutes and caches misses as readily as hits.
-        (new MembershipDao(obtainTestDatabase()))->destroyCacheTeamByIdAndUser($this->teamId(self::BASE), $user);
+        (new MembershipDao(obtainTestDatabase()))->destroyCache(
+            new MembershipStruct(['uid' => $user->uid, 'id_team' => $this->teamId(self::BASE)])
+        );
 
         $this->assertSame('true', $this->renderAndReadSplitEnabled());
     }
@@ -450,7 +480,7 @@ class AnalyzeControllerTest extends AbstractTest
             $this->controller->renderView();
             $this->fail('Expected RenderTerminatedException');
         } catch (RenderTerminatedException) {
-            return (string)$this->controller->addedParams['split_enabled'];
+            return (string)$this->controller->addedParams['splitEnabled'];
         } finally {
             AppConfig::$ENV = $previousEnv;
         }

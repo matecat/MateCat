@@ -70,7 +70,7 @@ class ProjectAccessValidator extends Base
     protected function _validate(): void
     {
         if (!$this->controller->isLoggedIn()) {
-            throw new AuthorizationError("Not Authorized. You must be logged in.", 401);
+            throw new AuthorizationError("Not authorized. You must be logged in.", 401);
         }
 
         $ownerEmail = $this->project->id_customer ?? '';
@@ -80,7 +80,7 @@ class ProjectAccessValidator extends Base
 
         $idTeam = $this->project->id_team ?? null;
         if ($idTeam === null) {
-            throw new AuthorizationError("Not Authorized, the user does not belong to team", 401);
+            throw new AuthorizationError("Not authorized", 401);
         }
 
         $team = (new MembershipDao($this->controller->getDatabase()))->setCacheTTL($this->ttl)->findTeamByIdAndUser(
@@ -89,7 +89,7 @@ class ProjectAccessValidator extends Base
         );
 
         if (empty($team)) {
-            throw new AuthorizationError("Not Authorized, the user does not belong to team " . $idTeam, 401);
+            throw new AuthorizationError("Not authorized", 401);
         }
 
         if (method_exists($this->controller, 'setTeam')) {

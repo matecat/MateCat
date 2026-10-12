@@ -279,7 +279,7 @@ class OutsourceConfirmationControllerTest extends AbstractTest
         ]);
 
         $this->expectException(AuthorizationError::class);
-        $this->expectExceptionMessage('Invalid Job');
+        $this->expectExceptionMessage('Invalid job');
 
         $this->controller->confirm();
     }
@@ -305,7 +305,7 @@ class OutsourceConfirmationControllerTest extends AbstractTest
         ]);
 
         $this->expectException(AuthorizationError::class);
-        $this->expectExceptionMessage('Invalid Job');
+        $this->expectExceptionMessage('Invalid job');
 
         $this->controller->confirm();
     }

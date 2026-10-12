@@ -21,6 +21,7 @@ use Model\WordCount\CounterModel;
 use Model\WordCount\WordCountStruct;
 use PDOException;
 use Plugins\Features\ReviewExtended\Email\BatchReviewProcessorAlertEmail;
+use RuntimeException;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use ReflectionException;
 use TypeError;
@@ -129,8 +130,12 @@ class BatchReviewProcessor
 
             LoggerFactory::doJsonLog('Batch review processor created a new chunkReview (id ' . $chunkReview->id . ') for chunk with id ' . $this->chunk->id);
 
+            // After the commit. send() enqueues to ActiveMQ rather than talking SMTP, so this is not
+            // a slow call — but enqueuing inside the transaction means a rollback still delivers the
+            // alert, and the worker can dequeue before the row it describes is visible. It also keeps
+            // one more network round trip out of the job-wide row locks held above.
             $alertEmail = new BatchReviewProcessorAlertEmail($this->chunk, $chunkReview);
-            $alertEmail->send();
+            $this->chunkReviewDao->getDatabaseHandler()->onCommit(static fn() => $alertEmail->send());
         }
 
         return $chunkReviews;
@@ -143,6 +148,23 @@ class BatchReviewProcessor
     public function process(): void
     {
         $project = $this->chunk->getProject(new ProjectDao($this->chunkReviewDao->getDatabaseHandler()));
+
+        // qa_chunk_reviews before qa_entries, once, for the whole batch.
+        //
+        // deleteIssues() below writes qa_entries, and TranslationIssueModel locks qa_chunk_reviews
+        // before touching qa_entries — so acquiring in the opposite order here is an ABBA deadlock
+        // against any concurrent issue create/delete on the same job. That became reachable when the
+        // job lock stopped being a Redis advisory lock (which never joined InnoDB's wait-for graph)
+        // and became row locks held to commit. translate() rolls back and rethrows, so the loser is
+        // a failed segment save for an ordinary user.
+        //
+        // Hoisting it also makes the find-then-create in getOrCreateChunkReviews() atomic — the
+        // id_job gap lock keeps a second request out of the window between findChunkReviews() and
+        // createRecord() — and saves re-locking the same rows once per chunk review per event.
+        $this->chunkReviewDao->lockByJobId(
+            $this->chunk->id ?? throw new RuntimeException('Missing chunk id')
+        );
+
         $chunkReviews = $this->getOrCreateChunkReviews($project);
 
         foreach ($this->prepared_events as $translationEvent) {
@@ -150,7 +172,11 @@ class BatchReviewProcessor
 
             $segmentTranslationModel->evaluateChunkReviewEventTransitions();
             $segmentTranslationModel->deleteIssues();
-            $segmentTranslationModel->sendNotificationEmail();
+            // Deferred for the same reason as the alert above: no notification for a save that ends
+            // up rolled back. Safe to move past the commit — _sendNotificationEmail() reads the
+            // in-memory event/segment/chunk plus users and routes, never the chunk-review counters —
+            // and the user/project lookups now see committed state.
+            $this->chunkReviewDao->getDatabaseHandler()->onCommit(static fn() => $segmentTranslationModel->sendNotificationEmail());
 
             foreach ($segmentTranslationModel->getEvent()->getChunkReviewsPartials() as $chunkReview) {
                 $project = $chunkReview->getChunk(new JobDao($this->chunkReviewDao->getDatabaseHandler()))->getProject(new ProjectDao($this->chunkReviewDao->getDatabaseHandler()));

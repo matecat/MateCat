@@ -87,7 +87,7 @@ class TeamMembersController extends KleinController
             is_array($params['members']) ? $params['members'] : [],
             'is_string'
         ));
-        if ($this->isOverInvitationRateLimit($this->response, $this->user, '/api/v2/teams/members')) {
+        if ($this->isOverInvitationRateLimit($this->response, $this->user, '/api/v2/teams/members', count($members))) {
             return;
         }
 
@@ -111,8 +111,9 @@ class TeamMembersController extends KleinController
      */
     public function delete(): void
     {
-        $this->getDatabase()->begin();
-
+        // No transaction is opened here. TeamModel::updateMembers() runs its own scope, and the
+        // begin() that used to sit on this line closed nothing: the model's commit ended it, so the
+        // controller opened a transaction another object decided when to end.
         $teamStruct = (new TeamDao($this->getDatabase()))
                 ->fetchById($this->request->param('id_team'), TeamStruct::class)
             ?? throw new \RuntimeException('Team not found');

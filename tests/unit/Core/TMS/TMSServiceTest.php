@@ -292,7 +292,7 @@ class TMSServiceTest extends AbstractTest
         $this->myMemoryStub->method('glossaryImport')->willReturn($importResponse);
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessage("Can't load Glossary file right now");
+        $this->expectExceptionMessage("Can't load glossary file right now");
         $this->service->addGlossaryInMyMemory($file);
     }
 

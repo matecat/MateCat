@@ -1,3 +1,4 @@
+@use 'commons/variables';
 .action-menu {
-  font-size: 16px;
+  font-size: variables.$font-size-small;
 }

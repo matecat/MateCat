@@ -266,7 +266,7 @@ const SegmentActions = {
        If is an ICE we allow to change the translation because is not possible to add an issue
      */
 
-    const mandatoryIssues = CatToolStore.getJobMetadata().job.mandatory_issues
+    const mandatoryIssues = CatToolStore.getJobMetadata()?.job?.mandatory_issues
 
     const currentRevisionKey = `r${config.revisionNumber}`
 
@@ -281,7 +281,7 @@ const SegmentActions = {
       !segment.splitted &&
       segment.modified &&
       issues.length === 0 &&
-      !segment.ice_locked &&
+      !segment.locked &&
       isMandatoryRevisionIssues
     ) {
       SegmentActions.openIssuesPanel({sid: segment.sid}, true)
@@ -461,8 +461,8 @@ const SegmentActions = {
       id_job: config.id_job,
       source: source,
       target: target,
-      source_lang: config.source_rfc,
-      target_lang: config.target_rfc,
+      source_lang: config.source_code,
+      target_lang: config.target_code,
       suggestion: suggestion,
       id_segment: sid,
     })
@@ -602,39 +602,47 @@ const SegmentActions = {
       !config.isReview &&
       config.job_completion_current_phase == 'revise'
     if (projectCompletionCheck) {
-      let message =
-        'All segments are in <b>read-only mode</b> because this job is under review.'
-
-      if (config.chunk_completion_undoable && config.last_completion_event_id) {
-        message =
-          message +
-          '<p class=\'warning-call-to\'><a href="javascript:void(0);" id="showTranslateWarningMessageUndoLink" >Re-Open Job</a></p>'
-      }
+      const showUndo =
+        config.chunk_completion_undoable && config.last_completion_event_id
 
       addNotification({
         uid: 'translate-warning',
         autoDismiss: false,
         dismissable: true,
         position: 'tc',
-        text: message,
+        text: (
+          <>
+            All segments are in <b>read-only mode</b> because this job is under
+            review.
+            {showUndo && (
+              <p className="warning-call-to">
+                <a
+                  href="javascript:void(0);"
+                  id="showTranslateWarningMessageUndoLink"
+                >
+                  Re-Open Job
+                </a>
+              </p>
+            )}
+          </>
+        ),
         title: 'Warning',
         type: 'warning',
-        allowHtml: true,
       })
     }
     if (TextUtils.justSelecting('readonly')) return
 
-    const locked = !segment.unlocked && SegmentUtils.isIceSegment(segment)
+    const locked = !segment.unlocked && SegmentUtils.isLockedSegment(segment)
     if (locked) {
       ModalsActions.showModalComponent(
         MODAL_KEY.ALERT,
         {
           text:
-            "Segment is locked (in-context exact match) and shouldn't be edited. " +
+            "Segment is locked and shouldn't be edited. " +
             'If you must edit it, click on the padlock icon to the left of the segment. ' +
             'The owner of the project will be notified of any edits.',
         },
-        'Ice Matches',
+        'Locked segment',
       )
       return
     }
@@ -1007,7 +1015,10 @@ const SegmentActions = {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
       sid: sid,
-      message: 'A termbase item has been deleted',
+      message: {
+        title: 'Termbase',
+        text: 'A termbase item has been deleted',
+      },
     })
     AppDispatcher.dispatch({
       actionType: SegmentConstants.DELETE_FROM_GLOSSARY,
@@ -1019,7 +1030,11 @@ const SegmentActions = {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
       sid: sid,
-      message: error.message ? error.message : `Error code: ${error.code}`,
+      message: {
+        title: 'Termbase',
+        text: error.message ? error.message : `Error code: ${error.code}`,
+        type: 'error',
+      },
     })
     AppDispatcher.dispatch({
       actionType: SegmentConstants.ERROR_DELETE_FROM_GLOSSARY,
@@ -1035,14 +1050,14 @@ const SegmentActions = {
       .catch((errors) => {
         if (errors.status === 403) {
           const notification = {
-            title: 'Glossary edit failed',
+            title: 'Termbase edit failed',
             text: (
               <span>
-                This glossary is part of a resource that isn’t enabled for
+                This Termbase is part of a resource that isn’t enabled for
                 updates.
                 <br />
                 To edit it, open the <b>Settings</b> panel, go to the{' '}
-                <b>Translation memory & glossary</b> tab, and enable the{' '}
+                <b>Translation memory & Termbase</b> tab, and enable the{' '}
                 <b>“Update”</b> checkbox next to the resource name.
               </span>
             ),
@@ -1054,7 +1069,11 @@ const SegmentActions = {
           AppDispatcher.dispatch({
             actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
             sid: sid,
-            message: errors[0].message,
+            message: {
+              title: 'Termbase',
+              text: errors[0].message,
+              type: 'error',
+            },
           })
         } else {
           OfflineUtils.failedConnection()
@@ -1076,7 +1095,11 @@ const SegmentActions = {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
       sid: sid,
-      message: error.message ? error.message : `Error code: ${error.code}`,
+      message: {
+        title: 'Termbase',
+        text: error.message ? error.message : `Error code: ${error.code}`,
+        type: 'error',
+      },
     })
     AppDispatcher.dispatch({
       actionType: SegmentConstants.ERROR_ADD_GLOSSARY_ITEM,
@@ -1126,7 +1149,11 @@ const SegmentActions = {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
       sid: sid,
-      message: error.message ? error.message : `Error code: ${error.code}`,
+      message: {
+        title: 'Termbase',
+        text: error.message ? error.message : `Error code: ${error.code}`,
+        type: 'error',
+      },
     })
     AppDispatcher.dispatch({
       actionType: SegmentConstants.ERROR_CHANGE_GLOSSARY,
@@ -1222,16 +1249,12 @@ const SegmentActions = {
     }
     localStorage.setItem(this.localStorageReviewPanelClosed, false)
     window.dispatchEvent(new Event('resize'))
-    if (data && openSegment) {
+    // Only bring the segment into view when it is not already open. Both
+    // openSegment() and scrollToSegment() scroll the row to 'start', and the
+    // file header is sticky at that offset, so scrolling a segment the user is
+    // already working in pushes it underneath the header for no reason.
+    if (data && openSegment && !segment?.opened) {
       SegmentActions.openSegment(data.sid)
-      SegmentActions.scrollToSegment(data.sid)
-      window.setTimeout(
-        function (data) {
-          SegmentActions.scrollToSegment(data.sid)
-        },
-        500,
-        data,
-      )
     }
     AppDispatcher.dispatch({
       actionType: SegmentConstants.OPEN_ISSUES_PANEL,
@@ -1483,7 +1506,7 @@ const SegmentActions = {
         ModalsActions.showModalComponent(
           MODAL_KEY.UNLOCK_ALL_SEGMENTS,
           {},
-          'Unlock all 101% segments',
+          'Unlock all locked segments',
         )
       }
     }
@@ -1711,8 +1734,7 @@ const SegmentActions = {
     setLastSegmentFromLocalStorage(id_segment.toString())
     const requestData = {
       action: 'setCurrentSegment',
-      password: config.password,
-      revision_number: config.revisionNumber,
+      password: config.currentPassword,
       id_segment: id_segment.toString(),
       id_job: config.id_job,
     }

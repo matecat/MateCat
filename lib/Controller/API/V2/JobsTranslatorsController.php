@@ -112,7 +112,7 @@ class JobsTranslatorsController extends KleinController
         $confirmationStruct = $confDao->setCacheTTL(60 * 60)->getConfirmation($this->jStruct);
 
         if (!empty($confirmationStruct)) {
-            throw new InvalidArgumentException("The Job is Outsourced.", 400);
+            throw new InvalidArgumentException("The job is outsourced.", 400);
         }
 
         if ($this->jStruct->isDeleted()) {

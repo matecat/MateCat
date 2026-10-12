@@ -76,4 +76,25 @@ class MSWordTest extends AbstractTest
         $dto->fromArray(['unknown' => true]);
         $this->assertFalse($dto->jsonSerialize()['extract_doc_properties']);
     }
+
+    #[Test]
+    public function settersTrimTheEdgesAndKeepInternalSpaces(): void
+    {
+        $dto = new MSWord();
+        $dto->setExcludeStyles([' Heading 1 ', '  ', 'Body Text']);
+        $dto->setExcludeHighlightColors([" yellow\n", '']);
+
+        $result = $dto->jsonSerialize();
+        $this->assertSame(['Heading 1', 'Body Text'], $result['exclude_styles']);
+        $this->assertSame(['yellow'], $result['exclude_highlight_colors']);
+    }
+
+    #[Test]
+    public function fromArrayTrimsNames(): void
+    {
+        $dto = new MSWord();
+        $dto->fromArray(['exclude_styles' => [' Normal ', ' ']]);
+
+        $this->assertSame(['Normal'], $dto->jsonSerialize()['exclude_styles']);
+    }
 }

@@ -28,6 +28,7 @@ use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
 use Utils\Constants\TranslationStatus;
 use Utils\Logger\LoggerFactory;
+use Utils\Validation\UserSuppliedName;
 use Utils\Validator\Contracts\ValidatorObject;
 use Utils\Validator\IsJobRevisionValidator;
 
@@ -36,23 +37,18 @@ class CatUtils
 
     const string splitPlaceHolder = '##$_SPLIT$##';
 
-    const string lfPlaceholderClass = '_0A';
-    const string crPlaceholderClass = '_0D';
-    const string crlfPlaceholderClass = '_0D0A';
     const string lfPlaceholder = '##$_0A$##';
     const string crPlaceholder = '##$_0D$##';
-    const string crlfPlaceholder = '##$_0D0A$##';
-    const string lfPlaceholderRegex = '/\#\#\$_0A\$\#\#/g';
-    const string crPlaceholderRegex = '/\#\#\$_0D\$\#\#/g';
-    const string crlfPlaceholderRegex = '/#\#\$_0D\$#\#\#\#\$_0A\$#\#/g';
 
     const string tabPlaceholder = '##$_09$##';
-    const string tabPlaceholderClass = '_09';
-    const string tabPlaceholderRegex = '/\#\#\$_09\$\#\#/g';
 
     const string nbspPlaceholder = '##$_A0$##';
-    const string nbspPlaceholderClass = '_A0';
-    const string nbspPlaceholderRegex = '/\#\#\$_A0\$\#\#/g';
+
+    /** `users`.`first_name` and `users`.`last_name` are varchar(100). */
+    const int PERSON_NAME_MAX_LENGTH = 100;
+
+    /** `projects`.`name` is a varchar(200). */
+    const int PROJECT_NAME_MAX_LENGTH = 200;
 
     // CJK and CJ languages
     /** @var array<string, float> */
@@ -65,19 +61,15 @@ class CatUtils
     protected JobDao $jobDao;
     protected SegmentTranslationDao $segmentTranslationDao;
     protected FeatureSet $featureSet;
-    /** @var array<string, mixed> */
-    private array $serverGlobalVars;
 
     /**
      * @param IDatabase $database
-     * @param array<string, mixed>|null $serverGlobalVars
      *
      * @throws Exception
      */
-    public function __construct(IDatabase $database, ?array $serverGlobalVars = null)
+    public function __construct(IDatabase $database)
     {
         $this->database = $database;
-        $this->serverGlobalVars = $serverGlobalVars ?? $_SERVER;
         $this->chunkReviewDao = new ChunkReviewDao($database);
         $this->jobDao = new JobDao($database);
         $this->segmentTranslationDao = new SegmentTranslationDao($database);
@@ -830,60 +822,6 @@ class CatUtils
     }
 
     /**
-     * @return bool
-     */
-    public function getIsRevisionFromRequestUri(): bool
-    {
-        if (!isset($this->serverGlobalVars['REQUEST_URI'])) {
-            return false;
-        }
-
-        $_from_url = parse_url($this->serverGlobalVars['REQUEST_URI']);
-
-        if ($_from_url === false || !isset($_from_url['path'])) {
-            return false;
-        }
-
-        return self::isARevisePath($_from_url['path']);
-    }
-
-    /**
-     * Determines if the current request originates from a "revise" path based on the HTTP referer.
-     *
-     * This function checks the `HTTP_REFERER` server variable to parse the URL and
-     * determine if the path corresponds to a "revise" operation.
-     *
-     * @return bool Returns `true` if the referer path is a "revise" path, otherwise `false`.
-     */
-    public function getIsRevisionFromReferer(): bool
-    {
-        // Check if the HTTP_REFERER server variable is set
-        if (!isset($this->serverGlobalVars['HTTP_REFERER'])) {
-            return false;
-        }
-
-        // Parse the referer URL to extract its components
-        $_from_url = parse_url($this->serverGlobalVars['HTTP_REFERER']);
-
-        if ($_from_url === false || !isset($_from_url['path'])) {
-            return false;
-        }
-
-        // Check if the path corresponds to a "revise" operation
-        return self::isARevisePath($_from_url['path']);
-    }
-
-    /**
-     * @param string $path
-     *
-     * @return bool
-     */
-    private static function isARevisePath(string $path): bool
-    {
-        return str_starts_with($path, "/revise");
-    }
-
-    /**
      * Get a job from a combination of ID and ANY password (t,r1 or r2)
      *
      * @param int $jobId
@@ -970,8 +908,22 @@ class CatUtils
     }
 
     /**
-     * This function is used to strip malicious content from
-     * user's first_name and last_name
+     * Normalise a person's own name.
+     *
+     * This used to replace everything that is not a Unicode letter with a space, which is a rule
+     * about what a name may not contain rather than about what makes one unsafe — and it was wrong
+     * far more often than it was right. `O'Brien` was stored as `O Brien`, `Jean-Luc` as `Jean Luc`
+     * and `J.R.` as `J R`; a name with a digit in it lost the digit. Nothing downstream needed any
+     * of that: a profile name reaches a JSON response, a JWT payload and the email templates, and
+     * each of those escapes for itself.
+     *
+     * {@see UserSuppliedName} now does the part that must happen on the way in — the control and
+     * format characters, the whitespace, the composed Unicode form.
+     *
+     * It cuts to fit rather than refusing, which is deliberate and is the one place that choice is
+     * made. `users`.`first_name` is a varchar(50), and all three callers — the profile edit, signup,
+     * and the OAuth callback where the name comes from the identity provider — are places where a
+     * 400 costs more than a trim does. Everywhere else a name that does not fit is refused.
      *
      * @param string $string
      *
@@ -979,11 +931,7 @@ class CatUtils
      */
     public static function stripMaliciousContentFromAName(string $string): string
     {
-        $string = preg_replace('/\P{L}+/u', ' ', $string) ?? $string; //replace all not letters (Unicode is valid) with a space
-        $string = preg_replace('/ {2,}/u', ' ', $string) ?? $string; // replace all double spaces with a single space
-        $string = mb_substr($string, 0, 50); // max allowed characters are 50
-
-        return trim($string);
+        return UserSuppliedName::normalizeAndTruncate($string, self::PERSON_NAME_MAX_LENGTH);
     }
 
     /**
@@ -1157,7 +1105,21 @@ class CatUtils
     }
 
     /**
-     * This functions removes symbols from a string
+     * Normalise a project name.
+     *
+     * This used to keep only `. - _`, Unicode letters, digits and whitespace, deleting everything
+     * else. `Acme & Co (2024)` was stored as `Acme  Co 2024`. Worse, in
+     * {@see \Controller\API\V2\ChangeProjectNameController} it ran *after*
+     * `FILTER_SANITIZE_SPECIAL_CHARS`, so `A & B` arrived here as `A &amp; B` and left as `A amp B`
+     * — the allowlist deleting the `&` and the `;` out of the entity the filter had just written.
+     *
+     * Names are kept as typed now. A project name reaches a JSON response, an analysis report and
+     * a download filename; the first two escape for themselves and the third goes through
+     * {@see \Controller\Abstracts\AbstractDownloadController::sanitizeContentDispositionFilename()}.
+     *
+     * Cuts to fit rather than refusing, because the two project-creation callers fall back to a
+     * generated name when this returns empty and must not throw. The rename endpoints check the
+     * length themselves, before this runs.
      *
      * @param string $name
      *
@@ -1165,7 +1127,7 @@ class CatUtils
      */
     public static function sanitizeProjectName(string $name): string
     {
-        return preg_replace('/[^.\-_\p{L}\p{N}\s]/u', '', $name) ?? '';
+        return UserSuppliedName::normalizeAndTruncate($name, self::PROJECT_NAME_MAX_LENGTH);
     }
 
     /**

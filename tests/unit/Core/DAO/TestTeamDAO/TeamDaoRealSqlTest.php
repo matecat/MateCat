@@ -21,9 +21,12 @@ use Utils\Constants\Teams;
  * (createPersonalTeam / createUserTeam / updateTeamName / delete / deleteTeam) build their own
  * isolated rows and the residue gate asserts whole-table COUNT(*) is unchanged after cleanup.
  *
- * createUserTeam wraps MembershipDao::createList in its own transaction (the harness opens no
- * ambient transaction), so the team + membership rows are committed; they are tracked via the
- * returned structs so cleanup removes them.
+ * createUserTeam runs MembershipDao::addMembersByEmail inside a transaction scope (the harness opens no
+ * ambient transaction, so the scope is the outermost one) and commits it, so the team + membership
+ * rows are committed; they are tracked via the returned structs so cleanup removes them. An earlier
+ * version of that boundary never committed at all — its guard asked for "no transaction open",
+ * which is true only when there is nothing to commit — and every assertion below still passed,
+ * because a connection reads its own uncommitted rows.
  */
 #[Group('PersistenceNeeded')]
 #[Group('DaoRealSql')]
@@ -122,7 +125,8 @@ class TeamDaoRealSqlTest extends AbstractTest
         // creator is_admin arm (created_by == uid)
         $this->assertTrue((bool)$members[0]->is_admin);
 
-        // committed to the DB on the same connection
+        // reachable on the same connection; that the commit really happened is asserted separately,
+        // by createUserTeam_leaves_no_open_transaction_when_it_owns_one()
         $reloaded = $this->dao->findById($team->id);
         $this->assertInstanceOf(TeamStruct::class, $reloaded);
     }
@@ -162,6 +166,75 @@ class TeamDaoRealSqlTest extends AbstractTest
         $this->assertFalse($byUid[$second['uid']]);
     }
 
+    /**
+     * The phantom team. createUserTeam() re-reads the row it has just inserted with a 24-hour TTL,
+     * and both its callers wrap it in a transaction — SignupModel::processSignup() and
+     * TeamModel::createUserTeam() — so the insert runs inside that transaction too. Before the
+     * cache layer learned to skip a populate taken inside one, that read published an uncommitted
+     * row: a rollback anywhere later in signup left a team that does not exist readable from cache
+     * for a day.
+     */
+    #[Test]
+    public function createUserTeam_publishes_nothing_while_the_callers_transaction_is_open(): void
+    {
+        $database = $this->realSqlDb();
+        $this->flushDaoCache();
+
+        $creator = new UserStruct();
+        $creator->uid = $this->creatorUid;
+        $creator->email = $this->creatorEmail;
+
+        // Stand in for SignupModel/TeamModel, which own the transaction createUserTeam joins.
+        $database->begin();
+        try {
+            $this->dao->createUserTeam($creator, [
+                'name' => 'Acme Phantom',
+                'type' => Teams::GENERAL,
+                'members' => [],
+            ]);
+
+            self::assertSame(
+                [],
+                $this->daoCacheRedis()->keys('*'),
+                'nothing may be cached from inside the transaction: the rows are not public yet'
+            );
+        } finally {
+            // The rollback is the point: after it the team never existed.
+            $database->rollback();
+        }
+
+        self::assertNull($this->dao->findById(0), 'sanity: the DAO reads through to the database');
+        self::assertSame([], $this->daoCacheRedis()->keys('*'), 'and the rollback left nothing behind');
+    }
+
+    /**
+     * createUserTeam() opened its own transaction and then guarded the commit on "no transaction is
+     * open", which is true only when there is nothing to commit. Called outside a transaction it
+     * therefore returned with one still open, on a connection a worker holds across messages.
+     */
+    #[Test]
+    public function createUserTeam_leaves_no_open_transaction_when_it_owns_one(): void
+    {
+        $connection = $this->realSqlDb()->getConnection();
+        $this->assertFalse($connection->inTransaction(), 'precondition: the harness opens no transaction');
+
+        $creator = new UserStruct();
+        $creator->uid = $this->creatorUid;
+        $creator->email = $this->creatorEmail;
+
+        $team = $this->dao->createUserTeam($creator, [
+            'name' => 'Acme Transaction Boundary',
+            'type' => Teams::GENERAL,
+            'members' => [],
+        ]);
+        $this->trackTeamAndMembers($team);
+
+        $this->assertFalse(
+            $connection->inTransaction(),
+            'createUserTeam() must close the transaction it opened'
+        );
+    }
+
     #[Test]
     public function getAssigneeWithProjectsByTeam_groups_counts_per_assignee(): void
     {
@@ -195,7 +268,7 @@ class TeamDaoRealSqlTest extends AbstractTest
 
         // populate the cache, then destroy it
         $this->dao->setCacheTTL(3600)->getAssigneeWithProjectsByTeam($team);
-        $this->assertTrue($this->dao->destroyCacheAssignee($team));
+        $this->assertTrue($this->dao->destroyCacheAssigneeWithProjectsByTeam($team));
     }
 
     #[Test]
@@ -224,35 +297,25 @@ class TeamDaoRealSqlTest extends AbstractTest
     }
 
     #[Test]
-    public function destroyCachePersonalByUid_returns_bool_after_caching_the_read(): void
+    public function destroyCache_drops_the_personal_team_entry(): void
     {
-        $this->makeTeamRow($this->creatorUid, Teams::PERSONAL);
+        $id = $this->makeTeamRow($this->creatorUid, Teams::PERSONAL);
 
         $this->dao->setCacheTTL(3600)->getPersonalByUid($this->creatorUid);
-        $this->assertTrue($this->dao->destroyCachePersonalByUid($this->creatorUid));
-    }
+        $this->renameBehindTheCache($id, 'rn_personal');
 
-    #[Test]
-    public function findUserCreatedTeams_hit_and_miss(): void
-    {
-        $this->makeTeamRow($this->creatorUid, Teams::GENERAL);
-
-        $team = $this->dao->findUserCreatedTeams($this->userWithUid($this->creatorUid));
+        $team = $this->dao->findById($id);
         $this->assertInstanceOf(TeamStruct::class, $team);
-        $this->assertSame($this->creatorUid, $team->created_by);
+        $this->dao->destroyCache($team);
 
-        // a user with no created teams returns null ([0] ?? null arm)
-        $this->assertNull($this->dao->findUserCreatedTeams($this->userWithUid(self::ASSIGNABLE_ID_FLOOR + 990003)));
+        $this->assertSame('rn_personal', $this->dao->setCacheTTL(3600)->getPersonalByUid($this->creatorUid)->name);
     }
 
-    #[Test]
-    public function destroyCacheUserCreatedTeams_returns_bool_after_caching_the_read(): void
+    /** Writes on the connection, so a cached read keeps answering with the row it holds. */
+    private function renameBehindTheCache(int $id, string $name): void
     {
-        $this->makeTeamRow($this->creatorUid, Teams::GENERAL);
-        $user = $this->userWithUid($this->creatorUid);
-
-        $this->dao->setCacheTTL(3600)->findUserCreatedTeams($user);
-        $this->assertTrue($this->dao->destroyCacheUserCreatedTeams($user));
+        $statement = $this->realSqlDb()->getConnection()->prepare('UPDATE teams SET name = :name WHERE id = :id');
+        $statement->execute(['name' => $name, 'id' => $id]);
     }
 
     #[Test]
@@ -260,7 +323,7 @@ class TeamDaoRealSqlTest extends AbstractTest
     {
         $id = $this->makeTeamRow($this->creatorUid, Teams::GENERAL);
 
-        $team       = new TeamStruct(['id' => $id]);
+        $team       = new TeamStruct(['id' => $id, 'created_by' => $this->creatorUid]);
         $team->name = 'Renamed Team';
 
         $returned = $this->dao->updateTeamName($team);
@@ -268,6 +331,62 @@ class TeamDaoRealSqlTest extends AbstractTest
 
         $reloaded = $this->dao->findById($id);
         $this->assertSame('Renamed Team', $reloaded->name);
+    }
+
+    /**
+     * A rename has to reach the readers that go through the cache rather than through the caller's
+     * own struct, and `fetchById` is cached for a day at a time by
+     * {@see \Model\Teams\MembershipStruct::getTeam()} and by the team-members endpoint.
+     *
+     * Written as the sequence that exposed it rather than as an assertion about eviction: prime the
+     * cache the way opening the members page does, rename, then read it back the way the membership
+     * email does. Before the fix the second read returned the previous name, which is how a renamed
+     * team went on announcing its old one by email for up to twenty-four hours.
+     */
+    /**
+     * A personal team is renameable like any other: TeamsController::update() resolves the team
+     * through the membership the caller holds, and the creator is a member of their own personal
+     * team. The row is cached a second time under created_by + type, read with a 24-hour TTL by
+     * TeamModel, and that entry publishes the name too.
+     */
+    #[Test]
+    public function updateTeamName_does_not_leave_the_old_name_in_the_personal_team_cache(): void
+    {
+        $id = $this->makeTeamRow($this->creatorUid, Teams::PERSONAL);
+
+        $this->dao->setCacheTTL(60 * 60 * 24)->getPersonalByUid($this->creatorUid);
+
+        $team = $this->dao->findById($id);
+        self::assertInstanceOf(TeamStruct::class, $team);
+        $team->name = 'Renamed personal';
+        (new TeamDao($this->realSqlDb()))->updateTeamName($team);
+
+        self::assertSame(
+            'Renamed personal',
+            $this->dao->setCacheTTL(60 * 60 * 24)->getPersonalByUid($this->creatorUid)->name,
+            'the read keyed on the creator addresses the same row and has to go with the rename'
+        );
+    }
+
+    #[Test]
+    public function updateTeamName_does_not_leave_the_old_name_in_the_fetchById_cache(): void
+    {
+        $id = $this->makeTeamRow($this->creatorUid, Teams::GENERAL);
+
+        /** @var TeamStruct $primed */
+        $primed = $this->dao->setCacheTTL(60 * 60 * 24)->fetchById($id, TeamStruct::class);
+        $this->assertNotSame('Renamed Team', $primed->name, 'precondition: the cache holds the original name');
+
+        $team = new TeamStruct(['id' => $id, 'created_by' => $this->creatorUid]);
+        $team->name = 'Renamed Team';
+        (new TeamDao($this->realSqlDb()))->updateTeamName($team);
+
+        /** @var TeamStruct $afterRename */
+        $afterRename = (new TeamDao($this->realSqlDb()))
+            ->setCacheTTL(60 * 60 * 24)
+            ->fetchById($id, TeamStruct::class);
+
+        $this->assertSame('Renamed Team', $afterRename->name);
     }
 
     #[Test]

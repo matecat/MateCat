@@ -58,7 +58,13 @@ class ValidatorTestableFiltersConfigTemplateController extends FiltersConfigTemp
 
 class FiltersConfigTemplateControllerTest extends AbstractTest
 {
-    private const VALID_JSON = '{}';
+    /**
+     * `{}` used to stand in for a valid payload here. It never was one — the struct's own
+     * hydrateFromJSON() refuses a payload with no `name` — and it only passed because the DAO is
+     * stubbed, so hydration never ran. The schema now declares `name` required, which is what
+     * surfaced the fixture.
+     */
+    private const VALID_JSON = '{"name":"My filters template"}';
 
     private ReflectionClass $reflector;
     private TestableFiltersConfigTemplateController $controller;
@@ -198,7 +204,7 @@ class FiltersConfigTemplateControllerTest extends AbstractTest
         $this->setRequest([], self::VALID_JSON, 'text/html');
 
         $response = $this->responseMock();
-        $response->expects(self::once())->method('json')->with(['error' => 'Bad Get']);
+        $response->expects(self::once())->method('json')->with(['error' => 'Bad get']);
 
         $this->controller->create();
     }
@@ -261,7 +267,7 @@ class FiltersConfigTemplateControllerTest extends AbstractTest
         $this->setRequest(['id' => '42'], self::VALID_JSON, 'text/html');
 
         $response = $this->responseMock();
-        $response->expects(self::once())->method('json')->with(['error' => 'Bad Get']);
+        $response->expects(self::once())->method('json')->with(['error' => 'Bad get']);
 
         $this->controller->update();
     }

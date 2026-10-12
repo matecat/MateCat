@@ -8,6 +8,7 @@ use Exception;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
 use Model\Projects\ManageModel;
+use Model\Projects\ProjectsCount;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -125,21 +126,19 @@ class ManageModelTest extends AbstractTest
     }
 
     #[Test]
-    public function getProjectsNumberReturnsCountRowsShape(): void
+    public function getProjectsNumberReturnsACount(): void
     {
-        $rows = ManageModel::getProjectsNumber(obtainTestDatabase(), null, null, null, null, false);
+        $count = ManageModel::getProjectsNumber(obtainTestDatabase(), null, null, null, null, false);
 
-        $this->assertIsArray($rows);
-        if ($rows !== []) {
-            $this->assertArrayHasKey('c', $rows[0]);
-        }
+        $this->assertGreaterThanOrEqual(0, $count->value);
+        $this->assertLessThanOrEqual(ProjectsCount::DEFAULT_CAP, $count->value);
     }
 
     /**
      * @throws Exception
      */
     #[Test]
-    public function getProjectsNumberWithTeamAndAssigneeFiltersReturnsCountRowsShape(): void
+    public function getProjectsNumberWithTeamAndAssigneeFiltersReturnsACount(): void
     {
         $team = new TeamStruct();
         $team->id = 1;
@@ -147,12 +146,10 @@ class ManageModelTest extends AbstractTest
         $assignee = new UserStruct();
         $assignee->uid = 1;
 
-        $rows = ManageModel::getProjectsNumber(obtainTestDatabase(), 'a', 'en', 'it', 'NEW', true, $team, $assignee, false);
+        $count = ManageModel::getProjectsNumber(obtainTestDatabase(), 'a', 'en', 'it', 'NEW', true, $team, $assignee, false);
 
-        $this->assertIsArray($rows);
-        if ($rows !== []) {
-            $this->assertArrayHasKey('c', $rows[0]);
-        }
+        $this->assertGreaterThanOrEqual(0, $count->value);
+        $this->assertFalse($count->approximated);
     }
 
     #[Test]
@@ -279,14 +276,33 @@ class ManageModelTest extends AbstractTest
     }
 
     #[Test]
-    public function getProjectsNumberWithNoAssigneeFilterReturnsCountRowsShape(): void
+    public function getProjectsNumberWithNoAssigneeFilterReturnsACount(): void
     {
-        $rows = ManageModel::getProjectsNumber(obtainTestDatabase(), null, null, null, null, false, null, null, true);
+        $count = ManageModel::getProjectsNumber(obtainTestDatabase(), null, null, null, null, false, null, null, true);
 
-        $this->assertIsArray($rows);
-        if ($rows !== []) {
-            $this->assertArrayHasKey('c', $rows[0]);
-        }
+        $this->assertGreaterThanOrEqual(0, $count->value);
+        $this->assertFalse($count->approximated);
+    }
+
+    /**
+     * The whole point of the cap is that the query stops early, so prove it against the database
+     * rather than against the value object: with a cap of one, a fixture set holding more than one
+     * project still comes back as one, flagged.
+     */
+    #[Test]
+    public function getProjectsNumberStopsAtTheCap(): void
+    {
+        $database = obtainTestDatabase();
+
+        $exact = ManageModel::getProjectsNumber($database, null, null, null, null, false);
+        $this->assertGreaterThan(1, $exact->value, 'the fixture set is too small to reach a cap of one');
+        $this->assertFalse($exact->approximated);
+
+        $capped = ManageModel::getProjectsNumber($database, null, null, null, null, false, null, null, false, 1);
+
+        $this->assertSame(1, $capped->value);
+        $this->assertTrue($capped->approximated);
+        $this->assertSame('1+', $capped->toString());
     }
 }
 

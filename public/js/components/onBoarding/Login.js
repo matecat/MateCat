@@ -84,7 +84,7 @@ const Login = () => {
             render={({field: {name, onChange, value}, fieldState: {error}}) => (
               <Input
                 type={INPUT_TYPE.EMAIL}
-                placeholder="Email"
+                label="Email"
                 {...{name, value, onChange, error}}
               />
             )}
@@ -101,7 +101,7 @@ const Login = () => {
             render={({field: {name, onChange, value}, fieldState: {error}}) => (
               <Input
                 type={INPUT_TYPE.PASSWORD}
-                placeholder="Password"
+                label="Password"
                 {...{name, value, onChange, error}}
               />
             )}
@@ -121,7 +121,7 @@ const Login = () => {
 
       <div className="footer-links-container">
         <span>
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Button
             className="link-underline"
             type={BUTTON_TYPE.PRIMARY}

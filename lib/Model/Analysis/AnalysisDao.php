@@ -19,9 +19,6 @@ use ReflectionException;
 class AnalysisDao extends AbstractDao
 {
 
-    private const string SQL_DESTROY_ANALYSIS_PROJECT_CACHE = '%s';
-
-
     protected static string $_sql_get_project_Stats_volume_analysis = "
         SELECT
                 st.id_job AS jid,
@@ -87,27 +84,16 @@ class AnalysisDao extends AbstractDao
     }
 
     /**
-     * @param int $project_id
+     * Evict the only read this DAO caches. Public because the callers that invalidate it are the
+     * workers that change what it counts: `FastAnalysis:275`, `ProjectCompletionRepository:158` and
+     * `JobSplitMergeService:129`.
      *
-     * @return bool
      * @throws PDOException
      * @throws ReflectionException
      */
-    public function destroyCacheByProjectId(int $project_id): bool
+    public function destroyCacheProjectStatsVolumeAnalysis(int $project_id): bool
     {
         $stmt = $this->database->getConnection()->prepare(self::$_sql_get_project_Stats_volume_analysis);
-
-        return $this->_destroyObjectCache($stmt, ShapelessConcreteStruct::class, ['pid' => $project_id]);
-    }
-
-    /**
-     * @throws PDOException
-     * @throws ReflectionException
-     */
-    public function destroyAnalysisProjectCache(int $project_id): bool
-    {
-        $sql = sprintf(self::SQL_DESTROY_ANALYSIS_PROJECT_CACHE, self::$_sql_get_project_Stats_volume_analysis);
-        $stmt = $this->database->getConnection()->prepare($sql);
 
         return $this->_destroyObjectCache($stmt, ShapelessConcreteStruct::class, ['pid' => $project_id]);
     }

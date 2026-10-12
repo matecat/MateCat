@@ -18,7 +18,7 @@ export const OnboardingTooltips = ({show, page}) => {
           <div className={'onboarding-tooltip'}>
             <h3 className="header">Manage your projects</h3>
             <p>
-              Click here, then "My projects" to retrieve and manage all the
+              Click here, then &quot;My projects&quot; to retrieve and manage all the
               projects you have created in Matecat.
             </p>
           </div>

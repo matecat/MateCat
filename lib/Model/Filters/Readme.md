@@ -324,6 +324,24 @@ Response example:
 
 ## Filters params endpoints documentation
 
+### Value normalization
+
+The element and key name lists are normalized on the way in, and the same normalization runs when a
+template is read back, so an older row is returned clean too.
+
+`xml.translate_elements`, `xml.do_not_translate_elements`, `xml.translate_attributes`,
+`dita.do_not_translate_elements`, `ms_word.exclude_styles`, `ms_word.exclude_highlight_colors` and
+`ms_excel.exclude_columns` hold tokens in which a leading or trailing space is never meaningful, so
+each member is trimmed and the ones left empty are dropped. Internal spaces are kept:
+`" Heading 1 "` becomes `"Heading 1"`.
+
+`json` and `yaml` are the exception. Their `translate_keys`, `do_not_translate_keys`, `context_keys`
+and `character_limit` hold JSON object keys and YAML mapping keys, which are arbitrary strings:
+`" label "` is a legitimate key distinct from `"label"` and is stored verbatim.
+
+`ms_powerpoint.translate_slides` holds slide numbers rather than names and is stored as it arrives,
+so an integer list stays an integer list.
+
 ### Schema
 
 This endpoint returns the JSON schema used to validate QAModels:

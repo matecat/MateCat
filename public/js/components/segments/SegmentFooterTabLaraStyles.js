@@ -108,7 +108,7 @@ export const SegmentFooterTabLaraStyles = ({
               setTranslationStyles({
                 error: (
                   <>
-                    Lara couldn't generate translations in different styles for
+                    Lara couldn&apos;t generate translations in different styles for
                     this segment. Please try again in a moment.
                   </>
                 ),

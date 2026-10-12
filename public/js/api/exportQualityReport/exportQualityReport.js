@@ -1,5 +1,3 @@
-import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
-
 /**
  * Export CSV from quality report page
  *

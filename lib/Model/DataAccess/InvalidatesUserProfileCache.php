@@ -19,11 +19,10 @@ use ReflectionException;
  * state should not carry the dependency, and a DAO that uses this trait advertises that it does.
  *
  * The invalidation hangs off the *write* methods, not off the cache-bust methods
- * ({@see \Model\Users\UserDao::destroyCacheByUid()} and friends). A write always runs; a bust runs
- * only where a caller remembered to add one — there were nine such call sites, maintained by hand —
- * and only when that DAO instance had a TTL set, since cacheTTL defaults to 0. Hooking writes is
- * what makes "a change to user data is always reflected" a property of the code instead of a
- * convention.
+ * ({@see \Model\Users\UserDao::destroyCache()}). A write always runs; a bust runs only where a
+ * caller adds one, and only when that DAO instance has a TTL set, since cacheTTL defaults to 0.
+ * Hooking writes is what makes "a change to user data is always reflected" a property of the code
+ * instead of a convention.
  */
 trait InvalidatesUserProfileCache
 {

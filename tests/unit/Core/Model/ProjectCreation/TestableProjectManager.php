@@ -3,6 +3,7 @@
 namespace Matecat\Core\Model\ProjectCreation;
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
+use DomainException;
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Exceptions\NotFoundException;
@@ -17,6 +18,7 @@ use Model\ProjectCreation\JobCreationService;
 use Model\ProjectCreation\ProjectManager;
 use Model\ProjectCreation\ProjectManagerModel;
 use Model\ProjectCreation\ProjectStructure;
+use Model\ProjectCreation\TmKeyService;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
@@ -130,6 +132,41 @@ class TestableProjectManager extends ProjectManager
     public function getTotalSegments(): int
     {
         return $this->total_segments;
+    }
+
+    /**
+     * Expose the per-segment fast-analysis subfiltering.
+     *
+     * @throws Exception
+     */
+    public function callSubfilterForAnalysis(string $segment, bool $isIcuSource): string
+    {
+        return $this->subfilterForAnalysis($segment, $isIcuSource);
+    }
+
+    /**
+     * Expose the per-segment ICU detection.
+     *
+     * @throws DomainException
+     */
+    public function callSourceIsIcuMessage(string $rawSource): bool
+    {
+        return $this->sourceIsIcuMessage($rawSource);
+    }
+
+    /**
+     * Expose the assembly of one fast-analysis payload row.
+     *
+     * @param array<string, mixed> $segmentElement
+     *
+     * @return array<string, mixed>
+     *
+     * @throws DomainException
+     * @throws Exception
+     */
+    public function callDecorateFastAnalysisSegment(array $segmentElement, string $job_id_passes): array
+    {
+        return $this->decorateFastAnalysisSegment($segmentElement, $job_id_passes);
     }
 
     /**
@@ -311,6 +348,26 @@ class TestableProjectManager extends ProjectManager
     }
 
     /**
+     * Seed the TmKeyService. getTmKeyService() resolves it with `??=`, so pre-setting the property
+     * is enough to keep the real (tmxServiceWrapper-dependent) service from ever being built.
+     */
+    public function setTmKeyService(TmKeyService $service): void
+    {
+        $this->tmKeyService = $service;
+    }
+
+    /**
+     * Public wrapper to invoke the private setPrivateTmKeysOrFail().
+     * @throws ReflectionException
+     */
+    public function callSetPrivateTmKeysOrFail(string $firstTMXFileName): void
+    {
+        $ref = new ReflectionClass(ProjectManager::class);
+        $method = $ref->getMethod('setPrivateTmKeysOrFail');
+        $method->invoke($this, $firstTMXFileName);
+    }
+
+    /**
      * Public wrapper to invoke the private validateBeforeCreation().
      * @throws ReflectionException
      */
@@ -417,11 +474,39 @@ class TestableProjectManager extends ProjectManager
         $this->zipFileHandlingCallback = $callback;
     }
 
+    /**
+     * Opt in to the real ProjectManager::zipFileHandling() body. The override above exists so
+     * handleZipFiles() can be tested in isolation, which also makes the production method
+     * unreachable; tests that target the method itself flip this on. Off by default so every
+     * existing caller keeps the stubbed behaviour.
+     */
+    private bool $useRealZipFileHandling = false;
+
+    public function enableRealZipFileHandling(): void
+    {
+        $this->useRealZipFileHandling = true;
+    }
+
     protected function zipFileHandling($linkFiles): void
     {
+        if ($this->useRealZipFileHandling) {
+            parent::zipFileHandling($linkFiles);
+
+            return;
+        }
+
         if ($this->zipFileHandlingCallback !== null) {
             ($this->zipFileHandlingCallback)($linkFiles);
         }
+    }
+
+    /**
+     * Public wrapper to invoke the protected zipFileHandling(); pair with
+     * enableRealZipFileHandling() to exercise the production body.
+     */
+    public function callZipFileHandling(array $linkFiles): void
+    {
+        $this->zipFileHandling($linkFiles);
     }
 
     /**

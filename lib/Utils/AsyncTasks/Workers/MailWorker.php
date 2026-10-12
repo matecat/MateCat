@@ -61,9 +61,9 @@ class MailWorker extends AbstractWorker
         $mail->isHTML();
 
         if (empty($queueElement->params['address'][0])) {
-            $this->_doLog("--- (Worker " . $this->_workerPid . ") :  Mailer Error: You must provide at least one recipient email address.");
+            $this->_doLog("--- (Worker " . $this->_workerPid . ") :  Mailer error: You must provide at least one recipient email address.");
             $this->_doLog("--- (Worker " . $this->_workerPid . ") : Message could not be sent: \n\n" . $mail->AltBody);
-            throw new EndQueueException(" Mailer Error: You must provide at least one recipient email address.");
+            throw new EndQueueException(" Mailer error: You must provide at least one recipient email address.");
         }
 
         /** @var array{0: string, 1: string} $address */
@@ -71,9 +71,9 @@ class MailWorker extends AbstractWorker
         $mail->addAddress($address[0], $address[1]);
 
         if (!$mail->send()) {
-            $this->_doLog("--- (Worker " . $this->_workerPid . ") : Mailer Error: " . $mail->ErrorInfo);
+            $this->_doLog("--- (Worker " . $this->_workerPid . ") : Mailer error: " . $mail->ErrorInfo);
             $this->_doLog("--- (Worker " . $this->_workerPid . ") : Message could not be sent: \n\n" . $mail->AltBody);
-            throw new ReQueueException('Mailer Error: ' . $mail->ErrorInfo);
+            throw new ReQueueException('Mailer error: ' . $mail->ErrorInfo);
         }
 
         $this->_doLog("--- (Worker " . $this->_workerPid . ") : Message has been sent.");

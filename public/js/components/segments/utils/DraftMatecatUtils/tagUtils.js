@@ -31,7 +31,6 @@ const restoreTempTags = (tags, text) =>
     return tag ? tag.match : match
   })
 import {isUndefined} from 'lodash'
-import getEntities from './getEntities'
 import matchTagStructure from './matchTag'
 import {createPcNumberer} from './pcTagUtils'
 
@@ -124,6 +123,7 @@ export const transformTagsToHtml = (text, isRtl = 0) => {
 }
 
 export const transformTagsToText = (text) => {
+  if (!text) return text
   try {
     for (let key in tagSignatures) {
       const {placeholderRegex, decodeNeeded, placeholder, regex} =
@@ -144,7 +144,7 @@ export const transformTagsToText = (text) => {
       }
     }
   } catch (e) {
-    console.error('Error parsing tag in transformTagsToHtml function')
+    console.error('Error parsing tag in transformTagsToText function', e)
   }
   return text
 }
@@ -183,7 +183,7 @@ export const excludeSomeTagsTransformToText = (text, excludeTags = []) => {
       }
     }
   } catch (e) {
-    console.error('Error parsing tag in transformTagsToHtml function')
+    console.error('Error parsing tag in excludeSomeTagsTransformToText function', e)
   }
   return text
 }
@@ -203,9 +203,34 @@ export const excludeSomeTagsFromText = (text, excludeTags = []) => {
       }
     }
   } catch (e) {
-    console.error('Error parsing tag in transformTagsToHtml function')
+    console.error('Error parsing tag in excludeSomeTagsFromText function', e)
   }
   return text
+}
+
+// decodeHtmlEntities shrinks these entities; used to correct tag offsets below
+const HTML_ENTITY_DECODE_DIFF = {
+  '&lt;': 3,
+  '&gt;': 3,
+  '&amp;': 4,
+}
+const isOffsetInsideTag = (offset, tagsStruct) =>
+  tagsStruct.some((tag) => offset >= tag.offset && offset < tag.offset + tag.length)
+
+// decodeHtmlEntities only decodes entities outside of tags (tags are protected
+// via temp placeholders), so offsets computed on the raw text must be shifted
+// left by however much entity-decoding shrinks the plain text before them
+const computeDecodeShrink = (text, tagsStruct, upToOffset) => {
+  let shrink = 0
+  const regex = /&lt;|&gt;|&amp;/g
+  let match
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index >= upToOffset) break
+    if (!isOffsetInsideTag(match.index, tagsStruct)) {
+      shrink += HTML_ENTITY_DECODE_DIFF[match[0]]
+    }
+  }
+  return shrink
 }
 
 export const transformTagsToLexiqaText = (text) => {
@@ -224,7 +249,12 @@ export const transformTagsToLexiqaText = (text) => {
       const {convertToLexiqaIgnoreAnglesBrackets, lexiqaText, decodeNeeded} =
         tagSignatures[data.name]
 
-      const offsetStart = data.originalOffset - difference
+      const decodeShrink = computeDecodeShrink(
+        text,
+        tagsStruct,
+        data.originalOffset,
+      )
+      const offsetStart = data.originalOffset - decodeShrink - difference
       const offsetEnd = offsetStart + data.encodedText.length
 
       const placeholderText = isToReplaceForLexiqa(data.name)
@@ -410,7 +440,7 @@ export const removePlaceholdersForGlossary = (str) => {
 
 export const decodeHtmlEntities = (text) => {
   return (
-    text
+    (text ?? '')
       // .replace(/&apos;/g, "'")
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')

@@ -111,7 +111,7 @@ class CustomPayableRateStructTypeSafetyTest extends AbstractTest
     public function validateBreakdowns_throws_on_missing_default(): void
     {
         $this->expectException(DomainException::class);
-        $this->expectExceptionMessage('`default` node is MANDATORY');
+        $this->expectExceptionMessage('`default` node is mandatory');
 
         (new CustomPayableRateStruct())->hydrateFromJSON(json_encode([
             'payable_rate_template_name' => 'Bad',

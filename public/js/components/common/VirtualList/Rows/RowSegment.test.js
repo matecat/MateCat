@@ -1,6 +1,7 @@
 import React from 'react'
 import {render, act} from '@testing-library/react'
 import RowSegment, {ProjectBar} from './RowSegment'
+import SegmentUtils from '../../../../utils/segmentUtils'
 
 global.ResizeObserver = class ResizeObserver {
   constructor(cb) {
@@ -394,6 +395,19 @@ describe('ProjectBar', () => {
         />,
       )
       expect(previousOpenedFileIdRef.current).toBe('unchanged')
+    })
+
+    it('uses the resolved file id rather than segment.id_file when they diverge (e.g. jsont2 split files)', () => {
+      jest.spyOn(SegmentUtils, 'getSegmentFileId').mockReturnValue(999)
+      const previousOpenedFileIdRef = {current: undefined}
+      render(
+        <ProjectBar
+          {...defaultProjectBarProps}
+          isSticky={true}
+          previousOpenedFileIdRef={previousOpenedFileIdRef}
+        />,
+      )
+      expect(previousOpenedFileIdRef.current).toBe(999)
     })
   })
 })

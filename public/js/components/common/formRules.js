@@ -28,7 +28,7 @@ export const maxLength = (length) => {
 
 export const atLeastOneSpecialChar = (length) => {
   return (text) => {
-    return text.search(/[ !"#$%&'()*+,-.\/:;<=>?@\[\]^_`{|}~]/) !== -1
+    return text.search(/[ !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/) !== -1
       ? null
       : ErrorMessages.atLeastOneSpecialChar(length)
   }
@@ -36,7 +36,7 @@ export const atLeastOneSpecialChar = (length) => {
 
 export const checkEmail = (text) => {
   var re =
-    /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
   if (!re.test(text.trim())) {
     return ErrorMessages.validEmail
   }

@@ -1,3 +1,4 @@
+import React from 'react'
 import {List} from 'immutable'
 import {CompositeDecorator} from 'draft-js'
 
@@ -33,7 +34,7 @@ class CompoundDecorator {
 
   getComponentForKey(key) {
     const tuple = JSON.parse(key)
-    return (props) => {
+    const CompoundDecoration = (props) => {
       const {decoratorProps, ...compositionProps} = props
       const Composed = tuple.reduce((Composition, decoration, index) => {
         if (decoration !== null) {
@@ -43,16 +44,22 @@ class CompoundDecorator {
             ...compositionProps,
             ...decoratorProps[index],
           }
-          return () => (
+          const Decorated = () => (
             <Component {...componentProps}>
               <Composition {...compositionProps} />
             </Component>
           )
+          Decorated.displayName = `Decorated(${index})`
+          return Decorated
         }
         return Composition
       }, Span)
       return <Composed>{props.children}</Composed>
     }
+
+    CompoundDecoration.displayName = 'CompoundDecoration'
+
+    return CompoundDecoration
   }
 
   getPropsForKey(key) {

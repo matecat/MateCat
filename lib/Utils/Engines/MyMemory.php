@@ -48,6 +48,17 @@ use Utils\TaskRunner\Exceptions\ReQueueException;
  */
 class MyMemory extends AbstractEngine
 {
+    /**
+     * Calls that write to the TM. A non-JSON answer to one of them is turned into a 502 error,
+     * so the caller requeues the write instead of losing it.
+     */
+    private const array WRITE_FUNCTIONS = ['update_relative_url', 'contribute_relative_url'];
+
+    /**
+     * How much of an invalid body is kept in the error message.
+     */
+    private const int RAW_BODY_EXCERPT_LENGTH = 200;
+
 
     /**
      * @inheritdoc
@@ -115,6 +126,24 @@ class MyMemory extends AbstractEngine
             $decoded = json_decode($rawValue, true);
         } else {
             $decoded = $rawValue; // already decoded in case of error
+        }
+
+        if (!is_array($decoded) && in_array($functionName, self::WRITE_FUNCTIONS, true)) {
+            /*
+             * A write answered with a body that is not a JSON object (e.g. HTTP 200 with the plain text
+             * "Failed to connect to broker", or an HTML page from a proxy) is a server-side failure:
+             * report it as a 502, so callers like SetContributionWorker requeue instead of crashing.
+             * The start of the raw body is kept, so the log still shows what MyMemory answered.
+             */
+            $rawBody = is_string($rawValue) ? $rawValue : var_export($rawValue, true);
+            $decoded = [
+                'error' => [
+                    'code' => -502,
+                    'message' => " Invalid response from MyMemory, the body is not a JSON object: "
+                        . mb_substr($rawBody, 0, self::RAW_BODY_EXCERPT_LENGTH)
+                ],
+                'responseStatus' => 502
+            ];
         }
 
         $dataRefMap = $this->_config['dataRefMap'] ?? [];

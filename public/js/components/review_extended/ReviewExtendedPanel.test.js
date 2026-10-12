@@ -48,7 +48,7 @@ jest.mock('../../actions/SegmentActions', () => ({
 }))
 
 jest.mock('../../utils/segmentUtils', () => ({
-  isIceSegment: jest.fn(() => false),
+  isLockedSegment: jest.fn(() => false),
 }))
 
 jest.mock('../../actions/ModalsActions', () => ({
@@ -80,7 +80,7 @@ const renderPanel = (props = {}) =>
 describe('ReviewExtendedPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    SegmentUtils.isIceSegment.mockReturnValue(false)
+    SegmentUtils.isLockedSegment.mockReturnValue(false)
   })
 
   afterEach(() => {
@@ -137,7 +137,7 @@ describe('ReviewExtendedPanel', () => {
     })
 
     test('does not render ReviewExtendedIssuePanel when segment is ICE-locked and not unlocked', () => {
-      SegmentUtils.isIceSegment.mockReturnValue(true)
+      SegmentUtils.isLockedSegment.mockReturnValue(true)
       renderPanel({
         isReview: true,
         segment: makeSegment({unlocked: false}),
@@ -146,7 +146,7 @@ describe('ReviewExtendedPanel', () => {
     })
 
     test('renders ReviewExtendedIssuePanel when segment is ICE-locked but unlocked', () => {
-      SegmentUtils.isIceSegment.mockReturnValue(true)
+      SegmentUtils.isLockedSegment.mockReturnValue(true)
       renderPanel({
         isReview: true,
         segment: makeSegment({unlocked: true}),

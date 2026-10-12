@@ -3,9 +3,6 @@
 namespace Matecat\Core\Features\ReviewExtended;
 
 use Matecat\TestHelpers\AbstractTest;
-use Model\Jobs\JobStruct;
-use Model\LQA\ChunkReviewDao;
-use Model\LQA\ChunkReviewStruct;
 use PHPUnit\Framework\Attributes\Test;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Utils\Constants\SourcePages;
@@ -60,29 +57,6 @@ class ReviewUtilsTest extends AbstractTest
     public function sourcePageToTranslationStatus_returnsNullForUnknownSourcePage(): void
     {
         $this->assertNull(ReviewUtils::sourcePageToTranslationStatus(99));
-    }
-
-    // ─────────────────────────────────────────────────────────────────
-    // revisionNumberToSourcePage
-    // ─────────────────────────────────────────────────────────────────
-
-    #[Test]
-    public function revisionNumberToSourcePage_returnsOneWhenNumberIsNull(): void
-    {
-        $this->assertSame(1, ReviewUtils::revisionNumberToSourcePage(null));
-    }
-
-    #[Test]
-    public function revisionNumberToSourcePage_returnsOneWhenNumberIsZero(): void
-    {
-        $this->assertSame(1, ReviewUtils::revisionNumberToSourcePage(0));
-    }
-
-    #[Test]
-    public function revisionNumberToSourcePage_returnsNumberPlusOneForPositiveInput(): void
-    {
-        $this->assertSame(2, ReviewUtils::revisionNumberToSourcePage(1));
-        $this->assertSame(3, ReviewUtils::revisionNumberToSourcePage(2));
     }
 
     // ─────────────────────────────────────────────────────────────────
@@ -145,64 +119,5 @@ class ReviewUtilsTest extends AbstractTest
         $lqaModel->method('getLimit')->willReturn([10, 20]);
 
         $this->assertSame(20, ReviewUtils::filterLQAModelLimit($lqaModel, 3));
-    }
-
-    // ─────────────────────────────────────────────────────────────────
-    // validRevisionNumbers
-    // ─────────────────────────────────────────────────────────────────
-
-    #[Test]
-    public function validRevisionNumbers_returnsFilteredRevisionNumbers(): void
-    {
-        $chunk = $this->createStub(JobStruct::class);
-
-        $review1 = $this->createStub(ChunkReviewStruct::class);
-        $review1->source_page = SourcePages::SOURCE_PAGE_REVISION; // 2 → revision 1
-        $review2 = $this->createStub(ChunkReviewStruct::class);
-        $review2->source_page = SourcePages::SOURCE_PAGE_REVISION_2; // 3 → revision 2
-
-        $dao = $this->createMock(ChunkReviewDao::class);
-        $dao->expects($this->once())
-            ->method('findChunkReviews')
-            ->with($chunk)
-            ->willReturn([$review1, $review2]);
-
-        $utils = new ReviewUtils($dao);
-        $result = $utils->validRevisionNumbers($chunk);
-
-        $this->assertSame([1, 2], $result);
-    }
-
-    #[Test]
-    public function validRevisionNumbers_filtersOutNullRevisionNumbers(): void
-    {
-        $chunk = $this->createStub(JobStruct::class);
-
-        $review1 = $this->createStub(ChunkReviewStruct::class);
-        $review1->source_page = SourcePages::SOURCE_PAGE_TRANSLATE; // 1 → null (filtered out)
-        $review2 = $this->createStub(ChunkReviewStruct::class);
-        $review2->source_page = SourcePages::SOURCE_PAGE_REVISION; // 2 → revision 1
-
-        $dao = $this->createStub(ChunkReviewDao::class);
-        $dao->method('findChunkReviews')->willReturn([$review1, $review2]);
-
-        $utils = new ReviewUtils($dao);
-        $result = $utils->validRevisionNumbers($chunk);
-
-        $this->assertSame([1], $result);
-    }
-
-    #[Test]
-    public function validRevisionNumbers_returnsEmptyArrayWhenNoReviews(): void
-    {
-        $chunk = $this->createStub(JobStruct::class);
-
-        $dao = $this->createStub(ChunkReviewDao::class);
-        $dao->method('findChunkReviews')->willReturn([]);
-
-        $utils = new ReviewUtils($dao);
-        $result = $utils->validRevisionNumbers($chunk);
-
-        $this->assertSame([], $result);
     }
 }

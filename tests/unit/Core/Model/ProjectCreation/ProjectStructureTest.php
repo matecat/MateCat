@@ -246,9 +246,9 @@ class ProjectStructureTest extends AbstractTest
     {
         $ps = new ProjectStructure();
 
-        // 80 public properties declared on ProjectStructure.
+        // 86 public properties declared on ProjectStructure.
         // The protected $cached_results from AbstractDaoObjectStruct is excluded.
-        $this->assertSame(82, count($ps));
+        $this->assertSame(86, count($ps));
     }
 
     // ── Nested array properties ──────────────────────────────────
@@ -330,12 +330,12 @@ class ProjectStructureTest extends AbstractTest
     {
         $ps = new ProjectStructure();
 
-        $ps->addError(-19, 'Invalid Upload Token.');
+        $ps->addError(-19, 'Invalid upload token.');
 
         $errors = $ps->result['errors'];
         $this->assertCount(1, $errors);
         $this->assertSame(-19, $errors[0]['code']);
-        $this->assertSame('Invalid Upload Token.', $errors[0]['message']);
+        $this->assertSame('Invalid upload token.', $errors[0]['message']);
     }
 
     #[Test]

@@ -2,6 +2,7 @@
 
 namespace Matecat\Core\Controllers;
 
+use Controller\API\Commons\Exceptions\AuthorizationError;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\V3\RevisionFeedbackController;
@@ -10,6 +11,7 @@ use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
 use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewStruct;
 use Model\ReviseFeedback\FeedbackDAO;
 use Model\ReviseFeedback\FeedbackStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
@@ -17,6 +19,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use ReflectionException;
+use Utils\Constants\SourcePages;
 
 class TestableRevisionFeedbackController extends RevisionFeedbackController
 {
@@ -59,18 +62,38 @@ class RevisionFeedbackControllerTest extends AbstractTest
         $this->reflector->getProperty('response')->setValue($this->controller, $this->responseMock);
         $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
 
+        $this->setCredential(SourcePages::SOURCE_PAGE_REVISION);
+    }
+
+    /**
+     * Stands in for ChunkPasswordValidator: the chunk carries the phase the presented password
+     * belongs to, and the matched review row carries the row key the feedback is written under.
+     *
+     * @throws ReflectionException
+     */
+    private function setCredential(int $sourcePage): void
+    {
         $chunk = $this->createStub(JobStruct::class);
         $chunk->method('isDeleted')->willReturn(false);
+        $chunk->method('getSourcePage')->willReturn($sourcePage);
         $this->reflector->getProperty('chunk')->setValue($this->controller, $chunk);
+
+        $chunkReview = null;
+        if ($sourcePage !== SourcePages::SOURCE_PAGE_TRANSLATE) {
+            $chunkReview = new ChunkReviewStruct();
+            $chunkReview->id_job = 123;
+            $chunkReview->review_password = 'abc';
+            $chunkReview->source_page = $sourcePage;
+        }
+        (new ReflectionClass(RevisionFeedbackController::class))
+            ->getProperty('chunkReview')
+            ->setValue($this->controller, $chunkReview);
     }
 
     private function setRequestParams(): void
     {
         $this->requestStub->method('param')->willReturnCallback(
             static fn(string $key) => match ($key) {
-                'id_job' => 123,
-                'password' => 'abc',
-                'revision_number' => 1,
                 'feedback' => 'Good translation',
                 default => null,
             }
@@ -187,6 +210,46 @@ class RevisionFeedbackControllerTest extends AbstractTest
             ->method('json')
             ->with(['status' => 'ko'])
             ->willReturnSelf();
+
+        $this->controller->feedback();
+    }
+
+    /** @throws ReflectionException */
+    #[Test]
+    public function feedbackRejectsATranslateCredential(): void
+    {
+        $this->setCredential(SourcePages::SOURCE_PAGE_TRANSLATE);
+        $this->setRequestParams();
+
+        $mockDao = $this->createMock(FeedbackDAO::class);
+        $mockDao->expects($this->never())->method('insertOrUpdate');
+        $this->controller->injectedFeedbackDao = $mockDao;
+
+        $this->expectException(AuthorizationError::class);
+        $this->expectExceptionCode(401);
+
+        $this->controller->feedback();
+    }
+
+    /** @throws ReflectionException */
+    #[Test]
+    public function feedbackWritesTheSecondRevisionRowForASecondPassCredential(): void
+    {
+        $this->setCredential(SourcePages::SOURCE_PAGE_REVISION_2);
+        $this->setRequestParams();
+
+        $mockDao = $this->createMock(FeedbackDAO::class);
+        $mockDao
+            ->expects($this->once())
+            ->method('insertOrUpdate')
+            ->with($this->callback(function (FeedbackStruct $struct): bool {
+                $this->assertSame(2, $struct->revision_number);
+
+                return true;
+            }))
+            ->willReturn(1);
+
+        $this->controller->injectedFeedbackDao = $mockDao;
 
         $this->controller->feedback();
     }

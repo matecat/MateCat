@@ -27,6 +27,7 @@ use Stomp\Transport\Message;
 use Throwable;
 use TypeError;
 use Utils\ActiveMQ\AMQHandler;
+use Utils\Constants\Constants;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\Lara\Headers;
 use Utils\Engines\Lara\HttpClientInterface;
@@ -272,6 +273,14 @@ class Lara extends AbstractEngine
         $laraStyleGuidelineId = $_config['lara_style_guideline_id'] ?? null;
         $laraModel = $_config['lara_model'] ?? '';
 
+        // Projects segmented by paragraph send whole paragraphs to Lara: ask Lara to treat them as
+        // multiline, it is not trained to split a single large block of text by itself.
+        // Computed for both branches below because both log it.
+        $multiline = !empty($_config['id_project'])
+            && $metadataDao->setCacheTTL(86400)
+                ->getValue($_config['id_project'], ProjectsMetadataMarshaller::SEGMENTATION_RULE->value)
+            === Constants::SEG_RULE_PARAGRAPH;
+
         if (empty($_config['translation'])) {
             // This is a normal request, not Lara Think
             $reasoning = false;
@@ -289,7 +298,7 @@ class Lara extends AbstractEngine
                 // call lara
                 $translateOptions = new TranslateOptions();
                 $translateOptions->setAdaptTo($_config['keys']);
-                $translateOptions->setMultiline(false);
+                $translateOptions->setMultiline($multiline);
                 $translateOptions->setContentType('application/xliff+xml');
                 $headers = new Headers();
 
@@ -371,7 +380,7 @@ class Lara extends AbstractEngine
                     'style_guideline_id' => $laraStyleGuidelineId,
                     'model' => $laraModel,
                     'glossaries' => is_array($laraGlossaries ?? null) ? implode(",", $laraGlossaries) : null,
-                    'multiline' => false,
+                    'multiline' => $multiline,
                     'translation' => $translation,
                     'score' => $score ?? null,
                     'extra_headers' => $headers->getArrayCopy(),
@@ -436,7 +445,7 @@ class Lara extends AbstractEngine
                 'source' => $_config['source'],
                 'target' => $_config['target'],
                 'content_type' => 'application/xliff+xml',
-                'multiline' => false,
+                'multiline' => $multiline,
                 'translation' => $translation,
                 'score' => $score ?? null,
                 'reasoning' => $reasoning,

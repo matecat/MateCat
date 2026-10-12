@@ -34,6 +34,7 @@ use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractElement;
+use Utils\Subfiltering\IcuCompliantHandlers;
 use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\QueueElement;
 use Utils\TaskRunner\Exceptions\EmptyElementException;
@@ -413,9 +414,19 @@ class TMAnalysisWorker extends AbstractWorker
         $_config['additional_params'] = $params->additional_params ?? null;
         $_config['priority_key'] = $params->tm_prioritization ?? null;
         $_config['job_id'] = $params->id_job ?? null;
-        $_config[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] = isset($params->subfiltering_handlers)
+        $subfilteringHandlers = isset($params->subfiltering_handlers)
             ? $params->subfiltering_handlers->toArray()
             : null;
+
+        // The payload text of an ICU segment was built with the ICU-compliant handlers only
+        // (see ProjectManager::decorateFastAnalysisSegment). MyMemory re-encodes the matches
+        // with the handlers this list names and knows nothing about ICU, so the full project
+        // list would hand the matches back with the ICU arguments wrapped in PH tags.
+        if (!empty($params->icu_source)) {
+            $subfilteringHandlers = IcuCompliantHandlers::reduceToIcuCompliant($subfilteringHandlers);
+        }
+
+        $_config[JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value] = $subfilteringHandlers;
 
         if ($params->dialect_strict ?? false) {
             $_config['dialect_strict'] = $params->dialect_strict;
@@ -439,7 +450,7 @@ class TMAnalysisWorker extends AbstractWorker
         $_config['mt_qe_workflow_enabled'] = (bool)($params->mt_qe_workflow_enabled ?? false);
 
         if ($_config['mt_qe_workflow_enabled']) {
-            $_config['mt_qe_config'] = new MTQEWorkflowParams(json_decode($params->mt_qe_workflow_parameters ?? '', true) ?? []);
+            $_config['mt_qe_config'] = MTQEWorkflowParams::fromQueueValue($params->mt_qe_workflow_parameters ?? null);
         }
 
         $mtEngine = EnginesFactory::getInstance((int)$params->id_mt_engine, $this->database, AbstractEngine::class);
@@ -562,7 +573,7 @@ class TMAnalysisWorker extends AbstractWorker
     private function decrementSegmentsToAnalyzeOfWaitingProjects(int $projectId): void
     {
         if (empty($projectId)) {
-            throw new Exception('Can Not send without a Queue ID. \Analysis\QueueHandler::setQueueID ', self::ERR_WRONG_PROJECT);
+            throw new Exception('Cannot send without a Queue ID. \Analysis\QueueHandler::setQueueID ', self::ERR_WRONG_PROJECT);
         }
 
         $workingJobs = $this->redisService->getWorkingProjects($this->_myContext->redis_key);

@@ -11,7 +11,7 @@ class PropagationTotalStruct extends AbstractDaoSilentStruct implements IDaoStru
 {
 
     /**
-     * @var array{total?: int, countSeg?: int, status?: string}
+     * @var array{total?: int, repetitions_count?: int}
      */
     protected array $totals = [];
 
@@ -40,7 +40,7 @@ class PropagationTotalStruct extends AbstractDaoSilentStruct implements IDaoStru
     ];
 
     /**
-     * @return array{total?: int, countSeg?: int, status?: string}
+     * @return array{total?: int, repetitions_count?: int}
      */
     public function getTotals(): array
     {
@@ -48,13 +48,20 @@ class PropagationTotalStruct extends AbstractDaoSilentStruct implements IDaoStru
     }
 
     /**
-     * @param array{total: int, countSeg: int, status: string} $params
+     * `repetitions_count` is how many segments in the chunk repeat this one, the current segment
+     * excluded; `total` is their summed word count, equivalent or raw depending on the project setting.
+     * Both count every repetition, including the ones propagation left untouched.
+     *
+     * A third key, `status`, used to travel with them. It read the third column of the rollup row,
+     * which is `id_segment` and not `status`, and a super-aggregate row holds NULL there — so it
+     * had always emitted null.
+     *
+     * @param array{total: int, repetitions_count: int} $params
      */
     public function setTotals(array $params): void
     {
         $this->totals['total'] = $params['total'];
-        $this->totals['countSeg'] = $params['countSeg'];
-        $this->totals['status'] = $params['status'];
+        $this->totals['repetitions_count'] = $params['repetitions_count'];
     }
 
     /**

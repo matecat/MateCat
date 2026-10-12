@@ -8,6 +8,7 @@ use PDO;
 use PDOException;
 use ReflectionException;
 use RuntimeException;
+use Throwable;
 
 class ApiKeyDao extends AbstractDao
 {
@@ -39,6 +40,8 @@ class ApiKeyDao extends AbstractDao
      * @throws ReflectionException
      * @throws RuntimeException
      * @throws Exception
+     * @throws Throwable the write runs inside a transaction scope, which aborts the transaction
+     *                   on any throw and re-throws the original, whatever its type
      */
     public function create(ApiKeyStruct $obj): ApiKeyStruct
     {
@@ -56,11 +59,17 @@ class ApiKeyDao extends AbstractDao
 
         $values = array_diff_key($obj->toArray(), ['id' => null]);
 
-        $this->database->begin();
-        $stmt->execute($values);
-        $result = $this->fetchById((int)$conn->lastInsertId(), ApiKeyStruct::class);
-        $this->database->commit();
+        $result = $this->database->transaction(function () use ($stmt, $values, $conn): ?ApiKeyStruct {
+            $stmt->execute($values);
 
+            // Read back inside the scope: lastInsertId() answers for this connection, and the row it
+            // names is only visible to it until the commit.
+            return $this->fetchById((int)$conn->lastInsertId(), ApiKeyStruct::class);
+        });
+
+        // Outside the scope, where the commit used to put it: the row is already durable, and
+        // rolling the insert back because the read came up empty would turn a failed read into a
+        // failed write.
         return $result ?? throw new RuntimeException('Failed to retrieve created API key');
     }
 

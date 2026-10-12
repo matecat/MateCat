@@ -134,7 +134,7 @@ class ConnectedServiceStructTest extends AbstractTest
         $struct->setEncryptedAccessToken(json_encode($tokenData));
 
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('key not found on token');
+        $this->expectExceptionMessage('Key not found on token');
 
         $struct->getDecodedOauthAccessToken('nonexistent_field');
     }

@@ -23,7 +23,7 @@ trait SignalHandlerTrait
     public function installHandler(): void
     {
         if (PHP_SAPI != 'cli' || isset ($_SERVER ['HTTP_HOST'])) {
-            die ("This script can be run only in CLI Mode.\n\n");
+            die ("This script can be run only in CLI mode.\n\n");
         }
 
         pcntl_async_signals(true);

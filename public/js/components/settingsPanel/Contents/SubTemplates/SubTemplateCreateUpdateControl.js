@@ -1,7 +1,7 @@
 import React, {useContext} from 'react'
 import {SUBTEMPLATE_MODIFIERS, SubTemplatesContext} from './SubTemplateContext'
 import Checkmark from '../../../../../img/icons/Checkmark'
-import IconClose from '../../../icons/IconClose'
+import IconClose from '../../../../../img/icons/IconClose'
 import {BUTTON_SIZE, BUTTON_TYPE, Button} from '../../../common/Button/Button'
 
 export const SubTemplateCreateUpdateControl = () => {
@@ -16,7 +16,6 @@ export const SubTemplateCreateUpdateControl = () => {
     <>
       <Button
         type={BUTTON_TYPE.PRIMARY}
-        size={BUTTON_SIZE.MEDIUM}
         testId="create-update-template"
         onClick={
           templateModifier === SUBTEMPLATE_MODIFIERS.CREATE
@@ -29,7 +28,11 @@ export const SubTemplateCreateUpdateControl = () => {
         Confirm
       </Button>
 
-      <Button type={BUTTON_TYPE.WARNING} onClick={cancel}>
+      <Button
+        size={BUTTON_SIZE.ICON_STANDARD}
+        type={BUTTON_TYPE.WARNING}
+        onClick={cancel}
+      >
         <IconClose size={11} />
       </Button>
     </>

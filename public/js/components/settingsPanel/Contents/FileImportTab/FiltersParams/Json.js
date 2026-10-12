@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from 'react'
 import Switch from '../../../../common/Switch'
 import {SegmentedControl} from '../../../../common/SegmentedControl'
-import {WordsBadge} from '../../../../common/WordsBadge/WordsBadge'
+import {KeysBadge} from '../../../../common/KeysBadge/KeysBadge'
 import {FiltersParamsContext} from './FiltersParamsContext'
 import {Controller, useForm} from 'react-hook-form'
 import {isEqual} from 'lodash'
@@ -100,7 +100,7 @@ export const Json = () => {
             control={control}
             name={id}
             render={({field: {onChange, value, name}}) => (
-              <WordsBadge
+              <KeysBadge
                 name={name}
                 value={value}
                 onChange={onChange}
@@ -155,10 +155,10 @@ export const Json = () => {
             <br />
             Key names are case sensitive.
             <br />
-            If the toggle is set to "Translatable", only the keys entered will
+            If the toggle is set to &quot;Translatable&quot;, only the keys entered will
             be extracted as translatable.
             <br />
-            If the toggle is set to "Non-translatable", all the keys in the file{' '}
+            If the toggle is set to &quot;Non-translatable&quot;, all the keys in the file{' '}
             <b>except</b> those entered will be extracted as translatable.
           </p>
         </div>
@@ -197,7 +197,7 @@ export const Json = () => {
           control={control}
           name="context_keys"
           render={({field: {onChange, value, name}}) => (
-            <WordsBadge
+            <KeysBadge
               name={name}
               value={value}
               onChange={onChange}
@@ -219,14 +219,14 @@ export const Json = () => {
             Character limits will be applied to translatable keys in the same
             object.
             <br />
-            Keys with a character limit won't be segmented.
+            Keys with a character limit won&apos;t be segmented.
           </p>
         </div>
         <Controller
           control={control}
           name="character_limit"
           render={({field: {onChange, value, name}}) => (
-            <WordsBadge
+            <KeysBadge
               name={name}
               value={value}
               onChange={onChange}

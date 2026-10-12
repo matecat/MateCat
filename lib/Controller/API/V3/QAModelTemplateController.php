@@ -12,6 +12,7 @@ use Klein\Response;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
 use RuntimeException;
 use Swaggest\JsonSchema\InvalidValue;
+use Throwable;
 use TypeError;
 use Utils\Registry\AppConfig;
 use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
@@ -82,6 +83,7 @@ class QAModelTemplateController extends KleinController
      * @throws LockedResponseException
      * @throws ResponseAlreadySentException
      * @throws TypeError
+     * @throws Throwable
      */
     public function create(): Response
     {
@@ -124,6 +126,8 @@ class QAModelTemplateController extends KleinController
      * @return Response
      * @throws LockedResponseException
      * @throws ResponseAlreadySentException
+     * @throws Throwable the delete runs inside a transaction scope, which aborts the transaction on
+     *                   any throw and re-throws the original, whatever its type
      * @throws TypeError
      */
     public function delete(): Response
@@ -158,6 +162,7 @@ class QAModelTemplateController extends KleinController
      * @throws LockedResponseException
      * @throws ResponseAlreadySentException
      * @throws TypeError
+     * @throws Throwable
      */
     public function edit(): Response
     {

@@ -23,9 +23,9 @@ class ValidationErrorTest extends AbstractTest
     public function carriesMessageAndCode(): void
     {
         $previous = new Exception('root');
-        $e = new ValidationError('issue not found', -2000, $previous);
+        $e = new ValidationError('Issue not found', -2000, $previous);
 
-        $this->assertSame('issue not found', $e->getMessage());
+        $this->assertSame('Issue not found', $e->getMessage());
         $this->assertSame(-2000, $e->getCode());
         $this->assertSame($previous, $e->getPrevious());
     }

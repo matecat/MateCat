@@ -13,10 +13,11 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthorizationError;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\Commons\Validators\ProjectAccessValidator;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
-use Controller\API\Commons\Validators\TeamAccessValidator;
 use Model\ActivityLog\ActivityLogDao;
 use Model\ActivityLog\ActivityLogStruct;
+use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use ReflectionException;
 use Throwable;
@@ -33,7 +34,7 @@ class ActivityLogController extends KleinController
         $validator = new ProjectPasswordValidator($this);
         $validator->validate();
 
-        $this->guardProjectTeamMembership($validator->getProject());
+        $this->guardProjectAccess($validator->getProject());
 
         $activityLogDao = new ActivityLogDao($this->getDatabase());
         $rawContent = $activityLogDao->getAllForProject($validator->getIdProject());
@@ -50,7 +51,7 @@ class ActivityLogController extends KleinController
         $validator = new ProjectPasswordValidator($this);
         $validator->validate();
 
-        $this->guardProjectTeamMembership($validator->getProject());
+        $this->guardProjectAccess($validator->getProject());
 
         $activityLogDao = new ActivityLogDao($this->getDatabase());
         $rawContent = $activityLogDao->getLastActionInProject($validator->getIdProject());
@@ -68,6 +69,8 @@ class ActivityLogController extends KleinController
         $validator = new ChunkPasswordValidator($this);
         $validator->validate();
 
+        $this->guardProjectAccess($validator->getChunk()->getProject(new ProjectDao($this->getDatabase())));
+
         $activityLogDao = new ActivityLogDao($this->getDatabase());
         $activityLogDao->whereConditions = ' id_job = :id_job ';
         $activityLogDao->epilogueString = " ORDER BY ID DESC LIMIT 1";
@@ -82,25 +85,28 @@ class ActivityLogController extends KleinController
     }
 
     /**
-     * The project id and password only prove the caller reached the project through a shared link.
-     * The activity log lists the name, email and IP of everyone who worked on the project, so it is
-     * restricted to the team that owns the project, matching the "View Project Logs" entry the editor
-     * offers only to that team. lastOnJob is deliberately not guarded this way: it is scoped to a
-     * single job by its own password, the working capability of a collaborator on that job.
+     * A project password, or a job password, only proves the caller reached the project through a
+     * shared link. Every read on this controller returns activity records carrying the name, email and
+     * IP of the people who worked on the project, so all three are restricted the same way: to the
+     * project's owner, or to a member of the team it sits in. That matches the "View Project Logs"
+     * entry the editor offers only to that team, and the manage page, whose callers are already
+     * members.
      *
-     * @throws AuthorizationError if the project has no team, since a project without a team has no
-     *                            members and there is nobody the membership check could match
+     * The owner is let through without a membership lookup by ProjectAccessValidator, because a
+     * project outlives its owner's membership of the team it sits in — see the reasoning there.
+     *
+     * @throws AuthorizationError if the caller is not logged in, or is neither the project's owner nor
+     *                            a member of its team — including when the project has no team at all,
+     *                            since there is then nobody the membership check could match
      * @throws Throwable
      */
-    private function guardProjectTeamMembership(?ProjectStruct $project): void
+    private function guardProjectAccess(?ProjectStruct $project): void
     {
-        if ($project === null || $project->id_team === null) {
+        if ($project === null) {
             throw new AuthorizationError('Not Authorized', 401);
         }
 
-        $teamValidator = new TeamAccessValidator($this);
-        $teamValidator->setIdTeam($project->id_team);
-        $teamValidator->validate();
+        (new ProjectAccessValidator($this, $project, $this->getUser()))->validate();
     }
 
     protected function registerValidators(): void

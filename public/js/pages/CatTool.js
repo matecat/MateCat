@@ -42,25 +42,24 @@ import {
   CHARS_SIZE_COUNTER_TYPES,
   charsSizeCounter,
 } from '../utils/charsSizeCounterUtil'
-import {CatToolInterface} from './CatToolInterface'
+import catToolInterface from './CatToolInterface'
 import CommentsActions from '../actions/CommentsActions'
 import ModalsActions from '../actions/ModalsActions'
 import FatalErrorModal from '../components/modals/FatalErrorModal'
 import ContextPreviewChannel from '../utils/contextPreviewChannel'
 import {extractSegmentContextFields} from '../utils/contextPreviewUtils'
 import useResizable from '../hooks/useResizable'
-import IconRedirect from '../components/icons/IconRedirect'
-import IconDown from '../components/icons/IconDown'
+import IconRedirect from '../../img/icons/IconRedirect'
+import IconDown from '../../img/icons/IconDown'
 import {
   Button,
   BUTTON_MODE,
   BUTTON_SIZE,
 } from '../components/common/Button/Button'
+import UserStore from '../stores/UserStore'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
-
-const cattoolInterface = new CatToolInterface()
 
 function CatTool() {
   useHotkeys(
@@ -393,10 +392,10 @@ function CatTool() {
           {
             text: (
               <span>
-                Access to the editor page is forbidden until the project's
+                Access to the editor page is forbidden until the project&apos;s
                 analysis is complete.
                 <br />
-                To follow the analysis' progress,{' '}
+                To follow the analysis&apos; progress,{' '}
                 <a
                   rel="noreferrer"
                   href={`/jobanalysis/${config.id_project}-${config.id_job}-${config.password}`}
@@ -595,7 +594,9 @@ function CatTool() {
     if (metadata) {
       if (Speech2Text.enabled(metadata)) Speech2Text.init()
       initTagSignature(metadata)
-      if (LXQ.enabled(metadata)) LXQ.init()
+
+      if (metadata.lexiqa === 1 || UserStore.getUserMetadata()?.lexiqa === 1)
+        LXQ.retrieveSupportedLocales(metadata)
     }
   }, [userInfo?.metadata])
 
@@ -627,7 +628,7 @@ function CatTool() {
     if (isFakeCurrentTemplateReady && typeof jobMetadata?.job !== 'undefined') {
       const isValidPresetCharacterMode = Object.values(
         CHARS_SIZE_COUNTER_TYPES,
-      ).some((value) => value === cattoolInterface.getCharacterCounterMode())
+      ).some((value) => value === catToolInterface.getCharacterCounterMode())
 
       modifyingCurrentTemplate((prevTemplate) => ({
         ...prevTemplate,
@@ -638,7 +639,7 @@ function CatTool() {
           typeof jobMetadata?.job?.character_counter_mode === 'string'
             ? jobMetadata?.job?.character_counter_mode
             : isValidPresetCharacterMode
-              ? cattoolInterface.getCharacterCounterMode()
+              ? catToolInterface.getCharacterCounterMode()
               : undefined,
         subfilteringHandlers: jobMetadata.job.subfiltering_handlers,
         mtQualityValueInEditor: jobMetadata.project.mt_quality_value_in_editor,
@@ -668,15 +669,14 @@ function CatTool() {
         jid={config.id_job}
         password={config.password}
         reviewPassword={config.review_password}
-        source_code={config.source_rfc}
-        target_code={config.target_rfc}
+        source_code={config.source_code}
+        target_code={config.target_code}
         isReview={config.isReview}
         revisionNumber={config.revisionNumber}
         userLogged={isUserLogged}
         projectName={config.project_name}
         projectCompletionEnabled={config.project_completion_feature_enabled}
         secondRevisionsCount={config.secondRevisionsCount}
-        overallQualityClass={config.overall_quality_class}
         qualityReportHref={config.quality_report_href}
         allowLinkToAnalysis={config.allow_link_to_analysis}
         analysisEnabled={config.analysis_enabled}
@@ -704,12 +704,12 @@ function CatTool() {
           }
         >
           {isUserLogged ? (
-            <article id="file" className="loading mbc-commenting-closed">
+            <article id="file" className="loading comment-closed">
               <div className="article-segments-container">
                 <SegmentsContainer
                   isReview={config.isReview}
                   startSegmentId={startSegmentIdRef.current}
-                  firstJobSegment={config.first_job_segment}
+                  firstJobSegment={config.first_job_segment?.toString()}
                   languages={supportedLanguages}
                 />
               </div>
@@ -806,16 +806,16 @@ function CatTool() {
             setMtEngines,
             sourceLang: {
               name: ApplicationStore.getLanguageNameFromLocale(
-                config.source_rfc,
+                config.source_code,
               ),
-              code: config.source_rfc,
+              code: config.source_code,
             },
             targetLangs: [
               {
                 name: ApplicationStore.getLanguageNameFromLocale(
-                  config.target_rfc,
+                  config.target_code,
                 ),
-                code: config.target_rfc,
+                code: config.target_code,
               },
             ],
             projectTemplates,
@@ -829,8 +829,8 @@ function CatTool() {
           idProject={config.id_project}
           idJob={config.id_job}
           password={config.password}
-          source={config.source_rfc}
-          target={config.target_rfc}
+          source={config.source_code}
+          target={config.target_code}
           isReview={config.isReview}
           isCJK={config.isCJK}
           languagesArray={supportedLanguages}

@@ -2,27 +2,35 @@
 
 namespace Matecat\Core\Workers\Analysis;
 
+use Exception;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
+use Model\Engines\EngineDAO;
+use Model\Engines\Structs\EngineStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use Model\Projects\ProjectsMetadataMarshaller;
 use PDO;
 use PDOStatement;
 use PDOException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\Stub;
 use Predis\Client as PredisClient;
 use ReflectionClass;
 use RuntimeException;
 use Stomp\Exception\ConnectionException;
+use Stomp\Transport\Message;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\Analysis\FastAnalysis;
 use Utils\Constants\ProjectStatus;
+use Utils\Constants\TranslationStatus;
+use Utils\TaskRunner\Commons\Context;
 use Utils\Engines\Results\MyMemory\AnalyzeResponse;
 use Utils\Logger\MatecatLogger;
 
@@ -482,6 +490,124 @@ class FastAnalysisTest extends AbstractTest
         $this->assertLessThan($rpushIndex, $lremIndex, 'LREM must precede RPUSH');
         $this->assertSame(['lrem', 'p_queue_position', 0, '7'], $redis->calls[$lremIndex]);
         $this->assertSame(['rpush', 'p_queue_position', [7]], $redis->calls[$rpushIndex]);
+    }
+
+    // ─── _fetchMyMemoryFast ───────────────────────────────────────────────
+
+    /**
+     * _fetchMyMemoryFast() opens with EnginesFactory::getInstance(1, ..., MyMemory::class), and the
+     * test fixture has no engine id 1. Install one for the duration of the callback, defeating the
+     * EngineDAO Redis cache on both sides so neither this test nor its neighbours see a stale row.
+     *
+     * @param callable(IDatabase):void $fn
+     */
+    private function withEngineOneAsMyMemory(callable $fn): void
+    {
+        $database   = obtainTestDatabase();
+        $connection = $database->getConnection();
+
+        $struct     = EngineStruct::getStruct();
+        $struct->id = 1;
+        $dao        = new EngineDAO($database);
+
+        // id 1 is not part of tests/inc/unittest_matecat_local.sql, but an environment may still
+        // carry it. Snapshot whatever is there and put it back verbatim afterwards, so this fixture
+        // can never destroy a row it did not create.
+        $existing = $connection->query("SELECT * FROM engines WHERE id = 1")->fetch(\PDO::FETCH_ASSOC) ?: null;
+
+        if ($existing !== null) {
+            $connection->exec("DELETE FROM engines WHERE id = 1");
+        }
+
+        $connection->exec(
+            "INSERT INTO engines (id, name, type, description, base_url, translate_relative_url, class_load, others, extra_parameters, penalty, active) "
+            . "VALUES (1, 'MyMemory', 'TM', 'fixture', 'https://api.mymemory.translated.net', 'get', 'MyMemory', '{}', '{}', 0, 1)"
+        );
+        $dao->destroyCache($struct);
+
+        try {
+            $fn($database);
+        } finally {
+            $connection->exec("DELETE FROM engines WHERE id = 1");
+
+            if ($existing !== null) {
+                $columns      = array_keys($existing);
+                $placeholders = array_map(static fn(string $c): string => ':' . $c, $columns);
+                $restore      = $connection->prepare(
+                    'INSERT INTO engines (`' . implode('`, `', $columns) . '`) VALUES (' . implode(', ', $placeholders) . ')'
+                );
+                $restore->execute($existing);
+            }
+
+            $dao->destroyCache($struct);
+        }
+    }
+
+    /**
+     * @return AbstractFilesStorage&Stub
+     */
+    private function filesStorageThrowingOnFastAnalysisData(): AbstractFilesStorage
+    {
+        $fs = $this->createStub(AbstractFilesStorage::class);
+        $fs->method('getFastAnalysisData')
+            ->willThrowException(new \UnexpectedValueException('no data on disk'));
+
+        return $fs;
+    }
+
+    /**
+     * Disk read fails, the database fallback runs and finds nothing, so the project is reported as
+     * fully pre-translated rather than as an error.
+     */
+    #[Test]
+    public function fetchMyMemoryFastFallsBackToTheDatabaseAndReportsAFullyPreTranslatedProject(): void
+    {
+        $this->withEngineOneAsMyMemory(function (IDatabase $database): void {
+            $daemon = $this->daemonWithDb($database);
+            $this->setProp($daemon, 'files_storage', $this->filesStorageThrowingOnFastAnalysisData());
+
+            $this->expectException(Exception::class);
+            $this->expectExceptionMessage('There is no analysis on that file, it is all pre-translated');
+            $this->expectExceptionCode(FastAnalysis::ERR_NO_SEGMENTS);
+
+            // No project rows exist for this pid, so the fallback query returns an empty set
+            $this->invoke($daemon, '_fetchMyMemoryFast', 99_999_999);
+        });
+    }
+
+    /**
+     * Both the disk read and the database fallback fail: that is the "too large" classification.
+     */
+    #[Test]
+    public function fetchMyMemoryFastReportsTooLargeWhenTheDatabaseFallbackAlsoFails(): void
+    {
+        $this->withEngineOneAsMyMemory(function (IDatabase $database): void {
+            $ref    = new ReflectionClass(FastAnalysisPdoFailingProbe::class);
+            $daemon = $ref->newInstanceWithoutConstructor();
+            (new ReflectionClass(FastAnalysis::class))->getProperty('db')->setValue($daemon, $database);
+            (new ReflectionClass(FastAnalysis::class))->getProperty('logger')
+                ->setValue($daemon, $this->createStub(MatecatLogger::class));
+            (new ReflectionClass(FastAnalysis::class))->getProperty('files_storage')
+                ->setValue($daemon, $this->filesStorageThrowingOnFastAnalysisData());
+
+            $this->expectException(Exception::class);
+            $this->expectExceptionMessage('Error fetching data for project. Too large. Skip.');
+            $this->expectExceptionCode(FastAnalysis::ERR_TOO_LARGE);
+
+            (new ReflectionClass(FastAnalysis::class))
+                ->getMethod('_fetchMyMemoryFast')->invoke($daemon, 12_345);
+        });
+    }
+
+    #[Test]
+    public function setTotalThrowsWhenThePidIsMissing(): void
+    {
+        $daemon = $this->daemonWithDb($this->createStub(IDatabase::class));
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Cannot set a Total without a Queue ID.');
+
+        $this->invoke($daemon, '_setTotal', ['total' => 5, 'pid' => 0, 'queueInfo' => null]);
     }
 
     /**
@@ -1307,6 +1433,253 @@ class FastAnalysisTest extends AbstractTest
         $handler = (new ReflectionClass(FastAnalysis::class))->getProperty('queueHandler')->getValue($probe);
         $handler->getRedisClient()->sismemberReturns = $script;
     }
+
+    /**
+     * The daemon writes the projects row through the raw query builder rather than through the DAO,
+     * so nothing evicts the row's cached reads for it. Both call sites below do it by hand, and both
+     * used to name several key families one by one; they go through the DAO's single door now.
+     */
+    private function daemonWithProjectDao(IDatabase $db, ProjectDao $projectDao): FastAnalysis
+    {
+        $daemon = $this->daemonWithDb($db);
+        // getProjectDao() memoises, so seeding the property is enough to hand both call sites the
+        // same double without a partial mock over a private method.
+        $this->setProp($daemon, 'projectDao', $projectDao);
+
+        return $daemon;
+    }
+
+    #[Test]
+    public function purgeProjectCachesEvictsTheProjectThroughTheDaoDoorWithItsPassword(): void
+    {
+        $projectDao = $this->createMock(ProjectDao::class);
+        $projectDao->expects($this->once())
+            ->method('destroyCache')
+            ->with(4242, 'proj-pw');
+
+        $daemon = $this->daemonWithProjectDao($this->stubDatabase(), $projectDao);
+
+        $this->invoke($daemon, '_purgeProjectCaches', 4242, 'proj-pw');
+    }
+
+    #[Test]
+    public function insertFastAnalysisEvictsTheProjectRowAfterWritingItOutsideTheDao(): void
+    {
+        $projectDao = $this->createMock(ProjectDao::class);
+        // Only the id: the word-count write does not touch the password, and the DAO reads the
+        // current one itself.
+        $projectDao->expects($this->once())
+            ->method('destroyCache')
+            ->with(77);
+
+        $daemon = $this->daemonWithProjectDao($this->stubDatabase(), $projectDao);
+        // No segments: the insert loop and its batched flush have their own cases, and this one is
+        // about the eviction that follows the projects write.
+        $this->setProp($daemon, 'segments', []);
+        $this->setProp($daemon, 'actual_project_row', ['id_mt_engine' => 0]);
+
+        $project = new ProjectStruct();
+        $project->id = 77;
+
+        try {
+            $this->invoke(
+                $daemon,
+                '_insertFastAnalysis',
+                $project,
+                '',
+                [],
+                $this->createStub(FeatureSet::class),
+                false
+            );
+        } catch (\Throwable $e) {
+            // The engine lookup that follows the eviction needs a live engine row; reaching it means
+            // the eviction already ran, which is what this case is about.
+        }
+    }
+
+    /**
+     * The five pre-translation options as stored in project metadata (string values, as the
+     * metadata table holds them).
+     *
+     * @return array<string, string>
+     */
+    private function pretranslateMetadata(): array
+    {
+        return [
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value => '1',
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_101_STATUS->value => TranslationStatus::STATUS_APPROVED2,
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_101_LOCK->value => '0',
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_100_STATUS->value => TranslationStatus::STATUS_APPROVED,
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_100_LOCK->value => '1',
+        ];
+    }
+
+    #[Test]
+    public function main_threadsThePretranslateOptionsFromProjectMetadata(): void
+    {
+        [$probe, $redis] = $this->wireMainProbe();
+        $probe->metadataDaoStub  = $this->makeMetadataDaoStub($this->pretranslateMetadata());
+        $redis->sismemberReturns = [true, false];
+        $probe->lockBatches      = [[$this->projectRow(1607)]];
+        $probe->fetchScript      = [new AnalyzeResponse(['data' => []])];
+        $probe->insertResults    = [0];
+
+        $this->runMain($probe);
+
+        $this->assertSame([
+            [
+                'pretranslate_101' => true,
+                'pretranslate_101_status' => TranslationStatus::STATUS_APPROVED2,
+                'pretranslate_101_lock' => false,
+                'pretranslate_100_status' => TranslationStatus::STATUS_APPROVED,
+                'pretranslate_100_lock' => true,
+            ],
+        ], $probe->pretranslateArgs);
+    }
+
+    #[Test]
+    public function main_leavesThePretranslateOptionsNullWhenTheProjectHasNoSuchMetadata(): void
+    {
+        [$probe, $redis] = $this->wireMainProbe();
+        $redis->sismemberReturns = [true, false];
+        $probe->lockBatches      = [[$this->projectRow(1608)]];
+        $probe->fetchScript      = [new AnalyzeResponse(['data' => []])];
+        $probe->insertResults    = [0];
+
+        $this->runMain($probe);
+
+        $this->assertSame([
+            [
+                'pretranslate_101' => null,
+                'pretranslate_101_status' => null,
+                'pretranslate_101_lock' => null,
+                'pretranslate_100_status' => null,
+                'pretranslate_100_lock' => null,
+            ],
+        ], $probe->pretranslateArgs);
+    }
+
+    /**
+     * Run the real _insertFastAnalysis() over one segment for one job and return the params of
+     * every message it publishes. The engine lookup reads engine 0 (NONE) from the test database;
+     * the insert, the queue-total bookkeeping and the queue routing are stubbed by the probe.
+     *
+     * @param array<int, mixed> $pretranslateArgs
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function publishedParams(array $pretranslateArgs): array
+    {
+        $ref    = new ReflectionClass(FastAnalysisPublishProbe::class);
+        $daemon = $ref->newInstanceWithoutConstructor();
+        $this->setProp($daemon, 'db', obtainTestDatabase());
+        $this->setProp($daemon, 'logger', $this->createStub(MatecatLogger::class));
+        $this->setProp($daemon, 'projectDao', $this->createStub(ProjectDao::class));
+
+        $published = [];
+        $amq       = $this->createStub(AMQHandler::class);
+        $amq->method('getRedisClient')->willReturn(new FastAnalysisFakeRedis());
+        $amq->method('publishToQueues')->willReturnCallback(
+            function (string $queue, Message $message) use (&$published): bool {
+                $published[] = json_decode($message->getBody(), true)['params'];
+
+                return true;
+            }
+        );
+        $this->setProp($daemon, 'queueHandler', $amq);
+
+        $this->setProp($daemon, 'actual_project_row', [
+            'id_mt_engine' => 0,
+            'pretranslate_100' => 1,
+            'tm_keys' => '[]',
+            'id_tms' => 1,
+            'only_private_tm' => 0,
+        ]);
+        $this->setProp($daemon, 'segments', [[
+            'id' => 4711,
+            'jsid' => '4711-99999991:pw1',
+            'segment' => 'Hello world',
+            'segment_hash' => 'abc',
+            'raw_word_count' => 2,
+            'match_type' => 'NO_MATCH',
+            'wc' => 2,
+            'source' => 'en-US',
+            'target' => '99999991:it-IT',
+            'payable_rates' => ['99999991' => '{"NO_MATCH":100}'],
+        ]]);
+
+        $project           = new ProjectStruct();
+        $project->id       = 99999990;
+        $project->password = 'ppw';
+
+        $this->invoke(
+            $daemon,
+            '_insertFastAnalysis',
+            $project,
+            '',
+            ['NO_MATCH' => 100],
+            $this->createStub(FeatureSet::class),
+            true,
+            false,
+            false,
+            null,
+            85,
+            [],
+            false,
+            ...$pretranslateArgs
+        );
+
+        return $published;
+    }
+
+    #[Test]
+    public function insertFastAnalysisPublishesThePretranslateOptionsOnTheQueueElement(): void
+    {
+        $published = $this->publishedParams([true, TranslationStatus::STATUS_APPROVED2, false, TranslationStatus::STATUS_APPROVED, true]);
+
+        $this->assertCount(1, $published);
+        $params = $published[0];
+        $this->assertSame(1, $params['pretranslate_100'], 'pretranslate_100 still comes from the project row');
+        $this->assertTrue($params[ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value]);
+        $this->assertSame(TranslationStatus::STATUS_APPROVED2, $params[ProjectsMetadataMarshaller::PRE_TRANSLATE_101_STATUS->value]);
+        $this->assertFalse($params[ProjectsMetadataMarshaller::PRE_TRANSLATE_101_LOCK->value]);
+        $this->assertSame(TranslationStatus::STATUS_APPROVED, $params[ProjectsMetadataMarshaller::PRE_TRANSLATE_100_STATUS->value]);
+        $this->assertTrue($params[ProjectsMetadataMarshaller::PRE_TRANSLATE_100_LOCK->value]);
+    }
+
+    #[Test]
+    public function insertFastAnalysisPublishesNullPretranslateOptionsWhenTheProjectHasNone(): void
+    {
+        $published = $this->publishedParams([]);
+
+        $this->assertCount(1, $published);
+        $params = $published[0];
+        foreach ([
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_101,
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_101_STATUS,
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_101_LOCK,
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_100_STATUS,
+            ProjectsMetadataMarshaller::PRE_TRANSLATE_100_LOCK,
+        ] as $key) {
+            $this->assertArrayHasKey($key->value, $params);
+            $this->assertNull($params[$key->value], $key->value . ' must stay null for the worker to default it');
+        }
+    }
+
+    private function stubDatabase(): IDatabase
+    {
+        $stmt = $this->createStub(PDOStatement::class);
+        $stmt->queryString = '';
+        $stmt->method('fetchAll')->willReturn([]);
+
+        $pdo = $this->createStub(PDO::class);
+        $pdo->method('prepare')->willReturn($stmt);
+
+        $db = $this->createStub(IDatabase::class);
+        $db->method('getConnection')->willReturn($pdo);
+
+        return $db;
+    }
 }
 
 /**
@@ -1386,6 +1759,39 @@ class FastAnalysisFakeRedis extends PredisClient
 }
 
 /**
+ * Probe subclass that makes the database fallback inside _fetchMyMemoryFast() fail the way a
+ * too-large project does. The engine lookup that runs before the try block still uses the real
+ * connection, so only the segments query is affected.
+ */
+class FastAnalysisPdoFailingProbe extends FastAnalysis
+{
+    protected function _getSegmentsForFastVolumeAnalysis(int $pid): array
+    {
+        throw new PDOException('simulated statement failure');
+    }
+}
+
+/**
+ * Lets _insertFastAnalysis() reach the publish loop without a broker: the segment_translations
+ * insert and the queue-total bookkeeping do nothing, and every segment routes to one fixed queue.
+ */
+class FastAnalysisPublishProbe extends FastAnalysis
+{
+    protected function _executeInsert(array $tuple_list, array $bind_values): void
+    {
+    }
+
+    protected function _setTotal(array $config = []): void
+    {
+    }
+
+    protected function _getQueueAddressesByPriority(int $queueLen, int $id_mt_engine): ?Context
+    {
+        return Context::buildFromArray(['queue_name' => 'fast_analysis_test_queue', 'max_executors' => 1]);
+    }
+}
+
+/**
  * Probe subclass that overrides the _newQueueHandler() seam so _rebuildQueueHandler can be
  * unit-tested without the real broker-connecting factory (AMQHandler::getNewInstanceForDaemons).
  */
@@ -1461,6 +1867,9 @@ class FastAnalysisMainProbe extends FastAnalysis
 
     public int $insertCallCount = 0;
 
+    /** @var list<array<string, bool|string|null>> pre-translation options of each _insertFastAnalysis() call */
+    public array $pretranslateArgs = [];
+
     public int $featureSetCallCount = 0;
 
     public int $rebuildCount = 0;
@@ -1512,9 +1921,21 @@ class FastAnalysisMainProbe extends FastAnalysis
         ?MTQEWorkflowParams $mt_qe_workflow_parameters = null,
         ?int                $mt_quality_value_in_editor = 85,
         ?array              $subfiltering_handlers = [],
-        bool                $icu_enabled = false
+        bool                $icu_enabled = false,
+        ?bool               $pretranslate_101 = null,
+        ?string             $pretranslate_101_status = null,
+        ?bool               $pretranslate_101_lock = null,
+        ?string             $pretranslate_100_status = null,
+        ?bool               $pretranslate_100_lock = null
     ): int {
         $this->insertCallCount++;
+        $this->pretranslateArgs[] = [
+            'pretranslate_101' => $pretranslate_101,
+            'pretranslate_101_status' => $pretranslate_101_status,
+            'pretranslate_101_lock' => $pretranslate_101_lock,
+            'pretranslate_100_status' => $pretranslate_100_status,
+            'pretranslate_100_lock' => $pretranslate_100_lock,
+        ];
         if ($this->insertThrows !== null) {
             throw $this->insertThrows;
         }

@@ -159,7 +159,7 @@ export const checkNodeTranslationStatus = (el, segments) => {
     group.sort((a, b) => Number(a.sid) - Number(b.sid))
     const targets = group.map((s) => {
       if (!s.target) return null
-      const stripped = stripSegmentTags(s.target).replace(/[\s​]+/g, ' ').trim()
+      const stripped = stripSegmentTags(s.target).replace(/[\s\u200B]+/g, ' ').trim()
       return stripped || null
     })
     if (targets.some((t) => t === null)) return 'no-target'

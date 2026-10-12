@@ -4,6 +4,7 @@ namespace Matecat\Core\Controllers;
 
 use Controller\Abstracts\Authentication\CookieManager;
 use Controller\API\App\CreateProjectController;
+use DomainException;
 use Exception;
 use InvalidArgumentException;
 use Klein\Request;
@@ -12,9 +13,11 @@ use Matecat\Locales\Languages;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
 use Model\FeaturesBase\FeatureSet;
+use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
@@ -222,6 +225,121 @@ class CreateProjectControllerTest extends AbstractTest
         $this->assertSame(0, $data['tms_engine']);
     }
 
+    // ─── segmentation_rule ───
+
+    /**
+     * Reads the private metadata property filled in by setMetadataFromPostInput().
+     *
+     * @return array<string, mixed>
+     * @throws ReflectionException
+     */
+    private function controllerMetadata(): array
+    {
+        /** @var array<string, mixed> $metadata */
+        $metadata = $this->reflector->getProperty('metadata')->getValue($this->controller);
+
+        return $metadata;
+    }
+
+    /**
+     * The paragraph rule must be persisted as project metadata: Lara reads it back to enable
+     * multiline, without which it receives whole paragraphs it is not trained to split.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateTheRequest_stores_paragraph_segmentation_rule_in_metadata(): void
+    {
+        $_COOKIE['upload_token'] = '33333333-3333-3333-3333-333333333333';
+        $params = $this->validRequestParams();
+        $params['segmentation_rule'] = Constants::SEG_RULE_PARAGRAPH;
+        $this->setRequestParams($params);
+
+        /** @var array<string, mixed> $data */
+        $data = $this->invokePrivate('validateTheRequest');
+
+        $key = ProjectsMetadataMarshaller::SEGMENTATION_RULE->value;
+        $this->assertSame(Constants::SEG_RULE_PARAGRAPH, $data[$key]);
+        $this->assertSame(Constants::SEG_RULE_PARAGRAPH, $this->controllerMetadata()[$key]);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateTheRequest_stores_patent_segmentation_rule_in_metadata(): void
+    {
+        $_COOKIE['upload_token'] = '44444444-4444-4444-4444-444444444444';
+        $params = $this->validRequestParams();
+        $params['segmentation_rule'] = Constants::SEG_RULE_PATENT;
+        $this->setRequestParams($params);
+
+        /** @var array<string, mixed> $data */
+        $data = $this->invokePrivate('validateTheRequest');
+
+        $key = ProjectsMetadataMarshaller::SEGMENTATION_RULE->value;
+        $this->assertSame(Constants::SEG_RULE_PATENT, $data[$key]);
+        $this->assertSame(Constants::SEG_RULE_PATENT, $this->controllerMetadata()[$key]);
+    }
+
+    /**
+     * 'standard' (labelled "General" in the UI) is the default and is normalized to null by
+     * Constants::validateSegmentationRules(), so it must not create a metadata row at all —
+     * that absence is what makes Lara keep multiline disabled.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateTheRequest_does_not_store_standard_segmentation_rule(): void
+    {
+        $_COOKIE['upload_token'] = '55555555-5555-5555-5555-555555555555';
+        $params = $this->validRequestParams();
+        $params['segmentation_rule'] = Constants::SEG_RULE_STANDARD;
+        $this->setRequestParams($params);
+
+        /** @var array<string, mixed> $data */
+        $data = $this->invokePrivate('validateTheRequest');
+
+        $key = ProjectsMetadataMarshaller::SEGMENTATION_RULE->value;
+        $this->assertArrayNotHasKey($key, $data);
+        $this->assertArrayNotHasKey($key, $this->controllerMetadata());
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateTheRequest_does_not_store_segmentation_rule_when_param_is_omitted(): void
+    {
+        $_COOKIE['upload_token'] = '66666666-6666-6666-6666-666666666666';
+        $this->setRequestParams($this->validRequestParams());
+
+        /** @var array<string, mixed> $data */
+        $data = $this->invokePrivate('validateTheRequest');
+
+        $key = ProjectsMetadataMarshaller::SEGMENTATION_RULE->value;
+        $this->assertArrayNotHasKey($key, $data);
+        $this->assertArrayNotHasKey($key, $this->controllerMetadata());
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateTheRequest_throws_on_unknown_segmentation_rule(): void
+    {
+        $_COOKIE['upload_token'] = '88888888-8888-8888-8888-888888888888';
+        $params = $this->validRequestParams();
+        $params['segmentation_rule'] = 'nonexistent-rule';
+        $this->setRequestParams($params);
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Segmentation rule not allowed: nonexistent-rule');
+        $this->expectExceptionCode(-4);
+
+        $this->invokePrivate('validateTheRequest');
+    }
+
     /**
      * @throws Throwable
      */
@@ -339,6 +457,173 @@ class CreateProjectControllerTest extends AbstractTest
         $this->expectExceptionCode(-6);
 
         $this->invokePrivate('validateTheRequest');
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateTheRequest_defaults_pretranslate_lock_options_when_absent(): void
+    {
+        $_COOKIE['upload_token'] = '77777777-7777-7777-7777-777777777777';
+        $this->setRequestParams($this->validRequestParams());
+
+        /** @var array<string, mixed> $data */
+        $data = $this->invokePrivate('validateTheRequest');
+
+        $this->assertSame(1, $data['pretranslate_101_lock']);
+        $this->assertSame(1, $data['pretranslate_100_lock']);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateTheRequest_reads_pretranslate_lock_options(): void
+    {
+        $_COOKIE['upload_token'] = '88888888-8888-8888-8888-888888888888';
+        $params = $this->validRequestParams();
+        $params['pretranslate_101_lock'] = '0';
+        $params['pretranslate_100_lock'] = '1';
+        $this->setRequestParams($params);
+
+        /** @var array<string, mixed> $data */
+        $data = $this->invokePrivate('validateTheRequest');
+
+        $this->assertSame(0, $data['pretranslate_101_lock']);
+        $this->assertSame(1, $data['pretranslate_100_lock']);
+    }
+
+    /**
+     * @return array<string, array{string, string}>
+     */
+    public static function invalidPretranslateLockValues(): array
+    {
+        return [
+            '101 out of range'   => ['pretranslate_101_lock', '2'],
+            '101 trailing junk'  => ['pretranslate_101_lock', '1x'],
+            '100 word'           => ['pretranslate_100_lock', 'true'],
+            '100 empty'          => ['pretranslate_100_lock', ''],
+        ];
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    #[DataProvider('invalidPretranslateLockValues')]
+    public function validateTheRequest_throws_on_invalid_pretranslate_lock(string $name, string $value): void
+    {
+        $_COOKIE['upload_token'] = '99999999-9999-9999-9999-999999999999';
+        $params = $this->validRequestParams();
+        $params[$name] = $value;
+        $this->setRequestParams($params);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("Invalid $name value");
+        $this->expectExceptionCode(-6);
+
+        $this->invokePrivate('validateTheRequest');
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateTheRequest_defaults_pretranslate_status_options_when_absent(): void
+    {
+        $_COOKIE['upload_token'] = '77777777-7777-7777-7777-777777777777';
+        $this->setRequestParams($this->validRequestParams());
+
+        /** @var array<string, mixed> $data */
+        $data = $this->invokePrivate('validateTheRequest');
+
+        $this->assertSame('APPROVED', $data['pretranslate_101_status']);
+        $this->assertSame('APPROVED', $data['pretranslate_100_status']);
+    }
+
+    /**
+     * The option is case-insensitive; it is stored as the upper-case TranslationStatus constant.
+     *
+     * @return array<string, array{string, string}>
+     */
+    public static function validPretranslateStatusValues(): array
+    {
+        return [
+            'TRANSLATED' => ['TRANSLATED', 'TRANSLATED'],
+            'APPROVED'   => ['APPROVED', 'APPROVED'],
+            'APPROVED2'  => ['APPROVED2', 'APPROVED2'],
+            'lower case' => ['approved2', 'APPROVED2'],
+            'mixed case' => ['Translated', 'TRANSLATED'],
+        ];
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    #[DataProvider('validPretranslateStatusValues')]
+    public function validateTheRequest_reads_pretranslate_status_options(string $status, string $expected): void
+    {
+        $_COOKIE['upload_token'] = '88888888-8888-8888-8888-888888888888';
+        $params = $this->validRequestParams();
+        $params['pretranslate_101_status'] = $status;
+        $params['pretranslate_100_status'] = $status;
+        $this->setRequestParams($params);
+
+        /** @var array<string, mixed> $data */
+        $data = $this->invokePrivate('validateTheRequest');
+
+        $this->assertSame($expected, $data['pretranslate_101_status']);
+        $this->assertSame($expected, $data['pretranslate_100_status']);
+    }
+
+    /**
+     * @return array<string, array{string, string}>
+     */
+    public static function invalidPretranslateStatusValues(): array
+    {
+        return [
+            '101 unknown'    => ['pretranslate_101_status', 'rejected'],
+            '100 empty'      => ['pretranslate_100_status', ''],
+            '100 draft'      => ['pretranslate_100_status', 'draft'],
+        ];
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    #[DataProvider('invalidPretranslateStatusValues')]
+    public function validateTheRequest_throws_on_invalid_pretranslate_status(string $name, string $value): void
+    {
+        $_COOKIE['upload_token'] = '99999999-9999-9999-9999-999999999999';
+        $params = $this->validRequestParams();
+        $params[$name] = $value;
+        $this->setRequestParams($params);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("Invalid $name value");
+        $this->expectExceptionCode(-6);
+
+        $this->invokePrivate('validateTheRequest');
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateTheRequest_defaults_pretranslate_101_to_1_when_absent(): void
+    {
+        $_COOKIE['upload_token'] = '77777777-7777-7777-7777-777777777777';
+        $params = $this->validRequestParams();
+        unset($params['pretranslate_101']);
+        $this->setRequestParams($params);
+
+        /** @var array<string, mixed> $data */
+        $data = $this->invokePrivate('validateTheRequest');
+
+        $this->assertSame('1', $data['pretranslate_101']);
     }
 
     /**
@@ -697,6 +982,27 @@ class CreateProjectControllerTest extends AbstractTest
 
         $this->assertIsArray($result);
         $this->assertNotEmpty($result);
+    }
+
+    /**
+     * Inline xliff_parameters with a locked draft rule: the hydration refuses it with a 400.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateXliffParameters_throws_400_for_a_locked_draft_rule(): void
+    {
+        $xliff = [
+            'name'  => 'locked draft',
+            'uid'   => $this->user->uid,
+            'rules' => ['xliff12' => [['states' => ['translated'], 'analysis' => 'pre-translated', 'editor' => 'draft', 'lock' => true]]],
+        ];
+
+        $this->expectException(DomainException::class);
+        $this->expectExceptionCode(400);
+        $this->expectExceptionMessage('A rule with editor status DRAFT can not be locked.');
+
+        $this->invokePrivate('validateXliffParameters', [json_encode($xliff), null]);
     }
 
     // ─── setMetadataFromPostInput ───

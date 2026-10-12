@@ -80,10 +80,66 @@ class PagerTest extends AbstractTest
         $this->assertSame(1, $result['current_page']);
         $this->assertSame(10, $result['per_page']);
         $this->assertSame(2, $result['last_page']);
-        $this->assertSame(20, $result['total']);
+        $this->assertSame(19, $result['total']);
         $this->assertNull($result['prev']);
         $this->assertSame('/api/test?page=2', $result['next']);
         $this->assertSame(['item1', 'item2'], $result['items']);
+    }
+
+    #[Test]
+    public function getPagination_does_not_advertise_a_page_past_the_last_full_one(): void
+    {
+        $stmt = $this->createStub(PDOStatement::class);
+        $stmt->method('fetchAll')->willReturn(['item1']);
+        $stmt->queryString = 'SELECT * FROM foo LIMIT %d OFFSET %d';
+
+        $pdo = $this->createStub(PDO::class);
+        $pdo->method('prepare')->willReturn($stmt);
+
+        $params = new PaginationParameters(
+            'SELECT * FROM foo LIMIT %d OFFSET %d',
+            [],
+            \stdClass::class,
+            '/api/test?page=',
+            5,
+            20
+        );
+
+        $pager = new Pager($pdo);
+        $result = $pager->getPagination(100, $params);
+
+        // 100 rows at 20 per page is five pages, not six, and page five is the last one
+        $this->assertSame(100, $result['total']);
+        $this->assertSame(5, $result['last_page']);
+        $this->assertNull($result['next']);
+    }
+
+    #[Test]
+    public function getPagination_reports_one_page_when_there_is_nothing_to_page(): void
+    {
+        $stmt = $this->createStub(PDOStatement::class);
+        $stmt->method('fetchAll')->willReturn([]);
+        $stmt->queryString = 'SELECT * FROM foo LIMIT %d OFFSET %d';
+
+        $pdo = $this->createStub(PDO::class);
+        $pdo->method('prepare')->willReturn($stmt);
+
+        $params = new PaginationParameters(
+            'SELECT * FROM foo LIMIT %d OFFSET %d',
+            [],
+            \stdClass::class,
+            '/api/test?page=',
+            1,
+            20
+        );
+
+        $pager = new Pager($pdo);
+        $result = $pager->getPagination(0, $params);
+
+        $this->assertSame(0, $result['total']);
+        $this->assertSame(1, $result['last_page']);
+        $this->assertNull($result['next']);
+        $this->assertSame([], $result['items']);
     }
 
     #[Test]

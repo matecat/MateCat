@@ -15,11 +15,11 @@ use Model\Translations\SegmentTranslationStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use Plugins\Features\ReviewExtended\BatchReviewProcessor;
-use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use Plugins\Features\TranslationEvents\TranslationEventsHandler;
 use ReflectionException;
+use Throwable;
 use TypeError;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\TaskRunner\Commons\AbstractElement;
@@ -55,6 +55,8 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
      * @throws EndQueueException
      * @throws Exception
      * @throws TypeError
+     * @throws Throwable the write runs inside a transaction scope, which aborts the transaction on
+     *                   any throw and re-throws the original, whatever its type
      */
     public function process(AbstractElement $queueElement): void
     {
@@ -80,52 +82,65 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
             throw new EndQueueException('Cannot resolve the user ' . $params['id_user'] . ' that enqueued this bulk status change', -1);
         }
 
-        $source_page = ReviewUtils::revisionNumberToSourcePage($params['revision_number']);
+        // The phase is decided by the credential the enqueuing request authenticated with and travels
+        // in the message. A message published before this key existed must not fall back to the
+        // translate page: it would book its revision events to the wrong phase, so it fails instead.
+        if (!isset($params['source_page'])) {
+            throw new EndQueueException('Missing the source_page of this bulk status change', -1);
+        }
+        $source_page = (int)$params['source_page'];
 
-        $this->database->begin();
+        $changed = $this->database->transaction(function () use ($chunk, $params, $status, $user, $source_page): bool {
+            $segmentTranslationDao = new SegmentTranslationDao($this->database);
 
-        $segmentTranslationDao = new SegmentTranslationDao($this->database);
+            $project = $chunk->getProject(new ProjectDao($this->database));
+            $featureSet = FeatureSet::forProject($project, $this->database);
 
-        $project = $chunk->getProject(new ProjectDao($this->database));
-        $featureSet = FeatureSet::forProject($project, $this->database);
+            $batchEventCreator = $this->createTranslationEventsHandler($chunk);
+            $batchEventCreator->setFeatureSet($featureSet);
+            $batchEventCreator->setProject($project);
 
-        $batchEventCreator = $this->createTranslationEventsHandler($chunk);
-        $batchEventCreator->setFeatureSet($featureSet);
-        $batchEventCreator->setProject($project);
+            $old_translations = $segmentTranslationDao->getAllSegmentsByIdListAndJobId($params['segment_ids'], (int)$chunk->id);
 
-        $old_translations = $segmentTranslationDao->getAllSegmentsByIdListAndJobId($params['segment_ids'], (int)$chunk->id);
+            $new_translations = [];
 
-        $new_translations = [];
+            if (empty($old_translations)) {
+                // Nothing to change. Returning leaves an empty transaction for the scope to close;
+                // the bare return that used to sit here walked out with it still open, and a worker
+                // keeps its connection for the next message on the queue.
+                return false;
+            }
 
-        if (empty($old_translations)) {
+            foreach ($old_translations as $old_translation) {
+                $new_translation = clone $old_translation;
+                $new_translation->status = $status;
+                $new_translation->translation_date = date("Y-m-d H:i:s");
+
+                $new_translations[] = $new_translation;
+
+                if ($featureSet->hasFeature(FeatureCodes::TRANSLATION_VERSIONS)) {
+                    try {
+                        $segmentTranslationEvent = $this->createTranslationEvent($old_translation, $new_translation, $user, $source_page);
+                    } catch (Exception $e) {
+                        throw new EndQueueException($e->getMessage(), $e->getCode(), $e);
+                    }
+
+                    $batchEventCreator->addEvent($segmentTranslationEvent);
+                }
+            }
+
+            $segmentTranslationDao->updateTranslationAndStatusAndDateByList($new_translations);
+
+            $batchEventCreator->save(new BatchReviewProcessor(new ChunkReviewDao($this->database), $user));
+
+            $this->_doLog('completed');
+
+            return true;
+        });
+
+        if (!$changed) {
             return;
         }
-
-        foreach ($old_translations as $old_translation) {
-            $new_translation = clone $old_translation;
-            $new_translation->status = $status;
-            $new_translation->translation_date = date("Y-m-d H:i:s");
-
-            $new_translations[] = $new_translation;
-
-            if ($featureSet->hasFeature(FeatureCodes::TRANSLATION_VERSIONS)) {
-                try {
-                    $segmentTranslationEvent = $this->createTranslationEvent($old_translation, $new_translation, $user, $source_page);
-                } catch (Exception $e) {
-                    throw new EndQueueException($e->getMessage(), $e->getCode(), $e);
-                }
-
-                $batchEventCreator->addEvent($segmentTranslationEvent);
-            }
-        }
-
-        $segmentTranslationDao->updateTranslationAndStatusAndDateByList($new_translations);
-
-        $batchEventCreator->save(new BatchReviewProcessor(new ChunkReviewDao($this->database), $user));
-
-        $this->_doLog('completed');
-
-        $this->database->commit();
 
         if ($client_id) {
             $segment_ids = $params['segment_ids'];

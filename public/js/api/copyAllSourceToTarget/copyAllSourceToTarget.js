@@ -5,19 +5,17 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain';
  *
  * @param {Object} options
  * @param {string} [options.idJob=config.id_job]
- * @param {string} [options.password=config.password]
- * @param {string} [options.revisionNumber=config.revisionNumber]
+ * @param {string} [options.password=config.currentPassword]
  * @returns {Promise<object>}
  */
 export const copyAllSourceToTarget = async ({
   idJob = config.id_job,
   password = config.currentPassword,
-  revisionNumber = config.revisionNumber,
 } = {}) => {
+  // No revision_number: the phase is derived server side from this password.
   const paramsData = {
     id_job: idJob,
     password: password,
-    revision_number: revisionNumber ? revisionNumber : undefined,
   }
   const formData = new FormData()
 

@@ -100,7 +100,7 @@ export const MsWord = () => {
         <div>
           <h3>Translate documents properties</h3>
           <p>
-            Choose whether to translate document properties (e.g. the author's
+            Choose whether to translate document properties (e.g. the author&apos;s
             name).
           </p>
         </div>
@@ -141,8 +141,8 @@ export const MsWord = () => {
             translated.
             <br />
             Style names are case sensitive, for styles whose names are comprised
-            of multiple words, remove the whitespaces: if a style's name is
-            "test Style", the relevant parameter value will be testStyle.
+            of multiple words, remove the whitespaces: if a style&apos;s name is
+            &quot;test Style&quot;, the relevant parameter value will be testStyle.
           </p>
         </div>
         <Controller
@@ -170,6 +170,7 @@ export const MsWord = () => {
             <a
               href="https://guides.matecat.com/file-import#:~:text=MS%20Word%202007,97%2D2003%20(DOC)"
               target="_blank"
+              rel="noreferrer"
             >
               here
             </a>

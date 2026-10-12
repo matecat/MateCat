@@ -21,6 +21,13 @@ import defaultFiltersParams from './Contents/defaultTemplates/filterParams.json'
 import {isEqual} from 'lodash'
 import useSyncTemplateWithConvertFile from './useSyncTemplateWithConvertFile'
 import {EditorOtherTab} from './Contents/EditorOtherTab'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../common/Button/Button'
+import Close from '../../../img/icons/Close'
 
 let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
   'openTab',
@@ -42,7 +49,7 @@ export const TEMPLATE_PROPS_BY_TAB = {
     SCHEMA_KEYS.tm,
     SCHEMA_KEYS.getPublicMatches,
     SCHEMA_KEYS.publicTmPenalty,
-    SCHEMA_KEYS.pretranslate100,
+    SCHEMA_KEYS.pretranslate,
     SCHEMA_KEYS.tmPrioritization,
   ],
   [SETTINGS_PANEL_TABS.machineTranslation]: [SCHEMA_KEYS.mt],
@@ -68,14 +75,14 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
   return [
     {
       id: SETTINGS_PANEL_TABS.translationMemoryGlossary,
-      label: 'Translation Memory and Termbase',
+      label: 'Translation memory and termbase',
       description:
         'Manage your language resources and select which should be used on your new project. <a href="https://guides.matecat.com/activ" target="_blank">More details</a>',
       component: <TranslationMemoryGlossaryTab />,
     },
     {
       id: SETTINGS_PANEL_TABS.machineTranslation,
-      label: 'Machine Translation',
+      label: 'Machine translation',
       description:
         'Manage your machine translation engines and select which should be used on your new project. <a href="https://guides.matecat.com/machine-translation-engines" target="_blank">More details</a>',
       component: <MachineTranslationTab />,
@@ -136,8 +143,6 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
       : []),
   ]
 }
-
-
 
 export const SettingsPanel = ({
   onClose,
@@ -354,8 +359,15 @@ export const SettingsPanel = ({
             <>
               <div className="settings-panel-header">
                 <div className="settings-panel-header-logo" />
-                <span>Settings</span>
-                <div onClick={close} className="close-matecat-modal x-popup" />
+                <h4>Settings</h4>
+                <Button
+                  type={BUTTON_TYPE.ICON}
+                  size={BUTTON_SIZE.ICON_STANDARD}
+                  mode={BUTTON_MODE.GHOST}
+                  onClick={close}
+                >
+                  <Close size={20} />
+                </Button>
               </div>
               {isEnabledProjectTemplateComponent && <ProjectTemplate />}
               {currentProjectTemplate && <ContentWrapper />}

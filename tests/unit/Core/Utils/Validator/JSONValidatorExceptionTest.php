@@ -66,7 +66,7 @@ class JSONValidatorExceptionTest extends AbstractTest
     {
         $ex = new JSONValidatorException($this->makeError());
 
-        $this->assertStringContainsString('JSON Validation Error', $ex->getMessage());
+        $this->assertStringContainsString('JSON validation error', $ex->getMessage());
     }
 
     // --- JsonValidatorGenericException ---

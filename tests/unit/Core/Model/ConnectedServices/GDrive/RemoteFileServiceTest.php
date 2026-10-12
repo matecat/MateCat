@@ -209,7 +209,7 @@ class RemoteFileServiceTest extends AbstractTest
         $service = new RemoteFileService('token', $this->createClientStub(), $driveService);
 
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Copy File - GDrive Error: Denied');
+        $this->expectExceptionMessage('Copy file - GDrive error: Denied');
         $service->copyFile('origin123', 'Copy');
     }
 

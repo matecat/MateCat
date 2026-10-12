@@ -29,7 +29,7 @@ const SegmentUtils = {
     return (
       this.checkTPSupportedLanguage() &&
       UserStore.getUserMetadata()?.guess_tags === 1 &&
-      !!!config.isReview
+      !config.isReview
     )
   },
   /**
@@ -57,8 +57,10 @@ const SegmentUtils = {
   },
   //********** Tag Projection code end ******************/
 
-  isIceSegment: function (segment) {
-    return segment.ice_locked
+  // Server-side locked flag. `segment.unlocked` is the local override kept in
+  // localStorage (see isUnlockedSegment), so callers check `locked && !unlocked`.
+  isLockedSegment: function (segment) {
+    return segment.locked
   },
   isSecondPassLockedSegment: function (segment) {
     return (
@@ -209,7 +211,7 @@ const SegmentUtils = {
     return {
       id_segment: segment.sid,
       id_job: config.id_job,
-      password: config.password,
+      password: config.currentPassword,
       status: status ? status : segment.status,
       translation: translation,
       segment: segmentSource,
@@ -223,8 +225,6 @@ const SegmentUtils = {
       id_before: idBefore,
       context_after: contextAfter,
       id_after: idAfter,
-      revision_number: config.revisionNumber,
-      current_password: config.currentPassword,
       splitStatuses: segment.splitted
         ? SegmentUtils.collectSplittedStatuses(
             segment.original_sid,

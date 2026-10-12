@@ -3,6 +3,7 @@
 namespace Matecat\Core\Controllers;
 
 use Controller\API\App\UpdateJobKeysController;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use DomainException;
 use InvalidArgumentException;
 use Klein\Request;
@@ -10,15 +11,15 @@ use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
 use Model\DataAccess\Database;
-use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\FeatureSet;
-use Model\Jobs\JobStruct;
+use Model\Jobs\JobDao;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use ReflectionException;
+use Utils\Constants\SourcePages;
 use Utils\Logger\MatecatLogger;
 
 /**
@@ -126,6 +127,21 @@ class UpdateJobKeysControllerTest extends AbstractTest
     }
 
     /**
+     * ChunkPasswordValidator runs before the action in production; these tests call update()
+     * directly, so seed the credential-resolved chunk the controller now reads instead of
+     * fetching by password inside validateTheRequest.
+     *
+     * @throws ReflectionException
+     */
+    private function seedChunk(int $sourcePage = SourcePages::SOURCE_PAGE_TRANSLATE): void
+    {
+        $chunk = (new JobDao(obtainTestDatabase()))->getByIdAndPassword($this->jobId(self::BASE), self::JOB_PASSWORD);
+        self::assertNotNull($chunk);
+        $chunk->setSourcePage($sourcePage);
+        $this->setProp('chunk', $chunk);
+    }
+
+    /**
      * @param array<int,mixed> $args
      *
      * @throws ReflectionException
@@ -170,7 +186,8 @@ class UpdateJobKeysControllerTest extends AbstractTest
         /** @var array<int,mixed> $validators */
         $validators = $validatorsProp->getValue($controller);
 
-        $this->assertCount(1, $validators);
+        $this->assertCount(2, $validators);
+        $this->assertInstanceOf(ChunkPasswordValidator::class, $validators[1]);
     }
 
     // ─── validateTheRequest happy path ───
@@ -190,10 +207,11 @@ class UpdateJobKeysControllerTest extends AbstractTest
         $result = $this->invokePrivate('validateTheRequest');
 
         $this->assertIsArray($result);
-        $this->assertSame((string) $this->jobId(self::BASE), $result['job_id']);
-        $this->assertSame(self::JOB_PASSWORD, $result['job_pass']);
-        $this->assertInstanceOf(JobStruct::class, $result['jobData']);
-        $this->assertSame($this->jobId(self::BASE), $result['jobData']->id);
+        // job_id/job_pass/jobData are no longer parsed here: ChunkPasswordValidator resolves the
+        // credential and the job is read from the credential-resolved chunk in update().
+        $this->assertArrayNotHasKey('job_id', $result);
+        $this->assertArrayNotHasKey('job_pass', $result);
+        $this->assertArrayNotHasKey('jobData', $result);
         $this->assertNull($result['public_tm_penalty']);
         $this->assertFalse($result['get_public_matches']);
         $this->assertTrue($result['only_private']);
@@ -242,40 +260,6 @@ class UpdateJobKeysControllerTest extends AbstractTest
      * @throws \Throwable
      */
     #[Test]
-    public function validateTheRequest_throws_when_job_id_missing(): void
-    {
-        $this->setRequestParams([
-            'job_pass' => self::JOB_PASSWORD,
-            'data'     => $this->validTmKeysJson(),
-        ]);
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionCode(-1);
-
-        $this->invokePrivate('validateTheRequest');
-    }
-
-    /**
-     * @throws \Throwable
-     */
-    #[Test]
-    public function validateTheRequest_throws_when_job_pass_missing(): void
-    {
-        $this->setRequestParams([
-            'job_id' => (string) $this->jobId(self::BASE),
-            'data'   => $this->validTmKeysJson(),
-        ]);
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionCode(-2);
-
-        $this->invokePrivate('validateTheRequest');
-    }
-
-    /**
-     * @throws \Throwable
-     */
-    #[Test]
     public function validateTheRequest_throws_when_penalty_out_of_range(): void
     {
         $this->setRequestParams([
@@ -287,23 +271,6 @@ class UpdateJobKeysControllerTest extends AbstractTest
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionCode(-6);
-
-        $this->invokePrivate('validateTheRequest');
-    }
-
-    /**
-     * @throws \Throwable
-     */
-    #[Test]
-    public function validateTheRequest_throws_not_found_for_wrong_password(): void
-    {
-        $this->setRequestParams([
-            'job_id'   => (string) $this->jobId(self::BASE),
-            'job_pass' => 'wrongpass',
-            'data'     => $this->validTmKeysJson(),
-        ]);
-
-        $this->expectException(NotFoundException::class);
 
         $this->invokePrivate('validateTheRequest');
     }
@@ -399,10 +366,9 @@ class UpdateJobKeysControllerTest extends AbstractTest
     #[Test]
     public function update_returns_ok_payload_for_owner_with_empty_keys(): void
     {
+        $this->seedChunk();
         $this->setRequestParams([
-            'job_id'   => (string) $this->jobId(self::BASE),
-            'job_pass' => self::JOB_PASSWORD,
-            'data'     => $this->validTmKeysJson(),
+            'data' => $this->validTmKeysJson(),
         ]);
 
         $this->responseMock->expects($this->once())
@@ -422,12 +388,10 @@ class UpdateJobKeysControllerTest extends AbstractTest
     #[Test]
     public function update_sets_public_tm_penalty_metadata_when_provided(): void
     {
+        $this->seedChunk();
         $this->setRequestParams([
-            'job_id'            => (string) $this->jobId(self::BASE),
-            'job_pass'          => self::JOB_PASSWORD,
             'data'              => $this->validTmKeysJson(),
             'public_tm_penalty' => '25',
-            'job_pass_meta'     => self::JOB_PASSWORD,
         ]);
 
         $this->responseMock->expects($this->once())
@@ -456,10 +420,9 @@ class UpdateJobKeysControllerTest extends AbstractTest
         $this->setProp('user', $user);
         $this->setProp('userIsLogged', true);
 
+        $this->seedChunk();
         $this->setRequestParams([
-            'job_id'   => (string) $this->jobId(self::BASE),
-            'job_pass' => self::JOB_PASSWORD,
-            'data'     => $this->validTmKeysJson(),
+            'data' => $this->validTmKeysJson(),
         ]);
 
         $this->responseMock->expects($this->once())
@@ -468,25 +431,6 @@ class UpdateJobKeysControllerTest extends AbstractTest
                 $this->assertSame('OK', $data['data']);
                 return true;
             }));
-
-        $this->controller->update();
-    }
-
-    // ─── update() failure propagation ───
-
-    /**
-     * @throws \Throwable
-     */
-    #[Test]
-    public function update_propagates_invalid_argument_when_job_id_missing(): void
-    {
-        $this->setRequestParams([
-            'job_pass' => self::JOB_PASSWORD,
-            'data'     => $this->validTmKeysJson(),
-        ]);
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionCode(-1);
 
         $this->controller->update();
     }
@@ -502,7 +446,7 @@ class UpdateJobKeysControllerTest extends AbstractTest
     #[Test]
     public function update_returns_ok_for_revisor_role(): void
     {
-        $this->seedChunkReview(self::BASE, self::JOB_PASSWORD, 'revpw_' . self::BASE, 3);
+        $this->seedChunk(SourcePages::SOURCE_PAGE_REVISION);
 
         $user             = new UserStruct();
         $user->uid        = $this->userId(self::BASE);
@@ -513,10 +457,7 @@ class UpdateJobKeysControllerTest extends AbstractTest
         $this->setProp('userIsLogged', true);
 
         $this->setRequestParams([
-            'job_id'           => (string) $this->jobId(self::BASE),
-            'job_pass'         => self::JOB_PASSWORD,
-            'current_password' => 'revpw_' . self::BASE,
-            'data'             => $this->validTmKeysJson(),
+            'data' => $this->validTmKeysJson(),
         ]);
 
         $this->responseMock->expects($this->once())
@@ -588,6 +529,8 @@ class UpdateJobKeysControllerTest extends AbstractTest
                 . ' WHERE id = ' . $this->jobId(self::BASE)
             );
 
+            $this->seedChunk();
+
             $data = (string) json_encode([
                 'mine' => [[
                     'name' => 'Owned', 'key' => $ownedKey,
@@ -599,9 +542,7 @@ class UpdateJobKeysControllerTest extends AbstractTest
             ]);
 
             $this->setRequestParams([
-                'job_id'   => (string) $this->jobId(self::BASE),
-                'job_pass' => self::JOB_PASSWORD,
-                'data'     => $data,
+                'data' => $data,
             ]);
 
             $this->responseMock->expects($this->once())

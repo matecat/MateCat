@@ -5,12 +5,15 @@ namespace Matecat\Core\Model\DataAccess;
 use Exception;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
+use Model\DataAccess\SequenceAllocationInTransaction;
+use Model\DataAccess\TransactionAbortedException;
 use PDO;
 use PDOException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
+use RuntimeException;
 use Utils\Registry\AppConfig;
 
 #[CoversClass(Database::class)]
@@ -349,6 +352,37 @@ class DatabaseTest extends AbstractTest
         $this->assertSame($first[0] + 1, $second[0]);
     }
 
+    #[Test]
+    public function nextSequenceRefusesToAllocateInsideAnOpenTransaction(): void
+    {
+        $this->db->begin();
+
+        try {
+            $this->expectException(SequenceAllocationInTransaction::class);
+
+            $this->db->nextSequence(Database::SEQ_ID_SEGMENT, 1);
+        } finally {
+            $this->db->rollback();
+        }
+    }
+
+    #[Test]
+    public function aRefusedAllocationLeavesTheCallersTransactionUntouched(): void
+    {
+        $this->db->begin();
+
+        try {
+            $this->db->nextSequence(Database::SEQ_ID_SEGMENT, 1);
+            $this->fail('the allocation should have been refused');
+        } catch (SequenceAllocationInTransaction) {
+            // The refusal must not take the caller's transaction down with it: the caller may well
+            // be able to carry on without the ids, and it is not this method's transaction to end.
+            $this->assertTrue($this->db->getConnection()->inTransaction());
+        } finally {
+            $this->db->rollback();
+        }
+    }
+
     // ─── useDb() ────────────────────────────────────────────────────────────
 
     #[Test]
@@ -385,5 +419,253 @@ class DatabaseTest extends AbstractTest
 
         $conn = $this->db->getConnection();
         $this->assertInstanceOf(PDO::class, $conn);
+    }
+
+    // ─── onCommit() ─────────────────────────────────────────────────────────
+
+    /**
+     * The ordering guarantee callers depend on: nothing scheduled through onCommit() may observe the
+     * data before it is visible. Cache invalidation is the motivating case — bust before the commit
+     * and a concurrent reader can repopulate from the pre-commit row, leaving a stale value that
+     * outlives the commit for the whole TTL.
+     */
+    #[Test]
+    public function onCommitRunsTheCallbackAfterTheCommitAndNotBefore(): void
+    {
+        $ran = false;
+
+        $this->db->begin();
+        $this->db->onCommit(function () use (&$ran): void {
+            $ran = true;
+        });
+
+        $this->assertFalse($ran, 'must not run while the transaction is still open');
+
+        $this->db->commit();
+
+        $this->assertTrue($ran);
+    }
+
+    #[Test]
+    public function onCommitDiscardsTheCallbackOnRollback(): void
+    {
+        $ran = false;
+
+        $this->db->begin();
+        $this->db->onCommit(function () use (&$ran): void {
+            $ran = true;
+        });
+        $this->db->rollback();
+
+        $this->assertFalse($ran, 'work queued on writes that were rolled back must not happen');
+
+        // And it must not leak into the next transaction either.
+        $this->db->begin();
+        $this->db->commit();
+
+        $this->assertFalse($ran);
+    }
+
+    /**
+     * Callers should not have to know whether a transaction is open, so with none the callback runs
+     * straight away — otherwise it would be queued forever and silently never run.
+     */
+    #[Test]
+    public function onCommitRunsImmediatelyWhenNoTransactionIsOpen(): void
+    {
+        $ran = false;
+
+        $this->db->onCommit(function () use (&$ran): void {
+            $ran = true;
+        });
+
+        $this->assertTrue($ran);
+    }
+
+    /**
+     * The commit already succeeded by the time these run, so a failing callback must not turn a
+     * completed write into an exception for the caller.
+     */
+    #[Test]
+    public function onCommitSwallowsAndLogsACallbackFailure(): void
+    {
+        $secondRan = false;
+
+        $this->db->begin();
+        $this->db->onCommit(static function (): void {
+            throw new Exception('cache invalidation failed');
+        });
+        $this->db->onCommit(function () use (&$secondRan): void {
+            $secondRan = true;
+        });
+
+        $this->db->commit();
+
+        $this->assertTrue($secondRan, 'one failing callback must not skip the rest');
+    }
+
+    /**
+     * A callback that itself defers work must queue for the next transaction rather than extend the
+     * drain in progress, or a self-scheduling callback would loop forever inside commit().
+     */
+    #[Test]
+    public function onCommitDoesNotRecurseWhenACallbackSchedulesMoreWork(): void
+    {
+        $outer = 0;
+        $inner = 0;
+
+        $this->db->begin();
+        $this->db->onCommit(function () use (&$outer, &$inner): void {
+            $outer++;
+            // No transaction is open during the drain, so this one runs immediately.
+            $this->db->onCommit(function () use (&$inner): void {
+                $inner++;
+            });
+        });
+        $this->db->commit();
+
+        $this->assertSame(1, $outer);
+        $this->assertSame(1, $inner);
+    }
+
+    /**
+     * The data is already committed and the caller has been told the write succeeded, so a failure
+     * in best-effort work — a cache bust, a message enqueue — must not turn into an exception it
+     * cannot act on.
+     */
+    #[Test]
+    public function onCommitSwallowsAFailingBestEffortCallback(): void
+    {
+        $this->db->begin();
+        $this->db->onCommit(static fn() => throw new RuntimeException('redis down'));
+
+        $this->db->commit();
+
+        $this->assertFalse($this->db->getConnection()->inTransaction());
+    }
+
+    /**
+     * The exception to that: work whose silent failure is a correctness or a security problem. A
+     * credential sweep that quietly fails leaves a revoked job password answering out of the cache
+     * for the whole TTL, and the caller is the only party left that can retry.
+     */
+    #[Test]
+    public function onCommitRethrowsAFailingCriticalCallback(): void
+    {
+        $this->db->begin();
+        $this->db->onCommit(static fn() => throw new RuntimeException('redis down'), true);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('redis down');
+        $this->db->commit();
+    }
+
+    #[Test]
+    public function onCommitRunsEveryCallbackBeforeRethrowingACriticalFailure(): void
+    {
+        $ran = false;
+
+        $this->db->begin();
+        $this->db->onCommit(static fn() => throw new RuntimeException('redis down'), true);
+        $this->db->onCommit(function () use (&$ran): void {
+            $ran = true;
+        });
+
+        try {
+            $this->db->commit();
+            $this->fail('the critical failure must be re-thrown');
+        } catch (RuntimeException) {
+            // asserted in onCommitRethrowsAFailingCriticalCallback
+        }
+
+        $this->assertTrue($ran, 'unrelated queued work has already been paid for and must still run');
+    }
+
+    #[Test]
+    public function onCommitRethrowsTheFirstCriticalFailureWhenSeveralFail(): void
+    {
+        $this->db->begin();
+        $this->db->onCommit(static fn() => throw new RuntimeException('first'), true);
+        $this->db->onCommit(static fn() => throw new RuntimeException('second'), true);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('first');
+        $this->db->commit();
+    }
+
+    /**
+     * A scope nested inside this transaction cannot roll it back — it does not own it — so it marks
+     * it unable to commit instead. Whoever eventually calls commit() is refused, including a caller
+     * that opened the transaction by hand and has never heard of this mechanism.
+     */
+    #[Test]
+    public function commitRefusesWhenTheTransactionWasMarkedRollbackOnly(): void
+    {
+        $this->db->begin();
+        $this->db->markRollbackOnly();
+
+        try {
+            $this->db->commit();
+            $this->fail('the commit must be refused');
+        } catch (TransactionAbortedException) {
+            // The refusal has to leave the connection clean, not half-open: the next caller on this
+            // connection must not inherit an abandoned transaction.
+            $this->assertFalse($this->db->getConnection()->inTransaction());
+        }
+    }
+
+    #[Test]
+    public function aRefusedCommitDiscardsTheDeferralQueue(): void
+    {
+        $ran = false;
+
+        $this->db->begin();
+        $this->db->onCommit(function () use (&$ran): void {
+            $ran = true;
+        });
+        $this->db->markRollbackOnly();
+
+        try {
+            $this->db->commit();
+        } catch (TransactionAbortedException) {
+            // asserted in commitRefusesWhenTheTransactionWasMarkedRollbackOnly
+        }
+
+        $this->assertFalse($ran, 'deferred work must not run for a transaction that was rolled back');
+    }
+
+    /**
+     * The flag belongs to the transaction, not to the connection: once the transaction it condemned
+     * is gone, the next one starts clean.
+     */
+    #[Test]
+    public function rollbackClearsTheRollbackOnlyFlag(): void
+    {
+        $this->db->begin();
+        $this->db->markRollbackOnly();
+        $this->db->rollback();
+
+        $this->db->begin();
+        $this->db->commit();
+
+        $this->assertFalse($this->db->getConnection()->inTransaction());
+    }
+
+    /**
+     * A request that dies between markRollbackOnly() and commit() leaves the flag set on a connection
+     * that outlives it — a worker holds its connection across messages. The next real begin() must
+     * not inherit someone else's verdict.
+     */
+    #[Test]
+    public function beginClearsTheRollbackOnlyFlagOfAnAbandonedTransaction(): void
+    {
+        $this->db->begin();
+        $this->db->markRollbackOnly();
+        $this->db->getConnection()->rollBack(); // an abrupt unwind that bypassed rollback()
+
+        $this->db->begin();
+        $this->db->commit();
+
+        $this->assertFalse($this->db->getConnection()->inTransaction());
     }
 }

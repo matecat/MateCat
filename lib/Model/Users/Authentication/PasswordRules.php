@@ -34,7 +34,9 @@ trait PasswordRules
 
         // Byte-wise on purpose: without the u modifier every byte of a multibyte character is above
         // 0x7F, so a legitimate accented or non-Latin password cannot match this range by accident.
-        if (preg_match('/[\x00-\x1F\x7F]/', $password) === 1) {
+        // `!== 0` rather than `=== 1`: preg_match returns false when PCRE gives up, and a rule that
+        // exists to reject must reject when it cannot decide. Only an explicit 0 is a pass.
+        if (preg_match('/[\x00-\x1F\x7F]/', $password) !== 0) {
             throw new ValidationError(
                 'The password cannot contain control characters, such as tabs, line breaks or null bytes'
             );

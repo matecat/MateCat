@@ -74,7 +74,7 @@ describe('findElementByMetadata', () => {
         'x-path',
       )
       expect(el).not.toBeNull()
-      expect(el.textContent).toBe('Second div paragraph.')
+      expect(el).toHaveTextContent('Second div paragraph.')
     })
 
     it('finds an element via absolute /html/body/h1 XPath', () => {
@@ -89,7 +89,7 @@ describe('findElementByMetadata', () => {
         '<img id="logo" alt="Company Logo" src="logo.png" />'
       const el = findElementByMetadata(container, "//img[@id='logo']", 'x-path')
       expect(el).not.toBeNull()
-      expect(el.getAttribute('id')).toBe('logo')
+      expect(el).toHaveAttribute('id', 'logo')
     })
 
     it('returns the owning element when XPath targets an attribute node', () => {
@@ -104,7 +104,7 @@ describe('findElementByMetadata', () => {
       )
       expect(result).not.toBeNull()
       expect(result.tagName).toBe('IMG')
-      expect(result.getAttribute('alt')).toBe('Company Logo')
+      expect(result).toHaveAttribute('alt', 'Company Logo')
     })
   })
 
@@ -257,21 +257,21 @@ describe('walkNodePath', () => {
     container.innerHTML = '<div><p>Hello</p></div>'
     const el = walkNodePath(container, 'div[0]/p[0]')
     expect(el).not.toBeNull()
-    expect(el.textContent).toBe('Hello')
+    expect(el).toHaveTextContent('Hello')
   })
 
   it('strips html[N]/body[N] prefix', () => {
     container.innerHTML = '<div><p>Target</p></div>'
     const el = walkNodePath(container, 'html[0]/body[0]/div[0]/p[0]')
     expect(el).not.toBeNull()
-    expect(el.textContent).toBe('Target')
+    expect(el).toHaveTextContent('Target')
   })
 
   it('uses 0-based indexing to pick the correct sibling', () => {
     container.innerHTML = '<div>A</div><div>B</div><div>C</div>'
-    expect(walkNodePath(container, 'div[0]').textContent).toBe('A')
-    expect(walkNodePath(container, 'div[1]').textContent).toBe('B')
-    expect(walkNodePath(container, 'div[2]').textContent).toBe('C')
+    expect(walkNodePath(container, 'div[0]')).toHaveTextContent('A')
+    expect(walkNodePath(container, 'div[1]')).toHaveTextContent('B')
+    expect(walkNodePath(container, 'div[2]')).toHaveTextContent('C')
   })
 
   it('handles skipped intermediate elements (descendant fallback)', () => {
@@ -281,7 +281,7 @@ describe('walkNodePath', () => {
       '</ul>'
     const el = walkNodePath(container, 'ul[0]/custom-el[0]/div[0]/h3[0]')
     expect(el).not.toBeNull()
-    expect(el.textContent).toBe('Target')
+    expect(el).toHaveTextContent('Target')
   })
 
   it('resolves the Equipment.html product path structure', () => {
@@ -301,7 +301,7 @@ describe('walkNodePath', () => {
       'div[0]/div[0]/div[0]/div[0]/div[0]/ul[0]/we-product-item[0]/div[0]/h3[0]',
     )
     expect(el).not.toBeNull()
-    expect(el.textContent).toBe('Marin Mountain Bike Shoes')
+    expect(el).toHaveTextContent('Marin Mountain Bike Shoes')
   })
 
   it('picks the correct 0-based index with skipped wrappers', () => {
@@ -312,7 +312,7 @@ describe('walkNodePath', () => {
       '</ul>'
     const el = walkNodePath(container, 'ul[0]/we-product-item[1]/div[0]/h3[0]')
     expect(el).not.toBeNull()
-    expect(el.textContent).toBe('Second')
+    expect(el).toHaveTextContent('Second')
   })
 
   it('returns null when index is out of bounds', () => {
@@ -348,7 +348,7 @@ describe('walkNodePath', () => {
       'x-path',
     )
     expect(el).not.toBeNull()
-    expect(el.textContent).toBe('Found')
+    expect(el).toHaveTextContent('Found')
   })
 
   it('does not break standard XPath in findElementByMetadata', () => {
@@ -359,7 +359,7 @@ describe('walkNodePath', () => {
       'x-path',
     )
     expect(el).not.toBeNull()
-    expect(el.textContent).toBe('Second')
+    expect(el).toHaveTextContent('Second')
   })
 })
 
@@ -492,6 +492,99 @@ describe('AemContainerTextMatchStrategy', () => {
         'Target Text',
       ),
     ).toBeNull()
+  })
+
+  describe('segment that is one sentence of a longer block', () => {
+    // Real AEM text component: the source paragraph is segmented into
+    // sentences, so no block's full text equals any single segment.
+    const SENTENCE_1 =
+      'WKND is a collective of outdoors enthusiasts that want to share our expertise with the world.'
+    const SENTENCE_2 =
+      'Our objective is create a community to enjoy life and create lasting memories.'
+    const PATH =
+      'data-node-path=/content/wknd/faqs/jcr:content/root/container/container/text'
+
+    beforeEach(() => {
+      container.innerHTML = `
+        <div class="translated-component-wrapper" data-node-path="/content/wknd/faqs/jcr:content/root/container/container/text">
+          <div id="text-2bba962020" class="cmp-text">
+            <p>${SENTENCE_1} ${SENTENCE_2}</p>
+          </div>
+        </div>
+      `
+    })
+
+    it('maps the first sentence to the innermost block that contains it', () => {
+      expect(strategy.execute(container, PATH, SENTENCE_1)).toBe(
+        container.querySelector('.cmp-text p'),
+      )
+    })
+
+    it('maps every sentence of the block to the same element', () => {
+      expect(strategy.execute(container, PATH, SENTENCE_2)).toBe(
+        container.querySelector('.cmp-text p'),
+      )
+    })
+
+    it('matches across differing whitespace and case', () => {
+      expect(
+        strategy.execute(
+          container,
+          PATH,
+          `  our   OBJECTIVE is create a community\n`,
+        ),
+      ).toBe(container.querySelector('.cmp-text p'))
+    })
+
+    it('still returns null when no block contains the source', () => {
+      expect(
+        strategy.execute(container, PATH, 'Who is the intended audience?'),
+      ).toBeNull()
+    })
+
+    it('does not match a fragment that only exists inside a larger word', () => {
+      expect(strategy.execute(container, PATH, 'ective is cre')).toBeNull()
+    })
+  })
+
+  it('returns null when two unrelated blocks both contain the source', () => {
+    container.innerHTML = `
+      <div data-node-path="/content/jcr:content">
+        <h3>Learn more about pricing.</h3>
+        <p>Learn more about shipping and returns.</p>
+      </div>
+    `
+    expect(
+      strategy.execute(
+        container,
+        'data-node-path=/content/jcr:content',
+        'Learn more',
+      ),
+    ).toBeNull()
+  })
+
+  it('maps a sentence of a container with no block children to the container', () => {
+    container.innerHTML =
+      '<div data-node-path="/content/jcr:content"><span>First sentence. Second sentence.</span></div>'
+    expect(
+      strategy.execute(
+        container,
+        'data-node-path=/content/jcr:content',
+        'Second sentence.',
+      ),
+    ).toBe(container.querySelector('[data-node-path]'))
+  })
+
+  it('keeps returning the single-block container for a near-identical source', () => {
+    container.innerHTML =
+      '<div data-node-path="/content/jcr:content"><p>Get started now!</p></div>'
+    expect(
+      strategy.execute(
+        container,
+        'data-node-path=/content/jcr:content',
+        'Get started now',
+      ),
+    ).toBe(container.querySelector('[data-node-path]'))
   })
 
   it('returns null when path is empty', () => {

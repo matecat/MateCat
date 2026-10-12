@@ -65,7 +65,7 @@ class CatDecorator extends AbstractDecorator
         $this->template->job_completion_current_phase = $this->current_phase;
 
         if ($lastCompletionEvent) {
-            $this->template->job_completion_last_event_id = $lastCompletionEvent['id_event'];
+            $this->template->last_completion_event_id = $lastCompletionEvent['id_event'];
             $this->varsForComplete();
         } else {
             $this->varsForUncomplete();

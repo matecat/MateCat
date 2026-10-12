@@ -13,34 +13,6 @@ use Utils\Tools\Utils;
 class UtilsTest extends AbstractTest
 {
     // =========================================================================
-    // Tests for getSourcePage() and getSourcePageFromReferer()
-    // =========================================================================
-
-    #[Test]
-    public function testGetSourcePageReturnsTranslateWhenNoRequestUri(): void
-    {
-        unset($_SERVER['REQUEST_URI']);
-        $result = Utils::getSourcePage();
-        $this->assertEquals(1, $result); // SOURCE_PAGE_TRANSLATE = 1
-    }
-
-    #[Test]
-    public function testGetSourcePageReturnsTranslateForTranslatePath(): void
-    {
-        $_SERVER['REQUEST_URI'] = '/translate/project/1-2/en-US-it-IT';
-        $result = Utils::getSourcePage();
-        $this->assertEquals(1, $result);
-    }
-
-    #[Test]
-    public function testGetSourcePageFromRefererReturnsTranslateWhenNoReferer(): void
-    {
-        unset($_SERVER['HTTP_REFERER']);
-        $result = Utils::getSourcePageFromReferer();
-        $this->assertEquals(1, $result);
-    }
-
-    // =========================================================================
     // Tests for getBrowser()
     // =========================================================================
 
@@ -1749,32 +1721,6 @@ class UtilsTest extends AbstractTest
     }
 
     #[Test]
-    public function testGetSourcePageForRevisePath(): void
-    {
-        $_SERVER['REQUEST_URI'] = '/revise/project/1-2/en-US-it-IT';
-        $result = Utils::getSourcePage();
-        // SOURCE_PAGE_REVISION = 2
-        $this->assertEquals(2, $result);
-    }
-
-    #[Test]
-    public function testGetSourcePageForRevise2Path(): void
-    {
-        $_SERVER['REQUEST_URI'] = '/revise2/project/1-2/en-US-it-IT';
-        $result = Utils::getSourcePage();
-        // revise2 should return SOURCE_PAGE_REVISION + 1 = 3
-        $this->assertEquals(3, $result);
-    }
-
-    #[Test]
-    public function testGetSourcePageFromRefererForRevisePath(): void
-    {
-        $_SERVER['HTTP_REFERER'] = 'https://example.com/revise/project/1-2/en-US-it-IT';
-        $result = Utils::getSourcePageFromReferer();
-        $this->assertEquals(2, $result);
-    }
-
-    #[Test]
     public function testMysqlTimestampFallbackForInvalidTime(): void
     {
         // Test with a value that causes date() to return false (line 284)
@@ -2369,6 +2315,58 @@ class UtilsTest extends AbstractTest
         }
         // 500 * 62 draws: every base62 symbol should appear (probability of a gap ≈ 0).
         self::assertCount(62, $seen);
+    }
+
+    // =========================================================================
+    // Tests for errMailBody()
+    // =========================================================================
+
+    /**
+     * The error report is the one email body built by hand, so the escaping it does is its own and
+     * has to be asserted here rather than through the template tests.
+     */
+    #[Test]
+    public function errMailBodyDeliversAPayloadAsText(): void
+    {
+        $body = Utils::errMailBody('<img src=x onerror=alert(1)> & "quoted" \'apostrophe\'');
+
+        self::assertStringNotContainsString('<img', $body);
+        self::assertStringContainsString('&lt;img src=x onerror=alert(1)&gt;', $body);
+        self::assertStringContainsString('&amp;', $body);
+        self::assertStringContainsString('&quot;quoted&quot;', $body);
+        self::assertStringContainsString('&apos;apostrophe&apos;', $body);
+    }
+
+    /**
+     * Only the wrapper is markup. A body that escaped everything, brackets included, would arrive as
+     * one unreadable line, and a body that escaped nothing is what this method exists to prevent.
+     */
+    #[Test]
+    public function errMailBodyKeepsItsOwnMarkupAndNoOther(): void
+    {
+        $body = Utils::errMailBody('plain text');
+
+        self::assertStringStartsWith('<pre>', $body);
+        self::assertStringEndsWith('</pre>', $body);
+        self::assertStringContainsString('<br />', $body);
+        self::assertSame(1, substr_count($body, '<br />'), 'the break separates trace from content');
+        self::assertSame(3, preg_match_all('~<[a-z/]~i', $body), 'no tag beyond <pre>, <br /> and </pre>');
+    }
+
+    /**
+     * A multi-line dump is what the callers actually pass — `print_r($_REQUEST, true)` — and the
+     * `<pre>` is what makes it readable, so the newlines have to survive the escaping while the
+     * markup inside them does not.
+     */
+    #[Test]
+    public function errMailBodyEscapesAMultiLineDumpWithoutFlatteningIt(): void
+    {
+        $body = Utils::errMailBody(print_r(['name' => '<b>bold</b>', 'url' => 'a&b'], true));
+
+        self::assertStringNotContainsString('<b>', $body);
+        self::assertStringContainsString('&lt;b&gt;bold&lt;/b&gt;', $body);
+        self::assertStringContainsString('a&amp;b', $body);
+        self::assertStringContainsString("\n", $body, 'the <pre> renders the newlines');
     }
 
 }

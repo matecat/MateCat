@@ -42,7 +42,7 @@ class EngineOwnershipValidator extends Base
     {
         $user = $this->controller->getUser();
         if ($user->uid === null) {
-            throw new AuthorizationError("Not Authorized. You must be logged in.", 401);
+            throw new AuthorizationError("Not authorized. You must be logged in.", 401);
         }
 
         /** @var T $engine */

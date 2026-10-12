@@ -219,10 +219,12 @@ class QualityReportControllerAPI extends KleinController
             $seg['comments'] = $segment->comments;
             $seg['dataRefMap'] = $segment->dataRefMap;
             $seg['edit_distance'] = $segment->edit_distance;
-            $seg['ice_locked'] = $segment->ice_locked;
+            // Deprecated alias of 'locked', kept for existing API consumers
+            $seg['ice_locked'] = $segment->locked;
             $seg['ice_modified'] = $segment->ice_modified;
             $seg['is_pre_translated'] = $segment->is_pre_translated;
             $seg['issues'] = $segment->issues;
+            $seg['history'] = $segment->history;
             $seg['last_revisions'] = $segment->last_revisions;
             $seg['last_translation'] = $segment->last_translation;
             $seg['locked'] = $segment->locked;

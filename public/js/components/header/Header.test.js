@@ -8,13 +8,14 @@ import {mswServer} from '../../../mocks/mswServer'
 import Header from './Header'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import userMock from '../../../mocks/userMock'
+import ModalsActions from '../../actions/ModalsActions'
 
 // create modal div
 const modalElement = document.createElement('div')
 modalElement.id = 'modal'
 document.body.appendChild(modalElement)
 const mountPoint = createRoot(modalElement)
-afterAll(() => mountPoint.unmount())
+afterAll(() => act(() => mountPoint.unmount()))
 
 window.config = {
   isLoggedIn: 1,
@@ -167,9 +168,13 @@ test('Rendering elements', async () => {
   expect(screen.getByTestId('team-select')).toBeInTheDocument()
 })
 
-xtest('Click profile from user menu', async () => {
+test('Click profile from user menu', async () => {
   const user = userEvent.setup()
   executeMswServer()
+  const openPreferencesModalSpy = jest.spyOn(
+    ModalsActions,
+    'openPreferencesModal',
+  )
 
   render(
     <ApplicationWrapperContext.Provider
@@ -181,5 +186,10 @@ xtest('Click profile from user menu', async () => {
   await act(async () => user.click(screen.getByTestId('user-menu-metadata')))
 
   await act(async () => user.click(screen.getByText('Profile')))
-  expect(screen.getByTestId('preferences-modal')).toBeInTheDocument()
+  // PreferencesModal itself is portal-rendered by a top-level app component
+  // that listens to ModalsStore, not by Header, so it can't appear in this
+  // isolated render — assert the action that would trigger it instead.
+  expect(openPreferencesModalSpy).toHaveBeenCalled()
+
+  openPreferencesModalSpy.mockRestore()
 })

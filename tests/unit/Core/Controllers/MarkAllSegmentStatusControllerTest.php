@@ -2,8 +2,8 @@
 
 namespace Matecat\Core\Controllers;
 
+use Controller\API\Commons\Exceptions\AuthorizationError;
 use Controller\API\V2\MarkAllSegmentStatusController;
-use InvalidArgumentException;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
@@ -13,10 +13,14 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use Stomp\Transport\Message;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use ReflectionException;
+use Utils\ActiveMQ\AMQHandler;
+use Utils\ActiveMQ\WorkerClient;
+use Utils\Constants\SourcePages;
 use Utils\Logger\MatecatLogger;
 
 /**
@@ -155,6 +159,9 @@ class MarkAllSegmentStatusControllerTest extends AbstractTest
         $chunk->target = 'it-IT';
         $chunk->job_first_segment = $this->segmentId(self::BASE);
         $chunk->job_last_segment = self::BASE + 30;
+        // ChunkPasswordValidator stamps the phase it resolved the password to; the translate
+        // password is what this fixture presents, so mirror the stamp it would leave.
+        $chunk->setSourcePage(SourcePages::SOURCE_PAGE_TRANSLATE);
 
         return $chunk;
     }
@@ -321,19 +328,45 @@ class MarkAllSegmentStatusControllerTest extends AbstractTest
     }
 
     /**
+     * Each bulk status belongs to exactly one phase. Here the chunk was reached with the translate
+     * password, so stamping the first reviewer's status onto the segments must be refused.
+     *
      * @throws \Throwable
      */
     #[Test]
-    public function changeSegmentsStatus_throws_for_invalid_revision_number(): void
+    public function changeSegmentsStatus_rejects_a_status_the_password_does_not_allow(): void
     {
         $this->setRequestParams([
             'segments_id' => [$this->segmentId(self::BASE)],
-            'status' => 'translated',
-            'revision_number' => '99',
+            'status' => 'approved',
         ]);
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid revision number');
+        $this->expectException(AuthorizationError::class);
+        $this->expectExceptionCode(401);
+
+        $this->controller->changeSegmentsStatus();
+    }
+
+    /**
+     * The same holds between the two revision phases: a first pass reviewer must not be able to
+     * stamp the second pass status.
+     *
+     * @throws \Throwable
+     */
+    #[Test]
+    public function changeSegmentsStatus_rejects_the_second_pass_status_for_a_first_pass_password(): void
+    {
+        $chunk = $this->buildChunk();
+        $chunk->setSourcePage(SourcePages::SOURCE_PAGE_REVISION);
+        $this->setProp('chunk', $chunk);
+
+        $this->setRequestParams([
+            'segments_id' => [$this->segmentId(self::BASE)],
+            'status' => 'approved2',
+        ]);
+
+        $this->expectException(AuthorizationError::class);
+        $this->expectExceptionCode(401);
 
         $this->controller->changeSegmentsStatus();
     }
@@ -342,15 +375,18 @@ class MarkAllSegmentStatusControllerTest extends AbstractTest
      * @throws \Throwable
      */
     #[Test]
-    public function changeSegmentsStatus_accepts_valid_revision_number_and_enqueues(): void
+    public function changeSegmentsStatus_accepts_the_status_of_the_resolved_phase_and_enqueues(): void
     {
-        // qa_chunk_reviews seeded with source_page=2 → valid revision number 1.
+        // The chunk carries the phase ChunkPasswordValidator resolved the review password to,
+        // so APPROVED is the status that credential is allowed to set.
         $segId = $this->segmentId(self::BASE);
+        $chunk = $this->buildChunk();
+        $chunk->setSourcePage(SourcePages::SOURCE_PAGE_REVISION);
+        $this->setProp('chunk', $chunk);
 
         $this->setRequestParams([
             'segments_id' => [$segId],
             'status' => 'approved',
-            'revision_number' => '1',
         ]);
 
         $this->responseMock->expects($this->once())
@@ -366,5 +402,59 @@ class MarkAllSegmentStatusControllerTest extends AbstractTest
             }));
 
         $this->controller->changeSegmentsStatus();
+    }
+
+    /**
+     * The worker writes segment_translation_events.source_page from what it is handed, so the value
+     * that leaves this controller must be the one derived from the credential — not a parameter the
+     * client chose, and not absent just because the client sent nothing.
+     *
+     * @throws \Throwable
+     */
+    #[Test]
+    public function changeSegmentsStatus_enqueuesTheSourcePageDerivedFromTheCredential(): void
+    {
+        $chunk = $this->buildChunk();
+        $chunk->setSourcePage(SourcePages::SOURCE_PAGE_REVISION_2);
+        $this->setProp('chunk', $chunk);
+
+        $this->setRequestParams([
+            'segments_id' => [$this->segmentId(self::BASE)],
+            'status' => 'approved2',
+        ]);
+
+        $savedHandler = WorkerClient::$_HANDLER;
+        $savedQueues = WorkerClient::$_QUEUES;
+
+        $captured = null;
+        $handlerMock = $this->createMock(AMQHandler::class);
+        $handlerMock->expects($this->once())
+            ->method('publishToQueues')
+            ->with(
+                $this->anything(),
+                $this->callback(function (Message $message) use (&$captured): bool {
+                    $captured = (string)$message->getBody();
+
+                    return true;
+                })
+            );
+
+        WorkerClient::$_HANDLER = $handlerMock;
+        WorkerClient::$_QUEUES = $savedQueues;
+
+        try {
+            $this->responseMock->method('json');
+            $this->controller->changeSegmentsStatus();
+        } finally {
+            WorkerClient::$_HANDLER = $savedHandler;
+            WorkerClient::$_QUEUES = $savedQueues;
+        }
+
+        $this->assertIsString($captured);
+        $payload = json_decode($captured, true);
+        $this->assertSame(
+            SourcePages::SOURCE_PAGE_REVISION_2,
+            $payload['params']['source_page']
+        );
     }
 }

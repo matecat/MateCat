@@ -27,8 +27,8 @@ import {ApplicationThreshold} from './ApplicationThreshold'
 import defaultMTOptions from '../../Contents/defaultTemplates/mtOptions.json'
 import {normalizeTemplatesWithNullProps} from '../../../../hooks/useTemplates'
 import {Button, BUTTON_TYPE} from '../../../common/Button/Button'
-import IconClose from '../../../icons/IconClose'
-import IconAdd from '../../../icons/IconAdd'
+import IconClose from '../../../../../img/icons/IconClose'
+import IconAdd from '../../../../../img/icons/IconAdd'
 
 let engineIdFromQueryString = new URLSearchParams(window.location.search).get(
   'engineId',
@@ -118,10 +118,10 @@ export const MachineTranslationTab = () => {
   const [deleteMTRequest, setDeleteMTRequest] = useState()
 
   const COLUMNS_TABLE = config.is_cattool
-    ? [{name: 'Active'}, {name: 'Engine Name'}, {name: 'Description'}]
+    ? [{name: 'Active'}, {name: 'Engine name'}, {name: 'Description'}]
     : [
         {name: 'Active'},
-        {name: 'Engine Name'},
+        {name: 'Engine name'},
         {name: 'Description'},
         {name: 'Action'},
       ]
@@ -190,9 +190,12 @@ export const MachineTranslationTab = () => {
         CatToolActions.addNotification({
           title: 'MT deleted',
           type: 'success',
-          text: `The MT (<b>${mtToDelete.name}</b>) has been successfully deleted`,
+          text: (
+            <>
+              The MT (<b>{mtToDelete.name}</b>) has been successfully deleted
+            </>
+          ),
           position: 'br',
-          allowHtml: true,
           timer: 5000,
         })
       })
@@ -307,7 +310,7 @@ export const MachineTranslationTab = () => {
     <div className="machine-translation-tab settings-panel-contentwrapper-tab-background">
       {!config.is_cattool && config.isLoggedIn && addMTVisible && (
         <div className="add-mt-container">
-          <h2>Add MT Engine</h2>
+          <h2>Add MT engine</h2>
           <div className="add-mt-provider" data-testid="add-mt-provider">
             <Select
               placeholder="Choose provider"
@@ -343,13 +346,13 @@ export const MachineTranslationTab = () => {
             <h2>Active MT</h2>
           </div>
           {!config.is_cattool && !addMTVisible && (
-            <button
-              className="ui primary button settings-panel-button-icon"
+            <Button
+              type={BUTTON_TYPE.PRIMARY}
               onClick={() => setAddMTVisible(true)}
               title="Add MT engine"
             >
               <IconAdd size={16} /> Add MT engine
-            </button>
+            </Button>
           )}
         </div>
 

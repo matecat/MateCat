@@ -5,6 +5,7 @@ namespace Matecat\Core\Plugins\ProjectCompletion;
 use Controller\Features\ProjectCompletion\CompletionEventStruct;
 use Matecat\TestHelpers\AbstractTest;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
@@ -14,6 +15,13 @@ use Plugins\Features\ProjectCompletion\Model\EventModel;
 
 class EventModelTest extends AbstractTest
 {
+    private function makeDatabase(): IDatabase
+    {
+        [$dbStub] = $this->createDatabaseMock();
+
+        return $dbStub;
+    }
+
     private function makeChunk(int $idProject = 100): JobStruct
     {
         return new JobStruct([
@@ -60,7 +68,7 @@ class EventModelTest extends AbstractTest
         $featureSet->expects($this->once())->method('loadForProject')->with($project);
         $featureSet->expects($this->once())->method('dispatch');
 
-        $model = new EventModel($chunk, $struct, $eventDao, $projectDao, $featureSet);
+        $model = new EventModel($chunk, $struct, $eventDao, $projectDao, $featureSet, $this->makeDatabase());
         $model->save();
 
         $this->assertSame(42, $model->getChunkCompletionEventId());
@@ -81,7 +89,7 @@ class EventModelTest extends AbstractTest
 
         $featureSet = $this->createStub(FeatureSet::class);
 
-        $model = new EventModel($chunk, $struct, $eventDao, $projectDao, $featureSet);
+        $model = new EventModel($chunk, $struct, $eventDao, $projectDao, $featureSet, $this->makeDatabase());
 
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Project not found for chunk 100');
@@ -98,7 +106,7 @@ class EventModelTest extends AbstractTest
         $eventDao = $this->createStub(ChunkCompletionEventDao::class);
         $eventDao->method('currentPhase')->willReturn(ChunkCompletionEventDao::TRANSLATE);
 
-        $model = new EventModel($chunk, $struct, $eventDao, $this->createStub(ProjectDao::class), new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
+        $model = new EventModel($chunk, $struct, $eventDao, $this->createStub(ProjectDao::class), new FeatureSet($this->createStub(IDatabase::class)), $this->makeDatabase());
 
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Cannot save event, current status mismatch.');
@@ -115,7 +123,7 @@ class EventModelTest extends AbstractTest
         $eventDao = $this->createStub(ChunkCompletionEventDao::class);
         $eventDao->method('currentPhase')->willReturn(ChunkCompletionEventDao::REVISE);
 
-        $model = new EventModel($chunk, $struct, $eventDao, $this->createStub(ProjectDao::class), new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
+        $model = new EventModel($chunk, $struct, $eventDao, $this->createStub(ProjectDao::class), new FeatureSet($this->createStub(IDatabase::class)), $this->makeDatabase());
 
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Cannot save event, current status mismatch.');
@@ -139,10 +147,68 @@ class EventModelTest extends AbstractTest
 
         $featureSet = $this->createStub(FeatureSet::class);
 
-        $model = new EventModel($chunk, $struct, $eventDao, $projectDao, $featureSet);
+        $model = new EventModel($chunk, $struct, $eventDao, $projectDao, $featureSet, $this->makeDatabase());
         $model->save();
 
         $this->assertSame(5, $model->getChunkCompletionEventId());
+    }
+
+    /**
+     * The event row and the dispatch have to be one unit. Beyond atomicity of the undo_data
+     * snapshot, the dispatch reaches QualityReportModel::resetScore(), which takes the job's
+     * qa_chunk_reviews row locks — and lockByJobId() refuses to run outside a transaction, so
+     * without this wrap POST /api/app/set-chunk-completed returned 500 for every
+     * revision-enabled project.
+     */
+    #[Test]
+    public function saveWrapsTheEventInsertAndTheDispatchInOneTransaction(): void
+    {
+        $chunk = $this->makeChunk();
+        $struct = $this->makeEventStruct(false);
+
+        $eventDao = $this->createStub(ChunkCompletionEventDao::class);
+        $eventDao->method('currentPhase')->willReturn(ChunkCompletionEventDao::TRANSLATE);
+        $eventDao->method('createFromChunk')->willReturn('42');
+
+        $projectDao = $this->createStub(ProjectDao::class);
+        $projectDao->method('findById')->willReturn(new ProjectStruct(['id' => 100]));
+
+        // The scope owns the transaction. Reaching past it is not expressible here any more —
+        // begin() and commit() are no longer on IDatabase — so the scope is what is left to assert.
+        $database = $this->createMock(IDatabase::class);
+        $database->expects($this->once())
+            ->method('transaction')
+            ->willReturnCallback(static fn(callable $work) => $work());
+
+        (new EventModel($chunk, $struct, $eventDao, $projectDao, $this->createStub(FeatureSet::class), $database))->save();
+    }
+
+    #[Test]
+    public function saveLetsAFailedDispatchUnwindTheTransactionScope(): void
+    {
+        $chunk = $this->makeChunk();
+        $struct = $this->makeEventStruct(false);
+
+        $eventDao = $this->createStub(ChunkCompletionEventDao::class);
+        $eventDao->method('currentPhase')->willReturn(ChunkCompletionEventDao::TRANSLATE);
+        $eventDao->method('createFromChunk')->willReturn('42');
+
+        // findById returning null makes save() throw after the insert, i.e. mid-unit.
+        $projectDao = $this->createStub(ProjectDao::class);
+        $projectDao->method('findById')->willReturn(null);
+
+        // The scope aborts the transaction and re-throws; the failure has to reach the caller rather
+        // than be swallowed by whatever closed the transaction.
+        $database = $this->createMock(IDatabase::class);
+        $database->expects($this->once())
+            ->method('transaction')
+            ->willReturnCallback(static fn(callable $work) => $work());
+
+        $model = new EventModel($chunk, $struct, $eventDao, $projectDao, $this->createStub(FeatureSet::class), $database);
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Project not found for chunk 100');
+        $model->save();
     }
 
     #[Test]
@@ -153,7 +219,8 @@ class EventModelTest extends AbstractTest
             $this->makeEventStruct(),
             $this->createStub(ChunkCompletionEventDao::class),
             $this->createStub(ProjectDao::class),
-            new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)),
+            new FeatureSet($this->createStub(IDatabase::class)),
+            $this->makeDatabase(),
         );
 
         $this->assertNull($model->getChunkCompletionEventId());

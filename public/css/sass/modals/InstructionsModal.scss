@@ -1,0 +1,68 @@
+@use '../tokens/colors';
+@use '../commons/variables';
+.instructions-modal {
+  min-height: 230px;
+  max-width: 900px;
+  .title {
+    display: flex;
+    gap: 8px
+  }
+  h4 {
+    margin: 20px 0;
+  }
+  .instructions-container {
+    background-color: colors.$white;
+    padding: 20px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    max-height: 400px;
+    overflow: auto;
+    p {
+      line-height: 26px;
+      word-break: break-all;
+    }
+    blockquote {
+      border-left: 5px solid colors.$grey200;
+      margin: 1.5em 10px;
+      padding: 0.5em 10px;
+    }
+  }
+
+  .description {
+    margin: 10px 20px 0 20px;
+  }
+}
+
+.instructions-accordion {
+  // Default: no rounding — middle items in a stacked group are flat
+  --accordion-title-br: 0;
+  --accordion-title-expanded-br: 0;
+  --accordion-content-br: 0;
+
+  &:not(:first-child) {
+    --accordion-title-border-top: solid 1px #{colors.$grey300};
+  }
+
+  &:first-child {
+    --accordion-title-br: #{variables.$border-radius-default} #{variables.$border-radius-default} 0 0;
+    --accordion-title-expanded-br: #{variables.$border-radius-default} #{variables.$border-radius-default} 0 0;
+  }
+
+  &:last-child {
+    --accordion-content-br: 0 0 #{variables.$border-radius-default} #{variables.$border-radius-default};
+
+    &:not(:has([data-expanded])) {
+      --accordion-title-br: 0 0 #{variables.$border-radius-default} #{variables.$border-radius-default};
+    }
+  }
+
+  // Single accordion (only child): full rounding when collapsed
+  &:first-child:nth-last-child(1):not(:has([data-expanded])) {
+    --accordion-title-br: #{variables.$border-radius-default};
+    --accordion-content-br: 0;
+  }
+
+  [data-expanded] > :first-child {
+    color: #{colors.$black};
+  }
+}

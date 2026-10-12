@@ -1,0 +1,72 @@
+@use '../../tokens/colors';
+@use '../../commons/variables';
+
+.lexiqa-tooltip {
+  width: max-content;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  font-size: 12px;
+
+  .tooltip-error-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+  .tooltip-error-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    line-height: 1.45;
+
+    .tooltip-error-category {
+      padding: 0.5rem;
+      max-width: 148px;
+      &::first-letter {
+        text-transform: capitalize;
+      }
+    }
+    .tooltip-error-ignore {
+      color: colors.$grey600;
+      text-decoration: none;
+      cursor: pointer;
+      border-radius: 0 4px 4px 0;
+      padding-left: 10px;
+      height: 40px;
+      &:hover {
+        color: colors.$grey700;
+      }
+      .tooltip-error-ignore-text {
+        margin-left: 5px;
+        margin-right: 10px;
+        float: left;
+        line-height: 40px;
+      }
+    }
+    &:not(:first-child) {
+      border-top: 1px solid rgba(255, 255, 255, 0.36);
+    }
+  }
+  .tooltip-suggestion-container {
+    display: flex;
+    flex-direction: column;
+    padding: 0 0.5rem 0.5rem;
+  }
+  .tooltip-suggestion-container ul > li {
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 22px;
+  }
+  .tooltip-suggestion-container ul > li:hover {
+    color: #4184c4;
+  }
+}
+
+.lexiqahighlight {
+  display: inline-block;
+  position: relative;
+}

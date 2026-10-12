@@ -161,7 +161,7 @@ class PayableRateController extends KleinController
         try {
             // accept only JSON
             if (!$this->isJsonRequest()) {
-                throw new Exception('Bad Get', 400);
+                throw new Exception('Bad get', 400);
             }
 
             $id = $this->request->param('id');

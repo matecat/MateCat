@@ -23,11 +23,15 @@ class Constants
     const string PUBLIC_TM = "Public TM";
     const string NO_DESCRIPTION_TM = "No description";
 
+    const string SEG_RULE_STANDARD = 'standard';
+    const string SEG_RULE_PATENT = 'patent';
+    const string SEG_RULE_PARAGRAPH = 'paragraph';
+
     /** @var list<string> */
     public static array $allowed_seg_rules = [
-        'standard',
-        'patent',
-        'paragraph',
+        self::SEG_RULE_STANDARD,
+        self::SEG_RULE_PATENT,
+        self::SEG_RULE_PARAGRAPH,
         ''
     ];
 
@@ -37,7 +41,7 @@ class Constants
     public static function validateSegmentationRules(?string $segmentation_rule = ''): ?string
     {
         //normalize segmentation rule to what it's used internally
-        if ($segmentation_rule == 'standard' || $segmentation_rule == '') {
+        if ($segmentation_rule == self::SEG_RULE_STANDARD || $segmentation_rule == '') {
             return null;
         }
 

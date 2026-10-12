@@ -1,5 +1,5 @@
 import React, {useEffect, useRef} from 'react'
-import {act, render, screen, waitFor} from '@testing-library/react'
+import {act, render, screen, waitFor, within} from '@testing-library/react'
 import projectTemplatesMock from '../../../../../mocks/projectTemplateMock'
 import tmKeysMock from '../../../../../mocks/tmKeysMock'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
@@ -12,6 +12,34 @@ import userEvent from '@testing-library/user-event'
 import {mswServer} from '../../../../../mocks/mswServer'
 import {HttpResponse, http} from 'msw'
 import ModalsActions from '../../../../actions/ModalsActions'
+
+class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
+// Suppress "not configured to support act(...)" false positive caused by
+// @testing-library/react temporarily unsetting IS_REACT_ACT_ENVIRONMENT
+// during async operations while promise-based state updates resolve.
+const originalConsoleError = console.error
+beforeAll(() => {
+  console.error = (...args) => {
+    if (
+      typeof args[0] === 'string' &&
+      args[0].includes('not configured to support act')
+    ) {
+      return
+    }
+    originalConsoleError(...args)
+  }
+
+  window.ResizeObserver = ResizeObserver
+  return (window.open = jest.fn())
+})
+afterAll(() => {
+  console.error = originalConsoleError
+})
 
 global.config = {
   basepath: 'http://localhost/',
@@ -342,7 +370,7 @@ test('Create and delete new resource', async () => {
   expect(rowNewEntry.update).toBeChecked()
 
   // delete
-  const menuButton = screen.getByTestId('menu-button-show-items')
+  const menuButton = screen.getByTestId('tm-row-menu')
 
   await act(async () => user.click(menuButton))
 
@@ -434,9 +462,9 @@ test('Row Menu items', async () => {
 
   rerender(<WrapperComponent {...contextValues} />)
 
-  const menuButton = screen.getByTestId('menu-button-show-items')
+  const menuButton = screen.getByTestId('tm-row-menu')
 
-  await act(async () => user.click(screen.getByTestId('menu-button')))
+  await act(async () => user.click(screen.getByTestId('tm-row-import-tmx')))
   expect(screen.getByText('Select a tmx file to import')).toBeInTheDocument()
 
   await act(async () => user.click(menuButton))
@@ -466,19 +494,136 @@ test('Row Menu items', async () => {
   expect(screen.getByText('Share')).toBeEnabled()
 })
 
+test('Toggling pretranslate and dialect-strict checkboxes modifies the current template', async () => {
+  const user = userEvent.setup()
+  const modifyingCurrentTemplate = jest.fn()
+  const {modifyingCurrentTemplate: _ignored, ...rest} = contextMockValues()
+  const contextValues = {...rest, modifyingCurrentTemplate}
+
+  render(<WrapperComponent {...contextValues} />)
+
+  await act(async () =>
+    user.click(screen.getByTestId('pretranslate-match_100-switch')),
+  )
+  await act(async () =>
+    user.click(screen.getByTestId('dialect-strict-checkbox')),
+  )
+
+  expect(modifyingCurrentTemplate).toHaveBeenCalledTimes(2)
+
+  const pretranslateUpdater = modifyingCurrentTemplate.mock.calls[0][0]
+  expect(
+    pretranslateUpdater({
+      pretranslate: {
+        match_101: {enabled: true, status: 'APPROVED', lock: true},
+        match_100: {enabled: false, status: 'TRANSLATED', lock: false},
+      },
+    }),
+  ).toEqual({
+    pretranslate: {
+      match_101: {enabled: true, status: 'APPROVED', lock: true},
+      match_100: {enabled: true, status: 'APPROVED', lock: true},
+    },
+  })
+
+  const dialectUpdater = modifyingCurrentTemplate.mock.calls[1][0]
+  expect(dialectUpdater({dialectStrict: false})).toEqual(
+    expect.objectContaining({dialectStrict: true}),
+  )
+})
+
 test('Pretranslate truthy', async () => {
   const {currentProjectTemplate, ...rest} = contextMockValues()
   const contextValues = {
     ...rest,
     currentProjectTemplate: {
       ...currentProjectTemplate,
-      pretranslate100: true,
+      pretranslate: {
+        ...currentProjectTemplate.pretranslate,
+        match_100: {
+          ...currentProjectTemplate.pretranslate.match_100,
+          enabled: true,
+        },
+      },
     },
   }
 
   render(<WrapperComponent {...contextValues} />)
 
-  expect(screen.getByTestId('pretranslate-checkbox')).toBeChecked()
+  expect(screen.getByTestId('pretranslate-match_100-switch')).toBeChecked()
+})
+
+test('Pretranslate status select is disabled while pre-confirm is off', async () => {
+  const user = userEvent.setup()
+  const {currentProjectTemplate, ...rest} = contextMockValues()
+  const contextValues = {
+    ...rest,
+    currentProjectTemplate: {
+      ...currentProjectTemplate,
+      pretranslate: {
+        match_101: {enabled: true, status: 'APPROVED', lock: true},
+        match_100: {enabled: false, status: 'TRANSLATED', lock: false},
+      },
+    },
+  }
+
+  render(<WrapperComponent {...contextValues} />)
+
+  const row101 = screen.getByTestId('pretranslate-match_101')
+  const row100 = screen.getByTestId('pretranslate-match_100')
+
+  expect(row101).toHaveTextContent('Approved (locked)')
+  expect(row100).toHaveTextContent('Approved (locked)')
+  expect(screen.queryByText('Approved 2')).not.toBeInTheDocument()
+
+  await act(async () =>
+    user.click(within(row101).getByText('Approved (locked)')),
+  )
+  expect(screen.getByText('Approved 2')).toBeInTheDocument()
+})
+
+test('Selecting a pretranslate status writes status and lock', async () => {
+  const user = userEvent.setup()
+  const modifyingCurrentTemplate = jest.fn()
+  const {
+    currentProjectTemplate,
+    modifyingCurrentTemplate: _ignored, // eslint-disable-line no-unused-vars
+    ...rest
+  } = contextMockValues()
+  const contextValues = {
+    ...rest,
+    modifyingCurrentTemplate,
+    currentProjectTemplate: {
+      ...currentProjectTemplate,
+      pretranslate: {
+        match_101: {enabled: true, status: 'APPROVED', lock: true},
+        match_100: {enabled: false, status: 'TRANSLATED', lock: false},
+      },
+    },
+  }
+
+  render(<WrapperComponent {...contextValues} />)
+
+  const row101 = screen.getByTestId('pretranslate-match_101')
+  await act(async () =>
+    user.click(within(row101).getByText('Approved (locked)')),
+  )
+  await act(async () => user.click(screen.getByText('Approved 2')))
+
+  const updater = modifyingCurrentTemplate.mock.calls[0][0]
+  expect(
+    updater({
+      pretranslate: {
+        match_101: {enabled: true, status: 'APPROVED', lock: true},
+        match_100: {enabled: false, status: 'TRANSLATED', lock: false},
+      },
+    }),
+  ).toEqual({
+    pretranslate: {
+      match_101: {enabled: true, status: 'APPROVED2', lock: false},
+      match_100: {enabled: false, status: 'TRANSLATED', lock: false},
+    },
+  })
 })
 
 test('Get public matches falsy', async () => {
@@ -559,7 +704,7 @@ test('Modal delete tmkeys used in other templates', async () => {
 
   render(<WrapperComponent {...contextValues} />)
 
-  const menuButton = screen.getByTestId('menu-button-show-items')
+  const menuButton = screen.getByTestId('tm-row-menu')
 
   await act(async () => user.click(menuButton))
 

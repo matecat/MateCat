@@ -1,14 +1,9 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 
-export const setChunkComplete = async ({
-  id_job,
-  password,
-  current_password,
-}) => {
+export const setChunkComplete = async ({id_job, password}) => {
   const paramsData = {
     id_job,
     password,
-    current_password,
   }
   const formData = new FormData()
 

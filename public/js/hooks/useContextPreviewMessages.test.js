@@ -34,11 +34,6 @@ const utils = require('../utils/contextPreviewUtils')
 
 const nullRef = () => ({current: null})
 
-const domRef = () => {
-  const el = document.createElement('div')
-  return {current: el}
-}
-
 const dispatch = (msg) => {
   act(() => {
     messageListener?.(msg)

@@ -588,7 +588,7 @@ class SegmentTranslationDaoRealSqlTest extends AbstractTest
     public function getUnchangeableStatus_throws_for_disallowed_status(): void
     {
         $this->expectException(Exception::class);
-        $this->expectExceptionMessage('not allowed to change status to');
+        $this->expectExceptionMessage('Not allowed to change status to');
 
         $this->dao->getUnchangeableStatus(
             $this->jobStruct,

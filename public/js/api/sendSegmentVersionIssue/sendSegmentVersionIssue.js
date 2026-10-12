@@ -6,20 +6,18 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @param {string} idSegment
  * @param {Object} issueDetails
  * @param {string} [idJob=config.id_job]
- * @param {string} [reviewPassword=config.review_password]
- * @param {number} [revisionNumber=config.revisionNumber]
+ * @param {string} [password=config.currentPassword]
  * @returns {Promise<object>}
  */
 export const sendSegmentVersionIssue = async ({
   idSegment,
   issueDetails,
   idJob = config.id_job,
-  reviewPassword = config.review_password,
-  revisionNumber = config.revisionNumber,
+  password = config.currentPassword,
 }) => {
+  // No revision_number: the phase the issue belongs to is derived server side from this password.
   const dataParams = {
     ...issueDetails,
-    revision_number: revisionNumber,
   }
   const formData = new FormData()
 
@@ -27,7 +25,7 @@ export const sendSegmentVersionIssue = async ({
     formData.append(key, dataParams[key])
   })
   const response = await fetch(
-    `${getMatecatApiDomain()}api/v2/jobs/${idJob}/${reviewPassword}/segments/${idSegment}/translation-issues`,
+    `${getMatecatApiDomain()}api/v2/jobs/${idJob}/${password}/segments/${idSegment}/translation-issues`,
     {
       method: 'POST',
       credentials: 'include',

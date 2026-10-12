@@ -17,14 +17,13 @@ const CommentsActions = {
     return submitCommentApi({
       idSegment: sid,
       username: UserStore.getUserName(),
-      sourcePage: config.revisionNumber ? config.revisionNumber + 1 : 1,
       message: text,
       isAnonymous,
     })
       .then((resp) => {
         AppDispatcher.dispatch({
           actionType: CommentsConstants.ADD_COMMENT,
-          comment: resp.data.entries.comment[0],
+          comment: resp.data.entries.comments[0],
           sid: sid,
         })
         return resp
@@ -38,12 +37,11 @@ const CommentsActions = {
       idSegment: sid,
       isAnonymous: isAnonymous,
       username: UserStore.getUserName(),
-      sourcePage: config.revisionNumber ? config.revisionNumber + 1 : 1,
     })
       .then((resp) => {
         AppDispatcher.dispatch({
           actionType: CommentsConstants.ADD_COMMENT,
-          comment: resp.data.entries.comment[0],
+          comment: resp.data.entries.comments[0],
           sid: sid,
         })
       })

@@ -519,21 +519,28 @@ let ManageActions = {
     idJob,
     passwordJob,
   ) {
-    return getSecondPassReview(
-      idProject,
-      passwordProject,
-      idJob,
-      passwordJob,
-    ).then((data) => {
-      AppDispatcher.dispatch({
-        actionType: ManageConstants.ADD_SECOND_PASS,
-        idProject: idProject,
-        passwordProject: passwordProject,
-        idJob: idJob,
-        passwordJob: passwordJob,
-        secondPassPassword: data.chunk_review.review_password,
+    return getSecondPassReview(idProject, passwordProject, idJob, passwordJob)
+      .then((data) => {
+        AppDispatcher.dispatch({
+          actionType: ManageConstants.ADD_SECOND_PASS,
+          idProject: idProject,
+          passwordProject: passwordProject,
+          idJob: idJob,
+          passwordJob: passwordJob,
+          secondPassPassword: data.chunk_review.review_password,
+        })
       })
-    })
+      .catch(() => {
+        const errorNotification = {
+          title: 'Generate revise 2',
+          text: 'The Revise 2 link could not be generated. Please try again.',
+          type: 'error',
+          position: 'bl',
+          allowHtml: true,
+          timer: 10000,
+        }
+        CatToolActions.addNotification(errorNotification)
+      })
   },
 
   /********* Modals *********/

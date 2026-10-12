@@ -223,7 +223,7 @@ class FileInsertionService
         $info = AbstractFilesStorage::pathinfo_fix($cachedXliffFilePathName);
 
         if (!in_array($info['extension'] ?? '', ['xliff', 'sdlxliff', 'xlf'])) {
-            throw new Exception("Failed to find converted Xliff", ProjectCreationError::XLIFF_NOT_FOUND->value);
+            throw new Exception("Failed to find converted XLIFF", ProjectCreationError::XLIFF_NOT_FOUND->value);
         }
     }
 

@@ -94,6 +94,10 @@ class XliffTranslationStatus
     const string INITIAL = 'initial';
     const string REVIEWED = 'reviewed';
 
+    // not an XLIFF value: a rule token for segments without state/state-qualifier,
+    // which also acts as the fallback for any state not matched by another rule
+    const string NO_STATE = 'no-state';
+
     /**
      * Those state-qualifiers (xliff 1.2) must force the translation to status NEW
      *

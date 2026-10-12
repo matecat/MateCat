@@ -3,17 +3,22 @@
 namespace Matecat\Core\Controllers;
 
 use Controller\API\V1\NewController;
+use DomainException;
 use Exception;
 use InvalidArgumentException;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
+use Model\Analysis\PayableRates;
 use Model\Filters\FiltersConfigTemplateStruct;
 use Model\MTQE\PayableRate\DTO\MTQEPayableRateBreakdowns;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
+use Model\PayableRates\CustomPayableRateDao;
+use Model\PayableRates\CustomPayableRateStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
+use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
 
 class NewControllerValidationMethodsTest extends AbstractTest
 {
@@ -74,8 +79,25 @@ class NewControllerValidationMethodsTest extends AbstractTest
         $longString = str_repeat('a', 2049);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('metadata string is too long');
+        $this->expectExceptionMessage('Metadata string is too long');
         $this->invokeMethod('validateMetadataParam', [$longString]);
+    }
+
+    #[Test]
+    public function validateMetadataParam_unknown_property_throws(): void
+    {
+        // project_metadata.json declares "additionalProperties": false
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid metadata.');
+        $this->invokeMethod('validateMetadataParam', ['{"not_a_known_key": 1}']);
+    }
+
+    #[Test]
+    public function validateMetadataParam_value_outside_enum_throws(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid metadata.');
+        $this->invokeMethod('validateMetadataParam', ['{"word_count_type": "bogus"}']);
     }
 
     #[Test]
@@ -414,7 +436,7 @@ class NewControllerValidationMethodsTest extends AbstractTest
     public function validateEngines_tms_engine_gt_1_throws(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid TM Engine.');
+        $this->expectExceptionMessage('Invalid TM engine.');
         $this->invokeMethod('validateEngines', [2, 0]);
     }
 
@@ -425,7 +447,7 @@ class NewControllerValidationMethodsTest extends AbstractTest
         $userIsLoggedProp->setValue($this->controller, false);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid MT Engine.');
+        $this->expectExceptionMessage('Invalid MT engine.');
         $this->invokeMethod('validateEngines', [0, 2]);
     }
 
@@ -479,26 +501,46 @@ class NewControllerValidationMethodsTest extends AbstractTest
     // ──────────────── validatePayableRateTemplate() ────────────────
 
     #[Test]
-    public function validatePayableRateTemplate_both_null_returns_null(): void
+    public function validatePayableRateTemplate_null_returns_null(): void
     {
-        $result = $this->invokeMethod('validatePayableRateTemplate', [null, null]);
+        $result = $this->invokeMethod('validatePayableRateTemplate', [null]);
         $this->assertNull($result);
     }
 
+    /**
+     * Regression: the id alone used to be refused with "`payable_rate_template_name` param is
+     * missing", although the API docs no longer list the name.
+     */
     #[Test]
-    public function validatePayableRateTemplate_name_without_id_throws(): void
+    public function validatePayableRateTemplate_id_alone_resolves_the_users_template(): void
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('`payable_rate_template_id` param is missing');
-        $this->invokeMethod('validatePayableRateTemplate', ['My Rate', null]);
+        $db = obtainTestDatabase();
+        $db->begin();
+        $this->reflector->getProperty('database')->setValue($this->controller, $db);
+
+        $template = new CustomPayableRateStruct();
+        $template->uid = 42;
+        $template->name = 'v1/new id-only ' . uniqid();
+        $template->breakdowns = ['default' => PayableRates::$DEFAULT_PAYABLE_RATES];
+        $saved = (new CustomPayableRateDao($db))->save($template);
+
+        $result = $this->invokeMethod('validatePayableRateTemplate', [(string)$saved->id]);
+
+        $this->assertInstanceOf(CustomPayableRateStruct::class, $result);
+        $this->assertSame($saved->id, $result->id);
+        $this->assertSame($template->name, $result->name);
     }
 
     #[Test]
-    public function validatePayableRateTemplate_id_without_name_throws(): void
+    public function validatePayableRateTemplate_unknown_id_throws(): void
     {
+        $db = obtainTestDatabase();
+        $db->begin();
+        $this->reflector->getProperty('database')->setValue($this->controller, $db);
+
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('`payable_rate_template_name` param is missing');
-        $this->invokeMethod('validatePayableRateTemplate', [null, '42']);
+        $this->expectExceptionMessage('Payable rate model id not valid');
+        $this->invokeMethod('validatePayableRateTemplate', ['999999999']);
     }
 
     // ──────────────── validateQaModelTemplate() ────────────────
@@ -573,6 +615,21 @@ class NewControllerValidationMethodsTest extends AbstractTest
         $this->assertInstanceOf(MTQEWorkflowParams::class, $result);
     }
 
+    #[Test]
+    public function validateMTQEParametersOrDefault_accepts_lock_best_quality_mt(): void
+    {
+        $result = $this->invokeMethod('validateMTQEParametersOrDefault', [null, '{"lock_best_quality_mt":true}']);
+        $this->assertInstanceOf(MTQEWorkflowParams::class, $result);
+        $this->assertTrue($result->lock_best_quality_mt);
+    }
+
+    #[Test]
+    public function validateMTQEParametersOrDefault_rejects_a_non_boolean_lock_best_quality_mt(): void
+    {
+        $this->expectException(JSONValidatorException::class);
+        $this->invokeMethod('validateMTQEParametersOrDefault', [null, '{"lock_best_quality_mt":"yes"}']);
+    }
+
     // ──────────────── validateMTQEPayableRateBreakdownsOrDefault() ────────────────
 
     #[Test]
@@ -604,5 +661,28 @@ class NewControllerValidationMethodsTest extends AbstractTest
     {
         $result = $this->invokeMethod('validateXliffParameters', ['{}', null]);
         $this->assertIsArray($result);
+    }
+
+    #[Test]
+    public function validateXliffParameters_locked_draft_rule_throws_400(): void
+    {
+        $this->expectException(DomainException::class);
+        $this->expectExceptionCode(400);
+        $this->expectExceptionMessage('A rule with editor status DRAFT can not be locked.');
+        $this->invokeMethod('validateXliffParameters', [
+            json_encode(['xliff20' => [['states' => ['translated'], 'analysis' => 'pre-translated', 'editor' => 'draft', 'lock' => true]]]),
+            null,
+        ]);
+    }
+
+    #[Test]
+    public function validateXliffParameters_keeps_a_locked_rule(): void
+    {
+        $result = $this->invokeMethod('validateXliffParameters', [
+            json_encode(['xliff12' => [['states' => ['final'], 'analysis' => 'pre-translated', 'editor' => 'approved2', 'lock' => true]]]),
+            null,
+        ]);
+
+        $this->assertTrue($result['xliff12'][0]['lock']);
     }
 }

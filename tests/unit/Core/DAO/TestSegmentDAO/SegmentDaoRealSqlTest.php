@@ -27,7 +27,7 @@ use Utils\Constants\TranslationStatus;
  * A rich FK graph is built per test: project -> job (with password + first/last segment bounds)
  * -> file -> files_job -> segments -> segment_translations (varied status/match_type/locked) ->
  * segment_translation_events (varied source_page) -> qa_entries (varied category/severity) plus
- * segment_revisions / segment_translations_splits / segment_original_data / files_parts.
+ * segment_translations_splits / segment_original_data / files_parts.
  *
  * All allocated ids for assignable / direct-insert rows live >= ASSIGNABLE_ID_FLOOR (M-2);
  * AUTO_INCREMENT rows created via the builder are auto-cleaned. Rows the test inserts directly
@@ -70,7 +70,6 @@ class SegmentDaoRealSqlTest extends AbstractTest
             'segment_translation_events',
             'segment_translations_splits',
             'segment_original_data',
-            'segment_revisions',
             'qa_categories',
             'qa_entries',
         ];
@@ -96,7 +95,6 @@ class SegmentDaoRealSqlTest extends AbstractTest
             // Direct-insert rows (rows the builder did not track) — scoped to this job/segments.
             // Delete child rows first, then let the builder remove its tracked parents in
             // reverse insertion order.
-            $conn->exec("DELETE FROM segment_revisions WHERE id_job = {$this->idJob}");
             $conn->exec("DELETE FROM segment_original_data WHERE id_segment >= " . self::ASSIGNABLE_ID_FLOOR);
             $conn->exec("DELETE FROM segment_translations WHERE id_job = {$this->idJob}");
             $conn->exec("DELETE FROM segment_translation_events WHERE id_job = {$this->idJob}");
@@ -361,22 +359,47 @@ class SegmentDaoRealSqlTest extends AbstractTest
         }
     }
 
+    /**
+     * The 'center' arm, which returns both sides of the reference segment in one query.
+     *
+     * This used to assert a PDOException: the arm passed seven sprintf() arguments to a format
+     * carrying six conversions unless a status filter happened to add a seventh, so without that
+     * filter the second block's join placeholder received the step and MySQL rejected the bare
+     * number with a 1064. It is asserted here without a status filter for that reason — that is the
+     * shape that used to fail.
+     */
     #[Test]
-    public function getSegmentsIdForQR_center_hits_the_center_arm(): void
+    public function getSegmentsIdForQR_center_returns_ids_on_both_sides_of_the_reference(): void
     {
-        // The 'center' arm of getSegmentsIdForQR is a PRE-EXISTING DAO BUG (not test-induced):
-        // sprintf($queryCenter, join, cond, step, step, join, cond, step) supplies 7 args for
-        // only 6 conversion specifiers (s,s,u / s,s,u). The 4th arg ($step, an int) is therefore
-        // positioned into the SECOND block's join `%s`, emitting a bare "100" where the JOIN
-        // clause belongs and producing a MySQL 1064 syntax error near '100\n WHERE ...'. The
-        // arm still executes through the match() + sprintf + prepare path (covering lib lines
-        // 316-352, 354-361) before MySQL rejects it. We assert the documented failure so the
-        // branch is exercised without masking the bug; fixing it is a lib/ concern, out of
-        // scope for this test-only work.
+        $this->seedQrTranslations();
+        $ref = $this->segIds[1];
+
+        $ids = array_map('intval', $this->dao->getSegmentsIdForQR($this->jobStruct, 100, $ref, 'center'));
+
+        // '>=' on one side and '<' on the other, so the reference segment itself belongs to the
+        // result: it is the segment the caller is centred on.
+        $this->assertContains($ref, $ids);
+        $this->assertContains($this->segIds[0], $ids, 'the block before the reference must contribute');
+        $this->assertContains($this->segIds[2], $ids, 'the block after the reference must contribute');
+    }
+
+    /**
+     * The same arm with the status filter on, which is the case that used to be accidentally
+     * correct: the ICE union added the conversion that made the argument count line up. Both cases
+     * now go through one argument list, and this pins the one that would break if the fragment ever
+     * regained a specifier.
+     */
+    #[Test]
+    public function getSegmentsIdForQR_center_survives_the_status_filter(): void
+    {
         $this->seedQrTranslations();
 
-        $this->expectException(\PDOException::class);
-        $this->dao->getSegmentsIdForQR($this->jobStruct, 100, $this->segIds[1], 'center');
+        $ids = array_map('intval', $this->dao->getSegmentsIdForQR($this->jobStruct, 100, $this->segIds[1], 'center', [
+            'filter' => ['status' => TranslationStatus::STATUS_TRANSLATED],
+        ]));
+
+        $this->assertContains($this->segIds[0], $ids);
+        $this->assertContains($this->segIds[2], $ids, 'the ICE union must still contribute its segment');
     }
 
     #[Test]
@@ -504,6 +527,47 @@ class SegmentDaoRealSqlTest extends AbstractTest
         $this->assertContains($this->segIds[0], $sids);
     }
 
+    /**
+     * Four rows crossing the locked flag with the ICE match type, so a check that still
+     * required both columns shows up as a wrong `locked` on the 100% or the unlocked ICE row.
+     */
+    private function seedLockedMatrix(): void
+    {
+        $this->insertTranslation($this->segIds[0], TranslationStatus::STATUS_APPROVED, ['match_type' => 'ICE', 'locked' => 1]);
+        $this->insertTranslation($this->segIds[1], TranslationStatus::STATUS_TRANSLATED, ['match_type' => '100%', 'locked' => 1]);
+        $this->insertTranslation($this->segIds[2], TranslationStatus::STATUS_TRANSLATED, ['match_type' => 'ICE', 'locked' => 0]);
+        $this->insertTranslation($this->segIds[3], TranslationStatus::STATUS_TRANSLATED, ['match_type' => 'TM', 'locked' => 0]);
+    }
+
+    /**
+     * @return array<int, bool> expected `locked` keyed by segment id
+     */
+    private function expectedLockedMatrix(): array
+    {
+        return [
+            $this->segIds[0] => true,
+            $this->segIds[1] => true,
+            $this->segIds[2] => false,
+            $this->segIds[3] => false,
+        ];
+    }
+
+    #[Test]
+    public function getSegmentsForQr_locked_reflects_the_locked_column_alone(): void
+    {
+        $this->seedLockedMatrix();
+
+        $rows = $this->dao->getSegmentsForQr(array_slice($this->segIds, 0, 4), $this->idJob, $this->password);
+
+        $locked = [];
+        foreach ($rows as $row) {
+            $locked[(int)$row->sid] = $row->locked;
+        }
+        ksort($locked);
+
+        $this->assertSame($this->expectedLockedMatrix(), $locked);
+    }
+
     // =========================================================================================
     // createList
     // =========================================================================================
@@ -550,7 +614,7 @@ class SegmentDaoRealSqlTest extends AbstractTest
         $struct = $this->newSegmentStruct($dupId, 'dup');
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessage('Segment import - DB Error');
+        $this->expectExceptionMessage('Segment import - DB error');
         $this->dao->createList([$struct]);
     }
 
@@ -629,6 +693,22 @@ class SegmentDaoRealSqlTest extends AbstractTest
         $this->assertNotEmpty($rows);
     }
 
+    #[Test]
+    public function getPaginationSegments_locked_reflects_the_locked_column_alone(): void
+    {
+        $this->seedLockedMatrix();
+
+        $rows = $this->dao->getPaginationSegments($this->jobStruct, 50, $this->segIds[0], 'center');
+
+        $locked = [];
+        foreach ($rows as $row) {
+            $locked[(int)$row->sid] = $row->locked;
+        }
+        ksort($locked);
+
+        $this->assertSame($this->expectedLockedMatrix(), $locked);
+    }
+
     // =========================================================================================
     // getSegmentsDownload
     // =========================================================================================
@@ -658,24 +738,8 @@ class SegmentDaoRealSqlTest extends AbstractTest
     }
 
     // =========================================================================================
-    // destroyCacheForGlobalTranslationMismatches  +  getTranslationsMismatches
+    // getTranslationsMismatches
     // =========================================================================================
-
-    #[Test]
-    public function destroyCacheForGlobalTranslationMismatches_evicts_a_primed_entry(): void
-    {
-        $this->insertTranslation($this->segIds[0], TranslationStatus::STATUS_TRANSLATED);
-
-        $job     = new JobStruct();
-        $job->id = $this->idJob;
-
-        // Prime the cache via the global-aggregation read so a cache entry exists, then destroy.
-        $this->dao->setCacheTTL(60)->getTranslationsMismatches($this->idJob, $this->password, null);
-
-        $this->dao->setCacheTTL(60);
-        $destroyed = $this->dao->destroyCacheForGlobalTranslationMismatches($job);
-        $this->assertTrue($destroyed);
-    }
 
     #[Test]
     public function getTranslationsMismatches_returns_empty_for_unknown_job(): void

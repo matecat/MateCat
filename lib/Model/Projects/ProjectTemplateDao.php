@@ -22,6 +22,7 @@ use Model\Xliff\XliffConfigTemplateDao;
 use PDO;
 use PDOException;
 use ReflectionException;
+use Utils\Constants\TranslationStatus;
 use stdClass;
 use TypeError;
 use Utils\Engines\AbstractEngine;
@@ -105,6 +106,10 @@ class ProjectTemplateDao extends AbstractDao
             )
         ) ?: null;
         $default->icu_enabled = true;
+        $default->pretranslate_101_lock = true;
+        $default->pretranslate_100_lock = true;
+        $default->pretranslate_101_status = TranslationStatus::STATUS_APPROVED;
+        $default->pretranslate_100_status = TranslationStatus::STATUS_APPROVED;
 
         return $default;
     }
@@ -198,7 +203,7 @@ class ProjectTemplateDao extends AbstractDao
             $targetLanguages = unserialize($projectTemplateStruct->target_language);
 
             if (!is_array($targetLanguages)) {
-                throw new Exception("target language is not an array", 403);
+                throw new Exception("Target language is not an array", 403);
             }
 
             $languages = Languages::getInstance();
@@ -215,7 +220,7 @@ class ProjectTemplateDao extends AbstractDao
             $xliffConfigModel = (new XliffConfigTemplateDao($this->database))->getByIdAndUser($projectTemplateStruct->xliff_config_template_id, $projectTemplateStruct->uid);
 
             if (empty($xliffConfigModel)) {
-                throw new Exception("Not existing Xliff template.", 404);
+                throw new Exception("Not existing XLIFF template.", 404);
             }
         }
 
@@ -224,7 +229,7 @@ class ProjectTemplateDao extends AbstractDao
             $filtersConfigModel = (new FiltersConfigTemplateDao($this->database))->getByIdAndUser($projectTemplateStruct->filters_template_id, $projectTemplateStruct->uid);
 
             if (empty($filtersConfigModel)) {
-                throw new Exception("Not existing Filters config template.", 404);
+                throw new Exception("Not existing filters config template.", 404);
             }
         }
 
@@ -405,7 +410,11 @@ class ProjectTemplateDao extends AbstractDao
                     `subfiltering_handlers`,
                     `created_at`,
                     `icu_enabled`,
-                    `mandatory_issues`
+                    `mandatory_issues`,
+                    `pretranslate_101_lock`,
+                    `pretranslate_100_lock`,
+                    `pretranslate_101_status`,
+                    `pretranslate_100_status`
                 ) VALUES (
                     :name,
                     :is_default,
@@ -433,7 +442,11 @@ class ProjectTemplateDao extends AbstractDao
                     :subfiltering_handlers,
                     :now,
                     :icu_enabled,
-                    :mandatory_issues
+                    :mandatory_issues,
+                    :pretranslate_101_lock,
+                    :pretranslate_100_lock,
+                    :pretranslate_101_status,
+                    :pretranslate_100_status
                 ); ";
 
         $now = (new DateTime())->format('Y-m-d H:i:s');
@@ -468,6 +481,10 @@ class ProjectTemplateDao extends AbstractDao
             'now' => (new DateTime())->format('Y-m-d H:i:s'),
             'icu_enabled' => $projectTemplateStruct->icu_enabled,
             'mandatory_issues' => $projectTemplateStruct->mandatory_issues,
+            'pretranslate_101_lock' => $projectTemplateStruct->pretranslate_101_lock,
+            'pretranslate_100_lock' => $projectTemplateStruct->pretranslate_100_lock,
+            'pretranslate_101_status' => $projectTemplateStruct->pretranslate_101_status,
+            'pretranslate_100_status' => $projectTemplateStruct->pretranslate_100_status,
         ]);
 
         $projectTemplateStruct->id = (int)$conn->lastInsertId();
@@ -522,7 +539,11 @@ class ProjectTemplateDao extends AbstractDao
             `mt_quality_value_in_editor` = :mt_quality_value_in_editor,
             `modified_at` = :now,
             `icu_enabled` = :icu_enabled,
-            `mandatory_issues` = :mandatory_issues
+            `mandatory_issues` = :mandatory_issues,
+            `pretranslate_101_lock` = :pretranslate_101_lock,
+            `pretranslate_100_lock` = :pretranslate_100_lock,
+            `pretranslate_101_status` = :pretranslate_101_status,
+            `pretranslate_100_status` = :pretranslate_100_status
          WHERE id = :id;";
 
         $conn = $this->database->getConnection();
@@ -556,6 +577,10 @@ class ProjectTemplateDao extends AbstractDao
             'now' => (new DateTime())->format('Y-m-d H:i:s'),
             'icu_enabled' => $projectTemplateStruct->icu_enabled,
             'mandatory_issues' => $projectTemplateStruct->mandatory_issues,
+            'pretranslate_101_lock' => $projectTemplateStruct->pretranslate_101_lock,
+            'pretranslate_100_lock' => $projectTemplateStruct->pretranslate_100_lock,
+            'pretranslate_101_status' => $projectTemplateStruct->pretranslate_101_status,
+            'pretranslate_100_status' => $projectTemplateStruct->pretranslate_100_status,
         ]);
 
         $this->destroyFetchByIdCache($id, ProjectTemplateStruct::class);
@@ -640,6 +665,17 @@ class ProjectTemplateDao extends AbstractDao
     public function removeSubTemplateByIdAndUser(int $id, int $uid, string $subTemplateField): int
     {
         $conn = $this->database->getConnection();
+
+        // Which project templates point at the sub-template, asked before the UPDATE clears the
+        // field: afterwards there is nothing left to match them on. $id is the sub-template's own
+        // id and numbers a different table, so it cannot be used to name a project template cache.
+        $stmt = $conn->prepare("SELECT id FROM " . self::TABLE . " WHERE uid = :uid AND `$subTemplateField` = :id ");
+        $stmt->execute([
+            'id' => $id,
+            'uid' => $uid,
+        ]);
+        $affectedTemplateIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
         $stmt = $conn->prepare("UPDATE " . self::TABLE . " SET `$subTemplateField` = :zero WHERE uid = :uid and `$subTemplateField` = :id ");
         $stmt->execute([
             'zero' => 0,
@@ -647,8 +683,14 @@ class ProjectTemplateDao extends AbstractDao
             'uid' => $uid,
         ]);
 
-        $this->destroyFetchByIdCache($id, ProjectTemplateStruct::class);
-        $this->destroyQueryByIdAndUserCache($conn, $id, $uid);
+        foreach ($affectedTemplateIds as $affectedTemplateId) {
+            $this->destroyFetchByIdCache((int)$affectedTemplateId, ProjectTemplateStruct::class);
+            $this->destroyQueryByIdAndUserCache($conn, (int)$affectedTemplateId, $uid);
+        }
+
+        // The default template is one of the rows the UPDATE may have touched, and it is cached for
+        // a day against the minute the by-id reads get.
+        $this->destroyDefaultTemplateCache($conn, $uid);
         $this->destroyQueryPaginated($uid);
 
         return $stmt->rowCount();

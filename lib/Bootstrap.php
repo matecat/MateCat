@@ -12,6 +12,7 @@ use Model\FeaturesBase\PluginsLoader;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
+use Utils\Session\PhpSession;
 
 /**
  * Created by PhpStorm.
@@ -173,7 +174,7 @@ class Bootstrap
             }
             self::$TASK_RUNNER_CONFIG = $parsed;
         } else {
-            throw new RuntimeException("Task Manager Configuration file not found: " . $task_runner_config_file->getPathname());
+            throw new RuntimeException("Task manager configuration file not found: " . $task_runner_config_file->getPathname());
         }
 
         // Load the app version from 'version.ini'
@@ -377,7 +378,7 @@ class Bootstrap
 
     public static function sessionClose(): void
     {
-        @session_write_close();
+        PhpSession::close();
     }
 
     /**
@@ -457,10 +458,7 @@ class Bootstrap
         if (stripos(PHP_SAPI, 'cli') === false) {
             register_shutdown_function([Bootstrap::class, 'sessionClose']);
 
-            ini_set('session.name', AppConfig::$PHP_SESSION_NAME);
-            ini_set('session.cookie_domain', '.' . AppConfig::$COOKIE_DOMAIN);
-            ini_set('session.cookie_secure', true);
-            ini_set('session.cookie_httponly', true);
+            PhpSession::configure(AppConfig::$PHP_SESSION_NAME, '.' . AppConfig::$COOKIE_DOMAIN);
         }
     }
 

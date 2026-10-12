@@ -11,8 +11,10 @@ namespace Model\QualityReport;
 use DivisionByZeroError;
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
+use Model\DataAccess\ShapelessConcreteStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Utils\LQA\QA;
@@ -43,8 +45,6 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
     public ?string $translation = null;
 
     public ?int $version; //unix timestamp of the last translation
-
-    public bool $ice_locked;
 
     public string $status;
 
@@ -107,6 +107,11 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
     protected string $tm_analysis_status;
 
     /**
+     * @var array<mixed>
+     */
+    public array $history = [];
+
+    /**
      * @return string
      */
     public function getTmAnalysisStatus(): string
@@ -132,7 +137,7 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
 
     public function isICE(): bool
     {
-        return ($this->match_type == 'ICE' && $this->locked);
+        return $this->match_type == InternalMatchesConstants::TM_ICE;
     }
 
     /**

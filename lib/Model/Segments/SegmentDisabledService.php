@@ -5,6 +5,7 @@ namespace Model\Segments;
 use Exception;
 use PDOException;
 use ReflectionException;
+use TypeError;
 
 /**
  * Service for managing segment disabled state.
@@ -25,18 +26,24 @@ class SegmentDisabledService
     /**
      * Check whether a segment is disabled for translation.
      *
+     * $ttl overrides the DAO's default (7-day) cache TTL for this read. A concurrent read that
+     * started before a disable/enable write commits can still cache a stale result after that
+     * write's eviction runs, silently re-poisoning the cache for up to 7 days. Callers where that
+     * matters (save-enforcement, idempotency checks guarding a unique-key insert) should pass 0;
+     * callers where an occasional stale read is harmless can leave it at the cached default.
+     *
      * @param int $id_segment
+     * @param int|null $ttl
      *
      * @return bool
      * @throws ReflectionException
      * @throws Exception
      */
-    public function isDisabled(int $id_segment): bool
+    public function isDisabled(int $id_segment, ?int $ttl = null): bool
     {
-        $metadata = $this->segmentMetadataDao->get(
-            $id_segment,
-            'translation_disabled'
-        );
+        $metadata = $ttl === null
+            ? $this->segmentMetadataDao->get($id_segment, 'translation_disabled')
+            : $this->segmentMetadataDao->get($id_segment, 'translation_disabled', $ttl);
 
         return $metadata !== null && $metadata->meta_value === '1';
     }
@@ -45,17 +52,22 @@ class SegmentDisabledService
      * Disable translation for a segment.
      *
      * Idempotent — safe to call multiple times. If already disabled, returns immediately.
-     * Persists the row via save(), then busts all related DAO caches.
+     * Persists the row via save(), which evicts every address it is read at.
      *
      * @param int $id_segment
      *
      * @return void
      * @throws PDOException
      * @throws Exception
+     * @throws TypeError
      */
     public function disable(int $id_segment): void
     {
-        if ($this->isDisabled($id_segment)) {
+        // ttl=0: segment_metadata has a UNIQUE KEY on (id_segment, meta_key) and save() below is
+        // a plain INSERT, not an upsert. A stale cached "not disabled" here would let this proceed
+        // to save() on an already-disabled segment and crash on the duplicate key instead of
+        // returning early as the docblock promises.
+        if ($this->isDisabled($id_segment, 0)) {
             return;
         }
 
@@ -65,16 +77,12 @@ class SegmentDisabledService
         $metadata->meta_value = "1";
 
         $this->segmentMetadataDao->save($metadata);
-        $this->segmentMetadataDao->destroyGetCache($id_segment, $metadata->meta_key);
-        $this->segmentMetadataDao->destroyGetAllCache($id_segment);
-        $this->segmentMetadataDao->destroyGetBySegmentIdsCache($metadata->meta_key);
-        $this->segmentMetadataDao->destroyGetAllInRangeCache();
     }
 
     /**
      * Enable translation for a previously disabled segment.
      *
-     * Deletes the metadata row and busts all related DAO caches.
+     * Deletes the metadata row, which evicts every address it was read at.
      * Safe to call even if the segment is not currently disabled.
      *
      * @param int $id_segment
@@ -82,15 +90,11 @@ class SegmentDisabledService
      * @return void
      * @throws ReflectionException
      * @throws PDOException
+     * @throws TypeError
      * @throws Exception
      */
     public function enable(int $id_segment): void
     {
-        $key = 'translation_disabled';
-        $this->segmentMetadataDao->delete($id_segment, $key);
-        $this->segmentMetadataDao->destroyGetCache($id_segment, $key);
-        $this->segmentMetadataDao->destroyGetAllCache($id_segment);
-        $this->segmentMetadataDao->destroyGetBySegmentIdsCache($key);
-        $this->segmentMetadataDao->destroyGetAllInRangeCache();
+        $this->segmentMetadataDao->delete($id_segment, 'translation_disabled');
     }
 }

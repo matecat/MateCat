@@ -242,10 +242,17 @@ class TmKeyManagementAppControllerTest extends AbstractTest
     }
 
     /**
+     * The inverse of what this used to assert.
+     *
+     * A html_entity_decode over every matched name used to sit in sortKeysInTheRightOrder(), and it
+     * existed only to undo the FILTER_SANITIZE_SPECIAL_CHARS that TmKeyManager::sanitize() applied
+     * on the way in. Names are stored as typed now, so decoding would corrupt one instead: a
+     * resource somebody deliberately called "Foo &amp;amp; Bar" must come back as they wrote it.
+     *
      * @throws \Throwable
      */
     #[Test]
-    public function sortKeysInTheRightOrder_html_decodes_matched_key_name(): void
+    public function sortKeysInTheRightOrder_returns_the_matched_key_name_as_stored(): void
     {
         $key = new ClientTmKeyStruct(['key' => 'ddddddddddd44444', 'name' => 'Foo &amp; Bar']);
         $jobKeyList = [['key' => 'ddddddddddd44444']];
@@ -253,7 +260,7 @@ class TmKeyManagementAppControllerTest extends AbstractTest
         $result = $this->invokePrivate('sortKeysInTheRightOrder', [[$key], $jobKeyList]);
 
         $this->assertCount(1, $result);
-        $this->assertSame('Foo & Bar', $result[0]->name);
+        $this->assertSame('Foo &amp; Bar', $result[0]->name);
     }
 
     // ─── getByJob (public action) ───

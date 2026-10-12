@@ -271,9 +271,8 @@ class FastAnalysis extends AbstractDaemon
     protected function _purgeProjectCaches(int $pid, string $password): void
     {
         (new JobDao($this->db()))->destroyCacheByProjectId($pid);
-        (new ProjectDao($this->db()))->destroyFetchByIdCache($pid, ProjectStruct::class);
-        $this->getProjectDao()->destroyCacheByIdAndPassword($pid, $password);
-        (new AnalysisDao($this->db()))->destroyCacheByProjectId($pid);
+        $this->getProjectDao()->destroyCache($pid, $password);
+        (new AnalysisDao($this->db()))->destroyCacheProjectStatsVolumeAnalysis($pid);
     }
 
     const int ERR_NO_SEGMENTS = 127;
@@ -554,6 +553,23 @@ class FastAnalysis extends AbstractDaemon
                         $subfiltering_handlers = $allMetadata[ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value] ?? [];
                         $subfiltering_handlers = is_array($subfiltering_handlers) ? $subfiltering_handlers : [];
                         $icu_enabled = (bool)($allMetadata[ProjectsMetadataMarshaller::ICU_ENABLED->value] ?? false);
+                        // Projects created before these options existed carry no such keys: each one
+                        // stays null and the TM analysis worker applies its default.
+                        $pretranslate_101 = isset($allMetadata[ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value])
+                            ? (bool)$allMetadata[ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value]
+                            : null;
+                        $pretranslate_101_status = isset($allMetadata[ProjectsMetadataMarshaller::PRE_TRANSLATE_101_STATUS->value])
+                            ? (string)$allMetadata[ProjectsMetadataMarshaller::PRE_TRANSLATE_101_STATUS->value]
+                            : null;
+                        $pretranslate_101_lock = isset($allMetadata[ProjectsMetadataMarshaller::PRE_TRANSLATE_101_LOCK->value])
+                            ? (bool)$allMetadata[ProjectsMetadataMarshaller::PRE_TRANSLATE_101_LOCK->value]
+                            : null;
+                        $pretranslate_100_status = isset($allMetadata[ProjectsMetadataMarshaller::PRE_TRANSLATE_100_STATUS->value])
+                            ? (string)$allMetadata[ProjectsMetadataMarshaller::PRE_TRANSLATE_100_STATUS->value]
+                            : null;
+                        $pretranslate_100_lock = isset($allMetadata[ProjectsMetadataMarshaller::PRE_TRANSLATE_100_LOCK->value])
+                            ? (bool)$allMetadata[ProjectsMetadataMarshaller::PRE_TRANSLATE_100_LOCK->value]
+                            : null;
 
                         $insertReportRes = $this->_insertFastAnalysis(
                             $projectStruct,
@@ -566,7 +582,12 @@ class FastAnalysis extends AbstractDaemon
                             $mt_qe_workflow_parameters,
                             $mt_quality_value_in_editor,
                             $subfiltering_handlers,
-                            $icu_enabled
+                            $icu_enabled,
+                            $pretranslate_101,
+                            $pretranslate_101_status,
+                            $pretranslate_101_lock,
+                            $pretranslate_100_status,
+                            $pretranslate_100_lock
                         );
                     } catch (Throwable $e) {
                         $insertReportRes = -1;
@@ -654,18 +675,18 @@ class FastAnalysis extends AbstractDaemon
             $this->logger->debug("Fetching data from disk");
             $this->segments = $fs->getFastAnalysisData($pid);
         } catch (UnexpectedValueException) {
-            $this->logger->debug("Error Fetching data from disk. Fallback to database.");
+            $this->logger->debug("Error fetching data from disk. Fallback to database.");
 
             try {
                 $this->segments = $this->_getSegmentsForFastVolumeAnalysis($pid);
             } catch (PDOException) {
-                throw new Exception("Error Fetching data for Project. Too large. Skip.", self::ERR_TOO_LARGE);
+                throw new Exception("Error fetching data for project. Too large. Skip.", self::ERR_TOO_LARGE);
             }
         }
 
         if (count($this->segments) == 0) {
-            //there is no analysis on that file, it is ALL Pre-Translated
-            $exceptionMsg = 'There is no analysis on that file, it is ALL Pre-Translated';
+            //there is no analysis on that file, it is all pre-translated
+            $exceptionMsg = 'There is no analysis on that file, it is all pre-translated';
             $this->logger->debug($exceptionMsg);
             throw new Exception($exceptionMsg, self::ERR_NO_SEGMENTS);
         }
@@ -807,6 +828,7 @@ class FastAnalysis extends AbstractDaemon
     /**
      * @throws PDOException
      * @throws LogInvalidArgumentException
+     * @throws ReflectionException
      */
     protected function _updateProject(int $pid, string $status): void
     {
@@ -960,6 +982,11 @@ class FastAnalysis extends AbstractDaemon
      * @param int|null $mt_quality_value_in_editor
      * @param array<int, string>|null $subfiltering_handlers
      * @param bool $icu_enabled
+     * @param bool|null $pretranslate_101
+     * @param string|null $pretranslate_101_status
+     * @param bool|null $pretranslate_101_lock
+     * @param string|null $pretranslate_100_status
+     * @param bool|null $pretranslate_100_lock
      * @return int
      * @throws Throwable
      */
@@ -974,7 +1001,12 @@ class FastAnalysis extends AbstractDaemon
         ?MTQEWorkflowParams $mt_qe_workflow_parameters = null,
         ?int                $mt_quality_value_in_editor = 85,
         ?array              $subfiltering_handlers = [],
-        bool                $icu_enabled = false
+        bool                $icu_enabled = false,
+        ?bool               $pretranslate_101 = null,
+        ?string             $pretranslate_101_status = null,
+        ?bool               $pretranslate_101_lock = null,
+        ?string             $pretranslate_100_status = null,
+        ?bool               $pretranslate_100_lock = null
     ): int
     {
         $pid = $projectStruct->id;
@@ -1097,6 +1129,9 @@ class FastAnalysis extends AbstractDaemon
             return $this->db()->update('projects', $data2, $where);
         });
 
+        // the projects row was written outside the DAO, so evict its id-keyed cache by hand
+        $this->getProjectDao()->destroyCache($pid);
+
         $engine = EnginesFactory::getInstance($this->actual_project_row['id_mt_engine'], $this->db(), AbstractEngine::class);
         if ($engine->isAdaptiveMT()) {
             $engine->syncMemories($this->actual_project_row, array_values($this->segments));
@@ -1149,6 +1184,11 @@ class FastAnalysis extends AbstractDaemon
                 $queue_element['pid'] = $pid;
                 $queue_element['id_segment'] = $queue_element['id'];
                 $queue_element['pretranslate_100'] = $this->actual_project_row['pretranslate_100'];
+                $queue_element[ProjectsMetadataMarshaller::PRE_TRANSLATE_100_STATUS->value] = $pretranslate_100_status;
+                $queue_element[ProjectsMetadataMarshaller::PRE_TRANSLATE_100_LOCK->value] = $pretranslate_100_lock;
+                $queue_element[ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value] = $pretranslate_101;
+                $queue_element[ProjectsMetadataMarshaller::PRE_TRANSLATE_101_STATUS->value] = $pretranslate_101_status;
+                $queue_element[ProjectsMetadataMarshaller::PRE_TRANSLATE_101_LOCK->value] = $pretranslate_101_lock;
                 $queue_element['tm_keys'] = $this->actual_project_row['tm_keys'];
                 $queue_element['id_tms'] = $this->actual_project_row['id_tms'];
                 $queue_element['id_mt_engine'] = $this->actual_project_row['id_mt_engine'];
@@ -1157,7 +1197,6 @@ class FastAnalysis extends AbstractDaemon
                 $queue_element['context_before'] = $this->segments[$k - 1]['segment'] ?? null;
                 $queue_element['context_after'] = $this->segments[$k + 1]['segment'] ?? null;
 
-                /** @noinspection SpellCheckingInspection */
                 $jobId_segmentId = explode("-", $queue_element['jsid']); // 749-49:7acfb82b8168,50:47c70434fe78,51:f3f5551e9c4f
                 $passwordMap = $this->_mapJobPasswords($jobId_segmentId[1]); // id_job => password (see R4 below)
 
@@ -1380,7 +1419,7 @@ HD;
     ): void
     {
         if (empty($config['pid'])) {
-            throw new Exception('Can Not set a Total without a Queue ID.');
+            throw new Exception('Cannot set a Total without a Queue ID.');
         }
 
         if (!empty($config['total'])) {

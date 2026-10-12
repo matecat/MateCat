@@ -10,6 +10,7 @@ use Model\Users\MetadataDao;
 use Model\Users\MetadataStruct;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use TypeError;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
@@ -193,14 +194,14 @@ class MetadataDaoTest extends AbstractTest
         $this->assertTrue(true);
     }
 
-    // ── destroyCacheKey ─────────────────────────────────────────────────────
+    // ── destroyCache ────────────────────────────────────────────────────────
 
     #[Test]
-    public function testDestroyCacheKeyReturnsBool(): void
+    public function testDestroyCacheRefusesAStructThatNamesNoKey(): void
     {
-        $result = $this->dao->destroyCacheKey(self::UID_1, 'any_key');
+        $this->expectException(TypeError::class);
 
-        $this->assertIsBool($result);
+        $this->dao->destroyCache(new MetadataStruct(['uid' => self::UID_1]));
     }
 
     // ── DI testability ──────────────────────────────────────────────────────

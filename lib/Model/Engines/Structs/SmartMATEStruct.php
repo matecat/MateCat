@@ -23,7 +23,7 @@ class SmartMATEStruct extends EngineStruct
     /**
      * @var ?string
      */
-    public ?string $description = "SmartMATE Engine by Capita";
+    public ?string $description = "SmartMATE engine by Capita";
 
     /**
      * @var ?string

@@ -7,6 +7,7 @@ use Controller\Abstracts\Authentication\CookieManager;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ScanDirectoryForConvertedFiles;
 use Controller\Traits\ValidatesDialectStrictTrait;
+use Controller\Traits\ValidatesPretranslateMatchTrait;
 use DomainException;
 use Exception;
 use InvalidArgumentException;
@@ -35,6 +36,7 @@ use TypeError;
 use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
 use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
+use Utils\Constants\TranslationStatus;
 use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\Lara;
@@ -57,6 +59,7 @@ class CreateProjectController extends AbstractStatefulKleinController
 
     use ScanDirectoryForConvertedFiles;
     use ValidatesDialectStrictTrait;
+    use ValidatesPretranslateMatchTrait;
 
     /** @var array<string, mixed> */
     private array $data = [];
@@ -193,7 +196,17 @@ class CreateProjectController extends AbstractStatefulKleinController
         ]);
         $disable_tms_engine_flag = filter_var($this->request->param('disable_tms_engine'), FILTER_VALIDATE_BOOLEAN);
         $pretranslate_100 = filter_var($this->request->param('pretranslate_100'), FILTER_SANITIZE_NUMBER_INT);
-        $pretranslate_101 = filter_var($this->request->param('pretranslate_101'), FILTER_SANITIZE_NUMBER_INT);
+        $pretranslate_101 = filter_var($this->request->param('pretranslate_101') ?? 1, FILTER_SANITIZE_NUMBER_INT);
+        ['lock' => $pretranslate_101_lock, 'status' => $pretranslate_101_status] = $this->validatePretranslateMatchParams(
+            '101',
+            $this->request->param('pretranslate_101_lock'),
+            $this->request->param('pretranslate_101_status')
+        );
+        ['lock' => $pretranslate_100_lock, 'status' => $pretranslate_100_status] = $this->validatePretranslateMatchParams(
+            '100',
+            $this->request->param('pretranslate_100_lock'),
+            $this->request->param('pretranslate_100_status')
+        );
         $tm_prioritization = filter_var($this->request->param('tm_prioritization'), FILTER_SANITIZE_NUMBER_INT);
         $id_team = filter_var($this->request->param('id_team'), FILTER_SANITIZE_NUMBER_INT, ['flags' => FILTER_REQUIRE_SCALAR]);
         $get_public_matches = filter_var($this->request->param('get_public_matches'), FILTER_VALIDATE_BOOLEAN);
@@ -243,8 +256,11 @@ class CreateProjectController extends AbstractStatefulKleinController
         $deepl_id_glossary = filter_var($this->request->param('deepl_id_glossary'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $deepl_formality = filter_var($this->request->param('deepl_formality'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $deepl_engine_type = filter_var($this->request->param('deepl_engine_type'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        $segmentation_rule = filter_var($this->request->param('segmentation_rule'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
+        $segmentation_rule = Constants::validateSegmentationRules($segmentation_rule ?: null);
 
         $icu_enabled = filter_var($this->request->param('icu_enabled'), FILTER_VALIDATE_BOOLEAN);
+
         $mandatory_issues = filter_var(
             $this->request->param('mandatory_issues'),
             FILTER_SANITIZE_FULL_SPECIAL_CHARS,
@@ -264,7 +280,7 @@ class CreateProjectController extends AbstractStatefulKleinController
         $arFiles = explode('@@SEP@@', html_entity_decode($file_name ?: '', ENT_QUOTES, 'UTF-8'));
 
         if (!isset($_COOKIE['upload_token']) || !Utils::isTokenValid($_COOKIE['upload_token'])) {
-            throw new Exception("Invalid Upload Token.", ProjectCreationError::INVALID_UPLOAD_TOKEN->value);
+            throw new Exception("Invalid upload token.", ProjectCreationError::INVALID_UPLOAD_TOKEN->value);
         }
 
         // Build project name from input or fallback:
@@ -338,6 +354,10 @@ class CreateProjectController extends AbstractStatefulKleinController
             'job_subject' => $job_subject,
             'pretranslate_100' => $pretranslate_100,
             'pretranslate_101' => $pretranslate_101,
+            'pretranslate_101_lock' => $pretranslate_101_lock,
+            'pretranslate_100_lock' => $pretranslate_100_lock,
+            'pretranslate_101_status' => $pretranslate_101_status,
+            'pretranslate_100_status' => $pretranslate_100_status,
             'tm_prioritization' => $tm_prioritization ?? null,
             'id_team' => $id_team,
             'enable_mt_analysis' => $enable_mt_analysis ?? null,
@@ -436,6 +456,10 @@ class CreateProjectController extends AbstractStatefulKleinController
         $data['project_features'] = $this->appendFeaturesToProject($data['mt_engine']);
         $data['team'] = $this->setTeam($id_team ?: null);
 
+        if (!empty($segmentation_rule)) {
+            $data[ProjectsMetadataMarshaller::SEGMENTATION_RULE->value] = $segmentation_rule;
+        }
+
         $this->setMetadataFromPostInput($data);
 
         return $data;
@@ -496,11 +520,17 @@ class CreateProjectController extends AbstractStatefulKleinController
         // new raw counter model
         $options = [ProjectsMetadataMarshaller::WORD_COUNT_TYPE_KEY->value => ProjectsMetadataMarshaller::WORD_COUNT_RAW->value];
 
-        if (isset($data['mt_quality_value_in_editor'])) {
-            $options[ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value] = $data['mt_quality_value_in_editor'];
+        if (isset($data[ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value])) {
+            $options[ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value] = $data[ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value];
         }
 
-        $options[ProjectsMetadataMarshaller::ICU_ENABLED->value] = $data['icu_enabled'];
+        // 'standard' and '' are normalized to null by Constants::validateSegmentationRules(), so only
+        // 'patent' and 'paragraph' ever reach the metadata. Lara reads this key to enable multiline.
+        if (!empty($data[ProjectsMetadataMarshaller::SEGMENTATION_RULE->value])) {
+            $options[ProjectsMetadataMarshaller::SEGMENTATION_RULE->value] = $data[ProjectsMetadataMarshaller::SEGMENTATION_RULE->value];
+        }
+
+        $options[ProjectsMetadataMarshaller::ICU_ENABLED->value] = $data[ProjectsMetadataMarshaller::ICU_ENABLED->value];
 
         $this->metadata = $options;
     }
@@ -672,7 +702,7 @@ class CreateProjectController extends AbstractStatefulKleinController
             // check if qa_model template exists
             if (null === $qaModelTemplate) {
                 throw new InvalidArgumentException(
-                    'This QA Model template does not exists or does not belongs to the logged in user'
+                    'This QA model template does not exist or does not belong to the logged-in user'
                 );
             }
 
@@ -888,6 +918,10 @@ class CreateProjectController extends AbstractStatefulKleinController
         $projectStructure->public_tm_penalty = $data['public_tm_penalty'];
         $projectStructure->pretranslate_100 = $data['pretranslate_100'];
         $projectStructure->pretranslate_101 = $data['pretranslate_101'];
+        $projectStructure->pretranslate_101_lock = $data['pretranslate_101_lock'];
+        $projectStructure->pretranslate_100_lock = $data['pretranslate_100_lock'];
+        $projectStructure->pretranslate_101_status = $data['pretranslate_101_status'];
+        $projectStructure->pretranslate_100_status = $data['pretranslate_100_status'];
         $projectStructure->dialect_strict = $data['dialect_strict'];
         $projectStructure->only_private = $data['only_private'];
         $projectStructure->due_date = $data['due_date'];

@@ -7,6 +7,7 @@ use Model\DataAccess\AbstractDao;
 use Model\DataAccess\IDaoStruct;
 use PDOException;
 use ReflectionException;
+use Throwable;
 use Utils\Logger\LoggerFactory;
 
 class OwnerFeatureDao extends AbstractDao
@@ -23,36 +24,35 @@ class OwnerFeatureDao extends AbstractDao
      * @return ?OwnerFeatureStruct
      * @throws PDOException
      * @throws ReflectionException
-     * @throws \Exception
+     * @throws Exception
+     * @throws Throwable
      */
     public function create(IDaoStruct $obj): ?OwnerFeatureStruct
     {
-        $conn = $this->database->getConnection();
+        return $this->database->transaction(function () use ($obj): ?OwnerFeatureStruct {
+            $conn = $this->database->getConnection();
 
-        $this->database->begin();
+            /**
+             * @var OwnerFeatureStruct $obj
+             */
+            $obj->create_date = date('Y-m-d H:i:s');
+            $obj->last_update = date('Y-m-d H:i:s');
 
-        /**
-         * @var OwnerFeatureStruct $obj
-         */
-        $obj->create_date = date('Y-m-d H:i:s');
-        $obj->last_update = date('Y-m-d H:i:s');
+            $stmt = $conn->prepare(
+                "INSERT INTO owner_features " .
+                " ( uid, feature_code, options, create_date, last_update, enabled, id_team )" .
+                " VALUES " .
+                " ( :uid, :feature_code, :options, :create_date, :last_update, :enabled, :id_team );"
+            );
 
-        $stmt = $conn->prepare(
-            "INSERT INTO owner_features " .
-            " ( uid, feature_code, options, create_date, last_update, enabled, id_team )" .
-            " VALUES " .
-            " ( :uid, :feature_code, :options, :create_date, :last_update, :enabled, :id_team );"
-        );
+            LoggerFactory::doJsonLog($obj->toArray());
 
-        LoggerFactory::doJsonLog($obj->toArray());
+            $values = array_diff_key($obj->toArray(), ['id' => null]);
 
-        $values = array_diff_key($obj->toArray(), ['id' => null]);
+            $stmt->execute($values);
 
-        $stmt->execute($values);
-        $record = $this->fetchById((int) $conn->lastInsertId(), OwnerFeatureStruct::class);
-        $conn->commit();
-
-        return $record;
+            return $this->fetchById((int)$conn->lastInsertId(), OwnerFeatureStruct::class);
+        });
     }
 
     /**

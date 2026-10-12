@@ -16,7 +16,7 @@ export const checkTPEnabled = () => {
   return (
     checkTPSupportedLanguage() &&
     UserStore.getUserMetadata()?.guess_tags === 1 &&
-    !!!config.isReview
+    !config.isReview
   )
 }
 

@@ -13,13 +13,13 @@ use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
+use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectDao;
-use Utils\LQA\ICUSourceSegmentChecker;
+use Utils\LQA\ICUSourceSegmentDetector;
 use Utils\LQA\QA;
 
 class XliffReplacerCallback implements XliffReplacerCallbackInterface
 {
-    use ICUSourceSegmentChecker;
 
 
     /** @var array<string>|null */
@@ -88,13 +88,22 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface
             }
         }
 
+        // Taken on the Layer 0 segment, before the conversion below rewrites it.
+        $sourceValidator = new MessagePatternValidator($this->jobStruct->source, $segment);
+        $sourceContainsIcu = ICUSourceSegmentDetector::sourceContainsIcu(
+            $sourceValidator,
+            (new ProjectMetadataDao($this->database))->isIcuEnabled(
+                (int)$this->jobStruct->getProject(new ProjectDao($this->database))->id
+            )
+        );
+
         $filter = MateCatFilter::getInstance(
             $this->featureSet,
             $this->sourceLang,
             $this->targetLang,
             $dataRefMap ?? [],
             $this->subfilteringCustomHandlers,
-            $this->sourceContainsIcu($this->jobStruct->getProject(new ProjectDao($this->database)), $this->jobStruct, $segment, $this->database)
+            $sourceContainsIcu
         );
 
         $segment = $filter->fromLayer0ToLayer1($segment);
@@ -117,15 +126,15 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface
         $check = new QA(
             $segment,
             $translation,
-            $this->icuSourcePatternValidator !== null ? MessagePatternComparator::fromValidators(
-                $this->icuSourcePatternValidator,
+            MessagePatternComparator::fromValidators(
+                $sourceValidator,
                 new MessagePatternValidator(
                     $this->jobStruct->target,
                     $translation
                 )
-            ) : null,
+            ),
             // ICU syntax is enabled for this project, and the translation content must contain valid ICU syntax
-            $this->sourceContainsIcu
+            $sourceContainsIcu
         ); // Layer 1 here
 
         $check->setFeatureSet($this->featureSet);

@@ -1,7 +1,7 @@
 <!doctype html>
 <html dir="ltr" lang="it-IT">
 <head>
-    <title>Job Archived</title>
+    <title>Job archived</title>
     <div metal:use-macro="${php: Utils\Registry\AppConfig::$TRACKING_CODES_VIEW_PATH}/CSP-HeaderMeta.html/CSP_NONCE"/>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="icon" type="image/png" sizes="32x32" href="${basepath}public/img/meta/favicon-32x32.svg"/>
@@ -9,11 +9,9 @@
 
     <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
         /*<![CDATA[*/
-        var config = {
-            basepath: '${basepath | string:/}',
-            job_id: '${jid}',
-            password: '${password}'
-        };
+        // One serialised document rather than a value per line: PHPTAL does not escape inside a script
+        // block, so anything interpolated here lands in JavaScript syntax verbatim. See BootstrapConfig.
+        var config = ${structure config_json};
         /*]]>*/
     </script>
 </head>
@@ -35,7 +33,7 @@
 <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
   document.getElementById('reactivate-job').addEventListener('click', function(e) {
     e.preventDefault();
-    const url = '/api/v3/jobs/' + config.job_id + '/' + config.password+'/active'
+    const url = '/api/v3/jobs/' + config.jid + '/' + config.password+'/active'
     fetch(url, {
       method: 'POST',
       credentials: 'include',

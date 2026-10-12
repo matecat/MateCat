@@ -127,48 +127,6 @@ class SegmentTranslationIssueTest extends AbstractTest
         $this->assertSame([], $result);
     }
 
-    public function testGenCSVTmpFileCreatesFile(): void
-    {
-        $entry = $this->makeEntryStruct(10);
-
-        // category_label is accessed inside the inner foreach loop only when
-        // comments are returned; EntryStruct does not define that property
-        // (it comes from a JOIN in production). Use empty comments to cover
-        // the outer loop and CSV header-writing code paths safely.
-        $path = $this->view->genCSVTmpFile([$entry]);
-
-        $this->assertFileExists($path);
-        $contents = file_get_contents($path);
-        $this->assertStringContainsString('ID Segment', $contents);
-
-        $this->view->cleanDownloadResource();
-    }
-
-    public function testGenCSVTmpFileSkipsRecordWithNullId(): void
-    {
-        $entry     = $this->makeEntryStruct(1);
-        $entry->id = null;
-
-        $dao = $this->createMock(EntryCommentDao::class);
-        $dao->expects($this->never())->method('findByIssueId');
-
-        $view = new SegmentTranslationIssue($dao);
-        $path = $view->genCSVTmpFile([$entry]);
-
-        $this->assertFileExists($path);
-        $view->cleanDownloadResource();
-    }
-
-    public function testGenCSVTmpFileReturnsStringPath(): void
-    {
-        $entry = $this->makeEntryStruct(3);
-        $path  = $this->view->genCSVTmpFile([$entry]);
-
-        $this->assertIsString($path);
-        $this->assertNotEmpty($path);
-        $this->view->cleanDownloadResource();
-    }
-
     public function testConstructorWithDao(): void
     {
         $view = new SegmentTranslationIssue($this->commentStub);

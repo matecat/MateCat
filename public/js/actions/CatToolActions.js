@@ -135,12 +135,7 @@ let CatToolActions = {
     )
   },
   sendRevisionFeedback: function (text) {
-    return sendRevisionFeedback(
-      config.id_job,
-      config.revisionNumber,
-      config.review_password,
-      text,
-    )
+    return sendRevisionFeedback(config.id_job, config.currentPassword, text)
   },
   reloadQualityReport: function () {
     AppDispatcher.dispatch({

@@ -78,6 +78,11 @@ class TestableDao extends AbstractDao
 {
     protected static array $primary_keys = ['id'];
     const string TABLE = 'test_table';
+
+    public function exposeCacheTransactionScope(): ?IDatabase
+    {
+        return $this->_cacheTransactionScope();
+    }
 }
 
 class AnotherTestableDao extends AbstractDao
@@ -502,5 +507,17 @@ class AbstractDaoInstanceMethodsTest extends AbstractTest
         $result = $dao->insertStruct($struct, ['on_duplicate_update' => ['name' => 'VALUES(name)']]);
 
         $this->assertSame(102, $result);
+    }
+
+    /**
+     * DaoCacheTrait defaults the scope to null, which would make every DAO's cache writes ignore
+     * the transaction they run in. AbstractDao is what binds them to the injected handle.
+     */
+    #[Test]
+    public function test_cache_transaction_scope_is_the_injected_database(): void
+    {
+        $database = $this->createStub(IDatabase::class);
+
+        $this->assertSame($database, (new TestableDao($database))->exposeCacheTransactionScope());
     }
 }

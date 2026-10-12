@@ -67,56 +67,6 @@ class RedisHandlerTest extends AbstractTest
         $this->assertSame($client1, $client2);
     }
 
-    // ── Lock / Unlock ──
-
-    public function testTryLockAndUnlock(): void
-    {
-        $key = 'test_lock_' . uniqid();
-
-        $this->handler->tryLock($key, 5);
-
-        $value = $this->handler->getConnection()->get("lock:" . $key);
-        $this->assertNotNull($value);
-
-        $this->handler->unlock($key);
-
-        $value = $this->handler->getConnection()->get("lock:" . $key);
-        $this->assertNull($value);
-    }
-
-    public function testTryLockThrowsOnTimeout(): void
-    {
-        $key        = 'test_timeout_lock_' . uniqid();
-        $connection = $this->handler->getConnection();
-
-        $connection->setnx("lock:" . $key, "other_instance");
-        $connection->expire("lock:" . $key, 10);
-
-        $this->expectException(Exception::class);
-        $this->expectExceptionMessage("Lock wait timeout reached.");
-
-        try {
-            $this->handler->tryLock($key, 1);
-        } finally {
-            $connection->del("lock:" . $key);
-        }
-    }
-
-    public function testUnlockDoesNotRemoveLockOwnedByOtherInstance(): void
-    {
-        $key        = 'test_other_owner_' . uniqid();
-        $connection = $this->handler->getConnection();
-
-        $connection->set("lock:" . $key, "some_other_instance_identifier");
-
-        $this->handler->unlock($key);
-
-        $value = $connection->get("lock:" . $key);
-        $this->assertNotNull($value, 'Lock owned by another instance should not be removed');
-
-        $connection->del("lock:" . $key);
-    }
-
     // ── formatDSN ──
 
     public function testFormatDSNAppendsInstanceId(): void
@@ -242,21 +192,6 @@ class RedisHandlerTest extends AbstractTest
         // Predis connects lazily, so building the client reaches the guard without touching either
         // host — which is what makes this assertable without a replicated Redis to point at.
         $this->assertInstanceOf(Client::class, (new RedisHandler())->getConnection());
-    }
-
-    // ── Instance identifier ──
-
-    public function testGetInstanceIdentifierIsUnique(): void
-    {
-        $handler1 = new RedisHandler();
-        $handler2 = new RedisHandler();
-
-        $ref = new \ReflectionMethod(RedisHandler::class, 'getInstanceIdentifier');
-
-        $id1 = $ref->invoke($handler1);
-        $id2 = $ref->invoke($handler2);
-
-        $this->assertNotSame($id1, $id2);
     }
 
     // ── Single mode via config ──

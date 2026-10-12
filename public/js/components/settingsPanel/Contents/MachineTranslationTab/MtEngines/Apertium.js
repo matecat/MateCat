@@ -6,7 +6,7 @@ import {
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../../../../common/Button/Button'
-import IconClose from '../../../../icons/IconClose'
+import IconClose from '../../../../../../img/icons/IconClose'
 import Checkmark from '../../../../../../img/icons/Checkmark'
 import ExternalLink from '../../../../../../img/icons/ExternalLink'
 
@@ -97,7 +97,6 @@ export const Apertium = ({
             <Button
               type={BUTTON_TYPE.PRIMARY}
               mode={BUTTON_MODE.BASIC}
-              size={BUTTON_SIZE.MEDIUM}
               disabled={isRequestInProgress}
               onClick={handleSubmit(onSubmit)}
             >

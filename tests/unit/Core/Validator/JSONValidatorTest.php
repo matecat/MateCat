@@ -105,7 +105,7 @@ class JSONValidatorTest extends AbstractTest
         $error = $validator->getExceptions()[0];
 
         $this->assertFalse($validator->isValid());
-        $this->assertEquals("JSON Validation Error: Too many items in array", $error->getMessage());
+        $this->assertEquals("JSON validation error: Too many items in array", $error->getMessage());
     }
 
     /**
@@ -602,6 +602,39 @@ class JSONValidatorTest extends AbstractTest
         $result = $validator->validate($validatorObject);
 
         $this->assertNotNull($result);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testXliffRulesSchemaAcceptsNoStateForBothVersions(): void
+    {
+        $json = json_encode([
+            'name'  => 'no state',
+            'rules' => [
+                'xliff12' => [['states' => ['no-state', 'id-match'], 'analysis' => 'pre-translated', 'editor' => 'translated', 'match_category' => 'ice']],
+                'xliff20' => [['states' => ['no-state'], 'analysis' => 'new']],
+            ],
+        ]);
+
+        $validator = new JSONValidator('xliff_parameters_rules_wrapper.json', true);
+
+        $this->assertNotNull($validator->validate(new JSONValidatorObject($json)));
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testXliffRulesSchemaRejectsAnUnknownNoStateSpelling(): void
+    {
+        $json = json_encode([
+            'name'  => 'no state',
+            'rules' => ['xliff20' => [['states' => ['no_state'], 'analysis' => 'new']]],
+        ]);
+
+        $this->expectException(JSONValidatorException::class);
+
+        (new JSONValidator('xliff_parameters_rules_wrapper.json', true))->validate(new JSONValidatorObject($json));
     }
 
 }

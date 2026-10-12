@@ -11,11 +11,17 @@ namespace Controller\Traits;
 
 
 use InvalidArgumentException;
+use Klein\Request;
 use Utils\Logger\LoggerFactory;
 use Utils\Tools\Utils;
 
 trait TimeLoggerTrait
 {
+
+    /**
+     * Provided by the host class (KleinController).
+     */
+    protected Request $request;
 
     protected string $timingLogFileName = 'fallback_calls_time.log';
 
@@ -41,7 +47,12 @@ trait TimeLoggerTrait
      */
     protected function logPageCall(): void
     {
-        $_request_uri = parse_url($_SERVER['REQUEST_URI']);
+        // Read from the request the controller was given rather than from $_SERVER. The two carry
+        // the same value under Apache, but only one of them exists off the web: the superglobal has
+        // no REQUEST_URI under the CLI, so logging a page call from a test warned about a missing
+        // key and then passed null to parse_url(). Request::uri() reads the server collection the
+        // request was constructed with and falls back to "/", so there is nothing to prop up.
+        $_request_uri = parse_url($this->request->uri());
         if (is_array($_request_uri) && isset($_request_uri['query'])) {
             parse_str($_request_uri['query'], $str);
             $_request_uri['query'] = $str;

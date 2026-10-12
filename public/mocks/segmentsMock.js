@@ -11,7 +11,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -40,7 +39,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -69,7 +67,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -98,7 +95,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -127,7 +123,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -156,7 +151,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -186,7 +180,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -215,7 +208,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -244,7 +236,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -273,7 +264,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -302,7 +292,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -331,7 +320,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -360,7 +348,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -389,7 +376,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -418,7 +404,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -447,7 +432,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'DRAFT',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -476,7 +460,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -505,7 +488,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -534,7 +516,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'DRAFT',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -563,7 +544,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -592,7 +572,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -621,7 +600,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'DRAFT',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -651,7 +629,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -681,7 +658,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -710,7 +686,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -739,7 +714,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -768,7 +742,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -798,7 +771,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -827,7 +799,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -857,7 +828,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -886,7 +856,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -915,7 +884,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -944,7 +912,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -973,7 +940,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'DRAFT',
     time_to_edit: '41',
-    parsed_time_to_edit: ['00', '00', '00', 41],
     warning: '0',
     source_chunk_lengths: [0, 6, 5],
     target_chunk_lengths: {
@@ -1002,7 +968,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'TRANSLATED',
     time_to_edit: '10605',
-    parsed_time_to_edit: ['00', '00', '10', 605],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1031,7 +996,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'TRANSLATED',
     time_to_edit: '11481',
-    parsed_time_to_edit: ['00', '00', '11', 481],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1060,7 +1024,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'TRANSLATED',
     time_to_edit: '30717',
-    parsed_time_to_edit: ['00', '00', '30', 717],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1091,7 +1054,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'TRANSLATED',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1122,7 +1084,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'TRANSLATED',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1151,7 +1112,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'TRANSLATED',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1180,7 +1140,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1209,7 +1168,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1238,7 +1196,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1267,7 +1224,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'TRANSLATED',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1296,7 +1252,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1325,7 +1280,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1354,7 +1308,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1383,7 +1336,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1412,7 +1364,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1441,7 +1392,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1470,7 +1420,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1499,7 +1448,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1528,7 +1476,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1557,7 +1504,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1586,7 +1532,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1615,7 +1560,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1644,7 +1588,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1673,7 +1616,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1702,7 +1644,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1731,7 +1672,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1760,7 +1700,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1789,7 +1728,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1818,7 +1756,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1847,7 +1784,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1876,7 +1812,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1905,7 +1840,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1934,7 +1868,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1963,7 +1896,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -1993,7 +1925,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -2022,7 +1953,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -2051,7 +1981,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -2081,7 +2010,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -2111,7 +2039,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -2140,7 +2067,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -2169,7 +2095,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -2198,7 +2123,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -2227,7 +2151,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -2256,7 +2179,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -2286,7 +2208,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {
@@ -2315,7 +2236,6 @@ export const segmentsMock = [
     ice_locked: '0',
     status: 'NEW',
     time_to_edit: '0',
-    parsed_time_to_edit: ['00', '00', '00', '00'],
     warning: '0',
     source_chunk_lengths: [],
     target_chunk_lengths: {

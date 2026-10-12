@@ -106,3 +106,5 @@ LivePreviewPanel.propTypes = {
   title: PropTypes.string.isRequired,
   zoomLevel: PropTypes.number.isRequired,
 }
+
+LivePreviewPanel.displayName = 'LivePreviewPanel'

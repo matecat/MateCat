@@ -7,31 +7,21 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @param {string} options.idSegment
  * @param {string} options.idIssue
  * @param {string} [options.idJob=config.id_job]
- * @param {string} [options.reviewPassword=config.review_password]
+ * @param {string} [options.password=config.currentPassword]
  * @returns {Promise<object>}
  */
 export const deleteSegmentIssue = async ({
   idSegment,
   idIssue,
   idJob = config.id_job,
-  reviewPassword = config.review_password,
-  revisionNumber = config.revisionNumber,
+  password = config.currentPassword,
 }) => {
-  const dataParams = {
-    revision_number: revisionNumber,
-  }
-  const formData = new FormData()
-
-  Object.keys(dataParams).forEach((key) => {
-    formData.append(key, dataParams[key])
-  })
-
+  // No revision_number: the phase is derived server side from this password.
   const response = await fetch(
-    `${getMatecatApiDomain()}api/v2/jobs/${idJob}/${reviewPassword}/segments/${idSegment}/translation-issues/${idIssue}`,
+    `${getMatecatApiDomain()}api/v2/jobs/${idJob}/${password}/segments/${idSegment}/translation-issues/${idIssue}`,
     {
       method: 'DELETE',
       credentials: 'include',
-      body: formData,
     },
   )
   if (!response.ok) {

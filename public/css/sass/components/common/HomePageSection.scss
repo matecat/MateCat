@@ -1,11 +1,12 @@
-@use "../../commons/colors";
+@use "../../tokens/colors";
+@use 'commons/variables';
 .home-page-section {
   .layout-bottom {
     height: 260px;
     padding: 48px 0;
     display: flex;
     flex-direction: column;
-    background-color: colors.$darkBlue;
+    background-color: colors.$blue900;
     align-items: center;
     gap: 8px;
     h3 {
@@ -16,7 +17,7 @@
       margin: 0;
     }
     span {
-      font-size: 18px;
+      font-size: variables.$font-size-base;
       line-height: 28px;
       color: colors.$white;
       margin-bottom: 16px;
@@ -27,18 +28,12 @@
     }
   }
 }
-.layout-container {
-  position: relative;
+.layout__container {
   z-index: 2;
-  margin-left: auto;
-  margin-right: auto;
-  width: 100%;
   display: flex;
   flex-direction: column;
-  h1 {
-    font-size: 48px;
-    line-height: 56px;
-    margin: 80px auto;
+  h3 {
+    margin: 80px auto 48px auto;
   }
   .layout-grid {
     display: grid;
@@ -55,61 +50,56 @@
         display: flex;
         gap: 16px;
         align-items: center;
-        h3 {
-          margin-top: 0;
-          font-size: 28px;
-          line-height: 32px;
-          color: #333;
-        }
-        img {
-          width: 64px;
-          height: 64px;
-        }
       }
       p {
-        font-size: 18px;
+        font-size: variables.$font-size-base;
         line-height: 24px;
-        color: colors.$grey6;
+        color: colors.$grey700;
+      }
+    }
+    .content-box .content-box_header {
+      h3 {
+        margin-top: 0;
+        color: colors.$grey1300;
+      }
+      img {
+        width: 48px;
+        height: 48px;
       }
     }
   }
 }
 
 @media (max-width: 829px) {
-  .layout-container {
-    max-width: 382px;
+  .layout__container {
     .layout-grid {
       grid-template-columns: 1fr;
     }
   }
 }
 @media (min-width: 830px) {
-  .layout-container {
-    max-width: 766px;
+  .layout__container {
     .layout-grid {
       grid-template-columns: 1fr 1fr;
     }
   }
 }
 @media (min-width: 1024px) {
-  .layout-container {
-    max-width: 928px;
+  .layout__container {
     .layout-grid {
       grid-template-columns: 1fr 1fr;
     }
   }
 }
 @media (min-width: 1280px) {
-  .layout-container {
-    max-width: 1080px;
+  .layout__container {
     .layout-grid {
       grid-template-columns: 1fr 1fr;
     }
   }
 }
 @media (min-width: 1440px) {
-  .layout-container {
-    max-width: 1280px;
+  .layout__container {
     .layout-grid {
       grid-template-columns: 1fr 1fr 1fr;
     }

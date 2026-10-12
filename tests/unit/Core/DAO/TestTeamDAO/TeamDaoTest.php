@@ -10,6 +10,7 @@ use Model\Users\UserStruct;
 use PDO;
 use PDOStatement;
 use PHPUnit\Framework\Attributes\Test;
+use TypeError;
 
 class TestTeamDao extends TeamDao
 {
@@ -45,6 +46,9 @@ class TeamDaoTest extends AbstractTest
     private function makeDbStub(): IDatabase
     {
         $stmt = $this->createStub(PDOStatement::class);
+        // Writes that evict a cache entry build its key from the statement they prepared, so a
+        // statement double has to carry one. Uninitialised, the typed property throws instead.
+        $stmt->queryString = 'stubbed';
 
         $pdo = $this->createStub(PDO::class);
         $pdo->method('prepare')->willReturn($stmt);
@@ -99,19 +103,25 @@ class TeamDaoTest extends AbstractTest
     }
 
     #[Test]
-    public function updateTeamName_calls_begin_then_commit_on_connection(): void
+    public function updateTeamName_runs_its_write_inside_a_transaction_scope(): void
     {
         $stmt = $this->createStub(PDOStatement::class);
+        $stmt->queryString = 'stubbed';
 
+        // The scope opens and closes the transaction now. The DAO committing on the raw handle is
+        // the mixed-handle shape this test pins against: a commit issued that way leaves the
+        // deferral queue undrained.
         $pdo = $this->createMock(PDO::class);
         $pdo->method('prepare')->willReturn($stmt);
-        $pdo->expects($this->once())->method('commit');
+        $pdo->expects($this->never())->method('commit');
 
         $db = $this->createMock(IDatabase::class);
-        $db->expects($this->once())->method('begin');
+        $db->expects($this->once())->method('transaction')->willReturnCallback(
+            static fn(callable $callback) => $callback()
+        );
         $db->method('getConnection')->willReturn($pdo);
 
-        $team       = new TeamStruct(['id' => 7]);
+        $team       = new TeamStruct(['id' => 7, 'created_by' => 42]);
         $team->name = 'Another Name';
 
         (new TeamDao($db))->updateTeamName($team);
@@ -136,71 +146,11 @@ class TeamDaoTest extends AbstractTest
     }
 
     #[Test]
-    public function findUserCreatedTeams_returns_team_struct_when_found(): void
+    public function destroyCache_refuses_a_struct_that_carries_no_creator(): void
     {
         $dao = new TestTeamDao($this->makeDbStub());
 
-        $expected       = new TeamStruct(['id' => 1]);
-        $expected->name = 'My Team';
-        $dao->fetchResult = [$expected];
-
-        $user      = new UserStruct();
-        $user->uid = 42;
-
-        $this->assertSame($expected, $dao->findUserCreatedTeams($user));
-    }
-
-    #[Test]
-    public function findUserCreatedTeams_returns_null_when_not_found(): void
-    {
-        $dao = new TestTeamDao($this->makeDbStub());
-        $dao->fetchResult = [];
-
-        $user      = new UserStruct();
-        $user->uid = 42;
-
-        $this->assertNull($dao->findUserCreatedTeams($user));
-    }
-
-    #[Test]
-    public function destroyCachePersonalByUid_returns_true_when_cache_destroyed(): void
-    {
-        $dao = new TestTeamDao($this->makeDbStub());
-        $dao->destroyResult = true;
-
-        $this->assertTrue($dao->destroyCachePersonalByUid(42));
-    }
-
-    #[Test]
-    public function destroyCachePersonalByUid_returns_false_when_cache_not_found(): void
-    {
-        $dao = new TestTeamDao($this->makeDbStub());
-        $dao->destroyResult = false;
-
-        $this->assertFalse($dao->destroyCachePersonalByUid(99));
-    }
-
-    #[Test]
-    public function destroyCacheUserCreatedTeams_returns_true_when_cache_destroyed(): void
-    {
-        $dao = new TestTeamDao($this->makeDbStub());
-        $dao->destroyResult = true;
-
-        $user      = new UserStruct();
-        $user->uid = 42;
-
-        $this->assertTrue($dao->destroyCacheUserCreatedTeams($user));
-    }
-
-    #[Test]
-    public function destroyCacheUserCreatedTeams_returns_false_when_cache_not_found(): void
-    {
-        $dao = new TestTeamDao($this->makeDbStub());
-        $dao->destroyResult = false;
-
-        $user      = new UserStruct();
-        $user->uid = 7;
-
-        $this->assertFalse($dao->destroyCacheUserCreatedTeams($user));
+        $this->expectException(TypeError::class);
+        $dao->destroyCache(new TeamStruct(['id' => 7]));
     }
 }

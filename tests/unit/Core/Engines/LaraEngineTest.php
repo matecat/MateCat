@@ -15,6 +15,7 @@ use Lara\Memories;
 use Lara\Memory;
 use Lara\TextBlock;
 use Lara\TextResult;
+use Lara\TranslateOptions;
 use Matecat\TestHelpers\AbstractTest;
 use Model\Engines\Structs\EngineStruct;
 use Model\TmKeyManagement\MemoryKeyStruct;
@@ -24,6 +25,7 @@ use ReflectionProperty;
 use RuntimeException;
 use stdClass;
 use Throwable;
+use Utils\Constants\Constants;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\Lara;
 use Utils\Engines\Lara\HeaderField;
@@ -149,6 +151,172 @@ class LaraEngineTest extends AbstractTest
         self::assertSame(200, $response->responseStatus);
         self::assertCount(1, $response->matches);
         self::assertSame('glossary translation', $response->matches[0]->raw_translation);
+    }
+    /**
+     * Builds a LaraClient mock that captures the TranslateOptions handed to translate(),
+     * so a test can assert on what was actually sent to Lara.
+     *
+     * @param TranslateOptions|null $captured Filled in with the options of the single translate() call.
+     */
+    private function mockClientCapturingOptions(?TranslateOptions &$captured, string $translation): LaraClient
+    {
+        $client = $this->createMock(LaraClient::class);
+        $client->method('getHttpClient')->willReturn(new TestHttpClient());
+        $client->expects(self::once())
+            ->method('translate')
+            ->willReturnCallback(
+                function ($text, $source, $target, $options) use (&$captured, $translation): TextResult {
+                    $captured = $options;
+
+                    return new TextResult('application/xliff+xml', 'en-US', [
+                        new TextBlock($translation, true),
+                    ]);
+                }
+            );
+
+        return $client;
+    }
+    /**
+     * Runs get() against a project whose segmentation_rule metadata is $segmentationRule
+     * (null means: no metadata row at all) and returns the multiline flag actually sent to Lara.
+     *
+     * @throws LaraException
+     * @throws Exception
+     */
+    private function multilineSentForSegmentationRule(?string $segmentationRule, bool $withIdProject = true): ?bool
+    {
+        $idProject = 1;
+        $key = ProjectsMetadataMarshaller::SEGMENTATION_RULE->value;
+
+        $metadataDao = new MetadataDao(obtainTestDatabase());
+        // set()/delete() both destroy the metadata cache, so the setCacheTTL(86400) read
+        // inside get() cannot serve a value seeded by a sibling test.
+        $metadataDao->delete($idProject, $key);
+        if ($segmentationRule !== null) {
+            $metadataDao->set($idProject, $key, $segmentationRule);
+            self::assertSame($segmentationRule, $metadataDao->getValue($idProject, $key));
+        }
+
+        $captured = null;
+        $this->engine->setMockClient($this->mockClientCapturingOptions($captured, 'translated segment'));
+
+        $config = [
+            'segment' => 'source segment',
+            'source' => 'en-US',
+            'target' => 'it-IT',
+            'keys' => ['k1'],
+            'context_list_before' => [],
+            'context_list_after' => [],
+        ];
+
+        if ($withIdProject) {
+            $config['id_project'] = $idProject;
+        }
+
+        try {
+            $response = $this->engine->get($config);
+        } finally {
+            // Keep project 1 metadata clean so sibling suites are unaffected.
+            $metadataDao->delete($idProject, $key);
+        }
+
+        self::assertSame(200, $response->responseStatus);
+        self::assertSame('translated segment', $response->matches[0]->raw_translation);
+        self::assertInstanceOf(TranslateOptions::class, $captured);
+
+        return $captured->isMultiline();
+    }
+    /**
+     * Paragraph segmentation produces one segment per paragraph, so Lara receives large
+     * multi-sentence blocks. Lara is not trained to split such a block itself, and quality
+     * drops when it is asked to: multiline must be enabled for these projects.
+     *
+     * @throws LaraException
+     * @throws Exception
+     */
+    #[Test]
+    public function getSendsMultilineTrueWhenProjectSegmentationRuleIsParagraph(): void
+    {
+        self::assertTrue($this->multilineSentForSegmentationRule(Constants::SEG_RULE_PARAGRAPH));
+    }
+    /**
+     * Only 'paragraph' flips the flag: 'patent' still segments by sentence.
+     *
+     * @throws LaraException
+     * @throws Exception
+     */
+    #[Test]
+    public function getSendsMultilineFalseWhenProjectSegmentationRuleIsPatent(): void
+    {
+        self::assertFalse($this->multilineSentForSegmentationRule(Constants::SEG_RULE_PATENT));
+    }
+    /**
+     * 'standard'/'General' is normalized to null by Constants::validateSegmentationRules() and
+     * therefore never stored, exactly like every project created before this feature existed.
+     * No row must mean multiline = false.
+     *
+     * @throws LaraException
+     * @throws Exception
+     */
+    #[Test]
+    public function getSendsMultilineFalseWhenProjectHasNoSegmentationRuleMetadata(): void
+    {
+        self::assertFalse($this->multilineSentForSegmentationRule(null));
+    }
+    /**
+     * Callers that do not provide id_project (no project context) cannot be resolved to a
+     * segmentation rule and must default to false rather than reading metadata for project 0.
+     *
+     * @throws LaraException
+     * @throws Exception
+     */
+    #[Test]
+    public function getSendsMultilineFalseWhenIdProjectIsMissing(): void
+    {
+        self::assertFalse(
+            $this->multilineSentForSegmentationRule(Constants::SEG_RULE_PARAGRAPH, false)
+        );
+    }
+    /**
+     * Regression test: $multiline used to be computed inside the non-Think branch only, while the
+     * "Lara Think" branch (translation already produced by the browser) logs it too. That raised
+     * "Warning: Undefined variable $multiline" on every Think contribution. phpunit.xml does not
+     * enable failOnWarning, so this test installs its own handler to turn the warning into a failure.
+     *
+     * @throws LaraException
+     * @throws Exception
+     */
+    #[Test]
+    public function getLaraThinkRequestDoesNotEmitUndefinedVariableWarning(): void
+    {
+        $idProject = 1;
+        $key = ProjectsMetadataMarshaller::SEGMENTATION_RULE->value;
+
+        $metadataDao = new MetadataDao(obtainTestDatabase());
+        $metadataDao->delete($idProject, $key);
+        $metadataDao->set($idProject, $key, Constants::SEG_RULE_PARAGRAPH);
+
+        set_error_handler(static function (int $severity, string $message): bool {
+            throw new RuntimeException($message);
+        }, E_WARNING);
+
+        try {
+            $response = $this->engine->get([
+                'segment' => 'source segment',
+                'source' => 'en-US',
+                'target' => 'it-IT',
+                'id_project' => $idProject,
+                'translation' => 'already translated',
+                'reasoning' => false,
+                'lara_model' => 'think',
+            ]);
+        } finally {
+            restore_error_handler();
+            $metadataDao->delete($idProject, $key);
+        }
+
+        self::assertSame(200, $response->responseStatus);
+        self::assertSame('already translated', $response->matches[0]->raw_translation);
     }
     /**
      * @throws LaraException

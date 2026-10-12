@@ -18,33 +18,27 @@ import RowSegment, {ProjectBar} from '../common/VirtualList/Rows/RowSegment'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
 import CatToolConstants from '../../constants/CatToolConstants'
-import CommentsConstants from '../../constants/CommentsConstants'
 import CatToolStore from '../../stores/CatToolStore'
 import Speech2Text from '../../utils/speech2text'
 import SegmentActions from '../../actions/SegmentActions'
 import {isUndefined} from 'lodash'
 import SegmentUtils from '../../utils/segmentUtils'
-import CommentsStore from '../../stores/CommentsStore'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import ContextPreviewChannel from '../../utils/contextPreviewChannel'
+import IconSplit from '../../../img/icons/IconSplit'
 
 const ROW_MARGIN = 3
 const ROW_HEIGHT = 90
 const OVERSCAN = 5
-const COMMENTS_PADDING_TOP = [
-  {empty: 110, filled: 270},
-  {empty: 40, filled: 140},
-  {filled: 50},
-]
-const SEARCH_BAR_OPENED_PADDING_TOP = 80
+const DEFAULT_STICKY_BAR_HEIGHT = 56
 
 const listRef = createRef()
 
 function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
   useHotkeys(
     Shortcuts.cattol.events.copySource.keystrokes[Shortcuts.shortCutsKeyType],
-    (e) => {
+    () => {
       SegmentActions.copySourceToTarget()
     },
     {
@@ -55,7 +49,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
   )
   useHotkeys(
     Shortcuts.cattol.events.gotoCurrent.keystrokes[Shortcuts.shortCutsKeyType],
-    (e) => {
+    () => {
       SegmentActions.scrollToCurrentSegment()
       SegmentActions.setFocusOnEditArea()
     },
@@ -67,7 +61,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
   )
   useHotkeys(
     Shortcuts.cattol.events.openPrevious.keystrokes[Shortcuts.shortCutsKeyType],
-    (e) => {
+    () => {
       SegmentActions.selectPrevSegmentDebounced()
     },
     {
@@ -105,7 +99,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     Shortcuts.cattol.events.openIssuesPanel.keystrokes[
       Shortcuts.shortCutsKeyType
     ],
-    (e) => {
+    () => {
       const segment = SegmentStore.getCurrentSegment()
       if (segment && config.isReview) {
         SegmentActions.openIssuesPanel({sid: segment.sid})
@@ -122,7 +116,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     Shortcuts.cattol.events.copyContribution1.keystrokes[
       Shortcuts.shortCutsKeyType
     ],
-    (e) => {
+    () => {
       SegmentActions.chooseContributionOnCurrentSegment(1)
     },
     {
@@ -135,7 +129,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     Shortcuts.cattol.events.copyContribution2.keystrokes[
       Shortcuts.shortCutsKeyType
     ],
-    (e) => {
+    () => {
       SegmentActions.chooseContributionOnCurrentSegment(2)
     },
     {
@@ -148,7 +142,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     Shortcuts.cattol.events.copyContribution3.keystrokes[
       Shortcuts.shortCutsKeyType
     ],
-    (e) => {
+    () => {
       SegmentActions.chooseContributionOnCurrentSegment(3)
     },
     {
@@ -159,7 +153,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
   )
   useHotkeys(
     Shortcuts.cattol.events.splitSegment.keystrokes[Shortcuts.shortCutsKeyType],
-    (e) => {
+    () => {
       const segment = SegmentStore.getCurrentSegment()
       if (segment) {
         SegmentActions.openSplitSegment(segment.sid)
@@ -201,7 +195,6 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
   const [scrollToSelected, setScrollToSelected] = useState(false)
   const [lastSelectedSegment, setLastSelectedSegment] = useState(undefined)
   const [files, setFiles] = useState(CatToolStore.getJobFilesInfo())
-  const [addedComment, setAddedComment] = useState(undefined)
   const [scrollTopVisible, setScrollTopVisible] = useState(undefined)
   const [clientConnected, setClientConnected] = useState()
   const [clientId, setClientId] = useState()
@@ -223,6 +216,8 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
   const lastProjectBarPropsRef = useRef()
   const {guess_tags: guessTagActive, dictation: speechToTextActive} =
     userInfo?.metadata ?? {}
+  const stickyBarRef = useRef()
+  const scrollAnchorShiftRef = useRef(0)
 
   // return row height and checks if it have margin
   const getRowHeightWithMargin = useCallback(({id, height}) => {
@@ -464,9 +459,9 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
   useEffect(() => {
     const recalcHeight = () => {
       const headerHeight =
-        document.getElementsByTagName('header')[0].offsetHeight
+        document.getElementsByTagName('header')[0]?.offsetHeight ?? 0
       const footerHeight =
-        document.getElementsByTagName('footer')[0].offsetHeight
+        document.getElementsByTagName('footer')[0]?.offsetHeight ?? 0
       const wrapperEl = document.getElementById('context-preview-wrapper')
       const wrapperHeight = wrapperEl ? wrapperEl.offsetHeight : 0
 
@@ -526,7 +521,6 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     const openSide = () => setIsSideOpen(true)
     const closeSide = () => setIsSideOpen(false)
     const storeJobInfo = (files) => setFiles(files)
-    const onAddComment = (sid) => setAddedComment({sid})
 
     const sseConnection = (clientId) => {
       setClientConnected(!!clientId)
@@ -554,7 +548,6 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     SegmentStore.addListener(SegmentConstants.OPEN_SIDE, openSide)
     SegmentStore.addListener(SegmentConstants.CLOSE_SIDE, closeSide)
     CatToolStore.addListener(CatToolConstants.STORE_FILES_INFO, storeJobInfo)
-    CommentsStore.addListener(CommentsConstants.ADD_COMMENT, onAddComment)
     CatToolStore.addListener(CatToolConstants.CLIENT_CONNECT, sseConnection)
 
     document.addEventListener('mousedown', mousedownHandler)
@@ -582,7 +575,6 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
         CatToolConstants.STORE_FILES_INFO,
         storeJobInfo,
       )
-      CommentsStore.removeListener(CommentsConstants.ADD_COMMENT, onAddComment)
       CatToolStore.removeListener(
         CatToolConstants.CLIENT_CONNECT,
         sseConnection,
@@ -691,7 +683,9 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     const hasAddedSegmentsBefore =
       rows.length > essentialRows.length &&
       essentialRows[0]?.id !== rows[0]?.id &&
-      rows[0]?.id !== config.first_job_segment
+      // compared as numbers on purpose: segment ids arrive as strings from the API, while
+      // config.first_job_segment is a JSON number
+      Number(rows[0]?.id) !== Number(config.first_job_segment)
     if (!hasAddedSegmentsBefore || current.haveBeenAddedSegmentsBefore) return
 
     const stopIndex = rows.findIndex(({id}) => id === essentialRows[0].id)
@@ -727,8 +721,10 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
       }px)`
     }
 
-    const scrollTop = additionalHeight
-    listRef.current.scrollTop = scrollTop
+    // shift by the prepended height rather than jump to it: after a scroll to a segment that
+    // was not loaded yet the list is no longer at the top, and dropping its offset leaves the
+    // opened segment above the viewport
+    listRef.current.scrollTop += additionalHeight
 
     current.haveBeenAddedSegmentsBefore = true
   }, [rows, essentialRows, hasCachedRows, getRowHeightWithMargin])
@@ -801,46 +797,36 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
         rowsRendered.length
       if (!haveBeenRowsRendered) return
 
+      // rows above the viewport get their real height only after a scroll to a segment has
+      // landed; keep the first visible row in place, or the opened segment moves out of view
+      if (!isUserDraggingCursor && listRef.current) {
+        const {scrollTop} = listRef.current
+        let offset = 0
+        for (
+          let index = 0;
+          index < essentialRows.length &&
+          offset + essentialRows[index].height <= scrollTop;
+          index++
+        ) {
+          offset += essentialRows[index].height
+          scrollAnchorShiftRef.current +=
+            rows[index].height - essentialRows[index].height
+        }
+      }
+
       setEssentialRows(
         rows.map(({id, height, hasRendered}) => ({id, height, hasRendered})),
       )
     }
   }, [rows, essentialRows, hasCachedRows, startIndex, stopIndex])
 
-  // set padding top to list ref (Comments padding or Search bar opened)
-  useEffect(() => {
-    if (!segments.size || !listRef?.current) return
-    const getPadding = () => {
-      if (isSideOpen) {
-        const segment1 = segments.get(0)
-        const segment2 = segments.get(1)
-        const segment3 = segments.get(2)
-
-        const [paddingSegment1, paddingSegment2, paddingSegment3] =
-          COMMENTS_PADDING_TOP
-
-        if (segment1.get('openComments')) {
-          const comments = CommentsStore.getCommentsBySegment(
-            segment1.get('original_sid'),
-          )
-          if (comments.length === 0) return paddingSegment1.empty
-          else if (comments.length > 0) return paddingSegment1.filled
-        } else if (segment2 && segment2.get('openComments')) {
-          const comments = CommentsStore.getCommentsBySegment(
-            segment2.get('original_sid'),
-          )
-          if (comments.length === 0) return paddingSegment2.empty
-          else if (comments.length > 0) return paddingSegment2.filled
-        } else if (segment3 && segment3.get('openComments')) {
-          const comments = CommentsStore.getCommentsBySegment(
-            segment3.get('original_sid'),
-          )
-          if (comments.length > 0) return paddingSegment3.filled
-        }
-      }
-      return 0
-    }
-  }, [isSideOpen, segments, addedComment])
+  // apply the anchor shift once the list has laid out the new heights, before paint
+  useLayoutEffect(() => {
+    const shift = scrollAnchorShiftRef.current
+    if (!shift || !listRef.current) return
+    scrollAnchorShiftRef.current = 0
+    listRef.current.scrollTop += shift
+  }, [essentialRows])
 
   // reset scrollTo
   useEffect(() => {
@@ -939,9 +925,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     lastProjectBarPropsRef.current = props
 
     return (
-      <div
-        className={`sticky-project-bar ${props.sideOpen ? 'sticky-project-bar-slide-right' : ''}`}
-      >
+      <div ref={stickyBarRef} className={`sticky-project-bar`}>
         <ProjectBar
           {...{
             ...props,
@@ -964,6 +948,11 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
         scrollToIndex={{
           value: scrollToParams.scrollTo,
           align: scrollToParams.position,
+          offset:
+            scrollToParams.position === 'start'
+              ? (stickyBarRef.current?.getBoundingClientRect().height ??
+                DEFAULT_STICKY_BAR_HEIGHT)
+              : undefined,
         }}
         overscan={OVERSCAN}
         height={heightArea}
@@ -1040,7 +1029,7 @@ const getSegmentStructure = (segment, sideOpen) => {
         </div>
         <div className="actions">
           <button className="split" title="Click to split segment">
-            <i className="icon-split"> </i>
+            <IconSplit />
           </button>
           <p className="split-shortcut">CTRL + S</p>
         </div>
@@ -1113,9 +1102,7 @@ const getSegmentStructure = (segment, sideOpen) => {
             </div>
           </div>
           <div className="status-container">
-            <a href="#" className="status no-hover">
-              {' '}
-            </a>
+            <div className="status no-hover" />
           </div>
         </div>
         <div className="edit-distance">Edit Distance:</div>

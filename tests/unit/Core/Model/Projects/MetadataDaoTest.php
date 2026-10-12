@@ -69,6 +69,53 @@ class MetadataDaoTest extends AbstractTest
         $this->assertSame('plain_value', $indexed['plain_key']);
     }
 
+    /**
+     * isIcuEnabled() reads through a 3600s cache, so each state gets its own id band: a band is
+     * only ever asked about one value, which keeps a cached answer from a previous run equal to
+     * the answer this run expects.
+     */
+    private function projectWithIcuFlag(int $band, ?string $value): int
+    {
+        $conn = obtainTestDatabase()->getConnection();
+        $id = $band + random_int(1, 999);
+        $conn->exec(
+            "INSERT IGNORE INTO projects (id, password, id_customer, name, create_date)
+             VALUES ($id, '" . self::TEST_PROJECT_PASSWORD . "', 1, 'MetadataDao icu test', NOW())"
+        );
+        $conn->exec('DELETE FROM project_metadata WHERE id_project = ' . $id);
+
+        if ($value !== null) {
+            $this->dao->set($id, ProjectsMetadataMarshaller::ICU_ENABLED->value, $value);
+        }
+
+        return $id;
+    }
+
+    #[Test]
+    public function isIcuEnabledIsTrueWhenTheProjectEnabledIt(): void
+    {
+        $id = $this->projectWithIcuFlag(9_991_000, '1');
+
+        $this->assertTrue($this->dao->isIcuEnabled($id));
+    }
+
+    #[Test]
+    public function isIcuEnabledIsFalseWhenTheProjectDisabledIt(): void
+    {
+        $id = $this->projectWithIcuFlag(9_992_000, '0');
+
+        $this->assertFalse($this->dao->isIcuEnabled($id));
+    }
+
+    #[Test]
+    public function isIcuEnabledIsFalseWhenTheKeyWasNeverSet(): void
+    {
+        // Projects created before the flag existed carry no row at all.
+        $id = $this->projectWithIcuFlag(9_993_000, null);
+
+        $this->assertFalse($this->dao->isIcuEnabled($id));
+    }
+
     #[Test]
     public function getValueReturnsNullWhenKeyDoesNotExist(): void
     {

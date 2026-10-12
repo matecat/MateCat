@@ -13,7 +13,7 @@ export const getComments = async ({
   firstSegment = null,
   lastSegment = null,
   idJob = config.id_job,
-  password = config.password,
+  password = config.currentPassword,
 }) => {
   const dataParams = {
     first_seg: firstSegment,

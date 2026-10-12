@@ -32,7 +32,7 @@ class WhitelistAccessValidator extends Base
         $realIpAddr = (string)Utils::getRealIpAddr();
 
         if (preg_replace($ipWhiteList, 'ALLOW', $realIpAddr) !== 'ALLOW') {
-            throw new DomainException("Invalid Get: not authorized domain: " . $realIpAddr, 403);
+            throw new DomainException("Invalid get: not authorized domain: " . $realIpAddr, 403);
         }
     }
 

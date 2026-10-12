@@ -3,10 +3,8 @@ import {render, act, fireEvent} from '@testing-library/react'
 import {fromJS} from 'immutable'
 import SegmentStore from '../../stores/SegmentStore'
 import CatToolStore from '../../stores/CatToolStore'
-import CommentsStore from '../../stores/CommentsStore'
 import SegmentConstants from '../../constants/SegmentConstants'
 import CatToolConstants from '../../constants/CatToolConstants'
-import CommentsConstants from '../../constants/CommentsConstants'
 import SegmentActions from '../../actions/SegmentActions'
 import SegmentsContainer from './SegmentsContainer'
 
@@ -48,8 +46,8 @@ jest.mock('../../utils/shortcuts', () => ({
 
 const mockSegmentStoreListeners = {}
 const mockCatToolStoreListeners = {}
-const mockCommentsStoreListeners = {}
 let mockCapturedFindFirstVisibleRow
+let mockCapturedScrollToIndex
 
 jest.mock('../../stores/SegmentStore', () => ({
   addListener: jest.fn((event, cb) => {
@@ -68,14 +66,6 @@ jest.mock('../../stores/CatToolStore', () => ({
   getJobFilesInfo: jest.fn(() => []),
 }))
 
-jest.mock('../../stores/CommentsStore', () => ({
-  addListener: jest.fn((event, cb) => {
-    mockCommentsStoreListeners[event] = cb
-  }),
-  removeListener: jest.fn(),
-  getCommentsBySegment: jest.fn(() => []),
-}))
-
 jest.mock('../../constants/SegmentConstants', () => ({
   RENDER_SEGMENTS: 'RENDER_SEGMENTS',
   REMOVE_ALL_SEGMENTS: 'REMOVE_ALL_SEGMENTS',
@@ -89,10 +79,6 @@ jest.mock('../../constants/SegmentConstants', () => ({
 jest.mock('../../constants/CatToolConstants', () => ({
   STORE_FILES_INFO: 'STORE_FILES_INFO',
   CLIENT_CONNECT: 'CLIENT_CONNECT',
-}))
-
-jest.mock('../../constants/CommentsConstants', () => ({
-  ADD_COMMENT: 'ADD_COMMENT',
 }))
 
 jest.mock('../../actions/SegmentActions', () => ({
@@ -109,7 +95,6 @@ jest.mock('../../actions/SegmentActions', () => ({
   openSegmentComment: jest.fn(),
   setBulkSelectionInterval: jest.fn(),
   getMoreSegments: jest.fn(),
-  scrollToCurrentSegment: jest.fn(),
 }))
 
 jest.mock('../../utils/speech2text', () => ({
@@ -157,13 +142,15 @@ jest.mock('../common/VirtualList/VirtualList', () => {
         onScroll,
         setFirstRowIdVisible,
         renderedRange,
-        header,
+        overlapHeader,
         items = [],
         findFirstVisibleRow,
+        scrollToIndex,
       },
       ref,
     ) => {
       mockCapturedFindFirstVisibleRow = findFirstVisibleRow
+      mockCapturedScrollToIndex = scrollToIndex
 
       React.useEffect(() => {
         if (setFirstRowIdVisible) setFirstRowIdVisible(items[0]?.id)
@@ -174,7 +161,7 @@ jest.mock('../common/VirtualList/VirtualList', () => {
         <div ref={ref} className="virtual-list" data-testid="virtual-list">
           {/* firstChild must exist with a style prop for listRef.current.firstChild.style */}
           <div style={{}}>
-            {header}
+            {overlapHeader}
             {items.map((item, index) => (
               <div key={item.id}>{onRender && onRender(index)}</div>
             ))}
@@ -262,15 +249,13 @@ describe('SegmentsContainer', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockCapturedFindFirstVisibleRow = undefined
+    mockCapturedScrollToIndex = undefined
     // Re-register listeners after clearAllMocks resets the mock implementations
     SegmentStore.addListener.mockImplementation((event, cb) => {
       mockSegmentStoreListeners[event] = cb
     })
     CatToolStore.addListener.mockImplementation((event, cb) => {
       mockCatToolStoreListeners[event] = cb
-    })
-    CommentsStore.addListener.mockImplementation((event, cb) => {
-      mockCommentsStoreListeners[event] = cb
     })
     CatToolStore.getJobFilesInfo.mockReturnValue([])
   })
@@ -358,14 +343,6 @@ describe('SegmentsContainer', () => {
       )
       expect(CatToolStore.addListener).toHaveBeenCalledWith(
         CatToolConstants.CLIENT_CONNECT,
-        expect.any(Function),
-      )
-    })
-
-    test('registers CommentsStore ADD_COMMENT listener on mount', () => {
-      renderComponent()
-      expect(CommentsStore.addListener).toHaveBeenCalledWith(
-        CommentsConstants.ADD_COMMENT,
         expect.any(Function),
       )
     })
@@ -508,6 +485,49 @@ describe('SegmentsContainer', () => {
       const {getByTestId} = renderComponent({startSegmentId: '5'})
       expect(getByTestId('virtual-list')).toBeInTheDocument()
     })
+
+    test('scrolls directly to the target index with a start align and a numeric offset', () => {
+      renderComponent({startSegmentId: '2'})
+      act(() => {
+        mockSegmentStoreListeners[SegmentConstants.RENDER_SEGMENTS](
+          makeSegments(['1', '2', '3']),
+        )
+      })
+
+      expect(mockCapturedScrollToIndex).toEqual({
+        value: 1,
+        align: 'start',
+        offset: expect.any(Number),
+      })
+    })
+
+    test('does not apply an offset when scrolling to the selected segment (align auto)', () => {
+      renderComponent({startSegmentId: '1'})
+      act(() => {
+        mockSegmentStoreListeners[SegmentConstants.RENDER_SEGMENTS](
+          makeSegments(['1', '2', '3']),
+        )
+      })
+      act(() => {
+        mockSegmentStoreListeners[SegmentConstants.SCROLL_TO_SELECTED_SEGMENT](
+          '3',
+        )
+      })
+
+      expect(mockCapturedScrollToIndex.align).toBe('auto')
+      expect(mockCapturedScrollToIndex.offset).toBeUndefined()
+    })
+
+    test('populates a numeric offset even before the sticky bar has been measured', () => {
+      renderComponent({startSegmentId: '5'})
+      act(() => {
+        mockSegmentStoreListeners[SegmentConstants.RENDER_SEGMENTS](
+          makeSegments(['5']),
+        )
+      })
+
+      expect(typeof mockCapturedScrollToIndex.offset).toBe('number')
+    })
   })
 
   describe('goToFirstSegment', () => {
@@ -559,5 +579,19 @@ describe('SegmentsContainer', () => {
     test('accepts isReview as boolean prop', () => {
       expect(() => render(<SegmentsContainer isReview={true} />)).not.toThrow()
     })
+  })
+})
+
+describe('SegmentsContainer height calculation', () => {
+  test('does not throw when the page has no footer', () => {
+    document.querySelector('footer').remove()
+
+    expect(() => render(<SegmentsContainer />)).not.toThrow()
+  })
+
+  test('does not throw when the page has no header', () => {
+    document.querySelector('header').remove()
+
+    expect(() => render(<SegmentsContainer />)).not.toThrow()
   })
 })

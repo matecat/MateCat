@@ -1,6 +1,5 @@
 import matchTag from './matchTag'
 import {Modifier, SelectionState, ContentState} from 'draft-js'
-import {decodeHtmlEntities} from './tagUtils'
 import {createPcNumberer} from './pcTagUtils'
 
 /**

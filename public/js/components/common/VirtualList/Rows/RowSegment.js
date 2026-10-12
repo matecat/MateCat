@@ -223,7 +223,7 @@ export const ProjectBar = ({
   }
   previousScrollTopRef.current = listRef?.scrollTop
 
-  if (isSticky) previousOpenedFileIdRef.current = currentSegment.id_file
+  if (isSticky) previousOpenedFileIdRef.current = idFileSegment
 
   return (
     <div
@@ -236,12 +236,11 @@ export const ProjectBar = ({
           className={`projectbar-filename ${isBlinkingState ? 'project-bar-blink' : ''}`}
           onAnimationEnd={() => setIsBlinkingState(false)}
         >
-          <span
-            title={currentSegment.filename}
-            className={'fileFormat ' + CommonUtils.getIconClass(fileType)}
-          >
-            {file.file_name}
-          </span>
+
+            {CommonUtils.getFileIcon(fileType[0])}
+            <span className="fileFormat" title={segment.filename}>
+                {file.file_name}
+            </span>
         </div>
       )}
       {file && file.weighted_words > 0 ? (

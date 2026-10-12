@@ -11,11 +11,13 @@ use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobDao;
 use Model\Translations\SegmentTranslationDao;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
 use ReflectionMethod;
+use Utils\Constants\SourcePages;
 use Utils\Engines\AbstractEngine;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Engines\Results\TMSAbstractResponse;
@@ -236,16 +238,28 @@ class DeleteContributionControllerTest extends AbstractTest
             });
     }
 
+    /**
+     * Seed the chunk that ChunkPasswordValidator would resolve in production, so
+     * delete() has its non-nullable JobStruct without running the validator chain.
+     */
+    private function seedChunk(object $controller, ReflectionClass $ref, mixed $db, int $idJob, string $password): void
+    {
+        $chunk = (new JobDao($db))->getByIdAndPassword($idJob, $password);
+        self::assertNotNull($chunk);
+        $chunk->setSourcePage(SourcePages::SOURCE_PAGE_TRANSLATE);
+        $ref->getProperty('chunk')->setValue($controller, $chunk);
+    }
+
     #[Test]
     public function validateTheRequest_missing_source_lang_throws(): void
     {
         $this->setupRequestParams([
             'id_segment' => '100', 'source_lang' => '', 'target_lang' => 'it-IT',
             'seg' => 'Hello', 'tra' => 'Ciao', 'id_job' => '999',
-            'id_match' => '1', 'password' => 'pass', 'current_password' => 'cpass', 'id_translator' => null,
+            'id_match' => '1', 'password' => 'pass', 'id_translator' => null,
         ]);
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('missing source_lang');
+        $this->expectExceptionMessage('Missing source_lang');
         $this->invokeMethod('validateTheRequest');
     }
 
@@ -255,10 +269,10 @@ class DeleteContributionControllerTest extends AbstractTest
         $this->setupRequestParams([
             'id_segment' => '100', 'source_lang' => 'en-US', 'target_lang' => '',
             'seg' => 'Hello', 'tra' => 'Ciao', 'id_job' => '999',
-            'id_match' => '1', 'password' => 'pass', 'current_password' => 'cpass', 'id_translator' => null,
+            'id_match' => '1', 'password' => 'pass', 'id_translator' => null,
         ]);
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('missing target_lang');
+        $this->expectExceptionMessage('Missing target_lang');
         $this->invokeMethod('validateTheRequest');
     }
 
@@ -268,10 +282,10 @@ class DeleteContributionControllerTest extends AbstractTest
         $this->setupRequestParams([
             'id_segment' => '100', 'source_lang' => 'en-US', 'target_lang' => 'it-IT',
             'seg' => '', 'tra' => 'Ciao', 'id_job' => '999',
-            'id_match' => '1', 'password' => 'pass', 'current_password' => 'cpass', 'id_translator' => null,
+            'id_match' => '1', 'password' => 'pass', 'id_translator' => null,
         ]);
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('missing source');
+        $this->expectExceptionMessage('Missing source');
         $this->invokeMethod('validateTheRequest');
     }
 
@@ -281,10 +295,10 @@ class DeleteContributionControllerTest extends AbstractTest
         $this->setupRequestParams([
             'id_segment' => '100', 'source_lang' => 'en-US', 'target_lang' => 'it-IT',
             'seg' => 'Hello', 'tra' => '', 'id_job' => '999',
-            'id_match' => '1', 'password' => 'pass', 'current_password' => 'cpass', 'id_translator' => null,
+            'id_match' => '1', 'password' => 'pass', 'id_translator' => null,
         ]);
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('missing target');
+        $this->expectExceptionMessage('Missing target');
         $this->invokeMethod('validateTheRequest');
     }
 
@@ -294,23 +308,10 @@ class DeleteContributionControllerTest extends AbstractTest
         $this->setupRequestParams([
             'id_segment' => '100', 'source_lang' => 'en-US', 'target_lang' => 'it-IT',
             'seg' => 'Hello', 'tra' => 'Ciao', 'id_job' => '',
-            'id_match' => '1', 'password' => 'pass', 'current_password' => 'cpass', 'id_translator' => null,
+            'id_match' => '1', 'password' => 'pass', 'id_translator' => null,
         ]);
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('missing id job');
-        $this->invokeMethod('validateTheRequest');
-    }
-
-    #[Test]
-    public function validateTheRequest_missing_password_throws(): void
-    {
-        $this->setupRequestParams([
-            'id_segment' => '100', 'source_lang' => 'en-US', 'target_lang' => 'it-IT',
-            'seg' => 'Hello', 'tra' => 'Ciao', 'id_job' => '999',
-            'id_match' => '1', 'password' => '', 'current_password' => 'cpass', 'id_translator' => null,
-        ]);
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('missing job password');
+        $this->expectExceptionMessage('Missing id job');
         $this->invokeMethod('validateTheRequest');
     }
 
@@ -320,7 +321,7 @@ class DeleteContributionControllerTest extends AbstractTest
         $this->setupRequestParams([
             'id_segment' => '100', 'source_lang' => 'en-US', 'target_lang' => 'it-IT',
             'seg' => ' Hello world ', 'tra' => ' Ciao mondo ', 'id_job' => '999',
-            'id_match' => '42', 'password' => ' mypass ', 'current_password' => ' currpass ', 'id_translator' => null,
+            'id_match' => '42', 'password' => ' mypass ', 'id_translator' => null,
         ]);
 
         $result = $this->invokeMethod('validateTheRequest');
@@ -330,11 +331,6 @@ class DeleteContributionControllerTest extends AbstractTest
         $this->assertSame('Hello world', $result['source']);
         $this->assertSame('Ciao mondo', $result['target']);
         $this->assertSame(999, $result['id_job']);
-        $this->assertSame('mypass', $result['password']);
-        $this->assertSame('currpass', $result['received_password']);
-
-        $idJobProp = $this->reflector->getProperty('id_job');
-        $this->assertSame(999, $idJobProp->getValue($this->controller));
     }
 
     #[Test]
@@ -343,7 +339,7 @@ class DeleteContributionControllerTest extends AbstractTest
         $this->setupRequestParams([
             'id_segment' => '100', 'source_lang' => 'en-US', 'target_lang' => 'it-IT',
             'seg' => 'Hello', 'tra' => 'Ciao', 'id_job' => '999',
-            'id_match' => '42', 'password' => 'pass', 'current_password' => 'cpass', 'id_translator' => '77',
+            'id_match' => '42', 'password' => 'pass', 'id_translator' => '77',
         ]);
 
         $result = $this->invokeMethod('validateTheRequest');
@@ -356,7 +352,7 @@ class DeleteContributionControllerTest extends AbstractTest
         $this->setupRequestParams([
             'id_segment' => '100', 'source_lang' => 'en-US', 'target_lang' => 'it-IT',
             'seg' => '0', 'tra' => 'zero', 'id_job' => '999',
-            'id_match' => '42', 'password' => 'pass', 'current_password' => 'cpass', 'id_translator' => null,
+            'id_match' => '42', 'password' => 'pass', 'id_translator' => null,
         ]);
 
         $result = $this->invokeMethod('validateTheRequest');
@@ -380,7 +376,6 @@ class DeleteContributionControllerTest extends AbstractTest
                 'id_job' => '1886428338',
                 'id_match' => '12345',
                 'password' => 'a90acf203402',
-                'current_password' => 'a90acf203402',
                 'id_translator' => null,
                 default => null,
             };
@@ -400,6 +395,8 @@ class DeleteContributionControllerTest extends AbstractTest
         $user->uid = 1886472050;
         $user->email = 'foo@example.org';
         $ref->getProperty('user')->setValue($testable, $user);
+
+        $this->seedChunk($testable, $ref, obtainTestDatabase(), 1886428338, 'a90acf203402');
 
         $testable->delete();
 
@@ -443,7 +440,6 @@ class DeleteContributionControllerTest extends AbstractTest
                     'id_job' => (string)$idJob,
                     'id_match' => '1',
                     'password' => 'pwd9978001',
-                    'current_password' => 'pwd9978001',
                     'id_translator' => null,
                     default => null,
                 };
@@ -463,6 +459,8 @@ class DeleteContributionControllerTest extends AbstractTest
             $user->uid = 1886472050;
             $user->email = 'foo@example.org';
             $ref->getProperty('user')->setValue($testable, $user);
+
+            $this->seedChunk($testable, $ref, $db, $idJob, 'pwd9978001');
 
             $this->expectException(\Controller\API\Commons\Exceptions\NotFoundException::class);
             $this->expectExceptionMessage('Cannot retrieve TM keys info.');
@@ -496,7 +494,6 @@ class DeleteContributionControllerTest extends AbstractTest
                     'id_job' => (string)$idJob,
                     'id_match' => '1',
                     'password' => 'pwd9978002',
-                    'current_password' => 'pwd9978002',
                     'id_translator' => null,
                     default => null,
                 };
@@ -516,6 +513,8 @@ class DeleteContributionControllerTest extends AbstractTest
             $user->uid = 1886472050;
             $user->email = 'foo@example.org';
             $ref->getProperty('user')->setValue($testable, $user);
+
+            $this->seedChunk($testable, $ref, $db, $idJob, 'pwd9978002');
 
             $testable->delete();
 
@@ -542,7 +541,6 @@ class DeleteContributionControllerTest extends AbstractTest
                 'id_job' => '1886428338',
                 'id_match' => '12345',
                 'password' => 'a90acf203402',
-                'current_password' => 'a90acf203402',
                 'id_translator' => null,
                 default => null,
             };
@@ -566,6 +564,8 @@ class DeleteContributionControllerTest extends AbstractTest
         $user->uid = 1886472050;
         $user->email = 'foo@example.org';
         $ref->getProperty('user')->setValue($testable, $user);
+
+        $this->seedChunk($testable, $ref, obtainTestDatabase(), 1886428338, 'a90acf203402');
 
         $testable->delete();
 
@@ -606,7 +606,6 @@ class DeleteContributionControllerTest extends AbstractTest
                     'id_job' => (string)$idJob,
                     'id_match' => '12345',
                     'password' => 'pwd9978003',
-                    'current_password' => 'pwd9978003',
                     'id_translator' => null,
                     default => null,
                 };
@@ -630,6 +629,8 @@ class DeleteContributionControllerTest extends AbstractTest
             $user->uid = 1886472050;
             $user->email = 'foo@example.org';
             $ref->getProperty('user')->setValue($testable, $user);
+
+            $this->seedChunk($testable, $ref, $db, $idJob, 'pwd9978003');
 
             $testable->delete();
 

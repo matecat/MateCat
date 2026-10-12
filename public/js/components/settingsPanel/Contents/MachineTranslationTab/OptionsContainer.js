@@ -5,7 +5,7 @@ import {LaraOptions} from './LaraOptions'
 import {DeepLOptions} from './DeepLOptions'
 import {BasicOptions} from './BasicOptions'
 import {IntentoOptions} from './IntentoOptions'
-import IconDown from '../../../icons/IconDown'
+import IconDown from '../../../../../img/icons/IconDown'
 
 const ContentComponent = {
   MMT: MMTOptions,

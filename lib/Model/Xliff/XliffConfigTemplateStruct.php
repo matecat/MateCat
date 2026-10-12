@@ -4,6 +4,7 @@ namespace Model\Xliff;
 
 use DomainException;
 use Exception;
+use InvalidArgumentException;
 use JsonSerializable;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\Xliff\DTO\Xliff12Rule;
@@ -12,6 +13,7 @@ use Model\Xliff\DTO\XliffRulesModel;
 use stdClass;
 use TypeError;
 use Utils\Date\DateTimeUtil;
+use Utils\Validation\UserSuppliedName;
 
 class XliffConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonSerializable
 {
@@ -35,6 +37,8 @@ class XliffConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonS
      * @return $this
      * @throws Exception
      * @throws TypeError
+     * @throws InvalidArgumentException when the name is empty, holds a character the connection
+     *                                  cannot carry, or will not fit the column
      */
     public function hydrateFromJSON(string $json, ?int $uid = null): XliffConfigTemplateStruct
     {
@@ -49,7 +53,10 @@ class XliffConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonS
         }
 
         $this->uid = $decoded_json['uid'] ?? $uid;
-        $this->name = $decoded_json['name'];
+        // Here rather than in the controller, so create and update are covered by one call: both
+        // hydrate through this method. The schema bounds the length, but only the composed form
+        // lets UNIQUE(uid, name) see a clash between two spellings of the same name.
+        $this->name = UserSuppliedName::validated($decoded_json['name'], 'name', UserSuppliedName::TEMPLATE_NAME_MAX_LENGTH);
 
         if (isset($decoded_json['id'])) {
             $this->id = $decoded_json['id'];
@@ -76,7 +83,7 @@ class XliffConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonS
     }
 
     /**
-     * @param array<string, list<array{states: list<string>, analysis: string, editor?: string|null, match_category?: string|null}>> $rules
+     * @param array<string, list<array{states: list<string>, analysis: string, editor?: string|null, match_category?: string|null, lock?: bool}>> $rules
      *
      * @throws Exception
      */
@@ -87,7 +94,7 @@ class XliffConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonS
         // rules
         if (isset($rules[XliffRulesModel::XLIFF_12]) and is_array($rules[XliffRulesModel::XLIFF_12])) {
             foreach ($rules[XliffRulesModel::XLIFF_12] as $xliff12Rule) {
-                $rule = new Xliff12Rule($xliff12Rule['states'], $xliff12Rule['analysis'], $xliff12Rule['editor'] ?? null, $xliff12Rule['match_category'] ?? null);
+                $rule = new Xliff12Rule($xliff12Rule['states'], $xliff12Rule['analysis'], $xliff12Rule['editor'] ?? null, $xliff12Rule['match_category'] ?? null, $xliff12Rule['lock'] ?? false);
                 $this->rules->addRule($rule);
             }
         }
@@ -95,7 +102,7 @@ class XliffConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonS
         // xliff20
         if (isset($rules[XliffRulesModel::XLIFF_20]) and is_array($rules[XliffRulesModel::XLIFF_20])) {
             foreach ($rules[XliffRulesModel::XLIFF_20] as $xliff20Rule) {
-                $rule = new Xliff20Rule($xliff20Rule['states'], $xliff20Rule['analysis'], $xliff20Rule['editor'] ?? null, $xliff20Rule['match_category'] ?? null);
+                $rule = new Xliff20Rule($xliff20Rule['states'], $xliff20Rule['analysis'], $xliff20Rule['editor'] ?? null, $xliff20Rule['match_category'] ?? null, $xliff20Rule['lock'] ?? false);
                 $this->rules->addRule($rule);
             }
         }

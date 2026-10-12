@@ -168,8 +168,17 @@ class ChangeProjectNameControllerTest extends AbstractTest
         $this->assertSame($newName, $reloaded->name);
     }
 
+    /**
+     * The inverse of what this used to assert.
+     *
+     * An empty rename used to be answered by silently renaming the project to
+     * `MATECAT_PROJ-<timestamp>`, because this endpoint shared the fallback that project *creation*
+     * uses. Creation has a reason for it — there may be no name yet, and an uploaded filename to
+     * borrow. A rename says what the name is to become, so an empty one is a caller mistake and is
+     * answered as one rather than by assigning a machine name nobody asked for.
+     */
     #[Test]
-    public function changeName_falls_back_to_default_name_when_name_is_empty(): void
+    public function changeName_refuses_an_empty_name(): void
     {
         $project = $this->loadSeededProject();
         $this->setProp('project', $project);
@@ -178,6 +187,50 @@ class ChangeProjectNameControllerTest extends AbstractTest
             'id_project' => (string) $this->projectId(self::BASE),
             'password' => self::PROJECT_PASSWORD,
             'name' => '',
+        ]);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionCode(400);
+        $this->expectExceptionMessage('name is empty');
+
+        $this->controller->changeName();
+    }
+
+    #[Test]
+    public function changeName_refuses_a_name_wider_than_the_column(): void
+    {
+        $project = $this->loadSeededProject();
+        $this->setProp('project', $project);
+
+        $this->setRequestParams([
+            'id_project' => (string)$this->projectId(self::BASE),
+            'password' => self::PROJECT_PASSWORD,
+            'name' => str_repeat('p', 201),
+        ]);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionCode(400);
+        $this->expectExceptionMessage('name must be at most 200 characters');
+
+        $this->controller->changeName();
+    }
+
+    /**
+     * The name is stored as the caller typed it. Both halves used to conspire against that:
+     * FILTER_SANITIZE_SPECIAL_CHARS turned `&` into `&amp;`, and sanitizeProjectName() then deleted
+     * the `&` and the `;` out of the entity, so this project was renamed to "Acme  Co 2024".
+     */
+    #[Test]
+    public function changeName_stores_punctuation_as_typed(): void
+    {
+        $project = $this->loadSeededProject();
+        $this->setProp('project', $project);
+
+        $typed = 'Acme & Co (2024)';
+        $this->setRequestParams([
+            'id_project' => (string)$this->projectId(self::BASE),
+            'password' => self::PROJECT_PASSWORD,
+            'name' => $typed,
         ]);
 
         $captured = null;
@@ -191,8 +244,8 @@ class ChangeProjectNameControllerTest extends AbstractTest
         $this->controller->changeName();
 
         $this->assertIsArray($captured);
-        $this->assertArrayHasKey('name', $captured);
-        $this->assertNotSame('', $captured['name']);
+        $this->assertSame($typed, $captured['name'], 'the payload must return the name as typed');
+        $this->assertSame($typed, $this->loadSeededProject()->name, 'the column must hold it too');
     }
 
     // ─── changeName() failure paths ───

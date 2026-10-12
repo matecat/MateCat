@@ -7,6 +7,7 @@ use Exception;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
 use Model\Jobs\JobStruct;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use Plugins\Features\SegmentFilter\Model\FilterDefinition;
 use Plugins\Features\SegmentFilter\Model\SegmentFilterDao;
@@ -239,7 +240,8 @@ class SegmentFilterDaoTest extends AbstractTest
         $sql = $dao->getSqlForIce($where);
 
         $this->assertStringContainsString("match_type = 'ICE'", $sql);
-        $this->assertStringContainsString('version_number = 0', $sql);
+        $this->assertStringContainsString('st.version_number = 0', $sql);
+        $this->assertStringNotContainsString('locked', $sql);
     }
 
     public function test_instance_getSqlForModifiedIce_returns_valid_sql(): void
@@ -250,7 +252,32 @@ class SegmentFilterDaoTest extends AbstractTest
         $sql = $dao->getSqlForModifiedIce($where);
 
         $this->assertStringContainsString("match_type = 'ICE'", $sql);
-        $this->assertStringContainsString('version_number > 0', $sql);
+        $this->assertStringContainsString('st.version_number > 0', $sql);
+        $this->assertStringNotContainsString('locked', $sql);
+    }
+
+    public function test_instance_getSqlForLocked_returns_valid_sql(): void
+    {
+        $dao = new SegmentFilterDao(obtainTestDatabase());
+        $where = ['sql' => '', 'data' => []];
+
+        $sql = $dao->getSqlForLocked($where);
+
+        $this->assertStringContainsString('st.locked = 1', $sql);
+        $this->assertStringContainsString('st.version_number = 0', $sql);
+        $this->assertStringNotContainsString('match_type', $sql);
+    }
+
+    public function test_instance_getSqlForModifiedLocked_returns_valid_sql(): void
+    {
+        $dao = new SegmentFilterDao(obtainTestDatabase());
+        $where = ['sql' => '', 'data' => []];
+
+        $sql = $dao->getSqlForModifiedLocked($where);
+
+        $this->assertStringContainsString('st.locked = 1', $sql);
+        $this->assertStringContainsString('st.version_number > 0', $sql);
+        $this->assertStringNotContainsString('match_type', $sql);
     }
 
     public function test_instance_getSqlForToDo_returns_valid_sql(): void
@@ -455,6 +482,60 @@ class SegmentFilterDaoTest extends AbstractTest
         $ids = array_map(fn($r) => (int)$r->id, $results);
 
         $this->assertCount(5, $ids);
+    }
+
+    /**
+     * ICE is the match type and `locked` is the scope: the two columns vary independently,
+     * and each bucket reads only its own column, split by version.
+     *
+     * @return array<string, array{string, list<int>}>
+     */
+    public static function iceAndLockedBuckets(): array
+    {
+        return [
+            'ice'             => ['ice', [1, 4]],
+            'modified_ice'    => ['modified_ice', [3, 6]],
+            'locked'          => ['locked', [1, 2]],
+            'modified_locked' => ['modified_locked', [3]],
+            'unlocked'        => ['unlocked', [4, 5, 6, 7]],
+        ];
+    }
+
+    /**
+     * @param list<int> $expectedOffsets
+     *
+     * @throws Exception
+     */
+    #[DataProvider('iceAndLockedBuckets')]
+    public function test_instance_findSegmentIdsForSample_ice_and_locked_bucket_membership(string $type, array $expectedOffsets): void
+    {
+        $conn = $this->database_instance->getConnection();
+        $rows = [
+            1 => ['ICE', 1, 0],
+            2 => ['100%', 1, 0],
+            3 => ['ICE', 1, 2],
+            4 => ['ICE', 0, 0],
+            5 => ['85%-94%', 0, 0],
+            6 => ['ICE', 0, 1],
+        ];
+        foreach ($rows as $offset => [$matchType, $locked, $version]) {
+            $segId = $this->baseSegmentId + $offset;
+            $conn->query(
+                "UPDATE segment_translations SET match_type = '$matchType', locked = $locked, version_number = $version
+                 WHERE id_segment = $segId AND id_job = {$this->jobId}"
+            );
+        }
+
+        $filter = new FilterDefinition([
+            'status' => '',
+            'sample' => ['type' => $type, 'size' => 0]
+        ]);
+
+        $dao = new SegmentFilterDao(obtainTestDatabase());
+        $ids = array_map(fn($r) => (int)$r->id, $dao->findSegmentIdsForSample($this->chunk, $filter));
+
+        $expected = array_map(fn(int $offset) => $this->baseSegmentId + $offset, $expectedOffsets);
+        $this->assertSame($expected, $ids);
     }
 
     public function test_instance_findSegmentIdsForSample_invalid_type_throws(): void

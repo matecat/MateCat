@@ -210,7 +210,7 @@ class Upload
                 default:
                     $this->setObjectErrorOrThrowException(
                         $fileUp,
-                        new Exception ("Unknown Error: $fileError")
+                        new Exception ("Unknown error: $fileError")
                     );
                     break;
             }
@@ -227,7 +227,7 @@ class Upload
             if (!$this->_isRightExtension($fileUp)) {
                 $this->setObjectErrorOrThrowException(
                     $fileUp,
-                    new DomainException ("File Extension Not Allowed. '" . $out_filename . "'")
+                    new DomainException ("File extension not allowed. '" . $out_filename . "'")
                 );
             }
 
@@ -242,7 +242,7 @@ class Upload
                 if ($fileSize >= $fileMaxSize) {
                     $this->setObjectErrorOrThrowException(
                         $fileUp,
-                        new DomainException ("File Dimensions Not Allowed. '$out_filename'")
+                        new DomainException ("File dimensions not allowed. '$out_filename'")
                     );
                 }
             }
@@ -265,7 +265,7 @@ class Upload
             if (!copy($fileTmpName, $this->dirUpload . DIRECTORY_SEPARATOR . $fileUp->name)) {
                 $this->setObjectErrorOrThrowException(
                     $fileUp,
-                    new Exception ("Failed To Store File '$out_filename' On Server.")
+                    new Exception ("Failed to store file '$out_filename' on server.")
                 );
             }
 
@@ -277,7 +277,7 @@ class Upload
             if (!chmod($this->dirUpload . DIRECTORY_SEPARATOR . $fileUp->name, 0664)) {
                 $this->setObjectErrorOrThrowException(
                     $fileUp,
-                    new Exception ("Failed To Set Permissions On File. '$out_filename'")
+                    new Exception ("Failed to set permissions on file. '$out_filename'")
                 );
             }
         }

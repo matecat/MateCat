@@ -20,8 +20,10 @@ class ProjectTemplateStructTest extends AbstractTest
         $obj->is_default                 = true;
         $obj->id_team                    = 99;
         $obj->segmentation_rule          = (object) ['name' => 'custom', 'value' => 'abc'];
-        $obj->pretranslate_100           = true;
-        $obj->pretranslate_101           = false;
+        $obj->pretranslate                = (object) [
+            'match_101' => (object) ['enabled' => false],
+            'match_100' => (object) ['enabled' => true],
+        ];
         $obj->tm_prioritization          = true;
         $obj->dialect_strict             = false;
         $obj->public_tm_penalty          = 5;
@@ -113,6 +115,58 @@ class ProjectTemplateStructTest extends AbstractTest
         self::assertFalse($struct->is_default);
         self::assertSame(0, $struct->public_tm_penalty);
         self::assertTrue($struct->icu_enabled);
+    }
+
+    #[Test]
+    public function hydrateFromJsonFallsBackToDefaultsWhenOnlySchemaRequiredFieldsAreSent(): void
+    {
+        $obj                     = new stdClass();
+        $obj->name               = 'Minimal';
+        $obj->id_team            = 99;
+        $obj->pretranslate       = (object)[
+            'match_101' => (object)['enabled' => true],
+            'match_100' => (object)['enabled' => false],
+        ];
+        $obj->get_public_matches = true;
+
+        $struct = new ProjectTemplateStruct();
+        $struct->hydrateFromJSON($obj, 7);
+
+        self::assertFalse($struct->tm_prioritization);
+        self::assertFalse($struct->dialect_strict);
+        self::assertSame(0, $struct->payable_rate_template_id);
+        self::assertSame(0, $struct->qa_model_template_id);
+        self::assertSame(0, $struct->filters_template_id);
+        self::assertSame(0, $struct->xliff_config_template_id);
+        self::assertFalse($struct->character_counter_count_tags);
+        self::assertNull($struct->character_counter_mode);
+        self::assertNull($struct->subject);
+        self::assertNull($struct->source_language);
+        self::assertNull($struct->mt);
+        self::assertEquals(new stdClass(), $struct->getMt());
+    }
+
+    #[Test]
+    public function hydrateFromJsonFallsBackToDefaultsWhenNullableFieldsAreNull(): void
+    {
+        $obj                           = $this->createFullInputObject();
+        $obj->dialect_strict           = null;
+        $obj->payable_rate_template_id = null;
+        $obj->qa_model_template_id     = null;
+        $obj->filters_template_id      = null;
+        $obj->xliff_config_template_id = null;
+        $obj->mt                       = null;
+
+        $struct = new ProjectTemplateStruct();
+        $struct->hydrateFromJSON($obj, 7);
+
+        self::assertFalse($struct->dialect_strict);
+        self::assertSame(0, $struct->payable_rate_template_id);
+        self::assertSame(0, $struct->qa_model_template_id);
+        self::assertSame(0, $struct->filters_template_id);
+        self::assertSame(0, $struct->xliff_config_template_id);
+        self::assertNull($struct->mt);
+        self::assertEquals(new stdClass(), $struct->getMt());
     }
 
     // ── Phase 2 — json_encode false → null ───────────────────────
@@ -317,7 +371,7 @@ class ProjectTemplateStructTest extends AbstractTest
             'payable_rate_template_id', 'qa_model_template_id',
             'filters_template_id', 'xliff_config_template_id',
             'get_public_matches', 'public_tm_penalty',
-            'pretranslate_100', 'pretranslate_101',
+            'pretranslate',
             'tm_prioritization', 'dialect_strict',
             'mt_quality_value_in_editor',
             'character_counter_count_tags', 'character_counter_mode',

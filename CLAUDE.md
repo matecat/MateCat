@@ -57,34 +57,84 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Matecat is an enterprise-level web-based Computer-Assisted Translation (CAT) tool. PHP 8.3+ backend with a React/Vite frontend. Uses Redis for caching, MySQL for persistence, and ActiveMQ for async job processing.
+Matecat is an enterprise-level web-based Computer-Assisted Translation (CAT) tool.
 
 ## Architecture
 
-### PHP Autoloading
+### Features and events
 
-PSR-4 root is `lib/` with empty namespace prefix. Classes in `lib/Controller/API/App/FooController.php` have namespace `Controller\API\App`. Plugin classes in `plugins/*/lib/` follow the same pattern (e.g., `Features\Translated`).
+- Two feature trees with similar names: `lib/Plugins/Features/` holds internal features (ReviewExtended,
+  TranslationVersions, …); `plugins/` holds external submodules, each with a `lib/Features/` class extending `BaseFeature`.
+- `FeatureSet` dispatches events from `lib/Model/FeaturesBase/`: `Hook/Event/Filter/` events transform and return data,
+  `Hook/Event/Run/` events are side effects only.
+- `DaoCacheTrait` uses XFetch early recomputation: a cached read can be refreshed before its TTL expires.
 
-### Directory Structure
+### Cache and transactions
 
-- `lib/Controller/` — HTTP controllers. `Abstracts/` contains the base chain: `KleinController` → `BaseKleinViewController` → concrete controllers
-- `lib/Model/` — Domain models, DAOs, structs. DAOs extend `AbstractDao` with `DaoCacheTrait` for Redis caching
-- `lib/Utils/` — Engines (MT/TM integrations), async workers, LQA, subfiltering, task runner
-- `lib/Plugins/Features/` — Internal features (ReviewExtended, TranslationVersions, SegmentFilter, ProjectCompletion)
-- `plugins/` — External plugin submodules (translated, airbnb, uber, aligner, vite). Each has `lib/Features/` with a class extending `BaseFeature`
-- `lib/Model/FeaturesBase/` — Event system. `Hook/Event/Filter/` for data-transforming events, `Hook/Event/Run/` for side-effect events. `FeatureSet` dispatches events to registered features
+`DaoCacheTrait` follows the transaction of the object using it, declared by `_cacheTransactionScope()`.
+`AbstractDao` returns its own injected `IDatabase`; `Pager`, `UserStateStore` and
+`SessionTokenStoreHandler` return null, because they do not write through a transaction and a token revocation must
+never wait behind a commit.
 
-### Engine Hierarchy
+- A read taken inside an open transaction is **not** written to cache — it is not public yet, and a rollback would leave
+  a row that never existed readable for the whole TTL.
+- An eviction issued inside an open transaction is **queued** on `IDatabase::onCommit()` and runs after the commit.
+  Evicting before the commit is worse than not evicting: another connection misses the cache, reads the pre-commit row
+  and caches it again, behind the eviction that just ran.
 
-`AbstractEngine` → concrete engines (MyMemory, MMT, DeepL, Lara, Google, etc.) → `Results/` response classes → `EnginesFactory`. Widest inheritance tree in the codebase.
+Callers do not schedule any of this. Do not wrap `destroyCacheXxx()` in `onCommit()` by hand.
+`onCommit($callback, critical: true)` re-throws a failure once the rest of the queue has run — use it only where a
+silent failure is a security problem, such as a credential sweep, not for a cache bust.
 
-### Async Workers
+A transaction is opened only through `IDatabase::transaction(callable)`. The outermost scope owns it; a scope entered
+inside an open transaction is a guest that opens and closes nothing, so it cannot commit its caller's work early. Any
+throw aborts the whole tree — including one the caller catches, because the failing scope marks the transaction unable
+to commit and `Database::commit()`
+refuses it. Work deferred with `onCommit()` drains once, after the single real commit, and is discarded on rollback.
 
-Workers in `lib/Utils/AsyncTasks/Workers/` process queued jobs via ActiveMQ. Key workers: `TMAnalysisWorker`, `GetContributionWorker`, `SetContributionWorker`, `FastAnalysis`, `ProjectCreationWorker`. Daemon entry points in `daemons/`.
+`begin()`, `commit()` and `rollback()` are not on `IDatabase`, so code holding the interface — which is all of it —
+cannot reach them. They stay public on `Database` for the test harness, which opens a fixture scope in `setUp()` and
+rolls it back in `tearDown()`. Those three and
+`PDO::beginTransaction()`/`commit()`/`rollBack()` are also reported by a PHPStan rule
+(`NoManualTransactionControlRule`), which covers the receivers the interface cannot: a `Database`, a subclass of it, and
+a bare PDO handle out of `getConnection()`. A raw commit leaves the deferral queue undrained and the next `begin()`
+discards it. Do not wrap transaction control in a helper class or a trait either: two such facades already had to be
+removed, and a type-based rule cannot see through them.
 
-### DataAccess Layer
+`onCommit()` is for code that does not own the scope. A DAO write cannot tell whether it is the outermost scope or
+nested five calls deep, so it defers and lets the owner's commit drain the queue. When you do own the scope, put the
+statement after `transaction()` returns instead — same effect, and you get the exception if it fails, where a queued
+callback only logs it.
 
-`AbstractDao` → concrete DAOs. `DaoCacheTrait` provides Redis-backed caching with XFetch early recomputation. Structs extend `AbstractDaoObjectStruct` with `ArrayAccessTrait`. `ShapelessConcreteStruct` for untyped data.
+### Database character set
+
+The character set of the database, its tables and the connection is infrastructure. Never set, change or work around it
+from PHP.
+
+MateCat is open source and every installation owns its own schema. `INSTALL/matecat.sql` ships
+`utf8mb4`, which is what a fresh self-hosted install gets. Older installations are `utf8mb3`, and
+`tests/inc/unittest_matecat_local.sql` matches those. Several tables — `project_templates`,
+`filters_config_templates`, `xliff_config_templates`, `payable_rate_templates` — are created by migrations with no
+charset clause at all and inherit the database default; the two `mt_qe_*` `name`
+columns are explicitly `CHARACTER SET latin1`. All of these are legitimate. None is drift to be reconciled.
+
+PHP knows nothing about any of it, and that is correct — it is the property that lets one codebase run on every
+installation. Do not treat it as a gap to close: **never read, assume or encode a storage charset in application code.**
+A rule written for three-byte storage is needlessly strict where four bytes are available; one written for four
+truncates silently where they are not. Neither belongs in the code.
+
+`Database::getConnection()` opens every connection with `SET NAMES utf8` (utf8mb3), and does it twice — once as
+`MYSQL_ATTR_INIT_COMMAND` and once as a bare `exec()`. `Model\Conversion\Filters`
+does the same on its own connection. Those lines are not a bug to tidy. Changing the connection charset alone, against
+columns that are narrower, corrupts or truncates across every query with no error and nothing shown to the user.
+Widening a column is an `ALTER TABLE` per column, plus the connection, plus the index key widths that follow from four
+bytes per character — coordinated, in a migration window, owned by whoever runs that installation. Never a code edit,
+never a rider on a feature PR.
+
+Application code adapts to what the storage can hold rather than changing it.
+`UserSuppliedName::assertNoAstral()` is the pattern: refuse on the narrower assumption where the user can see the 400,
+strip where a throw would break the request (the OAuth callback, project creation), and explain the limit without naming
+a charset.
 
 ## Testing
 
@@ -92,14 +142,8 @@ Workers in `lib/Utils/AsyncTasks/Workers/` process queued jobs via ActiveMQ. Key
 # Full test suite (excludes tests needing external services)
 vendor/bin/phpunit --exclude-group=ExternalServices --no-coverage
 
-# Single test file
-vendor/bin/phpunit tests/unit/Path/To/TestFile.php --no-coverage
-
-# Single test method
-vendor/bin/phpunit --filter testMethodName --no-coverage
-
 # With coverage (requires XDEBUG_MODE=coverage)
-XDEBUG_MODE=coverage vendor/bin/phpunit tests/unit/Path/To/TestFile.php --coverage-clover /tmp/coverage.xml
+XDEBUG_MODE=coverage vendor/bin/phpunit tests/unit/Path/To/TestFile.php --exclude-group=ExternalServices --coverage-clover /tmp/coverage.xml
 ```
 
 - Tests mirror source structure: `lib/Utils/Foo/Bar.php` → `tests/unit/Utils/Foo/BarTest.php`
@@ -118,19 +162,14 @@ vendor/bin/phpstan analyse path/to/File.php --configuration=phpstan.neon --no-pr
 
 ### PHPStan Configuration
 
-- Level 8, no baseline — every reported error must be fixed (there is no `phpstan-baseline.neon`)
-- `checkTooWideThrowTypesInProtectedAndPublicMethods: true` — must use precise exception types in `@throws`
-- `missingCheckedExceptionInThrows: true` — all thrown exceptions must be declared
-- `UnknownPropertyException` is unchecked (used by struct `ArrayAccessTrait`)
+- No baseline — every reported error must be fixed (there is no `phpstan-baseline.neon`)
 - When adding exceptions to PHPDoc, prefer `use` imports over FQCN
 
-## Frontend
+## User-Facing Copy: Sentence Case
 
-```bash
-yarn watch          # Dev server with HMR
-yarn build:dev      # Development build
-yarn build:production  # Production build
-```
+Every English string the app shows a user is **sentence case** — UI labels, API/AJAX error payloads, exception
+messages, emails. Load the `sentence-case-copy` skill before adding or changing one: it lists the capitals to keep,
+the strings that are contracts and must not be re-cased, and the greps to run before finishing.
 
 ## Git
 
@@ -157,19 +196,20 @@ Valid emoji Type Reference
 
 | Type     | Title                    | Emoji | Description                                                                                            | Example Scopes (non-exaustive)                                |
 |----------|--------------------------|-------|--------------------------------------------------------------------------------------------------------|---------------------------------------------------------------|
-| build    | Builds                   | 🏗️   | Changes that affect the build system or external dependencies                                          | gulp, broccoli, npm                                           |
+| build    | Builds                   | 🏗️    | Changes that affect the build system or external dependencies                                          | gulp, broccoli, npm                                           |
 | chore    | Chores                   | 🔧    | Other changes that don't modify src or test files                                                      | scripts, config                                               |
 | ci       | Continuous Integrations  | 👷    | Changes to our CI configuration files and scripts                                                      | Travis, Circle, BrowserStack, SauceLabs,github actions, husky |
 | docs     | Documentation            | 📝    | Documentation only changes                                                                             | README, API                                                   |
-| feat     | Features                 | ✨     | A new feature                                                                                          | user, payment, gallery                                        |
+| feat     | Features                 | ✨    | A new feature                                                                                          | user, payment, gallery                                        |
 | fix      | Bug Fixes                | 🐛    | A bug fix                                                                                              | auth, data                                                    |
 | security | Security Fixes           | 🔒    | A change that fixes a vulnerability or hardens against one                                             | auth, idor, xss, injection                                    |
 | perf     | Performance Improvements | ⚡️    | A code change that improves performance                                                                | query, cache                                                  |
 | refactor | Code Refactoring         | ♻️    | A code change that neither fixes a bug nor adds a feature                                              | utils, helpers                                                |
 | revert   | Reverts                  | ⏪️    | Reverts a previous commit                                                                              | query, utils,                                                 |
 | style    | Styles                   | 💄    | Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc) | formatting                                                    |
-| test     | Tests                    | ✅     | Adding missing tests or correcting existing tests                                                      | unit, e2e                                                     |
+| test     | Tests                    | ✅    | Adding missing tests or correcting existing tests                                                      | unit, e2e                                                     |
 | i18n     |                          | 🌐    | Internationalization                                                                                   | locale, translation                                           |
+| merge    | Merges                   | 🔀    | Merges a branch into another; the emoji is optional here, since git and the forge write their own      | develop, master                                               |
 
 ### Creating worktrees
 
@@ -206,23 +246,3 @@ scanning cannot.
 - **Architecture questions**: `get_architecture_overview_tool` + `list_communities_tool`
 
 Fall back to Grep/Glob/Read **only** when the graph doesn't cover what you need.
-
-### Key Tools
-
-| Tool | Use when |
-| ------ | ---------- |
-| `detect_changes_tool` | Reviewing code changes — gives risk-scored analysis |
-| `get_review_context_tool` | Need source snippets for review — token-efficient |
-| `get_impact_radius_tool` | Understanding blast radius of a change |
-| `get_affected_flows_tool` | Finding which execution paths are impacted |
-| `query_graph_tool` | Tracing callers, callees, imports, tests, dependencies |
-| `semantic_search_nodes_tool` | Finding functions/classes by name or keyword |
-| `get_architecture_overview_tool` | Understanding high-level codebase structure |
-| `refactor_tool` | Planning renames, finding dead code |
-
-### Workflow
-
-1. The graph auto-updates on file changes (via hooks).
-2. Use `detect_changes_tool` for code review.
-3. Use `get_affected_flows_tool` to understand impact.
-4. Use `query_graph_tool` pattern="tests_for" to check coverage.

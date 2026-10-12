@@ -38,7 +38,6 @@ class TestableJobSplitMergeService extends JobSplitMergeService
     private array $randomStrings = [];
     private int $randomStringIndex = 0;
 
-    private bool $beginTransactionCalled = false;
     private bool $destroyAnalysisCacheCalled = false;
     private ?int $destroyAnalysisCacheProjectId = null;
 
@@ -49,6 +48,8 @@ class TestableJobSplitMergeService extends JobSplitMergeService
     private array $updateForMergeCalls = [];
     /** @var JobStruct[] */
     private array $deleteOnMergeCalls = [];
+    /** @var array{chunk: JobStruct, oldPassword: string, newPassword: string}[] */
+    private array $sweepCredentialCachesCalls = [];
 
     /** @var array<string, mixed>[] Owner keys to return */
     private array $ownerKeysOverride = [];
@@ -91,18 +92,6 @@ class TestableJobSplitMergeService extends JobSplitMergeService
     protected function getJobByIdAndPassword(int $id, string $password): ?JobStruct
     {
         return $this->jobByIdAndPasswordOverride ?? parent::getJobByIdAndPassword($id, $password);
-    }
-
-    // ── beginTransaction ──
-
-    protected function beginTransaction(): void
-    {
-        $this->beginTransactionCalled = true;
-    }
-
-    public function wasBeginTransactionCalled(): bool
-    {
-        return $this->beginTransactionCalled;
     }
 
     // ── Cart ──
@@ -269,6 +258,23 @@ class TestableJobSplitMergeService extends JobSplitMergeService
     public function getDeleteOnMergeCalls(): array
     {
         return $this->deleteOnMergeCalls;
+    }
+
+    protected function sweepCredentialCaches(JobStruct $chunk, string $oldPassword, string $newPassword): void
+    {
+        $this->sweepCredentialCachesCalls[] = [
+            'chunk' => $chunk,
+            'oldPassword' => $oldPassword,
+            'newPassword' => $newPassword,
+        ];
+    }
+
+    /**
+     * @return array{chunk: JobStruct, oldPassword: string, newPassword: string}[]
+     */
+    public function getSweepCredentialCachesCalls(): array
+    {
+        return $this->sweepCredentialCachesCalls;
     }
 
     // ── getOwnerKeys ──

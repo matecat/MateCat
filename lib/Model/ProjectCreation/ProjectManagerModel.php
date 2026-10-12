@@ -15,6 +15,7 @@ use PDOStatement;
 use RecursiveArrayIterator;
 use RecursiveIteratorIterator;
 use RuntimeException;
+use Throwable;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
@@ -36,6 +37,8 @@ class ProjectManagerModel
      * internally.
      *
      * @throws Exception
+     * @throws Throwable the write runs inside a transaction scope, which aborts the transaction on
+     *                   any throw and re-throws the original, whatever its type
      */
     public function createProjectRecord(ProjectStructure $projectStructure, ?int $idTeam, string $status, ?int $idAssignee): ProjectStruct
     {
@@ -53,17 +56,17 @@ class ProjectManagerModel
         $data['instance_id'] = $projectStructure->instance_id ?: AppConfig::$INSTANCE_ID;
         $data['due_date'] = $projectStructure->due_date;
 
-        $this->dbHandler->begin();
-
-        try {
+        [$projectId, $project] = $this->dbHandler->transaction(function () use ($data): array {
             $projectId = $this->dbHandler->insert('projects', $data);
-            $project = (new ProjectDao($this->dbHandler))->findById((int)$projectId);
-            $this->dbHandler->commit();
-        } catch (Exception $e) {
-            $this->dbHandler->rollback();
-            throw $e;
-        }
 
+            // Read back inside the scope: the row it names is only visible to this connection until
+            // the commit.
+            return [$projectId, (new ProjectDao($this->dbHandler))->findById((int)$projectId)];
+        });
+
+        // Outside the scope, where the commit used to put it: the row is already durable, and
+        // rolling the insert back because the read came up empty would turn a failed read into a
+        // failed write.
         if ($project === null) {
             throw new RuntimeException("Failed to retrieve project after insert (id: $projectId)");
         }
@@ -304,7 +307,7 @@ class ProjectManagerModel
      *   segments (batched)
      *
      * Phase 3 — File/project-scoped + root records:
-     *   files_parts, files, file_references, file_metadata,
+     *   files_parts, files, file_metadata,
      *   context_groups, project_metadata, projects, jobs
      *
      * @param int $idProject
@@ -446,7 +449,7 @@ class ProjectManagerModel
      * rows and prevent row-lock spikes.  A subquery scopes the DELETE to
      * only rows belonging to this project's files.
      *
-     * Tables: files_parts, files, file_references, file_metadata,
+     * Tables: files_parts, files, file_metadata,
      * context_groups, project_metadata, projects, jobs.
      *
      * @param PDO $conn
@@ -482,9 +485,6 @@ class ProjectManagerModel
         }
 
         $stmt = $conn->prepare("DELETE FROM files WHERE id_project = :id_project");
-        $stmt->execute(['id_project' => $idProject]);
-
-        $stmt = $conn->prepare("DELETE FROM file_references WHERE id_project = :id_project");
         $stmt->execute(['id_project' => $idProject]);
 
         $stmt = $conn->prepare("DELETE FROM file_metadata WHERE id_project = :id_project");

@@ -188,7 +188,7 @@ class MemoryKeyDao extends AbstractDao
         $this->_validatePrimaryKey($obj);
         $this->_validateNotNullFields($obj);
 
-        $tmKey = $obj->tm_key ?? throw new Exception("Invalid Key value");
+        $tmKey = $obj->tm_key ?? throw new Exception("Invalid key value");
 
         $set_array = [];
         $where_conditions = [];
@@ -237,7 +237,7 @@ class MemoryKeyDao extends AbstractDao
         $this->_validatePrimaryKey($obj);
         $this->_validateNotNullFields($obj);
 
-        $tmKey = $obj->tm_key ?? throw new Exception("Invalid Key value");
+        $tmKey = $obj->tm_key ?? throw new Exception("Invalid key value");
 
         $query = "DELETE FROM " . self::TABLE . " WHERE uid = :uid and key_value = :key_value";
 
@@ -264,7 +264,7 @@ class MemoryKeyDao extends AbstractDao
         $this->_validatePrimaryKey($obj);
         $this->_validateNotNullFields($obj);
 
-        $tmKey = $obj->tm_key ?? throw new Exception("Invalid Key value");
+        $tmKey = $obj->tm_key ?? throw new Exception("Invalid key value");
 
         $query = "UPDATE " . self::TABLE . " set deleted = 1 WHERE uid = :uid and key_value = :key_value";
 
@@ -291,7 +291,7 @@ class MemoryKeyDao extends AbstractDao
         $this->_validatePrimaryKey($obj);
         $this->_validateNotNullFields($obj);
 
-        $tmKey = $obj->tm_key ?? throw new Exception("Invalid Key value");
+        $tmKey = $obj->tm_key ?? throw new Exception("Invalid key value");
 
         $query = "UPDATE " . self::TABLE . " set deleted = 0 WHERE uid = :uid and key_value = :key_value";
 
@@ -391,11 +391,11 @@ class MemoryKeyDao extends AbstractDao
         }
 
         if (empty($obj->uid)) {
-            throw new Exception("Invalid Uid");
+            throw new Exception("Invalid UID");
         }
 
         if ($obj->tm_key === null || empty($obj->tm_key->key)) {
-            throw new Exception("Invalid Key value");
+            throw new Exception("Invalid key value");
         }
     }
 
