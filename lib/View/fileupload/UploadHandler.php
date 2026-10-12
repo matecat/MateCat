@@ -39,10 +39,19 @@ class UploadHandler
         $this->logger = LoggerFactory::getLogger("upload_handler");
         $this->files  = $files;
 
+        $uploadToken = (string)($_COOKIE['upload_token'] ?? '');
+
+        try {
+            $uploadDir = Utils::uploadDirFromSessionCookie($uploadToken);
+        } catch (InvalidArgumentException) {
+            // No path is built from a token that is not a UUID: get(), post() and delete() reject it.
+            $uploadDir = null;
+        }
+
         $this->options = [
             'script_url' => $this->getFullUrl() . '/',
-            'upload_token' => $_COOKIE['upload_token'],
-            'upload_dir' => Utils::uploadDirFromSessionCookie($_COOKIE['upload_token']),
+            'upload_token' => $uploadToken,
+            'upload_dir' => $uploadDir,
             'upload_url' => $this->getFullUrl() . '/files/',
             'param_name' => 'files',
             // Set the following option to 'POST', if your server does not support
@@ -76,9 +85,29 @@ class UploadHandler
         }
     }
 
+    /**
+     * The constructor builds the upload directory only from a valid upload token, and every entry
+     * point rejects an invalid one first. Reaching the filesystem without it is a bug, never a
+     * path relative to the working directory.
+     *
+     * @throws LogicException when no upload directory was built
+     */
+    private function uploadDir(): string
+    {
+        $uploadDir = $this->options['upload_dir'];
+        if (!is_string($uploadDir)) {
+            throw new LogicException('No upload directory without a valid upload token.');
+        }
+
+        return $uploadDir;
+    }
+
+    /**
+     * @throws LogicException when no upload directory was built
+     */
     protected function get_file_object(string $file_name): ?stdClass
     {
-        $file_path = $this->options['upload_dir'] . $file_name;
+        $file_path = $this->uploadDir() . $file_name;
         if (is_file($file_path) && $file_name[0] !== '.') {
             $file = new stdClass();
             $file->name = $file_name;
@@ -94,6 +123,8 @@ class UploadHandler
 
     /**
      * @return list<stdClass>
+     *
+     * @throws LogicException when no upload directory was built
      */
     protected function get_file_objects(): array
     {
@@ -101,7 +132,7 @@ class UploadHandler
             array_filter(
                 array_map(
                     [$this, 'get_file_object'],
-                    scandir($this->options['upload_dir'])
+                    scandir($this->uploadDir())
                 )
             )
         );
@@ -131,6 +162,9 @@ class UploadHandler
         }
     }
 
+    /**
+     * @throws LogicException when no upload directory was built
+     */
     protected function validate(string $uploaded_file, stdClass $file, string $error): bool
     {
         if ($error) {
@@ -217,6 +251,8 @@ class UploadHandler
      * Counts the number of real files excluding those with specific patterns in their names.
      *
      * @return int The number of real files that do not match the predefined exclusion pattern.
+     *
+     * @throws LogicException when no upload directory was built
      */
     private function getRealFilesCount(): int
     {
@@ -289,6 +325,8 @@ class UploadHandler
      * Remove path information and dots around the filename, to prevent uploading
      * into different directories or replacing hidden system files.
      * Also remove control characters and spaces (\x00..\x20) around the filename:
+     *
+     * @throws LogicException when no upload directory was built
      */
     protected function trim_file_name(string $name): string
     {
@@ -297,7 +335,7 @@ class UploadHandler
         $file_name = trim($this->my_basename($name), ".\x00..\x20");
 
         if ($this->options['discard_aborted_uploads']) {
-            while (is_file($this->options['upload_dir'] . $file_name)) {
+            while (is_file($this->uploadDir() . $file_name)) {
                 $file_name = $this->up_count_name($file_name);
             }
         }
@@ -325,7 +363,7 @@ class UploadHandler
         }
 
         if ($this->validate($uploaded_file, $file, $error)) {
-            $file_path = $this->options['upload_dir'] . $file->name;
+            $file_path = $this->uploadDir() . $file->name;
             $append_file = !$this->options['discard_aborted_uploads'] &&
                 is_file($file_path) && $file->size > filesize($file_path);
             clearstatcache();
@@ -427,8 +465,13 @@ class UploadHandler
         return 'application/octet-stream';
     }
 
+    /**
+     * @throws Exception when the upload token is not valid
+     */
     public function get(): void
     {
+        self::_validateToken($this->options['upload_token']);
+
         $file_name = isset($_REQUEST['file']) ?
             basename(stripslashes($_REQUEST['file'])) : null;
         if ($file_name) {
@@ -453,7 +496,7 @@ class UploadHandler
             return;
         }
 
-        if (!Utils::isTokenValid($_COOKIE['upload_token'])) {
+        if (!Utils::isTokenValid($this->options['upload_token'])) {
             $info = [new stdClass()];
             $info[0]->error = "Invalid upload token. Check your browser, cookies must be enabled for this domain.";
             $this->flush($info);
@@ -614,7 +657,7 @@ class UploadHandler
      */
     private function normalFileDelete(string $file_name, string $source, ?string $segmentationRule = null, int $filtersTemplate = 0): array
     {
-        $file_path = $this->options['upload_dir'] . $file_name;
+        $file_path = $this->uploadDir() . $file_name;
 
         (new CatUtils($this->database))->deleteSha($file_path, $source, $segmentationRule, $filtersTemplate);
 
@@ -632,20 +675,20 @@ class UploadHandler
      */
     private function zipFileDelete(string $file_name, string $source, ?string $segmentationRule = null, int $filtersTemplate = 0): array
     {
-        $file_path = $this->options['upload_dir'] . $file_name;
+        $file_path = $this->uploadDir() . $file_name;
 
         $out_file_name = ZipArchiveHandler::getFileName($file_name);
 
         $success[$out_file_name] = is_file($file_path) && $file_name[0] !== '.' && unlink($file_path);
         if ($success[$out_file_name]) {
-            $containedFiles = glob($this->options['upload_dir'] . $file_name . "*");
+            $containedFiles = glob($this->uploadDir() . $file_name . "*");
             if ($containedFiles === false) {
                 $containedFiles = [];
             }
             $k = 0;
 
             while ($k < count($containedFiles)) {
-                $internalFileName = str_replace($this->options['upload_dir'], "", $containedFiles[$k]);
+                $internalFileName = str_replace($this->uploadDir(), "", $containedFiles[$k]);
                 $success = array_merge($success, $this->zipInternalFileDelete($internalFileName, $source, $segmentationRule, $filtersTemplate));
                 $k++;
             }
@@ -663,7 +706,7 @@ class UploadHandler
      */
     private function zipInternalFileDelete(string $file_name, string $source, ?string $segmentationRule = null, int $filtersTemplate = 0): array
     {
-        $file_path = $this->options['upload_dir'] . $file_name;
+        $file_path = $this->uploadDir() . $file_name;
         (new CatUtils($this->database))->deleteSha($file_path, $source, $segmentationRule, $filtersTemplate);
 
         $out_file_name = ZipArchiveHandler::getFileName($file_name);
