@@ -57,14 +57,11 @@ class UploadPageController extends BaseKleinViewController
         ]);
 
         // Set unconditionally, for the reason given in CattoolController: an unset variable is a key
-        // the page never receives. This one also closes a pre-existing fault — the old template
-        // interpolated ${lexiqa_languages} with no default at all, so an unlicensed install could
-        // not render this page.
+        // the page never receives.
         $licensed = (bool)AppConfig::$LXQ_LICENSE;
         $this->addParamsToView([
                 'lxq_license' => $licensed ? AppConfig::$LXQ_LICENSE : '',
                 'lxq_partnerid' => $licensed ? AppConfig::$LXQ_PARTNERID : '',
-                'lexiqa_languages' => new PHPTalMap($licensed ? LexiQaAndTagProjectionLanguages::$lexiQaAllowedLanguages : []),
                 'lexiqaServer' => $licensed ? AppConfig::$LXQ_SERVER : '',
             ]
         );

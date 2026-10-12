@@ -6,7 +6,6 @@ window.config = {
   password: 'pw',
   source_code: 'en-US',
   target_code: 'fr-FR',
-  lexiqa_languages: ['en-US', 'fr-FR'],
 }
 
 jest.mock('../actions/segmentDispatchActions', () => ({
@@ -26,6 +25,9 @@ jest.mock('../api/lexiqaTooltipwarnings', () => ({
 }))
 jest.mock('../api/getLexiqaQa', () => ({
   getLexiqaQa: jest.fn(() => Promise.resolve({qaData: []})),
+}))
+jest.mock('../api/getLexiqaSupportedLocales/getLexiqaSupportedLocales', () => ({
+  getLexiqaSupportedLocales: jest.fn(() => Promise.resolve([])),
 }))
 jest.mock('../stores/SegmentStore', () => ({
   __esModule: true,
@@ -51,6 +53,7 @@ import {getLexiqaWarnings as getLexiqaWarningsApi} from '../api/getLexiqaWarning
 import {lexiqaIgnoreError} from '../api/lexiqaIgnoreError'
 import {lexiqaTooltipwarnings} from '../api/lexiqaTooltipwarnings'
 import {getLexiqaQa} from '../api/getLexiqaQa'
+import {getLexiqaSupportedLocales} from '../api/getLexiqaSupportedLocales/getLexiqaSupportedLocales'
 import SegmentStore from '../stores/SegmentStore'
 import UserStore from '../stores/UserStore'
 
@@ -79,6 +82,7 @@ beforeEach(() => {
   LXQ.canActivate = undefined
   LXQ.initialized = false
   LXQ.notCheckedSegments = []
+  LXQ._supportedLocales = ['en-US', 'fr-FR']
   LXQ.lexiqaData = {
     lexiqaWarnings: {},
     enableHighlighting: true,
@@ -169,9 +173,15 @@ describe('activation', () => {
 
   test('checkCanActivate is false when a language is unsupported', () => {
     LXQ.canActivate = undefined
-    window.config.lexiqa_languages = ['en-US']
+    LXQ._supportedLocales = ['en-US']
     expect(LXQ.checkCanActivate()).toBe(false)
-    window.config.lexiqa_languages = ['en-US', 'fr-FR']
+  })
+
+  test('checkCanActivate memoizes its result and ignores later locale changes', () => {
+    LXQ.canActivate = undefined
+    expect(LXQ.checkCanActivate()).toBe(true)
+    LXQ._supportedLocales = []
+    expect(LXQ.checkCanActivate()).toBe(true)
   })
 
   test('enabled reflects user metadata', () => {
@@ -201,6 +211,100 @@ describe('activation', () => {
     await Promise.resolve()
     expect(toggleTagLexica).toHaveBeenCalledWith({enabled: false})
     expect(qaComponentsetLxqIssues).toHaveBeenCalledWith([])
+  })
+})
+
+// ---------------------------------------------------------------------------
+// getSupportedLocales (language mapping)
+// ---------------------------------------------------------------------------
+describe('getSupportedLocales', () => {
+  test('returns an empty array when no locales were retrieved', () => {
+    LXQ._supportedLocales = []
+    expect(LXQ.getSupportedLocales()).toEqual([])
+  })
+
+  test('passes through locales that need no mapping', () => {
+    LXQ._supportedLocales = ['en-US', 'fr-FR', 'it-IT']
+    expect(LXQ.getSupportedLocales()).toEqual(['en-US', 'fr-FR', 'it-IT'])
+  })
+
+  // _supportedLocales holds lexiQA's own codes (as returned by its /supportedLocales
+  // endpoint), so the mapping here must translate lexiQA -> MateCat, the opposite
+  // direction from the one used to build the outgoing QA request (see 'doLexiQA' below).
+  test.each([
+    ['ku-TR', 'kmr-TR'],
+    ['cb-IQ', 'ckb-IQ'],
+    ['pau', 'pau-PW'],
+    ['or-IN', 'ory-IN'],
+  ])('maps lexiQA code %s to the MateCat code %s', (lexiqaCode, matecatCode) => {
+    LXQ._supportedLocales = [lexiqaCode]
+    expect(LXQ.getSupportedLocales()).toEqual([matecatCode])
+  })
+
+  test('collapses duplicates when the server returns both the lexiQA and MateCat-shaped code', () => {
+    LXQ._supportedLocales = ['ku-TR', 'kmr-TR']
+    expect(LXQ.getSupportedLocales()).toEqual(['kmr-TR'])
+  })
+
+  test('keeps the first-seen order while mapping only the locales that need it', () => {
+    LXQ._supportedLocales = ['fr-FR', 'ku-TR', 'en-US', 'cb-IQ']
+    expect(LXQ.getSupportedLocales()).toEqual([
+      'fr-FR',
+      'kmr-TR',
+      'en-US',
+      'ckb-IQ',
+    ])
+  })
+})
+
+// ---------------------------------------------------------------------------
+// retrieveSupportedLocales
+// ---------------------------------------------------------------------------
+describe('retrieveSupportedLocales', () => {
+  let initSpy
+
+  beforeEach(() => {
+    initSpy = jest.spyOn(LXQ, 'init').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    initSpy.mockRestore()
+  })
+
+  test('stores the fetched locales and initializes lexiQA when enabled', async () => {
+    getLexiqaSupportedLocales.mockResolvedValueOnce(['en-US', 'fr-FR'])
+    LXQ.canActivate = undefined
+    LXQ._supportedLocales = []
+
+    LXQ.retrieveSupportedLocales({lexiqa: 1})
+    await Promise.resolve()
+    await Promise.resolve()
+
+    expect(LXQ._supportedLocales).toEqual(['en-US', 'fr-FR'])
+    expect(initSpy).toHaveBeenCalled()
+  })
+
+  test('does not initialize lexiQA when disabled for the user', async () => {
+    UserStore.getUserMetadata.mockReturnValue({lexiqa: 0})
+    getLexiqaSupportedLocales.mockResolvedValueOnce(['en-US', 'fr-FR'])
+    LXQ.canActivate = undefined
+    LXQ._supportedLocales = []
+
+    LXQ.retrieveSupportedLocales({lexiqa: 0})
+    await Promise.resolve()
+    await Promise.resolve()
+
+    expect(LXQ._supportedLocales).toEqual(['en-US', 'fr-FR'])
+    expect(initSpy).not.toHaveBeenCalled()
+  })
+
+  test('the stored locales go through the language mapping afterwards', async () => {
+    getLexiqaSupportedLocales.mockResolvedValueOnce(['ku-TR', 'cb-IQ'])
+    LXQ.retrieveSupportedLocales({})
+    await Promise.resolve()
+    await Promise.resolve()
+
+    expect(LXQ.getSupportedLocales()).toEqual(['kmr-TR', 'ckb-IQ'])
   })
 })
 
@@ -394,6 +498,37 @@ describe('doLexiQA', () => {
       )
     })
     expect(addLexiqaHighlight).toHaveBeenCalledWith(21, {})
+  })
+
+  test('translates MateCat source/target codes to lexiQA codes in the outgoing request', async () => {
+    const originalSource = config.source_code
+    const originalTarget = config.target_code
+    config.source_code = 'kmr-TR'
+    config.target_code = 'ckb-IQ'
+    // the raw lexiQA-side codes, so checkCanActivate() finds them through the
+    // lexiQA -> MateCat mapping in getSupportedLocales()
+    LXQ._supportedLocales = ['ku-TR', 'cb-IQ']
+    getLexiqaQa.mockResolvedValueOnce({qaData: []})
+
+    await new Promise((resolve) => {
+      LXQ.doLexiQA(
+        {sid: 22, lxqDecodedSource: 's', lxqDecodedTranslation: 't'},
+        false,
+        resolve,
+      )
+    })
+
+    expect(getLexiqaQa).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({
+          sourcelanguage: 'ku-TR',
+          targetlanguage: 'cb-IQ',
+        }),
+      }),
+    )
+
+    config.source_code = originalSource
+    config.target_code = originalTarget
   })
 })
 
