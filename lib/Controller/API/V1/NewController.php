@@ -73,6 +73,7 @@ use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\TMS\TMSService;
 use Utils\Tools\CatUtils;
+use Utils\Tools\InstructionsSanitizer;
 use Utils\Tools\Utils;
 use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
@@ -431,7 +432,7 @@ class NewController extends KleinController
             [
                 'flags' => FILTER_REQUIRE_ARRAY,
                 'options' => function ($value) {
-                    $value = Utils::stripTagsPreservingHrefs($value);
+                    $value = InstructionsSanitizer::sanitize($value);
                     /**
                      * Uber plugin callback
                      */

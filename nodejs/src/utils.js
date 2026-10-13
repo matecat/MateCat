@@ -3,20 +3,23 @@
  * @author: Domenico <ostico@gmail.com>, <domenico@translated.net>
  * Date: 11/11/2024
  */
-const winston = require('winston');
-require('winston-daily-rotate-file');
-const path = require("path");
+import winston from 'winston';
+import 'winston-daily-rotate-file';
+import path from 'node:path';
+import v8 from 'node:v8';
+import {PerformanceObserver} from 'node:perf_hooks';
+import ini from 'node-ini';
+import ipRegex from 'ip-regex';
+
 const {format} = winston;
 
-const ipRegex = require('ip-regex');
-
-const enrichLogContext = winston.format((info) => {
+export const enrichLogContext = winston.format((info) => {
   info['timestamp'] = new Date().toJSON();
   info['worker_id'] = process.env.worker_id || 'primary';
   return info;
 });
 
-const createLogger = (logConfig) => {
+export const createLogger = (logConfig) => {
   const transports = [
     new winston.transports.Console({
       level: logConfig.level,
@@ -26,7 +29,7 @@ const createLogger = (logConfig) => {
 
   if (logConfig.file) {
     transports.push(new winston.transports.DailyRotateFile({
-      filename: path.resolve(__dirname, logConfig.file),
+      filename: path.resolve(import.meta.dirname, logConfig.file),
       zippedArchive: true,
       maxSize: '100m',
       level: logConfig.level,
@@ -40,15 +43,10 @@ const createLogger = (logConfig) => {
   });
 };
 
-const ini = require('node-ini');
-const config = ini.parseSync(path.resolve(__dirname, '../config.ini'));
-const logger = createLogger(config.log);
+const config = ini.parseSync(path.resolve(import.meta.dirname, '../config.ini'));
+export const logger = createLogger(config.log);
 
-exports.enrichLogContext = enrichLogContext;
-exports.createLogger = createLogger;
-exports.logger = logger;
-
-const parseHeaderRemoteAddress = (headersList) => {
+export const parseHeaderRemoteAddress = (headersList) => {
   for (let key of [
     'client-ip',
     'x-forwarded-for',
@@ -67,17 +65,14 @@ const parseHeaderRemoteAddress = (headersList) => {
   }
 };
 
-exports.parseHeaderRemoteAddress = parseHeaderRemoteAddress;
-exports.getWebSocketClientAddress = (socket) => {
+export const getWebSocketClientAddress = (socket) => {
   let remoteAddress = parseHeaderRemoteAddress(socket.handshake.headers);
   return remoteAddress ? remoteAddress : socket.handshake.address;
 };
 
-exports.setMonitoring = () => {
+export const setMonitoring = () => {
 
-  const v8 = require('v8');
   v8.setFlagsFromString('--trace-gc');
-  const {PerformanceObserver} = require('node:perf_hooks');
   const obs = new PerformanceObserver(list => {
     const entry = list.getEntries()[0];
     logger.verbose(['GC: ', entry]);

@@ -1,9 +1,10 @@
-const {
+import {describe, test, expect} from 'vitest';
+import {
   parseHeaderRemoteAddress,
   getWebSocketClientAddress,
   enrichLogContext,
   createLogger,
-} = require('../src/utils');
+} from '../src/utils.js';
 
 describe('parseHeaderRemoteAddress', () => {
   test('returns first IP from x-forwarded-for chain', () => {
