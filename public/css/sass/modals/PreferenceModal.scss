@@ -23,7 +23,7 @@
 
   > label {
     font-size: 15px;
-    color: colors.$grey500;
+    color: colors.$grey700;
   }
 }
 
@@ -56,7 +56,7 @@
       font-size: 15px;
       text-align: left;
       word-wrap: break-word;
-      color: colors.$grey500;
+      color: colors.$grey600;
       white-space: nowrap;
       width: 100%;
       border: none;
@@ -239,7 +239,7 @@
 }
 
 .user-info-form .grey-txt {
-  color: colors.$grey500;
+  color: colors.$grey700;
 }
 
 #logoutlink,
