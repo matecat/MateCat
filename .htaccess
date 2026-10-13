@@ -25,7 +25,10 @@ RewriteRule ^api/docs$ lib/View/APIDoc.php [L]
 RewriteRule ^$ router.php [QSA,L]
 RewriteRule !\.(css|fonts|gif|jpe?g|png|ico|js|svg|woff|ttf|map|json)$ router.php [QSA,L]
 
-RedirectMatch 404 ^/\.git
+# A path segment starting with a dot is tooling or VCS metadata (.git, .claude, .vite, ...), never
+# application content: the rule above serves such a file as-is when its extension is static. Only
+# RFC 8615 /.well-known/ stays reachable.
+RedirectMatch 404 /\.(?!well-known/)
 RedirectMatch 404 ^/vendor
 RedirectMatch 404 ^/storage
 
