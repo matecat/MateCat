@@ -9,7 +9,7 @@ export const HomePageSection = () => {
           <div className="content-box">
             <div className="content-box_header">
               <img src="/public/img/icons/home/home-aiDriven.svg" />
-              <h5>AI-driven precision and speed</h5>
+              <h4>AI-driven precision and speed</h4>
             </div>
             <p>
               Matecat employs cutting-edge AI to help translators save time and
@@ -25,7 +25,7 @@ export const HomePageSection = () => {
           <div className="content-box">
             <div className="content-box_header">
               <img src="/public/img/icons/home/home-goFaster.svg" />
-              <h5>Save time with adaptive machine translation</h5>
+              <h4>Save time with adaptive machine translation</h4>
             </div>
             <p>
               Get top-quality machine translation matches in 200+ languages with
@@ -41,7 +41,7 @@ export const HomePageSection = () => {
           <div className="content-box">
             <div className="content-box_header">
               <img src="/public/img/icons/home/home-freeToUse.svg" />
-              <h5>Free to use</h5>
+              <h4>Free to use</h4>
             </div>
             <p>
               Matecat offers a powerful solution that&apos;s completely free.
@@ -57,7 +57,7 @@ export const HomePageSection = () => {
           <div className="content-box">
             <div className="content-box_header">
               <img src="/public/img/icons/home/home-cloud.svg" />
-              <h5>Keep your data secure</h5>
+              <h4>Keep your data secure</h4>
             </div>
             <p>
               Matecat prioritizes the security of your data. We provide secure
@@ -73,7 +73,7 @@ export const HomePageSection = () => {
           <div className="content-box">
             <div className="content-box_header">
               <img src="/public/img/icons/home/home-liveSupport.svg" />
-              <h5>A user-friendly experience</h5>
+              <h4>A user-friendly experience</h4>
             </div>
             <p>
               Matecat was created with a focus on you. It&apos;s designed so that
@@ -89,7 +89,7 @@ export const HomePageSection = () => {
           <div className="content-box">
             <div className="content-box_header">
               <img src="/public/img/icons/home/home-work.svg" />
-              <h5>Work from anywhere</h5>
+              <h4>Work from anywhere</h4>
             </div>
             <p>
               Matecat is entirely web-based, so you can access it from any
