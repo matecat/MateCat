@@ -551,12 +551,7 @@ const Search = (props) => {
       )
       SegmentStore.removeListener(SegmentConstants.UPDATE_SEARCH, updateSearch)
     }
-  }, [
-    handelKeydownFunction,
-    setResults,
-    handleCancelClick,
-    updateSearch,
-  ])
+  }, [handelKeydownFunction, setResults, handleCancelClick, updateSearch])
 
   let statusOptions = config.searchable_statuses.map((item) => {
     return {
@@ -717,7 +712,7 @@ const Search = (props) => {
                       (item) => item.id === search.selectStatus,
                     ) || undefined
                   }
-                  placeholder={'Status segment'}
+                  placeholder="Segment status"
                   checkSpaceToReverse={false}
                   showResetButton={true}
                   resetFunction={() => handleStatusChange('all')}
