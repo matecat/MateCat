@@ -20,7 +20,7 @@
   }
 
   .login-divider {
-    color: colors.$grey400;
+    color: colors.$grey700;
     display: flex;
     align-items: center;
     width: 100%;
@@ -48,7 +48,7 @@
     flex-direction: column;
     gap: 30px;
     font-size: variables.$font-size-small;
-    color: colors.$grey400;
+    color: colors.$grey700;
 
     > :first-child {
       display: flex;

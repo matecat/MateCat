@@ -52,14 +52,14 @@
     h4 {
       font-size: variables.$font-size-small;
       font-weight: bold;
-      color: colors.$grey400;
+      color: colors.$grey700;
       text-align: center;
       margin: 0;
     }
   }
 
   .register-divider {
-    color: colors.$grey400;
+    color: colors.$grey700;
     display: flex;
     align-items: center;
     width: 100%;
@@ -67,7 +67,7 @@
     div {
       flex-grow: 1;
       height: 1px;
-      background-color: colors.$grey200;
+      background-color: colors.$grey400;
     }
 
     span {
@@ -102,7 +102,7 @@
       }
       .input-container > span {
         display: flex;
-        color: colors.$grey400;
+        color: colors.$grey700;
       }
     }
 
@@ -117,7 +117,7 @@
     display: flex;
     justify-content: center;
     font-size: variables.$font-size-small;
-    color: colors.$grey400;
+    color: colors.$grey700;
   }
 }
 
