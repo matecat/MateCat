@@ -595,8 +595,7 @@ function CatTool() {
       if (Speech2Text.enabled(metadata)) Speech2Text.init()
       initTagSignature(metadata)
 
-      if (metadata.lexiqa === 1 || UserStore.getUserMetadata()?.lexiqa === 1)
-        LXQ.retrieveSupportedLocales(metadata)
+      if (config.lxq_license) LXQ.retrieveSupportedLocales(metadata)
     }
   }, [userInfo?.metadata])
 
