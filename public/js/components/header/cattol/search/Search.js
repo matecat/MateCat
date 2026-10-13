@@ -206,18 +206,20 @@ const Search = (props) => {
       return false
     }
 
+    // The replacement must land before updateAfterReplace: that call drops the
+    // replaced occurrence and re-flags the segments, so the editor would then
+    // replace the next occurrence, or nothing at all when it was the last one.
+    // It is applied synchronously to the store, so the segment read below
+    // already carries the new text and that is what gets saved.
+    SegmentActions.replaceCurrentSearch(search.replaceTarget)
+
     setTimeout(() => {
       const segment = SegmentStore.getSegmentByIdToJS(
         occurrencesList[featuredSearchResult],
       )
       if (segment) {
         updateAfterReplace(segment.original_sid)
-        segmentTranslation(
-          segment,
-          segment.status,
-          () => SegmentActions.replaceCurrentSearch(search.replaceTarget),
-          false,
-        )
+        segmentTranslation(segment, segment.status, () => {}, false)
       }
     })
   }

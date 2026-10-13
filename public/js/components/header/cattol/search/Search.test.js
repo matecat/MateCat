@@ -402,13 +402,11 @@ test('replaces the current occurrence and refreshes the segment translation', as
     featuredSearchResult: 0,
   })
 
-  // The replacement is applied by the save callback, not before the save is
-  // fired: replacing up front left the editor holding the new text while the
-  // request that had already been built still carried the old one.
-  let saveCallback
-  segmentTranslation.mockImplementationOnce((segment, status, callback) => {
-    saveCallback = callback
-  })
+  // The replacement has to reach the editor before the search results are
+  // refreshed: updateAfterReplace drops the replaced occurrence, so replacing
+  // afterwards (e.g. from the save callback) hit the next occurrence, or none
+  // at all when it was the only one.
+  SegmentActions.addSearchResultToSegments.mockClear()
 
   jest.useFakeTimers()
   act(() => {
@@ -417,12 +415,16 @@ test('replaces the current occurrence and refreshes the segment translation', as
   })
   jest.useRealTimers()
 
-  expect(segmentTranslation).toHaveBeenCalled()
-  expect(SegmentActions.replaceCurrentSearch).not.toHaveBeenCalled()
-
-  act(() => saveCallback())
-
   expect(SegmentActions.replaceCurrentSearch).toHaveBeenCalledWith('new')
+  expect(segmentTranslation).toHaveBeenCalled()
+  const replacedAt =
+    SegmentActions.replaceCurrentSearch.mock.invocationCallOrder[0]
+  expect(replacedAt).toBeLessThan(
+    SegmentActions.addSearchResultToSegments.mock.invocationCallOrder[0],
+  )
+  expect(replacedAt).toBeLessThan(
+    segmentTranslation.mock.invocationCallOrder[0],
+  )
 })
 
 // The confirm/execute/success/error flow used to live here, but Search.js now
