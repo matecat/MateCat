@@ -5,7 +5,7 @@
   gap: 12px;
   align-items: center;
   width: 100%;
-  >div {
+  > div {
     flex-grow: 1;
   }
 }
@@ -28,7 +28,7 @@
 }
 
 .translated-bar {
-  z-index: 4;
+  z-index: 2;
   background-color: colors.$blue500;
 }
 
@@ -38,7 +38,7 @@
 }
 
 .approved-bar-2nd-pass {
-  z-index: 2;
+  z-index: 4;
   background-color: colors.$purple500;
 }
 

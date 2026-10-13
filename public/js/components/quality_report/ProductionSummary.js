@@ -84,9 +84,9 @@ export const ProductionSummary = ({
           <JobProgressBar stats={stats} showPercent={false} />
           <div className="percent">
             {Math.round(
-              ((stats.equivalent.approved +
-                stats.equivalent.approved2 +
-                stats.equivalent.translated) /
+              ((qualitySummary.get('revision_number') === 1
+                ? stats.equivalent.approved + stats.equivalent.approved2
+                : stats.equivalent.approved2) /
                 stats.equivalent.total) *
                 100,
             )}

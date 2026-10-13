@@ -1017,7 +1017,7 @@ const SegmentActions = {
       sid: sid,
       message: {
         title: 'Termbase',
-        text: 'A termbase item has been deleted',
+        text: 'A termbase entry has been deleted',
       },
     })
     AppDispatcher.dispatch({
