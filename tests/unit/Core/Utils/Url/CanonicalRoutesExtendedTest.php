@@ -62,7 +62,7 @@ class CanonicalRoutesExtendedTest extends AbstractTest
     public function downloadXliffReturnsUrl(): void
     {
         $url = CanonicalRoutes::downloadXliff(1, 'pass');
-        $this->assertSame('https://example.com/api/v2/xliff/1/pass/1.zip', $url);
+        $this->assertSame('https://example.com/api/v3/jobs/1/pass/xliff', $url);
     }
 
     #[Test]
@@ -84,7 +84,7 @@ class CanonicalRoutesExtendedTest extends AbstractTest
     public function downloadTranslationReturnsUrl(): void
     {
         $url = CanonicalRoutes::downloadTranslation(1, 'pass');
-        $this->assertStringContainsString('/api/v2/translation/1/pass', $url);
+        $this->assertStringContainsString('/api/v3/jobs/1/pass/translation?', $url);
     }
 
     #[Test]

@@ -23,8 +23,8 @@ const fakeProjectsData = {
     props: {
       isChunk: false,
       isChunkOutsourced: false,
-      jobTMXUrl: '/api/v2/tmx/90/Y2Q3OTNjE5ZG629',
-      exportXliffUrl: '/xliff/90/Y2Q3OTNjE5ZG629/test.zip',
+      jobTMXUrl: '/api/v3/jobs/90/Y2Q3OTNjE5ZG629/tmx',
+      exportXliffUrl: '/api/v3/jobs/90/Y2Q3OTNjE5ZG629/xliff',
       originalUrl:
         '/?action=downloadOriginal&id_job=90 &password=Y2Q3OTNjE5ZG629&download_type=all',
       editingLogUrl: '/editlog/90-Y2Q3OTNjE5ZG629',
@@ -40,8 +40,8 @@ const fakeProjectsData = {
     props: {
       isChunk: true,
       isChunkOutsourced: false,
-      jobTMXUrl: '/api/v2/tmx/90/NWUxMWYjEwZT600',
-      exportXliffUrl: '/xliff/90/NWUxMWYjEwZT600/test.zip',
+      jobTMXUrl: '/api/v3/jobs/90/NWUxMWYjEwZT600/tmx',
+      exportXliffUrl: '/api/v3/jobs/90/NWUxMWYjEwZT600/xliff',
       originalUrl:
         '/?action=downloadOriginal&id_job=90 &password=NWUxMWYjEwZT600&download_type=all',
       editingLogUrl: '/editlog/90-NWUxMWYjEwZT600',
@@ -56,8 +56,8 @@ const fakeProjectsData = {
     props: {
       isChunk: false,
       isChunkOutsourced: false,
-      jobTMXUrl: '/api/v2/tmx/90/NWUxMWYjEwZT600',
-      exportXliffUrl: '/xliff/90/NWUxMWYjEwZT600/test.zip',
+      jobTMXUrl: '/api/v3/jobs/90/NWUxMWYjEwZT600/tmx',
+      exportXliffUrl: '/api/v3/jobs/90/NWUxMWYjEwZT600/xliff',
       originalUrl:
         '/?action=downloadOriginal&id_job=90 &password=NWUxMWYjEwZT600&download_type=all',
       editingLogUrl: '/editlog/90-NWUxMWYjEwZT600',
@@ -72,8 +72,8 @@ const fakeProjectsData = {
     props: {
       isChunk: false,
       isChunkOutsourced: false,
-      jobTMXUrl: '/api/v2/tmx/90/NWUxMWYjEwZT600',
-      exportXliffUrl: '/xliff/90/NWUxMWYjEwZT600/test.zip',
+      jobTMXUrl: '/api/v3/jobs/90/NWUxMWYjEwZT600/tmx',
+      exportXliffUrl: '/api/v3/jobs/90/NWUxMWYjEwZT600/xliff',
       originalUrl:
         '/?action=downloadOriginal&id_job=90 &password=NWUxMWYjEwZT600&download_type=all',
       editingLogUrl: '/editlog/90-NWUxMWYjEwZT600',
@@ -88,8 +88,8 @@ const fakeProjectsData = {
     props: {
       isChunk: false,
       isChunkOutsourced: false,
-      jobTMXUrl: '/api/v2/tmx/98/defe9aad39e3',
-      exportXliffUrl: '/xliff/98/defe9aad39e3/test.zip',
+      jobTMXUrl: '/api/v3/jobs/98/defe9aad39e3/tmx',
+      exportXliffUrl: '/api/v3/jobs/98/defe9aad39e3/xliff',
       originalUrl:
         '/?action=downloadOriginal&id_job=98 &password=defe9aad39e3&download_type=all',
       editingLogUrl: '/editlog/98-defe9aad39e3',

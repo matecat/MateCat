@@ -195,15 +195,8 @@ export const ChunksJobContainer = ({chunks, ...props}) => {
   }
 
   const getJobMenu = () => {
-    const jobTMXUrl = '/api/v2/tmx/' + job.get('id') + '/' + job.get('password')
-    const exportXliffUrl =
-      '/api/v2/xliff/' +
-      job.get('id') +
-      '/' +
-      job.get('password') +
-      '/' +
-      props.project.get('project_slug') +
-      '.zip'
+    const jobTMXUrl = `/api/v3/jobs/${job.get('id')}/${job.get('password')}/tmx`
+    const exportXliffUrl = `/api/v3/jobs/${job.get('id')}/${job.get('password')}/xliff`
 
     const originalUrl = `/api/v2/original/${job.get('id')}/${job.get('password')}`
 

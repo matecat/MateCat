@@ -764,6 +764,40 @@
           "Job"
         ],
         "summary": "Download Translation",
+        "description": "Download the Job translation. Deprecated: use /api/v3/jobs/{id_job}/{password}/translation",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "id_job",
+            "in": "path",
+            "description": "The id of the job",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "password",
+            "in": "path",
+            "description": "The password of the job",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job translation"
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
+    "/api/v3/jobs/{id_job}/{password}/translation": {
+      "get": {
+        "tags": [
+          "Job"
+        ],
+        "summary": "Download Translation",
         "description": "Download the Job translation",
         "parameters": [
           {
@@ -2617,7 +2651,8 @@
           "Files"
         ],
         "summary": "Download the xliff file(s)",
-        "description": "Download the xliff file(s) for a specific job",
+        "description": "Download the xliff file(s) for a specific job. Deprecated: use /api/v3/jobs/{id_job}/{password}/xliff",
+        "deprecated": true,
         "parameters": [
           {
             "name": "id_job",
@@ -2638,6 +2673,43 @@
             "in": "path",
             "description": "The filename of the xliff to download",
             "required": false,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/zip"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
+    "/api/v3/jobs/{id_job}/{password}/xliff": {
+      "get": {
+        "tags": [
+          "Job",
+          "Files"
+        ],
+        "summary": "Download the xliff file(s)",
+        "description": "Download the xliff file(s) for a specific job. A job with more than one file is downloaded as a zip archive.",
+        "parameters": [
+          {
+            "name": "id_job",
+            "in": "path",
+            "description": "The id of the job",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "password",
+            "in": "path",
+            "description": "The password of the job (Translate password)",
+            "required": true,
             "type": "string"
           }
         ],
@@ -2793,6 +2865,40 @@
       }
     },
     "/api/v3/TMX/{id_job}/{password}": {
+      "get": {
+        "tags": [
+          "Job"
+        ],
+        "summary": "Download Job TMX",
+        "description": "Download the Job TMX. Deprecated: use /api/v3/jobs/{id_job}/{password}/tmx",
+        "deprecated": true,
+        "parameters": [
+          {
+            "name": "id_job",
+            "in": "path",
+            "description": "The id of the job",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "password",
+            "in": "path",
+            "description": "The password of the job (Translate password)",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job TMX"
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
+    "/api/v3/jobs/{id_job}/{password}/tmx": {
       "get": {
         "tags": [
           "Job"
