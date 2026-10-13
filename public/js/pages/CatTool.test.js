@@ -633,21 +633,26 @@ describe('CatTool', () => {
   })
 
   describe('metadata dependent init', () => {
-    test('initializes Speech2Text and fetches lexiQA supported locales when enabled', async () => {
+    test('initializes Speech2Text and fetches lexiQA supported locales when licensed', async () => {
       Speech2Text.enabled.mockReturnValueOnce(true)
-      const metadata = {some: 'meta', lexiqa: 1}
-      await act(async () =>
-        renderCatTool({
-          userInfo: {user: {uid: 1}, metadata},
-        }),
-      )
+      config.lxq_license = 'license-key'
+      const metadata = {some: 'meta'}
+      try {
+        await act(async () =>
+          renderCatTool({
+            userInfo: {user: {uid: 1}, metadata},
+          }),
+        )
+      } finally {
+        delete config.lxq_license
+      }
       expect(Speech2Text.init).toHaveBeenCalled()
       expect(LXQ.retrieveSupportedLocales).toHaveBeenCalledWith(metadata)
     })
 
-    test('does not fetch lexiQA supported locales when disabled', () => {
+    test('does not fetch lexiQA supported locales without a license', () => {
       renderCatTool({
-        userInfo: {user: {uid: 1}, metadata: {some: 'meta', lexiqa: 0}},
+        userInfo: {user: {uid: 1}, metadata: {some: 'meta', lexiqa: 1}},
       })
       expect(LXQ.retrieveSupportedLocales).not.toHaveBeenCalled()
     })
