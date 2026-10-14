@@ -1,5 +1,5 @@
 import React from 'react'
-import {render, screen, fireEvent, waitFor} from '@testing-library/react'
+import {render, screen, fireEvent, waitFor, act} from '@testing-library/react'
 import {fromJS} from 'immutable'
 import SplitJobModal from './SplitJob'
 import {checkSplitRequest} from '../../api/checkSplitRequest'
@@ -86,8 +86,10 @@ test('shows the "too few segments" message and disables split when the API retur
   )
 
   expect(
-      await screen.findByText('Split unsuccessful: the job has too few segments.'),
-    ).toBeInTheDocument()
+    await screen.findByText(
+      'Split unsuccessful: the job has too few segments.',
+    ),
+  ).toBeInTheDocument()
   expect(screen.getByText('Check split')).toBeDisabled()
 })
 
@@ -237,4 +239,64 @@ test('starts with raw-word split checked when the job has zero equivalent words'
     null,
     true,
   )
+})
+
+const deferred = () => {
+  let resolve, reject
+  const promise = new Promise((res, rej) => {
+    resolve = res
+    reject = rej
+  })
+  return {promise, resolve, reject}
+}
+
+test('a second click on Confirm while the request is pending does not send a second split', async () => {
+  checkSplitRequest.mockResolvedValue({data: successData})
+  const pending = deferred()
+  confirmSplitRequest.mockReturnValue(pending.promise)
+  render(
+    <SplitJobModal job={baseJob} project={baseProject} callback={jest.fn()} />,
+  )
+
+  const confirm = await screen.findByRole('button', {name: 'Confirm'})
+  fireEvent.click(confirm)
+  fireEvent.click(confirm)
+
+  expect(confirmSplitRequest).toHaveBeenCalledTimes(1)
+  expect(confirm).toBeDisabled()
+
+  await act(async () => {
+    pending.resolve({data: {chunks: []}})
+  })
+
+  expect(ModalsActions.onCloseModal).toHaveBeenCalledTimes(1)
+})
+
+test('Confirm is enabled again when the response has no chunks', async () => {
+  checkSplitRequest.mockResolvedValue({data: successData})
+  confirmSplitRequest.mockResolvedValue({data: {}})
+  render(
+    <SplitJobModal job={baseJob} project={baseProject} callback={jest.fn()} />,
+  )
+
+  const confirm = await screen.findByRole('button', {name: 'Confirm'})
+  fireEvent.click(confirm)
+
+  await waitFor(() => expect(confirm).toBeEnabled())
+  expect(ModalsActions.onCloseModal).not.toHaveBeenCalled()
+})
+
+test('Confirm is enabled again when the request fails without an error list', async () => {
+  checkSplitRequest.mockResolvedValue({data: successData})
+  // confirmSplitRequest rejects with the fetch Response itself on a non-ok status.
+  confirmSplitRequest.mockRejectedValue({ok: false, status: 500})
+  render(
+    <SplitJobModal job={baseJob} project={baseProject} callback={jest.fn()} />,
+  )
+
+  const confirm = await screen.findByRole('button', {name: 'Confirm'})
+  fireEvent.click(confirm)
+
+  await waitFor(() => expect(confirm).toBeEnabled())
+  expect(confirmSplitRequest).toHaveBeenCalledTimes(1)
 })

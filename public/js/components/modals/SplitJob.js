@@ -3,12 +3,7 @@ import {checkSplitRequest} from '../../api/checkSplitRequest'
 import {confirmSplitRequest} from '../../api/confirmSplitRequest'
 import CommonUtils from '../../utils/commonUtils'
 import ModalsActions from '../../actions/ModalsActions'
-import {
-  Button,
-  BUTTON_MODE,
-  
-  BUTTON_TYPE,
-} from '../common/Button/Button'
+import {Button, BUTTON_MODE, BUTTON_TYPE} from '../common/Button/Button'
 import Tooltip from '../common/Tooltip'
 import {SpinnerLoader} from '../common/SpinnerLoader'
 
@@ -26,8 +21,12 @@ const SplitJobModal = ({job, project, callback}) => {
   )
   const [splitData, setSplitData] = useState()
   const [jobSplttable, setJobSplittable] = useState(true)
+  const [isConfirming, setIsConfirming] = useState(false)
 
   const splitSelectRef = useRef(null)
+  // A second split-job-apply on the same job re-splits it on top of the first one.
+  // The ref blocks a second click that lands before React re-renders the disabled button.
+  const isConfirmingRef = useRef(false)
   const tooltipRef = useRef()
 
   useEffect(() => {
@@ -179,7 +178,16 @@ const SplitJobModal = ({job, project, callback}) => {
       })
   }
 
+  const releaseConfirm = () => {
+    isConfirmingRef.current = false
+    setIsConfirming(false)
+    setShowLoader(false)
+  }
+
   const confirmSplitJob = () => {
+    if (isConfirmingRef.current) return
+    isConfirmingRef.current = true
+    setIsConfirming(true)
     setShowLoader(true)
     let array = wordsArray.filter((item) => item > 0)
 
@@ -190,20 +198,27 @@ const SplitJobModal = ({job, project, callback}) => {
       array,
       splitRawWord,
     )
-      .then((d) => {
-        if (d.data && d.data.chunks) {
-          callback()
-          ModalsActions.onCloseModal()
-        }
-      })
-      .catch((errors) => {
-        if (typeof errors !== 'undefined' && errors.length) {
-          setErrorMsg(errors[0].message)
-          setShowError(true)
-          setShowLoader(false)
-          setSplitChecked(false)
-        }
-      })
+      // Two-argument then: an error thrown by callback() after a successful split must not
+      // reach the failure handler, which would enable Confirm again on a job already split.
+      .then(
+        (d) => {
+          if (d.data && d.data.chunks) {
+            callback()
+            ModalsActions.onCloseModal()
+          } else {
+            releaseConfirm()
+          }
+        },
+        (errors) => {
+          if (typeof errors !== 'undefined' && errors.length) {
+            setErrorMsg(errors[0].message)
+            setShowError(true)
+            setShowLoader(false)
+            setSplitChecked(false)
+          }
+          releaseConfirm()
+        },
+      )
   }
 
   const getJobParts = () => {
@@ -348,7 +363,11 @@ const SplitJobModal = ({job, project, callback}) => {
             Cancel
           </Button>
           {!showSplitDiffError && splitChecked && (
-            <Button type={BUTTON_TYPE.PRIMARY} onClick={confirmSplitJob}>
+            <Button
+              type={BUTTON_TYPE.PRIMARY}
+              onClick={confirmSplitJob}
+              disabled={isConfirming}
+            >
               Confirm
             </Button>
           )}
