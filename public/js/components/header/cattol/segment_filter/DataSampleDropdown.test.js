@@ -42,6 +42,19 @@ test('shows the placeholder label when disabled even with a sampling type set', 
   expect(screen.getByRole('button', {name: /Data sample/})).toBeDisabled()
 })
 
+// Regression: the dropdown list used to stay in the DOM at all times (only a CSS class
+// toggled visibility/opacity), so its layout space was still counted by an ancestor's
+// scrollHeight even while closed — this is what caused SubHeaderContainer's measured
+// Filters-panel height to include the closed dropdown's size.
+test('does not render the dropdown list in the DOM while closed', () => {
+  renderDropdown()
+  expect(screen.queryByPlaceholderText('n°')).not.toBeInTheDocument()
+  expect(screen.queryByText('Regular interval')).not.toBeInTheDocument()
+
+  fireEvent.click(screen.getByRole('button', {name: /Data sample/}))
+  expect(screen.getByPlaceholderText('n°')).toBeInTheDocument()
+})
+
 test('toggles the dropdown open state and registers a click listener', () => {
   const {container} = renderDropdown()
   const trigger = screen.getByRole('button', {name: /Data sample/})
@@ -67,12 +80,14 @@ test('toggles the dropdown open state and registers a click listener', () => {
 
 test('selecting a sampling type calls onChange with its value', () => {
   const {onChange} = renderDropdown()
+  fireEvent.click(screen.getByRole('button', {name: /Data sample/}))
   fireEvent.click(screen.getByText('Regular interval'))
   expect(onChange).toHaveBeenCalledWith('regular_intervals')
 })
 
 test('marks the currently selected sampling type as active', () => {
   renderDropdown({samplingType: 'regular_intervals'})
+  fireEvent.click(screen.getByRole('button', {name: /Regular interval/}))
 
   expect(screen.getByText('Regular interval').closest('li')).toHaveClass(
     'active',
@@ -84,6 +99,7 @@ test('marks the currently selected sampling type as active', () => {
 
 test('updates the sample size when a valid value is entered', () => {
   const {onChangeSampleSize} = renderDropdown()
+  fireEvent.click(screen.getByRole('button', {name: /Data sample/}))
   const input = screen.getByPlaceholderText('n°')
 
   fireEvent.change(input, {target: {value: '42'}})
@@ -94,6 +110,7 @@ test('updates the sample size when a valid value is entered', () => {
 
 test('ignores out of range or invalid sample size values', () => {
   const {onChangeSampleSize} = renderDropdown()
+  fireEvent.click(screen.getByRole('button', {name: /Data sample/}))
   const input = screen.getByPlaceholderText('n°')
 
   fireEvent.change(input, {target: {value: '0'}})

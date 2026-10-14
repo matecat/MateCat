@@ -51,6 +51,11 @@ jest.mock('../../../common/Dropdown', () => {
 
 beforeEach(() => {
   jest.clearAllMocks()
+  // DataSampleDropdown's own open/close toggle (click-outside-to-close) uses this
+  window.eventHandler = {
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+  }
   global.config = {
     isReview: false,
     secondRevisionsCount: false,
@@ -445,13 +450,18 @@ test('selecting a data sample type submits the filter with the sample type', () 
   jest.useFakeTimers()
   renderFilter()
 
+  // the dropdown trigger is disabled until data sampling itself is switched on
+  fireEvent.click(screen.getByRole('checkbox'))
+  fireEvent.click(screen.getByRole('button', {name: /Data sample/}))
   fireEvent.click(screen.getByText('Regular interval'))
   act(() => {
     jest.advanceTimersByTime(100)
   })
 
   expect(SegmentFilterUtils.filterSubmit).toHaveBeenCalledWith(
-    expect.objectContaining({sample: {type: 'regular_intervals'}}),
+    expect.objectContaining({
+      sample: expect.objectContaining({type: 'regular_intervals'}),
+    }),
     expect.objectContaining({samplingType: 'regular_intervals'}),
   )
 

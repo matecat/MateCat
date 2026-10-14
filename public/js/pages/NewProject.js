@@ -69,8 +69,7 @@ import {ANALYSIS_SCHEMA_KEYS} from '../components/settingsPanel/Contents/Analysi
 import {FILTERS_PARAMS_SCHEMA_KEYS} from '../components/settingsPanel/Contents/FileImportTab/FiltersParams/FiltersParams'
 import {XLIFF_SETTINGS_SCHEMA_KEYS} from '../components/settingsPanel/Contents/FileImportTab/XliffSettings/XliffSettings'
 import {DEEPL_GLOSSARY_ROW_NONE} from '../components/settingsPanel/Contents/MachineTranslationTab/DeepLGlossary'
-
-const SELECT_HEIGHT = 324
+import {SELECT_HEIGHT} from '../constants/Constants'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -907,7 +906,6 @@ const NewProject = () => {
   return isDeviceCompatible ? (
     <CreateProjectContext.Provider
       value={{
-        SELECT_HEIGHT,
         tmKeys,
         setTmKeys,
         languages: supportedLanguages,

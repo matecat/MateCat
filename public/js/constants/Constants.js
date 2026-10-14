@@ -77,3 +77,5 @@ export const DASHBOARD_REQUEST_PROJECTS_STATUS = {
   MORE_IN_PROGRESS: 'more_in_progress',
   COMPLETED: 'completed',
 }
+
+export const SELECT_HEIGHT = 325

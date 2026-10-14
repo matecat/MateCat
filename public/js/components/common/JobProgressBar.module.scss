@@ -25,6 +25,7 @@
   height: 100%;
   border-top-right-radius: 5px;
   border-bottom-right-radius: 5px;
+  transition: width 0.5s ease-out;
 }
 
 .translated-bar {

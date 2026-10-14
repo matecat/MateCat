@@ -6,15 +6,11 @@ import {orderTmKeys} from '../settingsPanel/Contents/TranslationMemoryGlossaryTa
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import HelpCircle from '../../../img/icons/HelpCircle'
 import IconAdd from '../../../img/icons/IconAdd'
+import {SELECT_HEIGHT} from '../../constants/Constants'
 
 export const TmGlossarySelect = () => {
-  const {
-    SELECT_HEIGHT,
-    tmKeys,
-    setOpenSettings,
-    modifyingCurrentTemplate,
-    projectTemplates,
-  } = useContext(CreateProjectContext)
+  const {tmKeys, setOpenSettings, modifyingCurrentTemplate, projectTemplates} =
+    useContext(CreateProjectContext)
   const {isUserLogged} = useContext(ApplicationWrapperContext)
 
   const tmKeyActive = Array.isArray(tmKeys)
