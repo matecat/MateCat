@@ -370,9 +370,14 @@ const SegmentCommentsContainer = () => {
         >
           <IconClose size={10} />
         </Button>
-        <div className="comments-wrap" ref={wrapRef}>
-          {htmlComments}
-        </div>
+        {comments.length > 0 && (
+          <div className="comments-wrap-container">
+            <div className="comments-wrap" ref={wrapRef}>
+              {htmlComments}
+            </div>
+          </div>
+        )}
+
         <div className="comment-thread comment-post-wrap comment-clearfix comment-first-input">
           <div className="comment-post">
             <span className="comment-label comment-username comment-username-label comment-truncate comment-anonymous-label">
