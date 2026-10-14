@@ -21,7 +21,7 @@ jest.mock('../../../common/Select', () => ({
   ),
 }))
 
-const createProjectValue = {SELECT_HEIGHT: 200}
+const createProjectValue = {}
 
 const renderMandatoryIssues = (
   mandatoryIssues,

@@ -85,9 +85,9 @@ export const ProductionSummary = ({
           <div className="percent">
             {Math.round(
               ((qualitySummary.get('revision_number') === 1
-                ? stats.equivalent.approved + stats.equivalent.approved2
-                : stats.equivalent.approved2) /
-                stats.equivalent.total) *
+                ? stats.raw.approved + stats.raw.approved2
+                : stats.raw.approved2) /
+                stats.raw.total) *
                 100,
             )}
             %

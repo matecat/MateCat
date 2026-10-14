@@ -108,41 +108,43 @@ export const DataSampleDropdown = ({
         )}
         <ChevronDown />
       </Button>
-      <div className={`dropdown${isDropdownVisible ? ' open' : ''}`}>
-        <ul>
-          <li className="sample-size-item">
-            <div className="sample-size-container">
-              <span>
-                Sample size <b>(%)</b>
-              </span>
-              <input
-                type="number"
-                placeholder="n°"
-                value={samplingSizeValue}
-                onChange={(event) => {
-                  let value = parseInt(event.target.value, 10)
-                  if (value > 0 && value <= 100) {
-                    setSamplingSizeValue(value)
-                    onChangeSampleSize(value)
-                  }
-                }}
-              />
-            </div>
-            <div className="divider" />
-          </li>
-          {samplingTypeMap.map((item) => (
-            <li
-              className={item.value === samplingType ? 'active' : ''}
-              key={item.value}
-              onClick={() => {
-                onChange(item.value)
-              }}
-            >
-              <div className="type-item">{item.label}</div>
+      {isDropdownVisible && (
+        <div className="dropdown open">
+          <ul>
+            <li className="sample-size-item">
+              <div className="sample-size-container">
+                <span>
+                  Sample size <b>(%)</b>
+                </span>
+                <input
+                  type="number"
+                  placeholder="n°"
+                  value={samplingSizeValue}
+                  onChange={(event) => {
+                    let value = parseInt(event.target.value, 10)
+                    if (value > 0 && value <= 100) {
+                      setSamplingSizeValue(value)
+                      onChangeSampleSize(value)
+                    }
+                  }}
+                />
+              </div>
+              <div className="divider" />
             </li>
-          ))}
-        </ul>
-      </div>
+            {samplingTypeMap.map((item) => (
+              <li
+                className={item.value === samplingType ? 'active' : ''}
+                key={item.value}
+                onClick={() => {
+                  onChange(item.value)
+                }}
+              >
+                <div className="type-item">{item.label}</div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   )
 }
