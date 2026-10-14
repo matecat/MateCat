@@ -1,6 +1,9 @@
-.alert_modal {
+.modal-grid.alert_modal {
   .matecat-modal-body {
     padding: 30px !important;
+    // The generic modal body rule centres the box with `margin: 0 auto`, which
+    // shrinks it to the text inside the flex column and centres short messages
+    margin: 0;
 
     p {
       line-height: 25px;

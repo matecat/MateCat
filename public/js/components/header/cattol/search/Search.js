@@ -16,13 +16,28 @@ import AlertModal from '../../../modals/AlertModal'
 import ModalsActions from '../../../../actions/ModalsActions'
 import {tagSignatures} from '../../../segments/utils/DraftMatecatUtils/tagModel'
 import CommonUtils from '../../../../utils/commonUtils'
-import {REVISE_STEP_NUMBER} from '../../../../constants/Constants'
+import {
+  REVISE_STEP_NUMBER,
+  SEGMENTS_STATUS,
+} from '../../../../constants/Constants'
 import {Select} from '../../../common/Select'
 import {segmentTranslation} from '../../../../setTranslationUtil'
 import {Button, BUTTON_MODE, BUTTON_SIZE} from '../../../common/Button/Button'
 import ChevronLeft from '../../../../../img/icons/ChevronLeft'
 import ChevronRight from '../../../../../img/icons/ChevronRight'
 import {MODAL_KEY} from '../../../../constants/ModalKeys'
+
+// Mirrors TranslationStatus::$REVISION_STATUSES on the server
+const REVISION_STATUSES = [
+  SEGMENTS_STATUS.APPROVED,
+  SEGMENTS_STATUS.APPROVED2,
+  'REJECTED',
+]
+
+const isRevisedSegmentInTranslate = (segment) =>
+  !config.isReview &&
+  !!segment &&
+  REVISION_STATUSES.includes(segment.status?.toUpperCase())
 
 // mirrors the class's `defaultState.search` object, used both as the initial
 // value and as the value restored by handleCancelClick/handleClearClick
@@ -211,15 +226,39 @@ const Search = (props) => {
     // replace the next occurrence, or nothing at all when it was the last one.
     // It is applied synchronously to the store, so the segment read below
     // already carries the new text and that is what gets saved.
+    const sid = occurrencesList[featuredSearchResult]
+    const previousTranslation =
+      SegmentStore.getSegmentByIdToJS(sid)?.translation
+
+    // The server refuses to save a revised segment from the translate page,
+    // so refuse here too, before the text is changed
+    if (isRevisedSegmentInTranslate(SegmentStore.getSegmentByIdToJS(sid))) {
+      ModalsActions.showModalComponent(
+        MODAL_KEY.ALERT,
+        {text: 'Setting revised state from translation is not allowed.'},
+        'Error',
+      )
+      return false
+    }
+
     SegmentActions.replaceCurrentSearch(search.replaceTarget)
 
     setTimeout(() => {
-      const segment = SegmentStore.getSegmentByIdToJS(
-        occurrencesList[featuredSearchResult],
-      )
+      const segment = SegmentStore.getSegmentByIdToJS(sid)
       if (segment) {
         updateAfterReplace(segment.original_sid)
-        segmentTranslation(segment, segment.status, () => {}, false)
+        segmentTranslation(
+          segment,
+          segment.status,
+          () => {},
+          false,
+          () => {
+            // The server refused the replacement: put the text back and
+            // search again, so the results match what is actually saved
+            SegmentActions.replaceEditAreaTextContent(sid, previousTranslation)
+            SearchUtils.execFind(search)
+          },
+        )
       }
     })
   }

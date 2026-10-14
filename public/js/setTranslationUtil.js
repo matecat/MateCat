@@ -21,6 +21,7 @@ export const segmentTranslation = (
   status,
   callback,
   propagateIfNeeded = true,
+  errorCallback,
 ) => {
   if (!segment) return
   const segmentIsToPropagate =
@@ -34,6 +35,7 @@ export const segmentTranslation = (
       propagate,
       autoPropagate,
       callback,
+      errorCallback,
     })
     // Remove the modified class only if the segment is not in draft or new status
     if (
@@ -156,6 +158,7 @@ const setTranslationTail = ({
   propagate,
   autoPropagate,
   callback,
+  errorCallback,
 }) => {
   const queueItem = {
     segment,
@@ -163,6 +166,7 @@ const setTranslationTail = ({
     propagate,
     autoPropagate,
     callback,
+    errorCallback,
   }
   //Check if the translation is not already in the tail
   const saveTranslation = translationIsToSave(segment)
@@ -205,7 +209,7 @@ const setTranslationTail = ({
 export const execSetTranslationTail = () => {
   if (!setTranslationQueue.length) return
   const item = setTranslationQueue.shift()
-  const {segment, status, propagate, callback} = item
+  const {segment, status, propagate, callback, errorCallback} = item
   const idSegment = segment.sid
   SegmentStore.setLastTranslatedSegmentId(segment.sid)
   const translateRequest = SegmentUtils.createSetTranslationRequest(
@@ -235,6 +239,8 @@ export const execSetTranslationTail = () => {
     .catch(({errors}) => {
       if (errors && errors.length) {
         CatToolActions.processErrors(errors, 'setTranslation')
+        // The server refused the translation: it will not be retried
+        errorCallback?.(errors)
       } else {
         //Add to setTranslation tail
         setTranslationQueue.push(item)
@@ -274,7 +280,9 @@ const checkSegmentsPropagation = (item, propagationData) => {
     }
     if (!autoPropagate && propagationData.segments_for_propagation) {
       let text = (
-        <>The segment translation has been propagated to the other repetitions.</>
+        <>
+          The segment translation has been propagated to the other repetitions.
+        </>
       )
       if (
         propagationData.segments_for_propagation.not_propagated &&
