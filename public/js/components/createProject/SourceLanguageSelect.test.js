@@ -19,7 +19,6 @@ const renderWithContext = (
   appOverrides = {isUserLogged: true},
 ) => {
   const createProjectValue = {
-    SELECT_HEIGHT: 300,
     languages,
     sourceLang: {},
     changeSourceLanguage: jest.fn(),

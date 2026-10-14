@@ -22,9 +22,7 @@ jest.mock('../../../common/Select', () => ({
 
 const renderSubject = (subject, setSubject = jest.fn()) =>
   render(
-    <CreateProjectContext.Provider
-      value={{SELECT_HEIGHT: 200, subject, setSubject}}
-    >
+    <CreateProjectContext.Provider value={{subject, setSubject}}>
       <Subject />
     </CreateProjectContext.Provider>,
   )

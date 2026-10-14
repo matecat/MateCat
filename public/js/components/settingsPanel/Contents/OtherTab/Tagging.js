@@ -1,10 +1,10 @@
 import React, {useCallback, useContext, useMemo, useRef} from 'react'
 import {Select} from '../../../common/Select'
-import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import SegmentActions from '../../../../actions/SegmentActions'
 import CatToolActions from '../../../../actions/CatToolActions'
 import SegmentStore from '../../../../stores/SegmentStore'
+import {SELECT_HEIGHT} from '../../../../constants/Constants'
 
 export const taggingTypes = [
   {id: 'markup', name: 'Markup', code: '<text>', default: true},
@@ -58,7 +58,6 @@ export const taggingTypes = [
 ]
 
 export const Tagging = () => {
-  const {SELECT_HEIGHT} = useContext(CreateProjectContext)
   const {currentProjectTemplate, modifyingCurrentTemplate} =
     useContext(SettingsPanelContext)
 
@@ -118,12 +117,6 @@ export const Tagging = () => {
           (valueB) => value === valueB,
         ),
       )
-    console.log(
-      'shouldUpdateRender',
-      shouldUpdateRender,
-      currentProjectTemplate?.subfilteringHandlers,
-      previousSubfilteringHandlers.current,
-    )
     if (config.is_cattool && shouldUpdateRender) {
       SegmentActions.removeAllSegments()
       CatToolActions.onRender({
