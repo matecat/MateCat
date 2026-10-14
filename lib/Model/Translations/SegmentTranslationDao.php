@@ -218,6 +218,10 @@ class SegmentTranslationDao extends AbstractDao
             $rowCount += $stmt->rowCount();
         }
 
+        foreach (array_unique(array_map(fn(SegmentTranslationStruct $row) => (int)$row->id_job, $translation_struct)) as $id_job) {
+            $this->destroyWarningsCountCache($id_job);
+        }
+
         return $rowCount;
     }
 
@@ -296,6 +300,10 @@ class SegmentTranslationDao extends AbstractDao
         $stmt->execute($data);
 
         $rc = $stmt->rowCount();
+        if ($rc > 0) {
+            $this->destroyWarningsCountCache((int)$data['id_job']);
+        }
+
         if ($rc === 0) {
             return $this->isTranslationSkipped(
                 (int)($data['id_segment'] ?? throw new Exception('Missing id_segment in data')),
@@ -408,6 +416,7 @@ class SegmentTranslationDao extends AbstractDao
      *
      * @return int
      * @throws PDOException
+     * @throws Exception
      */
     public function addTranslation(SegmentTranslationStruct $translation_struct, bool $is_revision): int
     {
@@ -494,6 +503,8 @@ class SegmentTranslationDao extends AbstractDao
             throw new PDOException("Error when (UPDATE) the translation for the segment {$translation['id_segment']} - Error: {$e->getCode()}");
         }
 
+        $this->destroyWarningsCountCache((int)$translation_struct->id_job);
+
         return $stmt->rowCount();
     }
 
@@ -517,7 +528,22 @@ class SegmentTranslationDao extends AbstractDao
             $values['fields'][] = 'version_number';
         }
 
-        return $this->updateStruct($translation_struct, $values);
+        $rowCount = $this->updateStruct($translation_struct, $values);
+        $this->destroyWarningsCountCache((int)$translation_struct->id_job);
+
+        return $rowCount;
+    }
+
+    /**
+     * `warnings_count` reads segment_translations.warning and .status through a cached query: every
+     * write that can change either one has to evict it, or the PM-facing flag lags behind.
+     *
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    private function destroyWarningsCountCache(int $id_job): void
+    {
+        (new WarningDao($this->database))->destroyWarningsCountCache($id_job);
     }
 
     /**

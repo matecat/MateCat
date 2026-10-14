@@ -54,27 +54,25 @@ class GetWarningController extends KleinController
         $id_job = $request['id_job'];
         $password = $request['password'];
 
-        try {
-            $chunk = $this->getChunkAndLoadProjectFeatures($id_job, $password);
-            $warnings = (new WarningDao($this->getDatabase()))->getWarningsByJobIdAndPassword((int) $id_job, $password);
-            $tMismatch = (new SegmentDao($this->getDatabase()))->setCacheTTL(10 * 60 /* 10-minute cache */)->getTranslationsMismatches((int) $id_job, $password);
+        // No catch-all here: an empty payload reads as "this job has no warnings", which is
+        // the one answer a caller (OMP flags jobs for PMs off it) must never get by mistake.
+        // A wrong password is a 404, anything else an error the client can see.
+        $this->getChunkAndLoadProjectFeatures($id_job, $password);
+        $warnings = (new WarningDao($this->getDatabase()))->getWarningsByJobIdAndPassword((int) $id_job, $password);
+        // Uncached on purpose: a warning added on the last segment before delivery must show up at once.
+        $tMismatch = (new SegmentDao($this->getDatabase()))->getTranslationsMismatches((int) $id_job, $password);
 
-            $qa = new QAGlobalWarning($warnings, $tMismatch);
+        $qa = new QAGlobalWarning($warnings, $tMismatch);
 
-            $result = array_merge(
-                [
-                    'data' => [],
-                    'errors' => [],
-                ],
-                $qa->render()
-            );
+        $result = array_merge(
+            [
+                'data' => [],
+                'errors' => [],
+            ],
+            $qa->render()
+        );
 
-            $this->response->json($result);
-        } catch (Exception) {
-            $this->response->json([
-                'details' => []
-            ]);
-        }
+        $this->response->json($result);
     }
 
     /**
