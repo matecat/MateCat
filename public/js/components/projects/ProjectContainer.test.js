@@ -537,8 +537,8 @@ test('shows only the first 5 jobs with a View more toggle when a project has mor
 
   // the collapse wrapper defers unmounting the extra jobs until its height
   // transition ends, so the collapse animation is actually visible
-  const collapseWrapper =
-    screen.getByTestId(manyJobs[5].id).parentElement.parentElement
+  // eslint-disable-next-line testing-library/no-node-access
+  const collapseWrapper = screen.getByTestId(manyJobs[5].id).parentElement.parentElement
 
   await userEvent.click(toggle)
 

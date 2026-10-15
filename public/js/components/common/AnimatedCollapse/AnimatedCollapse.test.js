@@ -41,7 +41,9 @@ describe('AnimatedCollapse', () => {
         <div>revealed content</div>
       </AnimatedCollapse>,
     )
+    // eslint-disable-next-line testing-library/no-node-access
     const wrapper = container.firstChild
+    // eslint-disable-next-line testing-library/no-node-access
     const content = wrapper.firstChild
     Object.defineProperty(content, 'scrollHeight', {
       value: 120,
@@ -55,6 +57,7 @@ describe('AnimatedCollapse', () => {
     )
 
     expect(screen.getByText('revealed content')).toBeInTheDocument()
+    // eslint-disable-next-line jest-dom/prefer-to-have-style
     expect(wrapper.style.height).toBe('120px')
   })
 
@@ -64,6 +67,7 @@ describe('AnimatedCollapse', () => {
         <div>closing content</div>
       </AnimatedCollapse>,
     )
+    // eslint-disable-next-line testing-library/no-node-access
     const wrapper = container.firstChild
 
     rerender(
@@ -74,6 +78,7 @@ describe('AnimatedCollapse', () => {
 
     // still mounted mid-transition so the collapse is visible
     expect(screen.getByText('closing content')).toBeInTheDocument()
+    // eslint-disable-next-line jest-dom/prefer-to-have-style
     expect(wrapper.style.height).toBe('0px')
 
     dispatchTransitionEnd(wrapper)
@@ -87,6 +92,7 @@ describe('AnimatedCollapse', () => {
         <div>content</div>
       </AnimatedCollapse>,
     )
+    // eslint-disable-next-line testing-library/no-node-access
     const wrapper = container.firstChild
 
     rerender(
@@ -108,6 +114,7 @@ describe('AnimatedCollapse', () => {
         <div>content</div>
       </AnimatedCollapse>,
     )
+    // eslint-disable-next-line testing-library/no-node-access
     expect(container.firstChild).toHaveClass('extra-class')
   })
 

@@ -666,7 +666,8 @@ const SegmentActions = {
       {
         text: (
           <>
-            This segment is locked and shouldn't be edited. If you really need
+            This segment is locked and shouldn&apos;t be edited. If you really
+            need
             to make a change, click the padlock icon to the left of the segment
             to unlock it.
             <br />

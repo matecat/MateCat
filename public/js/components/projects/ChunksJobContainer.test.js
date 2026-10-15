@@ -459,8 +459,8 @@ test('shows only the first 5 chunks with a View more toggle when there are more 
 
   // the collapse wrapper defers unmounting the extra chunks until its height
   // transition ends, so the collapse animation is actually visible
-  const collapseWrapper = screen.getByTestId('job-container-95-6').parentElement
-    .parentElement
+  // eslint-disable-next-line testing-library/no-node-access
+  const collapseWrapper = screen.getByTestId('job-container-95-6').parentElement.parentElement
 
   await userEvent.click(toggle)
 
