@@ -2,7 +2,6 @@
 
 namespace Controller\API\V3;
 
-use Controller\Abstracts\AbstractDownloadController;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthorizationError;
 use Controller\Exceptions\RenderTerminatedException;
@@ -18,6 +17,7 @@ use Model\QualityReport\QualityReportSegmentModel;
 use TypeError;
 use Utils\Files\CsvCell;
 use Utils\Registry\AppConfig;
+use Utils\Tools\ContentDisposition;
 
 
 class DownloadQRController extends KleinController
@@ -565,7 +565,7 @@ class DownloadQRController extends KleinController
         // built from the job password, which getByIdAndPasswordOrFail() has already matched against
         // a generated random string, so it cannot hold a quote or a CR today; that safety comes from
         // the lookup rather than from this line, which is why the line gets its own.
-        $safeFilename = AbstractDownloadController::sanitizeContentDispositionFilename($filename);
+        $contentDisposition = ContentDisposition::build($filename);
 
         $outputContent = file_get_contents($filePath);
         if ($outputContent === false) {
@@ -583,7 +583,7 @@ class DownloadQRController extends KleinController
             header("Cache-Control: post-check=0, pre-check=0", false);
             header("Pragma: no-cache");
             header("Content-Type: $mimeType");
-            header("Content-Disposition: attachment; filename=\"$safeFilename\"");
+            header("Content-Disposition: $contentDisposition");
             header("Expires: 0");
             header("Connection: close");
             header("Content-Length: " . strlen($outputContent));
