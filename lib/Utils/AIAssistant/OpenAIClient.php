@@ -86,7 +86,7 @@ Return your classification and a brief explanation (2–3 lines) in JSON format.
                 ],
             ],
             'temperature' => 1.0,
-            'max_tokens' => $realMaxTokens,
+            'max_completion_tokens' => $realMaxTokens,
             'frequency_penalty' => 0,
             'presence_penalty' => 0,
             "stream" => false,
@@ -160,6 +160,10 @@ Return your classification and a brief explanation (2–3 lines) in JSON format.
                     "content" => $content
                 ],
             ],
+            'max_completion_tokens' => $realMaxTokens,
+            'temperature' => 1.0,
+            'frequency_penalty' => 0,
+            'presence_penalty' => 0,
             "stream" => true,
         ];
 
