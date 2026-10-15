@@ -5,6 +5,7 @@ namespace Controller\API\App;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\API\Commons\Exceptions\ValidationError as ControllerValidationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use DomainException;
 use Exception;
@@ -280,6 +281,7 @@ class GetSegmentsController extends KleinController
      * @throws EndQueueException
      * @throws ReQueueException
      * @throws ValidationError
+     * @throws ControllerValidationError
      * @throws \Model\Exceptions\NotFoundException
      * @throws DomainException
      */

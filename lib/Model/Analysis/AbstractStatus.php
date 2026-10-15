@@ -3,6 +3,7 @@
 namespace Model\Analysis;
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\ValidationError as ControllerValidationError;
 use Exception;
 use Matecat\Locales\LanguageDomains;
 use Model\Analysis\Constants\MatchConstantsFactory;
@@ -180,6 +181,7 @@ abstract class AbstractStatus
      * @throws NotFoundException
      * @throws ReQueueException
      * @throws ValidationError
+     * @throws ControllerValidationError
      */
     protected function isOutsourceEnabled(string $targetLang, string $id_customer, int $idJob): bool
     {
