@@ -346,7 +346,29 @@ class S3FilesStorage extends AbstractFilesStorage
         $prefix = $this->getCachePackageHashFolder($hash, $lang) . DIRECTORY_SEPARATOR . $keyToSearch; // example: c1/68/9bd71f45e76fd5e428f35c00d1f289a7e9e9__it-IT/work
         $items = $this->s3Client->getItemsInABucket(['bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $prefix]);
 
-        return (isset($items[0])) ? $items[0] : false;
+        return $this->pickPreferredKey($items, $hash . '.');
+    }
+
+    /**
+     * Returns the key whose last part starts with $preferredPrefix, otherwise the first key.
+     *
+     * A cache package written before the storage names were hashed can hold a legacy object next to a hashed one:
+     * the prefix makes the choice deterministic.
+     *
+     * @param array<int|string, string> $keys
+     * @param string $preferredPrefix
+     *
+     * @return false|string
+     */
+    private function pickPreferredKey(array $keys, string $preferredPrefix): false|string
+    {
+        foreach ($keys as $key) {
+            if (str_starts_with((string)$this->getTheLastPartOfKey($key), $preferredPrefix)) {
+                return $key;
+            }
+        }
+
+        return empty($keys) ? false : reset($keys);
     }
 
     /**
@@ -376,15 +398,11 @@ class S3FilesStorage extends AbstractFilesStorage
         $workPrefix = $this->getCachePackageHashFolder($hash, $lang) . '/work';
 
         // get records from S3 cache
-        $origItems = $this->s3Client->getItemsInABucket(['bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $origPrefix]);
-        $workItems = $this->s3Client->getItemsInABucket(['bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $workPrefix]);
-        $sourceItems = array_merge($origItems, $workItems);
+        $sourceItems = $this->getCachePackageItemsToCopy($origPrefix, $workPrefix, $hash, false);
 
         // if $sourceItems is empty, try to get the records from S3, skipping the cache
         if (empty($sourceItems)) {
-            $origItems = $this->s3Client->getItemsInABucket(['bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $origPrefix, 'exclude-cache' => true]);
-            $workItems = $this->s3Client->getItemsInABucket(['bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $workPrefix, 'exclude-cache' => true]);
-            $sourceItems = array_merge($origItems, $workItems);
+            $sourceItems = $this->getCachePackageItemsToCopy($origPrefix, $workPrefix, $hash, true);
         }
 
         // if $sourceItems is still empty, return false and then throw an Exception
@@ -426,6 +444,36 @@ class S3FilesStorage extends AbstractFilesStorage
 
             throw $e;
         }
+    }
+
+    /**
+     * One original and one xliff out of the cache package: a package written before the storage names were hashed can
+     * hold a legacy object next to a hashed one, and a project needs exactly one of each.
+     *
+     * @param string $origPrefix
+     * @param string $workPrefix
+     * @param string $hash
+     * @param bool $excludeCache
+     *
+     * @return list<string>
+     */
+    private function getCachePackageItemsToCopy(string $origPrefix, string $workPrefix, string $hash, bool $excludeCache): array
+    {
+        $items = [];
+
+        foreach ([$origPrefix, $workPrefix] as $prefix) {
+            $params = ['bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $prefix];
+            if ($excludeCache) {
+                $params['exclude-cache'] = true;
+            }
+
+            $key = $this->pickPreferredKey($this->s3Client->getItemsInABucket($params), $hash . '.');
+            if ($key !== false) {
+                $items[] = $key;
+            }
+        }
+
+        return $items;
     }
 
     /**
@@ -564,6 +612,56 @@ class S3FilesStorage extends AbstractFilesStorage
 
         (new RedisHandler())->getConnection()->hset(self::getUploadSessionSafeName($uploadSession), 'file_map', serialize($hasSet));
         $this->filesystem->deleteDir(AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession);
+    }
+
+    /**
+     * Downloads a file of the upload session from the queue folder to $uploadDir, under its original name.
+     *
+     * A file queued before the storage names were hashed is found under its legacy name.
+     *
+     * @param string $uploadDir
+     * @param string $fileName
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function downloadQueueFile(string $uploadDir, string $fileName): void
+    {
+        $prefix = self::QUEUE_FOLDER . DIRECTORY_SEPARATOR . self::getUploadSessionSafeName((string)$this->getTheLastPartOfKey($uploadDir));
+
+        $key = $prefix . DIRECTORY_SEPARATOR . static::getStorageFileName($fileName);
+        if (!$this->s3Client->hasItem(['bucket' => static::$FILES_STORAGE_BUCKET, 'key' => $key])) {
+            $key = $prefix . DIRECTORY_SEPARATOR . $this->getLegacyQueueFileName($prefix, $fileName);
+        }
+
+        $this->s3Client->downloadItem([
+            'bucket' => static::$FILES_STORAGE_BUCKET,
+            'key' => $key,
+            'save_as' => $uploadDir . DIRECTORY_SEPARATOR . $fileName,
+        ]);
+    }
+
+    /**
+     * The name a file got in the queue folder before the storage names were hashed: the extension lowercased, and the
+     * name replaced by the sha1 of its stem only when the key was too long.
+     *
+     * @param string $prefix
+     * @param string $fileName
+     *
+     * @return string
+     */
+    private function getLegacyQueueFileName(string $prefix, string $fileName): string
+    {
+        /** @var array{dirname?: string, basename?: string, extension?: string, filename?: string} $fileInfo */
+        $fileInfo = AbstractFilesStorage::pathinfo_fix($fileName);
+
+        if (empty($fileInfo['filename']) || empty($fileInfo['extension'])) {
+            return $fileName;
+        }
+
+        $stem = strlen(urlencode($prefix . DIRECTORY_SEPARATOR . $fileInfo['filename'])) > 221 ? sha1($fileInfo['filename']) : $fileInfo['filename'];
+
+        return $stem . '.' . $fileInfo['extension'];
     }
 
     /**
@@ -816,7 +914,15 @@ class S3FilesStorage extends AbstractFilesStorage
      */
     public function getOriginalZipPath(string $projectDate, string $projectID, string $zipName): string
     {
-        return self::ZIP_FOLDER . DIRECTORY_SEPARATOR . $this->getDatePath($projectDate) . DIRECTORY_SEPARATOR . $projectID . DIRECTORY_SEPARATOR . $zipName;
+        $zipDir = self::ZIP_FOLDER . DIRECTORY_SEPARATOR . $this->getDatePath($projectDate) . DIRECTORY_SEPARATOR . $projectID;
+
+        $storedKey = $zipDir . DIRECTORY_SEPARATOR . static::getStorageFileName($zipName);
+        if ($this->s3Client->hasItem(['bucket' => static::$FILES_STORAGE_BUCKET, 'key' => $storedKey])) {
+            return $storedKey;
+        }
+
+        // a zip stored before the names were hashed keeps its original name
+        return $zipDir . DIRECTORY_SEPARATOR . $zipName;
     }
 
     /**
@@ -836,6 +942,18 @@ class S3FilesStorage extends AbstractFilesStorage
      * 6. GENERAL METHODS
      **********************************************************************************************
      */
+
+    /**
+     * The object stored under $key, with its metadata (ContentLength, ContentType).
+     *
+     * @param string $key
+     *
+     * @return array<string, mixed>
+     */
+    public function getItem(string $key): array
+    {
+        return $this->s3Client->getItem(['bucket' => static::$FILES_STORAGE_BUCKET, 'key' => $key]);
+    }
 
     /**
      * Get the last part of key (exploded by /) from an S3 complete key.
