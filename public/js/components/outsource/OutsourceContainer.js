@@ -1,4 +1,5 @@
 import React, {useCallback, useEffect, useRef} from 'react'
+import PropTypes from 'prop-types'
 import Cookies from 'js-cookie'
 import {TransitionGroup, CSSTransition} from 'react-transition-group'
 
@@ -32,6 +33,8 @@ const OutsourceContainer = ({
   project,
   extendedView = true,
   onClickOutside,
+  outsourceEnabled = config.enable_outsource,
+  serviceLoginUrl,
 }) => {
   const containerRef = useRef(null)
 
@@ -87,7 +90,7 @@ const OutsourceContainer = ({
   }, [openOutsource, showTranslatorBox, handleDocumentClick, handleEscKey])
 
   const outsourceContainerClass =
-    !config.enable_outsource || (showTranslatorBox && !openOutsource)
+    !outsourceEnabled || (showTranslatorBox && !openOutsource)
       ? 'no-outsource'
       : showTranslatorBox && openOutsource
         ? 'showTranslator'
@@ -114,12 +117,14 @@ const OutsourceContainer = ({
                 closeOutsource={onClickOutside}
               />
             ) : null}
-            {config.enable_outsource && openOutsource ? (
+            {outsourceEnabled && openOutsource ? (
               <OutsourceVendor
                 project={project}
                 job={job}
                 extendedView={extendedView}
                 standardWC={standardWC}
+                outsourceEnabled={outsourceEnabled}
+                serviceLoginUrl={serviceLoginUrl}
               />
             ) : null}
           </div>
@@ -127,6 +132,23 @@ const OutsourceContainer = ({
       ) : null}
     </TransitionGroup>
   )
+}
+
+OutsourceContainer.propTypes = {
+  openOutsource: PropTypes.any,
+  showTranslatorBox: PropTypes.bool,
+  idJobLabel: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  job: PropTypes.object,
+  standardWC: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  project: PropTypes.object,
+  extendedView: PropTypes.bool,
+  onClickOutside: PropTypes.func,
+  outsourceEnabled: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.number,
+    PropTypes.string,
+  ]),
+  serviceLoginUrl: PropTypes.string,
 }
 
 export default OutsourceContainer

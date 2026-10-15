@@ -1,6 +1,9 @@
-import React, {useCallback, useRef, useState} from 'react'
+import React, {useCallback, useMemo, useRef, useState} from 'react'
+import PropTypes from 'prop-types'
 import Cookies from 'js-cookie'
-import useOutsourceQuote from '../../hooks/useOutsourceQuote'
+import useOutsourceQuote, {
+  evictOutsourceQuoteCache,
+} from '../../hooks/useOutsourceQuote'
 import useCurrencyRates from '../../hooks/useCurrencyRates'
 import OutsourceInfo from './OutsourceInfo'
 import OutsourceLoader from './components/OutsourceLoader'
@@ -23,6 +26,8 @@ const OutsourceVendor = ({
   extendedView: extendedViewProp,
   standardWC,
   translatorsNumber,
+  outsourceEnabled = config.enable_outsource,
+  serviceLoginUrl = config.outsource_service_login,
 }) => {
   const [extendedView, setExtendedView] = useState(extendedViewProp)
   const [needItFaster, setNeedItFaster] = useState(false)
@@ -30,6 +35,16 @@ const OutsourceVendor = ({
 
   const outsourceFormRef = useRef(null)
   const timezoneRef = useRef(Cookies.get('matecat_timezone'))
+
+  // The hook takes plain values: convert the Immutable job outsource record here
+  const immutableJobOutsource = job.get('outsource')
+  const jobOutsource = useMemo(
+    () =>
+      immutableJobOutsource && immutableJobOutsource.toJS
+        ? immutableJobOutsource.toJS()
+        : (immutableJobOutsource ?? null),
+    [immutableJobOutsource],
+  )
 
   // --- Hooks ---
   const {
@@ -65,7 +80,15 @@ const OutsourceVendor = ({
     updateTimezoneRef,
     getDeliveryDateFromQuote,
     checkChosenDateIsAfter,
-  } = useOutsourceQuote({job, project, getCurrentCurrency})
+  } = useOutsourceQuote({
+    projectId: project.get('id'),
+    projectPassword: project.get('password'),
+    jobId: job.get('id'),
+    jobPassword: job.get('password'),
+    jobOutsource,
+    enabled: !!outsourceEnabled,
+    getCurrentCurrency,
+  })
 
   // --- Derived values ---
   const priceCurrencySymbol =
@@ -153,12 +176,15 @@ const OutsourceVendor = ({
     )
     form.submit()
     form.querySelector('input[name=quoteData]').value = ''
+    // The job is being ordered: no cached quote may offer it again
+    evictOutsourceQuoteCache(job.get('id'), job.get('password'))
 
     CommonUtils.dispatchAnalyticsEvents({
       event: 'outsource_clicked',
       quote_data: quoteResponseRef.current,
     })
   }, [
+    job,
     chunkQuote,
     quoteResponseRef,
     urlOkRef,
@@ -244,7 +270,7 @@ const OutsourceVendor = ({
 
       <form
         id="continueForm"
-        action={config.outsource_service_login}
+        action={serviceLoginUrl}
         method="POST"
         target="_blank"
         ref={outsourceFormRef}
@@ -344,5 +370,19 @@ const CompactView = ({
     )}
   </>
 )
+
+OutsourceVendor.propTypes = {
+  job: PropTypes.object.isRequired,
+  project: PropTypes.object.isRequired,
+  extendedView: PropTypes.bool,
+  standardWC: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  translatorsNumber: PropTypes.object,
+  outsourceEnabled: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.number,
+    PropTypes.string,
+  ]),
+  serviceLoginUrl: PropTypes.string,
+}
 
 export default OutsourceVendor

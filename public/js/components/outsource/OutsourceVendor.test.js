@@ -4,7 +4,9 @@ import {fromJS} from 'immutable'
 import Cookies from 'js-cookie'
 
 import OutsourceVendor from './OutsourceVendor'
-import useOutsourceQuote from '../../hooks/useOutsourceQuote'
+import useOutsourceQuote, {
+  evictOutsourceQuoteCache,
+} from '../../hooks/useOutsourceQuote'
 import useCurrencyRates from '../../hooks/useCurrencyRates'
 import UserStore from '../../stores/UserStore'
 import CommonUtils from '../../utils/commonUtils'
@@ -95,11 +97,11 @@ const makeQuoteHook = (overrides = {}) => ({
   ...overrides,
 })
 
-const baseJob = fromJS({outsource: null})
+const baseJob = fromJS({id: 10, password: 'jobpwd', outsource: null})
 
 const baseProps = {
   job: baseJob,
-  project: fromJS({id: 1}),
+  project: fromJS({id: 1, password: 'projpwd'}),
   extendedView: true,
   standardWC: 100,
   translatorsNumber: {asInt: 10, printable: '10'},
@@ -109,7 +111,11 @@ describe('OutsourceVendor', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     Cookies.set('matecat_timezone', '2')
-    global.config = {...global.config, outsource_service_login: 'http://login'}
+    global.config = {
+      ...global.config,
+      enable_outsource: 1,
+      outsource_service_login: 'http://login',
+    }
     useCurrencyRates.mockReturnValue(baseCurrencyHook)
     UserStore.getUser.mockReturnValue({user: {email: 'user@translated.net'}})
   })
@@ -226,6 +232,7 @@ describe('OutsourceVendor', () => {
     expect(dispatchSpy).toHaveBeenCalledWith(
       expect.objectContaining({event: 'outsource_clicked'}),
     )
+    expect(evictOutsourceQuoteCache).toHaveBeenCalledWith(10, 'jobpwd')
     dispatchSpy.mockRestore()
   })
 
@@ -326,5 +333,65 @@ describe('OutsourceVendor', () => {
 
     fireEvent.click(screen.getByText('toggle-revision'))
     expect(toggleRevision).toHaveBeenCalled()
+  })
+
+  test('calls the quote hook with plain values taken from the Immutable job and project', () => {
+    useOutsourceQuote.mockReturnValue(makeQuoteHook())
+    render(<OutsourceVendor {...baseProps} />)
+    expect(useOutsourceQuote).toHaveBeenCalledWith({
+      projectId: 1,
+      projectPassword: 'projpwd',
+      jobId: 10,
+      jobPassword: 'jobpwd',
+      jobOutsource: null,
+      enabled: true,
+      getCurrentCurrency: baseCurrencyHook.getCurrentCurrency,
+    })
+  })
+
+  test('converts the existing job outsource record to a plain object', () => {
+    const job = fromJS({
+      id: 10,
+      password: 'jobpwd',
+      outsource: {price: '100', delivery_date: '2026-08-05T00:00:00.000Z'},
+    })
+    useOutsourceQuote.mockReturnValue(makeQuoteHook())
+    render(<OutsourceVendor {...baseProps} job={job} />)
+    expect(useOutsourceQuote).toHaveBeenCalledWith(
+      expect.objectContaining({
+        jobOutsource: {
+          price: '100',
+          delivery_date: '2026-08-05T00:00:00.000Z',
+        },
+      }),
+    )
+  })
+
+  test('disables the quote hook when outsourceEnabled is false', () => {
+    useOutsourceQuote.mockReturnValue(makeQuoteHook())
+    render(<OutsourceVendor {...baseProps} outsourceEnabled={false} />)
+    expect(useOutsourceQuote).toHaveBeenCalledWith(
+      expect.objectContaining({enabled: false}),
+    )
+  })
+
+  test('posts the order form to config.outsource_service_login by default', () => {
+    useOutsourceQuote.mockReturnValue(makeQuoteHook())
+    render(<OutsourceVendor {...baseProps} />)
+    expect(document.forms.namedItem('continueForm')).toHaveAttribute(
+      'action',
+      'http://login',
+    )
+  })
+
+  test('posts the order form to serviceLoginUrl when provided', () => {
+    useOutsourceQuote.mockReturnValue(makeQuoteHook())
+    render(
+      <OutsourceVendor {...baseProps} serviceLoginUrl="http://other-login" />,
+    )
+    expect(document.forms.namedItem('continueForm')).toHaveAttribute(
+      'action',
+      'http://other-login',
+    )
   })
 })
