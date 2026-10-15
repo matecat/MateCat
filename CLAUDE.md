@@ -152,6 +152,8 @@ XDEBUG_MODE=coverage vendor/bin/phpunit tests/unit/Path/To/TestFile.php --exclud
 
 ## Static Analysis
 
+Always run the Full codebase check unless it is necessary. Always fix all the phpstan errors.
+
 ```bash
 # Full codebase
 vendor/bin/phpstan analyse --configuration=phpstan.neon --no-progress --error-format=table

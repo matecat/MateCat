@@ -3,6 +3,8 @@
 namespace Controller\API\V2;
 
 use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\ConflictError;
+use Controller\API\Commons\JobRestructureLock;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
@@ -30,6 +32,7 @@ class ChangePasswordController extends KleinController
 
     /**
      * @throws Exception
+     * @throws Throwable
      */
     public function changePassword(): void
     {
@@ -83,6 +86,7 @@ class ChangePasswordController extends KleinController
      *                           decides which password is rotated (GHSA-7q94-2fmr-3p42).
      * @param string $new_password
      *
+     * @throws ConflictError when a split, merge or another password change holds the job
      * @throws Exception
      * @throws Throwable
      */
@@ -99,7 +103,50 @@ class ChangePasswordController extends KleinController
             (new ProjectDao($this->getDatabase()))->changePassword($pStruct, $new_password);
         } else { // change job passwords
 
-            [$jDao, $jStruct, $rotatedReviewSourcePage] = $this->getDatabase()->transaction(function () use ($user, $id, $actual_pwd, $new_password): array {
+            $this->rotateJobPassword($user, $id, $actual_pwd, $new_password);
+        }
+    }
+
+    /**
+     * The per-job lock split, merge and change-password share. A seam, so tests run without Redis.
+     *
+     * @throws Exception
+     */
+    protected function restructureLock(): JobRestructureLock
+    {
+        return JobRestructureLock::forDefaultConnection();
+    }
+
+    /**
+     * @throws ConflictError when a split, merge or another password change holds the job
+     * @throws Exception
+     */
+    private function acquireJob(int $id): JobRestructureLock
+    {
+        $lock = $this->restructureLock();
+        $lock->acquire($id);
+
+        return $lock;
+    }
+
+    /**
+     * The job is taken once the caller is authorized, so nobody without standing over it can hold it,
+     * and before the rotation: a merge running meanwhile would otherwise sweep the credentials of the
+     * chunk passwords it had read, and miss the one renamed here. Released after the sweep, whether the
+     * rotation committed or not.
+     *
+     * @throws ConflictError when a split, merge or another password change holds the job
+     * @throws Exception
+     * @throws Throwable
+     */
+    private function rotateJobPassword(UserStruct $user, int $id, string $actual_pwd, string $new_password): void
+    {
+        // Set only once acquired, so a refused or unauthorized request never deletes another holder's
+        // key, and created only then, so Redis is not reached before the caller is authorized.
+        $lock = null;
+
+        try {
+            [$jDao, $jStruct, $rotatedReviewSourcePage] = $this->getDatabase()->transaction(function () use (&$lock, $user, $id, $actual_pwd, $new_password): array {
                 $jDao = new JobDao($this->getDatabase());
                 $jStruct = $jDao->getByIdAndPassword($id, $actual_pwd);
 
@@ -111,6 +158,7 @@ class ChangePasswordController extends KleinController
 
                     $pDao = new ProjectDao($this->getDatabase());
                     $this->checkUserPermissions($jStruct->getProject($pDao), $user);
+                    $lock = $this->acquireJob($id);
 
                     $jDao->changePassword($jStruct, $new_password);
                     FeatureSet::forProject($jStruct->getProject($pDao), $this->getDatabase())
@@ -132,13 +180,18 @@ class ChangePasswordController extends KleinController
                     $jStruct = $chunkReview->getChunk($jDao);
                     $pDao = new ProjectDao($this->getDatabase());
                     $this->checkUserPermissions($jStruct->getProject($pDao), $user);
+                    $lock = $this->acquireJob($id);
 
                     $source_page = $chunkReview->source_page;
                     $revision_number = ReviewUtils::sourcePageToRevisionNumber($source_page)
                         ?? throw new Exception('The matched review row does not belong to a revision phase');
                     $rotatedReviewSourcePage = (int)$source_page;
 
-                    $dao->updateReviewPassword($id, $actual_pwd, $new_password, $source_page);
+                    // The review row was read before the job was held: a merge or another rotation
+                    // committing in between leaves nothing with the old password to rename.
+                    if ($dao->updateReviewPassword($id, $actual_pwd, $new_password, $source_page) === 0 && $new_password !== $actual_pwd) {
+                        throw new ConflictError('This job was changed by another request, reload it and try again');
+                    }
                     FeatureSet::forProject($jStruct->getProject($pDao), $this->getDatabase())
                         ->dispatch(new ReviewPasswordChangedEvent($id, $actual_pwd, $new_password, $revision_number));
                 }
@@ -165,6 +218,8 @@ class ChangePasswordController extends KleinController
                     $new_password
                 );
             }
+        } finally {
+            $lock?->release($id);
         }
     }
 
