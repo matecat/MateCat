@@ -1,4 +1,5 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
+import {getFilenameFromContentDisposition} from '../../utils/contentDisposition'
 
 /**
  * Download Analysis Report
@@ -33,14 +34,10 @@ export const downloadAnalysisReport = async ({
   if (!response.ok) return Promise.reject(response)
 
   const blob = await response.blob()
-  const contentDisposition = response.headers.get('Content-Disposition')
-  let filename = 'analysis-report.zip'
-  if (contentDisposition) {
-    const match = contentDisposition.match(/filename="?([^";\n]+)"?/)
-    if (match?.[1]) {
-      filename = match[1]
-    }
-  }
+  const filename = getFilenameFromContentDisposition(
+    response.headers.get('Content-Disposition'),
+    'analysis-report.zip',
+  )
 
   const url = window.URL.createObjectURL(blob)
   const link = document.createElement('a')

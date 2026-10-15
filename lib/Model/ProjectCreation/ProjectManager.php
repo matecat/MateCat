@@ -856,18 +856,21 @@ class ProjectManager
      */
     public function getSingleS3QueueFile(string $fileName): void
     {
-        $fs = FilesStorageFactory::create();
-
         if (false === is_dir($this->uploadDir)) {
             mkdir($this->uploadDir, 0755);
         }
 
-        /** @var S3FilesStorage $fs */
-        $client = $fs::getStaticS3Client();
-        $params['bucket'] = AppConfig::$AWS_STORAGE_BASE_BUCKET;
-        $params['key'] = $fs::QUEUE_FOLDER . DIRECTORY_SEPARATOR . $fs::getUploadSessionSafeName((string)$fs->getTheLastPartOfKey($this->uploadDir)) . DIRECTORY_SEPARATOR . $fileName;
-        $params['save_as'] = "$this->uploadDir/$fileName";
-        $client->downloadItem($params);
+        $this->getS3FilesStorage()->downloadQueueFile($this->uploadDir, $fileName);
+    }
+
+    /**
+     * @return S3FilesStorage
+     * @throws Exception
+     * @throws TypeError
+     */
+    protected function getS3FilesStorage(): S3FilesStorage
+    {
+        return new S3FilesStorage();
     }
 
     /**
