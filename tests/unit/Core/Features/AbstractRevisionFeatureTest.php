@@ -24,7 +24,6 @@ use Model\Projects\ProjectStruct;
 use PDOException;
 use PHPUnit\Framework\Attributes\Test;
 use Plugins\Features\AbstractRevisionFeature;
-use Plugins\Features\ReviewExtended;
 use Plugins\Features\SecondPassReview;
 use ReflectionMethod;
 use RuntimeException;
@@ -130,22 +129,8 @@ class AbstractRevisionFeatureTest extends AbstractTest
     }
 
     // ─────────────────────────────────────────────────────────────────
-    // postProjectCreate — returns early for ReviewExtended
+    // postProjectCreate
     // ─────────────────────────────────────────────────────────────────
-
-    #[Test]
-    public function postProjectCreate_returnsEarly_whenInstanceOfReviewExtended(): void
-    {
-        $reviewExtended = new ReviewExtended(
-            new BasicFeatureStruct(['feature_code' => 'review_extended'])
-        );
-
-        $projectStructure = new ProjectStructure();
-        $event = new PostProjectCreateEvent($projectStructure);
-
-        $reviewExtended->postProjectCreate($event);
-        $this->assertTrue(true);
-    }
 
     #[Test]
     public function postProjectCreate_callsSetQaModelAndCreateRecords_forSecondPassReview(): void
@@ -404,20 +389,8 @@ class AbstractRevisionFeatureTest extends AbstractTest
     }
 
     // ─────────────────────────────────────────────────────────────────
-    // loadAndValidateQualityFramework — instanceof logic fix
+    // loadAndValidateQualityFramework
     // ─────────────────────────────────────────────────────────────────
-
-    #[Test]
-    public function loadAndValidateQualityFramework_returnsEarly_whenCalledFromReviewExtended(): void
-    {
-        $projectStructure = new ProjectStructure();
-
-        // When called from ReviewExtended, should return early without modifying structure
-        ReviewExtended::loadAndValidateQualityFramework($projectStructure);
-
-        // features should remain empty — no quality_framework appended
-        $this->assertArrayNotHasKey('quality_framework', $projectStructure->features);
-    }
 
     #[Test]
     public function loadAndValidateQualityFramework_addsErrorWhenModelCannotBeDecoded(): void

@@ -38,7 +38,6 @@ class PluginsLoader
     protected array $VALID_CODES = [
         FeatureCodes::PROJECT_COMPLETION,
         FeatureCodes::TRANSLATION_VERSIONS,
-        FeatureCodes::REVIEW_EXTENDED,
         FeatureCodes::SECOND_PASS_REVIEW
     ];
 
@@ -197,9 +196,9 @@ class PluginsLoader
              * Try to load Matecat core plugins, so they can install it's own routes
              *
              * @deprecated because all Matecat internal route should not have a "plugins" namespace in the route, but they should have it's own controllers defined
-             *             Ex: http://xxxx/plugins/review_extended/quality_report/xxx/xxxxxxx
+             *             Ex: http://xxxx/plugins/second_pass_review/quality_report/xxx/xxxxxxx
              *             should be something like
-             *             http://xxxx/review_extended/quality_report/xxx/xxxxxxx
+             *             http://xxxx/second_pass_review/quality_report/xxx/xxxxxxx
              */
             $cls = static::getPluginClass($path[2]);
             if ($cls) {
