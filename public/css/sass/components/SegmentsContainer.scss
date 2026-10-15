@@ -50,6 +50,10 @@
         .footer .tab {
           border-bottom-left-radius: variables.$border-radius-default;
           border-bottom-right-radius: variables.$border-radius-default;
+
+          &:not(:has(.segment-footer-tab-more-button)) {
+            overflow: hidden;
+          }
         }
       }
     }

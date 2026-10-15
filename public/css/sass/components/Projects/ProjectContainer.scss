@@ -7,7 +7,10 @@
   background-color: colors.$white;
   border: 1px solid colors.$grey150;
   border-radius: 18px;
-  overflow: hidden;
+  // `clip` (unlike `hidden`) never establishes a scroll container, so it still rounds the
+  // card's corners and clips the job grid's horizontal overflow without trapping the
+  // header's `position: sticky` below.
+  overflow: clip;
 }
 
 .project-container-header {
@@ -18,6 +21,9 @@
   align-items: center;
   align-self: stretch;
   background-color: colors.$grey50;
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
 .project-container-header-sx,
@@ -69,11 +75,32 @@
   }
 }
 
+.project-container-show-more {
+  display: flex;
+  justify-content: center;
+  padding: 12px 24px;
+  border-top: 1px solid colors.$grey100;
+  background-color: colors.$white;
+  z-index: 1;
+
+  .project-container-show-more-icon {
+    display: flex;
+    svg {
+      transition: transform 0.2s ease;
+    }
+    &.is-expanded svg {
+      transform: rotate(180deg);
+    }
+  }
+}
+
 .project-container-footer {
   display: flex;
   align-items: center;
   padding: 0px 24px;
   height: 40px;
+  background-color: colors.$white;
+  z-index: 1;
   > * {
     color: colors.$grey700 !important;
     font-size: variables.$font-size-xsmall !important;
