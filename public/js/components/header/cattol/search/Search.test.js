@@ -447,10 +447,8 @@ const replaceFirstOccurrence = async (segment) => {
   })
 
   jest.useFakeTimers()
-  act(() => {
-    fireEvent.click(screen.getByText('REPLACE'))
-    jest.runAllTimers()
-  })
+  fireEvent.click(screen.getByText('REPLACE'))
+  act(() => jest.runAllTimers())
   jest.useRealTimers()
 }
 
