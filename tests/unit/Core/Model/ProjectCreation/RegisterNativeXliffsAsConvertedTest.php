@@ -262,7 +262,10 @@ class RegisterNativeXliffsAsConvertedTest extends AbstractTest
         ];
 
         $linkFiles = ['conversionHashes' => ['sha' => [], 'fileName' => []]];
-        $fs = $this->createStub(AbstractFilesStorage::class);
+
+        $fs = $this->createMock(AbstractFilesStorage::class);
+        $fs->expects($this->never())->method('makeCachePackage');
+        $fs->expects($this->never())->method('linkSessionToCacheForAlreadyConvertedFiles');
 
         try {
             // Suppress expected PHP warning from sha1_file on non-existent file
@@ -278,6 +281,7 @@ class RegisterNativeXliffsAsConvertedTest extends AbstractTest
             $this->assertSame("Failed to compute hash for file $fileName", $e->getMessage());
         }
 
+        $this->assertEmpty($linkFiles['conversionHashes']['sha']);
         $this->assertEmpty($this->projectStructure->result['errors']);
     }
 
@@ -302,6 +306,8 @@ class RegisterNativeXliffsAsConvertedTest extends AbstractTest
         $fs->expects($this->once())
             ->method('makeCachePackage')
             ->willThrowException($storageError);
+        $fs->expects($this->never())
+            ->method('linkSessionToCacheForAlreadyConvertedFiles');
 
         try {
             $this->service->registerNativeXliffsAsConverted(
@@ -318,77 +324,8 @@ class RegisterNativeXliffsAsConvertedTest extends AbstractTest
             $this->assertSame($storageError, $e->getPrevious());
         }
 
+        $this->assertEmpty($linkFiles['conversionHashes']['sha']);
         $this->assertEmpty($this->projectStructure->result['errors']);
-    }
-
-    // ── makeCachePackage error stops before linkSession + hash append ──
-
-    #[Test]
-    public function makeCachePackageErrorSkipsLinkAndHashAppend(): void
-    {
-        $fileName = 'test.xliff';
-        file_put_contents($this->uploadDir . '/' . $fileName, 'content');
-
-        $this->projectStructure->array_files = [$fileName];
-        $this->projectStructure->array_files_meta = [
-            ['mustBeConverted' => false],
-        ];
-
-        $linkFiles = ['conversionHashes' => ['sha' => [], 'fileName' => []]];
-
-        $fs = $this->createMock(AbstractFilesStorage::class);
-        $fs->expects($this->once())
-            ->method('makeCachePackage')
-            ->willThrowException(new Exception('Cache write failed'));
-        $fs->expects($this->never())
-            ->method('linkSessionToCacheForAlreadyConvertedFiles');
-
-        try {
-            $this->service->registerNativeXliffsAsConverted(
-                $fs,
-                $this->projectStructure,
-                $this->uploadDir,
-                $linkFiles
-            );
-            $this->fail('Expected Exception');
-        } catch (Exception) {
-            // expected
-        }
-
-        $this->assertEmpty($linkFiles['conversionHashes']['sha']);
-    }
-
-    // ── sha1_file failure prevents further processing ────────────────
-
-    #[Test]
-    public function sha1FailureSkipsCacheAndLinkForThatFile(): void
-    {
-        // File doesn't exist → sha1_file returns false
-        $this->projectStructure->array_files = ['missing.xliff'];
-        $this->projectStructure->array_files_meta = [
-            ['mustBeConverted' => false],
-        ];
-
-        $linkFiles = ['conversionHashes' => ['sha' => [], 'fileName' => []]];
-
-        $fs = $this->createMock(AbstractFilesStorage::class);
-        $fs->expects($this->never())->method('makeCachePackage');
-        $fs->expects($this->never())->method('linkSessionToCacheForAlreadyConvertedFiles');
-
-        try {
-            // Suppress expected PHP warning from sha1_file on non-existent file
-            @$this->service->registerNativeXliffsAsConverted(
-                $fs,
-                $this->projectStructure,
-                $this->uploadDir,
-                $linkFiles
-            );
-            $this->fail('Expected Exception');
-        } catch (Exception) {
-            // expected
-        }
-
-        $this->assertEmpty($linkFiles['conversionHashes']['sha']);
     }
 
     // ── Empty file list ──────────────────────────────────────────────

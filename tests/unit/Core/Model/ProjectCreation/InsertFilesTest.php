@@ -8,6 +8,7 @@ use Model\Files\MetadataDao;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\ProjectCreation\FileInsertionService;
 use Model\ProjectCreation\ProjectCreationError;
+use Model\ProjectCreation\ProjectCreationException;
 use Model\ProjectCreation\ProjectManagerModel;
 use Model\ProjectCreation\ProjectStructure;
 use PHPUnit\Framework\Attributes\Test;
@@ -259,7 +260,7 @@ class InsertFilesTest extends AbstractTest
             );
             $this->fail('Expected exception');
         } catch (Exception $e) {
-            $this->assertSame(Exception::class, $e::class);
+            $this->assertSame(ProjectCreationException::class, $e::class);
             $this->assertSame(ProjectCreationError::FILE_MOVE_FAILED->value, $e->getCode());
             $this->assertSame(
                 'There was a problem during the upload of your file(s). Please, try to rename your file(s) avoiding non-standard characters',

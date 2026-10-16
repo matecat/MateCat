@@ -6,6 +6,7 @@ use Exception;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\IDatabase;
 use Model\ProjectCreation\ProjectCreationError;
+use Model\ProjectCreation\ProjectCreationException;
 use Model\ProjectCreation\ProjectStructure;
 use Model\ProjectCreation\TmKeyService;
 use Model\TmKeyManagement\MemoryKeyDao;
@@ -27,11 +28,14 @@ use Utils\TMS\TMSService;
  *  - TM key validation (valid, invalid, exception)
  *  - Key-ring insertion (new vs existing keys, name placeholders)
  *  - TMX upload paths (no key, non-tmx skip, upload exception)
+ *  - A poll timeout is logged only: the file is dropped and creation continues
  *  - Failures throw and record nothing on projectStructure: createProject() records the one error
  */
 #[AllowMockObjectsWithoutExpectations]
 class TmKeyServiceTest extends AbstractTest
 {
+    private const string INVALID_KEY_MESSAGE = 'One of the private TM keys is not valid. Please check it and try again.';
+
     private TMSService&MockObject $tmxService;
     private IDatabase&MockStub $dbHandler;
     private MatecatLogger&MockStub $logger;
@@ -80,10 +84,12 @@ class TmKeyServiceTest extends AbstractTest
 
         try {
             $this->service->setPrivateTMKeys($ps, '');
-            self::fail('Expected Exception');
-        } catch (Exception $e) {
+            self::fail('Expected ProjectCreationException');
+        } catch (ProjectCreationException $e) {
             self::assertSame(ProjectCreationError::TM_KEY_INVALID->value, $e->getCode());
-            self::assertSame('TM key is not valid: bad-key', $e->getMessage());
+            self::assertSame(self::INVALID_KEY_MESSAGE, $e->getMessage());
+            // The key is a credential: it is never echoed back
+            self::assertStringNotContainsString('bad-key', $e->getMessage());
         }
 
         self::assertEmpty($ps->result['errors']);
@@ -98,9 +104,9 @@ class TmKeyServiceTest extends AbstractTest
 
         $this->tmxService->method('checkCorrectKey')->willReturn(null);
 
-        $this->expectException(Exception::class);
+        $this->expectException(ProjectCreationException::class);
         $this->expectExceptionCode(ProjectCreationError::TM_KEY_INVALID->value);
-        $this->expectExceptionMessage('TM key is not valid: null-key');
+        $this->expectExceptionMessage(self::INVALID_KEY_MESSAGE);
 
         $this->service->setPrivateTMKeys($ps, '');
     }
@@ -146,7 +152,7 @@ class TmKeyServiceTest extends AbstractTest
             $this->service->setPrivateTMKeys($ps, '');
             self::fail('Expected Exception');
         } catch (Exception $e) {
-            self::assertSame('TM key is not valid: bad-key', $e->getMessage());
+            self::assertSame(self::INVALID_KEY_MESSAGE, $e->getMessage());
         }
 
         self::assertSame(['good-key', 'bad-key'], $checked);
@@ -290,9 +296,8 @@ class TmKeyServiceTest extends AbstractTest
     {
         $ps = $this->makeProjectStructure([]);
 
-        $this->memoryKeyDao->expects(self::once())
-            ->method('createList')
-            ->with([]);
+        $this->tmxService->expects(self::never())->method('checkCorrectKey');
+        $this->memoryKeyDao->expects(self::never())->method('createList');
 
         $this->service->setPrivateTMKeys($ps, '');
 
@@ -300,7 +305,7 @@ class TmKeyServiceTest extends AbstractTest
     }
 
     #[Test]
-    public function testValidKeyNoErrorsRecorded(): void
+    public function testReturnsWhenTheKeyIsValid(): void
     {
         $ps = $this->makeProjectStructure([
             ['key' => 'valid-key', 'name' => 'TM'],
@@ -498,6 +503,36 @@ class TmKeyServiceTest extends AbstractTest
         self::assertEmpty($ps->result['errors']);
     }
 
+    #[Test]
+    public function testLoopTimeoutDropsTheFileAndRecordsNoError(): void
+    {
+        $ps = new ProjectStructure([
+            'private_tm_key'   => [['key' => 'abc123']],
+            'array_files'      => [0 => 'my.tmx', 1 => 'file.docx'],
+            'array_files_meta' => [0 => ['extension' => 'tmx'], 1 => ['extension' => 'docx']],
+            'uid'              => 42,
+            'result'           => ['errors' => []],
+        ]);
+
+        $this->tmxService->method('tmxUploadStatus')
+            ->willReturn(['completed' => false]);
+
+        $file = $this->createStub(TMSFile::class);
+        $file->method('getUuid')->willReturn('test-uuid-123');
+        $file->method('getName')->willReturn('my.tmx');
+        $file->method('getPosition')->willReturn(0);
+
+        // Each poll sleep moves the clock forward, so the 10-minute deadline passes without waiting
+        $this->service->startFakeClock(1_000_000);
+
+        $this->service->callLoopForTMXLoadStatus($ps, [$file]);
+
+        self::assertGreaterThan(1_000_000 + 10 * 60, $this->service->fakeNow);
+        self::assertSame([1 => 'file.docx'], $ps->array_files);
+        self::assertSame([1 => ['extension' => 'docx']], $ps->array_files_meta);
+        self::assertEmpty($ps->result['errors']);
+    }
+
     // ──────────────────────────────────────────────────────────────
     // Helpers
     // ──────────────────────────────────────────────────────────────
@@ -576,8 +611,24 @@ class TestableTmKeyService extends TmKeyService
         parent::loopForTMXLoadStatus($projectStructure, $memoryFiles);
     }
 
+    /** When set, now() returns it and pollSleep() advances it instead of sleeping. */
+    public ?int $fakeNow = null;
+
+    public function startFakeClock(int $start): void
+    {
+        $this->fakeNow = $start;
+    }
+
     protected function pollSleep(int $seconds): void
     {
-        // no-op in tests
+        // no sleeping in tests
+        if ($this->fakeNow !== null) {
+            $this->fakeNow += $seconds;
+        }
+    }
+
+    protected function now(): int
+    {
+        return $this->fakeNow ?? parent::now();
     }
 }

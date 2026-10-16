@@ -9,7 +9,6 @@ use Matecat\SubFiltering\MateCatFilter;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\BasicFeatureStruct;
-use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
 use Model\FilesStorage\AbstractFilesStorage;
@@ -18,6 +17,9 @@ use Model\ProjectCreation\JobCreationService;
 use Model\ProjectCreation\ProjectManager;
 use Model\ProjectCreation\ProjectManagerModel;
 use Model\ProjectCreation\ProjectStructure;
+use Model\ProjectCreation\QAProcessor;
+use Model\ProjectCreation\SegmentExtractor;
+use Model\ProjectCreation\SegmentStorageService;
 use Model\ProjectCreation\TmKeyService;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
@@ -329,20 +331,6 @@ class TestableProjectManager extends ProjectManager
     }
 
     /**
-     * Public wrapper to invoke the private describeCreationFailure().
-     *
-     * @return array{int, string}
-     * @throws ReflectionException
-     */
-    public function callDescribeCreationFailure(Throwable $e): array
-    {
-        $ref = new ReflectionClass(ProjectManager::class);
-        $method = $ref->getMethod('describeCreationFailure');
-
-        return $method->invoke($this, $e);
-    }
-
-    /**
      * Set the uploadDir for testing.
      */
     public function setUploadDir(string $dir): void
@@ -357,17 +345,6 @@ class TestableProjectManager extends ProjectManager
     public function setTmKeyService(TmKeyService $service): void
     {
         $this->tmKeyService = $service;
-    }
-
-    /**
-     * Public wrapper to invoke the private setPrivateTmKeysOrFail().
-     * @throws ReflectionException
-     */
-    public function callSetPrivateTmKeysOrFail(string $firstTMXFileName): void
-    {
-        $ref = new ReflectionClass(ProjectManager::class);
-        $method = $ref->getMethod('setPrivateTmKeysOrFail');
-        $method->invoke($this, $firstTMXFileName);
     }
 
     /**
@@ -393,20 +370,21 @@ class TestableProjectManager extends ProjectManager
         $method->invoke($this, $totalFilesStructure);
     }
 
-    /**
-     * Set files_word_count for testing.
-     */
-    public function setFilesWordCount(int $value): void
+    // ── Collaborators reached by createProject() past the extraction ──
+
+    public function setSegmentExtractor(SegmentExtractor $extractor): void
     {
-        $this->files_word_count = $value;
+        $this->segmentExtractor = $extractor;
     }
 
-    /**
-     * Set min_max_segments_id for testing.
-     */
-    public function setMinMaxSegmentsId(array $value): void
+    public function setSegmentStorageService(SegmentStorageService $service): void
     {
-        $this->min_max_segments_id = $value;
+        $this->segmentStorageService = $service;
+    }
+
+    public function setQAProcessor(QAProcessor $processor): void
+    {
+        $this->qaProcessor = $processor;
     }
 
     // ── ProjectManagerModel override ──
@@ -454,27 +432,7 @@ class TestableProjectManager extends ProjectManager
     }
 
     /**
-     * Opt in to the real ProjectManager::zipFileHandling() body. The override below stubs it to a
-     * no-op so createProject() can run without zip storage; tests that target the method itself
-     * flip this on. Off by default so every other caller keeps the stubbed behaviour.
-     */
-    private bool $useRealZipFileHandling = false;
-
-    public function enableRealZipFileHandling(): void
-    {
-        $this->useRealZipFileHandling = true;
-    }
-
-    protected function zipFileHandling($linkFiles): void
-    {
-        if ($this->useRealZipFileHandling) {
-            parent::zipFileHandling($linkFiles);
-        }
-    }
-
-    /**
-     * Public wrapper to invoke the protected zipFileHandling(); pair with
-     * enableRealZipFileHandling() to exercise the production body.
+     * Public wrapper to invoke the protected zipFileHandling().
      */
     public function callZipFileHandling(array $linkFiles): void
     {
@@ -508,11 +466,25 @@ class TestableProjectManager extends ProjectManager
     public array $activityLogPushedInsideScope = [];
 
     /**
+     * When set, getAnalyzeURL() throws it, so populateResult() fails after the commit.
+     */
+    public ?Throwable $analyzeUrlFailure = null;
+
+    /**
      * Record the call instead of enqueueing to AMQ.
      */
     protected function pushActivityLog(): void
     {
         $this->activityLogPushedInsideScope[] = $this->dbHandler->isInTransactionScope();
+    }
+
+    public function getAnalyzeURL(): string
+    {
+        if ($this->analyzeUrlFailure !== null) {
+            throw $this->analyzeUrlFailure;
+        }
+
+        return parent::getAnalyzeURL();
     }
 
     /**

@@ -34,7 +34,9 @@ use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use Model\Xliff\DTO\XliffRulesModel;
+use PDOException;
 use Plugins\Features\SecondPassReview;
+use Psr\Log\InvalidArgumentException;
 use ReflectionException;
 use RuntimeException;
 use Throwable;
@@ -52,6 +54,7 @@ use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\TMS\TMSService;
 use Utils\Tools\Utils;
 use Utils\Url\CanonicalRoutes;
+use View\API\Commons\Error;
 
 class ProjectManager
 {
@@ -283,7 +286,7 @@ class ProjectManager
     /**
      * Save features in project metadata
      * @throws ReflectionException
-     * @throws \PDOException
+     * @throws PDOException
      */
     protected function saveFeaturesInMetadata(): void
     {
@@ -347,7 +350,7 @@ class ProjectManager
      * @throws EndQueueException
      * @throws Exception
      * @throws NotFoundException
-     * @throws \PDOException
+     * @throws PDOException
      * @throws ReQueueException
      * @throws ReflectionException
      * @throws ValidationError
@@ -381,8 +384,12 @@ class ProjectManager
     }
 
     /**
+     * Run the whole creation. A failure before the commit records one error for the user, deletes the
+     * records written so far and ends the queue message. A failure after it keeps the project.
+     *
      * @throws EndQueueException
      * @throws Exception
+     * @throws InvalidArgumentException
      * @throws TypeError
      */
     public function createProject(): void
@@ -394,16 +401,20 @@ class ProjectManager
             // a plain array because XliffRulesModel::$ruleSets is private and
             // RecursiveArrayCopy::toArray() only sees public properties.
             if (!$this->projectStructure->xliff_parameters instanceof XliffRulesModel) {
-                $this->projectStructure->xliff_parameters = XliffRulesModel::fromArray(
-                    is_array($this->projectStructure->xliff_parameters) ? $this->projectStructure->xliff_parameters : []
-                );
+                try {
+                    $this->projectStructure->xliff_parameters = XliffRulesModel::fromArray(
+                        is_array($this->projectStructure->xliff_parameters) ? $this->projectStructure->xliff_parameters : []
+                    );
+                } catch (DomainException $e) {
+                    throw new ProjectCreationException(ProjectCreationError::INVALID_XLIFF_PARAMETERS, $e->getMessage(), $e);
+                }
             }
 
             $this->initGdriveSession();
             $this->validateBeforeCreation();
 
             $firstTMXFileName = $this->sortFilesWithTmxFirst();
-            $this->setPrivateTmKeysOrFail($firstTMXFileName);
+            $this->getTmKeyService()->setPrivateTMKeys($this->projectStructure, $firstTMXFileName);
 
             $linkFiles = $this->resolveUploadDirAndGetHashes($fs);
             $this->getTmKeyService()->pushTMXToMyMemory($this->projectStructure, $this->uploadDir);
@@ -415,20 +426,16 @@ class ProjectManager
 
             $this->resolveFilesExtractSegmentsAndStoreData($fs, $linkFiles);
             $this->finalizeProjectInTransaction();
-
-            // Only once the finalize has committed: the worker publishes the result whatever happens,
-            // and a rolled-back project must not be reported as created.
-            $this->populateResult();
         } catch (Throwable $e) {
-            $this->log("Project creation failed", $e);
-            $this->clearFailedProject();
-
             [$code, $message] = $this->describeCreationFailure($e);
 
             // Skipped on a validation failure: the validators have already recorded why the project is invalid.
             if (empty($this->projectStructure->result['errors'])) {
                 $this->projectStructure->addError($code, $message);
             }
+
+            $this->logger->error("Project creation failed", (new Error($e))->render(true));
+            $this->clearFailedProject();
 
             // Ack, never requeue: a second run would create the project again.
             throw new EndQueueException($e->getMessage(), $code, $e);
@@ -438,6 +445,22 @@ class ProjectManager
             if (isset($this->uploadDir)) {
                 $this->cleanupUploadDirectory($fs);
             }
+        }
+
+        // The project is committed: a failure from here on keeps it.
+        // The activity log runs only now, so a finalize that rolls back never reports PROJECT_CREATED.
+        $this->pushActivityLog();
+
+        // Built only now: the worker publishes the result whatever happens, and a rolled-back
+        // project must not be reported as created.
+        try {
+            $this->populateResult();
+        } catch (Throwable $e) {
+            [$code, $message] = $this->describeCreationFailure($e);
+            $this->projectStructure->addError($code, $message);
+            $this->logger->error("Project created, but its result could not be built", (new Error($e))->render(true));
+
+            throw new EndQueueException($e->getMessage(), $code, $e);
         }
     }
 
@@ -467,8 +490,8 @@ class ProjectManager
      * @throws AuthenticationError
      * @throws EndQueueException
      * @throws NotFoundException
-     * @throws \PDOException
-     * @throws \Psr\Log\InvalidArgumentException
+     * @throws PDOException
+     * @throws InvalidArgumentException
      * @throws ReQueueException
      * @throws ReflectionException
      * @throws ValidationError
@@ -532,25 +555,10 @@ class ProjectManager
     }
 
     /**
-     * Validate and insert private TM keys. Throws on the first invalid key.
-     *
-     * @throws Exception
-     * @throws DomainException
-     * @throws TypeError
-     * @throws \Psr\Log\InvalidArgumentException
-     */
-    private function setPrivateTmKeysOrFail(string $firstTMXFileName): void
-    {
-        if (count($this->projectStructure->private_tm_key)) {
-            $this->getTmKeyService()->setPrivateTMKeys($this->projectStructure, $firstTMXFileName);
-        }
-    }
-
-    /**
      * Resolve the upload directory from config + upload token, and retrieve file hashes from storage.
      *
      * @return array<string, mixed> The link files structure with conversion hashes and zip hashes.
-     * @throws \Psr\Log\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     private function resolveUploadDirAndGetHashes(AbstractFilesStorage $fs): array
     {
@@ -585,16 +593,16 @@ class ProjectManager
         $this->extractSegmentsFromFiles($totalFilesStructure);
 
         if ($this->total_segments === 0) {
-            throw new Exception(
-                "No translatable content found in any uploaded file. The project cannot be created.",
-                ProjectCreationError::NO_TRANSLATABLE_TEXT->value
+            throw new ProjectCreationException(
+                ProjectCreationError::NO_TRANSLATABLE_TEXT,
+                "No translatable content found in any uploaded file. The project cannot be created."
             );
         }
 
         if ($this->files_word_count > AppConfig::$MAX_SOURCE_WORDS) {
-            throw new Exception(
-                "Matecat is unable to create your project. Please contact us at " . AppConfig::$SUPPORT_MAIL . ", we will be happy to help you!",
-                ProjectCreationError::MAX_WORDS_EXCEEDED->value
+            throw new ProjectCreationException(
+                ProjectCreationError::MAX_WORDS_EXCEEDED,
+                "Matecat is unable to create your project. Please contact us at " . AppConfig::$SUPPORT_MAIL . ", we will be happy to help you!"
             );
         }
 
@@ -657,14 +665,13 @@ class ProjectManager
                 $this->log("Exceptions: " . $exceptionsFound);
                 $this->log("Failed to parse " . $file_info['original_filename'], $e);
 
-                if ($e->getCode() == ProjectCreationError::NO_TRANSLATABLE_TEXT->value && count($totalFilesStructure) > 1 && $exceptionsFound < count($totalFilesStructure)) {
-                    $this->log($e->getMessage());
+                if ($e instanceof ProjectCreationException && $e->getCode() === ProjectCreationError::NO_TRANSLATABLE_TEXT->value && count($totalFilesStructure) > 1 && $exceptionsFound < count($totalFilesStructure)) {
                     $exceptionsFound += 1;
                     unset($totalFilesStructure[$fid]);
                     continue;
-                } else {
-                    throw $e;
                 }
+
+                throw $e;
             }
         }
     }
@@ -672,18 +679,16 @@ class ProjectManager
     /**
      * The code and message to record for a failed project creation.
      *
-     * An exception carrying a ProjectCreationError code was thrown for the user, so its message is
-     * shown as it is. Anything else (a PDOException with its SQLSTATE string code, an exception with
-     * no code) is an internal failure: its message stays in the log and the user gets the generic error.
+     * A ProjectCreationException was thrown for the user, so its code and message are shown as they are.
+     * Anything else is an internal failure, whatever its code: other subsystems throw with the same
+     * numbers, so its message stays in the log and the user gets the generic error.
      *
      * @return array{int, string}
      */
     private function describeCreationFailure(Throwable $e): array
     {
-        $code = $e->getCode();
-
-        if (is_int($code) && $code !== ProjectCreationError::GENERIC_ERROR->value && ProjectCreationError::tryFrom($code) !== null) {
-            return [$code, $e->getMessage()];
+        if ($e instanceof ProjectCreationException) {
+            return [$e->getCode(), $e->getMessage()];
         }
 
         return [ProjectCreationError::CREATION_FAILED->value, 'Project creation failed. Please try again.'];
@@ -771,16 +776,12 @@ class ProjectManager
                 $this->files_word_count * count($this->projectStructure->array_jobs['job_languages'])
             );
         });
-
-        // After the commit, not inside the scope: a finalize that rolls back must not report
-        // PROJECT_CREATED for a project that never became ready.
-        $this->pushActivityLog();
     }
 
     /**
      * Delete the upload directory via the storage abstraction.
      *
-     * @throws \Psr\Log\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     private function cleanupUploadDirectory(AbstractFilesStorage $fs): void
     {
@@ -825,12 +826,13 @@ class ProjectManager
     }
 
     /**
-     * @throws \Psr\Log\InvalidArgumentException
+     * Best-effort deletion of the records a failed creation has written. A cleanup failure is logged,
+     * never thrown, so it cannot hide the creation failure.
+     *
+     * @throws InvalidArgumentException
      */
     private function clearFailedProject(): void
     {
-        $this->log("Deleting Records.");
-
         $idProject = $this->projectStructure->id_project;
 
         if (empty($idProject)) {
@@ -840,6 +842,7 @@ class ProjectManager
         }
 
         try {
+            $this->log("Deleting Records.");
             $this->getProjectManagerModel()->deleteProject($idProject);
             $this->log("Cascade-deleted project ID: " . $idProject);
         } catch (Throwable $cleanupError) {
@@ -981,7 +984,7 @@ class ProjectManager
     }
 
     /**
-     * @throws \Psr\Log\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     protected function pushActivityLog(): void
     {
@@ -1048,7 +1051,7 @@ class ProjectManager
 
             if (!$result) {
                 $this->log("Failed to store the ZIP file $zipHash - \n");
-                throw new Exception("Failed to store the original ZIP $zipHash ", ProjectCreationError::ZIP_STORE_FAILED->value);
+                throw new ProjectCreationException(ProjectCreationError::ZIP_STORE_FAILED, "Failed to store the original ZIP $zipHash ");
                 //Exit
             }
         } //end zip hashes manipulation
@@ -1157,8 +1160,9 @@ class ProjectManager
     }
 
     /**
-     * @throws \PDOException
-     * @throws \Psr\Log\InvalidArgumentException
+     * @throws ProjectCreationException
+     * @throws PDOException
+     * @throws InvalidArgumentException
      */
     private function insertContextsForFile(): void
     {

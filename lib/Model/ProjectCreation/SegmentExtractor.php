@@ -149,16 +149,16 @@ class SegmentExtractor
             $projectStructure->current_xliff_info[$fid] = $xliffInfo;
         } catch (Throwable $e) {
             if ($e->getCode() === ProjectCreationError::INVALID_XLIFF_PARAMETERS->value) {
-                throw new Exception($e->getMessage() . " in Failed to parse " . $file_info['original_filename'], $e->getCode(), $e);
+                throw new ProjectCreationException(ProjectCreationError::INVALID_XLIFF_PARAMETERS, $e->getMessage() . " in Failed to parse " . $file_info['original_filename'], $e);
             }
 
-            throw new Exception("XLIFF import error: Failed to parse " . $file_info['original_filename'], ProjectCreationError::XLIFF_IMPORT_ERROR->value, $e);
+            throw new ProjectCreationException(ProjectCreationError::XLIFF_IMPORT_ERROR, "XLIFF import error: Failed to parse " . $file_info['original_filename'], $e);
         }
 
         // Checking that parsing went well
         if (isset($xliff['parser-errors']) || !isset($xliff['files'])) {
             $this->log("Failed to parse " . $file_info['original_filename'] . join("\n", $xliff['parser-errors'] ?? []));
-            throw new Exception("XLIFF import error: Failed to parse " . $file_info['original_filename'], ProjectCreationError::XLIFF_IMPORT_ERROR->value);
+            throw new ProjectCreationException(ProjectCreationError::XLIFF_IMPORT_ERROR, "XLIFF import error: Failed to parse " . $file_info['original_filename']);
         }
 
         // needed to check if a file has only one segment
@@ -182,9 +182,9 @@ class SegmentExtractor
         // use generic
         if (count($projectStructure->segments[$fid]) == 0 || $_fileCounter_Show_In_Cattool == 0) {
             $this->log("Segment import - no segments found in {$file_info[ 'original_filename' ]}\n");
-            throw new Exception(
-                "No text to translate in the file " . ZipArchiveHandler::getFileName($file_info['original_filename']) . ".",
-                ProjectCreationError::NO_TRANSLATABLE_TEXT->value
+            throw new ProjectCreationException(
+                ProjectCreationError::NO_TRANSLATABLE_TEXT,
+                "No text to translate in the file " . ZipArchiveHandler::getFileName($file_info['original_filename']) . "."
             );
         } else {
             // increment global counter
@@ -819,7 +819,7 @@ class SegmentExtractor
         $internal_id = $trans_unit_reference;
         if (isset($trans_unit['notes'])) {
             if (count($trans_unit['notes']) > self::SEGMENT_NOTES_LIMIT) {
-                throw new Exception('File upload failed: a segment can have a maximum of ' . self::SEGMENT_NOTES_LIMIT . ' notes.', ProjectCreationError::TOO_MANY_NOTES->value);
+                throw new ProjectCreationException(ProjectCreationError::TOO_MANY_NOTES, 'File upload failed: a segment can have a maximum of ' . self::SEGMENT_NOTES_LIMIT . ' notes.');
             }
 
             foreach ($trans_unit['notes'] as $note) {
@@ -841,7 +841,7 @@ class SegmentExtractor
                 }
 
                 if (strlen($noteContent) > self::SEGMENT_NOTES_MAX_SIZE) {
-                    throw new Exception('File upload failed: a segment note can be at most ' . self::SEGMENT_NOTES_MAX_SIZE . ' bytes.', ProjectCreationError::SEGMENT_NOTE_TOO_LARGE->value);
+                    throw new ProjectCreationException(ProjectCreationError::SEGMENT_NOTE_TOO_LARGE, 'File upload failed: a segment note can be at most ' . self::SEGMENT_NOTES_MAX_SIZE . ' bytes.');
                 }
 
                 if (!isset($projectStructure->notes[$internal_id]['entries'])) {

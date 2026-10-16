@@ -54,6 +54,7 @@ class ProjectCreationWorker extends AbstractWorker
         try {
             $this->_createProject($queueElement);
         } catch (PDOException $e) {
+            // The Executor requeues a PDOException: a second run would create the project again.
             throw new EndQueueException($e);
         } finally {
             $this->_publishResults();

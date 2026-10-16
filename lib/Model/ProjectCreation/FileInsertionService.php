@@ -9,6 +9,7 @@ use Model\ConnectedServices\GDrive\Session;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\Files\MetadataDao;
 use Model\FilesStorage\AbstractFilesStorage;
+use TypeError;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 
@@ -85,7 +86,7 @@ class FileInsertionService
 
             $sha1 = sha1_file($filePathName);
             if ($sha1 === false) {
-                throw new Exception("Failed to compute hash for file $fileName", ProjectCreationError::FILE_HASH_FAILED->value);
+                throw new ProjectCreationException(ProjectCreationError::FILE_HASH_FAILED, "Failed to compute hash for file $fileName");
             }
 
             try {
@@ -93,7 +94,7 @@ class FileInsertionService
                 $this->logger->debug("File $fileName converted to cache");
             } catch (Exception $e) {
                 // The storage message can name internal paths: it stays in the previous, for the log.
-                throw new Exception("Failed to cache file $fileName", ProjectCreationError::FILE_HASH_FAILED->value, $e);
+                throw new ProjectCreationException(ProjectCreationError::FILE_HASH_FAILED, "Failed to cache file $fileName", $e);
             }
 
             $fs->linkSessionToCacheForAlreadyConvertedFiles(
@@ -123,9 +124,9 @@ class FileInsertionService
      *
      * @return array<int, array<string, mixed>> File structures keyed by file ID (fid).
      *
-     * @throws Exception On any failure, carrying the user-facing code and message.
+     * @throws Exception On any failure; a ProjectCreationException carries the user-facing code and message.
      *     The caller is responsible for project cleanup and queue management.
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function resolveAndInsertFiles(
         AbstractFilesStorage $fs,
@@ -170,7 +171,7 @@ class FileInsertionService
             // Treat "nothing inserted" as a hard failure.
             if (count($filesStructure ?: []) === 0) {
                 $this->logger->error('No files inserted in DB', ['files' => $_originalFileNames, 'sha1' => $sha1_original, 'xliff' => $cachedXliffFilePathName]);
-                throw new Exception('Files could not be saved in database.', ProjectCreationError::FILE_NOT_FOUND->value);
+                throw new ProjectCreationException(ProjectCreationError::FILE_NOT_FOUND, 'Files could not be saved in database.');
             }
 
             // Merge inserted file info into the overall result.
@@ -198,23 +199,23 @@ class FileInsertionService
     {
         if (count($_originalFileNames ?: []) === 0) {
             $this->logger->error('No hash files found', ['conversionHashes' => $linkFiles['conversionHashes']]);
-            throw new Exception('No hash files found', ProjectCreationError::FILE_NOT_FOUND->value);
+            throw new ProjectCreationException(ProjectCreationError::FILE_NOT_FOUND, 'No hash files found');
         }
 
         if (AbstractFilesStorage::isOnS3()) {
             if (!$cachedXliffFilePathName) {
-                throw new Exception(sprintf('Key not found on S3 cache bucket for file %s.', implode(',', $_originalFileNames)), ProjectCreationError::FILE_NOT_FOUND->value);
+                throw new ProjectCreationException(ProjectCreationError::FILE_NOT_FOUND, sprintf('Key not found on S3 cache bucket for file %s.', implode(',', $_originalFileNames)));
             }
         } elseif ($cachedXliffFilePathName === null || !file_exists($cachedXliffFilePathName)) {
             // The path is internal: it goes to the log, not to the user.
             $this->logger->error('Cached XLIFF not found on server after upload', ['path' => $cachedXliffFilePathName]);
-            throw new Exception('File not found on the server after upload.', ProjectCreationError::FILE_NOT_FOUND->value);
+            throw new ProjectCreationException(ProjectCreationError::FILE_NOT_FOUND, 'File not found on the server after upload.');
         }
 
         $info = AbstractFilesStorage::pathinfo_fix($cachedXliffFilePathName);
 
         if (!in_array($info['extension'] ?? '', ['xliff', 'sdlxliff', 'xlf'])) {
-            throw new Exception("File not found. Failed to save XLIFF conversion on disk.", ProjectCreationError::XLIFF_CONVERSION_NOT_FOUND->value);
+            throw new ProjectCreationException(ProjectCreationError::XLIFF_CONVERSION_NOT_FOUND, "File not found. Failed to save XLIFF conversion on disk.");
         }
     }
 
@@ -228,7 +229,7 @@ class FileInsertionService
      *
      * @return array<int, array<string, mixed>>
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     protected function insertFiles(AbstractFilesStorage $fs, ProjectStructure $projectStructure, array $_originalFileNames, string $sha1_original, string $cachedXliffFilePathName): array
     {
@@ -279,16 +280,16 @@ class FileInsertionService
                         throw $e;
                     }
 
-                    throw new Exception(
+                    throw new ProjectCreationException(
+                        ProjectCreationError::FILE_MOVE_FAILED,
                         'There was a problem during the upload of your file(s). Please, try to rename your file(s) avoiding non-standard characters',
-                        ProjectCreationError::FILE_MOVE_FAILED->value,
                         $e
                     );
                 }
 
                 // check if the files were moved
                 if (true !== $moved) {
-                    throw new Exception('Project creation failed. Please refresh page and retry.', ProjectCreationError::FILE_MOVE_FAILED->value);
+                    throw new ProjectCreationException(ProjectCreationError::FILE_MOVE_FAILED, 'Project creation failed. Please refresh page and retry.');
                 }
 
                 $projectStructure->file_id_list[] = $fid;

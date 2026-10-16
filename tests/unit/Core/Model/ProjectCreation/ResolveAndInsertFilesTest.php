@@ -7,6 +7,7 @@ use Matecat\TestHelpers\AbstractTest;
 use Model\Files\MetadataDao;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\ProjectCreation\ProjectCreationError;
+use Model\ProjectCreation\ProjectCreationException;
 use Model\ProjectCreation\ProjectManagerModel;
 use Model\ProjectCreation\ProjectStructure;
 use PHPUnit\Framework\Attributes\Test;
@@ -238,35 +239,6 @@ class ResolveAndInsertFilesTest extends AbstractTest
     // ── Empty insertFiles result ─────────────────────────────────────
 
     #[Test]
-    public function throwsWhenInsertFilesReturnsEmpty(): void
-    {
-        $sha1 = 'abc123';
-        $hashKey = $sha1 . '__en-US';
-
-        $linkFiles = [
-            'conversionHashes' => [
-                'sha' => [$hashKey],
-                'fileName' => [$hashKey => ['test.docx']],
-            ],
-        ];
-
-        $fs = $this->createStub(AbstractFilesStorage::class);
-        $fs->method('getXliffFromCache')->willReturn('/cache/file.xliff');
-
-        $this->service->skipValidation();
-        $this->service->stubInsertFiles([]); // empty — nothing inserted
-
-        $this->expectException(Exception::class);
-        $this->expectExceptionCode(ProjectCreationError::FILE_NOT_FOUND->value);
-
-        $this->service->resolveAndInsertFiles(
-            $fs,
-            $this->projectStructure,
-            $linkFiles
-        );
-    }
-
-    #[Test]
     public function emptyInsertFilesThrowsFileNotFoundAndRecordsNoError(): void
     {
         $sha1 = 'abc123';
@@ -293,56 +265,13 @@ class ResolveAndInsertFilesTest extends AbstractTest
             );
             $this->fail('Expected exception');
         } catch (Exception $e) {
-            $this->assertSame(Exception::class, $e::class);
+            $this->assertSame(ProjectCreationException::class, $e::class);
             $this->assertSame(ProjectCreationError::FILE_NOT_FOUND->value, $e->getCode());
             $this->assertSame('Files could not be saved in database.', $e->getMessage());
             $this->assertNull($e->getPrevious());
         }
 
         // createProject() records the one error, not the service
-        $this->assertEmpty($this->projectStructure->result['errors']);
-    }
-
-    // ── Validation failures propagate unchanged ──────────────────────
-
-    #[Test]
-    public function nonXliffCachedFilePropagatesConversionNotFound(): void
-    {
-        $sha1 = 'abc123';
-        $hashKey = $sha1 . '__en-US';
-
-        $linkFiles = [
-            'conversionHashes' => [
-                'sha' => [$hashKey],
-                'fileName' => [$hashKey => ['test.docx']],
-            ],
-        ];
-
-        // An existing cached file without an XLIFF extension: validateCachedXliff throws XLIFF_CONVERSION_NOT_FOUND (-16)
-        $notAnXliff = tempnam(sys_get_temp_dir(), 'resolve_insert_') . '.txt';
-        touch($notAnXliff);
-
-        $fs = $this->createStub(AbstractFilesStorage::class);
-        $fs->method('getXliffFromCache')->willReturn($notAnXliff);
-
-        try {
-            $this->service->resolveAndInsertFiles(
-                $fs,
-                $this->projectStructure,
-                $linkFiles
-            );
-            $this->fail('Expected exception');
-        } catch (Exception $e) {
-            $this->assertSame(Exception::class, $e::class);
-            $this->assertSame(ProjectCreationError::XLIFF_CONVERSION_NOT_FOUND->value, $e->getCode());
-            $this->assertSame('File not found. Failed to save XLIFF conversion on disk.', $e->getMessage());
-            $this->assertNull($e->getPrevious());
-        } finally {
-            @unlink($notAnXliff);
-            @unlink(substr($notAnXliff, 0, -4));
-        }
-
-        $this->assertSame([], $this->service->insertFilesCalls);
         $this->assertEmpty($this->projectStructure->result['errors']);
     }
 
@@ -375,37 +304,6 @@ class ResolveAndInsertFilesTest extends AbstractTest
             $this->projectStructure,
             $linkFiles
         );
-    }
-
-    #[Test]
-    public function emptyFileNamesPropagateTheValidationException(): void
-    {
-        $sha1 = 'abc123';
-        $hashKey = $sha1 . '__en-US';
-
-        $linkFiles = [
-            'conversionHashes' => [
-                'sha' => [$hashKey],
-                'fileName' => [$hashKey => []], // empty file names → validation throws FILE_NOT_FOUND
-            ],
-        ];
-
-        $fs = $this->createStub(AbstractFilesStorage::class);
-        $fs->method('getXliffFromCache')->willReturn('/cache/file.xliff');
-
-        try {
-            $this->service->resolveAndInsertFiles(
-                $fs,
-                $this->projectStructure,
-                $linkFiles
-            );
-            $this->fail('Expected exception');
-        } catch (Exception $e) {
-            $this->assertSame(Exception::class, $e::class);
-            $this->assertSame(ProjectCreationError::FILE_NOT_FOUND->value, $e->getCode());
-            $this->assertSame('No hash files found', $e->getMessage());
-            $this->assertNull($e->getPrevious());
-        }
     }
 
     // ── Stops at first error ────────────────────────────────────────

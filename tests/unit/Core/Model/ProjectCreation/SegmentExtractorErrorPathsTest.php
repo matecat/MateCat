@@ -5,7 +5,6 @@ namespace Matecat\Core\Model\ProjectCreation;
 
 use Exception;
 use Matecat\TestHelpers\AbstractTest;
-use Model\DataAccess\Database;
 use Model\ProjectCreation\ProjectCreationError;
 use Model\ProjectCreation\ProjectStructure;
 use Model\ProjectCreation\SegmentExtractor;

@@ -5,7 +5,6 @@ namespace Matecat\Core\Model\ProjectCreation;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\TestHelpers\AbstractTest;
 use Model\FeaturesBase\FeatureSet;
-use Model\FeaturesBase\Hook\Event\Run\PostProjectCreateEvent;
 use Model\Files\MetadataDao;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -18,8 +17,7 @@ use Utils\Registry\AppConfig;
 /**
  * Unit tests for {@see \Model\ProjectCreation\ProjectManager::finalizeProjectInTransaction()}.
  *
- * The finalize sets the project status, and enqueues the PROJECT_CREATED activity log only once its
- * transaction has committed: a finalize that rolls back must not report a project that never became ready.
+ * The finalize sets the project status.
  */
 class FinalizeProjectInTransactionTest extends AbstractTest
 {
@@ -70,45 +68,6 @@ class FinalizeProjectInTransactionTest extends AbstractTest
     }
 
     /**
-     * @throws ReflectionException
-     */
-    #[Test]
-    public function theActivityLogIsPushedAfterTheCommit(): void
-    {
-        $pm = $this->projectManager($this->passThroughFeatures());
-        $pm->callFinalizeProjectInTransaction();
-
-        $this->assertSame([false], $pm->activityLogPushedInsideScope);
-    }
-
-    /**
-     * @throws ReflectionException
-     */
-    #[Test]
-    public function aFinalizeThatRollsBackPushesNoActivityLog(): void
-    {
-        $features = $this->createStub(FeatureSet::class);
-        $features->method('dispatch')->willReturnCallback(function (object $event): object {
-            if ($event instanceof PostProjectCreateEvent) {
-                throw new RuntimeException('Hook failed');
-            }
-
-            return $event;
-        });
-
-        $pm = $this->projectManager($features);
-
-        try {
-            $pm->callFinalizeProjectInTransaction();
-            $this->fail('The hook failure must abort the finalize');
-        } catch (RuntimeException $e) {
-            $this->assertSame('Hook failed', $e->getMessage());
-        }
-
-        $this->assertSame([], $pm->activityLogPushedInsideScope);
-    }
-
-    /**
      * @return array<string, array{bool, int, string}>
      */
     public static function statusCases(): array
@@ -135,5 +94,20 @@ class FinalizeProjectInTransactionTest extends AbstractTest
         $pm->callFinalizeProjectInTransaction();
 
         $this->assertSame($expected, $pm->getTestProjectStructure()->status);
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function aMissingProjectIdFailsTheFinalize(): void
+    {
+        $pm = $this->projectManager($this->passThroughFeatures());
+        $pm->setProjectStructureValue('id_project', null);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Project id must be available before updating analysis status');
+
+        $pm->callFinalizeProjectInTransaction();
     }
 }

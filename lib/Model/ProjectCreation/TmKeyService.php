@@ -3,6 +3,7 @@
 namespace Model\ProjectCreation;
 
 use Closure;
+use DomainException;
 use Exception;
 use Model\Concerns\LogsMessages;
 use Model\DataAccess\IDatabase;
@@ -10,7 +11,9 @@ use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
+use Psr\Log\InvalidArgumentException;
 use ReflectionException;
+use TypeError;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\TmKeyStruct;
@@ -71,19 +74,24 @@ class TmKeyService
      * @param ProjectStructure $projectStructure
      * @param string|null $firstTMXFileName
      * @throws Exception
-     * @throws \DomainException
-     * @throws \TypeError
-     * @throws \Psr\Log\InvalidArgumentException
+     * @throws DomainException
+     * @throws TypeError
+     * @throws InvalidArgumentException
      */
     public function setPrivateTMKeys(ProjectStructure $projectStructure, ?string $firstTMXFileName = ''): void
     {
+        // No private TM key in the project: nothing to validate or insert.
+        if (empty($projectStructure->private_tm_key)) {
+            return;
+        }
+
         foreach ($projectStructure->private_tm_key as $_tmKey) {
             $keyExists = $this->tmxServiceWrapper->checkCorrectKey($_tmKey['key']);
 
             if (!isset($keyExists) || $keyExists === false) {
                 $this->log(__METHOD__ . " -> TM key is not valid.");
 
-                throw new Exception("TM key is not valid: " . $_tmKey['key'], ProjectCreationError::TM_KEY_INVALID->value);
+                throw new ProjectCreationException(ProjectCreationError::TM_KEY_INVALID, 'One of the private TM keys is not valid. Please check it and try again.');
             }
         }
 
@@ -135,7 +143,7 @@ class TmKeyService
 
     /**
      * Upload all TMX files found in the project's file list to MyMemory,
-     * then poll for each upload to complete (or time out after 30 minutes).
+     * then poll for each upload to complete or time out, see loopForTMXLoadStatus().
      *
      * TMX files are removed from the project's array_files / array_files_meta
      * after successful upload, so they are not processed as translation files.
@@ -187,9 +195,6 @@ class TmKeyService
                     }
 
                     $this->tmxServiceWrapper->addTmxInMyMemory($file, $userStruct);
-                } else {
-                    //don't call the postPushTMX for normal files
-                    continue;
                 }
             }
         }
@@ -219,9 +224,9 @@ class TmKeyService
     protected function loopForTMXLoadStatus(ProjectStructure $projectStructure, array $memoryFiles): void
     {
         foreach ($memoryFiles as $file) {
-            $deadline = strtotime('+' . self::TMX_POLL_TIMEOUT_MINUTES . ' minutes');
+            $startTime = $this->now();
+            $deadline = $startTime + self::TMX_POLL_TIMEOUT_MINUTES * 60;
             $pollInterval = self::TMX_POLL_INITIAL_INTERVAL;
-            $startTime = time();
 
             while (true) {
                 $uuid = $file->getUuid();
@@ -231,18 +236,18 @@ class TmKeyService
                 $result = $this->tmxServiceWrapper->tmxUploadStatus($uuid);
 
                 if ($result['completed']) {
-                    $elapsed = time() - $startTime;
+                    $elapsed = $this->now() - $startTime;
                     $this->log("TMX import completed for \"{$file->getName()}\" in {$elapsed}s");
                     break;
                 }
 
-                if (time() > $deadline) {
+                if ($this->now() > $deadline) {
                     // Not fatal: the project is created without this TMX, so no error is recorded.
                     $this->log("TMX import timed out after " . self::TMX_POLL_TIMEOUT_MINUTES . " minutes for file: " . $file->getName());
                     break;
                 }
 
-                $elapsed = time() - $startTime;
+                $elapsed = $this->now() - $startTime;
                 $this->log("Waiting for TMX \"{$file->getName()}\" — elapsed {$elapsed}s, next poll in {$pollInterval}s");
 
                 $this->pollSleep($pollInterval);
@@ -257,6 +262,11 @@ class TmKeyService
     protected function pollSleep(int $seconds): void
     {
         sleep($seconds);
+    }
+
+    protected function now(): int
+    {
+        return time();
     }
 
     // ──────────────────────────────────────────────────────────────

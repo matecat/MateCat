@@ -20,12 +20,6 @@ enum ProjectCreationError: int
     /** No translatable text or segments in the file */
     case NO_TRANSLATABLE_TEXT = -1;
 
-    /** Failed to find converted XLIFF: no longer thrown, FileInsertionService reports XLIFF_CONVERSION_NOT_FOUND */
-    case XLIFF_NOT_FOUND = -3;
-
-    /** XLIFF parse failure: no longer thrown, SegmentExtractor reports XLIFF_IMPORT_ERROR */
-    case XLIFF_PARSE_FAILURE = -4;
-
     /** TM key validation failure */
     case TM_KEY_INVALID = -5;
 
@@ -38,26 +32,17 @@ enum ProjectCreationError: int
     /** Failed to store/link an original zip file */
     case ZIP_STORE_FAILED = -10;
 
-    /** Failed to store reference files on disk (permission denied): no longer thrown */
-    case REFERENCE_FILES_DISK_ERROR = -11;
-
-    /** Failed to store reference files in the database: no longer thrown */
-    case REFERENCE_FILES_DB_ERROR = -12;
-
-    /** File cache/copy error (origin outside the expected directory) */
-    case FILE_CACHE_ERROR = -13;
-
     /** Project creation failed for an internal reason; the details are in the log, not shown to the user */
     case CREATION_FAILED = -14;
-
-    /** TMX import timed out during MyMemory polling */
-    case TMX_IMPORT_TIMEOUT = -15;
 
     /** The converted XLIFF is missing or is not an XLIFF */
     case XLIFF_CONVERSION_NOT_FOUND = -16;
 
     /** Invalid or missing upload token */
     case INVALID_UPLOAD_TOKEN = -19;
+
+    /** Payable rate template not valid for the project languages */
+    case INVALID_PAYABLE_RATES = -20;
 
     /** Segment has too many notes (exceeds SEGMENT_NOTES_LIMIT) */
     case TOO_MANY_NOTES = -44;
@@ -84,9 +69,6 @@ enum ProjectCreationError: int
     case FILE_HASH_FAILED = -230;
 
     // ── Non-negative codes ─────────────────────────────────────────
-
-    /** Generic or unset error code */
-    case GENERIC_ERROR = 0;
 
     /** Source word count exceeds MAX_SOURCE_WORDS */
     case MAX_WORDS_EXCEEDED = 128;
