@@ -9,7 +9,6 @@ use Matecat\SubFiltering\MateCatFilter;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\BasicFeatureStruct;
-use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
 use Model\FilesStorage\AbstractFilesStorage;
@@ -18,6 +17,9 @@ use Model\ProjectCreation\JobCreationService;
 use Model\ProjectCreation\ProjectManager;
 use Model\ProjectCreation\ProjectManagerModel;
 use Model\ProjectCreation\ProjectStructure;
+use Model\ProjectCreation\QAProcessor;
+use Model\ProjectCreation\SegmentExtractor;
+use Model\ProjectCreation\SegmentStorageService;
 use Model\ProjectCreation\TmKeyService;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
@@ -310,13 +312,13 @@ class TestableProjectManager extends ProjectManager
     }
 
     /**
-     * Public wrapper to invoke the private determineStatusAndPopulateResult().
+     * Public wrapper to invoke the private populateResult().
      * @throws ReflectionException
      */
-    public function callDetermineStatusAndPopulateResult(): void
+    public function callPopulateResult(): void
     {
         $ref = new ReflectionClass(ProjectManager::class);
-        $method = $ref->getMethod('determineStatusAndPopulateResult');
+        $method = $ref->getMethod('populateResult');
         $method->invoke($this);
     }
 
@@ -326,17 +328,6 @@ class TestableProjectManager extends ProjectManager
     public function setShowInCattoolSegsCounter(int $value): void
     {
         $this->show_in_cattool_segs_counter = $value;
-    }
-
-    /**
-     * Public wrapper to invoke the private mapSegmentExtractionError().
-     * @throws ReflectionException
-     */
-    public function callMapSegmentExtractionError(Throwable $e, AbstractFilesStorage $fs, string $linkFile): void
-    {
-        $ref = new ReflectionClass(ProjectManager::class);
-        $method = $ref->getMethod('mapSegmentExtractionError');
-        $method->invoke($this, $e, $fs, $linkFile);
     }
 
     /**
@@ -354,17 +345,6 @@ class TestableProjectManager extends ProjectManager
     public function setTmKeyService(TmKeyService $service): void
     {
         $this->tmKeyService = $service;
-    }
-
-    /**
-     * Public wrapper to invoke the private setPrivateTmKeysOrFail().
-     * @throws ReflectionException
-     */
-    public function callSetPrivateTmKeysOrFail(string $firstTMXFileName): void
-    {
-        $ref = new ReflectionClass(ProjectManager::class);
-        $method = $ref->getMethod('setPrivateTmKeysOrFail');
-        $method->invoke($this, $firstTMXFileName);
     }
 
     /**
@@ -390,20 +370,21 @@ class TestableProjectManager extends ProjectManager
         $method->invoke($this, $totalFilesStructure);
     }
 
-    /**
-     * Set files_word_count for testing.
-     */
-    public function setFilesWordCount(int $value): void
+    // ── Collaborators reached by createProject() past the extraction ──
+
+    public function setSegmentExtractor(SegmentExtractor $extractor): void
     {
-        $this->files_word_count = $value;
+        $this->segmentExtractor = $extractor;
     }
 
-    /**
-     * Set min_max_segments_id for testing.
-     */
-    public function setMinMaxSegmentsId(array $value): void
+    public function setSegmentStorageService(SegmentStorageService $service): void
     {
-        $this->min_max_segments_id = $value;
+        $this->segmentStorageService = $service;
+    }
+
+    public function setQAProcessor(QAProcessor $processor): void
+    {
+        $this->qaProcessor = $processor;
     }
 
     // ── ProjectManagerModel override ──
@@ -413,15 +394,28 @@ class TestableProjectManager extends ProjectManager
         $this->projectManagerModel = $model;
     }
 
+    public function setLogger(MatecatLogger $logger): void
+    {
+        (new ReflectionClass(ProjectManager::class))->getProperty('logger')->setValue($this, $logger);
+    }
+
+    /**
+     * Mark the project row as inserted by this run, as createProjectRecord() does.
+     */
+    public function setProject(ProjectStruct $project): void
+    {
+        $this->project = $project;
+    }
+
     /**
      * Public wrapper to invoke the private clearFailedProject().
      * @throws ReflectionException
      */
-    public function callClearFailedProject(Throwable $e): void
+    public function callClearFailedProject(): void
     {
         $ref = new ReflectionClass(ProjectManager::class);
         $method = $ref->getMethod('clearFailedProject');
-        $method->invoke($this, $e);
+        $method->invoke($this);
     }
 
     // ── Step 13: additional private methods testing support ──
@@ -451,58 +445,7 @@ class TestableProjectManager extends ProjectManager
     }
 
     /**
-     * Public wrapper to invoke the private handleZipFiles().
-     * @throws ReflectionException
-     */
-    public function callHandleZipFiles(array $linkFiles): void
-    {
-        $ref = new ReflectionClass(ProjectManager::class);
-        $method = $ref->getMethod('handleZipFiles');
-        $method->invoke($this, $linkFiles);
-    }
-
-    /**
-     * Override _zipFileHandling so handleZipFiles() tests can control behavior.
-     * By default, does nothing. Set a callback via setZipFileHandlingCallback().
-     *
-     * @var callable|null
-     */
-    private $zipFileHandlingCallback = null;
-
-    public function setZipFileHandlingCallback(?callable $callback): void
-    {
-        $this->zipFileHandlingCallback = $callback;
-    }
-
-    /**
-     * Opt in to the real ProjectManager::zipFileHandling() body. The override above exists so
-     * handleZipFiles() can be tested in isolation, which also makes the production method
-     * unreachable; tests that target the method itself flip this on. Off by default so every
-     * existing caller keeps the stubbed behaviour.
-     */
-    private bool $useRealZipFileHandling = false;
-
-    public function enableRealZipFileHandling(): void
-    {
-        $this->useRealZipFileHandling = true;
-    }
-
-    protected function zipFileHandling($linkFiles): void
-    {
-        if ($this->useRealZipFileHandling) {
-            parent::zipFileHandling($linkFiles);
-
-            return;
-        }
-
-        if ($this->zipFileHandlingCallback !== null) {
-            ($this->zipFileHandlingCallback)($linkFiles);
-        }
-    }
-
-    /**
-     * Public wrapper to invoke the protected zipFileHandling(); pair with
-     * enableRealZipFileHandling() to exercise the production body.
+     * Public wrapper to invoke the protected zipFileHandling().
      */
     public function callZipFileHandling(array $linkFiles): void
     {
@@ -527,5 +470,55 @@ class TestableProjectManager extends ProjectManager
     {
         return $this->uploadDir;
     }
-}
 
+    /**
+     * One entry per pushActivityLog() call: whether a transaction scope was open at that moment.
+     *
+     * @var list<bool>
+     */
+    public array $activityLogPushedInsideScope = [];
+
+    /**
+     * When set, getAnalyzeURL() throws it, so populateResult() fails after the commit.
+     */
+    public ?Throwable $analyzeUrlFailure = null;
+
+    /**
+     * When set, pushActivityLog() throws it after recording the call.
+     */
+    public ?Throwable $activityLogFailure = null;
+
+    /**
+     * Record the call instead of enqueueing to AMQ.
+     *
+     * @throws Throwable
+     */
+    protected function pushActivityLog(): void
+    {
+        $this->activityLogPushedInsideScope[] = $this->dbHandler->isInTransactionScope();
+
+        if ($this->activityLogFailure !== null) {
+            throw $this->activityLogFailure;
+        }
+    }
+
+    public function getAnalyzeURL(): string
+    {
+        if ($this->analyzeUrlFailure !== null) {
+            throw $this->analyzeUrlFailure;
+        }
+
+        return parent::getAnalyzeURL();
+    }
+
+    /**
+     * Public wrapper to invoke the private finalizeProjectInTransaction().
+     * @throws ReflectionException
+     */
+    public function callFinalizeProjectInTransaction(): void
+    {
+        $ref = new ReflectionClass(ProjectManager::class);
+        $method = $ref->getMethod('finalizeProjectInTransaction');
+        $method->invoke($this);
+    }
+}

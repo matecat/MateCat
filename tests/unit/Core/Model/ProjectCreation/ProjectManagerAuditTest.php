@@ -339,8 +339,8 @@ class ProjectManagerAuditTest extends AbstractTest
         $this->assertIsArray($ps->private_tm_key);
         $this->assertCount(0, $ps->private_tm_key);
 
-        // setPrivateTmKeysOrFail() checks: if (count($this->projectStructure->private_tm_key))
-        // With [], count returns 0 (falsy) — the TM key processing is skipped.
+        // TmKeyService::setPrivateTMKeys() returns early on empty($projectStructure->private_tm_key):
+        // with [], the TM key processing is skipped.
         $this->assertSame(0, count($ps->private_tm_key));
     }
 
@@ -355,7 +355,7 @@ class ProjectManagerAuditTest extends AbstractTest
 
         $this->assertCount(1, $ps->private_tm_key);
 
-        // setPrivateTmKeysOrFail() would enter the if-block.
+        // TmKeyService::setPrivateTMKeys() would get past its early return.
         $this->assertGreaterThan(0, count($ps->private_tm_key));
     }
 

@@ -12,6 +12,7 @@ use Model\Segments\SegmentMetadataMarshaller;
 use PDO;
 use PDOException;
 use PDOStatement;
+use Psr\Log\InvalidArgumentException as LogInvalidArgumentException;
 use RecursiveArrayIterator;
 use RecursiveIteratorIterator;
 use RuntimeException;
@@ -75,7 +76,7 @@ class ProjectManagerModel
     }
 
     /**
-     * @throws Exception
+     * @throws PDOException
      */
     public function insertFile(int $idProject, string $sourceLanguage, string $file_name, string $fileExtension, string $fileDateSha1Path): string
     {
@@ -87,20 +88,14 @@ class ProjectManagerModel
         $data['sha1_original_file'] = $fileDateSha1Path;
         $data['is_converted'] = 0;
 
-        try {
-            $idFile = $this->dbHandler->insert('files', $data);
-        } catch (PDOException $e) {
-            $this->log("Database insert error: {$e->getMessage()} ", $e);
-            throw new Exception("Database insert file error: {$e->getMessage()} ", -$e->getCode());
-        }
-
-        return $idFile;
+        return $this->dbHandler->insert('files', $data);
     }
 
     /**
      * @param list<array<string, mixed>> $query_translations_values
+     * @throws ProjectCreationException
      * @throws PDOException
-     * @throws \Psr\Log\InvalidArgumentException
+     * @throws LogInvalidArgumentException
      */
     public function insertPreTranslations(array $query_translations_values): void
     {
@@ -127,7 +122,7 @@ class ProjectManagerModel
 
         $tupleMarks = "( ?, ?, ?, ?, ?, ?, NOW(), 'SKIPPED', ?, ?, ?, ?, ?, ?, ?, ? )";
 
-        $this->executeBulkInsert($baseQuery, $tupleMarks, $query_translations_values, 100, 'Pre-Translations', ProjectCreationError::BULK_INSERT_PRE_TRANSLATIONS->value);
+        $this->executeBulkInsert($baseQuery, $tupleMarks, $query_translations_values, 100, 'Pre-Translations', ProjectCreationError::BULK_INSERT_PRE_TRANSLATIONS);
     }
 
     /**
@@ -139,10 +134,11 @@ class ProjectManagerModel
      * @param list<array<int|string, mixed>> $insertValues Rows — each element is a flat tuple of column values
      * @param positive-int $chunkSize Max rows per INSERT statement
      * @param string $label Human-readable label for logging/errors
-     * @param int $errorCode Code to attach to re-thrown PDOException
+     * @param ProjectCreationError $error Code to attach to the re-thrown ProjectCreationException
      *
+     * @throws ProjectCreationException
      * @throws PDOException
-     * @throws \Psr\Log\InvalidArgumentException
+     * @throws LogInvalidArgumentException
      */
     private function executeBulkInsert(
         string $insertTemplate,
@@ -150,7 +146,7 @@ class ProjectManagerModel
         array $insertValues,
         int $chunkSize,
         string $label,
-        int $errorCode
+        ProjectCreationError $error
     ): void {
         $this->log("$label: Total Rows to insert: " . count($insertValues));
 
@@ -177,7 +173,8 @@ class ProjectManagerModel
                 $this->log("$label import - Statement: " . ($stmt instanceof PDOStatement ? $stmt->queryString : 'N/A'));
                 $this->log("$label Chunk Dump: " . var_export($chunk, true));
                 $this->log("$label Flattened Values Dump: " . var_export($flattenedValues, true));
-                throw new PDOException("$label import - DB Error: " . $e->getMessage(), $errorCode, $e);
+                // The DB message is logged above and kept as the previous: the user is shown this one.
+                throw new ProjectCreationException($error, "Failed to save " . strtolower($label) . ".", $e);
             }
         }
     }
@@ -191,8 +188,9 @@ class ProjectManagerModel
      *
      * @param array<int|string, array<string, mixed>> $notes
      *
+     * @throws ProjectCreationException
      * @throws PDOException
-     * @throws \Psr\Log\InvalidArgumentException
+     * @throws LogInvalidArgumentException
      */
     public function bulkInsertSegmentNotesAndMetadata(array $notes): void
     {
@@ -249,11 +247,11 @@ class ProjectManagerModel
         }
 
         if ($noteValues !== []) {
-            $this->executeBulkInsert($noteTemplate, $noteTupleMarks, $noteValues, 30, 'Notes', ProjectCreationError::BULK_INSERT_NOTES->value);
+            $this->executeBulkInsert($noteTemplate, $noteTupleMarks, $noteValues, 30, 'Notes', ProjectCreationError::BULK_INSERT_NOTES);
         }
 
         if ($metaValues !== []) {
-            $this->executeBulkInsert($metaTemplate, $metaTupleMarks, $metaValues, 30, 'Segment Metadata', ProjectCreationError::BULK_INSERT_SEGMENT_METADATA->value);
+            $this->executeBulkInsert($metaTemplate, $metaTupleMarks, $metaValues, 30, 'Segment Metadata', ProjectCreationError::BULK_INSERT_SEGMENT_METADATA);
         }
     }
 
@@ -269,8 +267,9 @@ class ProjectManagerModel
     /**
      * @param array<int|string, array<string, mixed>> $contextGroups
      *
+     * @throws ProjectCreationException
      * @throws PDOException
-     * @throws \Psr\Log\InvalidArgumentException
+     * @throws LogInvalidArgumentException
      */
     public function bulkInsertContextsGroups(int $idProject, array $contextGroups): void
     {
@@ -288,7 +287,20 @@ class ProjectManagerModel
             }
         }
 
-        $this->executeBulkInsert($template, $tupleMarks, $insert_values, 30, 'Context Groups', ProjectCreationError::BULK_INSERT_CONTEXT_GROUPS->value);
+        $this->executeBulkInsert($template, $tupleMarks, $insert_values, 30, 'Context Groups', ProjectCreationError::BULK_INSERT_CONTEXT_GROUPS);
+    }
+
+    /**
+     * Read from the database, never from cache.
+     *
+     * @throws PDOException
+     */
+    public function projectExists(int $idProject): bool
+    {
+        $stmt = $this->dbHandler->getConnection()->prepare("SELECT 1 FROM projects WHERE id = :id_project");
+        $stmt->execute(['id_project' => $idProject]);
+
+        return $stmt->fetchColumn() !== false;
     }
 
     /**

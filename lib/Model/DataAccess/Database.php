@@ -47,6 +47,17 @@ class Database implements IDatabase
      */
     private bool $rollbackOnly = false;
 
+    /**
+     * Whether a scope was entered with begin() and not yet ended by commit(), rollback() or close().
+     *
+     * PDO::inTransaction() cannot answer that. It reads the status of the last OK packet, and the
+     * server ends the transaction on a deadlock (1213), or on a lock wait timeout (1205) under
+     * innodb_rollback_on_timeout, by answering with an error packet that leaves the flag untouched.
+     * The next statement then runs in autocommit, and a scope entered after it would open a fresh
+     * transaction of its own. This flag survives that, so the abort can be detected and refused.
+     */
+    private bool $transactionOpened = false;
+
 
     const string SEQ_ID_SEGMENT = 'id_segment';
     const string SEQ_ID_PROJECT = 'id_project';
@@ -131,6 +142,10 @@ class Database implements IDatabase
      */
     public function close(): void
     {
+        // The server rolls back whatever this connection left open, so nothing of it survives here.
+        $this->afterCommitCallbacks = [];
+        $this->rollbackOnly = false;
+        $this->transactionOpened = false;
         $this->connection = null;
     }
 
@@ -177,7 +192,43 @@ class Database implements IDatabase
             $this->getConnection()->beginTransaction();
         }
 
+        // Also when joining one a fixture opened on the raw connection: whoever began it now owns
+        // a scope, and only commit(), rollback() or close() ends it.
+        $this->transactionOpened = true;
+
         return $this->getConnection();
+    }
+
+    /**
+     * @throws TransactionAbortedException when the server ended the transaction begin() opened
+     * @throws PDOException
+     */
+    private function assertServerTransactionAlive(string $refusal): void
+    {
+        if ($this->getConnection()->inTransaction()) {
+            return;
+        }
+
+        // The server rolled the transaction back on its own. Every write it held is gone, and any
+        // statement run since landed in autocommit. Nothing queued against it may fire.
+        $this->afterCommitCallbacks = [];
+        $this->rollbackOnly = false;
+        $this->transactionOpened = false;
+
+        throw new TransactionAbortedException(
+            $refusal . ': the server already rolled it back, after a deadlock or a lock wait timeout'
+        );
+    }
+
+    /**
+     * @Override
+     * {@inheritdoc}
+     *
+     * @throws PDOException
+     */
+    public function isInTransactionScope(): bool
+    {
+        return $this->transactionOpened || $this->getConnection()->inTransaction();
     }
 
 
@@ -199,6 +250,12 @@ class Database implements IDatabase
                 'commit refused: a scope inside this transaction failed, so the whole transaction was rolled back'
             );
         }
+
+        if ($this->transactionOpened) {
+            $this->assertServerTransactionAlive('commit refused');
+        }
+
+        $this->transactionOpened = false;
 
         try {
             $this->getConnection()->commit();
@@ -300,6 +357,7 @@ class Database implements IDatabase
         // disappear. The verdict goes with it — it condemned this transaction, which is now gone.
         $this->afterCommitCallbacks = [];
         $this->rollbackOnly = false;
+        $this->transactionOpened = false;
 
         // Check if a transaction is currently active
         if ($connection->inTransaction()) {
@@ -316,13 +374,17 @@ class Database implements IDatabase
     public function transaction(callable $callback): mixed
     {
         // Whether this scope is the outermost one, and therefore the one that opens the transaction
-        // and issues its single commit. begin() joins an already open transaction silently, so
-        // having called it is no evidence of having opened anything: the connection has to be asked.
-        $isOutermostScope = !$this->getConnection()->inTransaction();
+        // and issues its single commit. It is not when begin() already opened one, even if the server
+        // has since ended it, nor when a test fixture opened one on the raw connection.
+        $isOutermostScope = !$this->isInTransactionScope();
 
         if ($isOutermostScope) {
             $this->begin();
-        } elseif ($this->rollbackOnly) {
+        } elseif ($this->transactionOpened) {
+            $this->assertServerTransactionAlive('refusing to enter a transaction scope');
+        }
+
+        if (!$isOutermostScope && $this->rollbackOnly) {
             // Every statement this scope would run is already destined for the rollback.
             throw new TransactionAbortedException(
                 'refusing to enter a transaction scope: an enclosing scope has already failed'
@@ -589,7 +651,7 @@ class Database implements IDatabase
         // instead would tie them to that transaction's fate, and a rollback would put ids that were
         // already handed out back on the counter. Refuse rather than allocate unsafely: the caller
         // allocates before it opens the transaction that consumes the ids.
-        if ($this->getConnection()->inTransaction()) {
+        if ($this->isInTransactionScope()) {
             throw new SequenceAllocationInTransaction(
                 'refusing to allocate from the `' . $sequence_name . '` sequence: a transaction is already open on this ' .
                 'connection, and an allocation that rolls back with it would hand the same ids out twice'

@@ -5,8 +5,10 @@ namespace Matecat\Core\Model\ProjectCreation;
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\TestHelpers\AbstractTest;
+use Model\Conversion\ZipArchiveHandler;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
+use Model\ProjectCreation\ProjectCreationError;
 use Model\ProjectCreation\TranslationTuple;
 use Model\Segments\SegmentStruct;
 use PHPUnit\Framework\Attributes\Test;
@@ -699,12 +701,40 @@ class ExtractSegmentsTest extends AbstractTest
         );
 
         $this->expectException(Exception::class);
-        $this->expectExceptionCode(-1);
+        $this->expectExceptionCode(ProjectCreationError::NO_TRANSLATABLE_TEXT->value);
+        $this->expectExceptionMessage('No text to translate in the file empty.xliff.');
 
         try {
             $this->pm->callExtractSegments(99, [
                 'path_cached_xliff' => $tmpFile,
                 'original_filename' => 'empty.xliff',
+            ]);
+        } finally {
+            unlink($tmpFile);
+        }
+    }
+
+    #[Test]
+    public function testEmptyFileInsideAZipNamesTheFileWithItsZipPath(): void
+    {
+        $tmpFile = tempnam(sys_get_temp_dir(), 'xliff_test_');
+        file_put_contents(
+            $tmpFile,
+            '<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2"><file original="empty.txt" source-language="en-US" target-language="it-IT" datatype="plaintext"><body></body></file></xliff>'
+        );
+
+        $internalName = 'archive.zip' . ZipArchiveHandler::INTERNAL_SEPARATOR . 'docs' . ZipArchiveHandler::INTERNAL_SEPARATOR . 'empty.xliff';
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionCode(ProjectCreationError::NO_TRANSLATABLE_TEXT->value);
+        $this->expectExceptionMessage(
+            'No text to translate in the file archive.zip' . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'empty.xliff.'
+        );
+
+        try {
+            $this->pm->callExtractSegments(99, [
+                'path_cached_xliff' => $tmpFile,
+                'original_filename' => $internalName,
             ]);
         } finally {
             unlink($tmpFile);

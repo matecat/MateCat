@@ -165,7 +165,10 @@ vendor/bin/phpstan analyse path/to/File.php --configuration=phpstan.neon --no-pr
 ### PHPStan Configuration
 
 - No baseline — every reported error must be fixed (there is no `phpstan-baseline.neon`)
-- When adding exceptions to PHPDoc, prefer `use` imports over FQCN
+- In a PHPDoc `@throws` tag, import the exception with `use` and write its short class name, without a leading
+  backslash: `@throws TypeError`, not `@throws \TypeError`. When two exceptions share a short name (the global
+  `InvalidArgumentException` and `Psr\Log\InvalidArgumentException`), alias the non-global one
+  (`use Psr\Log\InvalidArgumentException as LogInvalidArgumentException;`)
 
 ## User-Facing Copy: Sentence Case
 

@@ -105,6 +105,13 @@ interface IDatabase
     public function markRollbackOnly(): void;
 
     /**
+     * Whether the caller runs inside a transaction scope: one opened through transaction(), or by
+     * the test harness. Still true after the server has rolled that transaction back on its own,
+     * because the scope has not ended — the next scope entered, or its commit, will be refused.
+     */
+    public function isInTransactionScope(): bool;
+
+    /**
      * Execute an update query with an array as argument
      *
      * @param string $table Table to update

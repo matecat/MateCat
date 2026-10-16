@@ -43,7 +43,6 @@ class ZipFileHandlingTest extends AbstractTest
             $this->createStub(MetadataDao::class),
             $this->createStub(MatecatLogger::class),
         );
-        $this->pm->enableRealZipFileHandling();
 
         $this->pm->setProjectStructureValue('result', ['errors' => new ArrayObject()]);
         $this->pm->setProjectStructureValue('create_date', '2026-08-14 10:00:00');

@@ -3,6 +3,8 @@
 namespace Matecat\Core\Controllers;
 
 use Controller\API\App\CompletionEventController;
+use Controller\API\Commons\Exceptions\ValidationError;
+use JsonException;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
@@ -12,8 +14,10 @@ use Model\ChunksCompletion\ChunkCompletionEventStruct;
 use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\FeatureSet;
+use PDO;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Exception as PHPUnitException;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use ReflectionException;
@@ -27,6 +31,7 @@ use Utils\Logger\MatecatLogger;
  *   base+4 file (9059004), base+5 team (9059005), base+6 user (9059006).
  * Owner email: ctrltest_9059000@example.org (never the shared test@example.org).
  * The chunk_completion_events row uses a dedicated reserved id (base+20).
+ * The qa_chunk_reviews row uses the fragment id (base+8), carrying undo_data for EVENT_ID.
  * Clean ONLY by reserved id.
  */
 class TestableCompletionEventController extends CompletionEventController
@@ -47,6 +52,10 @@ class CompletionEventControllerTest extends AbstractTest
 
     private const int BASE     = 9_059_000;
     private const int EVENT_ID = 9_059_020;
+
+    private const float UNDO_PENALTY_POINTS       = 12.5;
+    private const int   UNDO_REVIEWED_WORDS_COUNT = 42;
+    private const int   UNDO_IS_PASS              = 1;
 
     /** @var ReflectionClass<CompletionEventController> */
     private ReflectionClass $reflector;
@@ -103,6 +112,7 @@ class CompletionEventControllerTest extends AbstractTest
 
     /**
      * @throws \PDOException
+     * @throws JsonException
      */
     private function seedTestData(): void
     {
@@ -119,6 +129,21 @@ class CompletionEventControllerTest extends AbstractTest
             . "NULL, " . $this->segmentId(self::BASE) . ", " . $this->segmentId(self::BASE) . ", "
             . "'jobpw', 'user', NOW(), '127.0.0.1', 0)"
         );
+
+        // The review as the completion event left it: score reset, the previous one kept as undo_data.
+        $this->seedChunkReview(self::BASE);
+        $stmt = $this->seedConnection()->prepare(
+            "UPDATE qa_chunk_reviews SET penalty_points = 0, reviewed_words_count = 0, is_pass = 0, undo_data = :undo WHERE id = :id"
+        );
+        $stmt->execute([
+            'undo' => json_encode([
+                'reset_by_event_id'    => (string) self::EVENT_ID,
+                'penalty_points'       => self::UNDO_PENALTY_POINTS,
+                'reviewed_words_count' => self::UNDO_REVIEWED_WORDS_COUNT,
+                'is_pass'              => self::UNDO_IS_PASS,
+            ], JSON_THROW_ON_ERROR),
+            'id'   => $this->chunkReviewId(self::BASE),
+        ]);
     }
 
     /**
@@ -144,6 +169,36 @@ class CompletionEventControllerTest extends AbstractTest
         return (int) ($row['c'] ?? 0);
     }
 
+    /**
+     * @return array<string, mixed>
+     * @throws \PDOException
+     * @throws PHPUnitException
+     */
+    private function chunkReviewRow(): array
+    {
+        $stmt = $this->seedConnection()->prepare(
+            "SELECT penalty_points, reviewed_words_count, is_pass, undo_data FROM qa_chunk_reviews WHERE id = :id"
+        );
+        $stmt->execute(['id' => $this->chunkReviewId(self::BASE)]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $this->assertIsArray($row, 'seeded chunk review row exists');
+
+        return $row;
+    }
+
+    /**
+     * @throws \PDOException
+     * @throws PHPUnitException
+     */
+    private function assertChunkReviewRestoredFromUndoData(): void
+    {
+        $row = $this->chunkReviewRow();
+        $this->assertEquals(self::UNDO_PENALTY_POINTS, $row['penalty_points']);
+        $this->assertEquals(self::UNDO_REVIEWED_WORDS_COUNT, $row['reviewed_words_count']);
+        $this->assertEquals(self::UNDO_IS_PASS, $row['is_pass']);
+        $this->assertNull($row['undo_data']);
+    }
+
     // ─── delete() public action ───
 
     /**
@@ -165,6 +220,7 @@ class CompletionEventControllerTest extends AbstractTest
         $this->controller->delete();
 
         $this->assertSame(0, $this->eventRowCount(), 'event row deleted by __performUndo');
+        $this->assertChunkReviewRestoredFromUndoData();
     }
 
     /**
@@ -177,6 +233,31 @@ class CompletionEventControllerTest extends AbstractTest
 
         // The dispatch + DAO delete both ran against the real DB; the row is gone.
         $this->assertSame(0, $this->eventRowCount());
+        $this->assertChunkReviewRestoredFromUndoData();
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    #[Test]
+    public function delete_without_undo_data_throws_and_keeps_the_event(): void
+    {
+        $this->seedConnection()->exec("UPDATE qa_chunk_reviews SET undo_data = NULL WHERE id = " . $this->chunkReviewId(self::BASE));
+
+        $this->responseMock->expects($this->never())->method('send');
+
+        try {
+            $this->controller->delete();
+            $this->fail('ValidationError expected when the review has no undo data');
+        } catch (ValidationError $e) {
+            $this->assertSame('Undo data is not available', $e->getMessage());
+        }
+
+        // The transaction was rolled back: the event is still there and the review untouched.
+        $this->assertSame(1, $this->eventRowCount());
+        $row = $this->chunkReviewRow();
+        $this->assertEquals(0, $row['penalty_points']);
+        $this->assertNull($row['undo_data']);
     }
 
     // ─── __performUndo() private helper (direct) ───
@@ -193,6 +274,7 @@ class CompletionEventControllerTest extends AbstractTest
         $m->invoke($this->controller);
 
         $this->assertSame(0, $this->eventRowCount());
+        $this->assertChunkReviewRestoredFromUndoData();
     }
 
     /**
@@ -201,7 +283,7 @@ class CompletionEventControllerTest extends AbstractTest
     #[Test]
     public function performUndo_is_noop_count_when_event_already_absent(): void
     {
-        // Remove the seeded row first, then run undo against a non-matching id.
+        // Remove the seeded row first; undo_data still points at the event struct's id, so only the delete is a no-op.
         $this->seedConnection()->exec("DELETE FROM chunk_completion_events WHERE id = " . self::EVENT_ID);
         $this->assertSame(0, $this->eventRowCount());
 

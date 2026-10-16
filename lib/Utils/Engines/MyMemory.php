@@ -3,6 +3,7 @@
 namespace Utils\Engines;
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\ValidationError as ControllerValidationError;
 use Exception;
 use Model\DataAccess\IDatabase;
 use Model\Analysis\Constants\InternalMatchesConstants;
@@ -256,6 +257,7 @@ class MyMemory extends AbstractEngine
       * @throws AuthenticationError
       * @throws NotFoundException
       * @throws ValidationError
+      * @throws ControllerValidationError
       * @throws EndQueueException
       * @throws ReQueueException
       */
