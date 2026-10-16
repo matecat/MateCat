@@ -45,6 +45,8 @@ class ExposedInsertFilesService extends FileInsertionService
  * - Blank filenames are skipped
  * - Happy path: inserts file record, moves from cache, returns correct structure
  * - moveFromCacheToFileDir returning non-true throws with FILE_MOVE_FAILED
+ * - An S3 "Invalid copy source encoding" failure becomes FILE_MOVE_FAILED with the rename
+ *   message and the original as previous; any other move failure propagates unchanged
  * - fid is appended to file_id_list
  * - Multiple files produce multiple structures keyed by fid
  * - pdfAnalysis metadata is inserted when present
@@ -227,6 +229,78 @@ class InsertFilesTest extends AbstractTest
             'abc123',
             '/cache/file.xliff',
         );
+    }
+
+    // ── Test 4b: S3 copy-source encoding failure ─────────────────────
+
+    /**
+     * @throws MockException
+     */
+    #[Test]
+    public function invalidCopySourceEncodingBecomesTheRenameMessage(): void
+    {
+        $pmModel = $this->createStub(ProjectManagerModel::class);
+        $pmModel->method('insertFile')->willReturn('100');
+
+        $original = new Exception('<Error><Code>InvalidRequest</Code><Message>Invalid copy source encoding.</Message></Error>');
+
+        $fs = $this->createStub(AbstractFilesStorage::class);
+        $fs->method('moveFromCacheToFileDir')->willThrowException($original);
+
+        $service = $this->buildService(pmModel: $pmModel);
+
+        try {
+            $service->callInsertFiles(
+                $fs,
+                $this->projectStructure,
+                ['document.docx'],
+                'abc123',
+                '/cache/file.xliff',
+            );
+            $this->fail('Expected exception');
+        } catch (Exception $e) {
+            $this->assertSame(Exception::class, $e::class);
+            $this->assertSame(ProjectCreationError::FILE_MOVE_FAILED->value, $e->getCode());
+            $this->assertSame(
+                'There was a problem during the upload of your file(s). Please, try to rename your file(s) avoiding non-standard characters',
+                $e->getMessage()
+            );
+            $this->assertSame($original, $e->getPrevious());
+        }
+
+        $this->assertSame([], $this->projectStructure->file_id_list);
+    }
+
+    /**
+     * @throws MockException
+     */
+    #[Test]
+    public function otherMoveFailurePropagatesUnchanged(): void
+    {
+        $pmModel = $this->createStub(ProjectManagerModel::class);
+        $pmModel->method('insertFile')->willReturn('100');
+
+        $original = new Exception('Storage unavailable', 503);
+
+        $fs = $this->createStub(AbstractFilesStorage::class);
+        $fs->method('moveFromCacheToFileDir')->willThrowException($original);
+
+        $service = $this->buildService(pmModel: $pmModel);
+
+        try {
+            $service->callInsertFiles(
+                $fs,
+                $this->projectStructure,
+                ['document.docx'],
+                'abc123',
+                '/cache/file.xliff',
+            );
+            $this->fail('Expected exception');
+        } catch (Exception $e) {
+            $this->assertSame($original, $e);
+        }
+
+        $this->assertSame([], $this->projectStructure->file_id_list);
     }
 
     // ── Test 5: fid appended to file_id_list ────────────────────────

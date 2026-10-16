@@ -310,13 +310,13 @@ class TestableProjectManager extends ProjectManager
     }
 
     /**
-     * Public wrapper to invoke the private determineStatusAndPopulateResult().
+     * Public wrapper to invoke the private populateResult().
      * @throws ReflectionException
      */
-    public function callDetermineStatusAndPopulateResult(): void
+    public function callPopulateResult(): void
     {
         $ref = new ReflectionClass(ProjectManager::class);
-        $method = $ref->getMethod('determineStatusAndPopulateResult');
+        $method = $ref->getMethod('populateResult');
         $method->invoke($this);
     }
 
@@ -329,14 +329,17 @@ class TestableProjectManager extends ProjectManager
     }
 
     /**
-     * Public wrapper to invoke the private mapSegmentExtractionError().
+     * Public wrapper to invoke the private describeCreationFailure().
+     *
+     * @return array{int, string}
      * @throws ReflectionException
      */
-    public function callMapSegmentExtractionError(Throwable $e, AbstractFilesStorage $fs, string $linkFile): void
+    public function callDescribeCreationFailure(Throwable $e): array
     {
         $ref = new ReflectionClass(ProjectManager::class);
-        $method = $ref->getMethod('mapSegmentExtractionError');
-        $method->invoke($this, $e, $fs, $linkFile);
+        $method = $ref->getMethod('describeCreationFailure');
+
+        return $method->invoke($this, $e);
     }
 
     /**
@@ -417,11 +420,11 @@ class TestableProjectManager extends ProjectManager
      * Public wrapper to invoke the private clearFailedProject().
      * @throws ReflectionException
      */
-    public function callClearFailedProject(Throwable $e): void
+    public function callClearFailedProject(): void
     {
         $ref = new ReflectionClass(ProjectManager::class);
         $method = $ref->getMethod('clearFailedProject');
-        $method->invoke($this, $e);
+        $method->invoke($this);
     }
 
     // ── Step 13: additional private methods testing support ──
@@ -451,34 +454,9 @@ class TestableProjectManager extends ProjectManager
     }
 
     /**
-     * Public wrapper to invoke the private handleZipFiles().
-     * @throws ReflectionException
-     */
-    public function callHandleZipFiles(array $linkFiles): void
-    {
-        $ref = new ReflectionClass(ProjectManager::class);
-        $method = $ref->getMethod('handleZipFiles');
-        $method->invoke($this, $linkFiles);
-    }
-
-    /**
-     * Override _zipFileHandling so handleZipFiles() tests can control behavior.
-     * By default, does nothing. Set a callback via setZipFileHandlingCallback().
-     *
-     * @var callable|null
-     */
-    private $zipFileHandlingCallback = null;
-
-    public function setZipFileHandlingCallback(?callable $callback): void
-    {
-        $this->zipFileHandlingCallback = $callback;
-    }
-
-    /**
-     * Opt in to the real ProjectManager::zipFileHandling() body. The override above exists so
-     * handleZipFiles() can be tested in isolation, which also makes the production method
-     * unreachable; tests that target the method itself flip this on. Off by default so every
-     * existing caller keeps the stubbed behaviour.
+     * Opt in to the real ProjectManager::zipFileHandling() body. The override below stubs it to a
+     * no-op so createProject() can run without zip storage; tests that target the method itself
+     * flip this on. Off by default so every other caller keeps the stubbed behaviour.
      */
     private bool $useRealZipFileHandling = false;
 
@@ -491,12 +469,6 @@ class TestableProjectManager extends ProjectManager
     {
         if ($this->useRealZipFileHandling) {
             parent::zipFileHandling($linkFiles);
-
-            return;
-        }
-
-        if ($this->zipFileHandlingCallback !== null) {
-            ($this->zipFileHandlingCallback)($linkFiles);
         }
     }
 

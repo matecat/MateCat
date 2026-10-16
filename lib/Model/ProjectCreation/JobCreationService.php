@@ -283,6 +283,14 @@ class JobCreationService
         // Validate segments exist before creating any jobs.
         // Intentionally moved outside the loop (was inside in the original code)
         // because minMaxSegmentsId does not change between iterations.
+        //
+        // Unreachable guard: an invariant check, not an error a user can trigger. Project creation
+        // reaches this point only with at least one file holding segments, because
+        // ProjectManager::resolveFilesExtractSegmentsAndStoreData() throws NO_TRANSLATABLE_TEXT when
+        // no file survives extraction, and SegmentStorageService::storeSegments() sets both ids for every
+        // file that has segments. Throwing here means that chain is broken: a bug, not bad input.
+        // It stays because without it buildJobStruct() would fail on the missing keys with a less
+        // readable TypeError.
         if (!isset($minMaxSegmentsId['job_first_segment']) || !isset($minMaxSegmentsId['job_last_segment'])) {
             throw new Exception('Job cannot be created. No segments found!');
         }

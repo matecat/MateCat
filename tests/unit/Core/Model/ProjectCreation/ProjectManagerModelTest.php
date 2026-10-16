@@ -6,10 +6,12 @@ use Exception;
 use InvalidArgumentException;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\IDatabase;
+use Model\ProjectCreation\ProjectCreationError;
 use Model\ProjectCreation\ProjectManagerModel;
 use PDO;
 use PDOException;
 use PDOStatement;
+use ReflectionProperty;
 use Utils\Logger\MatecatLogger;
 
 class ProjectManagerModelTest extends AbstractTest
@@ -886,17 +888,134 @@ class ProjectManagerModelTest extends AbstractTest
 
     public function testInsertFileThrowsOnPdoException(): void
     {
-        $this->expectException(Exception::class);
-        $this->expectExceptionMessage('Database insert file error');
+        $pdoException = new PDOException('Duplicate entry', 1062);
 
         $mockDb = $this->createStub(IDatabase::class);
-        $mockDb->method('insert')->willThrowException(
-            new PDOException('Duplicate entry', 1062)
-        );
+        $mockDb->method('insert')->willThrowException($pdoException);
 
         $mockLogger = $this->createStub(MatecatLogger::class);
         $model = new ProjectManagerModel($mockDb, $mockLogger);
 
-        $model->insertFile(1, 'en-US', 'test.xliff', 'application/xliff+xml', 'abc123');
+        try {
+            $model->insertFile(1, 'en-US', 'test.xliff', 'application/xliff+xml', 'abc123');
+            self::fail('Expected Exception');
+        } catch (Exception $e) {
+            self::assertNotInstanceOf(PDOException::class, $e);
+            self::assertStringStartsWith('Database insert file error: Duplicate entry', $e->getMessage());
+            self::assertSame(ProjectCreationError::GENERIC_ERROR->value, $e->getCode());
+            self::assertSame($pdoException, $e->getPrevious());
+        }
+    }
+
+    public function testInsertFileWrapsAPdoExceptionWithAnSqlStateStringCode(): void
+    {
+        // A real PDOException carries its SQLSTATE, a string: negating it used to raise a TypeError
+        $pdoException = new PDOException('SQLSTATE[23000]: Integrity constraint violation');
+        (new ReflectionProperty(Exception::class, 'code'))->setValue($pdoException, '23000');
+
+        $mockDb = $this->createStub(IDatabase::class);
+        $mockDb->method('insert')->willThrowException($pdoException);
+
+        $model = new ProjectManagerModel($mockDb, $this->createStub(MatecatLogger::class));
+
+        try {
+            $model->insertFile(1, 'en-US', 'test.xliff', 'application/xliff+xml', 'abc123');
+            self::fail('Expected Exception');
+        } catch (Exception $e) {
+            self::assertSame(ProjectCreationError::GENERIC_ERROR->value, $e->getCode());
+            self::assertSame($pdoException, $e->getPrevious());
+        }
+    }
+
+    // ── executeBulkInsert exception path ───────────────────────────
+
+    private function createModelFailingOnPrepare(PDOException $pdoException): ProjectManagerModel
+    {
+        $mockPdo = $this->createStub(PDO::class);
+        $mockPdo->method('prepare')->willThrowException($pdoException);
+
+        $mockDb = $this->createStub(IDatabase::class);
+        $mockDb->method('getConnection')->willReturn($mockPdo);
+
+        return new ProjectManagerModel($mockDb, $this->createStub(MatecatLogger::class));
+    }
+
+    private function sqlStatePdoException(): PDOException
+    {
+        $pdoException = new PDOException("SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '1-1' for key 'PRIMARY'");
+        (new ReflectionProperty(Exception::class, 'code'))->setValue($pdoException, '23000');
+
+        return $pdoException;
+    }
+
+    private function assertBulkInsertFailure(
+        PDOException $thrown,
+        PDOException $original,
+        ProjectCreationError $expectedCode,
+        string $expectedMessage
+    ): void {
+        self::assertSame($expectedCode->value, $thrown->getCode());
+        self::assertSame($expectedMessage, $thrown->getMessage());
+        self::assertStringNotContainsString('SQLSTATE', $thrown->getMessage());
+        self::assertStringNotContainsString('Duplicate entry', $thrown->getMessage());
+        self::assertSame($original, $thrown->getPrevious());
+    }
+
+    public function testBulkInsertContextsGroupsFailureCarriesTheBulkInsertCodeAndNoSqlText(): void
+    {
+        $original = $this->sqlStatePdoException();
+        $model = $this->createModelFailingOnPrepare($original);
+
+        try {
+            $model->bulkInsertContextsGroups(1, [
+                ['context_json' => ['a' => 'b'], 'context_json_segment_ids' => [10]],
+            ]);
+            self::fail('Expected PDOException');
+        } catch (PDOException $e) {
+            $this->assertBulkInsertFailure($e, $original, ProjectCreationError::BULK_INSERT_CONTEXT_GROUPS, 'Failed to save context groups.');
+        }
+    }
+
+    public function testInsertPreTranslationsFailureCarriesTheBulkInsertCodeAndNoSqlText(): void
+    {
+        $original = $this->sqlStatePdoException();
+        $model = $this->createModelFailingOnPrepare($original);
+
+        try {
+            $model->insertPreTranslations([[1, 1, 'hash', 'TRANSLATED', 't', 's', 0, 'ICE', 1, '', '', 'ICE', 1, 0]]);
+            self::fail('Expected PDOException');
+        } catch (PDOException $e) {
+            $this->assertBulkInsertFailure($e, $original, ProjectCreationError::BULK_INSERT_PRE_TRANSLATIONS, 'Failed to save pre-translations.');
+        }
+    }
+
+    public function testBulkInsertNotesFailureCarriesTheBulkInsertCodeAndNoSqlText(): void
+    {
+        $original = $this->sqlStatePdoException();
+        $model = $this->createModelFailingOnPrepare($original);
+
+        try {
+            $model->bulkInsertSegmentNotesAndMetadata([
+                42 => $this->makeNote([0 => 'comment'], [0 => 'a plain note'], [100]),
+            ]);
+            self::fail('Expected PDOException');
+        } catch (PDOException $e) {
+            $this->assertBulkInsertFailure($e, $original, ProjectCreationError::BULK_INSERT_NOTES, 'Failed to save notes.');
+        }
+    }
+
+    public function testBulkInsertSegmentMetadataFailureCarriesTheBulkInsertCodeAndNoSqlText(): void
+    {
+        $original = $this->sqlStatePdoException();
+        $model = $this->createModelFailingOnPrepare($original);
+
+        try {
+            $model->bulkInsertSegmentNotesAndMetadata([
+                42 => $this->makeNote([0 => 'id_request'], [0 => 'REQ-123'], [100]),
+            ]);
+            self::fail('Expected PDOException');
+        } catch (PDOException $e) {
+            $this->assertBulkInsertFailure($e, $original, ProjectCreationError::BULK_INSERT_SEGMENT_METADATA, 'Failed to save segment metadata.');
+        }
     }
 }

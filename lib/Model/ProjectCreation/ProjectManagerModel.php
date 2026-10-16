@@ -91,7 +91,7 @@ class ProjectManagerModel
             $idFile = $this->dbHandler->insert('files', $data);
         } catch (PDOException $e) {
             $this->log("Database insert error: {$e->getMessage()} ", $e);
-            throw new Exception("Database insert file error: {$e->getMessage()} ", -$e->getCode());
+            throw new Exception("Database insert file error: {$e->getMessage()} ", ProjectCreationError::GENERIC_ERROR->value, $e);
         }
 
         return $idFile;
@@ -177,7 +177,8 @@ class ProjectManagerModel
                 $this->log("$label import - Statement: " . ($stmt instanceof PDOStatement ? $stmt->queryString : 'N/A'));
                 $this->log("$label Chunk Dump: " . var_export($chunk, true));
                 $this->log("$label Flattened Values Dump: " . var_export($flattenedValues, true));
-                throw new PDOException("$label import - DB Error: " . $e->getMessage(), $errorCode, $e);
+                // The DB message is logged above and kept as the previous: the user is shown this one.
+                throw new PDOException("Failed to save " . strtolower($label) . ".", $errorCode, $e);
             }
         }
     }

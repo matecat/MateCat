@@ -13,19 +13,17 @@ namespace Model\ProjectCreation;
  *
  * Cases are ordered numerically from -1 descending.
  *
- * @see ProjectManager::addProjectError()
- * @see ProjectManager::mapFileInsertionError()
- * @see ProjectManager::mapSegmentExtractionError()
+ * @see ProjectManager::describeCreationFailure()
  */
 enum ProjectCreationError: int
 {
     /** No translatable text or segments in the file */
     case NO_TRANSLATABLE_TEXT = -1;
 
-    /** Failed to find converted XLIFF (null path or invalid extension) */
+    /** Failed to find converted XLIFF: no longer thrown, FileInsertionService reports XLIFF_CONVERSION_NOT_FOUND */
     case XLIFF_NOT_FOUND = -3;
 
-    /** XLIFF parse failure in SegmentExtractor */
+    /** XLIFF parse failure: no longer thrown, SegmentExtractor reports XLIFF_IMPORT_ERROR */
     case XLIFF_PARSE_FAILURE = -4;
 
     /** TM key validation failure */
@@ -34,25 +32,28 @@ enum ProjectCreationError: int
     /** File isn't found or not saved (covers multiple throw sites) */
     case FILE_NOT_FOUND = -6;
 
-    /** XLIFF import error (remapped from XLIFF_PARSE_FAILURE in output) */
+    /** XLIFF file that the parser cannot read */
     case XLIFF_IMPORT_ERROR = -7;
 
     /** Failed to store/link an original zip file */
     case ZIP_STORE_FAILED = -10;
 
-    /** Failed to store reference files on disk (permission denied) */
+    /** Failed to store reference files on disk (permission denied): no longer thrown */
     case REFERENCE_FILES_DISK_ERROR = -11;
 
-    /** Failed to store reference files in the database */
+    /** Failed to store reference files in the database: no longer thrown */
     case REFERENCE_FILES_DB_ERROR = -12;
 
     /** File cache/copy error (origin outside the expected directory) */
     case FILE_CACHE_ERROR = -13;
 
+    /** Project creation failed for an internal reason; the details are in the log, not shown to the user */
+    case CREATION_FAILED = -14;
+
     /** TMX import timed out during MyMemory polling */
     case TMX_IMPORT_TIMEOUT = -15;
 
-    /** XLIFF conversion wasn't found on disk (remapped from XLIFF_NOT_FOUND in output) */
+    /** The converted XLIFF is missing or is not an XLIFF */
     case XLIFF_CONVERSION_NOT_FOUND = -16;
 
     /** Invalid or missing upload token */
@@ -60,6 +61,9 @@ enum ProjectCreationError: int
 
     /** Segment has too many notes (exceeds SEGMENT_NOTES_LIMIT) */
     case TOO_MANY_NOTES = -44;
+
+    /** A segment note exceeds SEGMENT_NOTES_MAX_SIZE bytes */
+    case SEGMENT_NOTE_TOO_LARGE = -45;
 
     /** Notes bulk insert DB error */
     case BULK_INSERT_NOTES = -101;

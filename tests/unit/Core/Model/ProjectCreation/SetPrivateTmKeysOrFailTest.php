@@ -3,22 +3,23 @@
 namespace Matecat\Core\Model\ProjectCreation;
 
 use ArrayObject;
+use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\TestHelpers\AbstractTest;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
+use Model\ProjectCreation\ProjectCreationError;
 use Model\ProjectCreation\ProjectStructure;
 use Model\ProjectCreation\TmKeyService;
 use PHPUnit\Framework\Attributes\Test;
 use Utils\Logger\MatecatLogger;
-use Utils\TaskRunner\Exceptions\EndQueueException;
 
 /**
  * Unit tests for {@see \Model\ProjectCreation\ProjectManager::setPrivateTmKeysOrFail()}.
  *
  * The method is a thin gate around TmKeyService: it only runs when private TM keys were requested,
- * and it turns errors the service recorded on the project structure into an EndQueueException so
- * the queue stops instead of creating a half-configured project.
+ * and it lets the service's exception propagate untouched, so createProject() records the one error
+ * and the queue stops instead of creating a half-configured project.
  *
  * TmKeyService is seeded directly (getTmKeyService() resolves it with `??=`), which keeps the real
  * service — and its TMX service wrapper and HTTP calls to MyMemory — out of the test.
@@ -86,18 +87,24 @@ class SetPrivateTmKeysOrFailTest extends AbstractTest
     }
 
     #[Test]
-    public function throwsEndQueueExceptionWhenTheServiceRecordedErrors(): void
+    public function propagatesTheServiceExceptionUntouched(): void
     {
         $this->pm->setProjectStructureValue('private_tm_key', [['key' => 'a-private-key']]);
 
-        $this->seedTmKeyService(function (ProjectStructure $structure, ?string $tmxFileName): void {
-            $structure->result['errors'][] = ['code' => -1, 'message' => 'The key is invalid'];
+        $thrown = new Exception('The key is invalid', ProjectCreationError::TM_KEY_INVALID->value);
+        $this->seedTmKeyService(function (ProjectStructure $structure, ?string $tmxFileName) use ($thrown): void {
+            throw $thrown;
         });
 
-        $this->expectException(EndQueueException::class);
-        $this->expectExceptionMessage('Invalid project found.');
+        try {
+            $this->pm->callSetPrivateTmKeysOrFail('');
+            $this->fail('Expected the service exception');
+        } catch (Exception $e) {
+            $this->assertSame($thrown, $e);
+        }
 
-        $this->pm->callSetPrivateTmKeysOrFail('');
+        // createProject() records the one error, not this method
+        $this->assertCount(0, $this->pm->getTestProjectStructure()->result['errors']);
     }
 
     #[Test]

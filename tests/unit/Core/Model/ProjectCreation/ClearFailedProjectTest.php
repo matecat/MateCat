@@ -2,7 +2,6 @@
 
 namespace Matecat\Core\Model\ProjectCreation;
 
-use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\TestHelpers\AbstractTest;
 use Model\FeaturesBase\FeatureSet;
@@ -48,7 +47,7 @@ class ClearFailedProjectTest extends AbstractTest
 
         $this->pm->setProjectManagerModel($model);
 
-        $this->pm->callClearFailedProject(new Exception('Something went wrong'));
+        $this->pm->callClearFailedProject();
     }
 
     #[Test]
@@ -63,7 +62,7 @@ class ClearFailedProjectTest extends AbstractTest
 
         $this->pm->setProjectManagerModel($model);
 
-        $this->pm->callClearFailedProject(new Exception('fail'));
+        $this->pm->callClearFailedProject();
     }
 
     #[Test]
@@ -77,7 +76,7 @@ class ClearFailedProjectTest extends AbstractTest
 
         $this->pm->setProjectManagerModel($model);
 
-        $this->pm->callClearFailedProject(new Exception('fail'));
+        $this->pm->callClearFailedProject();
     }
 
     #[Test]
@@ -91,7 +90,7 @@ class ClearFailedProjectTest extends AbstractTest
 
         $this->pm->setProjectManagerModel($model);
 
-        $this->pm->callClearFailedProject(new Exception('fail'));
+        $this->pm->callClearFailedProject();
     }
 
     #[Test]
@@ -105,7 +104,7 @@ class ClearFailedProjectTest extends AbstractTest
 
         $this->pm->setProjectManagerModel($model);
 
-        $this->pm->callClearFailedProject(new Exception('original error'));
+        $this->pm->callClearFailedProject();
 
         $this->assertTrue(true);
     }

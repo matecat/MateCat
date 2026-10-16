@@ -6,7 +6,6 @@ use Exception;
 use Matecat\TestHelpers\AbstractTest;
 use Model\Files\MetadataDao;
 use Model\FilesStorage\AbstractFilesStorage;
-use Model\ProjectCreation\FileInsertionException;
 use Model\ProjectCreation\ProjectCreationError;
 use Model\ProjectCreation\ProjectManagerModel;
 use Model\ProjectCreation\ProjectStructure;
@@ -21,10 +20,11 @@ use Utils\Logger\MatecatLogger;
  * - Returns empty array when conversionHashes.sha is not set
  * - Skips malformed entries with no language suffix
  * - Resolves hash via getXliffFromCache and delegates to insertFiles
- * - Throws FileInsertionException when insertFiles returns empty
- * - Throws FileInsertionException when validateCachedXliff fails
+ * - Throws FILE_NOT_FOUND when insertFiles returns empty
+ * - Exceptions from validateCachedXliff and insertFiles propagate unchanged
+ *   (same class, code, message, no wrapping previous)
  * - Merges file structures from multiple hashes using += (preserves keys)
- * - Calls mapFileInsertionError before throwing
+ * - Nothing is recorded on the project structure: createProject() owns the one error
  */
 class ResolveAndInsertFilesTest extends AbstractTest
 {
@@ -52,7 +52,7 @@ class ResolveAndInsertFilesTest extends AbstractTest
     // ── Early returns for missing/empty conversionHashes ─────────────
 
     /**
-     * @throws FileInsertionException
+     * @throws Exception
      */
     #[Test]
     public function returnsEmptyArrayWhenConversionHashesNotSet(): void
@@ -69,7 +69,7 @@ class ResolveAndInsertFilesTest extends AbstractTest
     }
 
     /**
-     * @throws FileInsertionException
+     * @throws Exception
      */
     #[Test]
     public function returnsEmptyArrayWhenShaKeyNotSet(): void
@@ -86,7 +86,7 @@ class ResolveAndInsertFilesTest extends AbstractTest
     }
 
     /**
-     * @throws FileInsertionException
+     * @throws Exception
      */
     #[Test]
     public function returnsEmptyArrayWhenShaArrayIsEmpty(): void
@@ -105,7 +105,6 @@ class ResolveAndInsertFilesTest extends AbstractTest
     // ── Skips malformed entries ──────────────────────────────────────
 
     /**
-     * @throws FileInsertionException
      * @throws Exception
      */
     #[Test]
@@ -134,7 +133,6 @@ class ResolveAndInsertFilesTest extends AbstractTest
     // ── Successful single-file resolution ────────────────────────────
 
     /**
-     * @throws FileInsertionException
      * @throws Exception
      */
     #[Test]
@@ -188,7 +186,6 @@ class ResolveAndInsertFilesTest extends AbstractTest
     // ── Multiple hashes merge with += ────────────────────────────────
 
     /**
-     * @throws FileInsertionException
      * @throws Exception
      */
     #[Test]
@@ -238,10 +235,10 @@ class ResolveAndInsertFilesTest extends AbstractTest
         $this->assertSame('file_b.pdf', $result[20]['original_filename']);
     }
 
-    // ── FileInsertionException when insertFiles returns empty ────────
+    // ── Empty insertFiles result ─────────────────────────────────────
 
     #[Test]
-    public function throwsFileInsertionExceptionWhenInsertFilesReturnsEmpty(): void
+    public function throwsWhenInsertFilesReturnsEmpty(): void
     {
         $sha1 = 'abc123';
         $hashKey = $sha1 . '__en-US';
@@ -259,7 +256,8 @@ class ResolveAndInsertFilesTest extends AbstractTest
         $this->service->skipValidation();
         $this->service->stubInsertFiles([]); // empty — nothing inserted
 
-        $this->expectException(FileInsertionException::class);
+        $this->expectException(Exception::class);
+        $this->expectExceptionCode(ProjectCreationError::FILE_NOT_FOUND->value);
 
         $this->service->resolveAndInsertFiles(
             $fs,
@@ -269,7 +267,7 @@ class ResolveAndInsertFilesTest extends AbstractTest
     }
 
     #[Test]
-    public function addsProjectErrorWhenInsertFilesReturnsEmpty(): void
+    public function emptyInsertFilesThrowsFileNotFoundAndRecordsNoError(): void
     {
         $sha1 = 'abc123';
         $hashKey = $sha1 . '__en-US';
@@ -293,15 +291,59 @@ class ResolveAndInsertFilesTest extends AbstractTest
                 $this->projectStructure,
                 $linkFiles
             );
-            $this->fail('Expected FileInsertionException');
-        } catch (FileInsertionException) {
-            // expected
+            $this->fail('Expected exception');
+        } catch (Exception $e) {
+            $this->assertSame(Exception::class, $e::class);
+            $this->assertSame(ProjectCreationError::FILE_NOT_FOUND->value, $e->getCode());
+            $this->assertSame('Files could not be saved in database.', $e->getMessage());
+            $this->assertNull($e->getPrevious());
         }
 
-        $errors = $this->projectStructure->result['errors'];
-        $this->assertNotEmpty($errors);
-        // mapFileInsertionError maps FILE_NOT_FOUND (-6) to itself
-        $this->assertSame(ProjectCreationError::FILE_NOT_FOUND->value, $errors[0]['code']);
+        // createProject() records the one error, not the service
+        $this->assertEmpty($this->projectStructure->result['errors']);
+    }
+
+    // ── Validation failures propagate unchanged ──────────────────────
+
+    #[Test]
+    public function nonXliffCachedFilePropagatesConversionNotFound(): void
+    {
+        $sha1 = 'abc123';
+        $hashKey = $sha1 . '__en-US';
+
+        $linkFiles = [
+            'conversionHashes' => [
+                'sha' => [$hashKey],
+                'fileName' => [$hashKey => ['test.docx']],
+            ],
+        ];
+
+        // An existing cached file without an XLIFF extension: validateCachedXliff throws XLIFF_CONVERSION_NOT_FOUND (-16)
+        $notAnXliff = tempnam(sys_get_temp_dir(), 'resolve_insert_') . '.txt';
+        touch($notAnXliff);
+
+        $fs = $this->createStub(AbstractFilesStorage::class);
+        $fs->method('getXliffFromCache')->willReturn($notAnXliff);
+
+        try {
+            $this->service->resolveAndInsertFiles(
+                $fs,
+                $this->projectStructure,
+                $linkFiles
+            );
+            $this->fail('Expected exception');
+        } catch (Exception $e) {
+            $this->assertSame(Exception::class, $e::class);
+            $this->assertSame(ProjectCreationError::XLIFF_CONVERSION_NOT_FOUND->value, $e->getCode());
+            $this->assertSame('File not found. Failed to save XLIFF conversion on disk.', $e->getMessage());
+            $this->assertNull($e->getPrevious());
+        } finally {
+            @unlink($notAnXliff);
+            @unlink(substr($notAnXliff, 0, -4));
+        }
+
+        $this->assertSame([], $this->service->insertFilesCalls);
+        $this->assertEmpty($this->projectStructure->result['errors']);
     }
 
     // ── getXliffFromCache returns false → null path ──────────────────
@@ -323,37 +365,10 @@ class ResolveAndInsertFilesTest extends AbstractTest
         $fs = $this->createStub(AbstractFilesStorage::class);
         $fs->method('getXliffFromCache')->willReturn(false);
 
-        // Don't skip validation — let it run and verify it gets null
-        // This should throw because the cached xliff path is null
-        $this->expectException(FileInsertionException::class);
-
-        $this->service->resolveAndInsertFiles(
-            $fs,
-            $this->projectStructure,
-            $linkFiles
-        );
-    }
-
-    // ── Exception wrapping ───────────────────────────────────────────
-
-    #[Test]
-    public function wrapsValidationExceptionInFileInsertionException(): void
-    {
-        $sha1 = 'abc123';
-        $hashKey = $sha1 . '__en-US';
-
-        $linkFiles = [
-            'conversionHashes' => [
-                'sha' => [$hashKey],
-                'fileName' => [$hashKey => []], // empty file names → validation fails
-            ],
-        ];
-
-        $fs = $this->createStub(AbstractFilesStorage::class);
-        $fs->method('getXliffFromCache')->willReturn('/cache/file.xliff');
-
-        // Don't skip validation — let validateCachedXliff throw
-        $this->expectException(FileInsertionException::class);
+        // Don't skip validation — let it run and verify it gets null.
+        // A null path is FILE_NOT_FOUND on both S3 and the local filesystem.
+        $this->expectException(Exception::class);
+        $this->expectExceptionCode(ProjectCreationError::FILE_NOT_FOUND->value);
 
         $this->service->resolveAndInsertFiles(
             $fs,
@@ -363,7 +378,7 @@ class ResolveAndInsertFilesTest extends AbstractTest
     }
 
     #[Test]
-    public function fileInsertionExceptionPreservesOriginalCode(): void
+    public function emptyFileNamesPropagateTheValidationException(): void
     {
         $sha1 = 'abc123';
         $hashKey = $sha1 . '__en-US';
@@ -371,7 +386,7 @@ class ResolveAndInsertFilesTest extends AbstractTest
         $linkFiles = [
             'conversionHashes' => [
                 'sha' => [$hashKey],
-                'fileName' => [$hashKey => []], // empty → validation throws with code -6
+                'fileName' => [$hashKey => []], // empty file names → validation throws FILE_NOT_FOUND
             ],
         ];
 
@@ -384,10 +399,12 @@ class ResolveAndInsertFilesTest extends AbstractTest
                 $this->projectStructure,
                 $linkFiles
             );
-            $this->fail('Expected FileInsertionException');
-        } catch (FileInsertionException $e) {
+            $this->fail('Expected exception');
+        } catch (Exception $e) {
+            $this->assertSame(Exception::class, $e::class);
             $this->assertSame(ProjectCreationError::FILE_NOT_FOUND->value, $e->getCode());
-            $this->assertNotNull($e->getPrevious());
+            $this->assertSame('No hash files found', $e->getMessage());
+            $this->assertNull($e->getPrevious());
         }
     }
 
@@ -421,9 +438,10 @@ class ResolveAndInsertFilesTest extends AbstractTest
                 $this->projectStructure,
                 $linkFiles
             );
-            $this->fail('Expected FileInsertionException');
-        } catch (FileInsertionException) {
-            // expected
+            $this->fail('Expected exception');
+        } catch (Exception $e) {
+            // fail() throws an Exception too: the code tells the expected failure apart
+            $this->assertSame(ProjectCreationError::FILE_NOT_FOUND->value, $e->getCode());
         }
 
         // insertFiles should only be called once (stops at first error)

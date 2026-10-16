@@ -9,7 +9,6 @@ use Model\ConnectedServices\GDrive\Session;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\Files\MetadataDao;
 use Model\FilesStorage\AbstractFilesStorage;
-use Throwable;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 
@@ -22,7 +21,6 @@ use Utils\Registry\AppConfig;
  * - Validating cached XLIFF files
  * - Inserting file records into the database
  * - Moving files from cache to final storage
- * - Mapping file-insertion errors to user-friendly messages
  *
  * @see ProjectManager::createProject() — the orchestrator that calls this service
  */
@@ -87,18 +85,15 @@ class FileInsertionService
 
             $sha1 = sha1_file($filePathName);
             if ($sha1 === false) {
-                $projectStructure->addError(
-                    ProjectCreationError::FILE_HASH_FAILED->value,
-                    "Failed to compute hash for file $fileName"
-                );
-                continue;
+                throw new Exception("Failed to compute hash for file $fileName", ProjectCreationError::FILE_HASH_FAILED->value);
             }
 
             try {
                 $fs->makeCachePackage($sha1, (string)$projectStructure->source_language, null, $filePathName);
                 $this->logger->debug("File $fileName converted to cache");
             } catch (Exception $e) {
-                $projectStructure->addError(ProjectCreationError::FILE_HASH_FAILED->value, $e->getMessage());
+                // The storage message can name internal paths: it stays in the previous, for the log.
+                throw new Exception("Failed to cache file $fileName", ProjectCreationError::FILE_HASH_FAILED->value, $e);
             }
 
             $fs->linkSessionToCacheForAlreadyConvertedFiles(
@@ -128,9 +123,9 @@ class FileInsertionService
      *
      * @return array<int, array<string, mixed>> File structures keyed by file ID (fid).
      *
-     * @throws FileInsertionException On any failure. User-friendly errors are
-     *     already appended to $projectStructure->result['errors'] before throwing.
+     * @throws Exception On any failure, carrying the user-facing code and message.
      *     The caller is responsible for project cleanup and queue management.
+     * @throws \TypeError
      */
     public function resolveAndInsertFiles(
         AbstractFilesStorage $fs,
@@ -166,22 +161,16 @@ class FileInsertionService
             // Get the original file names associated with this converted file.
             $_originalFileNames = $linkFiles['conversionHashes']['fileName'][$linkFile];
 
-            try {
-                // Ensure original names exist and the cached converted file is valid.
-                $this->validateCachedXliff($cachedXliffFilePathName, $_originalFileNames, $linkFiles);
+            // Ensure original names exist and the cached converted file is valid.
+            $this->validateCachedXliff($cachedXliffFilePathName, $_originalFileNames, $linkFiles);
 
-                // Insert file records using the original names and resolved XLIFF path.
-                $filesStructure = $this->insertFiles($fs, $projectStructure, $_originalFileNames, $sha1_original, (string)$cachedXliffFilePathName);
+            // Insert file records using the original names and resolved XLIFF path.
+            $filesStructure = $this->insertFiles($fs, $projectStructure, $_originalFileNames, $sha1_original, (string)$cachedXliffFilePathName);
 
-                // Treat "nothing inserted" as a hard failure.
-                if (count($filesStructure ?: []) === 0) {
-                    $this->logger->error('No files inserted in DB', ['files' => $_originalFileNames, 'sha1' => $sha1_original, 'xliff' => $cachedXliffFilePathName]);
-                    throw new Exception('Files could not be saved in database.', ProjectCreationError::FILE_NOT_FOUND->value);
-                }
-            } catch (Throwable $e) {
-                // Format the error into user-friendly messages and rethrow.
-                $this->mapFileInsertionError($projectStructure, $e);
-                throw new FileInsertionException($e->getMessage(), $e->getCode(), $e);
+            // Treat "nothing inserted" as a hard failure.
+            if (count($filesStructure ?: []) === 0) {
+                $this->logger->error('No files inserted in DB', ['files' => $_originalFileNames, 'sha1' => $sha1_original, 'xliff' => $cachedXliffFilePathName]);
+                throw new Exception('Files could not be saved in database.', ProjectCreationError::FILE_NOT_FOUND->value);
             }
 
             // Merge inserted file info into the overall result.
@@ -217,48 +206,16 @@ class FileInsertionService
                 throw new Exception(sprintf('Key not found on S3 cache bucket for file %s.', implode(',', $_originalFileNames)), ProjectCreationError::FILE_NOT_FOUND->value);
             }
         } elseif ($cachedXliffFilePathName === null || !file_exists($cachedXliffFilePathName)) {
-            throw new Exception(sprintf('File %s not found on server after upload.', $cachedXliffFilePathName), ProjectCreationError::FILE_NOT_FOUND->value);
+            // The path is internal: it goes to the log, not to the user.
+            $this->logger->error('Cached XLIFF not found on server after upload', ['path' => $cachedXliffFilePathName]);
+            throw new Exception('File not found on the server after upload.', ProjectCreationError::FILE_NOT_FOUND->value);
         }
 
         $info = AbstractFilesStorage::pathinfo_fix($cachedXliffFilePathName);
 
         if (!in_array($info['extension'] ?? '', ['xliff', 'sdlxliff', 'xlf'])) {
-            throw new Exception("Failed to find converted XLIFF", ProjectCreationError::XLIFF_NOT_FOUND->value);
+            throw new Exception("File not found. Failed to save XLIFF conversion on disk.", ProjectCreationError::XLIFF_CONVERSION_NOT_FOUND->value);
         }
-    }
-
-    /**
-     * Map file-insertion error codes to user-friendly project errors.
-     */
-    private function mapFileInsertionError(ProjectStructure $projectStructure, Throwable $e): void
-    {
-        $code = $e->getCode();
-
-        match (true) {
-            $code == ProjectCreationError::REFERENCE_FILES_DISK_ERROR->value => $projectStructure->addError($code, "Failed to store reference files on disk. Permission denied"),
-            $code == ProjectCreationError::REFERENCE_FILES_DB_ERROR->value => $projectStructure->addError($code, "Failed to store reference files in database"),
-            $code == ProjectCreationError::XLIFF_NOT_FOUND->value => $projectStructure->addError(
-                ProjectCreationError::XLIFF_CONVERSION_NOT_FOUND->value,
-                "File not found. Failed to save XLIFF conversion on disk."
-            ),
-            $code == ProjectCreationError::GENERIC_ERROR->value && str_contains($e->getMessage(), '<Message>Invalid copy source encoding.</Message>') => $projectStructure->addError(
-                ProjectCreationError::FILE_MOVE_FAILED->value,
-                'There was a problem during the upload of your file(s). Please, ' .
-                'try to rename your file(s) avoiding non-standard characters'
-            ),
-            in_array(
-                $code,
-                [
-                    ProjectCreationError::ZIP_STORE_FAILED->value,
-                    ProjectCreationError::FILE_NOT_FOUND->value,
-                    ProjectCreationError::FILE_CACHE_ERROR->value,
-                    ProjectCreationError::FILE_MOVE_FAILED->value,
-                    ProjectCreationError::GENERIC_ERROR->value
-                ],
-                true
-            ) => $projectStructure->addError($code, $e->getMessage()),
-            default => $projectStructure->addError($code, 'An unexpected error occurred during file insertion: ' . $e->getMessage()),
-        };
     }
 
     /**
@@ -309,12 +266,25 @@ class FileInsertionService
                     }
                 }
 
-                $moved = $fs->moveFromCacheToFileDir(
-                    $fileDateSha1Path,
-                    (string)$projectStructure->source_language,
-                    $fidStr,
-                    $originalFileName
-                );
+                try {
+                    $moved = $fs->moveFromCacheToFileDir(
+                        $fileDateSha1Path,
+                        (string)$projectStructure->source_language,
+                        $fidStr,
+                        $originalFileName
+                    );
+                } catch (Exception $e) {
+                    // S3 refuses to copy a key whose name it cannot encode: the user can fix that by renaming the file.
+                    if (!str_contains($e->getMessage(), '<Message>Invalid copy source encoding.</Message>')) {
+                        throw $e;
+                    }
+
+                    throw new Exception(
+                        'There was a problem during the upload of your file(s). Please, try to rename your file(s) avoiding non-standard characters',
+                        ProjectCreationError::FILE_MOVE_FAILED->value,
+                        $e
+                    );
+                }
 
                 // check if the files were moved
                 if (true !== $moved) {

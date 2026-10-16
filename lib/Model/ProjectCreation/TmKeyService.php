@@ -66,11 +66,11 @@ class TmKeyService
      * into the user's key-ring. If a TMX file name is provided and the key has
      * no explicit name, the TMX file name is used as the key name.
      *
-     * On validation failure, the error is recorded in projectStructure, and
-     * the method returns early (callers should check for errors).
+     * Throws on the first key that is not valid, before any key reaches the key-ring.
      *
      * @param ProjectStructure $projectStructure
      * @param string|null $firstTMXFileName
+     * @throws Exception
      * @throws \DomainException
      * @throws \TypeError
      * @throws \Psr\Log\InvalidArgumentException
@@ -78,18 +78,12 @@ class TmKeyService
     public function setPrivateTMKeys(ProjectStructure $projectStructure, ?string $firstTMXFileName = ''): void
     {
         foreach ($projectStructure->private_tm_key as $_tmKey) {
-            try {
-                $keyExists = $this->tmxServiceWrapper->checkCorrectKey($_tmKey['key']);
+            $keyExists = $this->tmxServiceWrapper->checkCorrectKey($_tmKey['key']);
 
-                if (!isset($keyExists) || $keyExists === false) {
-                    $this->log(__METHOD__ . " -> TM key is not valid.");
+            if (!isset($keyExists) || $keyExists === false) {
+                $this->log(__METHOD__ . " -> TM key is not valid.");
 
-                    throw new Exception("TM key is not valid: " . $_tmKey['key'], ProjectCreationError::TM_KEY_INVALID->value);
-                }
-            } catch (Exception $e) {
-                $projectStructure->addError($e->getCode(), $e->getMessage());
-
-                return;
+                throw new Exception("TM key is not valid: " . $_tmKey['key'], ProjectCreationError::TM_KEY_INVALID->value);
             }
         }
 
@@ -178,30 +172,24 @@ class TmKeyService
 
                 $ext = $meta['extension'] ?? null;
 
-                try {
-                    if ('tmx' == $ext) {
-                        $file = new TMSFile(
-                            "$uploadDir/$fileName",
-                            $projectStructure->private_tm_key[0]['key'],
-                            $fileName,
-                            $pos
-                        );
+                if ('tmx' == $ext) {
+                    $file = new TMSFile(
+                        "$uploadDir/$fileName",
+                        $projectStructure->private_tm_key[0]['key'],
+                        $fileName,
+                        $pos
+                    );
 
-                        $memoryFiles[] = $file;
+                    $memoryFiles[] = $file;
 
-                        if (AppConfig::$FILE_STORAGE_METHOD == 's3') {
-                            ($this->s3QueueFileDownloader)($fileName);
-                        }
-
-                        $this->tmxServiceWrapper->addTmxInMyMemory($file, $userStruct);
-                    } else {
-                        //don't call the postPushTMX for normal files
-                        continue;
+                    if (AppConfig::$FILE_STORAGE_METHOD == 's3') {
+                        ($this->s3QueueFileDownloader)($fileName);
                     }
-                } catch (Exception $e) {
-                    $projectStructure->addError($e->getCode(), $e->getMessage());
 
-                    throw $e;
+                    $this->tmxServiceWrapper->addTmxInMyMemory($file, $userStruct);
+                } else {
+                    //don't call the postPushTMX for normal files
+                    continue;
                 }
             }
         }
@@ -221,8 +209,7 @@ class TmKeyService
      *
      * After each file completes (or times out), it is removed from the
      * project's array_files and array_files_meta lists.
-     * On timeout, a project error is recorded, but the loop continues
-     * to the next file.
+     * A timeout is not fatal: it is logged, and the loop continues to the next file.
      *
      * @param ProjectStructure $projectStructure
      * @param TMSFile[] $memoryFiles
@@ -237,41 +224,29 @@ class TmKeyService
             $startTime = time();
 
             while (true) {
-                try {
-                    $uuid = $file->getUuid();
-                    if ($uuid === null) {
-                        throw new Exception("TMX file UUID is null for file: " . $file->getName());
-                    }
-                    $result = $this->tmxServiceWrapper->tmxUploadStatus($uuid);
-
-                    if ($result['completed']) {
-                        $elapsed = time() - $startTime;
-                        $this->log("TMX import completed for \"{$file->getName()}\" in {$elapsed}s");
-                        break;
-                    }
-
-                    if (time() > $deadline) {
-                        $projectStructure->addError(
-                            ProjectCreationError::TMX_IMPORT_TIMEOUT->value,
-                            "TMX import timed out after " . self::TMX_POLL_TIMEOUT_MINUTES . " minutes for file: " . $file->getName()
-                        );
-                        $this->log("TMX import timed out after " . self::TMX_POLL_TIMEOUT_MINUTES . " minutes for file: " . $file->getName());
-                        break;
-                    }
-
-                    $elapsed = time() - $startTime;
-                    $this->log("Waiting for TMX \"{$file->getName()}\" — elapsed {$elapsed}s, next poll in {$pollInterval}s");
-
-                    $this->pollSleep($pollInterval);
-                    $pollInterval = min($pollInterval * 2, self::TMX_POLL_MAX_INTERVAL);
-                } catch (Exception $e) {
-                    $projectStructure->addError($e->getCode(), $e->getMessage());
-
-                    $this->log($e->getMessage(), $e);
-
-                    //exit project creation
-                    throw $e;
+                $uuid = $file->getUuid();
+                if ($uuid === null) {
+                    throw new Exception("TMX file UUID is null for file: " . $file->getName());
                 }
+                $result = $this->tmxServiceWrapper->tmxUploadStatus($uuid);
+
+                if ($result['completed']) {
+                    $elapsed = time() - $startTime;
+                    $this->log("TMX import completed for \"{$file->getName()}\" in {$elapsed}s");
+                    break;
+                }
+
+                if (time() > $deadline) {
+                    // Not fatal: the project is created without this TMX, so no error is recorded.
+                    $this->log("TMX import timed out after " . self::TMX_POLL_TIMEOUT_MINUTES . " minutes for file: " . $file->getName());
+                    break;
+                }
+
+                $elapsed = time() - $startTime;
+                $this->log("Waiting for TMX \"{$file->getName()}\" — elapsed {$elapsed}s, next poll in {$pollInterval}s");
+
+                $this->pollSleep($pollInterval);
+                $pollInterval = min($pollInterval * 2, self::TMX_POLL_MAX_INTERVAL);
             }
 
             unset($projectStructure->array_files[$file->getPosition()]);

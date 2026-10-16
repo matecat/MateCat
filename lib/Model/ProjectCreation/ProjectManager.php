@@ -10,7 +10,6 @@ use Matecat\SubFiltering\MateCatFilter;
 use Model\ActivityLog\ActivityLogStruct;
 use Model\Concerns\LogsMessages;
 use Model\ConnectedServices\GDrive\Session;
-use Model\Conversion\ZipArchiveHandler;
 use Model\DataAccess\IDatabase;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
@@ -382,23 +381,24 @@ class ProjectManager
     }
 
     /**
+     * @throws EndQueueException
      * @throws Exception
-     * @throws Throwable
+     * @throws TypeError
      */
     public function createProject(): void
     {
-        // Normalize xliff_parameters: after queue deserialization this arrives as
-        // a plain array because XliffRulesModel::$ruleSets is private and
-        // RecursiveArrayCopy::toArray() only sees public properties.
-        if (!$this->projectStructure->xliff_parameters instanceof XliffRulesModel) {
-            $this->projectStructure->xliff_parameters = XliffRulesModel::fromArray(
-                is_array($this->projectStructure->xliff_parameters) ? $this->projectStructure->xliff_parameters : []
-            );
-        }
-
         $fs = FilesStorageFactory::create();
 
         try {
+            // Normalize xliff_parameters: after queue deserialization this arrives as
+            // a plain array because XliffRulesModel::$ruleSets is private and
+            // RecursiveArrayCopy::toArray() only sees public properties.
+            if (!$this->projectStructure->xliff_parameters instanceof XliffRulesModel) {
+                $this->projectStructure->xliff_parameters = XliffRulesModel::fromArray(
+                    is_array($this->projectStructure->xliff_parameters) ? $this->projectStructure->xliff_parameters : []
+                );
+            }
+
             $this->initGdriveSession();
             $this->validateBeforeCreation();
 
@@ -406,15 +406,32 @@ class ProjectManager
             $this->setPrivateTmKeysOrFail($firstTMXFileName);
 
             $linkFiles = $this->resolveUploadDirAndGetHashes($fs);
-            $this->pushTmxToMemory();
+            $this->getTmKeyService()->pushTMXToMyMemory($this->projectStructure, $this->uploadDir);
 
             $this->getFileInsertionService()->registerNativeXliffsAsConverted(
                 $fs, $this->projectStructure, $this->uploadDir, $linkFiles
             );
-            $this->handleZipFiles($linkFiles);
+            $this->zipFileHandling($linkFiles);
 
             $this->resolveFilesExtractSegmentsAndStoreData($fs, $linkFiles);
             $this->finalizeProjectInTransaction();
+
+            // Only once the finalize has committed: the worker publishes the result whatever happens,
+            // and a rolled-back project must not be reported as created.
+            $this->populateResult();
+        } catch (Throwable $e) {
+            $this->log("Project creation failed", $e);
+            $this->clearFailedProject();
+
+            [$code, $message] = $this->describeCreationFailure($e);
+
+            // Skipped on a validation failure: the validators have already recorded why the project is invalid.
+            if (empty($this->projectStructure->result['errors'])) {
+                $this->projectStructure->addError($code, $message);
+            }
+
+            // Ack, never requeue: a second run would create the project again.
+            throw new EndQueueException($e->getMessage(), $code, $e);
         } finally {
             // Ensure the upload directory is cleaned up even when an exception
             // interrupts project creation, preventing orphaned temp files.
@@ -515,9 +532,9 @@ class ProjectManager
     }
 
     /**
-     * Validate and insert private TM keys. Aborts if validation errors occur.
+     * Validate and insert private TM keys. Throws on the first invalid key.
      *
-     * @throws EndQueueException
+     * @throws Exception
      * @throws DomainException
      * @throws TypeError
      * @throws \Psr\Log\InvalidArgumentException
@@ -526,10 +543,6 @@ class ProjectManager
     {
         if (count($this->projectStructure->private_tm_key)) {
             $this->getTmKeyService()->setPrivateTMKeys($this->projectStructure, $firstTMXFileName);
-
-            if (count($this->projectStructure->result['errors']) > 0) {
-                throw new EndQueueException("Invalid project found.");
-            }
         }
     }
 
@@ -551,123 +564,72 @@ class ProjectManager
     }
 
     /**
-     * Push TMX files to MyMemory via TmKeyService.
-     *
-     * @throws EndQueueException
-     * @throws \Psr\Log\InvalidArgumentException
-     */
-    private function pushTmxToMemory(): void
-    {
-        try {
-            $this->getTmKeyService()->pushTMXToMyMemory($this->projectStructure, $this->uploadDir);
-        } catch (Exception $e) {
-            $this->log($e->getMessage(), $e);
-            throw new EndQueueException($e->getMessage(), $e->getCode(), $e);
-        }
-    }
-
-    /**
-     * Link zip file hashes to the project. Aborts on failure.
-     *
-     * @param array<string, mixed> $linkFiles
-     *
-     * @throws EndQueueException
-     * @throws \Psr\Log\InvalidArgumentException
-     * @throws TypeError
-     */
-    private function handleZipFiles(array $linkFiles): void
-    {
-        try {
-            $this->zipFileHandling($linkFiles);
-        } catch (Exception $e) {
-            $this->log($e->getMessage(), $e);
-            $this->projectStructure->addError($e->getCode(), $e->getMessage());
-            throw new EndQueueException($e->getMessage(), $e->getCode(), $e);
-        }
-    }
-
-    /**
      * Resolve and insert files, extract segments, create project record, store segments,
      * create jobs, insert pre-translations, and write analysis data.
      * Tolerates individual file extraction failures in multi-file projects.
-     * On any failure, cleans up the project and file records before aborting.
+     * A failure leaves the records written so far to createProject(), which deletes them.
      *
      * @param array<string, mixed> $linkFiles
      *
-     * @throws EndQueueException
-     * @throws RuntimeException
-     * @throws \Psr\Log\InvalidArgumentException
+     * @throws Exception
+     * @throws TypeError
      */
     private function resolveFilesExtractSegmentsAndStoreData(
         AbstractFilesStorage $fs,
         array $linkFiles
     ): void {
-        // $linkFile is needed in the error handler for hash cleanup
-        $linkFile = '';
-        if (isset($linkFiles['conversionHashes']['sha'])) {
-            $shaSum = $linkFiles['conversionHashes']['sha'];
-            $linkFile = end($shaSum) ?: '';
-        }
+        $totalFilesStructure = $this->getFileInsertionService()->resolveAndInsertFiles(
+            $fs, $this->projectStructure, $linkFiles
+        );
 
-        try {
-            $totalFilesStructure = $this->getFileInsertionService()->resolveAndInsertFiles(
-                $fs, $this->projectStructure, $linkFiles
+        $this->extractSegmentsFromFiles($totalFilesStructure);
+
+        if ($this->total_segments === 0) {
+            throw new Exception(
+                "No translatable content found in any uploaded file. The project cannot be created.",
+                ProjectCreationError::NO_TRANSLATABLE_TEXT->value
             );
-
-            $this->extractSegmentsFromFiles($totalFilesStructure);
-
-            if ($this->total_segments === 0) {
-                throw new Exception(
-                    "No translatable content found in any uploaded file. The project cannot be created.",
-                    ProjectCreationError::NO_TRANSLATABLE_TEXT->value
-                );
-            }
-
-            if ($this->files_word_count > AppConfig::$MAX_SOURCE_WORDS) {
-                throw new Exception(
-                    "Matecat is unable to create your project. Please contact us at " . AppConfig::$SUPPORT_MAIL . ", we will be happy to help you!",
-                    ProjectCreationError::MAX_WORDS_EXCEEDED->value
-                );
-            }
-
-            $this->features->dispatch(new BeforeProjectCreationEvent(
-                $this->projectStructure,
-                [
-                    'total_project_segments' => $this->total_segments,
-                    'files_raw_wc' => $this->files_word_count,
-                ]
-            ));
-
-            $this->createProjectRecord();
-            $this->saveFeaturesInMetadata();
-            $this->saveMetadata();
-
-            foreach ($totalFilesStructure as $fid => $empty) {
-                $this->storeSegments($fid);
-            }
-
-            $jobs = $this->createJobs();
-            $this->linkFilesAndInsertPreTranslations($jobs);
-
-            if (!empty($this->projectStructure->notes)) {
-                $this->insertSegmentNotesForFile();
-            }
-
-            if (!empty($this->projectStructure->context_group)) {
-                $this->insertContextsForFile();
-            }
-
-            $this->projectStructure->translations = [];
-
-            $this->writeFastAnalysisData();
-
-            $this->determineStatusAndPopulateResult();
-            $this->insertFileInstructions($totalFilesStructure);
-        } catch (Throwable $e) {
-            $this->clearFailedProject($e);
-            $this->mapSegmentExtractionError($e, $fs, $linkFile);
-            throw new EndQueueException($e->getMessage(), $e->getCode(), $e);
         }
+
+        if ($this->files_word_count > AppConfig::$MAX_SOURCE_WORDS) {
+            throw new Exception(
+                "Matecat is unable to create your project. Please contact us at " . AppConfig::$SUPPORT_MAIL . ", we will be happy to help you!",
+                ProjectCreationError::MAX_WORDS_EXCEEDED->value
+            );
+        }
+
+        $this->features->dispatch(new BeforeProjectCreationEvent(
+            $this->projectStructure,
+            [
+                'total_project_segments' => $this->total_segments,
+                'files_raw_wc' => $this->files_word_count,
+            ]
+        ));
+
+        $this->createProjectRecord();
+        $this->saveFeaturesInMetadata();
+        $this->saveMetadata();
+
+        foreach ($totalFilesStructure as $fid => $empty) {
+            $this->storeSegments($fid);
+        }
+
+        $jobs = $this->createJobs();
+        $this->linkFilesAndInsertPreTranslations($jobs);
+
+        if (!empty($this->projectStructure->notes)) {
+            $this->insertSegmentNotesForFile();
+        }
+
+        if (!empty($this->projectStructure->context_group)) {
+            $this->insertContextsForFile();
+        }
+
+        $this->projectStructure->translations = [];
+
+        $this->writeFastAnalysisData();
+
+        $this->insertFileInstructions($totalFilesStructure);
     }
 
     /**
@@ -696,7 +658,7 @@ class ProjectManager
                 $this->log("Failed to parse " . $file_info['original_filename'], $e);
 
                 if ($e->getCode() == ProjectCreationError::NO_TRANSLATABLE_TEXT->value && count($totalFilesStructure) > 1 && $exceptionsFound < count($totalFilesStructure)) {
-                    $this->log("No text to translate in the file {$e->getMessage()}.");
+                    $this->log($e->getMessage());
                     $exceptionsFound += 1;
                     unset($totalFilesStructure[$fid]);
                     continue;
@@ -708,47 +670,34 @@ class ProjectManager
     }
 
     /**
-     * Map segment-extraction/project-creation error codes to user-friendly project errors.
+     * The code and message to record for a failed project creation.
      *
-     * @throws RuntimeException
-     * @throws \Psr\Log\InvalidArgumentException
+     * An exception carrying a ProjectCreationError code was thrown for the user, so its message is
+     * shown as it is. Anything else (a PDOException with its SQLSTATE string code, an exception with
+     * no code) is an internal failure: its message stays in the log and the user gets the generic error.
+     *
+     * @return array{int, string}
      */
-    private function mapSegmentExtractionError(Throwable $e, AbstractFilesStorage $fs, string $linkFile): void
+    private function describeCreationFailure(Throwable $e): array
     {
         $code = $e->getCode();
 
-        match ($code) {
-            ProjectCreationError::NO_TRANSLATABLE_TEXT->value => $this->projectStructure->addError(
-                ProjectCreationError::NO_TRANSLATABLE_TEXT->value,
-                "No text to translate in the file " . ZipArchiveHandler::getFileName($e->getMessage()) . "."
-            ),
-            ProjectCreationError::XLIFF_PARSE_FAILURE->value => $this->projectStructure->addError(ProjectCreationError::XLIFF_IMPORT_ERROR->value, "XLIFF import error: {$e->getMessage()}"),
-            ProjectCreationError::INVALID_XLIFF_PARAMETERS->value => $this->projectStructure->addError(
-                $code,
-                (null !== $e->getPrevious()) ? $e->getPrevious()->getMessage() . " in {$e->getMessage()}" : $e->getMessage()
-            ),
-            default => $this->projectStructure->addError($code, $e->getMessage()),
-        };
-
-        if ($code == ProjectCreationError::NO_TRANSLATABLE_TEXT->value && AppConfig::$FILE_STORAGE_METHOD != 's3') {
-            $fs->deleteHashFromUploadDir($this->uploadDir, $linkFile);
+        if (is_int($code) && $code !== ProjectCreationError::GENERIC_ERROR->value && ProjectCreationError::tryFrom($code) !== null) {
+            return [$code, $e->getMessage()];
         }
 
-        $this->log("Exception", $e);
+        return [ProjectCreationError::CREATION_FAILED->value, 'Project creation failed. Please try again.'];
     }
 
     /**
-     * Determine project status and populate the result structure with success data.
+     * Populate the result structure with success data.
      *
-     * @throws \Psr\Log\InvalidArgumentException
+     * @throws Exception
      */
-    private function determineStatusAndPopulateResult(): void
+    private function populateResult(): void
     {
-        $this->projectStructure->status = (AppConfig::$VOLUME_ANALYSIS_ENABLED) ? ProjectStatus::STATUS_NEW : ProjectStatus::STATUS_NOT_TO_ANALYZE;
-
-        if ($this->show_in_cattool_segs_counter == 0) {
-            $this->log("Segment Search: No segments in this project - \n");
-            $this->projectStructure->status = ProjectStatus::STATUS_EMPTY;
+        if (AppConfig::$VOLUME_ANALYSIS_ENABLED) {
+            $this->projectStructure->result['analyze_url'] = $this->getAnalyzeURL();
         }
 
         $this->projectStructure->result['code'] = 1;
@@ -796,22 +745,25 @@ class ProjectManager
      */
     private function finalizeProjectInTransaction(): void
     {
-        if (AppConfig::$VOLUME_ANALYSIS_ENABLED) {
-            $this->projectStructure->result['analyze_url'] = $this->getAnalyzeURL();
+        $status = (AppConfig::$VOLUME_ANALYSIS_ENABLED) ? ProjectStatus::STATUS_NEW : ProjectStatus::STATUS_NOT_TO_ANALYZE;
+
+        if ($this->show_in_cattool_segs_counter == 0) {
+            $this->log("Segment Search: No segments in this project - \n");
+            $status = ProjectStatus::STATUS_EMPTY;
         }
+
+        $this->projectStructure->status = $status;
 
         // The scope stays the outermost one here. This runs in the project-creation daemon, at the
         // end of a creation that has already allocated its sequence ids, so there is no caller
         // transaction for it to join and nothing above it to widen.
-        $this->dbHandler->transaction(function (): void {
+        $this->dbHandler->transaction(function () use ($status): void {
             (new ProjectDao($this->dbHandler))->destroyCache((int)$this->projectStructure->id_project, $this->projectStructure->ppassword);
 
             $this->features->dispatch(new PostProjectCreateEvent($this->projectStructure));
 
             $projectId = $this->projectStructure->id_project
                 ?? throw new RuntimeException('Project id must be available before updating analysis status');
-            $status = $this->projectStructure->status
-                ?? throw new RuntimeException('Project status must be available before updating analysis status');
 
             (new ProjectDao($this->dbHandler))->updateAnalysisStatus(
                 $projectId,
@@ -875,9 +827,8 @@ class ProjectManager
     /**
      * @throws \Psr\Log\InvalidArgumentException
      */
-    private function clearFailedProject(Throwable $e): void
+    private function clearFailedProject(): void
     {
-        $this->log($e->getMessage(), $e);
         $this->log("Deleting Records.");
 
         $idProject = $this->projectStructure->id_project;
