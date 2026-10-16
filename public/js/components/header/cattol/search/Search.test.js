@@ -314,9 +314,9 @@ test('shows the source&target results summary when both fields are used', () => 
     featuredSearchResult: 0,
   })
 
-  expect(
-    document.querySelector('.search-display .numbers'),
-  ).toHaveTextContent(/segment/)
+  expect(document.querySelector('.search-display .numbers')).toHaveTextContent(
+    /segment/,
+  )
 })
 
 test('next and previous buttons move the featured result and notify the segment', async () => {
@@ -425,6 +425,63 @@ test('replaces the current occurrence and refreshes the segment translation', as
   expect(replacedAt).toBeLessThan(
     segmentTranslation.mock.invocationCallOrder[0],
   )
+})
+
+const replaceFirstOccurrence = async (segment) => {
+  const user = userEvent.setup()
+  jest.spyOn(SegmentStore, 'getSegmentByIdToJS').mockReturnValue(segment)
+
+  render(<Search {...baseProps()} />)
+
+  await user.type(screen.getByPlaceholderText('Find in target'), 'old')
+  await user.click(checkboxByLabel('Replace with'))
+  await user.type(screen.getByPlaceholderText('Replace in target'), 'new')
+  await user.click(screen.getByText('FIND'))
+
+  emitStoreSearchResult({
+    total: 1,
+    searchResults: [{id: 1, occurrences: [1]}],
+    occurrencesList: [1],
+    searchResultsDictionary: {1: {id: 1, occurrences: [1]}},
+    featuredSearchResult: 0,
+  })
+
+  jest.useFakeTimers()
+  fireEvent.click(screen.getByText('REPLACE'))
+  act(() => jest.runAllTimers())
+  jest.useRealTimers()
+}
+
+test('shows the locked segment alert instead of replacing in a locked segment', async () => {
+  // Locked ICE matches are approved, so this would also fail the revised
+  // state check: the locked alert must win
+  await replaceFirstOccurrence({
+    id: 1,
+    original_sid: 1,
+    status: 'APPROVED',
+    locked: true,
+    occurrences: [1],
+  })
+
+  expect(SegmentActions.showLockedSegmentModal).toHaveBeenCalled()
+  expect(ModalsActions.showModalComponent).not.toHaveBeenCalled()
+  expect(SegmentActions.replaceCurrentSearch).not.toHaveBeenCalled()
+  expect(segmentTranslation).not.toHaveBeenCalled()
+})
+
+test('replaces in a locked segment once it has been unlocked', async () => {
+  await replaceFirstOccurrence({
+    id: 1,
+    original_sid: 1,
+    status: 'TRANSLATED',
+    locked: true,
+    unlocked: true,
+    occurrences: [1],
+  })
+
+  expect(SegmentActions.showLockedSegmentModal).not.toHaveBeenCalled()
+  expect(SegmentActions.replaceCurrentSearch).toHaveBeenCalledWith('new')
+  expect(segmentTranslation).toHaveBeenCalled()
 })
 
 // The confirm/execute/success/error flow used to live here, but Search.js now
