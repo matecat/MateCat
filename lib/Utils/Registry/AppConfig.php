@@ -208,6 +208,16 @@ class AppConfig
     public static bool $FILTERS_EMAIL_FAILURES = false;
 
     /**
+     * Bounds on the outbound conversion request. Without them libcurl applies its own defaults —
+     * a 300 second connect and an *unlimited* transfer — so an unreachable filters instance leaves
+     * the upload sitting at "Importing" forever with nothing shown to the user.
+     *
+     * The transfer bound is generous because converting a large document is legitimately slow.
+     */
+    public static int $FILTERS_CONNECT_TIMEOUT = 10; //seconds
+    public static int $FILTERS_TIMEOUT = 300; //seconds
+
+    /**
      * The MateCat Version
      */
     public static string $BUILD_NUMBER = '';

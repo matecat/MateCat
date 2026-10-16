@@ -49,6 +49,8 @@ class FiltersSendToFiltersTest extends AbstractTest
     private ?string $originalFiltersRapidApiKey = null;
     private string|false $originalFiltersForceVersion = false;
     private bool $originalFiltersEmailFailures = false;
+    private int $originalFiltersConnectTimeout = 0;
+    private int $originalFiltersTimeout = 0;
 
     protected function setUp(): void
     {
@@ -60,6 +62,8 @@ class FiltersSendToFiltersTest extends AbstractTest
         $this->originalFiltersRapidApiKey = AppConfig::$FILTERS_RAPIDAPI_KEY;
         $this->originalFiltersForceVersion = AppConfig::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION;
         $this->originalFiltersEmailFailures = AppConfig::$FILTERS_EMAIL_FAILURES;
+        $this->originalFiltersConnectTimeout = AppConfig::$FILTERS_CONNECT_TIMEOUT;
+        $this->originalFiltersTimeout = AppConfig::$FILTERS_TIMEOUT;
 
         $this->filters = new FiltersWithMockedCurl();
         AppConfig::$FILTERS_ADDRESS = 'http://localhost:8080';
@@ -78,6 +82,8 @@ class FiltersSendToFiltersTest extends AbstractTest
         AppConfig::$FILTERS_RAPIDAPI_KEY = $this->originalFiltersRapidApiKey;
         AppConfig::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION = $this->originalFiltersForceVersion;
         AppConfig::$FILTERS_EMAIL_FAILURES = $this->originalFiltersEmailFailures;
+        AppConfig::$FILTERS_CONNECT_TIMEOUT = $this->originalFiltersConnectTimeout;
+        AppConfig::$FILTERS_TIMEOUT = $this->originalFiltersTimeout;
 
         parent::tearDown();
     }
@@ -310,6 +316,80 @@ class FiltersSendToFiltersTest extends AbstractTest
         try {
             $result = $this->filters->sourceToXliff($tmpFile, 'en-US', 'it-IT');
             self::assertIsArray($result);
+        } finally {
+            @unlink($tmpFile);
+        }
+    }
+
+    // ── outbound request is bounded ────────────────────────────────────
+
+    /**
+     * @param array<int, mixed> $captured
+     */
+    private function createCapturingCurl(array &$captured): MultiCurlHandler
+    {
+        $curl = $this->createStub(MultiCurlHandler::class);
+        $curl->method('createResource')->willReturnCallback(
+            function (string $url, ?array $options = [], ?string $tokenHash = null) use (&$captured): string {
+                $captured = $options ?? [];
+
+                return '0';
+            }
+        );
+        $curl->method('getAllContents')->willReturn(['0' => json_encode(['key' => 'value'])]);
+        $curl->method('getAllInfo')->willReturn(['0' => [
+            'http_code' => 200,
+            'errno' => 0,
+            'error' => '',
+            'curlinfo_total_time' => 0.123,
+        ]]);
+        $curl->method('getAllHeaders')->willReturn(['0' => []]);
+
+        return $curl;
+    }
+
+    /**
+     * Without an explicit bound libcurl defaults to a 300s connect and an unlimited transfer, so an
+     * unreachable filters instance leaves the upload at "Importing" forever with no error shown.
+     */
+    #[Test]
+    public function sendToFiltersBoundsTheOutboundRequest(): void
+    {
+        $captured = [];
+        $this->filters->mockCurl = $this->createCapturingCurl($captured);
+
+        $tmpFile = tempnam(sys_get_temp_dir(), 'test-src-');
+        file_put_contents($tmpFile, 'content');
+
+        try {
+            $this->filters->sourceToXliff($tmpFile, 'en-US', 'it-IT');
+
+            self::assertArrayHasKey(CURLOPT_CONNECTTIMEOUT, $captured);
+            self::assertArrayHasKey(CURLOPT_TIMEOUT, $captured);
+            self::assertGreaterThan(0, $captured[CURLOPT_CONNECTTIMEOUT]);
+            self::assertGreaterThan(0, $captured[CURLOPT_TIMEOUT]);
+        } finally {
+            @unlink($tmpFile);
+        }
+    }
+
+    #[Test]
+    public function sendToFiltersHonoursConfiguredTimeouts(): void
+    {
+        AppConfig::$FILTERS_CONNECT_TIMEOUT = 3;
+        AppConfig::$FILTERS_TIMEOUT = 42;
+
+        $captured = [];
+        $this->filters->mockCurl = $this->createCapturingCurl($captured);
+
+        $tmpFile = tempnam(sys_get_temp_dir(), 'test-src-');
+        file_put_contents($tmpFile, 'content');
+
+        try {
+            $this->filters->sourceToXliff($tmpFile, 'en-US', 'it-IT');
+
+            self::assertSame(3, $captured[CURLOPT_CONNECTTIMEOUT]);
+            self::assertSame(42, $captured[CURLOPT_TIMEOUT]);
         } finally {
             @unlink($tmpFile);
         }
