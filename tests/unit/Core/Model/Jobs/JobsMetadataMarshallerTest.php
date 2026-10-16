@@ -283,6 +283,150 @@ class JobsMetadataMarshallerTest extends AbstractTest
     }
 
     // =========================================================================
+    // marshall — the typed value back to the string it is stored as
+    // =========================================================================
+
+    #[Test]
+    #[DataProvider('marshallAcceptedProvider')]
+    public function marshallStoresAnAcceptedValueInItsCanonicalForm(JobsMetadataMarshaller $case, mixed $value, string $expected): void
+    {
+        $this->assertSame($expected, $case->marshall($value));
+    }
+
+    public static function marshallAcceptedProvider(): array
+    {
+        return [
+            'count tags true'          => [JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS, true, '1'],
+            'dialect strict false'     => [JobsMetadataMarshaller::DIALECT_STRICT, false, '0'],
+            'tm prioritization true'   => [JobsMetadataMarshaller::TM_PRIORITIZATION, true, '1'],
+            'penalty lower bound'      => [JobsMetadataMarshaller::PUBLIC_TM_PENALTY, 0, '0'],
+            'penalty upper bound'      => [JobsMetadataMarshaller::PUBLIC_TM_PENALTY, 100, '100'],
+            'counter mode google_ads'  => [JobsMetadataMarshaller::CHARACTER_COUNTER_MODE, 'google_ads', 'google_ads'],
+            'counter mode exclude_cjk' => [JobsMetadataMarshaller::CHARACTER_COUNTER_MODE, 'exclude_cjk', 'exclude_cjk'],
+            'counter mode all_one'     => [JobsMetadataMarshaller::CHARACTER_COUNTER_MODE, 'all_one', 'all_one'],
+            'mandatory issues both'    => [JobsMetadataMarshaller::MANDATORY_ISSUES, ['r1', 'r2'], '["r1","r2"]'],
+            'mandatory issues none'    => [JobsMetadataMarshaller::MANDATORY_ISSUES, [], '[]'],
+            'subfiltering handlers'    => [JobsMetadataMarshaller::SUBFILTERING_HANDLERS, ['markup', 'twig'], '["markup","twig"]'],
+            'subfiltering all off'     => [JobsMetadataMarshaller::SUBFILTERING_HANDLERS, null, 'null'],
+            'subfiltering empty'       => [JobsMetadataMarshaller::SUBFILTERING_HANDLERS, '', ''],
+            'subfiltering none'        => [JobsMetadataMarshaller::SUBFILTERING_HANDLERS, 'none', 'none'],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('marshallRejectedProvider')]
+    public function marshallRefusesAValueTheKeyDoesNotAccept(JobsMetadataMarshaller $case, mixed $value): void
+    {
+        $this->assertNull($case->marshall($value));
+    }
+
+    public static function marshallRejectedProvider(): array
+    {
+        return [
+            'count tags as string'          => [JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS, '1'],
+            'dialect strict as int'         => [JobsMetadataMarshaller::DIALECT_STRICT, 1],
+            'penalty below range'           => [JobsMetadataMarshaller::PUBLIC_TM_PENALTY, -1],
+            'penalty above range'           => [JobsMetadataMarshaller::PUBLIC_TM_PENALTY, 101],
+            'penalty as string'             => [JobsMetadataMarshaller::PUBLIC_TM_PENALTY, '25'],
+            'unknown counter mode'          => [JobsMetadataMarshaller::CHARACTER_COUNTER_MODE, 'foo'],
+            'counter mode as list'          => [JobsMetadataMarshaller::CHARACTER_COUNTER_MODE, ['google_ads']],
+            'unknown revision phase'        => [JobsMetadataMarshaller::MANDATORY_ISSUES, ['r1', 'r3']],
+            'mandatory issues as object'    => [JobsMetadataMarshaller::MANDATORY_ISSUES, ['a' => 'r1']],
+            'mandatory issues as string'    => [JobsMetadataMarshaller::MANDATORY_ISSUES, 'r1'],
+            'unknown subfiltering handler'  => [JobsMetadataMarshaller::SUBFILTERING_HANDLERS, ['markup', 'html']],
+            'subfiltering handler not text' => [JobsMetadataMarshaller::SUBFILTERING_HANDLERS, [1]],
+            'subfiltering plain word'       => [JobsMetadataMarshaller::SUBFILTERING_HANDLERS, 'markup'],
+        ];
+    }
+
+    // =========================================================================
+    // sanitizeRawMap — what a copy is allowed to carry
+    // =========================================================================
+
+    /**
+     * Every value the write paths store, under every key, comes out exactly as it went in, so a
+     * well-formed job loses nothing to the check.
+     */
+    #[Test]
+    public function sanitizeRawMapKeepsEveryWellFormedRowUnchanged(): void
+    {
+        $raw = [
+            JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value => '1',
+            JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value       => 'google_ads',
+            JobsMetadataMarshaller::DIALECT_STRICT->value               => '0',
+            JobsMetadataMarshaller::MANDATORY_ISSUES->value             => '["r1","r2"]',
+            JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value            => '25',
+            JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value        => '["markup"]',
+            JobsMetadataMarshaller::TM_PRIORITIZATION->value            => '1',
+        ];
+
+        $this->assertSame($raw, JobsMetadataMarshaller::sanitizeRawMap($raw));
+    }
+
+    /**
+     * The editor sends a boolean false through a string parameter, which PHP stores as ''. It reads
+     * back as false, and the copy writes it the way creation does.
+     */
+    #[Test]
+    public function sanitizeRawMapRewritesAnEmptyBooleanAsZero(): void
+    {
+        $this->assertSame(
+            [JobsMetadataMarshaller::TM_PRIORITIZATION->value => '0'],
+            JobsMetadataMarshaller::sanitizeRawMap([JobsMetadataMarshaller::TM_PRIORITIZATION->value => ''])
+        );
+    }
+
+    #[Test]
+    #[DataProvider('sanitizeRawMapDroppedProvider')]
+    public function sanitizeRawMapDropsARowThatIsNotValidJobMetadata(string $key, string $rawValue): void
+    {
+        $this->assertSame([], JobsMetadataMarshaller::sanitizeRawMap([$key => $rawValue]));
+    }
+
+    public static function sanitizeRawMapDroppedProvider(): array
+    {
+        return [
+            // Check 1: the key.
+            'MMT context'                      => ['mt_context', 'some context'],
+            'key no code reads'                => ['retired_setting', '1'],
+            // Check 2: the value. unMarshall() would cast both of these to a boolean.
+            'boolean spelled as a word'        => [JobsMetadataMarshaller::DIALECT_STRICT->value, 'yes'],
+            'boolean as a number other than 1' => [JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value, '2'],
+            // ...and these to an integer.
+            'penalty above range'              => [JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value, '150'],
+            'penalty with trailing text'       => [JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value, '25abc'],
+            'negative penalty'                 => [JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value, '-5'],
+            'unknown counter mode'             => [JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value, 'foo'],
+            'unknown revision phase'           => [JobsMetadataMarshaller::MANDATORY_ISSUES->value, '["r3"]'],
+            'mandatory issues not JSON'        => [JobsMetadataMarshaller::MANDATORY_ISSUES->value, 'r1'],
+            'unknown subfiltering handler'     => [JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value, '["html"]'],
+        ];
+    }
+
+    #[Test]
+    public function sanitizeRawMapKeepsTheValidRowsOfAMixedMap(): void
+    {
+        $this->assertSame(
+            [
+                JobsMetadataMarshaller::DIALECT_STRICT->value   => '1',
+                JobsMetadataMarshaller::MANDATORY_ISSUES->value => '["r2"]',
+            ],
+            JobsMetadataMarshaller::sanitizeRawMap([
+                JobsMetadataMarshaller::DIALECT_STRICT->value    => '1',
+                'mt_context'                                     => 'some context',
+                JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value => '150',
+                JobsMetadataMarshaller::MANDATORY_ISSUES->value  => '["r2"]',
+            ])
+        );
+    }
+
+    #[Test]
+    public function sanitizeRawMapReturnsNothingForNothing(): void
+    {
+        $this->assertSame([], JobsMetadataMarshaller::sanitizeRawMap([]));
+    }
+
+    // =========================================================================
     // Helper
     // =========================================================================
 
