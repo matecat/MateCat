@@ -109,7 +109,7 @@ export const AddCategory = () => {
           tooltipPosition: TOOLTIP_POSITION.RIGHT,
           children: (
             <>
-              <IconAdd size={22} /> Add category
+              <IconAdd size={20} /> Add category
             </>
           ),
         }}

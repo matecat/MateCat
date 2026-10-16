@@ -127,7 +127,7 @@ export const Xliff20 = () => {
             type={BUTTON_TYPE.PRIMARY}
             onClick={onAdd}
           >
-            <IconAdd size={22} /> Add rule
+            <IconAdd size={20} /> Add rule
           </Button>
         )}
       </div>

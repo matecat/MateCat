@@ -37,6 +37,10 @@
   .chunks-job-container-line {
     display: flex;
     justify-content: space-between;
+    position: sticky;
+    top: 64px;
+    z-index: 1;
+    background-color: colors.$white;
 
     .chunks-job-container-line-sx {
       > :last-child {
@@ -53,6 +57,23 @@
 
   .chunks-job-container-list {
     padding-left: 8px;
+    overflow: hidden;
+  }
+
+  .chunks-job-container-show-more {
+    display: flex;
+    justify-content: center;
+    padding-top: 12px;
+
+    .chunks-job-container-show-more-icon {
+      display: flex;
+      svg {
+        transition: transform 0.2s ease;
+      }
+      &.is-expanded svg {
+        transform: rotate(180deg);
+      }
+    }
   }
 }
 

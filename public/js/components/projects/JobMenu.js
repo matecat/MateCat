@@ -79,22 +79,20 @@ const JobMenu = ({
   activateJobFn,
   deleteJobFn,
 }) => {
-  const openSecondPassUrl = () => {
-    if (job.has('revise_passwords') && job.get('revise_passwords').size > 1) {
-      const url =
-        config.hostpath +
-        '/revise2/' +
-        project.get('name') +
-        '/' +
-        job.get('source') +
-        '-' +
-        job.get('target') +
-        '/' +
-        jobId +
-        '-' +
-        job.get('revise_passwords').get(1).get('password')
-      window.open(url)
-    }
+  const openSecondPassUrl = (review2Password) => {
+    const url =
+      config.hostpath +
+      '/revise2/' +
+      project.get('name') +
+      '/' +
+      job.get('source') +
+      '-' +
+      job.get('target') +
+      '/' +
+      jobId +
+      '-' +
+      review2Password
+    window.open(url)
   }
 
   const retrieveSecondPassReviewLink = () => {
@@ -103,8 +101,8 @@ const JobMenu = ({
       project.get('password'),
       jobId,
       job.get('password'),
-    ).then(() => {
-      openSecondPassUrl()
+    ).then((review2Password) => {
+      if (review2Password) openSecondPassUrl(review2Password)
     })
   }
 
@@ -247,7 +245,7 @@ const JobMenu = ({
       id: JOB_MENU_ITEM_ID.QA_REPORT,
       label: (
         <>
-          <QR size={18}/> Quality report
+          <QR size={18} /> Quality report
         </>
       ),
       onClick: () => {

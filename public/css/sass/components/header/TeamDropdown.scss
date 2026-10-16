@@ -1,4 +1,5 @@
 @use '../../tokens/colors';
+@use '../../commons/variables';
 
 .team-dropdown {
   position: relative;
@@ -6,7 +7,6 @@
   .dropdown {
     position: absolute;
     visibility: hidden;
-    background-color: white;
     margin-top: 5px;
     padding: 5px;
     min-width: 200px;
@@ -15,7 +15,10 @@
     overflow: auto;
     opacity: 0;
     transition: opacity 0.2s linear;
-    box-shadow: 0px 2px 3px 0px rgba(34, 36, 38, 0.15);
+    border-radius: variables.$border-radius-default;
+    box-shadow: 0 0 24px rgba(colors.$black, 0.15);
+    background-color: colors.$white;
+    border: 1px solid colors.$grey100;
 
     &.open {
       visibility: visible;
@@ -37,17 +40,25 @@
       cursor: pointer;
       padding: 10px;
 
+      > span {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        max-width: 300px;
+      }
+
       &:hover {
-        background-color: colors.$grey75;
+        background-color: colors.$grey50;
       }
 
       &.active {
-        background-color: colors.$blue950;
-        color: colors.$white;
+        background-color: colors.$selectedBlueTransparent;
+        color: colors.$darkBlue;
       }
 
       .container-icon-settings {
         display: flex;
+        width: 16px;
         align-items: center;
         visibility: hidden;
       }
@@ -56,10 +67,6 @@
     ul > li:hover .container-icon-settings {
       visibility: visible;
       color: colors.$blue500;
-    }
-
-    ul > li.active .container-icon-settings {
-      color: colors.$white;
     }
   }
 

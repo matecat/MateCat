@@ -15,6 +15,12 @@ jest.mock('../../actions/ModalsActions')
 jest.mock('../../actions/CatToolActions')
 jest.mock('../../utils/commonUtils')
 
+global.ResizeObserver = class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
 jest.mock('./JobMenu', () => ({
   __esModule: true,
   default: (props) => (
@@ -415,6 +421,79 @@ test('toggles disableDownload state on DISABLE/ENABLE_DOWNLOAD_BUTTON store even
     ProjectsStore.emit(ManageConstants.DISABLE_DOWNLOAD_BUTTON, 999)
   })
   expect(screen.getByTestId('disable-download')).toHaveTextContent('enabled')
+})
+
+test('shows only the first 5 chunks with a View more toggle when there are more than 5', async () => {
+  const chunks = new Array(7)
+    .fill(null)
+    .map((_, index) => makeJob({id: 90 + index}))
+
+  render(
+    <ChunksJobContainer
+      chunks={chunks}
+      project={makeProject(7)}
+      isChecked={false}
+      isChunk={true}
+      isChunkOutsourced={false}
+      onCheckedJob={jest.fn()}
+      downloadTranslationFn={jest.fn()}
+    />,
+  )
+
+  for (let index = 1; index <= 5; index++) {
+    expect(
+      screen.getByTestId(`job-container-${89 + index}-${index}`),
+    ).toBeInTheDocument()
+  }
+  expect(screen.queryByTestId('job-container-95-6')).not.toBeInTheDocument()
+  expect(screen.queryByTestId('job-container-96-7')).not.toBeInTheDocument()
+
+  const toggle = screen.getByTestId('chunks-job-container-show-more')
+  expect(toggle).toHaveTextContent('View more')
+
+  await userEvent.click(toggle)
+
+  expect(screen.getByTestId('job-container-95-6')).toBeInTheDocument()
+  expect(screen.getByTestId('job-container-96-7')).toBeInTheDocument()
+  expect(toggle).toHaveTextContent('View less')
+
+  // the collapse wrapper defers unmounting the extra chunks until its height
+  // transition ends, so the collapse animation is actually visible
+  // eslint-disable-next-line testing-library/no-node-access
+  const collapseWrapper = screen.getByTestId('job-container-95-6').parentElement.parentElement
+
+  await userEvent.click(toggle)
+
+  expect(screen.getByTestId('job-container-95-6')).toBeInTheDocument()
+
+  act(() => {
+    const event = new Event('transitionend', {bubbles: true})
+    event.propertyName = 'height'
+    collapseWrapper.dispatchEvent(event)
+  })
+
+  expect(screen.queryByTestId('job-container-95-6')).not.toBeInTheDocument()
+  expect(toggle).toHaveTextContent('View more')
+})
+
+test('does not show the View more toggle with 5 or fewer chunks', () => {
+  const chunks = [makeJob({id: 90}), makeJob({id: 91})]
+
+  render(
+    <ChunksJobContainer
+      chunks={chunks}
+      project={makeProject(2)}
+      isChecked={false}
+      isChunk={true}
+      isChunkOutsourced={false}
+      onCheckedJob={jest.fn()}
+      downloadTranslationFn={jest.fn()}
+    />,
+  )
+
+  expect(
+    screen.queryByTestId('chunks-job-container-show-more'),
+  ).not.toBeInTheDocument()
 })
 
 test('removes the store listeners on unmount', () => {

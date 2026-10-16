@@ -487,3 +487,75 @@ test('Rendering elements', async () => {
     expect(screen.getByTestId(job.get('id'))).toBeInTheDocument(),
   )
 })
+
+test('shows only the first 5 jobs with a View more toggle when a project has more than 5', async () => {
+  window.ResizeObserver = ResizeObserver
+  executeMswServer()
+
+  const jobTemplate = fakeProjectsData.project.data.jobs[0]
+  const manyJobs = new Array(7).fill(null).map((_, index) => ({
+    ...jobTemplate,
+    id: 200 + index,
+    password: `pwd${200 + index}`,
+  }))
+
+  const {props} = getFakeProperties({
+    ...fakeProjectsData.project,
+    data: {...fakeProjectsData.project.data, jobs: manyJobs},
+  })
+
+  render(
+    <ApplicationWrapperContext.Provider
+      value={{isUserLogged: true, userInfo: userMock}}
+    >
+      <ProjectsBulkActionsContext.Provider
+        value={{jobsBulk: [], onCheckedProject, onCheckedJob}}
+      >
+        <ProjectContainer {...props} />
+      </ProjectsBulkActionsContext.Provider>
+    </ApplicationWrapperContext.Provider>,
+  )
+
+  manyJobs
+    .slice(0, 5)
+    .forEach((job) => expect(screen.getByTestId(job.id)).toBeInTheDocument())
+  manyJobs
+    .slice(5)
+    .forEach((job) =>
+      expect(screen.queryByTestId(job.id)).not.toBeInTheDocument(),
+    )
+
+  const toggle = screen.getByTestId('project-jobs-show-more')
+  expect(toggle).toHaveTextContent('View more')
+
+  await userEvent.click(toggle)
+
+  manyJobs.forEach((job) =>
+    expect(screen.getByTestId(job.id)).toBeInTheDocument(),
+  )
+  expect(toggle).toHaveTextContent('View less')
+
+  // the collapse wrapper defers unmounting the extra jobs until its height
+  // transition ends, so the collapse animation is actually visible
+  // eslint-disable-next-line testing-library/no-node-access
+  const collapseWrapper = screen.getByTestId(manyJobs[5].id).parentElement.parentElement
+
+  await userEvent.click(toggle)
+
+  manyJobs
+    .slice(5)
+    .forEach((job) => expect(screen.getByTestId(job.id)).toBeInTheDocument())
+
+  act(() => {
+    const event = new Event('transitionend', {bubbles: true})
+    event.propertyName = 'height'
+    collapseWrapper.dispatchEvent(event)
+  })
+
+  manyJobs
+    .slice(5)
+    .forEach((job) =>
+      expect(screen.queryByTestId(job.id)).not.toBeInTheDocument(),
+    )
+  expect(toggle).toHaveTextContent('View more')
+})

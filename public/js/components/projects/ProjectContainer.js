@@ -43,6 +43,8 @@ import UserStore from '../../stores/UserStore'
 import ProjectsStore from '../../stores/ProjectsStore'
 import {ChunksJobContainer} from './ChunksJobContainer'
 import {fromJS} from 'immutable'
+import useShowMore from '../../hooks/useShowMore'
+import {AnimatedCollapse} from '../common/AnimatedCollapse'
 
 export const ProjectContainer = ({
   project,
@@ -342,7 +344,7 @@ export const ProjectContainer = ({
         className="project-team-dropdown"
         align={DROPDOWN_MENU_ALIGN.RIGHT}
         toggleButtonProps={{
-          mode: BUTTON_MODE.BASIC,
+          mode: BUTTON_MODE.OUTLINE_BG,
           size: BUTTON_SIZE.SMALL,
           children: (
             <>
@@ -542,6 +544,14 @@ export const ProjectContainer = ({
     return date.toDateString()
   }
 
+  const {
+    visibleItems: visibleJobContainers,
+    extraItems: extraJobContainers,
+    hasMore: hasMoreJobContainers,
+    isExpanded: isJobContainersExpanded,
+    toggle: toggleJobContainers,
+  } = useShowMore(getJobContainer())
+
   return (
     <div ref={projectRef} className="project-container">
       <div className="project-container-header">
@@ -574,7 +584,29 @@ export const ProjectContainer = ({
           {getDropdownProjectMenu(getActivityLogUrl())}
         </div>
       </div>
-      {getJobContainer()}
+      {visibleJobContainers}
+      {hasMoreJobContainers && (
+        <AnimatedCollapse expanded={isJobContainersExpanded}>
+          {extraJobContainers}
+        </AnimatedCollapse>
+      )}
+      {hasMoreJobContainers && (
+        <div className="project-container-show-more">
+          <Button
+            testId="project-jobs-show-more"
+            mode={BUTTON_MODE.OUTLINE}
+            size={BUTTON_SIZE.SMALL}
+            onClick={toggleJobContainers}
+          >
+            {isJobContainersExpanded ? 'View less' : 'View more'}
+            <span
+              className={`project-container-show-more-icon${isJobContainersExpanded ? ' is-expanded' : ''}`}
+            >
+              <IconDown size={16} />
+            </span>
+          </Button>
+        </div>
+      )}
       <div className="project-container-footer">
         {lastAction && (
           <Button

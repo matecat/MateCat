@@ -4,6 +4,9 @@ import {JobContainer} from './JobContainer'
 import {Checkbox, CHECKBOX_STATE} from '../common/Checkbox'
 import IconDown from '../../../img/icons/IconDown'
 import JobMenu from './JobMenu'
+import {Button, BUTTON_MODE, BUTTON_SIZE} from '../common/Button/Button'
+import useShowMore from '../../hooks/useShowMore'
+import {AnimatedCollapse} from '../common/AnimatedCollapse'
 import Download from '../../../img/icons/Download'
 import CommonUtils from '../../utils/commonUtils'
 import ModalsActions from '../../actions/ModalsActions'
@@ -20,6 +23,14 @@ export const ChunksJobContainer = ({chunks, ...props}) => {
   const sourceTargetTextRef = useRef()
 
   const job = useMemo(() => chunks[0], [chunks])
+
+  const {
+    visibleItems: visibleChunks,
+    extraItems: extraChunks,
+    hasMore: hasMoreChunks,
+    isExpanded: isChunksExpanded,
+    toggle: toggleChunks,
+  } = useShowMore(chunks)
 
   const {project} = props
 
@@ -256,7 +267,7 @@ export const ChunksJobContainer = ({chunks, ...props}) => {
         <div className="chunks-job-container-line-dx">{getJobMenu()}</div>
       </div>
       <div className="chunks-job-container-list">
-        {chunks.map((job, index) => (
+        {visibleChunks.map((job, index) => (
           <JobContainer
             key={`${job.get('id')}-${index + 1}`}
             job={job}
@@ -264,7 +275,36 @@ export const ChunksJobContainer = ({chunks, ...props}) => {
             {...props}
           />
         ))}
+        {hasMoreChunks && (
+          <AnimatedCollapse expanded={isChunksExpanded}>
+            {extraChunks.map((job, index) => (
+              <JobContainer
+                key={`${job.get('id')}-${index + visibleChunks.length + 1}`}
+                job={job}
+                index={index + visibleChunks.length + 1}
+                {...props}
+              />
+            ))}
+          </AnimatedCollapse>
+        )}
       </div>
+      {hasMoreChunks && (
+        <div className="chunks-job-container-show-more">
+          <Button
+            testId="chunks-job-container-show-more"
+            mode={BUTTON_MODE.OUTLINE}
+            size={BUTTON_SIZE.SMALL}
+            onClick={toggleChunks}
+          >
+            {isChunksExpanded ? 'View less' : 'View more'}
+            <span
+              className={`chunks-job-container-show-more-icon${isChunksExpanded ? ' is-expanded' : ''}`}
+            >
+              <IconDown size={16} />
+            </span>
+          </Button>
+        </div>
+      )}
     </div>
   )
 }
