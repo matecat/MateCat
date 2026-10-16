@@ -21,7 +21,9 @@ class JobsWorker extends AbstractWorker
     private JobDao $jobDao;
 
     /**
-     * @throws ReflectionException
+     * @param AMQHandler $queueHandler
+     * @param IDatabase $database
+     * @param JobDao|null $jobDao
      */
     public function __construct(AMQHandler $queueHandler, IDatabase $database, ?JobDao $jobDao = null)
     {
@@ -92,7 +94,10 @@ class JobsWorker extends AbstractWorker
         $hidedPassword = str_repeat("*", max(0, $keyLength - 4)) . $last_digits;
         $this->_doLog("***** Job Split " . $jobStruct->id . "-" . $hidedPassword . " AvgPee: " . $Pee_weighted . " ***** ");
 
-        $this->jobDao->updateJobWeightedPeeAndTTE($jobStruct);
+        // rowCount() counts changed rows, so 0 also covers totals identical to the stored ones.
+        if ($this->jobDao->updateJobWeightedPeeAndTTE($jobStruct) === 0) {
+            $this->_doLog("***** Job Split " . $jobStruct->id . "-" . $hidedPassword . " no row changed: the chunk was merged or split again since the recount was queued, or its totals were already current ***** ");
+        }
     }
 
 }

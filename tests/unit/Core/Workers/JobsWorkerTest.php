@@ -74,6 +74,38 @@ class JobsWorkerTest extends AbstractTest
     }
 
     #[Test]
+    public function processLogsTheSkipWhenTheChunkChangedSinceTheFrameWasQueued(): void
+    {
+        $jobDao = $this->createMock(JobDao::class);
+        $jobDao->method('getAllModifiedSegmentsForPee')->willReturn([]);
+        $jobDao->method('updateJobWeightedPeeAndTTE')->willReturn(0);
+
+        $worker = $this->createWorker($jobDao);
+        $logged = [];
+        $worker->method('_doLog')->willReturnCallback(function (mixed $msg) use (&$logged): void {
+            $logged[] = (string)$msg;
+        });
+
+        $worker->process($this->createQueueElement());
+
+        self::assertCount(2, $logged);
+        self::assertStringContainsString('no row changed: the chunk was merged or split again', $logged[1]);
+    }
+
+    #[Test]
+    public function processDoesNotLogASkipWhenTheChunkWasWritten(): void
+    {
+        $jobDao = $this->createMock(JobDao::class);
+        $jobDao->method('getAllModifiedSegmentsForPee')->willReturn([]);
+        $jobDao->method('updateJobWeightedPeeAndTTE')->willReturn(1);
+
+        $worker = $this->createWorker($jobDao);
+        $worker->expects($this->once())->method('_doLog');
+
+        $worker->process($this->createQueueElement());
+    }
+
+    #[Test]
     public function processThrowsEndQueueOnMaxRequeue(): void
     {
         $jobDao = $this->createMock(JobDao::class);

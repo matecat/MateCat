@@ -3,12 +3,7 @@ import {checkSplitRequest} from '../../api/checkSplitRequest'
 import {confirmSplitRequest} from '../../api/confirmSplitRequest'
 import CommonUtils from '../../utils/commonUtils'
 import ModalsActions from '../../actions/ModalsActions'
-import {
-  Button,
-  BUTTON_MODE,
-  
-  BUTTON_TYPE,
-} from '../common/Button/Button'
+import {Button, BUTTON_MODE, BUTTON_TYPE} from '../common/Button/Button'
 import Tooltip from '../common/Tooltip'
 import {SpinnerLoader} from '../common/SpinnerLoader'
 

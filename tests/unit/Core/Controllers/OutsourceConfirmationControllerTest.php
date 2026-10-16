@@ -4,13 +4,18 @@ namespace Matecat\Core\Controllers;
 
 use Controller\API\App\OutsourceConfirmationController;
 use Controller\API\Commons\Exceptions\AuthorizationError;
+use Controller\API\Commons\Exceptions\ConflictError;
+use Controller\API\Commons\JobRestructureLock;
 use Exception;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
+use Matecat\TestHelpers\FakeLockRedisClient;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobDao;
+use Model\Translators\JobsTranslatorsDao;
 use Model\Users\UserStruct;
 use PDOException;
 use PHPUnit\Event\NoPreviousThrowableException;
@@ -41,8 +46,16 @@ use Utils\Tools\SimpleJWT;
  */
 class TestableOutsourceConfirmationController extends OutsourceConfirmationController
 {
+    public FakeLockRedisClient $redis;
+
     public function __construct()
     {
+        $this->redis = new FakeLockRedisClient();
+    }
+
+    protected function restructureLock(): JobRestructureLock
+    {
+        return new JobRestructureLock($this->redis);
     }
 
     protected function initDependencies(): void
@@ -136,6 +149,9 @@ class OutsourceConfirmationControllerTest extends AbstractTest
         $this->seedConnection()->exec(
             "DELETE FROM outsource_confirmation WHERE id_job = " . $this->jobId($base)
         );
+        $this->seedConnection()->exec(
+            "DELETE FROM jobs_translators WHERE id_job = " . $this->jobId($base)
+        );
         $this->cleanReservedFragments($base);
     }
 
@@ -175,6 +191,103 @@ class OutsourceConfirmationControllerTest extends AbstractTest
         $jwt = new SimpleJWT($claims, 'simple.jwt.claims', AppConfig::$AUTHSECRET);
 
         return (string) $jwt;
+    }
+
+    /**
+     * @throws PDOException
+     * @throws Exception
+     */
+    private function seedTranslator(): void
+    {
+        $this->seedConnection()->exec(
+            "INSERT INTO jobs_translators (id_job, job_password, added_by, email, source, target)
+             VALUES (" . $this->jobId(self::BASE) . ", '" . self::JOB_PASSWORD . "', " . $this->userId(self::BASE)
+            . ", 'translator_" . self::BASE . "@example.org', 'en-US', 'it-IT')"
+        );
+
+        // confirm() reads the translator through a day-long cache, which a previous run may have
+        // filled with the job having none.
+        $job = (new JobDao(obtainTestDatabase()))->getByIdAndPassword($this->jobId(self::BASE), self::JOB_PASSWORD);
+        (new JobsTranslatorsDao(obtainTestDatabase()))->destroyCacheByJobStruct($job);
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    private function requestConfirmation(): void
+    {
+        $jobId = $this->jobId(self::BASE);
+        $this->setRequestParams([
+            'id_job'   => (string) $jobId,
+            'password' => self::JOB_PASSWORD,
+            'payload'  => $this->makeToken(['id_job' => (string) $jobId, 'password' => self::JOB_PASSWORD]),
+        ]);
+    }
+
+    /**
+     * @throws PDOException
+     */
+    private function storedJobPassword(): string
+    {
+        return (string) $this->seedConnection()
+            ->query("SELECT password FROM jobs WHERE id = " . $this->jobId(self::BASE))
+            ->fetchColumn();
+    }
+
+    // ─── the per-job restructure lock ───
+
+    /**
+     * @throws Exception
+     */
+    #[Test]
+    public function confirm_without_a_translator_rotates_nothing_and_takes_no_lock(): void
+    {
+        $this->requestConfirmation();
+
+        $this->controller->confirm();
+
+        self::assertSame([], $this->controller->redis->log);
+        self::assertSame(self::JOB_PASSWORD, $this->storedJobPassword());
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[Test]
+    public function confirm_rotates_the_translator_password_holding_the_job(): void
+    {
+        $this->seedTranslator();
+        $this->requestConfirmation();
+        $key = JobRestructureLock::KEY_PREFIX . $this->jobId(self::BASE);
+
+        $this->controller->confirm();
+
+        self::assertNotSame(self::JOB_PASSWORD, $this->storedJobPassword());
+        self::assertSame(['set ' . $key, 'del ' . $key], $this->controller->redis->log);
+        self::assertSame([], $this->controller->redis->keys);
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[Test]
+    public function confirm_on_a_held_job_answers_conflict_and_rotates_nothing(): void
+    {
+        $this->seedTranslator();
+        $this->requestConfirmation();
+        (new JobRestructureLock($this->controller->redis))->acquire($this->jobId(self::BASE));
+
+        try {
+            $this->controller->confirm();
+            self::fail('a held job must be refused');
+        } catch (ConflictError) {
+        }
+
+        self::assertSame(self::JOB_PASSWORD, $this->storedJobPassword());
+        $confirmed = $this->seedConnection()
+            ->query("SELECT COUNT(*) FROM outsource_confirmation WHERE id_job = " . $this->jobId(self::BASE))
+            ->fetchColumn();
+        self::assertSame(0, (int) $confirmed);
     }
 
     // ─── confirm() happy path ───

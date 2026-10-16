@@ -165,10 +165,6 @@ abstract class AbstractRevisionFeature extends BaseFeature
     {
         $projectStructure = $event->projectStructure;
 
-        if ($this instanceof ReviewExtended) {
-            return;
-        }
-
         $this->setQaModelFromJsonFile($projectStructure);
         $this->createChunkReviewRecords($projectStructure);
     }
@@ -240,13 +236,6 @@ abstract class AbstractRevisionFeature extends BaseFeature
      */
     public function postJobSplitted(PostJobSplittedEvent $event): void
     {
-        // Projects carry both review_extended and second_pass_review in their features metadata, and
-        // FeatureSet::dispatch() calls the hook on each. A second run reads back the rows the first one
-        // just created, so only SecondPassReview handles it.
-        if ($this instanceof ReviewExtended) {
-            return;
-        }
-
         $projectStructure = $event->data;
 
         /**
@@ -310,11 +299,6 @@ abstract class AbstractRevisionFeature extends BaseFeature
      */
     public function postJobMerged(PostJobMergedEvent $event): void
     {
-        // See postJobSplitted: only SecondPassReview handles it.
-        if ($this instanceof ReviewExtended) {
-            return;
-        }
-
         $projectStructure = $event->data;
 
         $id_job = $projectStructure->jobToMerge ?? throw new RuntimeException('Job id is required when merging jobs');
@@ -371,12 +355,6 @@ abstract class AbstractRevisionFeature extends BaseFeature
      */
     public function projectCompletionEventSaved(ProjectCompletionEventSavedEvent $event): void
     {
-        // See postJobSplitted: a second resetScore would snapshot the zeros the first one wrote
-        // into undo_data.
-        if ($this instanceof ReviewExtended) {
-            return;
-        }
-
         $this->createQualityReportModel($event->chunk)->resetScore($event->completionEventId);
     }
 
@@ -400,11 +378,6 @@ abstract class AbstractRevisionFeature extends BaseFeature
      */
     public function alterChunkReviewStruct(AlterChunkReviewStructEvent $event): void
     {
-        // See postJobSplitted: only SecondPassReview restores from undo_data.
-        if ($this instanceof ReviewExtended) {
-            return;
-        }
-
         $struct = $event->event;
 
         // Restores absolute values from undo_data, so it is a read-modify-write like resetScore:
@@ -533,7 +506,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
     }
 
     /**
-     * Validate the project is valid in the scope of the ReviewExtended feature.
+     * Validate the project is valid in the scope of the revision feature.
      * A project is valid if we can find a qa_model.json file inside a `__meta` folder.
      * The qa_model.json file must also be valid.
      *
@@ -542,10 +515,6 @@ abstract class AbstractRevisionFeature extends BaseFeature
      */
     public static function loadAndValidateQualityFramework(ProjectStructure &$projectStructure, ?string $jsonPath = null): void
     {
-        if (is_a(static::class, ReviewExtended::class, true)) {
-            return;
-        }
-
         $decoded_model = $projectStructure->qa_model_template ?? $projectStructure->qa_model;
 
         if (empty($decoded_model)) {
