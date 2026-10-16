@@ -120,6 +120,8 @@ route('/api/v2/change-password', 'POST', ['Controller\API\V2\ChangePasswordContr
 
 // Download files
 route('/api/v2/original/[:id_job]/[:password]', 'GET', ['Controller\API\V2\DownloadOriginalController', 'index']);
+// Aliases of /api/v3/jobs/[:id_job]/[:password]/{translation,xliff,tmx}: do not remove, external integrations
+// (TOS) call them. The [:filename] segment is ignored by the controller.
 route('/api/v2/translation/[:id_job]/[:password]', 'GET', ['Controller\API\V2\DownloadController', 'index']);
 route('/api/v2/xliff/[:id_job]/[:password]/[:filename]', 'GET', ['Controller\API\V2\DownloadController', 'forceXliff']);
 route('/api/v2/tmx/[:id_job]/[:password]', 'GET', ['Controller\API\V2\DownloadJobTMXController', 'index']);

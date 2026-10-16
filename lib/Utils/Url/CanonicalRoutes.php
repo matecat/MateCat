@@ -77,7 +77,7 @@ class CanonicalRoutes
     {
         $host = self::httpHost($options);
 
-        return "$host/api/v2/xliff/$id_job/$password/$id_job.zip";
+        return "$host/api/v3/jobs/$id_job/$password/xliff";
     }
 
     /**
@@ -127,7 +127,7 @@ class CanonicalRoutes
             $params['filename'] = $filename;
         }
 
-        return "$host/api/v2/translation/$id_job/$password?" . http_build_query($params, '', '&', PHP_QUERY_RFC3986);
+        return "$host/api/v3/jobs/$id_job/$password/translation?" . http_build_query($params, '', '&', PHP_QUERY_RFC3986);
     }
 
     /**
