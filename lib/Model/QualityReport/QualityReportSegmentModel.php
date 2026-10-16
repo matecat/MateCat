@@ -10,6 +10,7 @@ namespace Model\QualityReport;
 
 use DivisionByZeroError;
 use Exception;
+use Matecat\ICU\MessagePatternValidator;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Comments\BaseCommentStruct;
 use Model\Comments\CommentDao;
@@ -18,6 +19,7 @@ use Model\DataAccess\ShapelessConcreteStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
+use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\LQA\CategoryDao;
 use Model\LQA\CategoryStruct;
@@ -33,6 +35,7 @@ use RuntimeException;
 use TypeError;
 use Utils\Constants\SourcePages;
 use Utils\Constants\TranslationStatus;
+use Utils\LQA\ICUSourceSegmentDetector;
 use Utils\Tools\CatUtils;
 
 class QualityReportSegmentModel
@@ -127,9 +130,15 @@ class QualityReportSegmentModel
      * @throws DivisionByZeroError
      * @throws TypeError
      */
-    protected function _commonSegmentAssignments(QualityReportSegmentStruct $seg, MateCatFilter $Filter, FeatureSet $featureSet, JobStruct $chunk, bool $isForUI = false): void
-    {
-        $seg->warnings = $seg->getLocalWarning($featureSet, $chunk, $Filter);
+    protected function _commonSegmentAssignments(
+        QualityReportSegmentStruct $seg,
+        MateCatFilter $Filter,
+        FeatureSet $featureSet,
+        JobStruct $chunk,
+        bool $isForUI = false,
+        bool $sourceContainsIcu = false
+    ): void {
+        $seg->warnings = $seg->getLocalWarning($featureSet, $chunk, $Filter, $sourceContainsIcu);
         $seg->pee = $seg->getPEE();
         $seg->ice_modified = $seg->isICEModified();
         $seg->secs_per_word = round($seg->getSecsPerWord());
@@ -204,7 +213,8 @@ class QualityReportSegmentModel
 
         $featureSet = new FeatureSet($this->database);
 
-        $featureSet->loadForProject($this->chunk->getProject(new ProjectDao($this->database)));
+        $project = $this->chunk->getProject(new ProjectDao($this->database));
+        $featureSet->loadForProject($project);
         $issue_comments = [];
 
          $issues = $this->qualityReportDao->getIssuesBySegments($segmentIds, $chunkId);
@@ -224,9 +234,18 @@ class QualityReportSegmentModel
 
         $segments = [];
 
+        $subfilteringHandlers = (new MetadataDao($this->database))->getSubfilteringCustomHandlers($chunkId, $chunkPassword);
+        $icuEnabled = (new ProjectMetadataDao($this->database))->isIcuEnabled((int)$project->id);
+
         foreach ($data as $index => $seg) {
             $dataRefMap = (new SegmentOriginalDataDao($this->database))->getSegmentDataRefMap($seg->sid);
-            $metadataDao = new MetadataDao($this->database);
+
+            // The source decides, as in the editor: with ICU enabled and an ICU source, only the
+            // ICU-compliant handlers may run, or single_curly_brackets locks the ICU arguments.
+            $sourceContainsIcu = $icuEnabled && ICUSourceSegmentDetector::sourceContainsIcu(
+                new MessagePatternValidator($this->chunk->source, $seg->segment),
+                $icuEnabled
+            );
 
             /** @var MateCatFilter $Filter */
             $Filter = MateCatFilter::getInstance(
@@ -234,12 +253,13 @@ class QualityReportSegmentModel
                 $this->chunk->source,
                 $this->chunk->target,
                 $dataRefMap,
-                $metadataDao->getSubfilteringCustomHandlers($chunkId, $chunkPassword)
+                $subfilteringHandlers,
+                $sourceContainsIcu
             );
 
             $seg->dataRefMap = $dataRefMap;
 
-            $this->_commonSegmentAssignments($seg, $Filter, $featureSet, $this->chunk, $isForUI);
+            $this->_commonSegmentAssignments($seg, $Filter, $featureSet, $this->chunk, $isForUI, $sourceContainsIcu);
             $this->_assignIssues($seg, $issues, $issue_comments);
             $this->_assignComments($seg, $comments);
             $this->_populateLastTranslationAndRevision($seg, $Filter, $all_events,  $isForUI);
