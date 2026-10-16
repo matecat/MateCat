@@ -15,7 +15,12 @@
       "mcp__dbhub__execute_sql_my_test_database",
       "mcp__bruno-mcp__list_collections",
       "mcp__bruno-mcp__list_requests",
-      "mcp__bruno-mcp__run_collection"
+      "mcp__bruno-mcp__run_collection",
+      "mcp__claude_ai_Asana__get_me",
+      "mcp__claude_ai_Asana__get_project",
+      "mcp__claude_ai_Asana__get_projects",
+      "mcp__claude_ai_Asana__get_task",
+      "mcp__claude_ai_Asana__search_tasks"
     ]
   }
 }
