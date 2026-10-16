@@ -17,6 +17,7 @@ use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentStruct;
 use Model\TmKeyManagement\UserKeysModel;
+use Model\Jobs\WarningsCountStruct;
 use Model\Translations\WarningDao;
 use Model\Translators\JobsTranslatorsDao;
 use Model\Translators\JobsTranslatorsStruct;
@@ -192,17 +193,17 @@ class JobStructDITest extends AbstractTest
 
 
     #[Test]
-    public function getWarningsCount_returns_count_for_matching_job()
+    public function getWarningsCount_returns_count_for_the_chunk()
     {
-        $warning = new stdClass();
+        $warning = new WarningsCountStruct();
         $warning->id_job = 42;
         $warning->password = 'secret';
-        $warning->count = '3';
+        $warning->count = 3;
         $warning->segment_list = '10,20,30';
 
         $dao = $this->createMock(WarningDao::class);
         $dao->method('setCacheTTL')->willReturnSelf();
-        $dao->method('getWarningsByProjectIds')->willReturn([$warning]);
+        $dao->expects($this->once())->method('getWarningsCountByJob')->with(42, 'secret')->willReturn($warning);
 
         $result = $this->struct->getWarningsCount($dao);
 
@@ -211,34 +212,16 @@ class JobStructDITest extends AbstractTest
     }
 
     #[Test]
-    public function getWarningsCount_returns_zero_when_no_matching_job()
+    public function getWarningsCount_returns_zero_when_no_segment_is_flagged()
     {
-        $warning = new stdClass();
-        $warning->id_job = 999;
-        $warning->password = 'other';
-        $warning->count = '3';
-        $warning->segment_list = '1,2';
-
         $dao = $this->createMock(WarningDao::class);
         $dao->method('setCacheTTL')->willReturnSelf();
-        $dao->method('getWarningsByProjectIds')->willReturn([$warning]);
+        $dao->method('getWarningsCountByJob')->willReturn(null);
 
         $result = $this->struct->getWarningsCount($dao);
 
         $this->assertSame(0, $result->warnings_count);
         $this->assertObjectNotHasProperty('warning_segments', $result);
-    }
-
-    #[Test]
-    public function getWarningsCount_returns_zero_for_empty_warnings()
-    {
-        $dao = $this->createMock(WarningDao::class);
-        $dao->method('setCacheTTL')->willReturnSelf();
-        $dao->method('getWarningsByProjectIds')->willReturn([]);
-
-        $result = $this->struct->getWarningsCount($dao);
-
-        $this->assertSame(0, $result->warnings_count);
     }
 
 

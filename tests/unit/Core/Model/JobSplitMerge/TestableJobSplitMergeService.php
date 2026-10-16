@@ -207,6 +207,14 @@ class TestableJobSplitMergeService extends JobSplitMergeService
         $this->destroyAnalysisCacheProjectId = $projectId;
     }
 
+    /** @var list<int> */
+    public array $destroyedWarningsCountJobIds = [];
+
+    protected function destroyWarningsCountCacheByJobId(int $jobId): void
+    {
+        $this->destroyedWarningsCountJobIds[] = $jobId;
+    }
+
     public function wasDestroyAnalysisCacheCalled(): bool
     {
         return $this->destroyAnalysisCacheCalled;

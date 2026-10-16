@@ -8,6 +8,7 @@ use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
 use Model\Propagation\PropagationTotalStruct;
 use Model\Translations\SegmentTranslationStruct;
+use Model\Translations\WarningDao;
 use PDOException;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
 use ReflectionException;
@@ -163,6 +164,9 @@ class PropagationWorker extends AbstractWorker
                     . var_export($propagationTotalStruct->getPropagatedIds(), true)
                 );
             }
+
+            // Propagation copies `warning` and `status` onto other segments of the job.
+            (new WarningDao($this->database))->destroyWarningsCountCache((int)$propagatorSegment['id_job']);
         }
     }
 

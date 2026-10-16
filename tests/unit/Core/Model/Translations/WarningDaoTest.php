@@ -94,10 +94,10 @@ class WarningDaoTest extends AbstractTest
         $this->assertSame('10', $result[0]->id_segment);
     }
 
-    // ─── getWarningsByProjectIds ───
+    // ─── getWarningsCountByJob ───
 
     #[Test]
-    public function test_getWarningsByProjectIds_returns_array_of_structs(): void
+    public function test_getWarningsCountByJob_returns_the_struct(): void
     {
         $struct = new WarningsCountStruct();
         $struct->count = 3;
@@ -108,35 +108,29 @@ class WarningDaoTest extends AbstractTest
         [$dao, $stmtStub] = $this->createMockedDao();
         $stmtStub->method('fetchAll')->willReturn([$struct]);
 
-        $result = $dao->getWarningsByProjectIds([1, 2]);
+        $result = $dao->getWarningsCountByJob(100, 'abc123');
 
-        $this->assertIsArray($result);
-        $this->assertCount(1, $result);
-        $this->assertInstanceOf(WarningsCountStruct::class, $result[0]);
-        $this->assertSame(3, $result[0]->count);
-        $this->assertSame(100, $result[0]->id_job);
+        $this->assertInstanceOf(WarningsCountStruct::class, $result);
+        $this->assertSame(3, $result->count);
+        $this->assertSame(100, $result->id_job);
     }
 
     #[Test]
-    public function test_getWarningsByProjectIds_returns_empty_array_for_no_matches(): void
+    public function test_getWarningsCountByJob_returns_null_for_no_matches(): void
     {
         [$dao, $stmtStub] = $this->createMockedDao();
         $stmtStub->method('fetchAll')->willReturn([]);
 
-        $result = $dao->getWarningsByProjectIds([999]);
-
-        $this->assertSame([], $result);
+        $this->assertNull($dao->getWarningsCountByJob(999, 'no-match'));
     }
 
     #[Test]
-    public function test_getWarningsByProjectIds_handles_single_project_id(): void
+    public function test_warningsCountKeyMap_is_addressed_by_job_id_only(): void
     {
-        [$dao, $stmtStub] = $this->createMockedDao();
-        $stmtStub->method('fetchAll')->willReturn([]);
-
-        $result = $dao->getWarningsByProjectIds([42]);
-
-        $this->assertSame([], $result);
+        $this->assertSame(
+            WarningDao::class . '::getWarningsCountByJob-42',
+            WarningDao::warningsCountKeyMap(42)
+        );
     }
 
     // ─── getErrorsByChunk ───
