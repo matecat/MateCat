@@ -50,6 +50,49 @@ const collectWarnings = (warnings) => {
     })
   })
 
+    return (
+      <div className="warnings-block">
+        {warnings.map((el, index) => {
+          let classes_block, icon
+          switch (el.type) {
+            case 'ERROR':
+              classes_block = 'error-alert alert-block'
+              icon = <SegmentQA size={16}/>
+              break
+            case 'WARNING':
+              classes_block = 'warning-alert alert-block'
+              icon = <AlertIcon size={16} />
+              break
+            case 'INFO':
+              classes_block = 'info-alert alert-block'
+              icon = <InfoIcon size={16} />
+              break
+            default:
+              classes_block = 'alert-block'
+              icon = <SegmentQA />
+              break
+          }
+          return (
+            <div key={index} className={classes_block}>
+              <ul>
+                <li className="icon-column">{icon}</li>
+                <li className="content-column">
+                  {/* `debug` is an HTML fragment: ErrorManager escapes its literal angle
+                      brackets and ICUChecker joins its parts with <br/>. */}
+                  <p dangerouslySetInnerHTML={{__html: el.debug}} />
+                  {el.tip !== '' ? (
+                    <p className="error-solution">
+                      <b>{el.tip}</b>
+                    </p>
+                  ) : null}
+                </li>
+              </ul>
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
   return collected
 }
 
