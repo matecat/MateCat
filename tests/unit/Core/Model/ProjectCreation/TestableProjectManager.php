@@ -527,5 +527,30 @@ class TestableProjectManager extends ProjectManager
     {
         return $this->uploadDir;
     }
-}
 
+    /**
+     * One entry per pushActivityLog() call: whether a transaction scope was open at that moment.
+     *
+     * @var list<bool>
+     */
+    public array $activityLogPushedInsideScope = [];
+
+    /**
+     * Record the call instead of enqueueing to AMQ.
+     */
+    protected function pushActivityLog(): void
+    {
+        $this->activityLogPushedInsideScope[] = $this->dbHandler->isInTransactionScope();
+    }
+
+    /**
+     * Public wrapper to invoke the private finalizeProjectInTransaction().
+     * @throws ReflectionException
+     */
+    public function callFinalizeProjectInTransaction(): void
+    {
+        $ref = new ReflectionClass(ProjectManager::class);
+        $method = $ref->getMethod('finalizeProjectInTransaction');
+        $method->invoke($this);
+    }
+}

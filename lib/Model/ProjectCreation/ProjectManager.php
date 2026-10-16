@@ -818,9 +818,11 @@ class ProjectManager
                 $status,
                 $this->files_word_count * count($this->projectStructure->array_jobs['job_languages'])
             );
-
-            $this->pushActivityLog();
         });
+
+        // After the commit, not inside the scope: a finalize that rolls back must not report
+        // PROJECT_CREATED for a project that never became ready.
+        $this->pushActivityLog();
     }
 
     /**
@@ -1030,7 +1032,7 @@ class ProjectManager
     /**
      * @throws \Psr\Log\InvalidArgumentException
      */
-    private function pushActivityLog(): void
+    protected function pushActivityLog(): void
     {
         $activity = new ActivityLogStruct();
         $activity->id_project = $this->projectStructure->id_project;
