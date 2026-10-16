@@ -6,6 +6,7 @@ use Exception;
 use Model\DataAccess\IDatabase;
 use Predis\Client;
 use ReflectionException;
+use Throwable;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AIAssistant\AIClientFactory;
 use Utils\AIAssistant\AlternativeTranslationsClientInterface;
@@ -120,26 +121,27 @@ class AIAssistantWorker extends AbstractWorker
             $client = $this->createAlternativeTranslationsClient();
             $alternativeTranslations = $client->manageAlternativeTranslations(
                 sourceLanguage: $payload['localized_source'],
-                targetLanguage:  $payload['localized_target'],
-                sourceSentence:  $payload['source_sentence'],
-                sourceContextSentencesString:  $payload['source_context_sentences_string'],
-                targetSentence:  $payload['target_sentence'],
-                targetContextSentencesString:  $payload['target_context_sentences_string'],
-                excerpt:   $payload['excerpt'],
-                styleInstructions:   $payload['style_instructions']
+                targetLanguage: $payload['localized_target'],
+                sourceSentence: $payload['source_sentence'],
+                sourceContextSentencesString: $payload['source_context_sentences_string'],
+                targetSentence: $payload['target_sentence'],
+                targetContextSentencesString: $payload['target_context_sentences_string'],
+                excerpt: $payload['excerpt'],
+                styleInstructions: $payload['style_instructions']
             );
 
-            $this->_doLog("Alternative translations for id_segment " . $payload['id_segment'] . ". Requested payload " . json_encode($payload) . ", received: " . json_encode($alternativeTranslations));
+            $this->_doLog(
+                "Alternative translations for id_segment " . $payload['id_segment'] . ". Requested payload " . json_encode($payload) . ", received: " . json_encode($alternativeTranslations)
+            );
 
-            if(empty($alternativeTranslations)){
+            if (empty($alternativeTranslations)) {
                 $errorCode = self::codeErrorsMap['NO_ALTERNATIVE_TRANSLATIONS_FOUND'];
                 throw new Exception("No alternative translations found");
             }
 
             $this->emitMessage("ai_assistant_alternative_translations", $payload['id_client'], $payload['id_segment'], $alternativeTranslations, false, true);
-        } catch (Exception $exception){
-
-            if($errorCode === self::codeErrorsMap['NO_ERROR']){
+        } catch (Exception $exception) {
+            if ($errorCode === self::codeErrorsMap['NO_ERROR']) {
                 $errorCode = self::codeErrorsMap['ERROR_GENERATING_ALTERNATIVE_TRANSLATIONS'];
             }
 
@@ -212,6 +214,7 @@ class AIAssistantWorker extends AbstractWorker
                 $phrase,
                 $payload['localized_target'],
                 function ($curl_info, $data) use (&$txt, &$buffer, $payload, $lockValue) {
+                    $this->_doLog("Start: " . AppConfig::$OPEN_AI_MODEL . " " . substr(AppConfig::$OPENAI_API_KEY, 0, 8) . "...");
 
                     $currentLockValue = $this->getLockValue(
                         $payload['id_segment'],
@@ -227,7 +230,6 @@ class AIAssistantWorker extends AbstractWorker
                     $buffer .= $data;
 
                     while (($pos = strpos($buffer, "\n\n")) !== false) {
-
                         $event = substr($buffer, 0, $pos);
                         $buffer = substr($buffer, $pos + 2);
 
@@ -292,8 +294,8 @@ class AIAssistantWorker extends AbstractWorker
                     return strlen($data);
                 }
             );
-
-        } catch (Exception) {
+        } catch (Throwable $e) {
+            $this->_doLog("Failed: " . $e->getMessage() . "\n" . $e->getTraceAsString());
         }
     }
 
@@ -324,7 +326,7 @@ class AIAssistantWorker extends AbstractWorker
      */
     private function emitMessage(string $type, string $idClient, string $idSegment, null|array|string $message, bool $hasError = false, bool $completed = false, ?int $errorCode = 0): void
     {
-        if($message === null){
+        if ($message === null) {
             $errorCode = self::codeErrorsMap['NO_ERROR_MESSAGE'];
             $hasError = true;
         }
