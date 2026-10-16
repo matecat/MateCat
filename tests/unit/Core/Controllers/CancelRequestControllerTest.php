@@ -69,9 +69,9 @@ class FakeStatefulStomp extends StatefulStomp
     /** @var list<array{0: string, 1: Message}> */
     public array $sentMessages = [];
 
-    public static function create(): self
+    public static function create(): static
     {
-        return (new ReflectionClass(self::class))->newInstanceWithoutConstructor();
+        return (new ReflectionClass(static::class))->newInstanceWithoutConstructor();
     }
 
     public function send($destination, Message $message)
@@ -311,7 +311,7 @@ class CancelRequestControllerTest extends AbstractTest
     {
         $service = $this->createMock(SegmentDisabledService::class);
         $service->method('isDisabled')->willReturn(true);
-        $service->expects($this->once())->method('enable')->with(42);
+        $service->expects($this->once())->method('enable')->with(42, 999);
 
         [$queueHandler] = $this->fakeAmqHandler();
         $controller = $this->createActionController(
@@ -459,7 +459,7 @@ class CancelRequestControllerTest extends AbstractTest
     {
         $service = $this->createMock(SegmentDisabledService::class);
         $service->method('isDisabled')->willReturn(false);
-        $service->expects($this->once())->method('disable')->with(42);
+        $service->expects($this->once())->method('disable')->with(42, 999);
 
         [$queueHandler] = $this->fakeAmqHandler();
         $controller = $this->createActionController(
@@ -984,7 +984,7 @@ class CancelRequestControllerTest extends AbstractTest
     {
         $service = $this->createMock(SegmentDisabledService::class);
         $service->method('isDisabled')->willReturn(false);
-        $service->expects($this->once())->method('disable')->with(42);
+        $service->expects($this->once())->method('disable')->with(42, 999);
 
         $logger = $this->createMock(MatecatLogger::class);
         $logger->expects($this->once())->method('error');
@@ -1016,7 +1016,7 @@ class CancelRequestControllerTest extends AbstractTest
     {
         $service = $this->createMock(SegmentDisabledService::class);
         $service->method('isDisabled')->willReturn(true);
-        $service->expects($this->once())->method('enable')->with(42);
+        $service->expects($this->once())->method('enable')->with(42, 999);
 
         $logger = $this->createMock(MatecatLogger::class);
         $logger->expects($this->once())->method('error');
@@ -1095,9 +1095,7 @@ class CancelRequestControllerTest extends AbstractTest
      */
     private function failingAmqHandler(): AMQHandler
     {
-        // Not FakeStatefulStomp::create() — its self::class is not late-bound and would
-        // hand back the non-throwing parent, making the test vacuous.
-        $stomp = (new ReflectionClass(ThrowingStatefulStomp::class))->newInstanceWithoutConstructor();
+        $stomp = ThrowingStatefulStomp::create();
 
         return new AMQHandler(preconfiguredStomp: $stomp);
     }

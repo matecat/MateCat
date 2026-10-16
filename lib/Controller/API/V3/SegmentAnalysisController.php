@@ -134,7 +134,7 @@ class SegmentAnalysisController extends KleinController
 
         $segmentsForAnalysis = (new SegmentDao($this->getDatabase()))->getSegmentsForAnalysisFromIdJobAndPassword($idJob, $password, $limit, $offset);
         $projectPasswordsMap = $this->projectDao->getPasswordsMap($jobStruct->id_project);
-        $issuesNotesAndIdRequests = $this->getIssuesNotesAndIdRequests($segmentsForAnalysis);
+        $issuesNotesAndIdRequests = $this->getIssuesNotesAndIdRequests($segmentsForAnalysis, $jobStruct->id_project);
 
         $notesAggregate = $issuesNotesAndIdRequests['notesAggregate'];
         $issuesAggregate = $issuesNotesAndIdRequests['issuesAggregate'];
@@ -236,7 +236,7 @@ class SegmentAnalysisController extends KleinController
         $segmentsForAnalysis = (new SegmentDao($this->getDatabase()))->getSegmentsForAnalysisFromIdProjectAndPassword($idProject, $password, $limit, $offset);
         $projectIdFromProject = $this->project->id ?? throw new Exception('Project not found');
         $projectPasswordsMap = $this->projectDao->getPasswordsMap((int)$projectIdFromProject);
-        $issuesNotesAndIdRequests = $this->getIssuesNotesAndIdRequests($segmentsForAnalysis);
+        $issuesNotesAndIdRequests = $this->getIssuesNotesAndIdRequests($segmentsForAnalysis, $idProject);
 
         $notesAggregate = $issuesNotesAndIdRequests['notesAggregate'];
         $issuesAggregate = $issuesNotesAndIdRequests['issuesAggregate'];
@@ -256,7 +256,7 @@ class SegmentAnalysisController extends KleinController
      * @throws Exception
      * @throws PDOException
      */
-    private function getIssuesNotesAndIdRequests(array $segmentsForAnalysis): array
+    private function getIssuesNotesAndIdRequests(array $segmentsForAnalysis, int $idProject): array
     {
         $segmentIds = [];
 
@@ -266,7 +266,7 @@ class SegmentAnalysisController extends KleinController
 
         $notesRecords = (new SegmentNoteDao($this->getDatabase()))->getBySegmentIds($segmentIds);
         $issuesRecords = (new EntryDao($this->getDatabase()))->getBySegmentIds($segmentIds);
-        $idRequestRecords = (new SegmentMetadataDao($this->getDatabase()))->getBySegmentIds($segmentIds, 'id_request');
+        $idRequestRecords = (new SegmentMetadataDao($this->getDatabase()))->getBySegmentIds($idProject, $segmentIds, 'id_request');
 
         $notesAggregate = [];
         $issuesAggregate = [];

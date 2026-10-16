@@ -16,7 +16,8 @@ use TypeError;
  *
  * One row is read at four addresses — by segment, by segment and key, by a key across a set of
  * segments, and across a segment range — with TTLs of one to seven days. These tests pin that one
- * write clears all four, so a caller cannot be left compensating for the ones the DAO forgot.
+ * write clears all four, so a caller cannot be left compensating for the ones the DAO forgot, and
+ * that the set and range reads, cached per project, are cleared only for the writer's project.
  */
 #[Group('PersistenceNeeded')]
 #[Group('DaoRealSql')]
@@ -27,6 +28,11 @@ class SegmentMetadataDaoEvictionRealSqlTest extends AbstractTest
     private const array TABLE_DEPS = ['segment_metadata'];
 
     private const string KEY = 'translation_disabled';
+
+    private const string ID_REQUEST = 'id_request';
+
+    private const int PROJECT_ID = 424242;
+    private const int OTHER_PROJECT_ID = 424243;
 
     private SegmentMetadataDao $dao;
     private int $idSegment;
@@ -62,15 +68,15 @@ class SegmentMetadataDaoEvictionRealSqlTest extends AbstractTest
 
         self::assertSame('1', $this->dao->get($this->idSegment, self::KEY)?->meta_value);
         self::assertCount(1, iterator_to_array($this->dao->getAll($this->idSegment)));
-        self::assertCount(1, $this->dao->getBySegmentIds([$this->idSegment], self::KEY));
-        self::assertCount(1, $this->dao->getAllInRange($this->idSegment, $this->idSegment));
+        self::assertCount(1, $this->dao->getBySegmentIds(self::PROJECT_ID, [$this->idSegment], self::KEY));
+        self::assertCount(1, $this->dao->getAllInRange(self::PROJECT_ID, $this->idSegment, $this->idSegment));
 
-        $this->dao->delete($this->idSegment, self::KEY);
+        $this->dao->delete($this->idSegment, self::KEY, self::PROJECT_ID);
 
         self::assertNull($this->dao->get($this->idSegment, self::KEY));
         self::assertCount(0, iterator_to_array($this->dao->getAll($this->idSegment)));
-        self::assertCount(0, $this->dao->getBySegmentIds([$this->idSegment], self::KEY));
-        self::assertCount(0, $this->dao->getAllInRange($this->idSegment, $this->idSegment));
+        self::assertCount(0, $this->dao->getBySegmentIds(self::PROJECT_ID, [$this->idSegment], self::KEY));
+        self::assertCount(0, $this->dao->getAllInRange(self::PROJECT_ID, $this->idSegment, $this->idSegment));
     }
 
     #[Test]
@@ -80,17 +86,17 @@ class SegmentMetadataDaoEvictionRealSqlTest extends AbstractTest
 
         self::assertSame('1', $this->dao->get($this->idSegment, self::KEY)?->meta_value);
         self::assertSame('1', iterator_to_array($this->dao->getAll($this->idSegment))[0]->meta_value);
-        self::assertSame('1', $this->dao->getBySegmentIds([$this->idSegment], self::KEY)[0]->meta_value);
-        self::assertSame('1', iterator_to_array($this->dao->getAllInRange($this->idSegment, $this->idSegment)[$this->idSegment])[0]->meta_value);
+        self::assertSame('1', $this->dao->getBySegmentIds(self::PROJECT_ID, [$this->idSegment], self::KEY)[0]->meta_value);
+        self::assertSame('1', iterator_to_array($this->dao->getAllInRange(self::PROJECT_ID, $this->idSegment, $this->idSegment)[$this->idSegment])[0]->meta_value);
 
         $this->editBehindTheCache('0');
 
-        $this->dao->destroyCache($this->structFor(self::KEY));
+        $this->dao->destroyCache($this->structFor(self::KEY), self::PROJECT_ID);
 
         self::assertSame('0', $this->dao->get($this->idSegment, self::KEY)?->meta_value);
         self::assertSame('0', iterator_to_array($this->dao->getAll($this->idSegment))[0]->meta_value);
-        self::assertSame('0', $this->dao->getBySegmentIds([$this->idSegment], self::KEY)[0]->meta_value);
-        self::assertSame('0', iterator_to_array($this->dao->getAllInRange($this->idSegment, $this->idSegment)[$this->idSegment])[0]->meta_value);
+        self::assertSame('0', $this->dao->getBySegmentIds(self::PROJECT_ID, [$this->idSegment], self::KEY)[0]->meta_value);
+        self::assertSame('0', iterator_to_array($this->dao->getAllInRange(self::PROJECT_ID, $this->idSegment, $this->idSegment)[$this->idSegment])[0]->meta_value);
     }
 
     /** Without this the test above would also pass on a door that cleared the whole DAO. */
@@ -103,7 +109,7 @@ class SegmentMetadataDaoEvictionRealSqlTest extends AbstractTest
 
         $this->editBehindTheCache('0');
 
-        $this->dao->destroyCache($this->structFor('unrelated'));
+        $this->dao->destroyCache($this->structFor('unrelated'), self::PROJECT_ID);
 
         self::assertSame('1', $this->dao->get($this->idSegment, self::KEY)?->meta_value);
     }
@@ -116,7 +122,7 @@ class SegmentMetadataDaoEvictionRealSqlTest extends AbstractTest
         $struct = new SegmentMetadataStruct();
         $struct->meta_key = self::KEY;
 
-        $this->dao->destroyCache($struct);
+        $this->dao->destroyCache($struct, self::PROJECT_ID);
     }
 
     #[Test]
@@ -127,7 +133,52 @@ class SegmentMetadataDaoEvictionRealSqlTest extends AbstractTest
         $struct = new SegmentMetadataStruct();
         $struct->id_segment = $this->idSegment;
 
-        $this->dao->destroyCache($struct);
+        $this->dao->destroyCache($struct, self::PROJECT_ID);
+    }
+
+    /**
+     * The defect: the range reads of every project shared one hash, so a write anywhere on the
+     * installation deleted all of them and the cache almost never served a read.
+     */
+    #[Test]
+    public function testAWriteEvictsTheRangeReadsOfItsOwnProjectOnly(): void
+    {
+        $otherSegment = $this->fixtures->nextAssignableId();
+        $this->fixtures->makeSegmentMetadata($this->idSegment, self::KEY, '0');
+        $this->fixtures->makeSegmentMetadata($otherSegment, self::KEY, '1');
+
+        self::assertSame('0', iterator_to_array($this->dao->getAllInRange(self::PROJECT_ID, $this->idSegment, $this->idSegment)[$this->idSegment])[0]->meta_value);
+        self::assertArrayHasKey($otherSegment, $this->dao->getAllInRange(self::OTHER_PROJECT_ID, $otherSegment, $otherSegment));
+
+        $this->dao->upsert($this->idSegment, self::KEY, '1', self::PROJECT_ID);
+
+        self::assertSame('1', iterator_to_array($this->dao->getAllInRange(self::PROJECT_ID, $this->idSegment, $this->idSegment)[$this->idSegment])[0]->meta_value);
+        self::assertGreaterThan(
+            0,
+            $this->daoCacheRedis()->hlen(SegmentMetadataDao::_keymap_get_all_in_range . self::OTHER_PROJECT_ID),
+            'A write in one project must leave the cached range reads of another project in place.'
+        );
+    }
+
+    /** The same defect on the set read: one hash per key, shared by every project. */
+    #[Test]
+    public function testAWriteEvictsTheSetReadsOfItsOwnProjectOnly(): void
+    {
+        $otherSegment = $this->fixtures->nextAssignableId();
+        $this->fixtures->makeSegmentMetadata($this->idSegment, self::ID_REQUEST, 'before');
+        $this->fixtures->makeSegmentMetadata($otherSegment, self::ID_REQUEST, 'other');
+
+        self::assertSame('before', $this->dao->getBySegmentIds(self::PROJECT_ID, [$this->idSegment], self::ID_REQUEST)[0]->meta_value);
+        self::assertCount(1, $this->dao->getBySegmentIds(self::OTHER_PROJECT_ID, [$otherSegment], self::ID_REQUEST));
+
+        $this->dao->upsert($this->idSegment, self::ID_REQUEST, 'mine', self::PROJECT_ID);
+
+        self::assertSame('mine', $this->dao->getBySegmentIds(self::PROJECT_ID, [$this->idSegment], self::ID_REQUEST)[0]->meta_value);
+        self::assertGreaterThan(
+            0,
+            $this->daoCacheRedis()->hlen(SegmentMetadataDao::_keymap_get_by_segment_ids . self::ID_REQUEST . '-' . self::OTHER_PROJECT_ID),
+            'A write in one project must leave the cached set reads of another project in place.'
+        );
     }
 
     private function structFor(string $key): SegmentMetadataStruct

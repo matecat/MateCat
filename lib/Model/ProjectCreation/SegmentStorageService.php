@@ -181,7 +181,11 @@ class SegmentStorageService
         $metadataCollection = $projectStructure->segments_meta_data[$fid][$position] ?? new SegmentMetadataCollection();
 
         foreach ($metadataCollection as $segmentMetadataStruct) {
-            $this->saveSegmentMetadata((int)$id_segment, $segmentMetadataStruct);
+            $this->saveSegmentMetadata(
+                (int)$id_segment,
+                $projectStructure->id_project ?? throw new TypeError('Segment metadata cannot be stored before the project has an id.'),
+                $segmentMetadataStruct
+            );
         }
 
         if (!isset($projectStructure->file_segments_count[$fid])) {
@@ -325,9 +329,9 @@ class SegmentStorageService
      * @throws Exception
      * @throws TypeError
      */
-    protected function persistSegmentMetadata(SegmentMetadataStruct $metadataStruct): void
+    protected function persistSegmentMetadata(SegmentMetadataStruct $metadataStruct, int $id_project): void
     {
-        (new SegmentMetadataDao($this->dbHandler))->save($metadataStruct);
+        (new SegmentMetadataDao($this->dbHandler))->save($metadataStruct, $id_project);
     }
 
     // ── Private helpers ─────────────────────────────────────────────
@@ -405,14 +409,14 @@ class SegmentStorageService
      * @throws Exception
      * @throws TypeError
      */
-    protected function saveSegmentMetadata(int $id_segment, ?SegmentMetadataStruct $metadataStruct = null): void
+    protected function saveSegmentMetadata(int $id_segment, int $id_project, ?SegmentMetadataStruct $metadataStruct = null): void
     {
         if ($metadataStruct !== null &&
             isset($metadataStruct->meta_key) && $metadataStruct->meta_key !== '' &&
             isset($metadataStruct->meta_value) && $metadataStruct->meta_value !== ''
         ) {
             $metadataStruct->id_segment = $id_segment;
-            $this->persistSegmentMetadata($metadataStruct);
+            $this->persistSegmentMetadata($metadataStruct, $id_project);
         }
     }
 
