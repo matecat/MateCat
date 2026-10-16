@@ -51,14 +51,8 @@ const buildChunk = ({idJob, password, files}) => {
     },
     memory_keys: [],
     urls: {
-      password,
-      translate: `https://dev.matecat.com/translate/project/en-US-it-IT/${idJob}-${password}`,
-      revise_urls: [
-        {
-          revision_number: 1,
-          url: `https://dev.matecat.com/revise/project/en-US-it-IT/${idJob}-${password}`,
-        },
-      ],
+      t: `https://dev.matecat.com/translate/analyzed-project/en-US-it-IT/${idJob}-${password}`,
+      r1: `https://dev.matecat.com/revise/analyzed-project/en-US-it-IT/${idJob}-${password}`,
     },
     files,
     summary: buildMatches({

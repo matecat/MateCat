@@ -1,0 +1,94 @@
+@use 'tokens/colors';
+@use 'commons/variables';
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: stretch;
+
+  // The project card takes the room, the saving card its own width
+  > :first-child {
+    flex: 999 1 420px;
+  }
+
+  > :last-child {
+    flex: 1 1 auto;
+  }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 20px;
+  border: 1px solid colors.$grey150;
+  border-radius: variables.$border-radius-default;
+  background-color: colors.$white;
+  color: colors.$grey1300;
+  text-align: left;
+
+  .titleRow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .id {
+    font-size: variables.$font-size-small;
+    color: colors.$grey500;
+  }
+
+  .name {
+    margin: 0;
+    font-size: variables.$font-size-big;
+    font-weight: 700;
+    color: colors.$blue900;
+    overflow-wrap: anywhere;
+  }
+
+  .languages {
+    padding: 2px 8px;
+    border-radius: variables.$border-radius-default;
+    background-color: colors.$blue50;
+    font-size: variables.$font-size-xsmall;
+    color: colors.$blue900;
+  }
+
+  .statusRow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .statusLabel {
+    font-size: variables.$font-size-small;
+    color: colors.$grey500;
+  }
+
+  .report {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    font-size: variables.$font-size-small;
+    color: colors.$blue600;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .error {
+    margin: 0;
+    font-size: variables.$font-size-small;
+    color: colors.$red600;
+  }
+}

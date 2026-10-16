@@ -1,0 +1,81 @@
+@use 'tokens/colors';
+@use 'commons/variables';
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 20px;
+  border: 1px solid colors.$grey150;
+  border-radius: variables.$border-radius-default;
+  background-color: colors.$white;
+  color: colors.$grey1300;
+  // The analysis page centres text globally
+  text-align: left;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.title {
+  margin: 0;
+  font-size: variables.$font-size-big;
+  font-weight: 700;
+  color: colors.$blue900;
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  font-size: variables.$font-size-small;
+  color: colors.$grey500;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.totals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+}
+
+.total {
+  flex: 1 1 120px;
+  padding: 8px 12px;
+  border-radius: variables.$border-radius-default;
+  background-color: colors.$grey100;
+
+  dt {
+    font-size: variables.$font-size-xsmall;
+    color: colors.$grey500;
+  }
+
+  dd {
+    margin: 4px 0 0;
+    font-size: variables.$font-size-big;
+    font-weight: 700;
+    color: colors.$blue900;
+  }
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: variables.$font-size-base;
+  font-weight: 700;
+  color: colors.$blue900;
+}

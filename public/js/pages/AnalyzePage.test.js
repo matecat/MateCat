@@ -5,6 +5,7 @@ import React from 'react'
 import {mswServer} from '../../mocks/mswServer'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
 import {ANALYSIS_STATUS} from '../constants/Constants'
+import {buildVolumeAnalysis, projectMock} from '../../mocks/volumeAnalysisMock'
 
 jest.mock('../sse/SocketListener', () => () => null)
 jest.mock('./mountPage', () => ({mountPage: jest.fn()}))
@@ -97,10 +98,8 @@ describe('AnalyzePage', () => {
   })
 
   test('non-jobAnalysis flow uses getVolumeAnalysis + getProject directly', async () => {
-    const jobs = [
-      {id: 1, chunks: [{password: 'a'}, {password: 'b'}]},
-      {id: 2, chunks: [{password: 'c'}]},
-    ]
+    // One job in one chunk: the single layout, still the previous page
+    const jobs = [{id: 1, chunks: [{password: 'a'}]}]
     mswServer.use(
       http.post('*/api/app/get-volume-analysis', () =>
         HttpResponse.json({
@@ -122,5 +121,72 @@ describe('AnalyzePage', () => {
     expect(mockAnalyzeMainProps.at(-1).project.get('name')).toBe(
       'Direct project',
     )
+  })
+  test('several jobs render the new tree page instead of AnalyzeMain', async () => {
+    mswServer.use(
+      http.post('*/api/app/get-volume-analysis', () =>
+        HttpResponse.json(buildVolumeAnalysis()),
+      ),
+      http.get('*/api/v2/projects/:id/:password', () =>
+        HttpResponse.json({project: projectMock}),
+      ),
+    )
+
+    renderPage()
+
+    expect(
+      await screen.findByRole('heading', {level: 1, name: 'Project analysis'}),
+    ).toBeInTheDocument()
+    expect(document.title).toBe('Project analysis - Matecat')
+    expect(
+      screen.getByRole('heading', {name: 'Analyzed project'}),
+    ).toBeInTheDocument()
+    expect(screen.getByText('2 language combinations')).toBeInTheDocument()
+    expect(
+      screen.getByRole('region', {name: 'Language combinations'}),
+    ).toBeInTheDocument()
+    // The first split job is selected as a whole
+    expect(
+      screen.getByText('Whole job · 2 chunks · ID 101'),
+    ).toBeInTheDocument()
+    expect(screen.queryByTestId('analyze-main')).not.toBeInTheDocument()
+  })
+
+  test('one job split in chunks is a tree too', async () => {
+    const analysis = buildVolumeAnalysis()
+    mswServer.use(
+      http.post('*/api/app/get-volume-analysis', () =>
+        HttpResponse.json({...analysis, jobs: [analysis.jobs[0]]}),
+      ),
+      http.get('*/api/v2/projects/:id/:password', () =>
+        HttpResponse.json({project: projectMock}),
+      ),
+    )
+
+    renderPage()
+
+    expect(
+      await screen.findByRole('heading', {level: 1, name: 'Project analysis'}),
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/language combinations$/)).not.toBeInTheDocument()
+    expect(screen.queryByTestId('analyze-main')).not.toBeInTheDocument()
+  })
+
+  test('AnalyzeMain shows the loading state before the analysis arrives', async () => {
+    mswServer.use(
+      http.post('*/api/app/get-volume-analysis', () =>
+        HttpResponse.json(buildVolumeAnalysis()),
+      ),
+      http.get('*/api/v2/projects/:id/:password', () =>
+        HttpResponse.json({project: projectMock}),
+      ),
+    )
+    renderPage()
+    expect(screen.getByTestId('analyze-main')).toBeInTheDocument()
+    expect(mockAnalyzeMainProps.at(-1).volumeAnalysis).toBeUndefined()
+
+    expect(
+      await screen.findByRole('heading', {level: 1, name: 'Project analysis'}),
+    ).toBeInTheDocument()
   })
 })

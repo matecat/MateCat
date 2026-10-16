@@ -11,6 +11,8 @@ export const DownloadAlertModal = ({
   successCallback,
   successCallbackWithoutErrors,
   cancelCallback,
+  // Owner-only "Download as it is"; a page without config.ownerIsMe passes its own
+  ownerIsMe = config.ownerIsMe,
 }) => {
   return (
     <div className="message-modal">
@@ -33,7 +35,7 @@ export const DownloadAlertModal = ({
               <li>
                 <b>Review issues and fix them</b> before download
               </li>
-              {config.ownerIsMe && (
+              {ownerIsMe && (
                 <li>
                   <b>Download the target file as it is</b>
                 </li>
@@ -58,7 +60,7 @@ export const DownloadAlertModal = ({
             >
               Fix issues
             </Button>
-            {config.ownerIsMe && (
+            {ownerIsMe && (
               <Button
                 type={BUTTON_TYPE.PRIMARY}
                 size={BUTTON_SIZE.MEDIUM}

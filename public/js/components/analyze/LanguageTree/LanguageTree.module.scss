@@ -1,0 +1,247 @@
+@use 'tokens/colors';
+@use 'tokens/z-index';
+@use 'commons/variables';
+@use '../shared/visuallyHidden';
+
+.card {
+  border: 1px solid colors.$grey150;
+  border-radius: variables.$border-radius-default;
+  background-color: colors.$white;
+  text-align: left;
+  // Rounds the corners without becoming a scroll container: the sticky header
+  // and total rows keep sticking to the page
+  overflow: clip;
+}
+
+.hidden {
+  @include visuallyHidden.visually-hidden;
+}
+
+.table {
+  width: 100%;
+  // Column widths come from the colgroup, never from the cell content
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: variables.$font-size-small;
+  color: colors.$grey1300;
+
+  th,
+  td {
+    padding: 8px 12px;
+    border-bottom: 1px solid colors.$grey150;
+    text-align: right;
+    font-weight: 400;
+    white-space: nowrap;
+    background-color: inherit;
+  }
+
+  th:first-child {
+    overflow: hidden;
+    text-align: left;
+  }
+}
+
+// Numbers take a modest fixed width; the actions column fits copy, "Buy
+// translation" (or "View order") and Translate; the language column takes
+// the rest
+.countColumn {
+  width: 112px;
+}
+
+.actionsColumn {
+  width: 296px;
+}
+
+.stickyHead th {
+  // A long header wraps inside its column instead of widening it
+  white-space: normal;
+  position: sticky;
+  // The scroll container has no padding in this layout (ProjectTreeAnalysis)
+  top: 0;
+  z-index: z-index.$z-sticky;
+  background-color: colors.$grey100;
+  font-size: variables.$font-size-xsmall;
+  font-weight: 700;
+  color: colors.$grey500;
+}
+
+.stickyTotal th,
+.stickyTotal td {
+  position: sticky;
+  bottom: 0;
+  z-index: z-index.$z-sticky;
+  border-top: 1px solid colors.$grey150;
+  border-bottom: none;
+  background-color: colors.$grey100;
+  font-weight: 700;
+}
+
+.jobRow,
+.chunkRow {
+  background-color: colors.$white;
+  cursor: pointer;
+}
+
+.chunkRow th:first-child {
+  padding-left: 32px;
+}
+
+.selected {
+  background-color: colors.$blue50;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.chevron,
+.chevronSpacer {
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+}
+
+.chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: variables.$border-radius-default;
+  background: none;
+  color: colors.$grey500;
+  cursor: pointer;
+  transform: rotate(-90deg);
+  transition: transform 0.15s ease;
+
+  &[aria-expanded='true'] {
+    transform: none;
+  }
+
+  &:hover {
+    background-color: colors.$grey150;
+  }
+}
+
+.select {
+  min-width: 0;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover .pair {
+    text-decoration: underline;
+  }
+}
+
+.pair {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 700;
+  color: colors.$blue900;
+}
+
+.meta {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: variables.$font-size-xsmall;
+  color: colors.$grey500;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.copy {
+  position: relative;
+  display: inline-flex;
+}
+
+.copyFallback {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: z-index.$z-dropdown;
+  padding: 8px;
+  border: 1px solid colors.$grey150;
+  border-radius: variables.$border-radius-default;
+  background-color: colors.$white;
+  box-shadow: 0 2px 8px rgba(colors.$grey1300, 0.15);
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: variables.$font-size-xsmall;
+    color: colors.$grey500;
+  }
+
+  input {
+    width: 320px;
+    padding: 4px 8px;
+    border: 1px solid colors.$grey150;
+    border-radius: variables.$border-radius-default;
+    font: inherit;
+    color: colors.$grey1300;
+  }
+}
+
+.copied {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 50%;
+  z-index: z-index.$z-dropdown;
+  padding: 2px 8px;
+  border-radius: variables.$border-radius-default;
+  background-color: colors.$grey1300;
+  font-size: variables.$font-size-xsmall;
+  color: colors.$white;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.iconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid colors.$grey150;
+  border-radius: variables.$border-radius-default;
+  background-color: colors.$white;
+  color: colors.$grey600;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background-color: colors.$grey100;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

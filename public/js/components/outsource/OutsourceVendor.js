@@ -17,7 +17,7 @@ import UserStore from '../../stores/UserStore'
 import {Badge, BADGE_TYPE} from '../common/Badge'
 import {formatWithCommas} from './outsourceConstants'
 
-const QUOTE_NOT_AVAILABLE_MESSAGE =
+export const QUOTE_NOT_AVAILABLE_MESSAGE =
   'Quote not available, please contact us at info@translated.net or call +39 06 90 254 001'
 
 const OutsourceVendor = ({

@@ -45,6 +45,31 @@ test('non-owner does not see the plain Download option', () => {
   expect(screen.getByText('Download with markers')).toBeInTheDocument()
 })
 
+test('the ownerIsMe prop overrides config.ownerIsMe', () => {
+  global.config.ownerIsMe = false
+  const {unmount} = render(
+    <DownloadAlertModal
+      successCallback={jest.fn()}
+      successCallbackWithoutErrors={jest.fn()}
+      cancelCallback={jest.fn()}
+      ownerIsMe={true}
+    />,
+  )
+  expect(screen.getByText('Download')).toBeInTheDocument()
+  unmount()
+
+  global.config.ownerIsMe = true
+  render(
+    <DownloadAlertModal
+      successCallback={jest.fn()}
+      successCallbackWithoutErrors={jest.fn()}
+      cancelCallback={jest.fn()}
+      ownerIsMe={false}
+    />,
+  )
+  expect(screen.queryByText('Download')).not.toBeInTheDocument()
+})
+
 test('"Fix issues" calls cancelCallback and closes the modal', () => {
   global.config.ownerIsMe = false
   const cancelCallback = jest.fn()

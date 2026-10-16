@@ -1,0 +1,44 @@
+@use 'tokens/colors';
+@use 'commons/variables';
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 20px;
+  border: 1px solid colors.$grey150;
+  border-radius: variables.$border-radius-default;
+  background-color: colors.$grey100;
+  color: colors.$grey1300;
+  text-align: left;
+
+  .title {
+    margin: 0;
+    font-size: variables.$font-size-base;
+    font-weight: 700;
+    color: colors.$blue900;
+  }
+
+  .message {
+    margin: 0;
+    font-size: variables.$font-size-small;
+  }
+
+  .quote {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .price {
+    font-size: variables.$font-size-big;
+    font-weight: 700;
+    color: colors.$blue900;
+  }
+
+  .delivery {
+    font-size: variables.$font-size-small;
+    color: colors.$grey500;
+  }
+}

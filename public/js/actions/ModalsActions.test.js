@@ -238,4 +238,28 @@ describe('ModalsActions', () => {
       }),
     )
   })
+
+  test('showDownloadWarningsModal forwards an explicit ownerIsMe', () => {
+    const successCallback = jest.fn()
+    const successCallbackWithoutErrors = jest.fn()
+    const cancelCallback = jest.fn()
+    ModalsActions.showDownloadWarningsModal(
+      successCallback,
+      successCallbackWithoutErrors,
+      cancelCallback,
+      {ownerIsMe: false},
+    )
+
+    expect(AppDispatcher.dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        component: 'DownloadAlert',
+        props: {
+          successCallback,
+          successCallbackWithoutErrors,
+          cancelCallback,
+          ownerIsMe: false,
+        },
+      }),
+    )
+  })
 })

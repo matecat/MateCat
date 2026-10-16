@@ -9,11 +9,13 @@
   border: 1px solid colors.$grey150;
   border-radius: variables.$border-radius-default;
   background-color: colors.$white;
+  // The analysis page centres text globally
+  text-align: left;
 
   .percent {
-    min-width: 3em;
-    font-size: variables.$font-size-big;
+    font-size: 44px;
     font-weight: 700;
+    line-height: 1;
     color: colors.$blue900;
   }
 

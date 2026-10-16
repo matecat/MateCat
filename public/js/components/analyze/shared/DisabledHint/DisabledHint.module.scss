@@ -1,0 +1,9 @@
+.hint {
+  display: inline-flex;
+
+  // The wrapper, not the disabled control, receives the hover
+  > :disabled,
+  > * :disabled {
+    pointer-events: none;
+  }
+}

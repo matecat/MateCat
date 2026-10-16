@@ -138,10 +138,16 @@ let ModalsActions = {
     successCallback,
     successCallbackWithoutErrors,
     cancelCallback,
+    {ownerIsMe} = {},
   ) {
     ModalsActions.showModalComponent(
       MODAL_KEY.DOWNLOAD_ALERT,
-      {successCallback, successCallbackWithoutErrors, cancelCallback},
+      {
+        successCallback,
+        successCallbackWithoutErrors,
+        cancelCallback,
+        ...(ownerIsMe !== undefined && {ownerIsMe}),
+      },
       'Unresolved Major Issues',
     )
   },

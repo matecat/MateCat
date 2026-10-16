@@ -262,6 +262,8 @@ describe('deriveAnalysisView jobs', () => {
       targetName: 'Italian',
       countUnit: 'words',
       payableRates: rawJob.payable_rates,
+      outsourceAvailable: true,
+      outsourceInfo: null,
       totals: {
         raw: rawJob.total_raw,
         industry: rawJob.total_industry,
@@ -278,6 +280,7 @@ describe('deriveAnalysisView jobs', () => {
       index: 1,
       count: 2,
       password: 'chunkpass1',
+      urls: rawChunk.urls,
       totals: {
         raw: rawChunk.total_raw,
         industry: rawChunk.total_industry,
