@@ -1,0 +1,26 @@
+// Analysis bucket palette. The colour tokens have no ordinal scale long enough
+// for the twelve STANDARD buckets (plus three MTQE-only ones), so these are the
+// only hard-coded colours of the analysis page. Buckets differ by lightness,
+// not by hue alone: within a family the colour gets lighter as the match gets
+// cheaper (New is darkest, TM 101% the lightest). The bar separates adjacent
+// segments with a white gap and outlines each one in grey.
+$bucket-colors: (
+  // Translation memory: navy to pale blue
+  'new': #0b2545,
+  'tm_50_74': #1d4f8c,
+  'tm_75_84': #2f6db8,
+  'tm_85_94': #5b93d3,
+  'tm_95_99': #8db6e4,
+  'tm_100': #b9d3f0,
+  'tm_100_public': #d3e3f6,
+  'ice': #ecf3fb,
+  // Repeated content: dark and light grey
+  'repetitions': #4b5160,
+  'internal': #a9aeb8,
+  // Machine translation: dark to light green
+  'MT': #135c43,
+  'ice_mt': #2f9a6f,
+  'top_quality_mt': #135c43,
+  'higher_quality_mt': #2f9a6f,
+  'standard_quality_mt': #8fd3b3
+);

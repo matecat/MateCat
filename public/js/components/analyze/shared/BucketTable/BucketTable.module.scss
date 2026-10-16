@@ -1,0 +1,102 @@
+@use 'tokens/colors';
+@use 'commons/variables';
+@use '../bucketPalette' as palette;
+@use '../visuallyHidden' as *;
+
+@each $type, $color in palette.$bucket-colors {
+  .segment[data-bucket='#{$type}'],
+  .swatch[data-bucket='#{$type}'] {
+    background-color: $color;
+  }
+}
+
+.component {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: colors.$grey1300;
+}
+
+.bar {
+  display: flex;
+  // The white gap keeps neighbouring segments apart whatever their colour
+  gap: 2px;
+  height: 12px;
+  border-radius: variables.$border-radius-default;
+  background-color: colors.$white;
+  overflow: hidden;
+
+  .segment {
+    min-width: 2px;
+    flex-basis: 0;
+    // Keeps the palest buckets visible on white
+    box-shadow: inset 0 0 0 1px colors.$grey150;
+  }
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: variables.$font-size-small;
+
+  .caption {
+    @include visually-hidden;
+  }
+
+  th,
+  td {
+    padding: 8px 12px;
+    border-bottom: 1px solid colors.$grey100;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  th:first-child {
+    text-align: left;
+  }
+
+  // Bucket and file names; the header and footer cells stay bold
+  tbody th:first-child {
+    font-weight: 400;
+  }
+
+  thead th {
+    font-size: variables.$font-size-xsmall;
+    font-weight: 700;
+    color: colors.$grey500;
+    background-color: colors.$grey50;
+  }
+
+  .bucket {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  tfoot th,
+  tfoot td {
+    font-weight: 700;
+    color: colors.$blue900;
+    border-bottom: none;
+  }
+
+  .swatch {
+    flex-shrink: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    // Keeps the palest buckets visible on white
+    box-shadow: inset 0 0 0 1px colors.$grey150;
+  }
+}
+
+.toggle {
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: variables.$font-size-xsmall;
+  color: colors.$blue600;
+  text-decoration: underline;
+  cursor: pointer;
+}

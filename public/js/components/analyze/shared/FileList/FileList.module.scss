@@ -1,0 +1,169 @@
+@use 'tokens/colors';
+@use 'commons/variables';
+@use '../visuallyHidden' as *;
+
+.component {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: colors.$grey1300;
+}
+
+.searchBox {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: variables.$font-size-small;
+
+  label {
+    font-weight: 700;
+    color: colors.$blue900;
+  }
+
+  input {
+    flex: 1 1 200px;
+    padding: 6px 10px;
+    border: 1px solid colors.$grey150;
+    border-radius: variables.$border-radius-default;
+    font-size: variables.$font-size-small;
+
+    &:focus {
+      outline: 2px solid colors.$blue500;
+      outline-offset: 1px;
+    }
+  }
+
+  .matchCount {
+    flex-basis: 100%;
+    margin: 0;
+    font-size: variables.$font-size-xsmall;
+    color: colors.$grey500;
+  }
+}
+
+.scroll {
+  max-height: 420px;
+  overflow-y: auto;
+  border: 1px solid colors.$grey150;
+  border-radius: variables.$border-radius-default;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: variables.$font-size-small;
+
+  th,
+  td {
+    padding: 8px 12px;
+    border-bottom: 1px solid colors.$grey100;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  th:first-child {
+    text-align: left;
+  }
+
+  // Bucket and file names; the header and footer cells stay bold
+  tbody th:first-child {
+    font-weight: 400;
+  }
+
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    font-size: variables.$font-size-xsmall;
+    font-weight: 700;
+    color: colors.$grey500;
+    background-color: colors.$grey50;
+    // A sticky cell loses its collapsed border once the body scrolls under it
+    border-bottom: none;
+    box-shadow: inset 0 -1px 0 colors.$grey100;
+  }
+
+  .open th,
+  .open td {
+    background-color: colors.$blue50;
+    border-bottom: none;
+  }
+
+  .detail > td {
+    padding-top: 0;
+    background-color: colors.$blue50;
+    text-align: left;
+  }
+
+  .noMatch {
+    text-align: left;
+    color: colors.$grey500;
+  }
+}
+
+.fileButton {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+
+  &:focus-visible {
+    outline: 2px solid colors.$blue500;
+    outline-offset: 2px;
+  }
+
+  .baseName {
+    font-size: variables.$font-size-small;
+    color: colors.$blue600;
+    word-break: break-word;
+  }
+
+  .folder {
+    font-size: variables.$font-size-xsmall;
+    color: colors.$grey500;
+    word-break: break-word;
+  }
+}
+
+.buckets {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: variables.$font-size-xsmall;
+
+  // Reset the outer table's cell rules
+  th,
+  td {
+    padding: 4px 0 4px 12px;
+    border-bottom: none;
+    background-color: transparent;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  tbody th {
+    padding-left: 16px;
+    text-align: left;
+    font-weight: 400;
+  }
+
+  td {
+    width: 6em;
+  }
+}
+
+.hidden {
+  @include visually-hidden;
+}
+
+.noBuckets {
+  margin: 0;
+  font-size: variables.$font-size-xsmall;
+  color: colors.$grey500;
+}

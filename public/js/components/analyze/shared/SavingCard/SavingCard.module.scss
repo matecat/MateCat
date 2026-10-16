@@ -1,0 +1,37 @@
+@use 'tokens/colors';
+@use 'commons/variables';
+
+.card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border: 1px solid colors.$grey150;
+  border-radius: variables.$border-radius-default;
+  background-color: colors.$white;
+
+  .percent {
+    min-width: 3em;
+    font-size: variables.$font-size-big;
+    font-weight: 700;
+    color: colors.$blue900;
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .title {
+    margin: 0;
+    font-size: variables.$font-size-base;
+    font-weight: 700;
+    color: colors.$blue900;
+  }
+
+  .work {
+    font-size: variables.$font-size-xsmall;
+    color: colors.$grey500;
+  }
+}

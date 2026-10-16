@@ -1,0 +1,31 @@
+@use 'tokens/colors';
+@use 'commons/variables';
+@use '../visuallyHidden' as *;
+
+.pending {
+  display: inline-flex;
+  width: 100%;
+  min-width: 3em;
+  justify-content: flex-start;
+  vertical-align: middle;
+
+  &.center {
+    justify-content: center;
+  }
+
+  &.end {
+    justify-content: flex-end;
+  }
+
+  .bar {
+    display: inline-block;
+    width: 3em;
+    height: 0.8em;
+    border-radius: variables.$border-radius-default;
+    background-color: colors.$grey150;
+  }
+
+  .hidden {
+    @include visually-hidden;
+  }
+}

@@ -1,0 +1,68 @@
+@use 'tokens/colors';
+@use 'commons/variables';
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 20px;
+  border: 1px solid colors.$grey150;
+  border-radius: variables.$border-radius-default;
+  background-color: colors.$white;
+  color: colors.$grey1300;
+
+  p {
+    margin: 0;
+  }
+
+  .steps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: variables.$font-size-xsmall;
+    color: colors.$grey500;
+
+    li + li::before {
+      // Decorative: screen readers get the list, not the arrows
+      content: '›' / '';
+      margin-right: 8px;
+      color: colors.$grey500;
+    }
+
+    .done {
+      color: colors.$green600;
+    }
+
+    .current {
+      font-weight: 700;
+      color: colors.$blue900;
+    }
+  }
+
+  .title {
+    font-size: variables.$font-size-base;
+    font-weight: 700;
+    color: colors.$blue900;
+  }
+
+  .detail {
+    font-size: variables.$font-size-small;
+    color: colors.$grey500;
+  }
+
+  .progress {
+    height: 8px;
+    border-radius: variables.$border-radius-default;
+    background-color: colors.$grey100;
+    overflow: hidden;
+
+    .progressValue {
+      height: 100%;
+      background-color: colors.$blue500;
+      transition: width 400ms ease-out;
+    }
+  }
+}

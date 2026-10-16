@@ -1,0 +1,18 @@
+@use 'tokens/colors';
+
+// Same highlight as the old analysis page's .updated-count. The colour comes
+// on at once and fades out over 400ms when the class goes, so it is fully
+// visible for the whole flash. Two classes, so the highlight wins over the
+// element's own single-class background.
+.flash {
+  transition: background-color 400ms ease-out;
+
+  &.flashing {
+    background-color: colors.$blue50;
+    transition: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
