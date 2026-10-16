@@ -1,184 +1,95 @@
 import React from 'react'
 import {fireEvent, render, screen} from '@testing-library/react'
-import {BuyTranslationDrawer} from './BuyTranslationDrawer'
+import {buildVolumeAnalysis} from '../../../../mocks/volumeAnalysisMock'
+import {deriveAnalysisView} from '../utils/deriveAnalysisView'
+import {BuyTranslationDrawer, getOrderItem} from './BuyTranslationDrawer'
 
-const mockContainerProps = []
-jest.mock('../../outsource/OutsourceContainer', () => {
-  const MockOutsourceContainer = (props) => {
-    mockContainerProps.push(props)
-    return (
-      <div className="outsource-container" data-testid="order-form">
-        <button type="button">Confirm order</button>
-        <button type="button" hidden>
-          Hidden action
-        </button>
-        <span aria-hidden="true">
-          <button type="button">Decorative action</button>
-        </span>
-        <span tabIndex="0" disabled>
-          Disabled custom control
-        </span>
-        <button type="button" disabled>
-          Disabled action
-        </button>
-      </div>
-    )
+const mockPanelProps = []
+jest.mock('../../outsource/OutsourceOrderPanel', () => {
+  const MockPanel = (props) => {
+    mockPanelProps.push(props)
+    return <div data-testid="order-panel">{props.job.get('password')}</div>
   }
-  return MockOutsourceContainer
+  return {__esModule: true, default: MockPanel, OutsourceOrderPanel: MockPanel}
 })
 
-// jsdom does no layout: offsetParent is null for everything. Rendered
-// elements get the body, hidden ones (and their content) null
-const offsetParent = Object.getOwnPropertyDescriptor(
-  HTMLElement.prototype,
-  'offsetParent',
-)
-beforeAll(() => {
-  Object.defineProperty(HTMLElement.prototype, 'offsetParent', {
-    configurable: true,
-    get() {
-      return this.matches('[hidden], [hidden] *') ? null : document.body
-    },
-  })
-})
-afterAll(() => {
-  Object.defineProperty(HTMLElement.prototype, 'offsetParent', offsetParent)
-})
-
-const project = {id: 20, password: 'projpass', name: 'Analyzed project'}
-const projectJob = {id: 102, password: 'frpass', outsource: null}
+const {jobs} = deriveAnalysisView({analysis: buildVolumeAnalysis()})
+const [italian, french] = jobs
+const project = {
+  id: 20,
+  password: 'projpass',
+  jobs: [{id: 102, password: 'frpass', outsource: null}],
+}
 
 const renderDrawer = (props = {}) => {
-  const onClose = jest.fn()
-  const utils = render(
-    <>
-      <button type="button">Opener</button>
-      <BuyTranslationDrawer
-        open={true}
-        onClose={onClose}
-        project={project}
-        projectJob={projectJob}
-        title="en-US › fr-FR"
-        subtitle="ID 102"
-        weightedWords={100}
-        {...props}
-      />
-    </>,
+  const handlers = {
+    onClose: jest.fn(),
+    onPickChunk: jest.fn(),
+    onMerge: jest.fn(),
+  }
+  render(
+    <BuyTranslationDrawer
+      open={true}
+      project={project}
+      job={french}
+      chunk={french.chunks[0]}
+      {...handlers}
+      {...props}
+    />,
   )
-  return {...utils, onClose}
+  return handlers
 }
 
 describe('BuyTranslationDrawer', () => {
   beforeEach(() => {
-    mockContainerProps.length = 0
+    mockPanelProps.length = 0
   })
 
-  test('renders nothing while closed', () => {
-    renderDrawer({open: false})
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-  })
-
-  test('opens as a labelled modal dialog with the focus on it', () => {
+  test('orders a chunk with the shared panel, quotes cached', () => {
     renderDrawer()
-    const dialog = screen.getByRole('dialog', {name: 'en-US › fr-FR'})
-    expect(dialog).toHaveAttribute('aria-modal', 'true')
-    expect(screen.getByText('ID 102')).toBeInTheDocument()
-    expect(screen.getByRole('button', {name: 'Close'})).toHaveFocus()
-  })
-
-  test('renders the existing order form for the job', () => {
-    renderDrawer()
-    expect(screen.getByTestId('order-form')).toBeInTheDocument()
-
-    const props = mockContainerProps.at(-1)
-    expect(props.openOutsource).toBe(true)
-    expect(props.extendedView).toBe(true)
-    expect(props.showTranslatorBox).toBe(false)
-    expect(props.standardWC).toBe(100)
-    expect(props.job.get('id')).toBe(102)
-    expect(props.job.get('password')).toBe('frpass')
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(screen.getByTestId('order-panel')).toHaveTextContent('frpass')
+    const props = mockPanelProps.at(-1)
+    expect(props.cache).toBe(true)
+    expect(props.standardWC).toBe(french.chunks[0].totals.equivalent)
     expect(props.project.get('id')).toBe(20)
+    expect(
+      screen.getByText(getOrderItem(french, french.chunks[0])),
+    ).toBeVisible()
   })
 
-  test('escape closes it', () => {
-    const {onClose} = renderDrawer()
-    fireEvent.keyDown(document, {key: 'Escape'})
-    expect(onClose).toHaveBeenCalledTimes(1)
+  test('a whole split job picks a chunk first, or merges', () => {
+    const {onPickChunk, onMerge} = renderDrawer({job: italian, chunk: null})
+    expect(screen.queryByTestId('order-panel')).not.toBeInTheDocument()
+    expect(
+      screen.getByText(
+        'This job is split into 2 chunks, and each chunk is bought on its own.',
+      ),
+    ).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', {name: /^Chunk 2 /}))
+    expect(onPickChunk).toHaveBeenCalledWith(italian.chunks[1])
+
+    fireEvent.click(screen.getByRole('button', {name: 'Merge'}))
+    expect(onMerge).toHaveBeenCalledTimes(1)
   })
 
-  test('the backdrop and the close button close it', () => {
-    const {onClose} = renderDrawer()
-    fireEvent.click(screen.getByTestId('buy-translation-backdrop'))
-    fireEvent.click(screen.getByRole('button', {name: 'Close'}))
-    expect(onClose).toHaveBeenCalledTimes(2)
+  test('without merge rights there is no merge button', () => {
+    renderDrawer({job: italian, chunk: null, onMerge: undefined})
+    expect(
+      screen.queryByRole('button', {name: 'Merge'}),
+    ).not.toBeInTheDocument()
   })
 
-  test('a click on the drawer frame does not count as outside the form', () => {
-    const {onClose} = renderDrawer()
-    const {onClickOutside} = mockContainerProps.at(-1)
-
-    onClickOutside({target: screen.getByText('ID 102')})
-    expect(onClose).not.toHaveBeenCalled()
-
-    onClickOutside({target: screen.getByTestId('buy-translation-backdrop')})
-    expect(onClose).toHaveBeenCalledTimes(1)
-  })
-
-  test('tab cycles inside the dialog, past the controls it cannot reach', () => {
-    renderDrawer()
-    const close = screen.getByRole('button', {name: 'Close'})
-    // The last reachable control: after it come hidden, aria-hidden and
-    // disabled ones
-    const last = screen.getByRole('button', {name: 'Confirm order'})
-
-    last.focus()
-    fireEvent.keyDown(document, {key: 'Tab'})
-    expect(close).toHaveFocus()
-
-    fireEvent.keyDown(document, {key: 'Tab', shiftKey: true})
-    expect(last).toHaveFocus()
-  })
-
-  test('renders into the body and makes the rest of the page inert', () => {
-    const {container, rerender, onClose} = renderDrawer()
-    const dialog = screen.getByRole('dialog')
-    expect(container).not.toContainElement(dialog)
-    expect(container).toHaveAttribute('inert')
-
-    rerender(
-      <BuyTranslationDrawer
-        open={false}
-        onClose={onClose}
-        project={project}
-        projectJob={projectJob}
-        title="en-US › fr-FR"
-      />,
+  test('getOrderItem describes what is bought', () => {
+    expect(getOrderItem(french, french.chunks[0])).toBe(
+      'en-US › fr-FR · 100 Matecat weighted words',
     )
-    expect(container).not.toHaveAttribute('inert')
-  })
-
-  test('closing gives the focus back to the opener', () => {
-    const page = (open) => (
-      <>
-        <button type="button">Opener</button>
-        <BuyTranslationDrawer
-          open={open}
-          onClose={jest.fn()}
-          project={project}
-          projectJob={projectJob}
-          title="en-US › fr-FR"
-        />
-      </>
+    expect(getOrderItem(italian, italian.chunks[1])).toBe(
+      `en-US › it-IT · chunk 2 of 2 · ${italian.chunks[1].totals.equivalent} Matecat weighted words`,
     )
-    const {rerender} = render(page(false))
-    const opener = screen.getByRole('button', {name: 'Opener'})
-    opener.focus()
-
-    rerender(page(true))
-    expect(opener).not.toHaveFocus()
-
-    rerender(page(false))
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-    expect(opener).toHaveFocus()
+    expect(getOrderItem(italian, null)).toBe(
+      `en-US › it-IT · 2 chunks · ${italian.totals.equivalent} Matecat weighted words`,
+    )
   })
 })

@@ -1,52 +1,65 @@
 @use 'tokens/colors';
 @use 'commons/variables';
 
+// Values from the analysis mockup (Main.dc.html, "Analysis details")
 .panel {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 16px 20px;
+  gap: 20px;
+  padding: 24px;
   border: 1px solid colors.$grey150;
-  border-radius: variables.$border-radius-default;
+  border-radius: variables.$border-radius-big;
   background-color: colors.$white;
   color: colors.$grey1300;
+  font-size: variables.$font-size-base;
   // The analysis page centres text globally
   text-align: left;
 }
 
 .header {
+  // As the mockup: the actions stay on the right, the title block shrinks
+  // and its subtitle wraps
   display: flex;
-  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
 }
 
+.heading {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
 .title {
   margin: 0;
-  font-size: variables.$font-size-big;
-  font-weight: 700;
-  color: colors.$blue900;
+  font-size: 22px;
+  font-weight: variables.$font-weight-bold;
+  line-height: 1.35;
+  color: colors.$grey1300;
 }
 
 .subtitle {
-  margin: 4px 0 0;
+  margin: 0;
   font-size: variables.$font-size-small;
+  line-height: 1.35;
   color: colors.$grey500;
 }
 
 .totals {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
   margin: 0;
 }
 
+// No tile background: label over value, as the mockup
 .total {
-  flex: 1 1 120px;
-  padding: 8px 12px;
-  border-radius: variables.$border-radius-default;
-  background-color: colors.$grey100;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 
   dt {
     font-size: variables.$font-size-xsmall;
@@ -54,22 +67,75 @@
   }
 
   dd {
-    margin: 4px 0 0;
-    font-size: variables.$font-size-big;
-    font-weight: 700;
-    color: colors.$blue900;
+    margin: 0;
+    font-size: 24px;
+    line-height: 1.35;
   }
 }
 
-.section {
+.strong dd {
+  font-weight: variables.$font-weight-bold;
+}
+
+.breakdown {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.sectionTitle {
+.breakdownHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: variables.$font-size-xsmall;
+  color: colors.$grey500;
+}
+
+.note {
   margin: 0;
-  font-size: variables.$font-size-base;
-  font-weight: 700;
-  color: colors.$blue900;
+  font-size: variables.$font-size-xsmall;
+  color: colors.$grey500;
+}
+
+.files {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filesTitle {
+  margin: 0;
+  // Headings carry a large global line-height on this page
+  line-height: 1.35;
+  font-size: variables.$font-size-small;
+  font-weight: variables.$font-weight-bold;
+  color: colors.$grey1300;
+}
+
+.filesToggle {
+  align-self: flex-start;
+  min-height: 40px;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: variables.$font-size-small;
+  font-weight: variables.$font-weight-bold;
+  color: colors.$blue600;
+  cursor: pointer;
+}
+
+.pending {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: variables.$border-radius-default;
+  background-color: colors.$grey50;
+  font-size: variables.$font-size-small;
+  color: colors.$grey500;
+}
+
+// The panel's actions never wrap under the title
+.header > :last-child {
+  flex: none;
+  flex-wrap: nowrap;
 }

@@ -8,11 +8,15 @@ import CommonUtils from '../../../utils/commonUtils'
 import {deriveAnalysisView} from '../utils/deriveAnalysisView'
 import {getJobSubtitle, SingleJobAnalysis} from './SingleJobAnalysis'
 
-jest.mock('../../outsource/OutsourceContainer', () => {
-  const MockOutsourceContainer = ({job}) => (
+jest.mock('../../outsource/OutsourceOrderPanel', () => {
+  const MockOrderPanel = ({job}) => (
     <div data-testid="order-form">{job.get('password')}</div>
   )
-  return MockOutsourceContainer
+  return {
+    __esModule: true,
+    default: MockOrderPanel,
+    OutsourceOrderPanel: MockOrderPanel,
+  }
 })
 
 // The offer card is tested on its own; here it only hands the chunk over
@@ -93,7 +97,7 @@ describe('SingleJobAnalysis', () => {
   test('while the analysis runs, actions wait and the cards explain why', () => {
     renderPage({status: 'FAST_OK', segments_analyzed: 10})
     expect(
-      screen.getByRole('region', {name: 'Analysis status'}),
+      screen.getByRole('status', {name: 'Analysis status'}),
     ).toBeInTheDocument()
     expect(screen.getByRole('button', {name: 'Translate'})).toBeDisabled()
     expect(screen.getByRole('button', {name: 'Split'})).toBeDisabled()
@@ -121,7 +125,9 @@ describe('SingleJobAnalysis', () => {
   test('buy opens the order drawer and tracks the request', () => {
     renderPage()
     fireEvent.click(screen.getByRole('button', {name: 'Buy this job'}))
-    const dialog = screen.getByRole('dialog', {name: 'en-US › fr-FR'})
+    const dialog = screen.getByRole('dialog', {
+      name: 'Let Translated do it for you',
+    })
     expect(within(dialog).getByTestId('order-form')).toHaveTextContent('frpass')
     expect(CommonUtils.dispatchAnalyticsEvents).toHaveBeenCalledWith({
       event: 'outsource_request',

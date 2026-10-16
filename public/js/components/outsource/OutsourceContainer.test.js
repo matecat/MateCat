@@ -4,21 +4,12 @@ import Cookies from 'js-cookie'
 import OutsourceContainer from './OutsourceContainer'
 
 jest.mock('./AssignToTranslator', () => () => <div>assign-to-translator</div>)
-jest.mock('./OutsourceVendor', () => (props) => (
-  <div>
-    outsource-vendor:{String(props.outsourceEnabled)}:
-    {String(props.serviceLoginUrl)}
-  </div>
-))
 
 const baseProps = {
-  openOutsource: false,
   showTranslatorBox: true,
   idJobLabel: 'job-1',
   job: {},
-  standardWC: 100,
   project: {},
-  extendedView: true,
   onClickOutside: jest.fn(),
 }
 
@@ -53,11 +44,7 @@ describe('OutsourceContainer', () => {
 
   test('renders nothing when both openOutsource and showTranslatorBox are false', () => {
     const {container} = render(
-      <OutsourceContainer
-        {...baseProps}
-        showTranslatorBox={false}
-        openOutsource={false}
-      />,
+      <OutsourceContainer {...baseProps} showTranslatorBox={false} />,
     )
     expect(container.querySelector('.outsource-container')).toBeNull()
   })
@@ -65,42 +52,6 @@ describe('OutsourceContainer', () => {
   test('renders the translator assignment box when showTranslatorBox is true', () => {
     render(<OutsourceContainer {...baseProps} />)
     expect(screen.getByText('assign-to-translator')).toBeInTheDocument()
-    expect(screen.queryByText(/outsource-vendor/)).not.toBeInTheDocument()
-  })
-
-  test('renders the outsource vendor box when openOutsource is true and outsourcing is enabled', () => {
-    render(
-      <OutsourceContainer
-        {...baseProps}
-        showTranslatorBox={false}
-        openOutsource={true}
-      />,
-    )
-    expect(screen.getByText(/outsource-vendor/)).toBeInTheDocument()
-  })
-
-  test('does not render the outsource vendor box when outsourcing is disabled globally', () => {
-    global.config = {...global.config, enable_outsource: 0}
-    render(
-      <OutsourceContainer
-        {...baseProps}
-        showTranslatorBox={false}
-        openOutsource={true}
-      />,
-    )
-    expect(screen.queryByText(/outsource-vendor/)).not.toBeInTheDocument()
-  })
-
-  test('renders both boxes when showTranslatorBox and openOutsource are both true', () => {
-    render(
-      <OutsourceContainer
-        {...baseProps}
-        showTranslatorBox={true}
-        openOutsource={true}
-      />,
-    )
-    expect(screen.getByText('assign-to-translator')).toBeInTheDocument()
-    expect(screen.getByText(/outsource-vendor/)).toBeInTheDocument()
   })
 
   test('calls onClickOutside when a mousedown happens outside the container', () => {
@@ -155,43 +106,5 @@ describe('OutsourceContainer', () => {
     jest.advanceTimersByTime(500)
     jest.useRealTimers()
     expect(() => unmount()).not.toThrow()
-  })
-
-  test('outsourceEnabled overrides config.enable_outsource', () => {
-    render(
-      <OutsourceContainer
-        {...baseProps}
-        showTranslatorBox={false}
-        openOutsource={true}
-        outsourceEnabled={false}
-      />,
-    )
-    expect(screen.queryByText(/outsource-vendor/)).not.toBeInTheDocument()
-  })
-
-  test('passes outsourceEnabled and serviceLoginUrl through to the vendor box', () => {
-    render(
-      <OutsourceContainer
-        {...baseProps}
-        showTranslatorBox={false}
-        openOutsource={true}
-        outsourceEnabled={true}
-        serviceLoginUrl="http://login"
-      />,
-    )
-    expect(
-      screen.getByText(/outsource-vendor:true:\s*http:\/\/login/),
-    ).toBeInTheDocument()
-  })
-
-  test('defaults outsourceEnabled to config.enable_outsource', () => {
-    render(
-      <OutsourceContainer
-        {...baseProps}
-        showTranslatorBox={false}
-        openOutsource={true}
-      />,
-    )
-    expect(screen.getByText(/outsource-vendor:1:/)).toBeInTheDocument()
   })
 })

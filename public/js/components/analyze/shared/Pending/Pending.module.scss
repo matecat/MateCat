@@ -17,12 +17,14 @@
     justify-content: flex-end;
   }
 
+  // As the mockup: a 56px grey bar, 0.8em tall, radius 4
   .bar {
     display: inline-block;
-    width: 3em;
+    width: 56px;
+    max-width: 100%;
     height: 0.8em;
-    border-radius: variables.$border-radius-default;
-    background-color: colors.$grey150;
+    border-radius: 4px;
+    background-color: colors.$grey100;
   }
 
   .hidden {

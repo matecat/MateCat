@@ -1,28 +1,35 @@
 @use 'tokens/colors';
 @use 'commons/variables';
 
+// Values from the analysis mockup (Main.dc.html single job, JobAnalysis.dc.html)
 .card {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
   min-width: 0;
-  padding: 20px 24px;
+  padding: 24px;
   border: 1px solid colors.$grey150;
-  border-radius: variables.$border-radius-default;
+  border-radius: variables.$border-radius-big;
   background-color: colors.$white;
   color: colors.$grey1300;
+  font-size: variables.$font-size-base;
   text-align: left;
 }
 
 .title {
   margin: 0;
-  font-size: variables.$font-size-base;
-  font-weight: 700;
-  color: colors.$blue900;
+  // Headings carry a large global line-height on this page
+  line-height: 1.35;
+  font-size: variables.$font-size-big;
+  font-weight: variables.$font-weight-bold;
+  color: colors.$grey1300;
 }
 
 .message {
   margin: 0;
+  padding: 14px 16px;
+  border-radius: variables.$border-radius-default;
+  background-color: colors.$grey50;
   font-size: variables.$font-size-small;
   color: colors.$grey500;
 }

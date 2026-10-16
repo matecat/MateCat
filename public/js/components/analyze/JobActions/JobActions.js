@@ -29,15 +29,15 @@ const MERGE_NOT_ALLOWED_HINT =
 export const countErrorSegments = (details) =>
   new Set(Object.values(details?.ERROR?.Categories ?? {}).flat()).size
 
-const NotAllowedButton = ({hint, className, children}) => (
+const NotAllowedButton = ({hint, className, size, children}) => (
   // A refused split/merge stays hoverable so the tooltip can explain why
   <Tooltip content={hint} stylePointerElement={{display: 'inline-flex'}}>
     <Button
       ref={createRef()}
       type={BUTTON_TYPE.PRIMARY}
       mode={BUTTON_MODE.OUTLINE}
-      size={BUTTON_SIZE.SMALL}
-      className={className}
+      size={size}
+      className={`${className} ${styles.splitButton}`}
       aria-disabled={true}
       tabIndex="0"
       onClick={() => {}}
@@ -50,6 +50,7 @@ const NotAllowedButton = ({hint, className, children}) => (
 NotAllowedButton.propTypes = {
   hint: PropTypes.string.isRequired,
   className: PropTypes.string,
+  size: PropTypes.string,
   children: PropTypes.node,
 }
 
@@ -64,7 +65,11 @@ export const JobActions = ({
   chunk,
   actionsEnabled,
   showSplitMerge = true,
+  size = 'small',
 }) => {
+  // Split and merge: 32px in the details panel, 40px in a page hero
+  const splitSize =
+    size === 'standard' ? BUTTON_SIZE.STANDARD : BUTTON_SIZE.SMALL
   // An unsplit job is its only chunk
   const item = chunk ?? (job.isSplit ? null : job.chunks[0])
   // The selected chunk, or every chunk of a whole split job
@@ -157,8 +162,8 @@ export const JobActions = ({
       <Button
         type={BUTTON_TYPE.PRIMARY}
         mode={BUTTON_MODE.OUTLINE}
-        size={BUTTON_SIZE.SMALL}
-        className="merge"
+        size={splitSize}
+        className={`merge ${styles.splitButton}`}
         tabIndex="0"
         disabled={!actionsEnabled}
         onClick={openMergeModal}
@@ -170,6 +175,7 @@ export const JobActions = ({
       <NotAllowedButton
         hint={MERGE_NOT_ALLOWED_HINT}
         className="merge merge-not-allowed"
+        size={splitSize}
       >
         <Merge size={18} />
         Merge
@@ -180,8 +186,8 @@ export const JobActions = ({
       <Button
         type={BUTTON_TYPE.PRIMARY}
         mode={BUTTON_MODE.OUTLINE}
-        size={BUTTON_SIZE.SMALL}
-        className="split"
+        size={splitSize}
+        className={`split ${styles.splitButton}`}
         tabIndex="0"
         disabled={!actionsEnabled || thereIsChunkOutsourced}
         onClick={openSplitModal}
@@ -193,6 +199,7 @@ export const JobActions = ({
       <NotAllowedButton
         hint={SPLIT_NOT_ALLOWED_HINT}
         className="split split-not-allowed"
+        size={splitSize}
       >
         <Split size={18} />
         Split
@@ -226,9 +233,10 @@ export const JobActions = ({
                   Download
                 </>
               ),
-              type: BUTTON_TYPE.PRIMARY,
+              type: BUTTON_TYPE.DEFAULT,
               mode: BUTTON_MODE.OUTLINE,
-              size: BUTTON_SIZE.SMALL,
+              size: BUTTON_SIZE.STANDARD,
+              className: styles.downloadButton,
             }}
           />
         </DisabledHint>
@@ -249,4 +257,5 @@ JobActions.propTypes = {
   chunk: PropTypes.object,
   actionsEnabled: PropTypes.bool,
   showSplitMerge: PropTypes.bool,
+  size: PropTypes.oneOf(['small', 'standard']),
 }

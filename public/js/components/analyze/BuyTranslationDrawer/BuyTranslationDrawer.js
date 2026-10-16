@@ -1,150 +1,115 @@
-import React, {useCallback, useEffect, useId, useMemo, useRef} from 'react'
+import React, {useMemo} from 'react'
 import PropTypes from 'prop-types'
-import {createPortal} from 'react-dom'
 import {fromJS} from 'immutable'
-import OutsourceContainer from '../../outsource/OutsourceContainer'
-import Close from '../../../../img/icons/Close'
+import OutsourceDrawer from '../../outsource/OutsourceDrawer'
+import OutsourceOrderPanel from '../../outsource/OutsourceOrderPanel'
+import {formatCount} from '../utils/buckets'
+import {getLanguagePair} from '../LanguageTree'
 import styles from './BuyTranslationDrawer.module.scss'
 
-const FOCUSABLE =
-  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
+// "en-US › fr-FR · chunk 1 of 6 · 59 Matecat weighted words"
+export const getOrderItem = (job, chunk) => {
+  const unit = chunk ?? job
+  const part = !job.isSplit
+    ? ''
+    : chunk
+      ? ` · chunk ${chunk.index} of ${chunk.count}`
+      : ` · ${job.chunkCount} chunks`
+  return `${getLanguagePair(job)}${part} · ${formatCount(unit.totals.equivalent)} Matecat weighted words`
+}
 
-// What Tab can reach: not disabled, not hidden, not aria-hidden
-const getFocusable = (root) =>
-  [...root.querySelectorAll(FOCUSABLE)].filter(
-    (element) =>
-      !element.disabled &&
-      element.offsetParent !== null &&
-      !element.closest('[aria-hidden="true"]'),
-  )
+const ChunkPicker = ({job, onPickChunk, onMerge}) => (
+  <div className={styles.picker}>
+    <p className={styles.pickerText}>
+      {`This job is split into ${job.chunkCount} chunks, and each chunk is bought on its own.`}
+    </p>
+    {onMerge && (
+      <div className={styles.mergeBox}>
+        <span>To buy the whole job in one order, merge it first.</span>
+        <button type="button" className={styles.mergeButton} onClick={onMerge}>
+          Merge
+        </button>
+      </div>
+    )}
+    <span className={styles.muted}>Or pick a chunk:</span>
+    <div className={styles.chunks}>
+      {job.chunks.map((chunk) => (
+        <button
+          key={chunk.index}
+          type="button"
+          className={styles.chunk}
+          onClick={() => onPickChunk(chunk)}
+        >
+          <span className={styles.chunkName}>{`Chunk ${chunk.index}`}</span>
+          <span className={styles.muted}>
+            {`${formatCount(chunk.totals.equivalent)} words`}
+          </span>
+          <span className={styles.chunkAction}>Get quote</span>
+        </button>
+      ))}
+    </div>
+  </div>
+)
+
+ChunkPicker.propTypes = {
+  job: PropTypes.object.isRequired,
+  onPickChunk: PropTypes.func.isRequired,
+  onMerge: PropTypes.func,
+}
 
 /**
- * Right-side dialog with the existing order form (OutsourceVendor) for one job
- * or chunk, so ordering works as it always did. Escape, the backdrop and the
- * close button dismiss it; Tab stays inside while it is open.
+ * The analysis page's order drawer: the shared outsource drawer with the
+ * order panel for a job or chunk (quotes cached with the offer card's). A
+ * whole split job first asks for a chunk.
  */
 export const BuyTranslationDrawer = ({
   open,
   onClose,
   project,
-  projectJob,
-  title,
-  subtitle,
-  weightedWords,
+  job,
+  chunk,
+  onPickChunk,
+  onMerge,
 }) => {
-  const titleId = useId()
-  const dialogRef = useRef()
-  const closeRef = useRef()
-
+  const projectJob = useMemo(
+    () =>
+      chunk &&
+      ((project.jobs ?? []).find(
+        (current) =>
+          String(current.id) === String(job.id) &&
+          current.password === chunk.password,
+      ) ?? {
+        id: job.id,
+        password: chunk.password,
+        source: job.source,
+        target: job.target,
+      }),
+    [project, job, chunk],
+  )
   const immutableProject = useMemo(() => fromJS(project), [project])
-  const immutableJob = useMemo(() => fromJS(projectJob), [projectJob])
-
-  // Rendered into document.body: everything else on the page goes inert.
-  // Declared first so the page is live again before the focus goes back
-  const portalRef = useRef(null)
-  useEffect(() => {
-    if (!open || !portalRef.current) return undefined
-    const others = [...document.body.children].filter(
-      (element) =>
-        element !== portalRef.current && !element.hasAttribute('inert'),
-    )
-    others.forEach((element) => element.setAttribute('inert', ''))
-    return () => others.forEach((element) => element.removeAttribute('inert'))
-  }, [open])
-
-  useEffect(() => {
-    if (!open) return undefined
-    const previousFocus = document.activeElement
-    closeRef.current?.focus()
-    return () => previousFocus?.focus?.()
-  }, [open])
-
-  useEffect(() => {
-    if (!open) return undefined
-    const onKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        event.stopPropagation()
-        onClose()
-        return
-      }
-      if (event.key !== 'Tab' || !dialogRef.current) return
-      const focusable = getFocusable(dialogRef.current)
-      if (focusable.length === 0) return
-      const first = focusable[0]
-      const last = focusable[focusable.length - 1]
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault()
-        last.focus()
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault()
-        first.focus()
-      } else if (!dialogRef.current.contains(document.activeElement)) {
-        event.preventDefault()
-        first.focus()
-      }
-    }
-    document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [open, onClose])
-
-  // The order form closes on any click outside itself: the drawer's own frame
-  // (title, padding) is not outside the dialog
-  const handleClickOutsideForm = useCallback(
-    (event) => {
-      if (event?.target && dialogRef.current?.contains(event.target)) return
-      onClose()
-    },
-    [onClose],
+  const immutableJob = useMemo(
+    () => projectJob && fromJS(projectJob),
+    [projectJob],
   )
 
-  if (!open) return null
-
-  return createPortal(
-    <div ref={portalRef} className={styles.overlay}>
-      <div
-        className={styles.backdrop}
-        data-testid="buy-translation-backdrop"
-        onClick={onClose}
-      />
-      <div
-        ref={dialogRef}
-        className={styles.drawer}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-      >
-        <div className={styles.header}>
-          <div>
-            <h2 id={titleId} className={styles.title}>
-              {title}
-            </h2>
-            {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
-          </div>
-          <button
-            ref={closeRef}
-            type="button"
-            className={styles.close}
-            aria-label="Close"
-            onClick={onClose}
-          >
-            <Close size={20} />
-          </button>
-        </div>
-        <div className={styles.body}>
-          <OutsourceContainer
-            project={immutableProject}
-            job={immutableJob}
-            openOutsource={true}
-            showTranslatorBox={false}
-            extendedView={true}
-            idJobLabel={`${projectJob.id}-${projectJob.password}`}
-            standardWC={weightedWords}
-            onClickOutside={handleClickOutsideForm}
-          />
-        </div>
-      </div>
-    </div>,
-    document.body,
+  return (
+    <OutsourceDrawer
+      open={open}
+      onClose={onClose}
+      item={getOrderItem(job, chunk)}
+    >
+      {chunk ? (
+        <OutsourceOrderPanel
+          key={`${job.id}-${chunk.password}`}
+          project={immutableProject}
+          job={immutableJob}
+          standardWC={chunk.totals.equivalent}
+          cache={true}
+        />
+      ) : (
+        <ChunkPicker job={job} onPickChunk={onPickChunk} onMerge={onMerge} />
+      )}
+    </OutsourceDrawer>
   )
 }
 
@@ -153,12 +118,10 @@ BuyTranslationDrawer.propTypes = {
   onClose: PropTypes.func.isRequired,
   // Plain project, as returned by the project API
   project: PropTypes.object.isRequired,
-  // The job of project.jobs for the chunk to buy
-  projectJob: PropTypes.shape({
-    id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
-    password: PropTypes.string.isRequired,
-  }).isRequired,
-  title: PropTypes.string.isRequired,
-  subtitle: PropTypes.string,
-  weightedWords: PropTypes.number,
+  // deriveAnalysisView job
+  job: PropTypes.object.isRequired,
+  // The chunk to buy; null on a whole split job asks for one
+  chunk: PropTypes.object,
+  onPickChunk: PropTypes.func,
+  onMerge: PropTypes.func,
 }

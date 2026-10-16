@@ -5,7 +5,7 @@
 
 .card {
   border: 1px solid colors.$grey150;
-  border-radius: variables.$border-radius-default;
+  border-radius: variables.$border-radius-big;
   background-color: colors.$white;
   text-align: left;
   // Rounds the corners without becoming a scroll container: the sticky header
@@ -23,7 +23,7 @@
   table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0;
-  font-size: variables.$font-size-small;
+  font-size: variables.$font-size-base;
   color: colors.$grey1300;
 
   th,
@@ -45,12 +45,15 @@
 // Numbers take a modest fixed width; the actions column fits copy, "Buy
 // translation" (or "View order") and Translate; the language column takes
 // the rest
+// Numbers and two-line headers ("Total word / count") at 18px
 .countColumn {
-  width: 112px;
+  width: 96px;
 }
 
+// Measured at 1440: copy 40 + "Buy translation" with the logo + Translate 84
+// + gaps 8 + cell padding 16 (see the report for the figures)
 .actionsColumn {
-  width: 296px;
+  width: 300px;
 }
 
 .stickyHead th {
@@ -60,10 +63,20 @@
   // The scroll container has no padding in this layout (ProjectTreeAnalysis)
   top: 0;
   z-index: z-index.$z-sticky;
-  background-color: colors.$grey100;
-  font-size: variables.$font-size-xsmall;
-  font-weight: 700;
+  padding-top: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid colors.$grey150;
+  background-color: colors.$grey50;
+  box-shadow: 0 2px 4px rgba(colors.$blue900, 0.06);
+  font-size: variables.$font-size-small;
+  font-weight: variables.$font-weight-regular;
   color: colors.$grey500;
+}
+
+// Matecat weighted heads the column the price is computed on
+.stickyHead .strongHeader {
+  font-weight: variables.$font-weight-bold;
+  color: colors.$grey1300;
 }
 
 .stickyTotal th,
@@ -71,23 +84,42 @@
   position: sticky;
   bottom: 0;
   z-index: z-index.$z-sticky;
+  padding-top: 14px;
+  padding-bottom: 14px;
   border-top: 1px solid colors.$grey150;
   border-bottom: none;
-  background-color: colors.$grey100;
-  font-weight: 700;
+  background-color: colors.$grey50;
+  box-shadow: 0 -2px 4px rgba(colors.$blue900, 0.06);
+  font-weight: variables.$font-weight-bold;
 }
 
 .jobRow,
 .chunkRow {
   background-color: colors.$white;
   cursor: pointer;
+
+  th,
+  td {
+    border-top: 1px solid colors.$grey100;
+    border-bottom: none;
+  }
+}
+
+.chunkRow {
+  background-color: colors.$grey50;
+}
+
+// The weighted count is the bold one (beats the table's own cell weight)
+.table .strongCount {
+  font-weight: variables.$font-weight-bold;
 }
 
 .chunkRow th:first-child {
   padding-left: 32px;
 }
 
-.selected {
+.jobRow.selected,
+.chunkRow.selected {
   background-color: colors.$blue50;
 }
 
@@ -151,14 +183,17 @@
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-weight: 700;
-  color: colors.$blue900;
+  white-space: nowrap;
+  font-weight: variables.$font-weight-bold;
+  color: colors.$grey1300;
 }
 
 .meta {
+  // "ID 396 · split into 6 chunks" on one line under the pair, as the mockup
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: variables.$font-size-xsmall;
   color: colors.$grey500;
 }
@@ -223,25 +258,99 @@
   }
 }
 
+// A bare icon, as the mockup: no border, the link colour
 .iconButton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 40px;
+  height: 40px;
   padding: 0;
-  border: 1px solid colors.$grey150;
+  border: none;
   border-radius: variables.$border-radius-default;
-  background-color: colors.$white;
-  color: colors.$grey600;
+  background: none;
+  color: colors.$blue600;
   cursor: pointer;
 
   &:hover:not(:disabled) {
-    background-color: colors.$grey100;
+    background-color: colors.$blue50;
   }
+
+  &:focus-visible {
+    outline: 2px solid colors.$blue500;
+    outline-offset: 1px;
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+// "Copy link" with its text (the single job hero)
+.textButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid colors.$grey200;
+  border-radius: variables.$border-radius-default;
+  background-color: colors.$white;
+  font: inherit;
+  font-size: variables.$font-size-small;
+  color: colors.$blue600;
+  cursor: pointer;
 
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
+}
+
+// Both labels in one grid cell: the wider sets the width, one is shown
+.textLabels {
+  display: inline-grid;
+
+  > span {
+    grid-area: 1 / 1;
+  }
+
+  > [aria-hidden='true'] {
+    visibility: hidden;
+  }
+}
+
+// Pending actions, as the mockup source (actionsGreyPre): copy and Buy
+// keep their colours at 0.45 opacity; Translate turns into a grey button.
+// The Button's own disabled colours would fade them twice; the doubled
+// classes outrank its `button.container.mode:disabled` rules
+.actions button.buy.buy:disabled {
+  opacity: 0.45;
+  color: colors.$grey1300;
+  box-shadow: inset 0 0 0 1px colors.$grey400;
+}
+
+.actions .iconButton:disabled {
+  opacity: 0.45;
+  color: colors.$blue600;
+}
+
+.actions button.translate.translate:disabled {
+  opacity: 1;
+  box-shadow: none;
+  background-color: colors.$grey100;
+  color: colors.$grey500;
+}
+
+// The actions cell needs every pixel: half the usual horizontal padding
+.table td:last-child {
+  padding-right: 8px;
+  padding-left: 8px;
+}
+
+// The pair's column has the number column's left padding beside it: its own
+// right padding can go, so "ID 396 · split into 6 chunks" fits on one line
+.table th:first-child {
+  padding-right: 0;
 }

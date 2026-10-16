@@ -198,7 +198,7 @@ describe('AnalyzePage', () => {
 
     expect(await h1('Project analysis')).toBeInTheDocument()
     expect(
-      screen.getByRole('region', {name: 'Analysis status'}),
+      screen.getByRole('status', {name: 'Analysis status'}),
     ).toBeInTheDocument()
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })

@@ -15,7 +15,6 @@ import {
   openTranslate,
 } from '../LanguageTree'
 import {JobActions} from '../JobActions'
-import {getSubtitle} from '../DetailsPanel'
 import {JobSummaryCard} from '../JobSummaryCard'
 import {BreakdownCard} from '../BreakdownCard'
 import {FilesCard} from '../FilesCard'
@@ -39,7 +38,7 @@ export const SingleJobAnalysis = ({project, view, workflowType}) => {
   const {jobs, phase, known, actionsEnabled, progress, totals} = view
   const [job] = jobs
   const [chunk] = job.chunks
-  const {order, openBuy, closeBuy} = useBuyTranslation({project})
+  const {order, openBuy, closeBuy} = useBuyTranslation()
   const done = phase === ANALYSIS_PHASE.DONE
   const projectJob = (project.jobs ?? []).find(
     (current) =>
@@ -75,6 +74,7 @@ export const SingleJobAnalysis = ({project, view, workflowType}) => {
                 label={`Copy the ${job.target} link`}
                 url={chunk.urls?.t}
                 disabled={!actionsEnabled}
+                showText
               />
             </DisabledHint>
             <JobActions
@@ -82,6 +82,7 @@ export const SingleJobAnalysis = ({project, view, workflowType}) => {
               job={job}
               chunk={null}
               actionsEnabled={actionsEnabled}
+              size="standard"
             />
             <DisabledHint
               hint={ACTIONS_DISABLED_TITLE}
@@ -89,8 +90,9 @@ export const SingleJobAnalysis = ({project, view, workflowType}) => {
             >
               <Button
                 type={BUTTON_TYPE.PRIMARY}
-                size={BUTTON_SIZE.SMALL}
+                size={BUTTON_SIZE.STANDARD}
                 tabIndex="0"
+                className={styles.translate}
                 disabled={!actionsEnabled}
                 onClick={() => openTranslate(chunk)}
               >
@@ -136,10 +138,8 @@ export const SingleJobAnalysis = ({project, view, workflowType}) => {
           open={true}
           onClose={closeBuy}
           project={project}
-          projectJob={order.projectJob}
-          title={getLanguagePair(order.job)}
-          subtitle={getSubtitle(order.job, null)}
-          weightedWords={order.chunk.totals.equivalent}
+          job={order.job}
+          chunk={order.chunk}
         />
       )}
     </AnalysisPage>

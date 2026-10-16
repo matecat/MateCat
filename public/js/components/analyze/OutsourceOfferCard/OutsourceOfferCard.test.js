@@ -7,7 +7,7 @@ import {buildVolumeAnalysis} from '../../../../mocks/volumeAnalysisMock'
 import {clearOutsourceQuoteCache} from '../../../hooks/useOutsourceQuote'
 import CommonUtils from '../../../utils/commonUtils'
 import {deriveAnalysisView} from '../utils/deriveAnalysisView'
-import {QUOTE_NOT_AVAILABLE_MESSAGE} from '../../outsource/OutsourceVendor'
+import {QUOTE_NOT_AVAILABLE_MESSAGE} from '../../outsource/outsourceConstants'
 import {CONTACT_US_URL, OutsourceOfferCard} from './OutsourceOfferCard'
 
 const QUOTE_URL = 'http://localhost/api/app/outsource-to'
@@ -112,18 +112,28 @@ describe('OutsourceOfferCard', () => {
     mockQuote(() => HttpResponse.json(quotePayload()))
     renderCard()
 
-    expect(screen.getByText('Getting a quote…')).toBeInTheDocument()
-    expect(screen.getAllByTestId('pending')).toHaveLength(2)
-    expect(screen.getByRole('button', {name: 'Buy translation'})).toBeDisabled()
+    expect(
+      screen.getByRole('heading', {name: 'Getting a quote…'}),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('status')).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', {name: 'Buy translation from Translated'}),
+    ).toBeDisabled()
 
-    expect(await screen.findByText('€100.00')).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', {
+        name: 'Translated by a professional for € 100.00',
+      }),
+    ).toBeInTheDocument()
     const delivery = CommonUtils.getGMTDate('2026-11-02T10:00:00.000Z')
     expect(
       screen.getByText(
-        `Delivery by ${delivery.day} ${delivery.month} at ${delivery.time}`,
+        `${french.chunks[0].totals.equivalent} words · delivered by ${delivery.day} ${delivery.month} at ${delivery.time} · revision available`,
       ),
     ).toBeInTheDocument()
-    expect(screen.getByRole('button', {name: 'Buy translation'})).toBeEnabled()
+    expect(
+      screen.getByRole('button', {name: 'Buy translation from Translated'}),
+    ).toBeEnabled()
     expect(requests).toEqual([{jpassword: 'frpass'}])
   })
 
@@ -154,7 +164,9 @@ describe('OutsourceOfferCard', () => {
 
     fail = false
     fireEvent.click(retry)
-    expect(await screen.findByText('€100.00')).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', {name: /for € 100\.00$/}),
+    ).toBeInTheDocument()
     expect(requests).toHaveLength(2)
   })
 
@@ -167,23 +179,28 @@ describe('OutsourceOfferCard', () => {
         'The price depends on the weighted word count, so it is ready when the analysis is complete.',
       ),
     ).toBeInTheDocument()
-    expect(screen.getByRole('button', {name: 'Buy translation'})).toBeDisabled()
+    expect(
+      screen.getByRole('button', {name: 'Buy translation from Translated'}),
+    ).toBeDisabled()
     await waitPastDebounce()
     expect(requests).toHaveLength(0)
   })
 
   test('a whole split job is never quoted', async () => {
     mockQuote(() => HttpResponse.json(quotePayload()))
-    renderCard({job: italian, chunk: null})
+    const {onBuy} = renderCard({job: italian, chunk: null})
 
     expect(
-      screen.getByText(
-        'Chunks are bought one at a time. Merge the job to buy it in one order.',
-      ),
+      screen.getByRole('heading', {name: 'Get this job translated for you'}),
     ).toBeInTheDocument()
     expect(
-      screen.queryByRole('button', {name: 'Buy translation'}),
-    ).not.toBeInTheDocument()
+      screen.getByText(
+        'Each of the 2 chunks is bought on its own. To buy the whole job in one order, merge it first.',
+      ),
+    ).toBeInTheDocument()
+    // The drawer opens on the chunk picker
+    fireEvent.click(screen.getByRole('button', {name: 'Choose a chunk'}))
+    expect(onBuy).toHaveBeenCalledWith(italian, null)
     await waitPastDebounce()
     expect(requests).toHaveLength(0)
   })
@@ -203,7 +220,9 @@ describe('OutsourceOfferCard', () => {
       />,
     )
 
-    expect(await screen.findByText('€100.00')).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', {name: /for € 100\.00$/}),
+    ).toBeInTheDocument()
     await waitPastDebounce()
     expect(requests).toEqual([{jpassword: 'chunkpass2'}])
   })
@@ -212,8 +231,10 @@ describe('OutsourceOfferCard', () => {
     mockQuote(() => HttpResponse.json(quotePayload()))
     const {onBuy} = renderCard()
 
-    await screen.findByText('€100.00')
-    fireEvent.click(screen.getByRole('button', {name: 'Buy translation'}))
+    await screen.findByRole('heading', {name: /for € 100\.00$/})
+    fireEvent.click(
+      screen.getByRole('button', {name: 'Buy translation from Translated'}),
+    )
     expect(onBuy).toHaveBeenCalledWith(french, french.chunks[0])
     // outsource_request fires when the order form opens (ProjectTreeAnalysis)
     expect(CommonUtils.dispatchAnalyticsEvents).not.toHaveBeenCalled()
@@ -236,10 +257,10 @@ describe('OutsourceOfferCard', () => {
     await waitFor(() => expect(requests).toHaveLength(0))
   })
 
-  test('the heading level can follow the page', () => {
-    renderCard({actionsEnabled: false, headingLevel: 2})
-    expect(
-      screen.getByRole('heading', {level: 2, name: 'Professional translation'}),
-    ).toBeInTheDocument()
+  test('no revision on offer when the vendor quotes none', async () => {
+    mockQuote(() => HttpResponse.json(quotePayload({r_price: '0'})))
+    renderCard()
+    await screen.findByRole('heading', {name: /for € 100\.00$/})
+    expect(screen.queryByText(/revision available/)).not.toBeInTheDocument()
   })
 })

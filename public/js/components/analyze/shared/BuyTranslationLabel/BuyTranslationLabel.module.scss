@@ -1,0 +1,22 @@
+@use '../visuallyHidden' as *;
+
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+// The icon's paths have no fill of their own: they follow the text, so the
+// logo reads on white, on the green button and on navy alike
+.logo {
+  display: inline-flex;
+
+  svg {
+    fill: currentColor;
+  }
+}
+
+.hidden {
+  @include visually-hidden;
+}

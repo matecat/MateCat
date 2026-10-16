@@ -10,34 +10,43 @@
   }
 }
 
+// Values from the analysis mockup (Main.dc.html, the bucket table)
 .component {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
   color: colors.$grey1300;
 }
 
 .bar {
   display: flex;
-  // The white gap keeps neighbouring segments apart whatever their colour
+  // The gap keeps neighbouring segments apart whatever their colour
   gap: 2px;
-  height: 12px;
-  border-radius: variables.$border-radius-default;
-  background-color: colors.$white;
+  height: 16px;
+  border-radius: 8px;
+  background-color: colors.$grey100;
   overflow: hidden;
 
   .segment {
     min-width: 2px;
     flex-basis: 0;
-    // Keeps the palest buckets visible on white
-    box-shadow: inset 0 0 0 1px colors.$grey150;
   }
+}
+
+.compact .bar {
+  height: 14px;
+  border-radius: 7px;
 }
 
 .table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   font-size: variables.$font-size-small;
+
+  .nameColumn {
+    width: 40%;
+  }
 
   .caption {
     @include visually-hidden;
@@ -45,57 +54,73 @@
 
   th,
   td {
-    padding: 8px 12px;
+    padding: 10px 0 10px 8px;
     border-bottom: 1px solid colors.$grey100;
     text-align: right;
+    font-weight: variables.$font-weight-regular;
     font-variant-numeric: tabular-nums;
+    background: none;
   }
 
   th:first-child {
+    padding-left: 0;
     text-align: left;
   }
 
-  // Bucket and file names; the header and footer cells stay bold
-  tbody th:first-child {
-    font-weight: 400;
+  thead th {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    border-bottom-color: colors.$grey150;
+    font-size: variables.$font-size-xsmall;
+    color: colors.$grey500;
   }
 
-  thead th {
-    font-size: variables.$font-size-xsmall;
-    font-weight: 700;
+  .rate {
     color: colors.$grey500;
-    background-color: colors.$grey50;
+  }
+
+  .weighted {
+    font-weight: variables.$font-weight-bold;
+  }
+
+  .empty,
+  .empty .rate {
+    color: colors.$grey400;
   }
 
   .bucket {
     display: flex;
     align-items: center;
     gap: 8px;
+    min-width: 0;
   }
 
   tfoot th,
   tfoot td {
-    font-weight: 700;
-    color: colors.$blue900;
     border-bottom: none;
+    font-weight: variables.$font-weight-bold;
   }
 
   .swatch {
-    flex-shrink: 0;
+    flex: none;
     width: 12px;
     height: 12px;
     border-radius: 3px;
-    // Keeps the palest buckets visible on white
-    box-shadow: inset 0 0 0 1px colors.$grey150;
+  }
+
+  .empty .swatch {
+    background-color: colors.$grey150;
   }
 }
 
 .toggle {
   align-self: flex-start;
-  padding: 0;
+  margin-top: -8px;
+  padding: 10px 0;
   border: none;
   background: none;
-  font-size: variables.$font-size-xsmall;
+  font: inherit;
+  font-size: variables.$font-size-small;
   color: colors.$blue600;
   text-decoration: underline;
   cursor: pointer;

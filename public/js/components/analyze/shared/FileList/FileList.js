@@ -5,6 +5,7 @@ import {
   UNIT_COUNT,
 } from '../../../../constants/Constants'
 import {formatCount, getBuckets} from '../../utils/buckets'
+import ChevronRight from '../../../../../img/icons/ChevronRight'
 import styles from './FileList.module.scss'
 
 // Above this many files the list gets a search box
@@ -26,6 +27,7 @@ export const FileList = ({
   payableRates,
   workflowType,
   countUnit = UNIT_COUNT.WORDS,
+  scroll = false,
 }) => {
   const [query, setQuery] = useState('')
   const [expanded, setExpanded] = useState(() => new Set())
@@ -56,6 +58,7 @@ export const FileList = ({
             id={`${idPrefix}-search`}
             type="search"
             value={query}
+            placeholder="File name"
             onChange={(event) => setQuery(event.target.value)}
           />
           <p className={styles.matchCount} aria-live="polite">
@@ -63,11 +66,18 @@ export const FileList = ({
           </p>
         </div>
       )}
-      <div className={styles.scroll}>
+      <div className={scroll ? styles.scroll : undefined}>
         <table className={styles.table}>
+          <colgroup>
+            <col className={styles.nameColumn} />
+            <col />
+            <col />
+          </colgroup>
           <thead>
             <tr>
-              <th scope="col">File</th>
+              <th scope="col">
+                <span className={styles.hidden}>File</span>
+              </th>
               <th scope="col">Raw</th>
               <th scope="col">Weighted</th>
             </tr>
@@ -103,20 +113,30 @@ export const FileList = ({
                         aria-controls={isOpen ? detailId : undefined}
                         onClick={() => toggle(file.id)}
                       >
-                        <span className={styles.baseName}>{baseName}</span>
-                        {folder && (
-                          <span className={styles.folder}>{folder}</span>
-                        )}
+                        <ChevronRight size={16} />
+                        <span className={styles.fileName}>
+                          <span className={styles.baseName}>{baseName}</span>
+                          {folder && (
+                            <span className={styles.folder}>{folder}</span>
+                          )}
+                        </span>
                       </button>
                     </th>
                     <td>{formatCount(file.totals?.raw)}</td>
-                    <td>{formatCount(file.totals?.equivalent)}</td>
+                    <td className={styles.weighted}>
+                      {formatCount(file.totals?.equivalent)}
+                    </td>
                   </tr>
                   {isOpen && (
                     <tr id={detailId} className={styles.detail}>
                       <td colSpan={3}>
                         {buckets.length > 0 ? (
                           <table className={styles.buckets}>
+                            <colgroup>
+                              <col className={styles.nameColumn} />
+                              <col />
+                              <col />
+                            </colgroup>
                             <caption className={styles.hidden}>
                               {`${baseName} by analysis bucket`}
                             </caption>
@@ -130,9 +150,20 @@ export const FileList = ({
                             <tbody>
                               {buckets.map(({type, label, raw, equivalent}) => (
                                 <tr key={type}>
-                                  <th scope="row">{label}</th>
+                                  <th scope="row">
+                                    <span className={styles.bucket}>
+                                      <span
+                                        className={styles.swatch}
+                                        data-bucket={type}
+                                        aria-hidden="true"
+                                      />
+                                      {label}
+                                    </span>
+                                  </th>
                                   <td>{formatCount(raw)}</td>
-                                  <td>{formatCount(equivalent)}</td>
+                                  <td className={styles.weighted}>
+                                    {formatCount(equivalent)}
+                                  </td>
                                 </tr>
                               ))}
                             </tbody>
@@ -177,4 +208,6 @@ FileList.propTypes = {
   workflowType: PropTypes.oneOf(Object.values(ANALYSIS_WORKFLOW_TYPES))
     .isRequired,
   countUnit: PropTypes.oneOf(Object.values(UNIT_COUNT)),
+  // In the details panel: the list scrolls past 420px
+  scroll: PropTypes.bool,
 }

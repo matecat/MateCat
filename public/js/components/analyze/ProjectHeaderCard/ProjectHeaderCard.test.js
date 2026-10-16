@@ -72,8 +72,8 @@ describe('ProjectHeaderCard', () => {
     ).toHaveAttribute('href', 'mailto:support@matecat.com')
   })
 
-  test('the analysis report is downloadable once complete', () => {
-    const {unmount} = renderCard({phase: ANALYSIS_PHASE.ANALYZING})
+  test('the analysis report is downloadable once the words are counted', () => {
+    const {unmount} = renderCard({phase: ANALYSIS_PHASE.COUNTING})
     expect(
       screen.queryByRole('button', {name: /Download analysis report/}),
     ).not.toBeInTheDocument()
@@ -107,7 +107,10 @@ describe('ProjectHeaderCard', () => {
 
   test('the saving is pending before the analysis starts', () => {
     renderCard({phase: ANALYSIS_PHASE.QUEUE})
-    expect(screen.getAllByTestId('pending')).toHaveLength(2)
+    expect(screen.getAllByTestId('pending')).toHaveLength(1)
+    expect(
+      screen.getByText('Available when the analysis is complete'),
+    ).toBeInTheDocument()
   })
 })
 

@@ -12,12 +12,13 @@ export const getSavedLabel = (weighted, raw) => {
   return percent === null ? '' : `${percent}% less than the total`
 }
 
-const Stat = ({label, value, note, known, live}) => {
+const Stat = ({label, value, note, known, live, featured = false}) => {
   const flashing = useValueFlash(value, {enabled: live && known})
   return (
     <div
       className={[
         styles.stat,
+        featured && styles.featured,
         VALUE_FLASH_CLASS.base,
         flashing && VALUE_FLASH_CLASS.active,
       ]
@@ -39,6 +40,8 @@ Stat.propTypes = {
   note: PropTypes.string,
   known: PropTypes.bool.isRequired,
   live: PropTypes.bool,
+  // The Matecat weighted tile stands out
+  featured: PropTypes.bool,
 }
 
 /**
@@ -98,6 +101,7 @@ export const JobSummaryCard = ({
           note={getSavedLabel(totals.equivalent, totals.raw)}
           known={weightedKnown}
           live={live}
+          featured
         />
       </dl>
     </section>

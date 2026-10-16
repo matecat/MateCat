@@ -1,74 +1,76 @@
 @use 'tokens/colors';
-@use 'tokens/z-index';
 @use 'commons/variables';
 
-.overlay {
-  position: fixed;
-  inset: 0;
-  z-index: z-index.$z-overlay;
-}
-
-.backdrop {
-  position: absolute;
-  inset: 0;
-  background-color: rgba(colors.$grey1300, 0.4);
-}
-
-.drawer {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
+// The chunk picker of a whole split job (Main.dc.html, the "buy" view)
+.picker {
   display: flex;
   flex-direction: column;
-  width: min(720px, 100%);
-  background-color: colors.$white;
-  box-shadow: -4px 0 16px rgba(colors.$grey1300, 0.2);
-  color: colors.$grey1300;
+  gap: 12px;
 }
 
-.header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 16px 20px;
-  border-bottom: 1px solid colors.$grey150;
-}
-
-.title {
+.pickerText {
   margin: 0;
-  font-size: variables.$font-size-big;
-  font-weight: 700;
-  color: colors.$blue900;
 }
 
-.subtitle {
-  margin: 4px 0 0;
+.mergeBox {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid colors.$grey150;
+  border-radius: variables.$border-radius-default;
+  background-color: colors.$blue50;
+
+  span {
+    flex: 1 1 220px;
+  }
+}
+
+.mergeButton {
+  min-height: 40px;
+  padding: 6px 12px;
+  border: 1px solid colors.$blue500;
+  border-radius: variables.$border-radius-default;
+  background-color: colors.$white;
+  font: inherit;
+  font-size: variables.$font-size-small;
+  font-weight: variables.$font-weight-bold;
+  color: colors.$blue600;
+  cursor: pointer;
+}
+
+.muted {
   font-size: variables.$font-size-small;
   color: colors.$grey500;
 }
 
-.close {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: none;
-  border-radius: variables.$border-radius-default;
-  background: none;
-  color: colors.$grey600;
-  cursor: pointer;
-
-  &:hover {
-    background-color: colors.$grey100;
-  }
+.chunks {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid colors.$grey100;
 }
 
-.body {
-  flex: 1 1 auto;
-  overflow-y: auto;
-  padding: 16px 20px;
+.chunk {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 16px;
+  min-height: 48px;
+  padding: 12px 0;
+  border: none;
+  border-bottom: 1px solid colors.$grey100;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.chunkName {
+  font-weight: variables.$font-weight-bold;
+}
+
+.chunkAction {
+  color: colors.$blue600;
 }

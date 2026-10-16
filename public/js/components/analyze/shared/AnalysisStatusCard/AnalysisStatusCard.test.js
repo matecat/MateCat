@@ -24,7 +24,9 @@ test('counting shows the fast word count message', () => {
   render(
     <AnalysisStatusCard phase={ANALYSIS_PHASE.COUNTING} progress={progress} />,
   )
-  expect(screen.getByRole('status')).toHaveTextContent('Fast word counting…')
+  expect(screen.getByRole('status')).toHaveTextContent(
+    'Counting the words in your files',
+  )
   expect(currentStep()).toHaveTextContent('Word count')
   expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
 })
@@ -41,7 +43,8 @@ test('queue shows the projects and segments in queue', () => {
   )
   expect(screen.getByText('1,500 segments in queue')).toBeInTheDocument()
   expect(currentStep()).toHaveTextContent('Queue')
-  expect(screen.getByText('Word count')).toHaveClass('done')
+  // A done step reads as done, not by its colour alone
+  expect(screen.getByText('✓ Word count')).toBeInTheDocument()
 })
 
 test('queue with one segment uses the singular', () => {
@@ -62,7 +65,7 @@ test('analyzing shows the progress with its aria values', () => {
     'Searching for TM matches',
   )
   expect(screen.getByText('1,200 of 4,800 segments · 25%')).toBeInTheDocument()
-  const bar = screen.getByRole('progressbar', {name: 'Analysis progress'})
+  const bar = screen.getByRole('progressbar', {name: 'Segments analyzed'})
   expect(bar).toHaveValue(25)
   expect(bar).toHaveAttribute('aria-valuemin', '0')
   expect(bar).toHaveAttribute('aria-valuemax', '100')
@@ -79,4 +82,18 @@ test.each([
     <AnalysisStatusCard phase={phase} progress={progress} />,
   )
   expect(container).toBeEmptyDOMElement()
+})
+
+test('the steps before the current one are done, the later ones next', () => {
+  render(
+    <AnalysisStatusCard
+      phase="analyzing"
+      progress={{segmentsAnalyzed: 1, totalSegments: 4, percent: 25}}
+    />,
+  )
+  expect(screen.getByText('Analysis')).toHaveAttribute('aria-current', 'step')
+  expect(screen.getByText('1 of 4 segments · 25%')).toBeInTheDocument()
+  // Steps before the current one carry the check, later ones do not
+  expect(screen.getByText('✓ Queue')).toBeInTheDocument()
+  expect(screen.getByText('Complete')).toBeInTheDocument()
 })

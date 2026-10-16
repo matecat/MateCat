@@ -1,11 +1,5 @@
 import React from 'react'
-import {
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-  within,
-} from '@testing-library/react'
+import {fireEvent, render, screen, waitFor} from '@testing-library/react'
 import {buildVolumeAnalysis} from '../../../../mocks/volumeAnalysisMock'
 import ModalsActions from '../../../actions/ModalsActions'
 import {getGlobalWarnings} from '../../../api/getGlobalWarnings'
@@ -184,21 +178,6 @@ describe('DetailsPanel', () => {
     ).toHaveLength(2)
   })
 
-  test('the download trigger is labelled and styled like split', () => {
-    renderPanel()
-    const trigger = lastDownloadMenu().triggerProps
-    expect(trigger).toEqual(
-      expect.objectContaining({
-        type: 'primary',
-        mode: 'outline',
-        size: 'small',
-      }),
-    )
-    const {children} = trigger
-    render(<button type="button">{children}</button>)
-    expect(screen.getByRole('button', {name: 'Download'})).toBeInTheDocument()
-  })
-
   test('a Google Drive download decides from warnings_count without waiting', () => {
     global.config.isGDriveProject = true
     const proceed = jest.fn()
@@ -359,21 +338,21 @@ describe('DetailsPanel', () => {
     expect(
       screen.getByRole('table', {name: /Analysis by bucket/}),
     ).toBeInTheDocument()
-    expect(screen.getByRole('heading', {name: 'Files'})).toBeInTheDocument()
+    expect(screen.getByRole('heading', {name: 'File'})).toBeInTheDocument()
     expect(screen.getByText('manual.docx')).toBeInTheDocument()
   })
 
   test('a whole split job sums the buckets and files of its chunks', () => {
     renderPanel({job: italian, chunk: null})
-    // Both chunks' files, and the job totals in the bucket footer
+    // Several files sit behind a toggle
+    fireEvent.click(
+      screen.getByRole('button', {name: 'Show the breakdown by file (2)'}),
+    )
+    // Both chunks' files; the job totals sit in the tiles (the panel's
+    // bucket table has no total row)
     expect(screen.getByText('manual.docx')).toBeInTheDocument()
     expect(screen.getByText('guide.docx')).toBeInTheDocument()
-    const footer = within(
-      screen.getByRole('table', {name: /Analysis by bucket/}),
-    )
-      .getAllByRole('rowgroup')
-      .at(-1)
-    expect(footer).toHaveTextContent(String(italian.totals.raw))
+    expect(screen.getByText(String(italian.totals.raw))).toBeInTheDocument()
   })
 
   test('the offer card gets the chunk, or none for a whole split job', () => {
@@ -387,4 +366,31 @@ describe('DetailsPanel', () => {
       'frpass',
     )
   })
+})
+test('many files sit behind a toggle; the rates note follows the job', () => {
+  renderPanel({job: italian, chunk: null})
+  expect(
+    screen.getByText(
+      'Payable rates are set on the job, so all 2 chunks share them.',
+    ),
+  ).toBeInTheDocument()
+  const toggle = screen.getByRole('button', {
+    name: 'Show the breakdown by file (2)',
+  })
+  expect(toggle).toHaveAttribute('aria-expanded', 'false')
+  expect(screen.queryByText('guide.docx')).not.toBeInTheDocument()
+  fireEvent.click(toggle)
+  expect(
+    screen.getByRole('button', {name: 'Hide the breakdown by file (2)'}),
+  ).toHaveAttribute('aria-expanded', 'true')
+})
+
+test('before the analysis ends the breakdown waits', () => {
+  renderPanel({known: {raw: true, weighted: false, liveWeighted: true}})
+  expect(
+    screen.getByText(
+      'The breakdown by bucket and by file appears when the analysis is complete.',
+    ),
+  ).toBeInTheDocument()
+  expect(screen.queryByRole('table')).not.toBeInTheDocument()
 })

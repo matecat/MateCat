@@ -1,68 +1,78 @@
 @use 'tokens/colors';
 @use 'commons/variables';
 
+// Values from the analysis mockup (Main.dc.html, "Analysis progress")
 .card {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 16px 20px;
-  border: 1px solid colors.$grey150;
-  border-radius: variables.$border-radius-default;
+  gap: 10px;
+  padding: 20px 24px;
+  border: 1px solid colors.$blue500;
+  border-radius: variables.$border-radius-big;
   background-color: colors.$white;
   color: colors.$grey1300;
+  font-size: variables.$font-size-base;
+  text-align: left;
+}
 
-  p {
-    margin: 0;
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.title {
+  margin: 0;
+  font-size: variables.$font-size-big;
+  font-weight: variables.$font-weight-bold;
+  line-height: 1.35;
+  color: colors.$grey1300;
+}
+
+.figure {
+  font-weight: variables.$font-weight-bold;
+  color: colors.$blue600;
+}
+
+.text {
+  margin: 0;
+  color: colors.$grey500;
+}
+
+.progress {
+  height: 8px;
+  border-radius: 4px;
+  background-color: colors.$grey100;
+  overflow: hidden;
+}
+
+.progressValue {
+  height: 100%;
+  background-color: colors.$blue500;
+  transition: width 400ms ease;
+}
+
+.steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: variables.$font-size-xsmall;
+
+  .done {
+    color: colors.$green1000;
   }
 
-  .steps {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    font-size: variables.$font-size-xsmall;
-    color: colors.$grey500;
-
-    li + li::before {
-      // Decorative: screen readers get the list, not the arrows
-      content: '›' / '';
-      margin-right: 8px;
-      color: colors.$grey500;
-    }
-
-    .done {
-      color: colors.$green600;
-    }
-
-    .current {
-      font-weight: 700;
-      color: colors.$blue900;
-    }
+  .current {
+    font-weight: variables.$font-weight-bold;
+    color: colors.$blue600;
   }
 
-  .title {
-    font-size: variables.$font-size-base;
-    font-weight: 700;
-    color: colors.$blue900;
-  }
-
-  .detail {
-    font-size: variables.$font-size-small;
-    color: colors.$grey500;
-  }
-
-  .progress {
-    height: 8px;
-    border-radius: variables.$border-radius-default;
-    background-color: colors.$grey100;
-    overflow: hidden;
-
-    .progressValue {
-      height: 100%;
-      background-color: colors.$blue500;
-      transition: width 400ms ease-out;
-    }
+  .next {
+    color: colors.$grey400;
   }
 }

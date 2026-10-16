@@ -25,6 +25,9 @@ import CommentsIcon from '../../../img/icons/CommentsIcon'
 import ProjectsStore from '../../stores/ProjectsStore'
 import ManageConstants from '../../constants/ManageConstants'
 import OutsourceContainer from '../outsource/OutsourceContainer'
+import OutsourceDrawer from '../outsource/OutsourceDrawer'
+import OutsourceOrderPanel from '../outsource/OutsourceOrderPanel'
+import {formatWithCommas} from '../outsource/outsourceConstants'
 import Close from '../../../img/icons/Close'
 
 export const JobContainer = ({
@@ -39,6 +42,7 @@ export const JobContainer = ({
 }) => {
   const [showDownloadProgress, setShowDownloadProgress] = useState(false)
   const [showingOutsource, setShowingOutsource] = useState()
+  const [buying, setBuying] = useState(false)
 
   const qrIconRef = useRef()
   const warningsIconRef = useRef()
@@ -459,24 +463,32 @@ export const JobContainer = ({
     )
   }
 
+  // Buy translation opens the order drawer; "assign to a translator" stays
+  // inline under the job
   const openOutsourceModal = (showTranslatorBox, extendedView) => {
-    if (
-      (showTranslatorBox && !job.get('outsource_available')) ||
-      job.get('outsource_available')
-    ) {
-      if (
-        job.get('outsource_available') &&
-        typeof showingOutsource !== 'undefined'
-      ) {
-        const data = {
-          event: 'outsource_request',
-        }
-        CommonUtils.dispatchAnalyticsEvents(data)
-      }
+    if (!showTranslatorBox && job.get('outsource_available')) {
+      CommonUtils.dispatchAnalyticsEvents({event: 'outsource_request'})
+      setBuying(true)
+      return
+    }
+    if (showTranslatorBox) {
       setShowingOutsource({showTranslatorBox, extendedView})
     } else {
       window.open('https://translated.com/contact-us', '_blank')
     }
+  }
+
+  // "en-US › fr-FR · chunk 2 of 6 · 59 Matecat weighted words"
+  const getOrderItem = () => {
+    const chunkCount = project
+      .get('jobs')
+      .filter((current) => current.get('id') === job.get('id')).size
+    const chunk =
+      isChunk && chunkCount > 1 ? ` · chunk ${index} of ${chunkCount}` : ''
+    const words = formatWithCommas(
+      Math.round(parseFloat(stats.equivalent.total)),
+    )
+    return `${job.get('source')} › ${job.get('target')}${chunk} · ${words} Matecat weighted words`
   }
 
   const closeOutsourceModal = () => setShowingOutsource()
@@ -774,14 +786,24 @@ export const JobContainer = ({
           <OutsourceContainer
             project={project}
             job={job}
-            standardWC={Math.round(parseFloat(stats.equivalent.total))}
             showTranslatorBox={showingOutsource.showTranslatorBox}
-            extendedView={showingOutsource.extendedView}
             onClickOutside={closeOutsourceModal}
-            openOutsource={showingOutsource}
             idJobLabel={job.id}
           />
         </div>
+      )}
+      {buying && (
+        <OutsourceDrawer
+          open={true}
+          onClose={() => setBuying(false)}
+          item={getOrderItem()}
+        >
+          <OutsourceOrderPanel
+            project={project}
+            job={job}
+            standardWC={Math.round(parseFloat(stats.equivalent.total))}
+          />
+        </OutsourceDrawer>
       )}
     </div>
   )

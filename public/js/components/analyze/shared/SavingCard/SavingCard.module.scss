@@ -1,43 +1,59 @@
 @use 'tokens/colors';
 @use 'commons/variables';
 
+// Values from the analysis mockup (Main.dc.html, sty.savingBox / sty.saving)
 .card {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 16px 20px;
+  padding: 20px 24px;
   border: 1px solid colors.$grey150;
-  border-radius: variables.$border-radius-default;
-  background-color: colors.$white;
+  border-radius: variables.$border-radius-big;
+  background-color: colors.$grey50;
+  color: colors.$grey1300;
+  font-size: variables.$font-size-base;
   // The analysis page centres text globally
   text-align: left;
 
   .percent {
+    flex: none;
     font-size: 44px;
-    font-weight: 700;
+    font-weight: variables.$font-weight-bold;
     line-height: 1;
-    color: colors.$blue900;
   }
 
   .unavailable {
-    color: colors.$grey500;
+    color: colors.$grey400;
   }
 
   .content {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+  }
+
+  // The label always stays on one line; with a value so does the work line.
+  // While pending the reason may wrap once: the column keeps room for half of
+  // it
+  .title,
+  &.known .work {
+    white-space: nowrap;
+  }
+
+  .work {
+    min-width: 13em;
   }
 
   .title {
     margin: 0;
+    // Headings carry a large global line-height on this page
+    line-height: 1.35;
     font-size: variables.$font-size-base;
-    font-weight: 700;
-    color: colors.$blue900;
+    font-weight: variables.$font-weight-regular;
+    color: colors.$grey1300;
   }
 
   .work {
-    font-size: variables.$font-size-xsmall;
+    font-size: variables.$font-size-small;
     color: colors.$grey500;
   }
 }

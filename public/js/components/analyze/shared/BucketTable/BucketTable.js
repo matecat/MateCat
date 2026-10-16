@@ -25,6 +25,7 @@ export const BucketTable = ({
   workflowType,
   countUnit = UNIT_COUNT.WORDS,
   totals,
+  compact = false,
 }) => {
   const [showEmpty, setShowEmpty] = useState(false)
   const bodyId = useId()
@@ -51,7 +52,9 @@ export const BucketTable = ({
     .join(', ')}`
 
   return (
-    <div className={styles.component}>
+    <div
+      className={`${styles.component} ${compact ? styles.compact : ''}`.trim()}
+    >
       {bucketsRaw > 0 && (
         <div className={styles.bar} role="img" aria-label={barLabel}>
           {filled.map(({type, raw}) => (
@@ -65,6 +68,12 @@ export const BucketTable = ({
         </div>
       )}
       <table className={styles.table}>
+        <colgroup>
+          <col className={styles.nameColumn} />
+          <col />
+          <col />
+          <col />
+        </colgroup>
         <caption
           className={styles.caption}
         >{`Analysis by bucket, in ${unit}`}</caption>
@@ -77,8 +86,8 @@ export const BucketTable = ({
           </tr>
         </thead>
         <tbody id={bodyId}>
-          {rows.map(({type, label, rate, raw, equivalent}) => (
-            <tr key={type}>
+          {rows.map(({type, label, rate, raw, equivalent, empty}) => (
+            <tr key={type} className={empty ? styles.empty : undefined}>
               <th scope="row">
                 <span className={styles.bucket}>
                   <span
@@ -89,20 +98,22 @@ export const BucketTable = ({
                   {label}
                 </span>
               </th>
-              <td>{formatRate(rate)}</td>
+              <td className={styles.rate}>{formatRate(rate)}</td>
               <td>{formatCount(raw)}</td>
-              <td>{formatCount(equivalent)}</td>
+              <td className={styles.weighted}>{formatCount(equivalent)}</td>
             </tr>
           ))}
         </tbody>
-        <tfoot>
-          <tr>
-            <th scope="row">Total</th>
-            <td />
-            <td>{formatCount(totalRaw)}</td>
-            <td>{formatCount(totalEquivalent)}</td>
-          </tr>
-        </tfoot>
+        {!compact && (
+          <tfoot>
+            <tr>
+              <th scope="row">Total</th>
+              <td />
+              <td>{formatCount(totalRaw)}</td>
+              <td>{formatCount(totalEquivalent)}</td>
+            </tr>
+          </tfoot>
+        )}
       </table>
       {emptyCount > 0 && (
         <button
@@ -138,4 +149,7 @@ BucketTable.propTypes = {
     raw: PropTypes.number,
     equivalent: PropTypes.number,
   }),
+  // Inside the details panel: a thinner bar and no total row (the panel
+  // shows the totals above)
+  compact: PropTypes.bool,
 }

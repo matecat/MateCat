@@ -1,7 +1,7 @@
-import React, {useId} from 'react'
+import React, {useId, useState} from 'react'
 import PropTypes from 'prop-types'
 import {ANALYSIS_WORKFLOW_TYPES, UNIT_COUNT} from '../../../constants/Constants'
-import {formatCount} from '../utils/buckets'
+import {formatCount, getSavedPercent} from '../utils/buckets'
 import {BucketTable} from '../shared/BucketTable'
 import {FileList} from '../shared/FileList'
 import {Pending} from '../shared/Pending'
@@ -55,12 +55,13 @@ export const getSubtitle = (job, chunk) => {
   return `Chunk ${chunk.index} of ${chunk.count} · job ${job.id}`
 }
 
-const TotalValue = ({label, value, known, live}) => {
+const TotalValue = ({label, value, known, live, strong = false}) => {
   const flashing = useValueFlash(value, {enabled: live && known})
   return (
     <div
       className={[
         styles.total,
+        strong && styles.strong,
         VALUE_FLASH_CLASS.base,
         flashing && VALUE_FLASH_CLASS.active,
       ]
@@ -80,6 +81,8 @@ TotalValue.propTypes = {
   value: PropTypes.number,
   known: PropTypes.bool.isRequired,
   live: PropTypes.bool,
+  // The Matecat weighted value is the bold one
+  strong: PropTypes.bool,
 }
 
 /**
@@ -97,6 +100,7 @@ export const DetailsPanel = ({
   onBuy,
 }) => {
   const titleId = useId()
+  const [filesShown, setFilesShown] = useState(false)
   const isWholeSplitJob = job.isSplit && !chunk
   // An unsplit job is its only chunk
   const item = chunk ?? (job.isSplit ? null : job.chunks[0])
@@ -119,10 +123,13 @@ export const DetailsPanel = ({
   const countUnit = job.countUnit ?? UNIT_COUNT.WORDS
   const characters = countUnit === UNIT_COUNT.CHARACTERS
 
+  const savedPercent = getSavedPercent(totals.equivalent, totals.raw)
+  const manyFiles = files.length > 1
+
   return (
     <section className={styles.panel} aria-labelledby={titleId}>
       <div className={styles.header}>
-        <div>
+        <div className={styles.heading}>
           <h2 id={titleId} className={styles.title}>
             {getLanguagePair(job)}
           </h2>
@@ -155,29 +162,67 @@ export const DetailsPanel = ({
           value={totals.equivalent}
           known={weightedKnown}
           live={live}
+          strong
         />
       </dl>
 
-      {workflowType && (
-        <BucketTable
-          matches={matches}
-          payableRates={job.payableRates}
-          workflowType={workflowType}
-          countUnit={countUnit}
-          totals={totals}
-        />
-      )}
+      {known.weighted && workflowType ? (
+        <>
+          <div className={styles.breakdown}>
+            <div className={styles.breakdownHeader}>
+              <span>
+                {characters
+                  ? 'Where the characters come from'
+                  : 'Where the words come from'}
+              </span>
+              {savedPercent !== null && <span>{`${savedPercent}% saved`}</span>}
+            </div>
+            <BucketTable
+              matches={matches}
+              payableRates={job.payableRates}
+              workflowType={workflowType}
+              countUnit={countUnit}
+              totals={totals}
+              compact
+            />
+            <p className={styles.note}>
+              {job.isSplit
+                ? `Payable rates are set on the job, so all ${job.chunkCount} chunks share them.`
+                : 'Payable rates set on this job.'}
+            </p>
+          </div>
 
-      {workflowType && files.length > 0 && (
-        <div className={styles.section}>
-          <h3 className={styles.sectionTitle}>Files</h3>
-          <FileList
-            files={files}
-            payableRates={job.payableRates}
-            workflowType={workflowType}
-            countUnit={countUnit}
-          />
-        </div>
+          {files.length > 0 && (
+            <div className={styles.files}>
+              {manyFiles ? (
+                <button
+                  type="button"
+                  className={styles.filesToggle}
+                  aria-expanded={filesShown}
+                  onClick={() => setFilesShown((shown) => !shown)}
+                >
+                  {`${filesShown ? 'Hide' : 'Show'} the breakdown by file (${formatCount(files.length)})`}
+                </button>
+              ) : (
+                <h3 className={styles.filesTitle}>File</h3>
+              )}
+              {(!manyFiles || filesShown) && (
+                <FileList
+                  files={files}
+                  payableRates={job.payableRates}
+                  workflowType={workflowType}
+                  countUnit={countUnit}
+                  scroll
+                />
+              )}
+            </div>
+          )}
+        </>
+      ) : (
+        <p className={styles.pending}>
+          The breakdown by bucket and by file appears when the analysis is
+          complete.
+        </p>
       )}
 
       <OutsourceOfferCard

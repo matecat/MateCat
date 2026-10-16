@@ -338,7 +338,9 @@ describe('LanguageTree', () => {
   test('buy reports the chunk; the event is the page’s to fire', () => {
     const {onBuy, view} = renderTree()
     fireEvent.click(
-      within(frenchRow()).getByRole('button', {name: 'Buy translation'}),
+      within(frenchRow()).getByRole('button', {
+        name: 'Buy translation from Translated',
+      }),
     )
     expect(onBuy).toHaveBeenCalledWith(view.jobs[1], view.jobs[1].chunks[0])
     expect(CommonUtils.dispatchAnalyticsEvents).not.toHaveBeenCalled()
@@ -354,7 +356,7 @@ describe('LanguageTree', () => {
     const {onBuy} = renderTree({view})
 
     const buy = within(frenchRow()).getByRole('button', {
-      name: 'Buy translation',
+      name: 'Buy translation from Translated',
     })
     expect(buy).toBeDisabled()
     expect(
@@ -383,7 +385,7 @@ describe('LanguageTree', () => {
     global.config.enable_outsource = false
     renderTree()
     expect(
-      screen.queryByRole('button', {name: 'Buy translation'}),
+      screen.queryByRole('button', {name: 'Buy translation from Translated'}),
     ).not.toBeInTheDocument()
   })
 

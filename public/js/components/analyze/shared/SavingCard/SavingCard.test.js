@@ -58,7 +58,11 @@ test('shows placeholders when the saving is not known', () => {
   expect(
     screen.queryByText('2 work hours at 3,000 w/day'),
   ).not.toBeInTheDocument()
-  expect(screen.getAllByText('Not available yet')).toHaveLength(2)
+  // A placeholder for the figure, the reason for the work line
+  expect(screen.getAllByText('Not available yet')).toHaveLength(1)
+  expect(
+    screen.getByText('Available when the analysis is complete'),
+  ).toBeInTheDocument()
 })
 
 test('does not flash while the saving is not known', () => {

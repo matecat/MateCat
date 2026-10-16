@@ -39,3 +39,5 @@ export const timeOptions = [
 export const formatWithCommas = (value) =>
   String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 
+export const QUOTE_NOT_AVAILABLE_MESSAGE =
+  'Quote not available, please contact us at info@translated.net or call +39 06 90 254 001'

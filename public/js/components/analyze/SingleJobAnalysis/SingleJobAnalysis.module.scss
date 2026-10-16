@@ -1,5 +1,7 @@
-// The breakdown takes the room; the offer and the files go beside it, or
-// under it on a narrow screen
+@use 'tokens/colors';
+
+// As the mockup: the breakdown beside the offer and the files (1.3 : 1), or
+// above them on a narrow screen
 .columns {
   display: flex;
   flex-wrap: wrap;
@@ -8,14 +10,22 @@
 }
 
 .main {
-  flex: 999 1 560px;
+  flex: 1.3 1 520px;
   min-width: 0;
 }
 
 .side {
   display: flex;
-  flex: 1 1 420px;
+  flex: 1 1 380px;
   flex-direction: column;
   gap: 16px;
   min-width: 0;
+}
+
+// Pending Translate, as the mockup: a grey button, not a faded blue one.
+// The doubled class outranks the Button's own disabled rules
+button.translate.translate:disabled {
+  box-shadow: none;
+  background-color: colors.$grey100;
+  color: colors.$grey500;
 }

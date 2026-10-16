@@ -27,7 +27,10 @@ export const SavingCard = ({
     .join(' ')
 
   return (
-    <section className={className} data-testid="saving-card">
+    <section
+      className={`${className} ${known ? styles.known : ''}`.trim()}
+      data-testid="saving-card"
+    >
       <div className={styles.percent}>
         {unavailable ? (
           <span className={styles.unavailable}>–</span>
@@ -38,11 +41,12 @@ export const SavingCard = ({
       <div className={styles.content}>
         <h2 className={styles.title}>Saving on word count</h2>
         <div className={styles.work}>
-          {unavailable ? (
-            'No analysis available'
-          ) : (
-            <Pending known={known}>{workMinutesLabel}</Pending>
-          )}
+          {unavailable
+            ? 'No analysis available'
+            : // As the mockup: the reason, not a placeholder
+              known
+              ? workMinutesLabel
+              : 'Available when the analysis is complete'}
         </div>
       </div>
     </section>

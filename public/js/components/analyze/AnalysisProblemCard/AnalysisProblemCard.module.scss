@@ -17,6 +17,8 @@
 
 .title {
   margin: 0;
+  // Headings carry a large global line-height on this page
+  line-height: 1.35;
   font-size: variables.$font-size-big;
   font-weight: 700;
   color: colors.$blue900;

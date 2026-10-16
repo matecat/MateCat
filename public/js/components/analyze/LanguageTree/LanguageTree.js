@@ -24,6 +24,7 @@ import {formatCount} from '../utils/buckets'
 import {Pending, PENDING_ALIGN} from '../shared/Pending'
 import {useValueFlash, VALUE_FLASH_CLASS} from '../shared/useValueFlash'
 import {DisabledHint} from '../shared/DisabledHint'
+import {BuyTranslationLabel} from '../shared/BuyTranslationLabel'
 import styles from './LanguageTree.module.scss'
 
 export const ACTIONS_DISABLED_TITLE = 'Available when the analysis is complete'
@@ -55,11 +56,12 @@ export const openTranslate = (chunk) => {
   window.open(chunk.urls.t, '_blank')
 }
 
-const CountCell = ({value, known, live}) => {
+const CountCell = ({value, known, live, strong = false}) => {
   const flashing = useValueFlash(value, {enabled: live && known})
   const className = [
     VALUE_FLASH_CLASS.base,
     flashing && VALUE_FLASH_CLASS.active,
+    strong && styles.strongCount,
   ]
     .filter(Boolean)
     .join(' ')
@@ -76,9 +78,10 @@ CountCell.propTypes = {
   value: PropTypes.number,
   known: PropTypes.bool.isRequired,
   live: PropTypes.bool,
+  strong: PropTypes.bool,
 }
 
-export const CopyLinkButton = ({label, url, disabled}) => {
+export const CopyLinkButton = ({label, url, disabled, showText = false}) => {
   // 'copied' after a successful copy, 'fallback' when the clipboard failed
   const [state, setState] = useState(null)
   const timerRef = useRef()
@@ -102,16 +105,23 @@ export const CopyLinkButton = ({label, url, disabled}) => {
     <span className={styles.copy}>
       <button
         type="button"
-        className={styles.iconButton}
+        className={showText ? styles.textButton : styles.iconButton}
         aria-label={label}
         title={disabled ? undefined : label}
         disabled={disabled}
         onClick={copyLink}
       >
         {state === 'copied' ? <Check size={16} /> : <Copy size={16} />}
+        {showText && (
+          // Both labels share one cell, so the button keeps its width
+          <span className={styles.textLabels}>
+            <span aria-hidden={state === 'copied'}>Copy link</span>
+            <span aria-hidden={state !== 'copied'}>Link copied</span>
+          </span>
+        )}
       </button>
       {/* Overlays the row: the confirmation never moves the other actions */}
-      <span className={styles.copied} role="status">
+      <span className={showText ? styles.hidden : styles.copied} role="status">
         {state === 'copied' ? 'Link copied' : ''}
       </span>
       {state === 'fallback' && (
@@ -138,6 +148,8 @@ export const CopyLinkButton = ({label, url, disabled}) => {
 
 CopyLinkButton.propTypes = {
   label: PropTypes.string.isRequired,
+  // "Copy link" next to the icon (the single job hero)
+  showText: PropTypes.bool,
   url: PropTypes.string,
   disabled: PropTypes.bool,
 }
@@ -148,24 +160,28 @@ const BuyButton = ({job, outsourced, disabled, onBuy}) => {
       <Tooltip content={CUSTOM_BILLING_MESSAGE}>
         <Button
           ref={createRef()}
-          mode={BUTTON_MODE.GHOST}
+          type={BUTTON_TYPE.PRIMARY}
+          mode={BUTTON_MODE.OUTLINE}
           size={BUTTON_SIZE.SMALL}
+          className={styles.buy}
           disabled={true}
         >
-          Buy translation
+          <BuyTranslationLabel compact />
         </Button>
       </Tooltip>
     )
   }
   return (
     <Button
-      mode={BUTTON_MODE.GHOST}
+      type={BUTTON_TYPE.PRIMARY}
+      mode={BUTTON_MODE.OUTLINE}
       size={BUTTON_SIZE.SMALL}
       tabIndex="0"
+      className={styles.buy}
       disabled={disabled}
       onClick={onBuy}
     >
-      {outsourced ? 'View order' : 'Buy translation'}
+      {outsourced ? 'View order' : <BuyTranslationLabel compact />}
     </Button>
   )
 }
@@ -213,6 +229,7 @@ const RowActions = ({
           type={BUTTON_TYPE.PRIMARY}
           size={BUTTON_SIZE.SMALL}
           tabIndex="0"
+          className={styles.translate}
           disabled={disabled}
           onClick={() => openTranslate(chunk)}
         >
@@ -291,6 +308,7 @@ export const LanguageTree = ({
         value={item.totals.equivalent}
         known={weightedKnown}
         live={live}
+        strong
       />
     </>
   )
@@ -313,7 +331,9 @@ export const LanguageTree = ({
               {characters ? 'Total character count' : 'Total word count'}
             </th>
             {showIndustry && <th scope="col">Industry weighted</th>}
-            <th scope="col">Matecat weighted</th>
+            <th scope="col" className={styles.strongHeader}>
+              Matecat weighted
+            </th>
             <th scope="col">
               <span className={styles.hidden}>Actions</span>
             </th>

@@ -1,89 +1,84 @@
 @use 'tokens/colors';
 @use 'commons/variables';
 
+// Values from the analysis mockup (Main.dc.html, the project header)
 .row {
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
-  align-items: stretch;
 
-  // The project card takes the room, the saving card its own width
   > :first-child {
-    flex: 999 1 420px;
+    flex: 999 1 560px;
+    min-width: 0;
   }
 
   > :last-child {
-    flex: 1 1 auto;
+    flex: 1 1 320px;
   }
 }
 
 .card {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 16px 20px;
+  gap: 12px;
+  padding: 20px 24px;
   border: 1px solid colors.$grey150;
-  border-radius: variables.$border-radius-default;
-  background-color: colors.$white;
+  border-radius: variables.$border-radius-big;
+  background-color: colors.$grey50;
   color: colors.$grey1300;
+  font-size: variables.$font-size-base;
   text-align: left;
 
   .titleRow {
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
-    gap: 8px;
+    gap: 4px 12px;
   }
 
   .id {
-    font-size: variables.$font-size-small;
+    font-size: variables.$font-size-big;
     color: colors.$grey500;
   }
 
   .name {
     margin: 0;
+    line-height: 1.35;
     font-size: variables.$font-size-big;
-    font-weight: 700;
-    color: colors.$blue900;
+    font-weight: variables.$font-weight-bold;
+    color: colors.$grey1300;
     overflow-wrap: anywhere;
   }
 
   .languages {
-    padding: 2px 8px;
-    border-radius: variables.$border-radius-default;
+    margin-left: auto;
+    padding: 2px 12px;
+    border-radius: 999px;
     background-color: colors.$blue50;
-    font-size: variables.$font-size-xsmall;
-    color: colors.$blue900;
+    font-size: variables.$font-size-small;
+    font-weight: variables.$font-weight-bold;
+    color: colors.$blue600;
+    white-space: nowrap;
   }
 
   .statusRow {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 8px;
-  }
-
-  .statusLabel {
-    font-size: variables.$font-size-small;
-    color: colors.$grey500;
+    gap: 12px;
   }
 
   .report {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    margin-left: auto;
     padding: 0;
     border: none;
     background: none;
     font: inherit;
-    font-size: variables.$font-size-small;
     color: colors.$blue600;
+    text-decoration: underline;
     cursor: pointer;
-
-    &:hover {
-      text-decoration: underline;
-    }
   }
 
   .error {
@@ -91,4 +86,31 @@
     font-size: variables.$font-size-small;
     color: colors.$red600;
   }
+}
+
+// The analysis status pill: tones from the mockup
+.pill {
+  padding: 2px 12px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: variables.$font-size-xsmall;
+  white-space: nowrap;
+}
+
+.ok {
+  border-color: colors.$green300;
+  background-color: colors.$green50;
+  color: colors.$green1000;
+}
+
+.busy {
+  border-color: colors.$blue500;
+  background-color: colors.$blue50;
+  color: colors.$blue600;
+}
+
+.errorTone {
+  border-color: colors.$red100;
+  background-color: colors.$red50;
+  color: colors.$red600;
 }

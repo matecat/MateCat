@@ -10,25 +10,24 @@
   color: colors.$grey500;
 }
 
-// A link that looks like the outline buttons next to it
+// "Back to translation": the page's main action (JobAnalysis.dc.html)
 .back {
   display: inline-flex;
   align-items: center;
-  min-height: 32px;
-  padding: 0 12px;
-  border: 1px solid colors.$blue600;
+  padding: 12px 24px;
   border-radius: variables.$border-radius-default;
-  font-size: variables.$font-size-small;
-  font-weight: 700;
-  color: colors.$blue600;
+  background-color: colors.$blue500;
+  font-size: variables.$font-size-base;
+  font-weight: variables.$font-weight-bold;
+  color: colors.$white;
   text-decoration: none;
+  white-space: nowrap;
 
-  // The same hover and keyboard focus as the outline buttons beside it
+  // The same hover and keyboard focus as the primary Button
   &:hover,
   &:focus-visible {
-    border-color: colors.$blue700;
-    background-color: colors.$blue50;
-    color: colors.$blue700;
+    background-color: colors.$blue600;
+    color: colors.$white;
   }
 
   &:focus {
@@ -42,7 +41,12 @@
   align-items: flex-start;
   gap: 16px;
 
-  > * {
-    flex: 1 1 480px;
+  // As the mockup: breakdown and files side by side (1.3 : 1)
+  > :first-child {
+    flex: 1.3 1 520px;
+  }
+
+  > :last-child {
+    flex: 1 1 380px;
   }
 }

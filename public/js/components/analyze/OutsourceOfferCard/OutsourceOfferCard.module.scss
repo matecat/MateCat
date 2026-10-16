@@ -1,44 +1,120 @@
 @use 'tokens/colors';
 @use 'commons/variables';
+@use '../shared/visuallyHidden' as *;
 
+// Values from the analysis mockup (Main.dc.html, "Professional translation
+// offer")
 .card {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 16px 20px;
-  border: 1px solid colors.$grey150;
-  border-radius: variables.$border-radius-default;
-  background-color: colors.$grey100;
-  color: colors.$grey1300;
+  gap: 10px;
+  padding: 20px;
+  border-radius: variables.$border-radius-big;
+  background-color: colors.$blue900;
+  color: colors.$white;
+  font-size: variables.$font-size-base;
   text-align: left;
+}
 
-  .title {
-    margin: 0;
-    font-size: variables.$font-size-base;
-    font-weight: 700;
-    color: colors.$blue900;
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: variables.$font-size-xsmall;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: colors.$grey300;
+}
+
+.title {
+  margin: 0;
+  // Headings carry a large global line-height on this page
+  line-height: 1.35;
+  font-size: variables.$font-size-big;
+  font-weight: variables.$font-weight-bold;
+  color: colors.$white;
+}
+
+.text {
+  margin: 0;
+  color: colors.$grey150;
+}
+
+.link {
+  color: colors.$white;
+  text-decoration: underline;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.shimmer,
+.shimmerShort {
+  display: block;
+  height: 14px;
+  border-radius: 4px;
+  background-color: rgba(colors.$white, 0.18);
+}
+
+.shimmer {
+  width: 60%;
+}
+
+.shimmerShort {
+  width: 40%;
+}
+
+.buy {
+  align-self: flex-start;
+  min-height: 48px;
+  margin-top: 4px;
+  padding: 0 20px;
+  border: none;
+  border-radius: variables.$border-radius-default;
+  background-color: colors.$green1000;
+  font: inherit;
+  font-weight: variables.$font-weight-bold;
+  color: colors.$white;
+  cursor: pointer;
+
+  &:hover:not(:disabled),
+  &:focus-visible {
+    filter: brightness(1.1);
   }
 
-  .message {
-    margin: 0;
-    font-size: variables.$font-size-small;
+  &:disabled {
+    background-color: colors.$grey300;
+    cursor: not-allowed;
   }
+}
 
-  .quote {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
+.retry {
+  align-self: flex-start;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid colors.$white;
+  border-radius: variables.$border-radius-default;
+  background: none;
+  font: inherit;
+  font-size: variables.$font-size-small;
+  font-weight: variables.$font-weight-bold;
+  color: colors.$white;
+  cursor: pointer;
+}
 
-  .price {
-    font-size: variables.$font-size-big;
-    font-weight: 700;
-    color: colors.$blue900;
-  }
+// The logo follows the eyebrow's colour: legible on navy
+.logo {
+  display: inline-flex;
 
-  .delivery {
-    font-size: variables.$font-size-small;
-    color: colors.$grey500;
+  svg {
+    fill: currentColor;
   }
+}
+
+.hidden {
+  @include visually-hidden;
 }

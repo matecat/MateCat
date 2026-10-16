@@ -10,6 +10,22 @@ import CatToolActions from '../../actions/CatToolActions'
 import {changeJobPassword} from '../../api/changeJobPassword'
 import CommonUtils from '../../utils/commonUtils'
 
+const mockOrderPanelProps = []
+jest.mock('../outsource/OutsourceOrderPanel', () => {
+  const MockOrderPanel = (props) => {
+    mockOrderPanelProps.push(props)
+    return (
+      <div data-testid="order-panel-mock">
+        {`${props.job.get('id')}-${props.job.get('password')}`}
+      </div>
+    )
+  }
+  return {
+    __esModule: true,
+    default: MockOrderPanel,
+    OutsourceOrderPanel: MockOrderPanel,
+  }
+})
 jest.mock('../../actions/ManageActions')
 jest.mock('../../actions/ModalsActions')
 jest.mock('../../actions/CatToolActions')
@@ -1281,7 +1297,7 @@ describe('Extended interactions (menu actions, outsource, notifications)', () =>
     ).not.toBeInTheDocument()
   })
 
-  test('Buy translation button: opens the outsource box (and dispatches analytics on re-open)', async () => {
+  test('Buy translation opens the order drawer for this job, then closes it', async () => {
     const data = cloneData(fakeProjectsData.jobWithoutActivity.data)
     data.jobs[0].outsource_available = true
     const {props} = buildFakeProperties(data, {
@@ -1290,21 +1306,51 @@ describe('Extended interactions (menu actions, outsource, notifications)', () =>
 
     render(<JobContainer {...props} />)
 
-    await userEvent.click(screen.getByTestId('buy-translation-button'))
-    expect(screen.getByTestId('outsource-container-mock')).toBeInTheDocument()
+    const trigger = screen.getByTestId('buy-translation-button')
+    await userEvent.click(trigger)
 
-    // clicking again while already open: outsource_available is true and
-    // showingOutsource is already defined, exercising the analytics branch
-    await userEvent.click(screen.getByTestId('buy-translation-button'))
-    expect(screen.getByTestId('outsource-container-mock')).toBeInTheDocument()
-    expect(CommonUtils.dispatchAnalyticsEvents).toHaveBeenCalledWith({
-      event: 'outsource_request',
-    })
-
-    await userEvent.click(screen.getByTestId('outsource-close'))
+    expect(screen.getByTestId('order-panel-mock')).toHaveTextContent(
+      `${props.job.get('id')}-${props.job.get('password')}`,
+    )
+    // A whole (unsplit) job: no chunk in the item line
+    expect(
+      screen.getByText(
+        new RegExp(
+          `^${props.job.get('source')} › ${props.job.get('target')} · [\\d,]+ Matecat weighted words$`,
+        ),
+      ),
+    ).toBeInTheDocument()
+    // Not the inline box: that one is for assigning a translator
     expect(
       screen.queryByTestId('outsource-container-mock'),
     ).not.toBeInTheDocument()
+    expect(CommonUtils.dispatchAnalyticsEvents).toHaveBeenCalledWith({
+      event: 'outsource_request',
+    })
+    // Manage quotes without the shared cache
+    expect(mockOrderPanelProps.at(-1).cache).toBeUndefined()
+
+    await userEvent.click(screen.getByRole('button', {name: 'Close'}))
+    expect(screen.queryByTestId('order-panel-mock')).not.toBeInTheDocument()
+    expect(trigger).toHaveFocus()
+  })
+
+  test('Buy translation of a job Translated cannot sell goes to the contact page', async () => {
+    const data = cloneData(fakeProjectsData.jobWithoutActivity.data)
+    data.jobs[0].outsource_available = false
+    const {props} = buildFakeProperties(data, {
+      downloadTranslationFn: jest.fn(),
+    })
+    const open = jest.spyOn(window, 'open').mockImplementation(() => null)
+
+    render(<JobContainer {...props} />)
+    await userEvent.click(screen.getByTestId('buy-translation-button'))
+    expect(open).toHaveBeenCalledWith(
+      'https://translated.com/contact-us',
+      '_blank',
+    )
+    expect(screen.queryByTestId('order-panel-mock')).not.toBeInTheDocument()
+    open.mockRestore()
   })
 
   test('Remove translator: notifies and undo restores the previous password', async () => {

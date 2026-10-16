@@ -1,10 +1,11 @@
 import React, {useCallback, useMemo, useState} from 'react'
 import PropTypes from 'prop-types'
+import ModalsActions from '../../../actions/ModalsActions'
 import {ANALYSIS_PHASE} from '../utils/deriveAnalysisView'
 import {ProjectHeaderCard} from '../ProjectHeaderCard'
 import {AnalysisStatusCard} from '../shared/AnalysisStatusCard'
-import {LanguageTree, getLanguagePair} from '../LanguageTree'
-import {DetailsPanel, getSubtitle} from '../DetailsPanel'
+import {LanguageTree} from '../LanguageTree'
+import {DetailsPanel} from '../DetailsPanel'
 import {BuyTranslationDrawer, useBuyTranslation} from '../BuyTranslationDrawer'
 import {ANALYSIS_PAGE_TITLE, AnalysisPage} from '../shared/AnalysisPage'
 import styles from './ProjectTreeAnalysis.module.scss'
@@ -55,14 +56,24 @@ export const ProjectTreeAnalysis = ({project, view, workflowType}) => {
     (job, chunk) =>
       setSelection({
         jobId: job.id,
-        chunkIndex: job.isSplit ? chunk.index : null,
+        chunkIndex: job.isSplit && chunk ? chunk.index : null,
       }),
     [],
   )
-  const {order, openBuy, closeBuy} = useBuyTranslation({
-    project,
+  const {order, openBuy, pickChunk, closeBuy} = useBuyTranslation({
     onOpen: selectBought,
   })
+
+  // From the drawer's chunk picker: merging buys the whole job in one order
+  const mergeOrderedJob = useCallback(() => {
+    const projectJob = (project.jobs ?? []).find(
+      (current) => String(current.id) === String(order?.job.id),
+    )
+    closeBuy()
+    ModalsActions.openMergeModal(project, projectJob, () =>
+      window.location.reload(),
+    )
+  }, [project, order, closeBuy])
 
   return (
     <AnalysisPage title={PAGE_TITLE}>
@@ -99,6 +110,8 @@ export const ProjectTreeAnalysis = ({project, view, workflowType}) => {
         {selected && (
           <div className={styles.details}>
             <DetailsPanel
+              // A new selection starts with its file breakdown closed
+              key={`${selected.job.id}-${selected.chunk?.password ?? 'job'}`}
               project={project}
               job={selected.job}
               chunk={selected.chunk}
@@ -115,13 +128,10 @@ export const ProjectTreeAnalysis = ({project, view, workflowType}) => {
           open={true}
           onClose={closeBuy}
           project={project}
-          projectJob={order.projectJob}
-          title={getLanguagePair(order.job)}
-          subtitle={getSubtitle(
-            order.job,
-            order.job.isSplit ? order.chunk : null,
-          )}
-          weightedWords={order.chunk.totals.equivalent}
+          job={order.job}
+          chunk={order.chunk}
+          onPickChunk={pickChunk}
+          onMerge={config.splitEnabled ? mergeOrderedJob : undefined}
         />
       )}
     </AnalysisPage>

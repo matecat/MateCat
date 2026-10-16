@@ -1,7 +1,15 @@
 @use 'tokens/colors';
 @use 'commons/variables';
+@use '../bucketPalette' as palette;
 @use '../visuallyHidden' as *;
 
+@each $type, $color in palette.$bucket-colors {
+  .swatch[data-bucket='#{$type}'] {
+    background-color: $color;
+  }
+}
+
+// Values from the analysis mockup (Main.dc.html, the files list)
 .component {
   display: flex;
   flex-direction: column;
@@ -11,22 +19,19 @@
 
 .searchBox {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  font-size: variables.$font-size-small;
-
-  label {
-    font-weight: 700;
-    color: colors.$blue900;
-  }
+  flex-direction: column;
+  gap: 4px;
+  font-size: variables.$font-size-xsmall;
+  color: colors.$grey500;
 
   input {
-    flex: 1 1 200px;
-    padding: 6px 10px;
-    border: 1px solid colors.$grey150;
+    min-height: 40px;
+    padding: 8px 10px;
+    border: 1px solid colors.$grey200;
     border-radius: variables.$border-radius-default;
+    font: inherit;
     font-size: variables.$font-size-small;
+    color: colors.$grey1300;
 
     &:focus {
       outline: 2px solid colors.$blue500;
@@ -35,7 +40,6 @@
   }
 
   .matchCount {
-    flex-basis: 100%;
     margin: 0;
     font-size: variables.$font-size-xsmall;
     color: colors.$grey500;
@@ -45,54 +49,53 @@
 .scroll {
   max-height: 420px;
   overflow-y: auto;
-  border: 1px solid colors.$grey150;
-  border-radius: variables.$border-radius-default;
+  // Reaches into the panel's right padding: without a scrollbar the columns
+  // end where the bucket table's do; with one, the bar (classic or overlay)
+  // sits in this padding, never over a number
+  margin-right: -16px;
+  padding-right: 16px;
 }
 
 .table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   font-size: variables.$font-size-small;
 
+  .nameColumn {
+    width: 50%;
+  }
+
   th,
   td {
-    padding: 8px 12px;
-    border-bottom: 1px solid colors.$grey100;
+    padding: 8px 0 8px 8px;
+    border-top: 1px solid colors.$grey100;
     text-align: right;
+    font-weight: variables.$font-weight-regular;
     font-variant-numeric: tabular-nums;
+    vertical-align: middle;
   }
 
   th:first-child {
+    padding-left: 0;
     text-align: left;
   }
 
-  // Bucket and file names; the header and footer cells stay bold
-  tbody th:first-child {
-    font-weight: 400;
-  }
-
   thead th {
-    position: sticky;
-    top: 0;
-    z-index: 1;
+    padding-top: 0;
+    border-top: none;
+    background-color: colors.$white;
     font-size: variables.$font-size-xsmall;
-    font-weight: 700;
     color: colors.$grey500;
-    background-color: colors.$grey50;
-    // A sticky cell loses its collapsed border once the body scrolls under it
-    border-bottom: none;
-    box-shadow: inset 0 -1px 0 colors.$grey100;
   }
 
-  .open th,
-  .open td {
-    background-color: colors.$blue50;
-    border-bottom: none;
+  .weighted {
+    font-weight: variables.$font-weight-bold;
   }
 
   .detail > td {
-    padding-top: 0;
-    background-color: colors.$blue50;
+    padding: 0 0 8px;
+    border-top: none;
     text-align: left;
   }
 
@@ -102,60 +105,98 @@
   }
 }
 
+// Only a scrolling list keeps its header row in view
+.scroll .table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
 .fileButton {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  gap: 6px;
   width: 100%;
+  min-height: 32px;
   padding: 0;
   border: none;
   background: none;
+  font: inherit;
+  color: inherit;
   text-align: left;
   cursor: pointer;
-  color: inherit;
+
+  > svg {
+    flex: none;
+    transition: transform 0.12s ease;
+  }
+
+  &[aria-expanded='true'] > svg {
+    transform: rotate(90deg);
+  }
 
   &:focus-visible {
     outline: 2px solid colors.$blue500;
     outline-offset: 2px;
   }
-
-  .baseName {
-    font-size: variables.$font-size-small;
-    color: colors.$blue600;
-    word-break: break-word;
-  }
-
-  .folder {
-    font-size: variables.$font-size-xsmall;
-    color: colors.$grey500;
-    word-break: break-word;
-  }
 }
 
+.fileName {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.baseName,
+.folder {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.folder {
+  font-size: variables.$font-size-xsmall;
+  color: colors.$grey500;
+}
+
+// The buckets of an open file: the same columns as the file rows, so their
+// Raw and Weighted line up; only the label is indented
 .buckets {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   font-size: variables.$font-size-xsmall;
 
-  // Reset the outer table's cell rules
+  .nameColumn {
+    width: 50%;
+  }
+
   th,
   td {
-    padding: 4px 0 4px 12px;
-    border-bottom: none;
-    background-color: transparent;
+    padding: 6px 0 6px 8px;
+    border-top: none;
     text-align: right;
     font-variant-numeric: tabular-nums;
   }
 
   tbody th {
-    padding-left: 16px;
+    padding-left: 22px;
     text-align: left;
-    font-weight: 400;
+    font-weight: variables.$font-weight-regular;
   }
+}
 
-  td {
-    width: 6em;
-  }
+.bucket {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.swatch {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
 }
 
 .hidden {
@@ -164,6 +205,7 @@
 
 .noBuckets {
   margin: 0;
+  padding: 6px 0 6px 22px;
   font-size: variables.$font-size-xsmall;
   color: colors.$grey500;
 }

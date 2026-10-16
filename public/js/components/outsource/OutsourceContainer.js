@@ -4,7 +4,6 @@ import Cookies from 'js-cookie'
 import {TransitionGroup, CSSTransition} from 'react-transition-group'
 
 import AssignToTranslator from './AssignToTranslator'
-import OutsourceVendor from './OutsourceVendor'
 
 const checkTimezone = () => {
   let timezoneToShow = Cookies.get('matecat_timezone')
@@ -24,17 +23,16 @@ const IGNORED_CLICK_CLASSES = [
   'react-datepicker__day',
 ]
 
+/**
+ * The "assign to a translator" box under a Manage job. Buying a translation
+ * opens the outsource drawer instead (JobContainer).
+ */
 const OutsourceContainer = ({
-  openOutsource,
   showTranslatorBox = true,
   idJobLabel,
   job,
-  standardWC,
   project,
-  extendedView = true,
   onClickOutside,
-  outsourceEnabled = config.enable_outsource,
-  serviceLoginUrl,
 }) => {
   const containerRef = useRef(null)
 
@@ -72,7 +70,7 @@ const OutsourceContainer = ({
   )
 
   useEffect(() => {
-    if (openOutsource || showTranslatorBox) {
+    if (showTranslatorBox) {
       const timer = setTimeout(() => {
         window.addEventListener('mousedown', handleDocumentClick)
         window.addEventListener('keydown', handleEscKey)
@@ -87,46 +85,25 @@ const OutsourceContainer = ({
       window.removeEventListener('mousedown', handleDocumentClick)
       window.removeEventListener('keydown', handleEscKey)
     }
-  }, [openOutsource, showTranslatorBox, handleDocumentClick, handleEscKey])
-
-  const outsourceContainerClass =
-    !outsourceEnabled || (showTranslatorBox && !openOutsource)
-      ? 'no-outsource'
-      : showTranslatorBox && openOutsource
-        ? 'showTranslator'
-        : openOutsource
-          ? 'showOutsource'
-          : ''
+  }, [showTranslatorBox, handleDocumentClick, handleEscKey])
 
   return (
     <TransitionGroup style={{width: '100%'}}>
-      {openOutsource || showTranslatorBox ? (
+      {showTranslatorBox ? (
         <CSSTransition
           key={idJobLabel}
           classNames="transitionOutsource"
           timeout={{enter: 500, exit: 300}}
         >
           <div
-            className={'outsource-container ' + outsourceContainerClass}
+            className="outsource-container showTranslator"
             ref={containerRef}
           >
-            {showTranslatorBox ? (
-              <AssignToTranslator
-                job={job}
-                project={project}
-                closeOutsource={onClickOutside}
-              />
-            ) : null}
-            {outsourceEnabled && openOutsource ? (
-              <OutsourceVendor
-                project={project}
-                job={job}
-                extendedView={extendedView}
-                standardWC={standardWC}
-                outsourceEnabled={outsourceEnabled}
-                serviceLoginUrl={serviceLoginUrl}
-              />
-            ) : null}
+            <AssignToTranslator
+              job={job}
+              project={project}
+              closeOutsource={onClickOutside}
+            />
           </div>
         </CSSTransition>
       ) : null}
@@ -135,20 +112,11 @@ const OutsourceContainer = ({
 }
 
 OutsourceContainer.propTypes = {
-  openOutsource: PropTypes.any,
   showTranslatorBox: PropTypes.bool,
   idJobLabel: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   job: PropTypes.object,
-  standardWC: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   project: PropTypes.object,
-  extendedView: PropTypes.bool,
   onClickOutside: PropTypes.func,
-  outsourceEnabled: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.number,
-    PropTypes.string,
-  ]),
-  serviceLoginUrl: PropTypes.string,
 }
 
 export default OutsourceContainer

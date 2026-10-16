@@ -8,11 +8,15 @@ import CommonUtils from '../../../utils/commonUtils'
 import {deriveAnalysisView} from '../utils/deriveAnalysisView'
 import {getDefaultSelection, ProjectTreeAnalysis} from './ProjectTreeAnalysis'
 
-jest.mock('../../outsource/OutsourceContainer', () => {
-  const MockOutsourceContainer = ({job}) => (
+jest.mock('../../outsource/OutsourceOrderPanel', () => {
+  const MockOrderPanel = ({job}) => (
     <div data-testid="order-form">{job.get('password')}</div>
   )
-  return MockOutsourceContainer
+  return {
+    __esModule: true,
+    default: MockOrderPanel,
+    OutsourceOrderPanel: MockOrderPanel,
+  }
 })
 
 // The tree and the panel are tested on their own; here only the wiring
@@ -87,14 +91,18 @@ describe('ProjectTreeAnalysis', () => {
     renderPage()
     const frenchRow = screen.getByRole('row', {name: /^en-US › fr-FR ID/})
     fireEvent.click(
-      within(frenchRow).getByRole('button', {name: 'Buy translation'}),
+      within(frenchRow).getByRole('button', {
+        name: 'Buy translation from Translated',
+      }),
     )
 
     expect(CommonUtils.dispatchAnalyticsEvents).toHaveBeenCalledTimes(1)
     expect(CommonUtils.dispatchAnalyticsEvents).toHaveBeenCalledWith({
       event: 'outsource_request',
     })
-    const dialog = screen.getByRole('dialog', {name: 'en-US › fr-FR'})
+    const dialog = screen.getByRole('dialog', {
+      name: 'Let Translated do it for you',
+    })
     expect(within(dialog).getByTestId('order-form')).toHaveTextContent('frpass')
     expect(within(panel()).getByText('ID 102')).toBeInTheDocument()
 
@@ -108,7 +116,9 @@ describe('ProjectTreeAnalysis', () => {
     renderPage(analysis)
     const frenchRow = screen.getByRole('row', {name: /^en-US › fr-FR ID/})
     fireEvent.click(
-      within(frenchRow).getByRole('button', {name: 'Buy translation'}),
+      within(frenchRow).getByRole('button', {
+        name: 'Buy translation from Translated',
+      }),
     )
     expect(window.open).toHaveBeenCalledWith(
       'https://translated.com/contact-us',
@@ -123,7 +133,7 @@ describe('ProjectTreeAnalysis', () => {
       buildVolumeAnalysis({summary: {status: 'FAST_OK', segments_analyzed: 4}}),
     )
     expect(
-      screen.getByRole('region', {name: 'Analysis status'}),
+      screen.getByRole('status', {name: 'Analysis status'}),
     ).toBeInTheDocument()
   })
 })

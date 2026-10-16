@@ -49,6 +49,7 @@ export const JobAnalysis = ({project, view, workflowType}) => {
               chunk={job.isSplit ? chunk : null}
               actionsEnabled={actionsEnabled}
               showSplitMerge={false}
+              size="standard"
             />
             {chunk.urls?.t && (
               <a className={styles.back} href={chunk.urls.t}>

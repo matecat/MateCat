@@ -1,6 +1,34 @@
+@use 'tokens/colors';
+@use 'commons/variables';
+
+// Values from the analysis mockup (Main.dc.html, the panel and hero actions)
 .actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+}
+
+// Split and merge: a light blue fill with the blue outline. The Button reads
+// its colours from these variables
+.actions .splitButton {
+  --btnBorderColor: #{colors.$blue500};
+  --btnAltTextColor: #{colors.$blue600};
+  font-size: variables.$font-size-small;
+}
+
+// One class more than the Button's own background rules
+.actions .splitButton:not(:disabled) {
+  background-color: colors.$blue50;
+}
+
+// Download: white with a grey outline and regular weight
+.actions .downloadButton {
+  --btnBorderColor: #{colors.$grey200};
+  --btnAltTextColor: #{colors.$grey1300};
+}
+
+.actions .downloadButton:not(:disabled) {
+  background-color: colors.$white;
+  font-weight: variables.$font-weight-regular;
 }
