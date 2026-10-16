@@ -8,7 +8,13 @@ import styles from './SavingCard.module.scss'
  * "Saving on word count" card. While the analysis runs (`live`) the whole card
  * flashes each time the saving changes.
  */
-export const SavingCard = ({savingPercent, workMinutesLabel, known, live}) => {
+export const SavingCard = ({
+  savingPercent,
+  workMinutesLabel,
+  known,
+  live,
+  unavailable = false,
+}) => {
   const flashing = useValueFlash(savingPercent, {enabled: live && known})
   const percentKnown = known && Number.isFinite(savingPercent)
 
@@ -23,12 +29,20 @@ export const SavingCard = ({savingPercent, workMinutesLabel, known, live}) => {
   return (
     <section className={className} data-testid="saving-card">
       <div className={styles.percent}>
-        <Pending known={percentKnown}>{`${savingPercent}%`}</Pending>
+        {unavailable ? (
+          <span className={styles.unavailable}>–</span>
+        ) : (
+          <Pending known={percentKnown}>{`${savingPercent}%`}</Pending>
+        )}
       </div>
       <div className={styles.content}>
         <h2 className={styles.title}>Saving on word count</h2>
         <div className={styles.work}>
-          <Pending known={known}>{workMinutesLabel}</Pending>
+          {unavailable ? (
+            'No analysis available'
+          ) : (
+            <Pending known={known}>{workMinutesLabel}</Pending>
+          )}
         </div>
       </div>
     </section>
@@ -41,4 +55,6 @@ SavingCard.propTypes = {
   workMinutesLabel: PropTypes.string,
   known: PropTypes.bool.isRequired,
   live: PropTypes.bool,
+  // No analysis at all (no text, or it failed): a dash instead of a value
+  unavailable: PropTypes.bool,
 }

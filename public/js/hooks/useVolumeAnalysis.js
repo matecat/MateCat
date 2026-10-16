@@ -6,6 +6,8 @@ import {ANALYSIS_STATUS} from '../constants/Constants'
 
 const POLLING_TIME = 1000
 const SEGMENTS_THRESHOLD = 50000
+// A failed poll is retried this many times, each wait twice the last
+export const POLL_RETRIES = 3
 
 const FINISHED_STATUSES = [ANALYSIS_STATUS.DONE, ANALYSIS_STATUS.NOT_TO_ANALYZE]
 const STOP_STATUSES = [...FINISHED_STATUSES, ANALYSIS_STATUS.EMPTY]
@@ -38,6 +40,8 @@ const filterJobAnalysis = (analysis, idJob, jobPassword) => {
 /**
  * Loads the volume analysis and the project of the analyze page. In project
  * mode it polls until the analysis is over, then refreshes the project once.
+ * A failed poll keeps the last analysis and is retried POLL_RETRIES times
+ * with backoff; then `error` is set next to the analysis it still returns.
  * The job page is reachable only once the analysis is done, so it never polls.
  *
  * @param {object} [options]
@@ -75,9 +79,25 @@ const useVolumeAnalysis = ({
       setLoading(false)
     }
 
+    let interval = POLLING_TIME
+    let failedPolls = 0
+
     const schedulePoll = ({summary}) => {
       if (STOP_STATUSES.includes(summary?.status)) return
-      timer = setTimeout(poll, getPollingInterval(summary?.total_segments))
+      interval = getPollingInterval(summary?.total_segments)
+      timer = setTimeout(poll, interval)
+    }
+
+    // The last good analysis stays on screen: retry with backoff, and only
+    // report the error once every retry failed
+    const pollFailed = (reason) => {
+      if (!active) return
+      failedPolls += 1
+      if (failedPolls > POLL_RETRIES) {
+        setError(reason)
+        return
+      }
+      timer = setTimeout(poll, interval * 2 ** failedPolls)
     }
 
     // The analysis is complete and usable: a failed refresh keeps the last project
@@ -92,13 +112,15 @@ const useVolumeAnalysis = ({
       getVolumeAnalysis(idProject, password)
         .then((response) => {
           if (!active) return
+          failedPolls = 0
+          setError(null)
           setAnalysis(response)
           if (FINISHED_STATUSES.includes(response.summary?.status)) {
             return refreshProject()
           }
           schedulePoll(response)
         })
-        .catch(fail)
+        .catch(pollFailed)
     }
 
     const initialLoad = jobAnalysis

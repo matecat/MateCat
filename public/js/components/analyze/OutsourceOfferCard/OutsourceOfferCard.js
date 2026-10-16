@@ -186,18 +186,23 @@ OfferBody.propTypes = offerPropTypes
  * once the analysis is complete. A whole split job is not quoted: its chunks
  * are bought one by one. Hidden when outsourcing is off.
  */
-export const OutsourceOfferCard = (props) => {
+export const OutsourceOfferCard = ({headingLevel = 3, ...offerProps}) => {
   const titleId = useId()
   if (!config.enable_outsource) return null
+  const Heading = `h${headingLevel}`
 
   return (
     <section className={styles.card} aria-labelledby={titleId}>
-      <h3 id={titleId} className={styles.title}>
+      <Heading id={titleId} className={styles.title}>
         Professional translation
-      </h3>
-      <OfferBody {...props} />
+      </Heading>
+      <OfferBody {...offerProps} />
     </section>
   )
 }
 
-OutsourceOfferCard.propTypes = offerPropTypes
+OutsourceOfferCard.propTypes = {
+  ...offerPropTypes,
+  // The card's heading: 3 inside a panel, 2 when it sits on the page itself
+  headingLevel: PropTypes.oneOf([2, 3, 4]),
+}

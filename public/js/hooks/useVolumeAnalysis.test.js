@@ -7,7 +7,10 @@ import {
   volumeAnalysisBuilders,
 } from '../../mocks/volumeAnalysisMock'
 import {ANALYSIS_STATUS} from '../constants/Constants'
-import useVolumeAnalysis, {getPollingInterval} from './useVolumeAnalysis'
+import useVolumeAnalysis, {
+  getPollingInterval,
+  POLL_RETRIES,
+} from './useVolumeAnalysis'
 
 // jsdom has no global setImmediate; take Node's, which fake timers leave alone
 const {setImmediate: realSetImmediate} = jest.requireActual('timers')
@@ -459,7 +462,7 @@ describe('useVolumeAnalysis lifecycle', () => {
     ).toHaveLength(1)
   })
 
-  test('surfaces a failed poll in error and stops polling', async () => {
+  test('retries a failed poll with backoff, then reports it and stops', async () => {
     let call = 0
     mswServer.use(
       http.post(ANALYSIS_URL, () => {
@@ -473,14 +476,49 @@ describe('useVolumeAnalysis lifecycle', () => {
     const {result} = renderVolumeAnalysis(PROJECT_OPTIONS)
 
     await flushNetwork()
-    expect(result.current.error).toBeNull()
-
     await advance(1000)
+    // First failure: retried after 2s, 4s and 8s, the error held back
+    expect(call).toBe(2)
+    expect(result.current.error).toBeNull()
+    await advance(2000)
+    expect(call).toBe(3)
+    await advance(4000)
+    expect(call).toBe(4)
+    expect(result.current.error).toBeNull()
+    await advance(8000)
+    expect(call).toBe(1 + 1 + POLL_RETRIES)
     expect(result.current.error).toBeInstanceOf(Response)
     expect(result.current.error.status).toBe(500)
+    // The last good analysis stays
     expect(result.current.analysis.summary.status).toBe(ANALYSIS_STATUS.BUSY)
 
-    await advance(10000)
-    expect(call).toBe(2)
+    await advance(60000)
+    expect(call).toBe(1 + 1 + POLL_RETRIES)
+  })
+
+  test('a retry that succeeds clears the failure and keeps polling', async () => {
+    let call = 0
+    mswServer.use(
+      http.post(ANALYSIS_URL, () => {
+        call += 1
+        if (call === 2) return new HttpResponse(null, {status: 500})
+        return HttpResponse.json(
+          buildVolumeAnalysis({
+            summary: {status: ANALYSIS_STATUS.BUSY, segments_analyzed: call},
+          }),
+        )
+      }),
+    )
+    const {result} = renderVolumeAnalysis(PROJECT_OPTIONS)
+
+    await flushNetwork()
+    await advance(1000)
+    await advance(2000)
+    expect(call).toBe(3)
+    expect(result.current.error).toBeNull()
+    expect(result.current.analysis.summary.segments_analyzed).toBe(3)
+
+    await advance(1000)
+    expect(call).toBe(4)
   })
 })

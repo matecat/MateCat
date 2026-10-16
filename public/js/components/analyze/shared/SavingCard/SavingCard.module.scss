@@ -19,6 +19,10 @@
     color: colors.$blue900;
   }
 
+  .unavailable {
+    color: colors.$grey500;
+  }
+
   .content {
     display: flex;
     flex-direction: column;

@@ -1,5 +1,5 @@
 import {ANALYSIS_WORKFLOW_TYPES} from '../../../constants/Constants'
-import {formatCount, getBuckets} from './buckets'
+import {formatCount, getBuckets, getSavedPercent} from './buckets'
 
 const STANDARD_RATES = {
   NO_MATCH: 100,
@@ -194,4 +194,18 @@ test('getBuckets returns nothing for an unknown workflow', () => {
 test('formatCount rounds and groups thousands', () => {
   expect(formatCount(1234.6)).toBe('1,235')
   expect(formatCount(undefined)).toBe('0')
+})
+
+describe('getSavedPercent', () => {
+  test.each([
+    [72, 100, 28],
+    [6, 4193, 99.9],
+    [4180, 4193, 0.3],
+    [4192, 4193, 0.1],
+    [0, 4193, 100],
+    [4193, 4193, 0],
+    [50, 0, null],
+  ])('%s of %s → %s', (part, total, percent) => {
+    expect(getSavedPercent(part, total)).toBe(percent)
+  })
 })

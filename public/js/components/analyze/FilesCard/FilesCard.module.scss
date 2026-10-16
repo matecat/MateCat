@@ -1,0 +1,28 @@
+@use 'tokens/colors';
+@use 'commons/variables';
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 20px 24px;
+  border: 1px solid colors.$grey150;
+  border-radius: variables.$border-radius-default;
+  background-color: colors.$white;
+  color: colors.$grey1300;
+  text-align: left;
+}
+
+.title {
+  margin: 0;
+  font-size: variables.$font-size-base;
+  font-weight: 700;
+  color: colors.$blue900;
+}
+
+.message {
+  margin: 0;
+  font-size: variables.$font-size-small;
+  color: colors.$grey500;
+}

@@ -1,19 +1,15 @@
 import React, {useCallback, useMemo, useState} from 'react'
 import PropTypes from 'prop-types'
-import CommonUtils from '../../../utils/commonUtils'
 import {ANALYSIS_PHASE} from '../utils/deriveAnalysisView'
 import {ProjectHeaderCard} from '../ProjectHeaderCard'
 import {AnalysisStatusCard} from '../shared/AnalysisStatusCard'
 import {LanguageTree, getLanguagePair} from '../LanguageTree'
 import {DetailsPanel, getSubtitle} from '../DetailsPanel'
-import {BuyTranslationDrawer} from '../BuyTranslationDrawer'
-import {CONTACT_US_URL} from '../OutsourceOfferCard'
+import {BuyTranslationDrawer, useBuyTranslation} from '../BuyTranslationDrawer'
+import {ANALYSIS_PAGE_TITLE, AnalysisPage} from '../shared/AnalysisPage'
 import styles from './ProjectTreeAnalysis.module.scss'
 
-export const PAGE_TITLE = 'Project analysis'
-
-// For the page's scroll container (#analyze-container): see the SCSS
-export const SCROLL_CONTAINER_CLASS = styles.scrollContainer
+export const PAGE_TITLE = ANALYSIS_PAGE_TITLE.PROJECT
 
 // The first split job as a whole if there is one, else the first job
 export const getDefaultSelection = (jobs) => {
@@ -39,7 +35,6 @@ const resolveSelection = (jobs, selection) => {
 export const ProjectTreeAnalysis = ({project, view, workflowType}) => {
   const {jobs, phase, known, actionsEnabled, progress, totals} = view
   const [selection, setSelection] = useState(() => getDefaultSelection(jobs))
-  const [drawer, setDrawer] = useState(null)
 
   // A selection that no longer exists (e.g. merged chunks) falls back
   const selected =
@@ -56,37 +51,21 @@ export const ProjectTreeAnalysis = ({project, view, workflowType}) => {
     [project],
   )
 
-  const closeDrawer = useCallback(() => setDrawer(null), [])
-
-  const openBuy = useCallback(
-    (job, chunk) => {
-      if (!job.outsourceAvailable) {
-        window.open(CONTACT_US_URL, '_blank')
-        return
-      }
-      const projectJob = (project.jobs ?? []).find(
-        (current) =>
-          String(current.id) === String(job.id) &&
-          current.password === chunk.password,
-      ) ?? {id: job.id, password: chunk.password}
-      CommonUtils.dispatchAnalyticsEvents({event: 'outsource_request'})
+  const selectBought = useCallback(
+    (job, chunk) =>
       setSelection({
         jobId: job.id,
         chunkIndex: job.isSplit ? chunk.index : null,
-      })
-      setDrawer({
-        projectJob,
-        title: getLanguagePair(job),
-        subtitle: getSubtitle(job, job.isSplit ? chunk : null),
-        weightedWords: chunk.totals.equivalent,
-      })
-    },
-    [project],
+      }),
+    [],
   )
+  const {order, openBuy, closeBuy} = useBuyTranslation({
+    project,
+    onOpen: selectBought,
+  })
 
   return (
-    <div className={styles.page}>
-      <h1 className={styles.title}>{PAGE_TITLE}</h1>
+    <AnalysisPage title={PAGE_TITLE}>
       <ProjectHeaderCard
         projectId={project.id}
         projectName={project.name}
@@ -131,18 +110,21 @@ export const ProjectTreeAnalysis = ({project, view, workflowType}) => {
           </div>
         )}
       </div>
-      {drawer && (
+      {order && (
         <BuyTranslationDrawer
           open={true}
-          onClose={closeDrawer}
+          onClose={closeBuy}
           project={project}
-          projectJob={drawer.projectJob}
-          title={drawer.title}
-          subtitle={drawer.subtitle}
-          weightedWords={drawer.weightedWords}
+          projectJob={order.projectJob}
+          title={getLanguagePair(order.job)}
+          subtitle={getSubtitle(
+            order.job,
+            order.job.isSplit ? order.chunk : null,
+          )}
+          weightedWords={order.chunk.totals.equivalent}
         />
       )}
-    </div>
+    </AnalysisPage>
   )
 }
 

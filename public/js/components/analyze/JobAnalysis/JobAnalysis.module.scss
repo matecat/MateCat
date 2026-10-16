@@ -1,0 +1,48 @@
+@use 'tokens/colors';
+@use 'commons/variables';
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0 0;
+  font-size: variables.$font-size-small;
+  color: colors.$grey500;
+}
+
+// A link that looks like the outline buttons next to it
+.back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid colors.$blue600;
+  border-radius: variables.$border-radius-default;
+  font-size: variables.$font-size-small;
+  font-weight: 700;
+  color: colors.$blue600;
+  text-decoration: none;
+
+  // The same hover and keyboard focus as the outline buttons beside it
+  &:hover,
+  &:focus-visible {
+    border-color: colors.$blue700;
+    background-color: colors.$blue50;
+    color: colors.$blue700;
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.columns {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 16px;
+
+  > * {
+    flex: 1 1 480px;
+  }
+}

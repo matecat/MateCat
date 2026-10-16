@@ -94,3 +94,24 @@ export const getBuckets = ({
 
 export const formatCount = (value) =>
   Math.round(value ?? 0).toLocaleString('en-US')
+
+/**
+ * How much of `total` the weighting takes off, in percent. Whole numbers,
+ * except near the ends: 99.86% is 99.9, never 100, and 0.3% is 0.3, never 0,
+ * so only an exact 0% or 100% reads as one.
+ *
+ * @param {number} part weighted count
+ * @param {number} total raw count
+ * @returns {number|null} null without a total
+ */
+export const getSavedPercent = (part, total) => {
+  if (!(total > 0)) return null
+  const percent = (1 - (part ?? 0) / total) * 100
+  if (percent === 0 || percent === 100) return percent
+  const rounded = Math.round(percent)
+  if (rounded > 0 && rounded < 100) return rounded
+  if (percent > 0 && percent < 100) {
+    return Math.min(99.9, Math.max(0.1, Math.round(percent * 10) / 10))
+  }
+  return rounded
+}

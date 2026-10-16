@@ -235,4 +235,11 @@ describe('OutsourceOfferCard', () => {
     await waitPastDebounce()
     await waitFor(() => expect(requests).toHaveLength(0))
   })
+
+  test('the heading level can follow the page', () => {
+    renderCard({actionsEnabled: false, headingLevel: 2})
+    expect(
+      screen.getByRole('heading', {level: 2, name: 'Professional translation'}),
+    ).toBeInTheDocument()
+  })
 })

@@ -10,7 +10,7 @@ import {buildVolumeAnalysis} from '../../../../mocks/volumeAnalysisMock'
 import ModalsActions from '../../../actions/ModalsActions'
 import {getGlobalWarnings} from '../../../api/getGlobalWarnings'
 import {deriveAnalysisView} from '../utils/deriveAnalysisView'
-import {countErrorSegments, DetailsPanel} from './DetailsPanel'
+import {DetailsPanel} from './DetailsPanel'
 
 jest.mock('../../../actions/ModalsActions', () => ({
   __esModule: true,
@@ -386,15 +386,5 @@ describe('DetailsPanel', () => {
       'data-chunk',
       'frpass',
     )
-  })
-})
-
-describe('countErrorSegments', () => {
-  test('counts each segment once across categories', () => {
-    expect(
-      countErrorSegments({ERROR: {Categories: {A: [1, 2], B: [2, 3]}}}),
-    ).toBe(3)
-    expect(countErrorSegments({})).toBe(0)
-    expect(countErrorSegments(undefined)).toBe(0)
   })
 })

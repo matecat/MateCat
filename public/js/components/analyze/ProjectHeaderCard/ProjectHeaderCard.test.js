@@ -56,6 +56,8 @@ describe('ProjectHeaderCard', () => {
     [ANALYSIS_PHASE.COUNTING, 'Counting words'],
     [ANALYSIS_PHASE.QUEUE, 'In queue'],
     [ANALYSIS_PHASE.ANALYZING, 'Analyzing'],
+    [ANALYSIS_PHASE.NOT_ANALYZED, 'Not analyzed'],
+    [ANALYSIS_PHASE.EMPTY, 'No text found'],
   ])('phase %s shows the %s status', (phase, label) => {
     renderCard({phase})
     expect(screen.getByText(label)).toBeInTheDocument()
@@ -107,6 +109,20 @@ describe('ProjectHeaderCard', () => {
     renderCard({phase: ANALYSIS_PHASE.QUEUE})
     expect(screen.getAllByTestId('pending')).toHaveLength(2)
   })
+})
+
+test('without an analysis the saving card shows no value', () => {
+  render(
+    <ProjectHeaderCard
+      projectId={20}
+      projectName="Analyzed project"
+      projectPassword="projpass"
+      languageCount={1}
+      phase={ANALYSIS_PHASE.EMPTY}
+      totals={{raw: 0, industry: 0, equivalent: 0, discount: 0}}
+    />,
+  )
+  expect(screen.getByText('No analysis available')).toBeInTheDocument()
 })
 
 describe('getWorkLabel', () => {

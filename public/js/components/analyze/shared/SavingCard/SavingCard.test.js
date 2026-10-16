@@ -73,3 +73,11 @@ test('shows a placeholder for a missing saving', () => {
   expect(screen.getByText('Not available yet')).toBeInTheDocument()
   expect(screen.getByText('2 work hours at 3,000 w/day')).toBeInTheDocument()
 })
+
+test('an unavailable analysis shows a dash and says so', () => {
+  render(<SavingCard {...props} unavailable={true} />)
+  expect(screen.getByText('–')).toBeInTheDocument()
+  expect(screen.getByText('No analysis available')).toBeInTheDocument()
+  expect(screen.queryByText('Not available yet')).not.toBeInTheDocument()
+  expect(screen.queryByText(/work hours/)).not.toBeInTheDocument()
+})

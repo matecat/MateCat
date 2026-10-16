@@ -78,7 +78,7 @@ CountCell.propTypes = {
   live: PropTypes.bool,
 }
 
-const CopyLinkButton = ({label, url, disabled}) => {
+export const CopyLinkButton = ({label, url, disabled}) => {
   // 'copied' after a successful copy, 'fallback' when the clipboard failed
   const [state, setState] = useState(null)
   const timerRef = useRef()

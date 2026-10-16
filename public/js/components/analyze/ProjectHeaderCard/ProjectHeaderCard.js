@@ -5,6 +5,7 @@ import {Badge, BADGE_TYPE} from '../../common/Badge'
 import Download from '../../../../img/icons/Download'
 import {ANALYSIS_PHASE} from '../utils/deriveAnalysisView'
 import {SavingCard} from '../shared/SavingCard'
+import {getSavedPercent} from '../utils/buckets'
 import styles from './ProjectHeaderCard.module.scss'
 
 const WORDS_PER_DAY = 3000
@@ -34,10 +35,20 @@ const PHASE_STATUS = {
   [ANALYSIS_PHASE.QUEUE]: {label: 'In queue', type: BADGE_TYPE.YELLOW},
   [ANALYSIS_PHASE.ANALYZING]: {label: 'Analyzing', type: BADGE_TYPE.BLUE},
   [ANALYSIS_PHASE.NOT_ANALYZED]: {label: 'Not analyzed', type: BADGE_TYPE.RED},
-  [ANALYSIS_PHASE.EMPTY]: {label: 'No text to translate', type: BADGE_TYPE.RED},
+  [ANALYSIS_PHASE.EMPTY]: {label: 'No text found', type: BADGE_TYPE.RED},
 }
 
 const FAILED_STATUS = {label: 'Failed', type: BADGE_TYPE.RED}
+
+// The analysis status pill
+export const PhaseBadge = ({phase}) => {
+  const status = PHASE_STATUS[phase]
+  return status ? <Badge type={status.type}>{status.label}</Badge> : null
+}
+
+PhaseBadge.propTypes = {
+  phase: PropTypes.oneOf(Object.values(ANALYSIS_PHASE)).isRequired,
+}
 
 const SupportContact = () =>
   config.support_mail?.includes('@') ? (
@@ -70,9 +81,7 @@ export const ProjectHeaderCard = ({
   const savingPercent =
     done && totals.discount > 0
       ? totals.discount
-      : totals.raw > 0
-        ? Math.floor(((totals.raw - totals.equivalent) / totals.raw) * 100)
-        : 0
+      : (getSavedPercent(totals.equivalent, totals.raw) ?? 0)
 
   const handleDownloadReport = () => {
     downloadAnalysisReport({
@@ -120,6 +129,10 @@ export const ProjectHeaderCard = ({
         workMinutesLabel={getWorkLabel(totals.equivalent)}
         known={done || live}
         live={live}
+        unavailable={[
+          ANALYSIS_PHASE.NOT_ANALYZED,
+          ANALYSIS_PHASE.EMPTY,
+        ].includes(phase)}
       />
     </div>
   )

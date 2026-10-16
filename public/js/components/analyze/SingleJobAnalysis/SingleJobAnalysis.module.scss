@@ -1,0 +1,21 @@
+// The breakdown takes the room; the offer and the files go beside it, or
+// under it on a narrow screen
+.columns {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.main {
+  flex: 999 1 560px;
+  min-width: 0;
+}
+
+.side {
+  display: flex;
+  flex: 1 1 420px;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}

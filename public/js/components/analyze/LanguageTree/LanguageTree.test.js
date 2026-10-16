@@ -67,7 +67,11 @@ const jobRow = (pair) =>
     name: new RegExp(`^(Chunks of ${pair} )?${pair} ID`),
   })
 const frenchRow = () => jobRow('en-US › fr-FR')
-const flush = () => act(() => Promise.resolve())
+// The copy awaits the clipboard, then sets state. Node's setImmediate (which
+// fake timers leave alone) lets every pending promise settle inside act
+const {setImmediate: realSetImmediate} = jest.requireActual('timers')
+const flush = () =>
+  act(() => new Promise((resolve) => realSetImmediate(resolve)))
 
 // The compiled rules of a class in the component's own stylesheet
 const SCSS = fs.readFileSync(
@@ -172,7 +176,7 @@ describe('LanguageTree', () => {
     ).not.toHaveAttribute('aria-current')
   })
 
-  test('clicking anywhere on a row selects it, except on its own controls', () => {
+  test('clicking anywhere on a row selects it, except on its own controls', async () => {
     const {onSelect} = renderTree()
 
     fireEvent.click(within(jobRow('en-US › fr-FR')).getAllByRole('cell')[0])
@@ -186,6 +190,8 @@ describe('LanguageTree', () => {
 
     onSelect.mockClear()
     fireEvent.click(screen.getByRole('button', {name: 'Copy the fr-FR link'}))
+    // Let the copy finish inside act
+    await flush()
     expect(onSelect).not.toHaveBeenCalled()
   })
 

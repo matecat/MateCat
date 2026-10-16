@@ -1,0 +1,38 @@
+@use 'tokens/colors';
+@use 'commons/variables';
+
+// #analyze-container scrolls the page. Sticky rows stick to its padding edge,
+// so its padding moves onto the page and the sticky offsets stay 0
+:global(.project-list).scrollContainer {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 40px 0 160px;
+  text-align: left;
+}
+
+.title {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: colors.$blue900;
+  text-align: left;
+}
+
+.notice {
+  margin: 0;
+  padding: 12px 16px;
+  border: 1px solid colors.$orange600;
+  border-left-width: 4px;
+  border-radius: variables.$border-radius-default;
+  background-color: colors.$white;
+  font-size: variables.$font-size-small;
+  color: colors.$grey1300;
+  text-align: left;
+}
