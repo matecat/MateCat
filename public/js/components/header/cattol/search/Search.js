@@ -16,6 +16,7 @@ import AlertModal from '../../../modals/AlertModal'
 import ModalsActions from '../../../../actions/ModalsActions'
 import {tagSignatures} from '../../../segments/utils/DraftMatecatUtils/tagModel'
 import CommonUtils from '../../../../utils/commonUtils'
+import SegmentUtils from '../../../../utils/segmentUtils'
 import {
   REVISE_STEP_NUMBER,
   SEGMENTS_STATUS,
@@ -227,12 +228,23 @@ const Search = (props) => {
     // It is applied synchronously to the store, so the segment read below
     // already carries the new text and that is what gets saved.
     const sid = occurrencesList[featuredSearchResult]
-    const previousTranslation =
-      SegmentStore.getSegmentByIdToJS(sid)?.translation
+    const segmentToReplace = SegmentStore.getSegmentByIdToJS(sid)
+    const previousTranslation = segmentToReplace?.translation
+
+    // A locked segment is usually approved too, so check it first: show the
+    // same alert as clicking on it, not the revised state error below
+    if (
+      segmentToReplace &&
+      !segmentToReplace.unlocked &&
+      SegmentUtils.isLockedSegment(segmentToReplace)
+    ) {
+      SegmentActions.showLockedSegmentModal()
+      return false
+    }
 
     // The server refuses to save a revised segment from the translate page,
     // so refuse here too, before the text is changed
-    if (isRevisedSegmentInTranslate(SegmentStore.getSegmentByIdToJS(sid))) {
+    if (isRevisedSegmentInTranslate(segmentToReplace)) {
       ModalsActions.showModalComponent(
         MODAL_KEY.ALERT,
         {text: 'Setting revised state from translation is not allowed.'},
