@@ -291,6 +291,19 @@ class ProjectManagerModel
     }
 
     /**
+     * Read from the database, never from cache.
+     *
+     * @throws PDOException
+     */
+    public function projectExists(int $idProject): bool
+    {
+        $stmt = $this->dbHandler->getConnection()->prepare("SELECT 1 FROM projects WHERE id = :id_project");
+        $stmt->execute(['id_project' => $idProject]);
+
+        return $stmt->fetchColumn() !== false;
+    }
+
+    /**
      * Performs a full cascade deletion of a project and all its related data.
      *
      * Deletion order mirrors the production cleanup script to respect implicit

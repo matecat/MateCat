@@ -12,6 +12,7 @@ use Model\ProjectCreation\ProjectManagerModel;
 use PDO;
 use PDOException;
 use PDOStatement;
+use PHPUnit\Framework\Attributes\DataProvider;
 use ReflectionProperty;
 use Utils\Logger\MatecatLogger;
 
@@ -994,5 +995,38 @@ class ProjectManagerModelTest extends AbstractTest
         } catch (ProjectCreationException $e) {
             $this->assertBulkInsertFailure($e, $original, ProjectCreationError::BULK_INSERT_SEGMENT_METADATA, 'Failed to save segment metadata.');
         }
+    }
+
+    // ── projectExists: a redelivered creation must not delete a project another run inserted ──
+
+    /**
+     * @return array<string, array{int|false, bool}>
+     */
+    public static function projectRows(): array
+    {
+        return [
+            'no row' => [false, false],
+            'a row'  => [1, true],
+        ];
+    }
+
+    #[DataProvider('projectRows')]
+    public function testProjectExistsReadsTheProjectsTable(int|false $column, bool $expected): void
+    {
+        $stmt = $this->createMock(PDOStatement::class);
+        $stmt->expects($this->once())->method('execute')->with(['id_project' => 7])->willReturn(true);
+        $stmt->method('fetchColumn')->willReturn($column);
+
+        $pdo = $this->createMock(PDO::class);
+        $pdo->expects($this->once())->method('prepare')
+            ->with('SELECT 1 FROM projects WHERE id = :id_project')
+            ->willReturn($stmt);
+
+        $db = $this->createStub(IDatabase::class);
+        $db->method('getConnection')->willReturn($pdo);
+
+        $model = new ProjectManagerModel($db, $this->createStub(MatecatLogger::class));
+
+        $this->assertSame($expected, $model->projectExists(7));
     }
 }

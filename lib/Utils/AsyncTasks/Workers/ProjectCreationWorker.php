@@ -128,7 +128,8 @@ class ProjectCreationWorker extends AbstractWorker
             $this->publishProjectResults($this->projectStructure);
         } catch (Throwable $e) {
             // Ack, never requeue: a Redis error reaching Executor::main() as ConnectionException requeues the
-            // message, and the second run deletes the project the first one committed (clearFailedProject()).
+            // message, and the second run fails and reports the project the first one committed as failed
+            // (clearFailedProject() keeps the project, but the published result is an error).
             throw new EndQueueException(
                 "--- (Worker " . $this->_workerPid . ") :  result of project $idProject not published: " . $e->getMessage(),
                 self::ERR_REQUEUE_END,

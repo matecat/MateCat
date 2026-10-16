@@ -434,7 +434,12 @@ class ProjectManager
                 $this->projectStructure->addError($code, $message);
             }
 
-            $this->logger->error("Project creation failed", (new Error($e))->render(true));
+            // The id goes in the error line: the cleanup below removes every row that names it, unless another run
+            // inserted the project, and its own lines are debug only.
+            $this->logger->error(
+                "Project creation failed: project " . $this->projectStructure->id_project,
+                (new Error($e))->render(true)
+            );
             $this->clearFailedProject();
 
             // Ack, never requeue: a second run would create the project again.
@@ -847,6 +852,21 @@ class ProjectManager
         }
 
         try {
+            // A redelivered message carries the id of a project another run inserted: one that finished, or one
+            // still running if the broker redelivered while it worked. This run fails before the insert (the upload
+            // directory is gone) or on it (duplicate key), and deleting by id would remove that project. The files
+            // rows this run inserted before the projects insert (resolveAndInsertFiles()) stay under that id.
+            // Known cost: a first run killed mid-creation (SIGKILL, OOM) after its insert cannot be told from a live
+            // one, so its partial rows stay too. Also skipped, and left behind: this run's own row when
+            // createProjectRecord() throws after its commit (the read-back came up empty), because $this->project is
+            // then never set. Both stay NOT_READY_FOR_ANALYSIS, hidden from the project lists; to find them:
+            // SELECT id FROM projects WHERE status_analysis = 'NOT_READY_FOR_ANALYSIS' AND create_date < NOW() - INTERVAL 1 DAY
+            if (!isset($this->project) && $this->getProjectManagerModel()->projectExists($idProject)) {
+                $this->logger->warning("Project $idProject was inserted by another run: cleanup skipped");
+
+                return;
+            }
+
             $this->log("Deleting Records.");
             $this->getProjectManagerModel()->deleteProject($idProject);
             $this->log("Cascade-deleted project ID: " . $idProject);

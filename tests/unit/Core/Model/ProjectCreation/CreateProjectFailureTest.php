@@ -395,6 +395,12 @@ class CreateProjectFailureTest extends AbstractTest
         $model->expects($this->once())->method('deleteProject')->with(self::MISSING_PROJECT_ID);
         $this->reachTheFinalize($this->failOnPostProjectCreate($original), $model);
 
+        // The id is in the error line: the cleanup deletes every row that would name it.
+        $logger = $this->createMock(MatecatLogger::class);
+        $logger->expects($this->once())->method('error')
+            ->with('Project creation failed: project ' . self::MISSING_PROJECT_ID, $this->anything());
+        $this->pm->setLogger($logger);
+
         $thrown = $this->runCreateProject();
 
         $result = $this->pm->getTestProjectStructure()->result;

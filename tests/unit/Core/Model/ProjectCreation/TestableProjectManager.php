@@ -394,6 +394,19 @@ class TestableProjectManager extends ProjectManager
         $this->projectManagerModel = $model;
     }
 
+    public function setLogger(MatecatLogger $logger): void
+    {
+        (new ReflectionClass(ProjectManager::class))->getProperty('logger')->setValue($this, $logger);
+    }
+
+    /**
+     * Mark the project row as inserted by this run, as createProjectRecord() does.
+     */
+    public function setProject(ProjectStruct $project): void
+    {
+        $this->project = $project;
+    }
+
     /**
      * Public wrapper to invoke the private clearFailedProject().
      * @throws ReflectionException
