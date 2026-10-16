@@ -425,6 +425,24 @@ class CreateProjectFailureTest extends AbstractTest
     }
 
     #[Test]
+    public function aFailedActivityLogStillReportsTheCommittedProject(): void
+    {
+        $model = $this->createMock(ProjectManagerModel::class);
+        $model->expects($this->never())->method('deleteProject');
+        $this->reachTheFinalize($this->passThroughFeatures(), $model);
+
+        // An Error, not an Exception: the old catch inside pushActivityLog() let it escape with no result.
+        $this->pm->activityLogFailure = new Error('Activity log failed');
+
+        $this->pm->createProject();
+
+        $result = $this->pm->getTestProjectStructure()->result;
+        self::assertEmpty($result['errors']);
+        self::assertSame(self::MISSING_PROJECT_ID, $result['id_project']);
+        self::assertSame([false], $this->pm->activityLogPushedInsideScope);
+    }
+
+    #[Test]
     public function aFailureAfterTheCommitKeepsTheProject(): void
     {
         $model = $this->createMock(ProjectManagerModel::class);

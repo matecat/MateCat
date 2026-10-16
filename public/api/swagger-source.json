@@ -680,6 +680,26 @@
               "$ref": "#/definitions/ProjectCreationStatus"
             }
           },
+          "202": {
+            "description": "The project is still in the creation queue. Poll again later.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "integer"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No project matches the supplied id and password, or its creation status has expired.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
           "default": {
             "description": "Unexpected error"
           }

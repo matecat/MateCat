@@ -449,7 +449,12 @@ class ProjectManager
 
         // The project is committed: a failure from here on keeps it.
         // The activity log runs only now, so a finalize that rolls back never reports PROJECT_CREATED.
-        $this->pushActivityLog();
+        // Best effort: whatever it throws, the creation goes on to populateResult() and reports the project.
+        try {
+            $this->pushActivityLog();
+        } catch (Throwable $e) {
+            $this->log("**** Activity Log failed for project {$this->projectStructure->id_project}. ****", $e);
+        }
 
         // Built only now: the worker publishes the result whatever happens, and a rolled-back
         // project must not be reported as created.
@@ -984,7 +989,10 @@ class ProjectManager
     }
 
     /**
+     * The caller, createProject(), catches and logs any failure.
+     *
      * @throws InvalidArgumentException
+     * @throws Exception
      */
     protected function pushActivityLog(): void
     {
@@ -995,20 +1003,13 @@ class ProjectManager
         $activity->uid = $this->projectStructure->uid;
         $activity->event_date = date('Y-m-d H:i:s');
 
-        try {
-            WorkerClient::enqueueWithClient(
-                AMQHandler::getNewInstanceForDaemons(),
-                'ACTIVITYLOG',
-                ActivityLogWorker::class,
-                $activity->toArray(),
-                ['persistent' => WorkerClient::$_HANDLER->persistent]
-            );
-        } catch (Exception $e) {
-            # Handle the error, logging, ...
-            $output = "**** Activity Log failed. AMQ Connection Error. **** ";
-            $output .= var_export($activity, true);
-            $this->log($output, $e);
-        }
+        WorkerClient::enqueueWithClient(
+            AMQHandler::getNewInstanceForDaemons(),
+            'ACTIVITYLOG',
+            ActivityLogWorker::class,
+            $activity->toArray(),
+            ['persistent' => WorkerClient::$_HANDLER->persistent]
+        );
     }
 
     /**

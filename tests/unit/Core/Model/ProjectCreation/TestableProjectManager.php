@@ -471,11 +471,22 @@ class TestableProjectManager extends ProjectManager
     public ?Throwable $analyzeUrlFailure = null;
 
     /**
+     * When set, pushActivityLog() throws it after recording the call.
+     */
+    public ?Throwable $activityLogFailure = null;
+
+    /**
      * Record the call instead of enqueueing to AMQ.
+     *
+     * @throws Throwable
      */
     protected function pushActivityLog(): void
     {
         $this->activityLogPushedInsideScope[] = $this->dbHandler->isInTransactionScope();
+
+        if ($this->activityLogFailure !== null) {
+            throw $this->activityLogFailure;
+        }
     }
 
     public function getAnalyzeURL(): string

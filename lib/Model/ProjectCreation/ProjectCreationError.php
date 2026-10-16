@@ -7,7 +7,7 @@ namespace Model\ProjectCreation;
  *
  * These integer values flow through Redis to the frontend via
  * {@see \Utils\ActiveMQ\ClientHelpers\ProjectQueue::publishResults()} and
- * {@see \Controller\API\App\ProjectCreationStatusController}, so their
+ * {@see \Controller\API\V2\ProjectCreationStatusController}, so their
  * numeric values are part of the public contract and must not change
  * without coordinating with the frontend.
  *
