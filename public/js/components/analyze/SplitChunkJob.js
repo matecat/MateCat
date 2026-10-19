@@ -27,23 +27,24 @@ const SplitChunkJob = ({
 
   const chunksHtml = job.chunks.map((rawChunk, rawIndex) => {
     const index = rawIndex + 1
+    const chunkJob = project
+      .get('jobs')
+      .find(
+        (item) =>
+          item.get('id') === job.id &&
+          item.get('password') === rawChunk.password,
+      )
     const chunkAnalysis = {
       ...rawChunk,
       id: job.id,
       outsource_available: job.outsource_available,
       target_name: job.target_name,
       source_name: job.source_name,
+      outsource_info: chunkJob?.get('outsource_info').toJS(),
     }
 
     const isOutsourceOpen =
       openOutsource && outsourceJobId === `${job.id}-${index}`
-    const chunkJob = project
-      .get('jobs')
-      .find(
-        (item) =>
-          item.get('id') === chunkAnalysis.id &&
-          item.get('password') === chunkAnalysis.password,
-      )
     checkPayableChanged(job.id + index, chunkAnalysis.total_equivalent)
 
     const jidChunk = `${chunkAnalysis.id}-${index}`
