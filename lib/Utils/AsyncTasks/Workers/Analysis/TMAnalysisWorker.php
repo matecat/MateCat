@@ -77,8 +77,12 @@ class TMAnalysisWorker extends AbstractWorker
     ) {
         parent::__construct($queueHandler, $database);
 
-        $this->redisService = $redisService ?? new AnalysisRedisService($queueHandler);
-        $this->segmentUpdater = $segmentUpdater ?? new SegmentUpdaterService($this->database);
+        // Route the services' logs to the analysis-queue log (via _doLog observer),
+        // alongside the rest of the analysis logs, instead of the global general_log.txt.
+        $log = fn(string $message) => $this->_doLog($message);
+
+        $this->redisService = $redisService ?? new AnalysisRedisService($queueHandler, $log);
+        $this->segmentUpdater = $segmentUpdater ?? new SegmentUpdaterService($this->database, $log);
         $this->projectCompletion = $projectCompletion ?? new ProjectCompletionService(
             $this->redisService,
             new ProjectCompletionRepository(
@@ -87,10 +91,9 @@ class TMAnalysisWorker extends AbstractWorker
                 new JobDao($this->database),
                 new AnalysisDao($this->database),
                 new CounterModel($this->database),
+                $log,
             ),
-            // Route completion logs to the analysis-queue log (via _doLog observer),
-            // alongside the rest of the analysis logs, instead of the global general_log.txt.
-            fn(string $message) => $this->_doLog($message)
+            $log
         );
         $this->engineService = $engineService ?? new EngineService(new DefaultEngineResolver($this->database), $this->database);
         $this->matchProcessor = $matchProcessor ?? new MatchProcessorService(new MatchSorter(), $this->database);

@@ -12,6 +12,7 @@ use Exception;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Model\Users\UserStruct;
+use TypeError;
 use Utils\Logger\LoggerFactory;
 use Utils\TmKeyManagement\ClientTmKeyStruct;
 use Utils\TmKeyManagement\Filter;
@@ -41,7 +42,7 @@ class UserKeysModel
      *
      * @return array{totals: array<int, ClientTmKeyStruct>, job_keys: list<ClientTmKeyStruct>}
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function getKeys(string $jobKeys, int $ttl = 0): array
     {
@@ -54,7 +55,7 @@ class UserKeysModel
             $keyList = $_keyDao->read($dh, false, $ttl);
         } catch (Exception $e) {
             $keyList = [];
-            LoggerFactory::doJsonLog($e->getMessage());
+            LoggerFactory::getLogger('engines')->error($e->getMessage());
         }
 
         $reverse_lookup_user_personal_keys = ['pos' => [], 'elements' => []];

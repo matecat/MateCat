@@ -11,7 +11,6 @@ use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
-use Psr\Log\InvalidArgumentException;
 use ReflectionException;
 use TypeError;
 use Utils\Logger\MatecatLogger;
@@ -76,7 +75,6 @@ class TmKeyService
      * @throws Exception
      * @throws DomainException
      * @throws TypeError
-     * @throws InvalidArgumentException
      */
     public function setPrivateTMKeys(ProjectStructure $projectStructure, ?string $firstTMXFileName = ''): void
     {

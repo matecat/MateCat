@@ -34,7 +34,9 @@ class Database implements IDatabase
     /**
      * Work deferred until the current transaction commits.
      *
-     * @var list<array{callable(): void, bool}> The callback and whether its failure is critical.
+     * @var array<int|string, array{callable(): void, bool}> The callback and whether its failure is
+     *      critical. Int keys for plain callbacks, string keys for the ones queued with a callback
+     *      dedupe key.
      */
     private array $afterCommitCallbacks = [];
 
@@ -285,7 +287,7 @@ class Database implements IDatabase
      *
      * @throws PDOException
      */
-    public function onCommit(callable $callback, bool $critical = false): void
+    public function onCommit(callable $callback, bool $critical = false, ?string $callbackDedupeKey = null): void
     {
         if (!$this->getConnection()->inTransaction()) {
             $callback();
@@ -293,7 +295,19 @@ class Database implements IDatabase
             return;
         }
 
-        $this->afterCommitCallbacks[] = [$callback, $critical];
+        if ($callbackDedupeKey === null) {
+            $this->afterCommitCallbacks[] = [$callback, $critical];
+
+            return;
+        }
+
+        // Prefixed so that a numeric key such as '42' stays a string: PHP would turn it into the int
+        // key of a plain callback and overwrite that one instead.
+        $slot = 'key:' . $callbackDedupeKey;
+
+        // Removed first, so the replacement goes to the end of the queue and not to the old place.
+        unset($this->afterCommitCallbacks[$slot]);
+        $this->afterCommitCallbacks[$slot] = [$callback, $critical];
     }
 
     /**
@@ -321,8 +335,7 @@ class Database implements IDatabase
             try {
                 $callback();
             } catch (Throwable $e) {
-                LoggerFactory::doJsonLog([
-                    'message' => 'after-commit callback failed',
+                LoggerFactory::getLogger('dao')->error('after-commit callback failed', [
                     'critical' => $critical,
                     'error' => $e->getMessage(),
                 ]);
@@ -405,8 +418,7 @@ class Database implements IDatabase
                     // MySQL kills the transaction itself on deadlock (1213) and on lock wait timeout
                     // (1205), so the rollback can fail for reasons that say nothing about the cause.
                     // Record it and let the original exception travel.
-                    LoggerFactory::doJsonLog([
-                        'message' => 'rollback failed while aborting a transaction scope',
+                    LoggerFactory::getLogger('dao')->error('rollback failed while aborting a transaction scope', [
                         'error' => $rollbackFailure->getMessage(),
                         'cause' => $e->getMessage(),
                     ]);

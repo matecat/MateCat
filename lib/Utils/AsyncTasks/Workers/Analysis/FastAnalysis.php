@@ -4,6 +4,7 @@ namespace Utils\AsyncTasks\Workers\Analysis;
 
 use DateTime;
 use Exception;
+use InvalidArgumentException;
 use Model\Analysis\AnalysisDao;
 use Model\Analysis\PayableRates as PayableRates;
 use Model\DataAccess\Database;
@@ -25,7 +26,6 @@ use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use PDO;
 use PDOException;
-use Psr\Log\InvalidArgumentException as LogInvalidArgumentException;
 use ReflectionException;
 use RuntimeException;
 use Stomp\Exception\ConnectionException;
@@ -56,7 +56,6 @@ use Utils\TaskRunner\Exceptions\DaemonTerminatedException;
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 04/12/15
  * Time: 13.05
- *
  */
 class FastAnalysis extends AbstractDaemon
 {
@@ -101,7 +100,6 @@ class FastAnalysis extends AbstractDaemon
      *
      * @return AMQHandler the freshly built handler (also stored in $this->queueHandler)
      * @throws ConnectionException
-     * @throws LogInvalidArgumentException
      */
     private function _rebuildQueueHandler(): AMQHandler
     {
@@ -310,7 +308,7 @@ class FastAnalysis extends AbstractDaemon
      * Reload Configuration every cycle
      *
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     protected function _updateConfiguration(): void
     {
@@ -322,7 +320,6 @@ class FastAnalysis extends AbstractDaemon
 
     /**
      * @throws PDOException
-     * @throws LogInvalidArgumentException
      */
     protected function _checkDatabaseConnection(): void
     {
@@ -346,10 +343,9 @@ class FastAnalysis extends AbstractDaemon
     }
 
     /**
-     * @throws \TypeError
+     * @throws TypeError
      * @throws Exception
-     * @throws \InvalidArgumentException
-     * @throws LogInvalidArgumentException
+     * @throws InvalidArgumentException
      */
     protected function __construct(string $configFile = null, ?string $contextIndex = null)
     {
@@ -805,7 +801,6 @@ class FastAnalysis extends AbstractDaemon
     /**
      * @throws ReflectionException
      * @throws RuntimeException
-     * @throws LogInvalidArgumentException
      * @throws Exception
      */
     public function cleanShutDown(): void
@@ -827,7 +822,6 @@ class FastAnalysis extends AbstractDaemon
 
     /**
      * @throws PDOException
-     * @throws LogInvalidArgumentException
      * @throws ReflectionException
      */
     protected function _updateProject(int $pid, string $status): void
@@ -944,7 +938,6 @@ class FastAnalysis extends AbstractDaemon
      * @param list<mixed> $bind_values
      *
      * @throws PDOException
-     * @throws LogInvalidArgumentException
      */
     protected function _executeInsert(array $tuple_list, array $bind_values): void
     {
@@ -1066,7 +1059,7 @@ class FastAnalysis extends AbstractDaemon
                     $this->segments[$k]['match_type'] = $match_type;
                     $this->segments[$k]['fast_exact_match_type'] = $v['match_type'];
                 } elseif ($perform_Tms_Analysis) {
-                    LoggerFactory::doJsonLog('Skipped Fast Segment: ' . var_export($this->segments[$k], true));
+                    $this->logger->debug('Skipped Fast Segment: ' . var_export($this->segments[$k], true));
                     // this segment must not be sent to the TM analysis queue
                     unset($this->segments[$k]);
                 } else {
@@ -1391,7 +1384,7 @@ HD;
             $stmt->execute([$pid]);
             $results = $stmt->fetchAll();
         } catch (PDOException $e) {
-            LoggerFactory::doJsonLog($e->getMessage());
+            $this->logger->error($e->getMessage());
             throw $e;
         }
 
@@ -1454,8 +1447,6 @@ HD;
      * @param $id_mt_engine int
      *
      * @return Context|null
-     *
-     * @throws LogInvalidArgumentException
      */
     protected function _getQueueAddressesByPriority(int $queueLen, int $id_mt_engine): ?Context
     {

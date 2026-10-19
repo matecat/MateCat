@@ -114,10 +114,10 @@ class EngineServiceTest extends AbstractTest
         $methodStart = strpos($source, 'function getMTTranslation(');
         $this->assertNotFalse($methodStart, 'getMTTranslation method must exist in EngineService.');
 
-        $logPos = strpos($source, 'LoggerFactory::doJsonLog(', $methodStart);
+        $logPos = strpos($source, "LoggerFactory::getLogger('engines')->error(", $methodStart);
         $this->assertNotFalse(
             $logPos,
-            'getMTTranslation must log exceptions via LoggerFactory::doJsonLog() in the catch block.'
+            "getMTTranslation must log exceptions on the 'engines' logger in the catch block."
         );
     }
 

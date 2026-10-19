@@ -4,7 +4,6 @@
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 04/05/15
  * Time: 13.37
- *
  */
 
 namespace Utils\TaskRunner;
@@ -16,11 +15,11 @@ use Monolog\Handler\StreamHandler;
 use PDOException;
 use Predis\Connection\ConnectionException;
 use Predis\Response\ServerException;
-use Psr\Log\InvalidArgumentException;
 use ReflectionException;
 use RuntimeException;
 use SplObserver;
 use SplSubject;
+use Stomp\Exception\ConnectionException as StompConnectionException;
 use Stomp\Transport\Frame;
 use Throwable;
 use Utils\ActiveMQ\AMQHandler;
@@ -337,7 +336,6 @@ class Executor implements SplObserver
      *
      * @return array{0: Frame, 1: QueueElement}
      * @throws FrameException
-     * @throws InvalidArgumentException
      */
     protected function _readAMQFrame(): array
     {
@@ -437,7 +435,7 @@ class Executor implements SplObserver
      * @param QueueElement $queueElement The element to re-publish
      *
      * @throws Exception
-     * @throws \Stomp\Exception\ConnectionException
+     * @throws StompConnectionException
      */
     private function _ackAndRequeue(Frame $msgFrame, QueueElement $queueElement): void
     {
@@ -453,7 +451,7 @@ class Executor implements SplObserver
     }
 
     /**
-     * @throws \Stomp\Exception\ConnectionException
+     * @throws StompConnectionException
      */
     protected function _createPublisher(): AMQHandler
     {

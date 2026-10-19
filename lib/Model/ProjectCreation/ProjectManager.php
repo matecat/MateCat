@@ -36,7 +36,6 @@ use Model\Users\UserStruct;
 use Model\Xliff\DTO\XliffRulesModel;
 use PDOException;
 use Plugins\Features\SecondPassReview;
-use Psr\Log\InvalidArgumentException;
 use ReflectionException;
 use RuntimeException;
 use Throwable;
@@ -389,7 +388,6 @@ class ProjectManager
      *
      * @throws EndQueueException
      * @throws Exception
-     * @throws InvalidArgumentException
      * @throws TypeError
      */
     public function createProject(): void
@@ -501,7 +499,6 @@ class ProjectManager
      * @throws EndQueueException
      * @throws NotFoundException
      * @throws PDOException
-     * @throws InvalidArgumentException
      * @throws ReQueueException
      * @throws ReflectionException
      * @throws ValidationError
@@ -568,7 +565,6 @@ class ProjectManager
      * Resolve the upload directory from config + upload token, and retrieve file hashes from storage.
      *
      * @return array<string, mixed> The link files structure with conversion hashes and zip hashes.
-     * @throws InvalidArgumentException
      */
     private function resolveUploadDirAndGetHashes(AbstractFilesStorage $fs): array
     {
@@ -790,8 +786,6 @@ class ProjectManager
 
     /**
      * Delete the upload directory via the storage abstraction.
-     *
-     * @throws InvalidArgumentException
      */
     private function cleanupUploadDirectory(AbstractFilesStorage $fs): void
     {
@@ -838,8 +832,6 @@ class ProjectManager
     /**
      * Best-effort deletion of the records a failed creation has written. A cleanup failure is logged,
      * never thrown, so it cannot hide the creation failure.
-     *
-     * @throws InvalidArgumentException
      */
     private function clearFailedProject(): void
     {
@@ -1011,7 +1003,6 @@ class ProjectManager
     /**
      * The caller, createProject(), catches and logs any failure.
      *
-     * @throws InvalidArgumentException
      * @throws Exception
      */
     protected function pushActivityLog(): void
@@ -1183,7 +1174,6 @@ class ProjectManager
     /**
      * @throws ProjectCreationException
      * @throws PDOException
-     * @throws InvalidArgumentException
      */
     private function insertContextsForFile(): void
     {

@@ -5,7 +5,6 @@ namespace Model\FeaturesBase;
 use DirectoryIterator;
 use Klein\Klein;
 use Klein\Request;
-use Psr\Log\InvalidArgumentException;
 use Plugins\Features\BaseFeature;
 use Plugins\Features\UnknownFeature;
 use RuntimeException;
@@ -23,7 +22,6 @@ use Utils\Tools\Utils;
  *
  * and the internal ones
  * by making a fallback on the default internal namespace for \PluginsLoader
- *
  *
  */
 class PluginsLoader
@@ -136,7 +134,6 @@ class PluginsLoader
      * @param string $decoratorName
      *
      * @return bool|string
-     * @throws InvalidArgumentException
      * @throws RuntimeException
      */
     public static function getFeatureClassDecorator(BasicFeatureStruct $feature, string $decoratorName): bool|string

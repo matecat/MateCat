@@ -2,20 +2,39 @@
 
 namespace Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service;
 
+use Closure;
 use Exception;
 use Model\DataAccess\IDatabase;
 use Model\Translations\SegmentTranslationDao;
 use PDOException;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\SegmentUpdaterServiceInterface;
-use Utils\Logger\LoggerFactory;
 
 class SegmentUpdaterService implements SegmentUpdaterServiceInterface
 {
     private IDatabase $db;
 
-    public function __construct(IDatabase $db)
+    /**
+     * Sink for log messages. Injected by the worker so these lines land in the analysis-queue
+     * log, next to the rest of the job's lines. Null skips logging (unit tests).
+     *
+     * @var (Closure(string): void)|null
+     */
+    private ?Closure $logger;
+
+    /**
+     * @param (Closure(string): void)|null $logger
+     */
+    public function __construct(IDatabase $db, ?Closure $logger = null)
     {
         $this->db = $db;
+        $this->logger = $logger;
+    }
+
+    private function log(string $message): void
+    {
+        if ($this->logger !== null) {
+            ($this->logger)($message);
+        }
     }
 
     /**
@@ -47,8 +66,8 @@ class SegmentUpdaterService implements SegmentUpdaterServiceInterface
             $stmt->execute([':id_segment' => $idSegment, ':id_job' => $idJob]);
             $affectedRows = $stmt->rowCount();
         } catch (PDOException $e) {
-            LoggerFactory::doJsonLog($e->getMessage());
-            LoggerFactory::doJsonLog("**** DB failure in forceSetSegmentAnalyzed for segment $idSegment. NOT incrementing counters.");
+            $this->log($e->getMessage());
+            $this->log("**** DB failure in forceSetSegmentAnalyzed for segment $idSegment. NOT incrementing counters.");
             return 0;
         }
 

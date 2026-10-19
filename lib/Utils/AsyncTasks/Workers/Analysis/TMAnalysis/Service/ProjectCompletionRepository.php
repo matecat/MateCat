@@ -2,6 +2,7 @@
 
 namespace Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service;
 
+use Closure;
 use DomainException;
 use Exception;
 use Model\Analysis\AnalysisDao;
@@ -16,17 +17,36 @@ use ReflectionException;
 use RuntimeException;
 use Throwable;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\ProjectCompletionRepositoryInterface;
-use Utils\Logger\LoggerFactory;
 
 class ProjectCompletionRepository implements ProjectCompletionRepositoryInterface
 {
+    /**
+     * Sink for log messages. Injected by the worker so these lines land in the analysis-queue
+     * log, next to the rest of the job's lines. Null skips logging (unit tests).
+     *
+     * @var (Closure(string): void)|null
+     */
+    private ?Closure $logger;
+
+    /**
+     * @param (Closure(string): void)|null $logger
+     */
     public function __construct(
         private IDatabase $db,
         private ProjectDao $projectDao,
         private JobDao $jobDao,
         private AnalysisDao $analysisDao,
         private CounterModel $counterModel,
+        ?Closure $logger = null,
     ) {
+        $this->logger = $logger;
+    }
+
+    private function log(string $message): void
+    {
+        if ($this->logger !== null) {
+            ($this->logger)($message);
+        }
     }
 
     /**
@@ -76,7 +96,7 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
 
             return $stmt->fetchAll();
         } catch (PDOException $e) {
-            LoggerFactory::doJsonLog($e->getMessage());
+            $this->log($e->getMessage());
 
             throw new RuntimeException($e->getMessage(), 0, $e);
         }
@@ -130,7 +150,7 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
     }
 
     /**
-     * @throws \PDOException
+     * @throws PDOException
      */
     public function initializeJobWordCount(int $jobId, string $password): void
     {

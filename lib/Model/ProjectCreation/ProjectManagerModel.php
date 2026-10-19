@@ -12,7 +12,6 @@ use Model\Segments\SegmentMetadataMarshaller;
 use PDO;
 use PDOException;
 use PDOStatement;
-use Psr\Log\InvalidArgumentException as LogInvalidArgumentException;
 use RecursiveArrayIterator;
 use RecursiveIteratorIterator;
 use RuntimeException;
@@ -95,7 +94,6 @@ class ProjectManagerModel
      * @param list<array<string, mixed>> $query_translations_values
      * @throws ProjectCreationException
      * @throws PDOException
-     * @throws LogInvalidArgumentException
      */
     public function insertPreTranslations(array $query_translations_values): void
     {
@@ -138,7 +136,6 @@ class ProjectManagerModel
      *
      * @throws ProjectCreationException
      * @throws PDOException
-     * @throws LogInvalidArgumentException
      */
     private function executeBulkInsert(
         string $insertTemplate,
@@ -190,7 +187,6 @@ class ProjectManagerModel
      *
      * @throws ProjectCreationException
      * @throws PDOException
-     * @throws LogInvalidArgumentException
      */
     public function bulkInsertSegmentNotesAndMetadata(array $notes): void
     {
@@ -269,7 +265,6 @@ class ProjectManagerModel
      *
      * @throws ProjectCreationException
      * @throws PDOException
-     * @throws LogInvalidArgumentException
      */
     public function bulkInsertContextsGroups(int $idProject, array $contextGroups): void
     {

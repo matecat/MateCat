@@ -68,10 +68,15 @@ interface IDatabase
      *                       queue has run. Only for work whose silent failure is a correctness or a
      *                       security problem — revoking a credential, not warming a cache — because
      *                       by then the caller is the only party left that can retry.
+     * @param string|null $callbackDedupeKey Callbacks queued with the same key in one transaction
+     *                       replace each other: only the last one runs, in the position of the last
+     *                       call, with its own $critical. Example: 'chunk_review_updated:42'
+     *                       publishes chunk review 42 once, however many times the transaction
+     *                       updates it.
      *
      * @throws PDOException
      */
-    public function onCommit(callable $callback, bool $critical = false): void;
+    public function onCommit(callable $callback, bool $critical = false, ?string $callbackDedupeKey = null): void;
 
     /**
      * Run a callback inside a database transaction.

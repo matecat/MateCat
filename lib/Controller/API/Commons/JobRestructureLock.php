@@ -6,7 +6,6 @@ use Controller\API\Commons\Exceptions\ConflictError;
 use Exception;
 use Predis\Client;
 use Predis\PredisException;
-use Psr\Log\InvalidArgumentException;
 use Random\RandomException;
 use Throwable;
 use Utils\Logger\LoggerFactory;
@@ -91,8 +90,6 @@ class JobRestructureLock
      * caller has to see. A key that could not be deleted expires with its TTL.
      *
      * A job this instance does not hold is left alone.
-     *
-     * @throws InvalidArgumentException only from the logger, for a log level it does not know
      */
     public function release(int $idJob): void
     {

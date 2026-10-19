@@ -194,7 +194,7 @@ class SearchModel
             $stmt->execute($params);
             $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            LoggerFactory::doJsonLog($e->getMessage());
+            LoggerFactory::getLogger('dao')->error($e->getMessage());
             // A PDOException carries the SQLSTATE as its code, which is a string such as '42S02': cast it
             // before negating it, or PHP warns about the non-numeric value it has to coerce on its own.
             throw new Exception($e->getMessage(), -abs((int)$e->getCode()), $e);

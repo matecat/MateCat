@@ -2,13 +2,13 @@
 
 namespace Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service;
 
+use Closure;
 use Exception;
 use Predis\Client;
 use ReflectionException;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\Analysis\RedisKeys;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\AnalysisRedisServiceInterface;
-use Utils\Logger\LoggerFactory;
 
 class AnalysisRedisService implements AnalysisRedisServiceInterface
 {
@@ -35,12 +35,30 @@ class AnalysisRedisService implements AnalysisRedisServiceInterface
     private Client $redis;
 
     /**
+     * Sink for log messages. Injected by the worker so these lines land in the analysis-queue
+     * log, next to the rest of the job's lines. Null skips logging (unit tests).
+     *
+     * @var (Closure(string): void)|null
+     */
+    private ?Closure $logger;
+
+    /**
+     * @param (Closure(string): void)|null $logger
+     *
      * @throws ReflectionException
      * @throws Exception
      */
-    public function __construct(AMQHandler $queueHandler)
+    public function __construct(AMQHandler $queueHandler, ?Closure $logger = null)
     {
         $this->redis = $queueHandler->getRedisClient();
+        $this->logger = $logger;
+    }
+
+    private function log(string $message): void
+    {
+        if ($this->logger !== null) {
+            ($this->logger)($message);
+        }
     }
 
     public function reconnect(): void
@@ -156,7 +174,7 @@ class AnalysisRedisService implements AnalysisRedisServiceInterface
             $sleepMs  = min($sleepMs * 2, 500);
         }
 
-        LoggerFactory::doJsonLog("WARNING — timed out waiting for init completion for PID $pid");
+        $this->log("WARNING — timed out waiting for init completion for PID $pid");
 
         return false;
     }

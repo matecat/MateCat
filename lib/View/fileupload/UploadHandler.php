@@ -1,6 +1,7 @@
 <?php
 
 use Controller\Exceptions\RenderTerminatedException;
+use LogicException;
 use Model\Conversion\MimeTypes\MimeTypes;
 use Model\Conversion\ZipArchiveHandler;
 use Model\DataAccess\IDatabase;
@@ -344,8 +345,7 @@ class UploadHandler
     }
 
     /**
-     * @throws \LogicException
-     * @throws \Psr\Log\InvalidArgumentException
+     * @throws LogicException
      */
     protected function handle_file_upload(string $uploaded_file, string $name, int $size, string $error): stdClass
     {
@@ -443,7 +443,7 @@ class UploadHandler
      * @param string $filename
      *
      * @return string|false
-     * @throws \LogicException
+     * @throws LogicException
      */
     private function getMimeContentType(string $filename): string|false
     {

@@ -19,7 +19,6 @@ use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\PayableRates\CustomPayableRateDao;
 use Model\PayableRates\CustomPayableRateStruct;
 use PDOException;
-use Psr\Log\InvalidArgumentException as LogInvalidArgumentException;
 use ReflectionException;
 use TypeError;
 use Utils\Logger\MatecatLogger;
@@ -102,7 +101,6 @@ class JobCreationService
      * Replaces the {{pid}} placeholder with the actual project ID.
      *
      * @throws DomainException
-     * @throws LogInvalidArgumentException
      * @throws TypeError
      */
     private function buildTmKeysJson(ProjectStructure $projectStructure): string
@@ -245,8 +243,6 @@ class JobCreationService
     /**
      * Associate a payable rate model with a job if both model ID and template exist.
      * Wrapped in try-catch to preserve the original error handling behavior.
-     *
-     * @throws LogInvalidArgumentException
      */
     private function associatePayableRateModel(
         JobStruct $job,

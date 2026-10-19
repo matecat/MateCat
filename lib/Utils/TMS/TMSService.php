@@ -17,6 +17,7 @@ use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\TMSService\TMSServiceDao;
 use Model\Users\MetadataDao;
 use Model\Users\UserStruct;
+use PDOException;
 use ReflectionException;
 use RuntimeException;
 use SplTempFileObject;
@@ -120,7 +121,6 @@ class TMSService
         try {
             $newUser = $this->mymemory_engine->createMyMemoryKey();
         } catch (Exception $e) {
-            //            Log::doJsonLog( $e->getMessage() );
             throw new Exception($e->getMessage(), -7);
         }
 
@@ -184,7 +184,6 @@ class TMSService
     /**
      * @param UserStruct $user
      * @return EngineInterface[]
-     * @throws \Psr\Log\InvalidArgumentException
      */
     protected function getUserAdaptiveMTEngines(UserStruct $user): array
     {
@@ -334,7 +333,6 @@ class TMSService
      * @param string $userName
      *
      * @return ExportResponse
-     * @throws \Psr\Log\InvalidArgumentException
      * @throws RuntimeException
      */
     public function glossaryExport(string $key, string $keyName, string $userEmail, string $userName): ExportResponse
@@ -421,7 +419,7 @@ class TMSService
      *
      * @throws ReflectionException
      * @throws Exception
-     * @throws \PDOException
+     * @throws PDOException
      */
     public function exportJobAsTMX(int $jid, string $jPassword, string $sourceLang, string $targetLang, ?int $uid = null): SplTempFileObject
     {
@@ -593,7 +591,7 @@ class TMSService
      * @return SplTempFileObject
      *
      * @throws RuntimeException
-     * @throws \PDOException
+     * @throws PDOException
      */
     public function exportJobAsCSV(int $jid, string $jPassword, string $sourceLang, string $targetLang): SplTempFileObject
     {

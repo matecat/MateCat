@@ -49,7 +49,7 @@ class ProjectQueue
             $output = "**** Project Enqueue failed. AMQ Connection Error. ****\n\t";
             $output .= "{$e->getMessage()}";
             $output .= var_export($projectStructure, true);
-            LoggerFactory::doJsonLog($output);
+            LoggerFactory::getLogger('project_manager')->error($output);
             throw $e;
         }
     }

@@ -111,7 +111,7 @@ class EntryDao extends AbstractDao
             " qa_entry_comments WHERE id_qa_entry = :id " .
             " ) WHERE id = :id ";
 
-        LoggerFactory::doJsonLog($sql);
+        LoggerFactory::getLogger('dao')->debug($sql);
 
         $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);

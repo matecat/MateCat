@@ -412,7 +412,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
         // Deferred to the commit inside DaoCacheTrait; the caller does not schedule it.
         $chunkReviewDao->destroyCache($review);
 
-        LoggerFactory::doJsonLog("CompletionEventController deleting event: " . var_export($struct->getArrayCopy(), true));
+        LoggerFactory::getLogger('feature_set')->debug("CompletionEventController deleting event: " . var_export($struct->getArrayCopy(), true));
     }
 
     /**

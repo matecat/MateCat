@@ -17,7 +17,6 @@ use Utils\Logger\MatecatLogger;
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 14/04/14
  * Time: 18.35
- *
  */
 class MultiCurlHandler
 {
@@ -72,23 +71,23 @@ class MultiCurlHandler
 
     public bool $verbose = false;
     public bool $high_verbosity = false;
-    private ?MatecatLogger $logger;
+    private MatecatLogger $logger;
 
     /**
      * Class Constructor, init the multi curl handler
      *
+     * @param MatecatLogger|null $logger Where the verbose curl log goes. Defaults to general_log.txt.
      */
     public function __construct(?MatecatLogger $logger = null)
     {
         $this->multi_handler = curl_multi_init();
         // Default is 10
         curl_multi_setopt($this->multi_handler, CURLMOPT_MAXCONNECTS, 50);
-        $this->logger = $logger;
+        $this->logger = $logger ?? LoggerFactory::getLogger();
     }
 
     /**
      * Class destructor
-     *
      */
     public function __destruct()
     {
@@ -97,7 +96,6 @@ class MultiCurlHandler
 
     /**
      * Close all active curl handlers and multi curl handler itself
-     *
      */
     public function multiCurlCloseAll(): void
     {
@@ -120,7 +118,6 @@ class MultiCurlHandler
      * to a container
      *
      * @throws RuntimeException
-     * @throws \Psr\Log\InvalidArgumentException
      */
     public function multiExec(): void
     {
@@ -214,22 +211,9 @@ class MultiCurlHandler
             //TIMING nad LOGGING
 
             if ($this->verbose) {
-                $this->log($this->multi_curl_log[$tokenHash]);
+                $this->logger->debug($this->multi_curl_log[$tokenHash]);
             }
         }
-    }
-
-    /**
-     * @throws \Psr\Log\InvalidArgumentException
-     */
-    protected function log(mixed $logging): void
-    {
-        if (!empty($this->logger)) {
-            $this->logger->debug($logging);
-
-            return;
-        }
-        LoggerFactory::doJsonLog($logging);
     }
 
     /**

@@ -137,7 +137,7 @@ class EngineService implements EngineServiceInterface
                 return [];
             }
         } catch (Exception $e) {
-            LoggerFactory::doJsonLog($e->getMessage());
+            LoggerFactory::getLogger('engines')->error($e->getMessage());
         }
 
         return $mt_result;
