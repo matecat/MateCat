@@ -860,6 +860,36 @@ class SplitJobMergeTest extends AbstractTest
     }
 
     /**
+     * The commit queue drains in order. The sweeps have to be on it before the merge hooks queue their
+     * own work, which would otherwise run first and, on a fatal error the drain cannot catch, skip the
+     * sweeps altogether.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function mergeALLRegistersTheCredentialSweepsBeforeThePostJobMergedHook(): void
+    {
+        $this->setupMergeStubs();
+        $chunks = $this->makeJobChunksForMerge();
+        $ps = new SplitMergeProjectData(999);
+
+        // onCommit() runs its callback inline in this test, so a sweep already recorded when the hook
+        // is dispatched is one registered before it.
+        $sweepsWhenDispatched = null;
+        $this->features->expects($this->once())->method('dispatch')
+            ->with($this->isInstanceOf(PostJobMergedEvent::class))
+            ->willReturnCallback(function (PostJobMergedEvent $event) use (&$sweepsWhenDispatched) {
+                $sweepsWhenDispatched = count($this->service->getSweepCredentialCachesCalls());
+
+                return $event;
+            });
+
+        $this->service->mergeALL($ps, $chunks, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
+
+        $this->assertSame(2, $sweepsWhenDispatched);
+    }
+
+    /**
      * @return void
      * @throws Exception
      */
