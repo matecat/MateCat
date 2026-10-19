@@ -11,6 +11,7 @@ use Model\Jobs\JobStruct;
 use PDO;
 use PDOStatement;
 use PHPUnit\Framework\Attributes\Test;
+use Utils\Network\MultiCurlHandler;
 use Utils\Registry\AppConfig;
 
 /**
@@ -71,6 +72,63 @@ class TestableFilters extends Filters
     public function testFormatErrorMessage(string $error): string
     {
         return $this->formatErrorMessage($error);
+    }
+}
+
+/**
+ * Runs the real sendToFilters() against a canned curl result instead of the network.
+ */
+class FakeCurlFilters extends Filters
+{
+    /** @var array<string, string|false> */
+    public array $contents = [];
+
+    /** @var array<string, array<string, mixed>> */
+    public array $infos = [];
+
+    protected function createMultiCurlHandler(): MultiCurlHandler
+    {
+        $handler = new class extends MultiCurlHandler {
+            /** @var array<string, string|false> */
+            public array $contents = [];
+
+            /** @var array<string, array<string, mixed>> */
+            public array $infos = [];
+
+            public function createResource(string $url, ?array $options = [], ?string $tokenHash = null): string
+            {
+                return (string)$tokenHash;
+            }
+
+            public function setRequestHeader(string $tokenHash): MultiCurlHandler
+            {
+                return $this;
+            }
+
+            public function multiExec(): void
+            {
+            }
+
+            public function getAllContents(?callable $function = null): mixed
+            {
+                return $this->contents;
+            }
+
+            public function getAllInfo(): array
+            {
+                return $this->infos;
+            }
+
+            public function getAllHeaders(): array
+            {
+                return [];
+            }
+        };
+
+        $handler->contents = $this->contents;
+        $handler->infos = $this->infos;
+
+        return $handler;
     }
 }
 
@@ -504,6 +562,23 @@ class FiltersTest extends AbstractTest
         } finally {
             @unlink($tmpFile);
         }
+    }
+
+    // ── sendToFilters error path ───────────────────────────────────────
+
+    #[Test]
+    public function xliffToTargetFlagsAFailedConversionAsNotSuccessful(): void
+    {
+        $filters = new FakeCurlFilters();
+        $filters->contents = ['file1' => '{"errorMessage":"conversion exploded"}'];
+        $filters->infos = ['file1' => ['http_code' => 500, 'errno' => 0, 'error' => '', 'curlinfo_total_time' => 0.25]];
+
+        $result = $filters->xliffToTarget(['file1' => ['document_content' => '<xliff/>']]);
+
+        self::assertFalse($result['file1']['successful']);
+        self::assertSame('conversion exploded', $result['file1']['errorMessage']);
+        self::assertArrayNotHasKey('document_content', $result['file1']);
+        self::assertEquals(250, $result['file1']['time']);
     }
 
     // ── constants ──────────────────────────────────────────────────────
