@@ -6,6 +6,7 @@ use Controller\API\Commons\Exceptions\ConflictError;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\JobRestructureLock;
 use Controller\API\V2\JobsTranslatorsController;
+use Exception;
 use InvalidArgumentException;
 use Klein\Request;
 use Klein\Response;
@@ -13,8 +14,15 @@ use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
 use Matecat\TestHelpers\FakeLockRedisClient;
 use Model\DataAccess\Database;
+use Model\Exceptions\NotFoundException as ModelNotFoundException;
 use Model\Jobs\JobStruct;
 use Model\Outsource\ConfirmationDao;
+use PDOException;
+use PHPUnit\Event\NoPreviousThrowableException;
+use PHPUnit\Framework\InvalidArgumentException as PHPUnitInvalidArgumentException;
+use PHPUnit\Framework\MockObject\Exception as MockObjectException;
+use Throwable;
+use TypeError;
 use Utils\Constants\JobStatus;
 use Model\FeaturesBase\FeatureSet;
 use Model\Translators\JobsTranslatorsStruct;
@@ -87,12 +95,12 @@ class JobsTranslatorsControllerTest extends AbstractTest
 
     /**
      * @throws ReflectionException
-     * @throws \PDOException
-     * @throws \Exception
-     * @throws \TypeError
-     * @throws \PHPUnit\Framework\MockObject\Exception
-     * @throws \PHPUnit\Event\NoPreviousThrowableException
-     * @throws \PHPUnit\Framework\InvalidArgumentException
+     * @throws PDOException
+     * @throws Exception
+     * @throws TypeError
+     * @throws MockObjectException
+     * @throws NoPreviousThrowableException
+     * @throws PHPUnitInvalidArgumentException
      */
     protected function setUp(): void
     {
@@ -127,8 +135,8 @@ class JobsTranslatorsControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \PDOException
-     * @throws \Exception
+     * @throws PDOException
+     * @throws Exception
      */
     protected function tearDown(): void
     {
@@ -139,7 +147,7 @@ class JobsTranslatorsControllerTest extends AbstractTest
 
     /**
      * @throws ReflectionException
-     * @throws \PDOException
+     * @throws PDOException
      */
     private function seedConfirmation(JobStruct $jStruct): void
     {
@@ -154,7 +162,7 @@ class JobsTranslatorsControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \PDOException
+     * @throws PDOException
      */
     private function seedTestData(): void
     {
@@ -212,10 +220,10 @@ class JobsTranslatorsControllerTest extends AbstractTest
 
     /**
      * @throws ReflectionException
-     * @throws \Model\Exceptions\NotFoundException
+     * @throws ModelNotFoundException
      * @throws NotFoundException
-     * @throws \Exception
-     * @throws \TypeError
+     * @throws Exception
+     * @throws TypeError
      */
     #[Test]
     public function get_returns_job_payload_with_null_translator_when_not_outsourced(): void
@@ -243,10 +251,10 @@ class JobsTranslatorsControllerTest extends AbstractTest
 
     /**
      * @throws ReflectionException
-     * @throws \Model\Exceptions\NotFoundException
+     * @throws ModelNotFoundException
      * @throws NotFoundException
-     * @throws \Exception
-     * @throws \TypeError
+     * @throws Exception
+     * @throws TypeError
      */
     #[Test]
     public function get_throws_invalid_argument_when_job_is_outsourced(): void
@@ -265,10 +273,10 @@ class JobsTranslatorsControllerTest extends AbstractTest
 
     /**
      * @throws ReflectionException
-     * @throws \Model\Exceptions\NotFoundException
+     * @throws ModelNotFoundException
      * @throws NotFoundException
-     * @throws \Exception
-     * @throws \TypeError
+     * @throws Exception
+     * @throws TypeError
      */
     #[Test]
     public function get_throws_not_found_when_job_is_deleted(): void
@@ -286,8 +294,8 @@ class JobsTranslatorsControllerTest extends AbstractTest
     /**
      * @throws ReflectionException
      * @throws NotFoundException
-     * @throws \Exception
-     * @throws \TypeError
+     * @throws Exception
+     * @throws TypeError
      */
     #[Test]
     public function add_throws_invalid_argument_when_email_is_empty(): void
@@ -310,8 +318,8 @@ class JobsTranslatorsControllerTest extends AbstractTest
     /**
      * @throws ReflectionException
      * @throws NotFoundException
-     * @throws \Exception
-     * @throws \TypeError
+     * @throws Exception
+     * @throws TypeError
      */
     #[Test]
     public function add_throws_not_found_when_job_is_deleted(): void
@@ -339,9 +347,9 @@ class JobsTranslatorsControllerTest extends AbstractTest
      *
      * @throws ReflectionException
      * @throws NotFoundException
-     * @throws \Exception
-     * @throws \TypeError
-     * @throws \PHPUnit\Framework\MockObject\Exception
+     * @throws Exception
+     * @throws TypeError
+     * @throws MockObjectException
      */
     #[Test]
     public function add_renders_translator_payload_from_seam_model(): void
@@ -382,8 +390,8 @@ class JobsTranslatorsControllerTest extends AbstractTest
 
     /**
      * @throws ReflectionException
-     * @throws \Exception
-     * @throws \TypeError
+     * @throws Exception
+     * @throws TypeError
      */
     #[Test]
     public function add_updates_the_translator_holding_the_job(): void
@@ -410,8 +418,8 @@ class JobsTranslatorsControllerTest extends AbstractTest
 
     /**
      * @throws ReflectionException
-     * @throws \Exception
-     * @throws \TypeError
+     * @throws Exception
+     * @throws TypeError
      */
     #[Test]
     public function add_on_a_held_job_answers_conflict_and_never_updates(): void
@@ -430,8 +438,8 @@ class JobsTranslatorsControllerTest extends AbstractTest
 
     /**
      * @throws ReflectionException
-     * @throws \Exception
-     * @throws \TypeError
+     * @throws Exception
+     * @throws TypeError
      */
     #[Test]
     public function add_releases_the_job_when_the_update_fails(): void
@@ -454,7 +462,7 @@ class JobsTranslatorsControllerTest extends AbstractTest
     /**
      * @return TranslatorsModel&MockObject
      *
-     * @throws \PHPUnit\Framework\MockObject\Exception
+     * @throws MockObjectException
      */
     private function makeFluentModelMock(): TranslatorsModel&MockObject
     {
@@ -484,7 +492,7 @@ class JobsTranslatorsControllerTest extends AbstractTest
 
     /**
      * @throws ReflectionException
-     * @throws \PHPUnit\Framework\MockObject\Exception
+     * @throws MockObjectException
      */
     private function makeStubModelController(TranslatorsModel $model, JobStruct $jStruct): StubModelJobsTranslatorsController
     {
@@ -520,7 +528,7 @@ class JobsTranslatorsControllerTest extends AbstractTest
      * covering lines 130-136.
      *
      * @throws ReflectionException
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function register_validators_wires_login_and_password_validators(): void

@@ -2,6 +2,7 @@
 
 namespace Matecat\Core\Model\ProjectCreation;
 
+use Exception;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\ProjectCreation\FileInsertionService;
 use Model\ProjectCreation\ProjectStructure;
@@ -59,7 +60,7 @@ class TestableFileInsertionService extends FileInsertionService
 
     /**
      * Public wrapper to invoke validateCachedXliff() (now protected).
-     * @throws \Exception
+     * @throws Exception
      */
     public function callValidateCachedXliff(?string $cachedXliffFilePathName, array $_originalFileNames, array $linkFiles): void
     {

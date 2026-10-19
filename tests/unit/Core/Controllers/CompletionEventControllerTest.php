@@ -15,12 +15,14 @@ use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\FeatureSet;
 use PDO;
+use PDOException;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Exception as PHPUnitException;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use ReflectionException;
+use Throwable;
 use Utils\Logger\MatecatLogger;
 
 /**
@@ -64,7 +66,7 @@ class CompletionEventControllerTest extends AbstractTest
     private Response&MockObject $responseMock;
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     protected function setUp(): void
     {
@@ -93,7 +95,7 @@ class CompletionEventControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \PDOException
+     * @throws PDOException
      */
     protected function tearDown(): void
     {
@@ -111,7 +113,7 @@ class CompletionEventControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \PDOException
+     * @throws PDOException
      * @throws JsonException
      */
     private function seedTestData(): void
@@ -147,7 +149,7 @@ class CompletionEventControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \PDOException
+     * @throws PDOException
      */
     private function cleanTestData(): void
     {
@@ -156,7 +158,7 @@ class CompletionEventControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \PDOException
+     * @throws PDOException
      */
     private function eventRowCount(): int
     {
@@ -171,7 +173,7 @@ class CompletionEventControllerTest extends AbstractTest
 
     /**
      * @return array<string, mixed>
-     * @throws \PDOException
+     * @throws PDOException
      * @throws PHPUnitException
      */
     private function chunkReviewRow(): array
@@ -187,7 +189,7 @@ class CompletionEventControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \PDOException
+     * @throws PDOException
      * @throws PHPUnitException
      */
     private function assertChunkReviewRestoredFromUndoData(): void
@@ -202,7 +204,7 @@ class CompletionEventControllerTest extends AbstractTest
     // ─── delete() public action ───
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function delete_removes_event_row_and_sends_response(): void
@@ -224,7 +226,7 @@ class CompletionEventControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function delete_dispatches_alter_chunk_review_event_with_seeded_event(): void
@@ -237,7 +239,7 @@ class CompletionEventControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function delete_without_undo_data_throws_and_keeps_the_event(): void
@@ -263,7 +265,7 @@ class CompletionEventControllerTest extends AbstractTest
     // ─── __performUndo() private helper (direct) ───
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function performUndo_commits_deletion_of_the_event(): void
@@ -278,7 +280,7 @@ class CompletionEventControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function performUndo_is_noop_count_when_event_already_absent(): void
@@ -300,7 +302,7 @@ class CompletionEventControllerTest extends AbstractTest
      * event via ChunkCompletionEventDao, assigns chunk/event, and loads project
      * features. Covers the happy path of the validator success callback.
      *
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function registerValidators_onSuccess_loads_event_and_chunk(): void
@@ -344,7 +346,7 @@ class CompletionEventControllerTest extends AbstractTest
      * The onSuccess closure throws NotFoundException when the event row is absent
      * for the resolved chunk (covers lines 46-48).
      *
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function registerValidators_onSuccess_throws_not_found_when_event_missing(): void
@@ -378,7 +380,7 @@ class CompletionEventControllerTest extends AbstractTest
     /**
      * Sanity: the DAO used by the controller fetches the seeded event by id+chunk.
      *
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function dao_getByIdAndChunk_returns_seeded_event(): void

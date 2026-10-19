@@ -29,6 +29,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use ReflectionException;
 use TypeError;
+use UnexpectedValueException;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 use Utils\Tools\SimpleJWT;
@@ -184,7 +185,7 @@ class OutsourceConfirmationControllerTest extends AbstractTest
      * @param array<string, mixed> $claims
      *
      * @throws TypeError
-     * @throws \UnexpectedValueException
+     * @throws UnexpectedValueException
      */
     private function makeToken(array $claims): string
     {

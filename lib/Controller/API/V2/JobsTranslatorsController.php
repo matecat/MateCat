@@ -18,6 +18,7 @@ use Controller\API\Commons\Validators\JobPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
+use Model\Exceptions\NotFoundException as ModelNotFoundException;
 use Model\Jobs\JobStruct;
 use Model\Users\UserDao;
 use Model\Outsource\ConfirmationDao;
@@ -41,7 +42,7 @@ class JobsTranslatorsController extends KleinController
      * @throws NotFoundException
      * @throws ConflictError when a split, a merge or a password change holds the job
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function add(): void
     {
@@ -112,7 +113,7 @@ class JobsTranslatorsController extends KleinController
 
     /**
      * @throws ReflectionException
-     * @throws \Model\Exceptions\NotFoundException
+     * @throws ModelNotFoundException
      * @throws NotFoundException
      * @throws Exception
      * @throws TypeError

@@ -14,6 +14,7 @@ use Matecat\ICU\MessagePatternValidator;
 use Matecat\Locales\Languages;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Conversion\ZipArchiveHandler;
+use Model\Exceptions\NotFoundException as ModelNotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\Hook\Event\Filter\FilterGetSegmentsResultEvent;
 use Model\FeaturesBase\Hook\Event\Filter\PrepareNotesForRenderingEvent;
@@ -55,7 +56,7 @@ class GetSegmentsController extends KleinController
      * @throws AuthenticationError
      * @throws ReQueueException
      * @throws ValidationError
-     * @throws \Model\Exceptions\NotFoundException
+     * @throws ModelNotFoundException
      * @throws EndQueueException
      * @throws ReflectionException
      * @throws NotFoundException
@@ -282,7 +283,7 @@ class GetSegmentsController extends KleinController
      * @throws ReQueueException
      * @throws ValidationError
      * @throws ControllerValidationError
-     * @throws \Model\Exceptions\NotFoundException
+     * @throws ModelNotFoundException
      * @throws DomainException
      */
     private function attachNotes(SegmentUIStruct &$segment, array $segment_notes): void

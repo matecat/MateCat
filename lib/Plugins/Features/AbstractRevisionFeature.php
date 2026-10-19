@@ -350,8 +350,8 @@ abstract class AbstractRevisionFeature extends BaseFeature
     }
 
     /**
-     * @throws \Exception
-     * @throws \TypeError
+     * @throws Exception
+     * @throws TypeError
      */
     public function projectCompletionEventSaved(ProjectCompletionEventSavedEvent $event): void
     {

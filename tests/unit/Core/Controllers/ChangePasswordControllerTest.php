@@ -25,6 +25,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use ReflectionException;
+use Throwable;
 use Utils\Logger\MatecatLogger;
 
 /**
@@ -74,7 +75,7 @@ class ChangePasswordControllerTest extends AbstractTest
     private Response&MockObject $responseMock;
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     protected function setUp(): void
     {
@@ -161,7 +162,7 @@ class ChangePasswordControllerTest extends AbstractTest
     // ─── changePassword() validation failures ───
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changePassword_throws_when_id_is_empty(): void
@@ -175,7 +176,7 @@ class ChangePasswordControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changePassword_throws_when_password_is_empty(): void
@@ -189,7 +190,7 @@ class ChangePasswordControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changePassword_throws_when_undo_without_new_password(): void
@@ -207,7 +208,7 @@ class ChangePasswordControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changePassword_throws_when_the_password_matches_no_phase_of_the_job(): void
@@ -228,7 +229,7 @@ class ChangePasswordControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changePassword_throws_on_invalid_res(): void
@@ -248,7 +249,7 @@ class ChangePasswordControllerTest extends AbstractTest
     // ─── changePassword() happy path: project password change ───
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changePassword_project_returns_payload_with_id_and_new_pwd(): void
@@ -286,7 +287,7 @@ class ChangePasswordControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changePassword_project_undo_uses_supplied_new_password(): void
@@ -320,7 +321,7 @@ class ChangePasswordControllerTest extends AbstractTest
     // ─── changePassword() happy path: job password change ───
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changePassword_job_returns_payload_and_persists_new_password(): void
@@ -355,7 +356,7 @@ class ChangePasswordControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changePassword_job_refuses_a_chunk_renamed_before_the_job_was_held(): void
@@ -381,7 +382,7 @@ class ChangePasswordControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changePassword_review_refuses_a_review_row_renamed_before_the_job_was_held(): void
@@ -402,7 +403,7 @@ class ChangePasswordControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changePassword_job_revision_updates_review_password(): void
@@ -434,7 +435,7 @@ class ChangePasswordControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changeThePassword_job_throws_when_job_not_found(): void
@@ -460,7 +461,7 @@ class ChangePasswordControllerTest extends AbstractTest
      * A merge reading the chunk passwords while this rotation runs would sweep the credentials it read
      * and miss the one renamed here: the rotation holds the job, and lets it go once swept.
      *
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changePassword_job_holds_the_job_and_releases_it_after(): void
@@ -482,7 +483,7 @@ class ChangePasswordControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changePassword_job_revision_holds_the_job_and_releases_it_after(): void
@@ -505,7 +506,7 @@ class ChangePasswordControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changePassword_job_answers_conflict_and_rotates_nothing_while_the_job_is_held(): void
@@ -538,7 +539,7 @@ class ChangePasswordControllerTest extends AbstractTest
      * A review row on source page 1 matches the password but names no revision phase, which makes the
      * review branch throw once it holds the job.
      *
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changePassword_job_releases_the_job_when_the_rotation_fails(): void
@@ -570,7 +571,7 @@ class ChangePasswordControllerTest extends AbstractTest
      * A password that opens nothing must not hold the job: anyone logged in could otherwise keep its
      * owner from splitting it.
      *
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changeThePassword_job_not_found_never_takes_the_job(): void
@@ -592,7 +593,7 @@ class ChangePasswordControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changePassword_project_does_not_take_any_job(): void
@@ -611,7 +612,7 @@ class ChangePasswordControllerTest extends AbstractTest
     // ─── changeThePassword() / checkUserPermissions() failure branches ───
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changeThePassword_project_throws_not_found_for_wrong_password(): void
@@ -631,7 +632,7 @@ class ChangePasswordControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function checkUserPermissions_throws_when_user_not_in_team(): void
@@ -651,7 +652,7 @@ class ChangePasswordControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function checkUserPermissions_passes_for_team_member(): void
@@ -674,7 +675,7 @@ class ChangePasswordControllerTest extends AbstractTest
      * authenticates through cannot keep serving the replaced credential until their TTL expires
      * (callers cache them for up to a day).
      *
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changePassword_job_evicts_the_cached_translate_password(): void
@@ -721,7 +722,7 @@ class ChangePasswordControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changePassword_job_revision_evicts_the_cached_review_password(): void
