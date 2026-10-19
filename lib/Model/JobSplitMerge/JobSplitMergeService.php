@@ -703,9 +703,6 @@ class JobSplitMergeService
             $wCountManager->initializeJobWordCount((int)$first_job['id'], (string)$first_job['password']);
 
             $chunk = new JobStruct($first_job->toArray());
-            $this->features->dispatch(new PostJobMergedEvent($data, $chunk, $actingUser));
-
-            $jobDao->updateStdWcAndTotalWc((int)$first_job['id'], (string)$first_job['password'], $standard_word_count, $total_raw_wc);
 
             // Every password the merge revoked keeps resolving out of the cache until its entry expires,
             // and the surviving one now answers with the pre-merge row. The sweep reads the database, so
@@ -716,12 +713,20 @@ class JobSplitMergeService
             // critical because a revoked job credential still answering out of the cache is a security
             // problem, not the stale read an ordinary eviction failure leaves behind. The sweep covers
             // the project data and the project's job list too, which publish the passwords in their value.
+            // Registered before the PostJobMergedEvent dispatch, so it drains after the merge's own
+            // evictions but ahead of the hooks' deferred work (a render and a broker publish per chunk
+            // review), which would otherwise delay the sweep, or skip it altogether when that work dies of
+            // a fatal error the drain cannot catch, such as the memory or time limit.
             foreach ($mergedPasswords as $mergedPassword) {
                 $this->dbHandler->onCommit(
                     fn() => $this->sweepCredentialCaches($chunk, $mergedPassword, (string)$chunk->password),
                     critical: true
                 );
             }
+
+            $this->features->dispatch(new PostJobMergedEvent($data, $chunk, $actingUser));
+
+            $jobDao->updateStdWcAndTotalWc((int)$first_job['id'], (string)$first_job['password'], $standard_word_count, $total_raw_wc);
 
             // These stay inside the scope so the DAOs' own deferral applies to them. Outside it they
             // would fire the moment they are called, which is right while the merge owns the outermost
