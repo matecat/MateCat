@@ -4,7 +4,6 @@ import {JobContainer} from './JobContainer'
 import {Checkbox, CHECKBOX_STATE} from '../common/Checkbox'
 import IconDown from '../../../img/icons/IconDown'
 import JobMenu from './JobMenu'
-import {Button, BUTTON_MODE, BUTTON_SIZE} from '../common/Button/Button'
 import useShowMore from '../../hooks/useShowMore'
 import {AnimatedCollapse} from '../common/AnimatedCollapse'
 import Download from '../../../img/icons/Download'
@@ -17,7 +16,12 @@ import Tooltip from '../common/Tooltip'
 import ProjectsStore from '../../stores/ProjectsStore'
 import ManageConstants from '../../constants/ManageConstants'
 
-export const ChunksJobContainer = ({chunks, ...props}) => {
+export const ChunksJobContainer = ({
+  chunks,
+  expanded = false,
+  visibleLimit = 5,
+  ...props
+}) => {
   const [showDownloadProgress, setShowDownloadProgress] = useState(false)
 
   const sourceTargetTextRef = useRef()
@@ -28,9 +32,7 @@ export const ChunksJobContainer = ({chunks, ...props}) => {
     visibleItems: visibleChunks,
     extraItems: extraChunks,
     hasMore: hasMoreChunks,
-    isExpanded: isChunksExpanded,
-    toggle: toggleChunks,
-  } = useShowMore(chunks)
+  } = useShowMore(chunks, visibleLimit)
 
   const {project} = props
 
@@ -231,7 +233,7 @@ export const ChunksJobContainer = ({chunks, ...props}) => {
         jobTMXUrl={jobTMXUrl}
         exportXliffUrl={exportXliffUrl}
         originalUrl={originalUrl}
-        getDownloadLabel={getDownloadLabel()}
+        downloadLabel={getDownloadLabel()}
         openMergeModalFn={openMergeModal}
         archiveJobFn={archiveJob}
         activateJobFn={activateJob}
@@ -243,7 +245,7 @@ export const ChunksJobContainer = ({chunks, ...props}) => {
   }
 
   return (
-    <div className="chunks-job-container">
+    <div className="chunks-job-container job-container-background">
       <div className="chunks-job-container-line">
         <div className="chunks-job-container-line-sx">
           <Checkbox
@@ -276,7 +278,7 @@ export const ChunksJobContainer = ({chunks, ...props}) => {
           />
         ))}
         {hasMoreChunks && (
-          <AnimatedCollapse expanded={isChunksExpanded}>
+          <AnimatedCollapse expanded={expanded}>
             {extraChunks.map((job, index) => (
               <JobContainer
                 key={`${job.get('id')}-${index + visibleChunks.length + 1}`}
@@ -288,27 +290,12 @@ export const ChunksJobContainer = ({chunks, ...props}) => {
           </AnimatedCollapse>
         )}
       </div>
-      {hasMoreChunks && (
-        <div className="chunks-job-container-show-more">
-          <Button
-            testId="chunks-job-container-show-more"
-            mode={BUTTON_MODE.OUTLINE}
-            size={BUTTON_SIZE.SMALL}
-            onClick={toggleChunks}
-          >
-            {isChunksExpanded ? 'View less' : 'View more'}
-            <span
-              className={`chunks-job-container-show-more-icon${isChunksExpanded ? ' is-expanded' : ''}`}
-            >
-              <IconDown size={16} />
-            </span>
-          </Button>
-        </div>
-      )}
     </div>
   )
 }
 
 ChunksJobContainer.propTypes = {
   chunks: PropTypes.array.isRequired,
+  expanded: PropTypes.bool,
+  visibleLimit: PropTypes.number,
 }

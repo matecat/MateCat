@@ -20,7 +20,7 @@
   height: 64px;
   align-items: center;
   align-self: stretch;
-  background-color: colors.$grey50;
+  background-color: colors.$grey75;
   position: sticky;
   top: 0;
   z-index: 2;
@@ -76,12 +76,21 @@
 }
 
 .project-container-show-more {
+  position: relative;
   display: flex;
   justify-content: center;
-  padding: 12px 24px;
-  border-top: 1px solid colors.$grey100;
+  padding: 0 12px 24px;
   background-color: colors.$white;
   z-index: 1;
+
+  // continue the .job-container-background zebra stripe (see JobContainer.scss)
+  // into the show-more bar instead of always showing white under it
+  .job-container-background:nth-last-child(
+      1 of .job-container-background
+    ):nth-of-type(odd)
+    ~ & {
+    background-color: colors.$grey25;
+  }
 
   .project-container-show-more-icon {
     display: flex;
@@ -100,7 +109,9 @@
   padding: 0px 24px;
   height: 40px;
   background-color: colors.$white;
+  border-top: 1px solid colors.$grey100;
   z-index: 1;
+
   > * {
     color: colors.$grey700 !important;
     font-size: variables.$font-size-xsmall !important;

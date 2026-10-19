@@ -559,3 +559,106 @@ test('shows only the first 5 jobs with a View more toggle when a project has mor
     )
   expect(toggle).toHaveTextContent('View more')
 })
+
+test('one show-more toggle reveals both the extra jobs and a chunk group\'s extra parts, sharing a single 5-row budget', async () => {
+  window.ResizeObserver = ResizeObserver
+  executeMswServer()
+
+  const jobTemplate = fakeProjectsData.project.data.jobs[0]
+  const plainJobs = [
+    {...jobTemplate, id: 300, password: 'pwd300'},
+    {...jobTemplate, id: 301, password: 'pwd301'},
+  ]
+  // 7 chunks sharing the same id are grouped into a single chunk group by
+  // ProjectContainer's getChunkGroups(). The 2 plain jobs above spend 2 of
+  // the shared 5-row budget, leaving 3 for this group before truncating.
+  const chunkJobs = new Array(7).fill(null).map((_, index) => ({
+    ...jobTemplate,
+    id: 302,
+    password: `pwd302-${index}`,
+  }))
+
+  const {props} = getFakeProperties({
+    ...fakeProjectsData.project,
+    data: {
+      ...fakeProjectsData.project.data,
+      jobs: [...plainJobs, ...chunkJobs],
+    },
+  })
+
+  render(
+    <ApplicationWrapperContext.Provider
+      value={{isUserLogged: true, userInfo: userMock}}
+    >
+      <ProjectsBulkActionsContext.Provider
+        value={{jobsBulk: [], onCheckedProject, onCheckedJob}}
+      >
+        <ProjectContainer {...props} />
+      </ProjectsBulkActionsContext.Provider>
+    </ApplicationWrapperContext.Provider>,
+  )
+
+  expect(screen.getByTestId(300)).toBeInTheDocument()
+  expect(screen.getByTestId(301)).toBeInTheDocument()
+  // every chunk shares the underlying job id (302), so count rows instead of
+  // asserting on individual testids
+  expect(screen.getAllByTestId(302)).toHaveLength(3)
+
+  // only one toggle exists for the whole card
+  expect(screen.queryAllByTestId('project-jobs-show-more')).toHaveLength(1)
+  const toggle = screen.getByTestId('project-jobs-show-more')
+
+  await userEvent.click(toggle)
+
+  expect(screen.getAllByTestId(302)).toHaveLength(7)
+})
+
+test('hides a chunk group entirely, including its header, when the budget runs out before reaching it', async () => {
+  window.ResizeObserver = ResizeObserver
+  executeMswServer()
+
+  const jobTemplate = fakeProjectsData.project.data.jobs[0]
+  // 6 plain jobs already exceed the shared 5-row budget, so the chunk group
+  // after them should not show even its summary line until expanded.
+  const plainJobs = new Array(6).fill(null).map((_, index) => ({
+    ...jobTemplate,
+    id: 400 + index,
+    password: `pwd${400 + index}`,
+  }))
+  const chunkJobs = new Array(3).fill(null).map((_, index) => ({
+    ...jobTemplate,
+    id: 410,
+    password: `pwd410-${index}`,
+  }))
+
+  const {props} = getFakeProperties({
+    ...fakeProjectsData.project,
+    data: {
+      ...fakeProjectsData.project.data,
+      jobs: [...plainJobs, ...chunkJobs],
+    },
+  })
+
+  render(
+    <ApplicationWrapperContext.Provider
+      value={{isUserLogged: true, userInfo: userMock}}
+    >
+      <ProjectsBulkActionsContext.Provider
+        value={{jobsBulk: [], onCheckedProject, onCheckedJob}}
+      >
+        <ProjectContainer {...props} />
+      </ProjectsBulkActionsContext.Provider>
+    </ApplicationWrapperContext.Provider>,
+  )
+
+  plainJobs
+    .slice(0, 5)
+    .forEach((job) => expect(screen.getByTestId(job.id)).toBeInTheDocument())
+  expect(screen.queryByTestId(plainJobs[5].id)).not.toBeInTheDocument()
+  expect(screen.queryByTestId(410)).not.toBeInTheDocument()
+
+  await userEvent.click(screen.getByTestId('project-jobs-show-more'))
+
+  expect(screen.getByTestId(plainJobs[5].id)).toBeInTheDocument()
+  expect(screen.getAllByTestId(410)).toHaveLength(3)
+})

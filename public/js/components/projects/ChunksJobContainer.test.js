@@ -28,10 +28,10 @@ jest.mock('./JobMenu', () => ({
       <span data-testid="disable-download">
         {props.disableDownload ? 'disabled' : 'enabled'}
       </span>
-      <div data-testid="download-label">{props.getDownloadLabel.label}</div>
+      <div data-testid="download-label">{props.downloadLabel.label}</div>
       <button
         data-testid="download-action"
-        onClick={() => props.getDownloadLabel.action()}
+        onClick={() => props.downloadLabel.action()}
       >
         download
       </button>
@@ -423,7 +423,7 @@ test('toggles disableDownload state on DISABLE/ENABLE_DOWNLOAD_BUTTON store even
   expect(screen.getByTestId('disable-download')).toHaveTextContent('enabled')
 })
 
-test('shows only the first 5 chunks with a View more toggle when there are more than 5', async () => {
+test('shows only the first 5 chunks when there are more than 5 and not expanded', () => {
   const chunks = new Array(7)
     .fill(null)
     .map((_, index) => makeJob({id: 90 + index}))
@@ -447,22 +447,63 @@ test('shows only the first 5 chunks with a View more toggle when there are more 
   }
   expect(screen.queryByTestId('job-container-95-6')).not.toBeInTheDocument()
   expect(screen.queryByTestId('job-container-96-7')).not.toBeInTheDocument()
+})
 
-  const toggle = screen.getByTestId('chunks-job-container-show-more')
-  expect(toggle).toHaveTextContent('View more')
+test('reveals the extra chunks when the shared expanded prop is true', () => {
+  const chunks = new Array(7)
+    .fill(null)
+    .map((_, index) => makeJob({id: 90 + index}))
 
-  await userEvent.click(toggle)
+  render(
+    <ChunksJobContainer
+      chunks={chunks}
+      project={makeProject(7)}
+      isChecked={false}
+      isChunk={true}
+      isChunkOutsourced={false}
+      onCheckedJob={jest.fn()}
+      downloadTranslationFn={jest.fn()}
+      expanded={true}
+    />,
+  )
 
   expect(screen.getByTestId('job-container-95-6')).toBeInTheDocument()
   expect(screen.getByTestId('job-container-96-7')).toBeInTheDocument()
-  expect(toggle).toHaveTextContent('View less')
+})
 
-  // the collapse wrapper defers unmounting the extra chunks until its height
-  // transition ends, so the collapse animation is actually visible
+test('collapsing the shared expanded prop defers unmounting the extra chunks until the transition ends', () => {
+  const chunks = new Array(7)
+    .fill(null)
+    .map((_, index) => makeJob({id: 90 + index}))
+
+  const {rerender} = render(
+    <ChunksJobContainer
+      chunks={chunks}
+      project={makeProject(7)}
+      isChecked={false}
+      isChunk={true}
+      isChunkOutsourced={false}
+      onCheckedJob={jest.fn()}
+      downloadTranslationFn={jest.fn()}
+      expanded={true}
+    />,
+  )
+
   // eslint-disable-next-line testing-library/no-node-access
   const collapseWrapper = screen.getByTestId('job-container-95-6').parentElement.parentElement
 
-  await userEvent.click(toggle)
+  rerender(
+    <ChunksJobContainer
+      chunks={chunks}
+      project={makeProject(7)}
+      isChecked={false}
+      isChunk={true}
+      isChunkOutsourced={false}
+      onCheckedJob={jest.fn()}
+      downloadTranslationFn={jest.fn()}
+      expanded={false}
+    />,
+  )
 
   expect(screen.getByTestId('job-container-95-6')).toBeInTheDocument()
 
@@ -473,27 +514,6 @@ test('shows only the first 5 chunks with a View more toggle when there are more 
   })
 
   expect(screen.queryByTestId('job-container-95-6')).not.toBeInTheDocument()
-  expect(toggle).toHaveTextContent('View more')
-})
-
-test('does not show the View more toggle with 5 or fewer chunks', () => {
-  const chunks = [makeJob({id: 90}), makeJob({id: 91})]
-
-  render(
-    <ChunksJobContainer
-      chunks={chunks}
-      project={makeProject(2)}
-      isChecked={false}
-      isChunk={true}
-      isChunkOutsourced={false}
-      onCheckedJob={jest.fn()}
-      downloadTranslationFn={jest.fn()}
-    />,
-  )
-
-  expect(
-    screen.queryByTestId('chunks-job-container-show-more'),
-  ).not.toBeInTheDocument()
 })
 
 test('removes the store listeners on unmount', () => {

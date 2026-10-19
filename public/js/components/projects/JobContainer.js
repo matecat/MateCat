@@ -26,6 +26,7 @@ import ProjectsStore from '../../stores/ProjectsStore'
 import ManageConstants from '../../constants/ManageConstants'
 import OutsourceContainer from '../outsource/OutsourceContainer'
 import Close from '../../../img/icons/Close'
+import IconRedirect from '../../../img/icons/IconRedirect'
 
 export const JobContainer = ({
   job,
@@ -585,6 +586,7 @@ export const JobContainer = ({
       outsourceJobElement = (
         <Button
           className="job-container-button-weight-normal"
+          mode={BUTTON_MODE.OUTLINE}
           size={BUTTON_SIZE.SMALL}
           onClick={() => openOutsourceModal(true, false)}
         >
@@ -628,6 +630,7 @@ export const JobContainer = ({
               <Button
                 className="job-delivery-date-button-close"
                 size={BUTTON_SIZE.ICON_XSMALL}
+                mode={BUTTON_MODE.OUTLINE}
                 onClick={removeTranslator}
                 testId="remove-translator-button"
               >
@@ -665,6 +668,7 @@ export const JobContainer = ({
             <Button
               ref={buyTranslationRef}
               size={BUTTON_SIZE.SMALL}
+              mode={BUTTON_MODE.OUTLINE}
               className="job-container-button-weight-normal"
               id="open-quote-request"
               data-testid="buy-translation-button"
@@ -679,6 +683,7 @@ export const JobContainer = ({
         <div>
           <Button
             size={BUTTON_SIZE.SMALL}
+            mode={BUTTON_MODE.OUTLINE}
             className="job-container-button-weight-normal"
             id="open-quote-request"
             onClick={() => openOutsourceModal(false, true)}
@@ -714,7 +719,10 @@ export const JobContainer = ({
   const stats = job.get('stats').toJS()
 
   return (
-    <div data-testid={job.get('id')} className="job-container">
+    <div
+      data-testid={job.get('id')}
+      className={`job-container ${!isChunk ? 'job-container-background' : ''}`}
+    >
       <div
         className={`job-container-grid ${isChunk ? 'chunk-job-container' : ''}`}
       >
@@ -752,17 +760,18 @@ export const JobContainer = ({
         </div>
         <div>
           <Tooltip
-            content={`Total: ${Math.round(stats.raw.total)} / Weighted: ${Math.round(stats.equivalent.total)}`}
+            content={`Total: ${Math.round(stats.equivalent.total)} / Weighted: ${Math.round(stats.raw.total)}`}
           >
             <Button
               ref={wordsButtonRef}
-              size={BUTTON_SIZE.SMALL}
+              size={BUTTON_SIZE.XSMALL}
               className="job-container-button-weight-normal job-container-words-button"
               onClick={() => window.open(getProjectAnalyzeUrl(), '_blank')}
               testId="words-button"
             >
-              Words: {Math.round(stats.raw.total)}{' '}
-              <span>({Math.round(stats.equivalent.total)})</span>
+              <IconRedirect size={14} />
+              Words: {Math.round(stats.equivalent.total)}{' '}
+              <span>({Math.round(stats.raw.total)})</span>
             </Button>
           </Tooltip>
         </div>
