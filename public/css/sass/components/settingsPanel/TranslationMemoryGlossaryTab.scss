@@ -44,6 +44,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  font-size: variables.$font-size-small;
 }
 
 .translation-memory-glossary-pretranslate {
@@ -64,8 +65,9 @@
   p {
     margin: 0;
     padding: 0 10px;
-    color: colors.$grey600;
+    color: colors.$grey700;
     text-align: left;
+    font-size: variables.$font-size-small;
   }
 }
 
@@ -90,11 +92,13 @@
   align-items: center;
   gap: 8px;
   font-weight: bold;
+  font-size: variables.$font-size-small;
 }
 
 .translation-memory-glossary-pretranslate-status-label {
-  color: colors.$grey600;
+  color: colors.$grey700;
   text-align: left;
+  font-size: variables.$font-size-small;
 }
 
 .translation-memory-glossary-tab-table-title {
