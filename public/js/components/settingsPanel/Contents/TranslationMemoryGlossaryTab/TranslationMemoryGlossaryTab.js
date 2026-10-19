@@ -563,7 +563,7 @@ export const TranslationMemoryGlossaryTab = () => {
                 onClick={onNewResource}
                 testId="new-resource-tm"
               >
-                <IconAdd size={20} /> New resource
+                <IconAdd size={22} /> New resource
               </Button>
             </div>
           </div>
