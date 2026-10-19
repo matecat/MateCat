@@ -288,6 +288,75 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver
         $this->assertEquals(['XXXXXXXXXXXXXXXXXXX', 'YYYYYYYYYYYYYYYYYYYY'], $invocations[0]->parameters()[0]['id_user']);
     }
 
+    #[Test]
+    public function execContribution_sends_only_the_owner_keys_as_mt_key()
+    {
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub(), obtainTestDatabase());
+        $_worker->attach($this);
+
+        $stubEngine = $this
+            ->getMockBuilder(MyMemory::class)
+            ->onlyMethods(['update'])
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $stubEngine->expects($stubEngineParameterSpy = $this->once())
+            ->method('update')
+            ->with($this->anything())
+            ->willReturn(
+                UpdateContributionResponse::getInstance(
+                    json_decode('{"responseData":"OK","responseStatus":200,"responseDetails":[545482283]}', true),
+                    $this->featureSet
+                )
+            );
+
+        $_worker->setEngine($stubEngine);
+
+        $contributionMockQueueObject = $this
+            ->getMockBuilder(SetContributionRequest::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getProp', 'getJobStruct'])
+            ->getMock();
+        $contributionMockQueueObject->expects($this->once())->method('getProp');
+        $contributionMockQueueObject->expects($this->once())
+            ->method('getJobStruct')
+            ->willReturn(
+                new JobStruct(
+                    [
+                        'id' => $this->contributionStruct->id_job,
+                        'password' => $this->contributionStruct->job_password,
+                        'source' => 'en-US',
+                        'target' => 'it-IT',
+                        'id_tms' => 1,
+                        // an owner key, an owner key without write grant, and the revisor's own key
+                        'tm_keys' => '[{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"","key":"OWNERKEY","r":true,"w":true,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null},'
+                            . '{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"","key":"OWNERREADONLY","r":true,"w":false,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null},'
+                            . '{"tm":true,"glos":true,"owner":false,"uid_transl":null,"uid_rev":1234,"name":"","key":"REVISORKEY","r":false,"w":false,"r_transl":null,"w_transl":null,"r_rev":true,"w_rev":true,"source":null,"target":null}]'
+                    ]
+                )
+            );
+
+        $contributionMockQueueObject->fromRevision = true;
+        $contributionMockQueueObject->id_job = $this->contributionStruct->id_job;
+        $contributionMockQueueObject->job_password = $this->contributionStruct->job_password;
+        $contributionMockQueueObject->segment = $this->contributionStruct->segment;
+        $contributionMockQueueObject->id_segment = $this->contributionStruct->id_segment;
+        $contributionMockQueueObject->translation = $this->contributionStruct->translation;
+        $contributionMockQueueObject->api_key = $this->contributionStruct->api_key;
+        $contributionMockQueueObject->uid = $this->contributionStruct->uid;
+        $contributionMockQueueObject->oldTranslationStatus = $this->contributionStruct->oldTranslationStatus;
+        $contributionMockQueueObject->oldSegment = $this->contributionStruct->oldSegment;
+        $contributionMockQueueObject->oldTranslation = $this->contributionStruct->oldTranslation;
+
+        $reflectedMethod = new ReflectionMethod($_worker, '_execContribution');
+        $reflectedMethod->invokeArgs($_worker, [$contributionMockQueueObject]);
+
+        $inspector = new InvocationInspector($stubEngineParameterSpy);
+        $config = $inspector->getInvocations()[0]->parameters()[0];
+        $this->assertEquals(['OWNERKEY', 'REVISORKEY'], $config['id_user']);
+        $this->assertEquals(['OWNERKEY'], $config['mt_key']);
+    }
+
     /**
      * @test
      * @throws ReflectionException

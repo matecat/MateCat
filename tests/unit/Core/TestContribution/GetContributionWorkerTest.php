@@ -586,6 +586,42 @@ class GetContributionWorkerTest extends AbstractTest
     }
 
     #[Test]
+    public function test_getMatches_sends_only_the_owner_keys_as_mt_key(): void
+    {
+        $request = $this->makeBaseRequest();
+        $request->setJobStruct(new JobStruct([
+            'id' => self::TEST_JOB_ID,
+            'id_project' => self::TEST_PROJECT_ID,
+            'password' => 'pw',
+            'source' => 'en-US',
+            'target' => 'it-IT',
+            'job_first_segment' => self::TEST_SEGMENT_ID,
+            'job_last_segment' => self::TEST_SEGMENT_ID,
+            'id_tms' => 1,
+            'id_mt_engine' => 1,
+            // an owner key and the translator's (uid 999) own key
+            'tm_keys' => '[{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"","key":"OWNERKEY","r":true,"w":true,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"penalty":0},'
+                . '{"tm":true,"glos":true,"owner":false,"uid_transl":999,"uid_rev":null,"name":"","key":"TRANSLATORKEY","r":false,"w":false,"r_transl":true,"w_transl":true,"r_rev":null,"w_rev":null,"penalty":0}]',
+        ]));
+
+        $tmEngine = $this->getMockBuilder(MyMemory::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getConfigStruct', 'setMTPenalty', 'get'])
+            ->getMock();
+
+        $tmEngine->method('getConfigStruct')->willReturn([]);
+        $tmEngine->method('setMTPenalty')->willReturnSelf();
+        $tmEngine->expects($this->once())->method('get')->with($this->callback(function (array $config): bool {
+            return $config['id_user'] === ['OWNERKEY', 'TRANSLATORKEY'] && $config['mt_key'] === ['OWNERKEY'];
+        }))->willReturn(new GetMemoryResponse(['responseStatus' => 200, 'matches' => []]));
+
+        $request->forcedTMEngine = $tmEngine;
+
+        $method = new ReflectionMethod($this->worker, '_getMatches');
+        $method->invoke($this->worker, $request, $request->getJobStruct(), 'it-IT', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)), false);
+    }
+
+    #[Test]
     public function test_execGetContribution_publishes_primary_and_cross_language_payloads(): void
     {
         $worker = new WorkerHarnessGetContributionWorker(self::getStubBuilder(AMQHandler::class)->getStub(), obtainTestDatabase());

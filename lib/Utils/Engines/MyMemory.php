@@ -89,6 +89,7 @@ class MyMemory extends AbstractEngine
         'prop' => null,
         'get_mt' => 1,
         'id_user' => null,
+        'mt_key' => null,
         'num_result' => 3,
         'mt_only' => false,
         'isConcordance' => false,
@@ -298,12 +299,7 @@ class MyMemory extends AbstractEngine
             $parameters['context_before'] = $_config['context_before'] ?? '';
         }
 
-        if (!empty($_config['id_user'])) {
-            if (!is_array($_config['id_user'])) {
-                $_config['id_user'] = [$_config['id_user']];
-            }
-            $parameters['key'] = implode(",", $_config['id_user']);
-        }
+        $this->addKeyParameters($parameters, $_config);
 
         // Here we pass the subfiltering configuration to the API.
         // This value can be an array or null, if null, no filters will be loaded, if the array is empty, the default filters list will be loaded.
@@ -405,14 +401,28 @@ class MyMemory extends AbstractEngine
             $parameters['context_before'] = $config['context_before'] ?? '';
         }
 
-        if (!empty($config['id_user'])) {
-            if (!is_array($config['id_user'])) {
-                $config['id_user'] = [$config['id_user']];
-            }
-            $parameters['key'] = implode(",", $config['id_user']);
-        }
+        $this->addKeyParameters($parameters, $config);
 
         return $parameters;
+    }
+
+    /**
+     * Add the TM key parameters to a MyMemory request.
+     *
+     * `key` holds every key the current user can use on the job: the owner's keys and the user's own.
+     * `mt_key` holds only the keys the job owner linked to the job, so MyMemory can tell them apart.
+     * Both are comma-separated lists and are left out when empty.
+     *
+     * @param array<string, mixed> $parameters
+     * @param array<string, mixed> $config
+     */
+    private function addKeyParameters(array &$parameters, array $config): void
+    {
+        foreach (['key' => 'id_user', 'mt_key' => 'mt_key'] as $parameter => $configKey) {
+            if (!empty($config[$configKey])) {
+                $parameters[$parameter] = implode(",", (array)$config[$configKey]);
+            }
+        }
     }
 
     /**
@@ -439,12 +449,7 @@ class MyMemory extends AbstractEngine
             $parameters['context_before'] = $_config['context_before'] ?? '';
         }
 
-        if (!empty($_config['id_user'])) {
-            if (!is_array($_config['id_user'])) {
-                $_config['id_user'] = [$_config['id_user']];
-            }
-            $parameters['key'] = implode(",", $_config['id_user']);
-        }
+        $this->addKeyParameters($parameters, $_config);
 
         $this->call("update_relative_url", $parameters, true);
 
