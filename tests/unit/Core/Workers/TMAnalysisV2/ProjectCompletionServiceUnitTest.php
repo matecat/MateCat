@@ -5,6 +5,8 @@ namespace Matecat\Core\Workers\TMAnalysisV2;
 use Exception;
 use Matecat\TestHelpers\AbstractTest;
 use Model\FeaturesBase\FeatureSet;
+use Monolog\Handler\TestHandler;
+use Monolog\Logger;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use RuntimeException;
@@ -116,12 +118,11 @@ class ProjectCompletionServiceUnitTest extends AbstractTest
     #[Test]
     public function tryCloseProject_routes_logs_through_injected_logger(): void
     {
-        // The worker injects _doLog here so completion logs land in the analysis-queue
+        // The worker injects its queue logger here so completion logs land in the analysis-queue
         // log rather than the global general_log.txt. Verify the logger is actually used.
-        $captured = [];
-        $logger = function (string $message) use (&$captured): void {
-            $captured[] = $message;
-        };
+        $handler = new TestHandler();
+        $logger = new Logger('test');
+        $logger->pushHandler($handler);
 
         $redis = $this->createMock(AnalysisRedisServiceInterface::class);
         $redis->method('getProjectWordCounts')->willReturn(['project_segments' => 10, 'num_analyzed' => 10]);
@@ -135,8 +136,11 @@ class ProjectCompletionServiceUnitTest extends AbstractTest
         $service = new ProjectCompletionService($redis, $repo, $logger);
         $service->tryCloseProject(7, 'pass', 'queue', $this->makeFeatureSet());
 
-        $this->assertNotEmpty($captured, 'injected logger must receive completion log output');
-        $this->assertStringContainsString('empty rollup', implode("\n", $captured));
+        $this->assertNotEmpty($handler->getRecords(), 'injected logger must receive completion log output');
+        $this->assertTrue(
+            $handler->hasWarningThatContains('empty rollup'),
+            'the empty rollup must be logged as a warning on the injected logger'
+        );
     }
 
     // ── Happy path ─────────────────────────────────────────────────────
@@ -222,7 +226,7 @@ class ProjectCompletionServiceUnitTest extends AbstractTest
         $repo->expects($this->never())->method('updateProjectAnalysisStatus');
 
         // gateRetrySleepMicros:0 → the retry loop exhausts all attempts with no real sleep.
-        $service = new ProjectCompletionService($redis, $repo, null, gateRetrySleepMicros: 0);
+        $service = new ProjectCompletionService($redis, $repo, gateRetrySleepMicros: 0);
         $service->tryCloseProject(42, 'pass', 'queue', $this->makeFeatureSet());
     }
 
@@ -259,7 +263,7 @@ class ProjectCompletionServiceUnitTest extends AbstractTest
         $repo->expects($this->atLeastOnce())->method('transaction');
 
         // gateRetrySleepMicros:0 → the one retry needed happens with no real sleep.
-        $service = new ProjectCompletionService($redis, $repo, null, gateRetrySleepMicros: 0);
+        $service = new ProjectCompletionService($redis, $repo, gateRetrySleepMicros: 0);
         $service->tryCloseProject(77, 'pass', 'queue', $this->makeFeatureSet());
     }
 
@@ -279,7 +283,7 @@ class ProjectCompletionServiceUnitTest extends AbstractTest
         $repo->expects($this->never())->method('getProjectSegmentsTranslationSummary');
         $repo->expects($this->never())->method('updateProjectAnalysisStatus');
 
-        $service = new ProjectCompletionService($redis, $repo, null, maxGateRetries: 0);
+        $service = new ProjectCompletionService($redis, $repo, maxGateRetries: 0);
         $service->tryCloseProject(88, 'pass', 'queue', $this->makeFeatureSet());
     }
 

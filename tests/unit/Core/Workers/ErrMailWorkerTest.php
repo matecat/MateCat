@@ -23,7 +23,7 @@ class ErrMailWorkerTest extends AbstractTest
 
         $worker = $this->getMockBuilder(ErrMailWorker::class)
             ->setConstructorArgs([$amq, obtainTestDatabase()])
-            ->onlyMethods(['createMailer', '_checkDatabaseConnection', '_doLog'])
+            ->onlyMethods(['createMailer', '_checkDatabaseConnection'])
             ->getMock();
 
         $worker->method('createMailer')->willReturn($mailer);
@@ -52,15 +52,6 @@ class ErrMailWorkerTest extends AbstractTest
         $queueElement->reQueueNum = 0;
 
         return $queueElement;
-    }
-
-    #[Test]
-    public function getLoggerNameReturnsExpected(): void
-    {
-        $amq = $this->createStub(AMQHandler::class);
-        $worker = new ErrMailWorker($amq, obtainTestDatabase());
-
-        $this->assertSame('err_mail.log', $worker->getLoggerName());
     }
 
     #[Test]

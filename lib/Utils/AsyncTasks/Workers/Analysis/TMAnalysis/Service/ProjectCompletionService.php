@@ -2,8 +2,9 @@
 
 namespace Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service;
 
-use Closure;
 use Model\FeaturesBase\FeatureSet;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use RuntimeException;
 use Throwable;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\AnalysisRedisServiceInterface;
@@ -17,14 +18,10 @@ class ProjectCompletionService implements ProjectCompletionServiceInterface
     private ProjectCompletionRepositoryInterface $repository;
 
     /**
-     * Sink for completion log messages. Injected by the worker so these lines land in the
-     * analysis-queue log (via the worker's _doLog observer) alongside the rest of the
-     * analysis logs, instead of the global general_log.txt. Null → logging is skipped
-     * (e.g. isolated unit tests that don't assert on log output).
-     *
-     * @var (Closure(string): void)|null
+     * Where the service logs. The worker passes its queue logger, so these lines land in the
+     * analysis-queue log. The default NullLogger drops them (unit tests).
      */
-    private ?Closure $logger;
+    private LoggerInterface $logger;
 
     /**
      * Number of times the DB-authoritative completion gate is polled before giving up.
@@ -40,14 +37,14 @@ class ProjectCompletionService implements ProjectCompletionServiceInterface
     /**
      * @param AnalysisRedisServiceInterface $redisService
      * @param ProjectCompletionRepositoryInterface $repository
-     * @param (Closure(string): void)|null $logger
+     * @param LoggerInterface $logger
      * @param int $maxGateRetries
      * @param int $gateRetrySleepMicros
      */
     public function __construct(
         AnalysisRedisServiceInterface $redisService,
         ProjectCompletionRepositoryInterface $repository,
-        ?Closure $logger = null,
+        LoggerInterface $logger = new NullLogger(),
         int $maxGateRetries = 6,
         int $gateRetrySleepMicros = 1_000_000,
     ) {
@@ -58,22 +55,15 @@ class ProjectCompletionService implements ProjectCompletionServiceInterface
         $this->gateRetrySleepMicros = $gateRetrySleepMicros;
     }
 
-    private function log(string $message): void
-    {
-        if ($this->logger !== null) {
-            ($this->logger)($message);
-        }
-    }
-
     public function tryCloseProject(int $pid, string $projectPassword, string $queueKey, FeatureSet $featureSet): void
     {
         $projectTotals = $this->redisService->getProjectWordCounts($pid);
 
-        $this->log("--- trying to close project $pid: project_segments=" . ($projectTotals['project_segments'] ?? 'NULL'));
-        $this->log("--- trying to close project $pid: num_analyzed=" . ($projectTotals['num_analyzed'] ?? 'NULL'));
+        $this->logger->debug("--- trying to close project $pid: project_segments=" . ($projectTotals['project_segments'] ?? 'NULL'));
+        $this->logger->debug("--- trying to close project $pid: num_analyzed=" . ($projectTotals['num_analyzed'] ?? 'NULL'));
 
         if (empty($projectTotals['project_segments'])) {
-            $this->log("--- WARNING !!! error while counting segments in project $pid, skipping and continue");
+            $this->logger->warning("--- error while counting segments in project $pid, skipping and continue");
             return;
         }
 
@@ -115,7 +105,7 @@ class ProjectCompletionService implements ProjectCompletionServiceInterface
                     $rollup       = array_pop($_full_report);
 
                     if ($rollup === null) {
-                        $this->log("--- WARNING: empty rollup for project $pid. Releasing lock.");
+                        $this->logger->warning("--- empty rollup for project $pid. Releasing lock.");
                         $this->redisService->releaseCompletionLock($pid);
 
                         return;
@@ -127,7 +117,7 @@ class ProjectCompletionService implements ProjectCompletionServiceInterface
                     }
 
                     if ($attempt === $maxAttempts) {
-                        $this->log("--- Redis triggered close for project $pid but MySQL still reports $dbRemaining segments after $maxAttempts checks. Releasing lock.");
+                        $this->logger->warning("--- Redis triggered close for project $pid but MySQL still reports $dbRemaining segments after $maxAttempts checks. Releasing lock.");
                         $this->redisService->releaseCompletionLock($pid);
 
                         return;
@@ -147,11 +137,9 @@ class ProjectCompletionService implements ProjectCompletionServiceInterface
 
                 $_analyzed_report = $_full_report;
 
-                $this->log("--- trying to initialize job total word count for project $pid.");
+                $this->logger->debug("--- trying to initialize job total word count for project $pid.");
 
                 $this->repository->transaction(function () use ($pid, $rollup, $_analyzed_report): void {
-                    $this->log("--- analysis project $pid finished: change status to DONE");
-
                     $this->repository->updateProjectAnalysisStatus(
                         $pid,
                         ProjectStatus::STATUS_DONE,
@@ -176,6 +164,8 @@ class ProjectCompletionService implements ProjectCompletionServiceInterface
                     }
                 });
 
+                $this->logger->info("--- analysis project $pid finished: status changed to DONE");
+
                 // Remove from queue AFTER commit — if the worker crashes before commit,
                 // the project stays in the queue and another worker can retry.
                 $this->redisService->removeProjectFromQueue($queueKey, $pid);
@@ -184,7 +174,7 @@ class ProjectCompletionService implements ProjectCompletionServiceInterface
 
                 $this->repository->destroyAllCaches($pid, $projectPassword);
             } catch (Throwable $e) {
-                $this->log("**** Finalization failed for project $pid: " . $e->getMessage());
+                $this->logger->error("**** Finalization failed for project $pid: " . $e->getMessage());
 
                 // No rollback here: the scope has already rolled its transaction back by the time
                 // this catch runs, and the guard that used to sit around it existed because the

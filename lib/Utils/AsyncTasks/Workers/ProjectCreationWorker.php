@@ -75,10 +75,10 @@ class ProjectCreationWorker extends AbstractWorker
         if ($queueElement->reQueueNum >= 100) {
             $msg = "\n\n Error Project Creation  \n\n " . var_export($queueElement, true);
             Utils::sendErrMailReport($msg);
-            $this->_doLog("--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip.");
+            $this->logger->debug("--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip.");
             throw new EndQueueException("--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip.", self::ERR_REQUEUE_END);
         } elseif ($queueElement->reQueueNum > 0) {
-//            $this->_doLog( "--- (Worker " . $this->_workerPid . ") :  Frame re-queued {$queueElement->reQueueNum} times." );
+//            $this->logger->debug( "--- (Worker " . $this->_workerPid . ") :  Frame re-queued {$queueElement->reQueueNum} times." );
         }
     }
 
@@ -96,7 +96,7 @@ class ProjectCreationWorker extends AbstractWorker
         if (empty($queueElement->params)) {
             $msg = "\n\n Error Project Creation  \n\n " . var_export($queueElement, true);
             Utils::sendErrMailReport($msg);
-            $this->_doLog("--- (Worker " . $this->_workerPid . ") :  empty params found.");
+            $this->logger->debug("--- (Worker " . $this->_workerPid . ") :  empty params found.");
             throw new EndQueueException("--- (Worker " . $this->_workerPid . ") :  empty params found.", self::ERR_REQUEUE_END);
         }
 
@@ -111,7 +111,7 @@ class ProjectCreationWorker extends AbstractWorker
     protected function _publishResults(): void
     {
         if (!isset($this->projectStructure)) {
-            $this->_doLog("Project creation failed before ProjectStructure was initialized; skipping result publication.");
+            $this->logger->debug("Project creation failed before ProjectStructure was initialized; skipping result publication.");
             return;
         }
 
@@ -147,7 +147,7 @@ class ProjectCreationWorker extends AbstractWorker
             unset($this->projectStructure);
         }
 
-        $this->_doLog("Project creation completed: " . $idProject);
+        $this->logger->debug("Project creation completed: " . $idProject);
     }
 
     /**

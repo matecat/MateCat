@@ -169,8 +169,6 @@ class TMAnalysisWorkerTest extends AbstractTest
             $processor ?? $this->createStub(MatchProcessorServiceInterface::class),
         );
 
-        (new ReflectionProperty(AbstractWorker::class, '_observer'))->setValue($worker, []);
-
         $worker->setContext(Context::buildFromArray([
             'queue_name'    => 'test_queue',
             'max_executors' => 1,

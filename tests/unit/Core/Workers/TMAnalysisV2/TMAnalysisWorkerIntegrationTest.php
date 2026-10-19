@@ -12,7 +12,6 @@ use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use Predis\Client;
 use ReflectionClass;
-use ReflectionProperty;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\AnalysisRedisServiceInterface;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\EngineServiceInterface;
@@ -252,7 +251,6 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
 
         $worker->fixedConfig = ['pid' => 100, 'segment' => 'Hello world'];
 
-        (new ReflectionProperty(AbstractWorker::class, '_observer'))->setValue($worker, []);
         $worker->setContext(Context::buildFromArray([
             'queue_name' => 'test_queue',
             'max_executors' => 1,
@@ -387,7 +385,6 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
             new MatchProcessorService(new MatchSorter(), obtainTestDatabase()),
         );
 
-        (new ReflectionProperty(AbstractWorker::class, '_observer'))->setValue($worker, []);
         $worker->setContext(Context::buildFromArray([
             'queue_name'    => 'test_queue',
             'max_executors' => 1,

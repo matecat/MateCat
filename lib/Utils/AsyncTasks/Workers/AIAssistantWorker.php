@@ -12,6 +12,7 @@ use Utils\AIAssistant\AIClientFactory;
 use Utils\AIAssistant\AlternativeTranslationsClientInterface;
 use Utils\AIAssistant\ContextExplainerClientInterface;
 use Utils\AIAssistant\TranslationEvaluatorClientInterface;
+use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
@@ -39,9 +40,9 @@ class AIAssistantWorker extends AbstractWorker
      * @throws ReflectionException
      * @throws Exception
      */
-    public function __construct(AMQHandler $queueHandler, IDatabase $database)
+    public function __construct(AMQHandler $queueHandler, IDatabase $database, ?MatecatLogger $logger = null)
     {
-        parent::__construct($queueHandler, $database);
+        parent::__construct($queueHandler, $database, $logger);
         $this->redis = $queueHandler->getRedisClient();
     }
 
@@ -92,7 +93,7 @@ class AIAssistantWorker extends AbstractWorker
 
         $this->_checkDatabaseConnection();
 
-        $this->_doLog('AI ASSISTANT: ' . $action . ' action was executed with payload ' . json_encode($payload));
+        $this->logger->debug('AI ASSISTANT: ' . $action . ' action was executed with payload ' . json_encode($payload));
 
         $this->{$action}($payload);
     }
@@ -130,7 +131,7 @@ class AIAssistantWorker extends AbstractWorker
                 styleInstructions: $payload['style_instructions']
             );
 
-            $this->_doLog(
+            $this->logger->debug(
                 "Alternative translations for id_segment " . $payload['id_segment'] . ". Requested payload " . json_encode($payload) . ", received: " . json_encode($alternativeTranslations)
             );
 
@@ -200,9 +201,9 @@ class AIAssistantWorker extends AbstractWorker
 
         $lockValue = $this->generateLockValue();
 
-        $this->_doLog("Preparing for OpenAI call for id_segment " . $payload['id_segment']);
+        $this->logger->debug("Preparing for OpenAI call for id_segment " . $payload['id_segment']);
         $this->generateLock($payload['id_segment'], $payload['id_job'], $payload['password'], $lockValue);
-        $this->_doLog("Generated lock for id_segment " . $payload['id_segment']);
+        $this->logger->debug("Generated lock for id_segment " . $payload['id_segment']);
 
         try {
             $explainer = $this->createContextExplainer();
@@ -214,7 +215,7 @@ class AIAssistantWorker extends AbstractWorker
                 $phrase,
                 $payload['localized_target'],
                 function ($curl_info, $data) use (&$txt, &$buffer, $payload, $lockValue) {
-                    $this->_doLog("Start: " . AppConfig::$OPEN_AI_MODEL . " " . substr(AppConfig::$OPENAI_API_KEY, 0, 8) . "...");
+                    $this->logger->debug("Start: " . AppConfig::$OPEN_AI_MODEL . " " . substr(AppConfig::$OPENAI_API_KEY, 0, 8) . "...");
 
                     $currentLockValue = $this->getLockValue(
                         $payload['id_segment'],
@@ -223,7 +224,7 @@ class AIAssistantWorker extends AbstractWorker
                     );
 
                     if ($currentLockValue !== $lockValue) {
-                        $this->_doLog("Lock invalid for id_segment " . $payload['id_segment']);
+                        $this->logger->debug("Lock invalid for id_segment " . $payload['id_segment']);
                         return strlen($data);
                     }
 
@@ -240,7 +241,7 @@ class AIAssistantWorker extends AbstractWorker
                         $json = trim(substr($event, 5));
 
                         if ($json === '[DONE]') {
-                            $this->_doLog("Stream completed for id_segment " . $payload['id_segment']);
+                            $this->logger->debug("Stream completed for id_segment " . $payload['id_segment']);
 
                             $this->emitMessage(
                                 "ai_assistant_explain_meaning",
@@ -263,7 +264,7 @@ class AIAssistantWorker extends AbstractWorker
                         $arr = json_decode($json, true);
 
                         if (json_last_error() !== JSON_ERROR_NONE) {
-                            $this->_doLog("Invalid JSON chunk: " . $json);
+                            $this->logger->debug("Invalid JSON chunk: " . $json);
                             continue;
                         }
 
@@ -295,7 +296,7 @@ class AIAssistantWorker extends AbstractWorker
                 }
             );
         } catch (Throwable $e) {
-            $this->_doLog("Failed: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+            $this->logger->debug("Failed: " . $e->getMessage() . "\n" . $e->getTraceAsString());
         }
     }
 
@@ -309,7 +310,7 @@ class AIAssistantWorker extends AbstractWorker
      */
     private function emitErrorMessage(string $type, string $message, array $payload, ?int $errorCode = 4): void
     {
-        $this->_doLog($message);
+        $this->logger->debug($message);
         $this->emitMessage($type, $payload['id_client'], $payload['id_segment'], $message, true, true, $errorCode);
     }
 

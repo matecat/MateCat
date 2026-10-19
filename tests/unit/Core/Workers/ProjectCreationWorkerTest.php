@@ -44,7 +44,7 @@ class ProjectCreationWorkerTest extends AbstractTest
 
         return $this->getMockBuilder(ProjectCreationWorker::class)
             ->setConstructorArgs([$amq, obtainTestDatabase()])
-            ->onlyMethods(['_checkDatabaseConnection', '_doLog', 'createProjectManager', 'publishProjectResults'])
+            ->onlyMethods(['_checkDatabaseConnection', 'createProjectManager', 'publishProjectResults'])
             ->getMock();
     }
 
@@ -146,7 +146,7 @@ class ProjectCreationWorkerTest extends AbstractTest
 
         $worker = $this->getMockBuilder(ProjectCreationWorker::class)
             ->setConstructorArgs([$amq, obtainTestDatabase()])
-            ->onlyMethods(['_checkDatabaseConnection', '_doLog', 'publishProjectResults'])
+            ->onlyMethods(['_checkDatabaseConnection', 'publishProjectResults'])
             ->getMock();
 
         $worker->expects($this->never())->method('publishProjectResults');
@@ -162,7 +162,7 @@ class ProjectCreationWorkerTest extends AbstractTest
 
         $worker = $this->getMockBuilder(ProjectCreationWorker::class)
             ->setConstructorArgs([$amq, obtainTestDatabase()])
-            ->onlyMethods(['_checkDatabaseConnection', '_doLog', 'publishProjectResults'])
+            ->onlyMethods(['_checkDatabaseConnection', 'publishProjectResults'])
             ->getMock();
 
         // A second message that fails before assigning its structure must not publish the first one again.
@@ -181,7 +181,7 @@ class ProjectCreationWorkerTest extends AbstractTest
     {
         $worker = $this->getMockBuilder(ProjectCreationWorker::class)
             ->setConstructorArgs([$this->createStub(AMQHandler::class), obtainTestDatabase()])
-            ->onlyMethods(['_checkDatabaseConnection', '_doLog', 'publishProjectResults'])
+            ->onlyMethods(['_checkDatabaseConnection', 'publishProjectResults'])
             ->getMock();
 
         (new ReflectionProperty($worker, 'projectStructure'))->setValue($worker, $structure);

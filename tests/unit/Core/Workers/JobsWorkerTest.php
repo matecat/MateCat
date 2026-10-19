@@ -6,11 +6,14 @@ use Matecat\TestHelpers\AbstractTest;
 use Model\EditLog\EditLogSegmentStruct;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Monolog\Handler\TestHandler;
+use Monolog\Logger;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use Model\DataAccess\Database;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\JobsWorker;
+use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\Params;
 use Utils\TaskRunner\Commons\QueueElement;
@@ -19,9 +22,13 @@ use Utils\TaskRunner\Exceptions\EndQueueException;
 #[AllowMockObjectsWithoutExpectations]
 class JobsWorkerTest extends AbstractTest
 {
+    /** Collects every record the worker writes through the logger injected by createWorker(). */
+    private TestHandler $logHandler;
+
     protected function setUp(): void
     {
         parent::setUp();
+        $this->logHandler = new TestHandler();
         AppConfig::$SKIP_SQL_CACHE = true;
         $this->createDatabaseMock();
     }
@@ -38,8 +45,8 @@ class JobsWorkerTest extends AbstractTest
         $amq = $this->createStub(AMQHandler::class);
 
         $worker = $this->getMockBuilder(JobsWorker::class)
-            ->setConstructorArgs([$amq, obtainTestDatabase(), $jobDao])
-            ->onlyMethods(['_checkDatabaseConnection', '_doLog'])
+            ->setConstructorArgs([$amq, obtainTestDatabase(), $jobDao, new MatecatLogger(new Logger('test', [$this->logHandler]))])
+            ->onlyMethods(['_checkDatabaseConnection'])
             ->getMock();
 
         return $worker;
@@ -81,15 +88,12 @@ class JobsWorkerTest extends AbstractTest
         $jobDao->method('updateJobWeightedPeeAndTTE')->willReturn(0);
 
         $worker = $this->createWorker($jobDao);
-        $logged = [];
-        $worker->method('_doLog')->willReturnCallback(function (mixed $msg) use (&$logged): void {
-            $logged[] = (string)$msg;
-        });
 
         $worker->process($this->createQueueElement());
 
-        self::assertCount(2, $logged);
-        self::assertStringContainsString('no row changed: the chunk was merged or split again', $logged[1]);
+        $records = $this->logHandler->getRecords();
+        self::assertCount(2, $records);
+        self::assertStringContainsString('no row changed: the chunk was merged or split again', $records[1]->message);
     }
 
     #[Test]
@@ -100,9 +104,10 @@ class JobsWorkerTest extends AbstractTest
         $jobDao->method('updateJobWeightedPeeAndTTE')->willReturn(1);
 
         $worker = $this->createWorker($jobDao);
-        $worker->expects($this->once())->method('_doLog');
 
         $worker->process($this->createQueueElement());
+
+        self::assertCount(1, $this->logHandler->getRecords());
     }
 
     #[Test]

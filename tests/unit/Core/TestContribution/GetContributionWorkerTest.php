@@ -838,8 +838,6 @@ class WorkerHarnessGetContributionWorker extends GetContributionWorker
     public array $queuedMatchResults = [];
     /** @var list<array<string, mixed>> */
     public array $publishedPayloads = [];
-    /** @var list<array|string> */
-    public array $logs = [];
 
     public function queueMatchResult(array $mt, array $matches): void
     {
@@ -854,11 +852,6 @@ class WorkerHarnessGetContributionWorker extends GetContributionWorker
     protected function publishToNodeJsClients($_object): void
     {
         $this->publishedPayloads[] = $_object;
-    }
-
-    protected function _doLog(array|string $msg): void
-    {
-        $this->logs[] = $msg;
     }
 }
 

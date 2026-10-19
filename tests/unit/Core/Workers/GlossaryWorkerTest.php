@@ -4,7 +4,6 @@ namespace Matecat\Core\Workers;
 
 use Matecat\TestHelpers\AbstractTest;
 use PHPUnit\Framework\Attributes\Test;
-use ReflectionProperty;
 use Model\DataAccess\Database;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\GlossaryWorker;
@@ -17,7 +16,6 @@ use Utils\Engines\Results\MyMemory\KeysGlossaryResponse;
 use Utils\Engines\Results\MyMemory\SearchGlossaryResponse;
 use Utils\Engines\Results\MyMemory\SetGlossaryResponse;
 use Utils\Engines\Results\MyMemory\UpdateGlossaryResponse;
-use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\QueueElement;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 
@@ -53,9 +51,6 @@ class GlossaryWorkerTest extends AbstractTest
 
         $amqStub = $this->createStub(AMQHandler::class);
         $this->worker = new TestableGlossaryWorker($amqStub, obtainTestDatabase());
-
-        $observerRef = new ReflectionProperty(AbstractWorker::class, '_observer');
-        $observerRef->setValue($this->worker, []);
     }
 
     /**

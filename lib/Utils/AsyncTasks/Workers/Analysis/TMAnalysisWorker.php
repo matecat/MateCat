@@ -32,6 +32,7 @@ use Utils\AsyncTasks\Workers\Service\MatchSorter;
 use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
+use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\Subfiltering\IcuCompliantHandlers;
@@ -74,15 +75,13 @@ class TMAnalysisWorker extends AbstractWorker
         ?ProjectCompletionServiceInterface $projectCompletion = null,
         ?EngineServiceInterface $engineService = null,
         ?MatchProcessorServiceInterface $matchProcessor = null,
+        ?MatecatLogger $logger = null,
     ) {
-        parent::__construct($queueHandler, $database);
+        parent::__construct($queueHandler, $database, $logger);
 
-        // Route the services' logs to the analysis-queue log (via _doLog observer),
-        // alongside the rest of the analysis logs, instead of the global general_log.txt.
-        $log = fn(string $message) => $this->_doLog($message);
-
-        $this->redisService = $redisService ?? new AnalysisRedisService($queueHandler, $log);
-        $this->segmentUpdater = $segmentUpdater ?? new SegmentUpdaterService($this->database, $log);
+        // The services log to the analysis-queue log, next to the rest of the analysis lines.
+        $this->redisService = $redisService ?? new AnalysisRedisService($queueHandler, $this->logger);
+        $this->segmentUpdater = $segmentUpdater ?? new SegmentUpdaterService($this->database, $this->logger);
         $this->projectCompletion = $projectCompletion ?? new ProjectCompletionService(
             $this->redisService,
             new ProjectCompletionRepository(
@@ -91,9 +90,8 @@ class TMAnalysisWorker extends AbstractWorker
                 new JobDao($this->database),
                 new AnalysisDao($this->database),
                 new CounterModel($this->database),
-                $log,
             ),
-            $log
+            $this->logger
         );
         $this->engineService = $engineService ?? new EngineService(new DefaultEngineResolver($this->database), $this->database);
         $this->matchProcessor = $matchProcessor ?? new MatchProcessorService(new MatchSorter(), $this->database);
@@ -117,7 +115,7 @@ class TMAnalysisWorker extends AbstractWorker
 
         $this->_matches = null;
 
-        $this->_doLog("--- (Worker $this->_workerPid) : Segment $params->id_segment - Job $params->id_job found ");
+        $this->logger->debug("--- (Worker $this->_workerPid) : Segment $params->id_segment - Job $params->id_job found ");
 
         $this->_checkForReQueueEnd($queueElement);
 
@@ -132,7 +130,7 @@ class TMAnalysisWorker extends AbstractWorker
             try {
                 $tmMatches = $this->engineService->getTMMatches($config, $this->featureSet, $mtPenalty);
             } catch (ReQueueException $rEx) {
-                $this->_doLog("--- (Worker $this->_workerPid) : RequeueException: {$rEx->getMessage()}");
+                $this->logger->debug("--- (Worker $this->_workerPid) : RequeueException: {$rEx->getMessage()}");
                 throw $rEx;
             } catch (NotSupportedMTException) {
                 // Do nothing, skip the frame
@@ -143,13 +141,13 @@ class TMAnalysisWorker extends AbstractWorker
             $matches = $this->matchProcessor->sortMatches($mtResult, $tmMatches);
 
             if (empty($matches)) {
-                $this->_doLog("--- (Worker $this->_workerPid) : No contribution found for this segment: " . $params->id_segment);
+                $this->logger->debug("--- (Worker $this->_workerPid) : No contribution found for this segment: " . $params->id_segment);
                 $this->_forceSetSegmentAnalyzed($queueElement);
                 throw new EmptyElementException("--- (Worker $this->_workerPid) : No contribution found for this segment.", self::ERR_EMPTY_ELEMENT);
             }
 
             $this->_matches = $matches;
-            $this->_doLog("--- (Worker $this->_workerPid) : Segment $params->id_segment - Job $params->id_job matches retrieved.");
+            $this->logger->debug("--- (Worker $this->_workerPid) : Segment $params->id_segment - Job $params->id_job matches retrieved.");
 
             $bestMatch = $this->getHighestNotMT_OrPickTheFirstOne();
 
@@ -226,20 +224,20 @@ class TMAnalysisWorker extends AbstractWorker
             try {
                 $updateRes = $this->segmentUpdater->setAnalysisValue($tmData);
             } catch (Exception $e) {
-                $this->_doLog("**** " . $e->getMessage());
-                $this->_doLog("**** Error occurred during the storing (UPDATE) of the suggestions for the segment {$tmData['id_segment']}");
+                $this->logger->debug("**** " . $e->getMessage());
+                $this->logger->debug("**** Error occurred during the storing (UPDATE) of the suggestions for the segment {$tmData['id_segment']}");
                 throw new ReQueueException("**** Error occurred during the storing (UPDATE) of the suggestions for the segment {$tmData['id_segment']}", self::ERR_REQUEUE);
             }
 
             if ($updateRes === 0) {
-                $this->_doLog("Segment {$tmData['id_segment']}-{$tmData['id_job']} not updated (already DONE or missing), skipping side-effects.");
+                $this->logger->debug("Segment {$tmData['id_segment']}-{$tmData['id_job']} not updated (already DONE or missing), skipping side-effects.");
                 return;
             } elseif ($updateRes === -1) {
-                $this->_doLog("Segment {$tmData['id_segment']}-{$tmData['id_job']} not updated (SKIPPED) pre-translation");
+                $this->logger->debug("Segment {$tmData['id_segment']}-{$tmData['id_job']} not updated (SKIPPED) pre-translation");
             }
 
-            $this->_doLog("Row found: {$tmData['id_segment']}-{$tmData['id_job']} - UPDATED.");
-            $this->_doLog("--- (Worker $this->_workerPid) : Segment $params->id_segment - Job $params->id_job updated.");
+            $this->logger->debug("Row found: {$tmData['id_segment']}-{$tmData['id_job']} - UPDATED.");
+            $this->logger->debug("--- (Worker $this->_workerPid) : Segment $params->id_segment - Job $params->id_job updated.");
 
             // ── POINT OF NO RETURN ────────────────────────────────────────────────
             // MySQL committed. Redis failures MUST NOT escape to the Executor.
@@ -258,9 +256,9 @@ class TMAnalysisWorker extends AbstractWorker
                 $standardWords
             );
 
-            $this->_doLog("--- (Worker $this->_workerPid) : Segment $params->id_segment - Job $params->id_job acknowledged.");
+            $this->logger->debug("--- (Worker $this->_workerPid) : Segment $params->id_segment - Job $params->id_job acknowledged.");
         } catch (ReQueueException $e) {
-            $this->_doLog("--- (Worker $this->_workerPid) : RequeueException: {$e->getMessage()}");
+            $this->logger->debug("--- (Worker $this->_workerPid) : RequeueException: {$e->getMessage()}");
             throw $e;
         }
     }
@@ -284,7 +282,7 @@ class TMAnalysisWorker extends AbstractWorker
     {
         if ($queueElement->params->raw_word_count == 0) {
             $this->_forceSetSegmentAnalyzed($queueElement);
-            $this->_doLog("--- (Worker $this->_workerPid) : empty word count segment. acknowledge and continue.");
+            $this->logger->debug("--- (Worker $this->_workerPid) : empty word count segment. acknowledge and continue.");
             throw new EmptyElementException("--- (Worker $this->_workerPid) : empty segment. acknowledge and continue", self::ERR_EMPTY_WORD_COUNT);
         }
     }
@@ -301,10 +299,10 @@ class TMAnalysisWorker extends AbstractWorker
         );
 
         if ($segmentSet === 0) {
-            $this->_doLog("Segment {$queueElement->params->id_segment} already DONE, skipping force-set side-effects.");
+            $this->logger->debug("Segment {$queueElement->params->id_segment} already DONE, skipping force-set side-effects.");
             return;
         } elseif ($segmentSet === -1) {
-            $this->_doLog("Segment {$queueElement->params->id_segment} not updated (SKIPPED) pre-translation");
+            $this->logger->debug("Segment {$queueElement->params->id_segment} not updated (SKIPPED) pre-translation");
         }
 
         // POINT OF NO RETURN — DB committed
@@ -333,7 +331,7 @@ class TMAnalysisWorker extends AbstractWorker
                 // Winner abandoned init: waitForInitialization returns false as soon as the
                 // init semaphore is gone (failed doInit released it, or a crash let its TTL
                 // expire) with no counters written. Try to become the initializer ourselves.
-                $this->_doLog("--- (Worker $this->_workerPid) : init not ready for PID $pid, attempting re-init");
+                $this->logger->debug("--- (Worker $this->_workerPid) : init not ready for PID $pid, attempting re-init");
                 if ($this->redisService->acquireInitLock($pid)) {
                     $this->doInit($pid);
                 } else {
@@ -344,10 +342,10 @@ class TMAnalysisWorker extends AbstractWorker
             $_projectTotSegments = $this->redisService->getProjectTotalSegments($pid);
             $_analyzed = $this->redisService->getProjectAnalyzedCount($pid);
 
-            $this->_doLog("--- (Worker $this->_workerPid) : found $_projectTotSegments, analyzed $_analyzed segments for PID $pid in Redis");
+            $this->logger->debug("--- (Worker $this->_workerPid) : found $_projectTotSegments, analyzed $_analyzed segments for PID $pid in Redis");
         }
 
-        $this->_doLog("--- (Worker $this->_workerPid) : fetched data for segment $sid-$jid. Project ID is $pid");
+        $this->logger->debug("--- (Worker $this->_workerPid) : fetched data for segment $sid-$jid. Project ID is $pid");
     }
 
     private function doInit(int $pid): void
@@ -376,7 +374,7 @@ class TMAnalysisWorker extends AbstractWorker
             // empty("0") as "count failed" and bails — while the mere presence of the key
             // suppresses any re-init. Release the lock so the next segment retries init.
             if ($projectSegments <= 0) {
-                $this->_doLog("--- (Worker $this->_workerPid) : segment count for PID $pid not available yet (got $projectSegments). Releasing init lock for retry.");
+                $this->logger->debug("--- (Worker $this->_workerPid) : segment count for PID $pid not available yet (got $projectSegments). Releasing init lock for retry.");
                 $this->redisService->releaseInitLock($pid);
 
                 return;
@@ -384,7 +382,7 @@ class TMAnalysisWorker extends AbstractWorker
 
             $this->redisService->initializeProjectCounters($pid, $projectSegments, $numAnalyzed);
 
-            $this->_doLog("--- (Worker $this->_workerPid) : found $projectSegments segments for PID $pid");
+            $this->logger->debug("--- (Worker $this->_workerPid) : found $projectSegments segments for PID $pid");
         } catch (Throwable $e) {
             // doInit failed after acquiring the init lock. Leaving the lock held would make
             // every other worker for this PID a loser reading NULL counters until the TTL
@@ -393,7 +391,7 @@ class TMAnalysisWorker extends AbstractWorker
             // init failed — a later segment will initialize the counters. Completion
             // correctness stays gated by the DB-authoritative check in tryCloseProject.
             $this->redisService->releaseInitLock($pid);
-            $this->_doLog("--- (Worker $this->_workerPid) : doInit failed for PID $pid: {$e->getMessage()}. Init lock released for retry.");
+            $this->logger->debug("--- (Worker $this->_workerPid) : doInit failed for PID $pid: {$e->getMessage()}. Init lock released for retry.");
         }
     }
 
@@ -529,7 +527,7 @@ class TMAnalysisWorker extends AbstractWorker
                 break;
             } catch (PredisConnectionException|PredisServerException $e) {
                 if ($attempt === $maxRetries) {
-                    $this->_doLog(
+                    $this->logger->debug(
                         "CRITICAL: Redis side-effects permanently lost after $maxRetries retries"
                         . " for PID $pid (eq=$eqWords, st=$standardWords)."
                         . " Project may not auto-complete. Error: " . $e->getMessage()
@@ -538,7 +536,7 @@ class TMAnalysisWorker extends AbstractWorker
                     return;
                 }
 
-                $this->_doLog(
+                $this->logger->debug(
                     "WARNING: Redis failure (attempt $attempt/$maxRetries) for PID $pid."
                     . " Reconnecting and retrying in {$delayMs}ms. Error: " . $e->getMessage()
                 );
@@ -555,7 +553,7 @@ class TMAnalysisWorker extends AbstractWorker
         try {
             $this->decrementSegmentsToAnalyzeOfWaitingProjects($pid);
         } catch (PredisConnectionException|PredisServerException $e) {
-            $this->_doLog(
+            $this->logger->debug(
                 "WARNING: decrement waiting segments failed for PID $pid,"
                 . " queue ordering may drift. Error: " . $e->getMessage()
             );

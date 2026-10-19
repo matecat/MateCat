@@ -283,7 +283,7 @@ class ProjectCompletionServiceTest extends AbstractTest
 
         // gateRetrySleepMicros = 0: the first DB-gate check already confirms completion, so no
         // sleep is needed, but pass 0 defensively to keep the test fast.
-        $service = new ProjectCompletionService($redisService, $repository, null, 6, 0);
+        $service = new ProjectCompletionService($redisService, $repository, gateRetrySleepMicros: 0);
 
         $service->tryCloseProject($pid, 'ppwd', 'queue_key', $this->createStub(FeatureSet::class));
     }

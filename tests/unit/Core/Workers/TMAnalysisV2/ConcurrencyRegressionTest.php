@@ -321,7 +321,7 @@ class ConcurrencyRegressionTest extends AbstractTest
         $this->assertNotFalse($backoffPos, 'Expected exponential backoff ($sleepMs * 2) in waitForInitialization().');
 
         $this->assertStringContainsString(
-            'WARNING — timed out waiting for init completion',
+            '$this->logger->warning("Timed out waiting for init completion',
             $source,
             'Expected timeout warning log in waitForInitialization().'
         );
