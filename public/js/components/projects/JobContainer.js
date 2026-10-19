@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types'
-import React, {useEffect, useRef, useState} from 'react'
+import React, {createRef, useEffect, useRef, useState} from 'react'
 import {Checkbox, CHECKBOX_STATE} from '../common/Checkbox'
 import JobMenu from './JobMenu'
 import Download from '../../../img/icons/Download'
@@ -652,19 +652,29 @@ export const JobContainer = ({
     let label =
       !job.get('outsource_available') && outsourceInfo?.custom_payable_rate ? (
         <div>
-          <Button
-            size={BUTTON_SIZE.SMALL}
-            className="job-container-button-weight-normal"
-            id="open-quote-request"
-            data-testid="buy-translation-button"
-            disabled={true}
-            tooltip={
-              "Jobs created with custom billing models cannot be outsourced to Translated.<br />In order to outsource this job to Translated, please recreate it using Matecat's standard billing model"
+          <Tooltip
+            content={
+              <div>
+                Jobs created with custom billing models cannot be outsourced to
+                Translated.
+                <br />
+                In order to outsource this job to Translated, please recreate it
+                using Matecat&apos;s standard billing model
+              </div>
             }
           >
-            Buy translation from
-            <TranslatedIconSmall size={20} />
-          </Button>
+            <Button
+              ref={createRef()}
+              size={BUTTON_SIZE.SMALL}
+              className="job-container-button-weight-normal"
+              id="open-quote-request"
+              data-testid="buy-translation-button"
+              disabled={true}
+            >
+              Buy translation from
+              <TranslatedIconSmall size={20} />
+            </Button>
+          </Tooltip>
         </div>
       ) : (
         <div>

@@ -1,4 +1,3 @@
-import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 import {getFilenameFromContentDisposition} from '../../utils/contentDisposition'
 
 /**
@@ -16,7 +15,9 @@ export const downloadAnalysisReport = async ({
   downloadType = 'XTRF',
 }) => {
   const response = await fetch(
-    `${getMatecatApiDomain()}api/app/download-analysis-report`,
+    // Same origin as the page: the endpoint streams the file itself and sends no CORS headers,
+    // so a request to a multi-domain ajax host is blocked by the browser.
+    `${config.basepath}api/app/download-analysis-report`,
     {
       method: 'POST',
       credentials: 'include',
