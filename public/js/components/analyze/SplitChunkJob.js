@@ -40,7 +40,7 @@ const SplitChunkJob = ({
       outsource_available: job.outsource_available,
       target_name: job.target_name,
       source_name: job.source_name,
-      outsource_info: chunkJob?.get('outsource_info').toJS(),
+      outsource_info: chunkJob?.get('outsource_info')?.toJS(),
     }
 
     const isOutsourceOpen =

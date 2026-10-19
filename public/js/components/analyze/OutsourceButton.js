@@ -5,7 +5,6 @@ import Tooltip from '../common/Tooltip'
 import {Button, BUTTON_MODE, BUTTON_SIZE} from '../common/Button/Button'
 
 const OutsourceButton = ({chunk, index, openOutsourceModal, status}) => {
-  console.log(chunk)
   return !chunk.outsource_available &&
     chunk.outsource_info?.custom_payable_rate ? (
     <div

@@ -38,7 +38,7 @@ const SingleChunkJob = ({
     outsource: job.outsource,
     target_name: job.target_name,
     source_name: job.source_name,
-    outsource_info: chunkJob?.get('outsource_info').toJS(),
+    outsource_info: chunkJob?.get('outsource_info')?.toJS(),
   }
   const totalRaw = chunkAnalysis.total_raw
   const totalStandard = chunkAnalysis.total_industry || 0
