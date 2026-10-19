@@ -21,6 +21,7 @@ use Model\Jobs\MetadataDao;
 use Model\LQA\ChunkReviewDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
+use Model\Translations\WarningDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\Translators\JobsTranslatorsDao;
@@ -125,6 +126,18 @@ class JobSplitMergeService
     protected function destroyAnalysisCacheByProjectId(int $projectId): void
     {
         (new AnalysisDao($this->dbHandler))->destroyCacheProjectStatsVolumeAnalysis($projectId);
+    }
+
+    /**
+     * Split and merge move segments between chunks without touching segment_translations, so the
+     * cached `warnings_count` of a chunk would keep counting segments it no longer owns.
+     *
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    protected function destroyWarningsCountCacheByJobId(int $jobId): void
+    {
+        (new WarningDao($this->dbHandler))->destroyWarningsCountCache($jobId);
     }
 
     /**
@@ -578,6 +591,7 @@ class JobSplitMergeService
         $projectStruct = $this->getProjectForCacheInvalidation($jobToSplit);
         $this->createProjectDao()->destroyCache($projectStruct->id ?? throw new RuntimeException('Missing project id'), $projectStruct->password);
         $this->destroyAnalysisCacheByProjectId($data->idProject);
+        $this->destroyWarningsCountCacheByJobId((int)$jobToSplit->id);
 
         $this->getCart()?->deleteCart();
 
@@ -714,6 +728,7 @@ class JobSplitMergeService
             $projectStruct = $this->getProjectForCacheInvalidation($jobStructs[0]);
             $this->createProjectDao()->destroyCache($projectStruct->id ?? throw new RuntimeException('Missing project id'), $projectStruct->password);
             $this->destroyAnalysisCacheByProjectId($data->idProject);
+            $this->destroyWarningsCountCacheByJobId((int)$jobStructs[0]->id);
         });
     }
 }
