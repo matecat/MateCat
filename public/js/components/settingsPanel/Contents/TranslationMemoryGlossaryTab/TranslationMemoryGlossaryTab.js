@@ -13,14 +13,9 @@ import {updateJobMetadata} from '../../../../api/updateJobMetadata/updateJobMeta
 import IconAdd from '../../../../../img/icons/IconAdd'
 import UsersPlus from '../../../../../img/icons/UsersPlus'
 import {Button, BUTTON_TYPE} from '../../../common/Button/Button'
-import Switch from '../../../common/Switch'
-import {Select} from '../../../common/Select'
-import {
-  fromStatusLockId,
-  PRETRANSLATE_ENABLED_DEFAULT,
-  PRETRANSLATE_STATUS_OPTIONS,
-  toStatusLockId,
-} from '../../../../utils/editorStatusLock'
+import {TM_SUBTABS} from '../../SettingsPanelConstants'
+import {AdvancedSettings} from './AdvancedSettings'
+import {TmSubTabs} from './TmSubTabs'
 
 const COLUMNS_TABLE_ACTIVE = [
   {name: 'Lookup'},
@@ -37,11 +32,6 @@ const COLUMNS_TABLE_INACTIVE = [
   {name: 'Name'},
   {name: 'Key'},
   {name: ''},
-]
-
-const PRETRANSLATE_MATCHES = [
-  {key: 'match_101', label: 'Pre-confirm 101% matches'},
-  {key: 'match_100', label: 'Pre-confirm 100% matches'},
 ]
 
 export const SPECIAL_ROWS_ID = {
@@ -125,21 +115,6 @@ export const TranslationMemoryGlossaryTab = () => {
   const {userInfo} = useContext(ApplicationWrapperContext)
   const getPublicMatches = currentProjectTemplate.getPublicMatches
   const publicTmPenalty = currentProjectTemplate.publicTmPenalty
-  const pretranslate = currentProjectTemplate.pretranslate
-  const setPretranslateMatch = (key, value) =>
-    modifyingCurrentTemplate((prevTemplate) => ({
-      ...prevTemplate,
-      pretranslate: {
-        ...prevTemplate.pretranslate,
-        [key]: {...prevTemplate.pretranslate[key], ...value},
-      },
-    }))
-  const isDialectStrictActive = currentProjectTemplate.dialectStrict
-  const setIsDialectStrictActive = (value) =>
-    modifyingCurrentTemplate((prevTemplate) => ({
-      ...prevTemplate,
-      dialectStrict: value,
-    }))
   const tmPrioritization = currentProjectTemplate.tmPrioritization
   const [specialRows, setSpecialRows] = useState([
     {
@@ -150,6 +125,9 @@ export const TranslationMemoryGlossaryTab = () => {
   ])
   const [keyRows, setKeyRows] = useState([])
   const [filterInactiveKeys, setFilterInactiveKeys] = useState('')
+  const [activeSubTab, setActiveSubTab] = useState(
+    TM_SUBTABS.resourceManagement,
+  )
 
   const ref = useRef()
   const previousStatesRef = useRef({
@@ -464,131 +442,69 @@ export const TranslationMemoryGlossaryTab = () => {
 
   return (
     <TranslationMemoryGlossaryTabContext.Provider value={{ref, setSpecialRows}}>
+      {!config.is_cattool && (
+        <TmSubTabs activeSubTab={activeSubTab} onChange={setActiveSubTab} />
+      )}
       <div
         ref={ref}
         className="translation-memory-glossary-tab settings-panel-contentwrapper-tab-background"
       >
         {!config.is_cattool && (
-          <>
-            <div className="translation-memory-glossary-pretranslate">
-              <div className="translation-memory-glossary-tab-table-title">
-                <h2>Pre-confirmation</h2>
-              </div>
-              <p>
-                Choose if 100% and 101% matches should be pre-confirmed when
-                creating a project.
-                <br />
-                By default, pre-confirmed segments are displayed as approved and
-                locked. You can customize these settings using the options below
-                to suit your project&apos;s needs.
-              </p>
-              <div className="translation-memory-glossary-pretranslate-cards">
-                {PRETRANSLATE_MATCHES.map(({key, label}) => (
-                  <div
-                    key={key}
-                    className="translation-memory-glossary-pretranslate-card"
-                    data-testid={`pretranslate-${key}`}
-                  >
-                    <div className="translation-memory-glossary-pretranslate-toggle">
-                      <Switch
-                        active={pretranslate[key].enabled}
-                        onChange={(enabled) =>
-                          setPretranslateMatch(
-                            key,
-                            enabled
-                              ? PRETRANSLATE_ENABLED_DEFAULT
-                              : {enabled: false},
-                          )
-                        }
-                        testId={`pretranslate-${key}-switch`}
-                        showText={false}
-                      />
-                      {label}
-                    </div>
-                    <span className="translation-memory-glossary-pretranslate-status-label">
-                      State in editor
-                    </span>
-                    <Select
-                      isPortalDropdown={true}
-                      name={`pretranslate-${key}-status`}
-                      options={PRETRANSLATE_STATUS_OPTIONS}
-                      maxHeightDroplist={260}
-                      activeOption={PRETRANSLATE_STATUS_OPTIONS.find(
-                        ({id}) =>
-                          id ===
-                          toStatusLockId(
-                            pretranslate[key].enabled
-                              ? pretranslate[key]
-                              : PRETRANSLATE_ENABLED_DEFAULT,
-                          ),
-                      )}
-                      onSelect={(option) =>
-                        setPretranslateMatch(key, fromStatusLockId(option.id))
-                      }
-                      isDisabled={!pretranslate[key].enabled}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="translation-memory-glossary-checkbox-container">
-              <div className="translation-memory-glossary-checkbox-item">
-                <input
-                  checked={isDialectStrictActive}
-                  onChange={(e) =>
-                    setIsDialectStrictActive(e.currentTarget.checked)
-                  }
-                  type="checkbox"
-                  data-testid="dialect-strict-checkbox"
-                />
-                Activate variant-strict matching
-              </div>
-            </div>
-          </>
-        )}
-        <div className="translation-memory-glossary-tab-active-resources">
-          <div className="translation-memory-glossary-tab-table-title">
-            <h2>Active resources</h2>
-            <div className="translation-memory-glossary-tab-buttons-group">
-              <Button
-                type={BUTTON_TYPE.PRIMARY}
-                onClick={onAddSharedResource}
-                testId="add-shared-resource-tm"
-              >
-                <UsersPlus size={18} /> Add shared resource
-              </Button>
-
-              <Button
-                type={BUTTON_TYPE.PRIMARY}
-                onClick={onNewResource}
-                testId="new-resource-tm"
-              >
-                <IconAdd size={22} /> New resource
-              </Button>
-            </div>
+          <div
+            className="translation-memory-glossary-subtab-panel"
+            hidden={activeSubTab !== TM_SUBTABS.advanced}
+          >
+            <AdvancedSettings />
           </div>
-          <SettingsPanelTable
-            className="translation-memory-glossary-tab-active-table"
-            columns={COLUMNS_TABLE_ACTIVE}
-            rows={keyRows.filter(({isActive}) => isActive)}
-            onChangeRowsOrder={onOrderActiveRows}
-          />
-        </div>
-        <div className="translation-memory-glossary-tab-inactive-resources">
-          <div className="translation-memory-glossary-tab-table-title">
-            <h2>Inactive resources</h2>
-            <input
-              className="translation-memory-glossary-tab-input-text"
-              placeholder="Search resources by name or key"
-              value={filterInactiveKeys}
-              onChange={(e) => setFilterInactiveKeys(e.currentTarget.value)}
-              data-testid="search-inactive-tmkeys"
+        )}
+        <div
+          className="translation-memory-glossary-subtab-panel"
+          hidden={activeSubTab !== TM_SUBTABS.resourceManagement}
+        >
+          <div className="translation-memory-glossary-tab-active-resources">
+            <div className="translation-memory-glossary-tab-table-title">
+              <h2>Active resources</h2>
+              <div className="translation-memory-glossary-tab-buttons-group">
+                <Button
+                  type={BUTTON_TYPE.PRIMARY}
+                  onClick={onAddSharedResource}
+                  testId="add-shared-resource-tm"
+                >
+                  <UsersPlus size={18} /> Add shared resource
+                </Button>
+
+                <Button
+                  type={BUTTON_TYPE.PRIMARY}
+                  onClick={onNewResource}
+                  testId="new-resource-tm"
+                >
+                  <IconAdd size={22} /> New resource
+                </Button>
+              </div>
+            </div>
+            <SettingsPanelTable
+              className="translation-memory-glossary-tab-active-table"
+              columns={COLUMNS_TABLE_ACTIVE}
+              rows={keyRows.filter(({isActive}) => isActive)}
+              onChangeRowsOrder={onOrderActiveRows}
             />
           </div>
-          <SettingsPanelTable
-            columns={COLUMNS_TABLE_INACTIVE}
-            rows={inactiveKeys}
-          />
+          <div className="translation-memory-glossary-tab-inactive-resources">
+            <div className="translation-memory-glossary-tab-table-title">
+              <h2>Inactive resources</h2>
+              <input
+                className="translation-memory-glossary-tab-input-text"
+                placeholder="Search resources by name or key"
+                value={filterInactiveKeys}
+                onChange={(e) => setFilterInactiveKeys(e.currentTarget.value)}
+                data-testid="search-inactive-tmkeys"
+              />
+            </div>
+            <SettingsPanelTable
+              columns={COLUMNS_TABLE_INACTIVE}
+              rows={inactiveKeys}
+            />
+          </div>
         </div>
       </div>
     </TranslationMemoryGlossaryTabContext.Provider>

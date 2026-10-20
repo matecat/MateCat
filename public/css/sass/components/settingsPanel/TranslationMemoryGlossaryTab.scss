@@ -29,76 +29,151 @@
   }
 }
 
-.translation-memory-glossary-checkbox-container {
+.translation-memory-glossary-subtabs {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  border-radius: variables.$border-radius-default;
-  border: 1px dashed colors.$grey200;
-  padding: 10px;
-  margin-bottom: 20px;
-  background: colors.$white;
+  gap: 28px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid colors.$grey150;
 }
 
-.translation-memory-glossary-checkbox-item {
-  display: flex;
+.translation-memory-glossary-subtab {
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  padding: 12px 2px 10px;
+  margin-bottom: -1px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: none;
+  font-family: inherit;
   font-size: variables.$font-size-small;
+  font-weight: bold;
+  color: colors.$grey700;
+  cursor: pointer;
+
+  &:hover {
+    color: colors.$blue900;
+  }
 }
 
-.translation-memory-glossary-pretranslate {
+.translation-memory-glossary-subtab-active {
+  color: colors.$blue900;
+  border-bottom-color: colors.$blue500;
+}
+
+.translation-memory-glossary-advanced {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  text-align: left;
+}
+
+.translation-memory-glossary-advanced-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.translation-memory-glossary-advanced
+  .translation-memory-glossary-advanced-heading {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-bottom: 20px;
 
-  .translation-memory-glossary-tab-table-title {
-    margin-bottom: 0;
-
-    h2 {
-      margin: 0;
-      padding: 0 10px;
-    }
+  h2 {
+    margin: 0;
+    padding: 0;
+    font-size: variables.$font-size-big;
+    line-height: 24px;
   }
 
   p {
     margin: 0;
-    padding: 0 10px;
-    color: colors.$grey700;
-    text-align: left;
     font-size: variables.$font-size-small;
+    line-height: 24px;
+    color: colors.$grey700;
   }
 }
 
 .translation-memory-glossary-pretranslate-cards {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 
 .translation-memory-glossary-pretranslate-card {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   border-radius: variables.$border-radius-default;
-  border: 1px solid colors.$grey200;
-  padding: 12px;
+  border: 1px solid colors.$grey150;
+  padding: 16px;
   background: colors.$white;
 }
 
 .translation-memory-glossary-pretranslate-toggle {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-weight: bold;
+  gap: 12px;
   font-size: variables.$font-size-small;
+  font-weight: bold;
+}
+
+.translation-memory-glossary-pretranslate-status {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .translation-memory-glossary-pretranslate-status-label {
-  color: colors.$grey700;
-  text-align: left;
   font-size: variables.$font-size-small;
+  color: colors.$grey700;
+}
+
+.translation-memory-glossary-variant-matching {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: variables.$font-size-small;
+    line-height: 24px;
+    color: #2d2d30;
+    cursor: pointer;
+  }
+
+  input {
+    appearance: none;
+    flex: none;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    border: 1px solid rgba(1, 1, 24, 0.26);
+    border-radius: 50%;
+    background: rgba(56, 56, 56, 0.04);
+    cursor: pointer;
+
+    &:checked {
+      border-color: #2985ec;
+      background: radial-gradient(circle, colors.$white 0 5px, #2985ec 5px);
+    }
+
+    &:focus-visible {
+      outline: 2px solid #2985ec;
+      outline-offset: 2px;
+    }
+  }
+}
+
+.translation-memory-glossary-subtab-panel {
+  display: flex;
+  flex-direction: column;
+
+  &[hidden] {
+    display: none;
+  }
 }
 
 .translation-memory-glossary-tab-table-title {
