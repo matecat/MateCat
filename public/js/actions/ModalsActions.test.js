@@ -225,11 +225,11 @@ describe('ModalsActions', () => {
       actionType: 'SHOW_MODAL',
       title: 'Merge failed',
     })
-    return alert
+    return {alert, successCallback}
   }
 
   test('openMergeModal shows the server message in an alert when the merge fails', async () => {
-    const alert = await failMerge({
+    const {alert} = await failMerge({
       response: {ok: false, status: 409},
       errors: [
         {code: 0, message: 'This job is being changed by another request'},
@@ -242,11 +242,21 @@ describe('ModalsActions', () => {
   })
 
   test('openMergeModal shows a generic message when the merge fails without an error list', async () => {
-    const alert = await failMerge(new TypeError('Failed to fetch'))
+    const {alert} = await failMerge(new TypeError('Failed to fetch'))
 
     expect(alert.props.text.props.children).toBe(
       'Something went wrong. Please try again.',
     )
+  })
+
+  test('openMergeModal refreshes the page when the failure alert is closed', async () => {
+    const {alert, successCallback} = await failMerge(
+      new TypeError('Failed to fetch'),
+    )
+
+    alert.props.onCloseCallback()
+
+    expect(successCallback).toHaveBeenCalledTimes(1)
   })
 
   test('openMergeModal cancelCallback closes modal', () => {

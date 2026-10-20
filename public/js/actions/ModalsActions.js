@@ -127,10 +127,14 @@ let ModalsActions = {
           // The confirm modal is already closed, so the failure opens an alert, for example a 409 when
           // another request is changing this job. An alert, not a notification: the analyze page has no
           // notification box. The text is a node, so the server message is not rendered as HTML.
+          // Closing the alert runs the caller's refresh, so the user sees what another request changed.
           (rejection) => {
             this.showModalComponent(
               MODAL_KEY.ALERT,
-              {text: <span>{getApiErrorMessage(rejection)}</span>},
+              {
+                text: <span>{getApiErrorMessage(rejection)}</span>,
+                onCloseCallback: successCallback,
+              },
               'Merge failed',
             )
           },
