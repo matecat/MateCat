@@ -4,6 +4,8 @@ import SegmentActions from '../../../../actions/SegmentActions'
 import SegmentConstants from '../../../../constants/SegmentConstants'
 import SegmentStore from '../../../../stores/SegmentStore'
 import CatToolActions from '../../../../actions/CatToolActions'
+import ModalsActions from '../../../../actions/ModalsActions'
+import ConfirmMessageModal from '../../../modals/ConfirmMessageModal'
 import {
   Button,
   BUTTON_MODE,
@@ -100,7 +102,7 @@ const BulkSelectionBar = ({isReview, active, onActiveChange = () => {}}) => {
     })
   }
 
-  const onClickBulk = () => {
+  const performBulkStatusChange = () => {
     setChangingStatus(true)
     if (isReview) {
       SegmentActions.approveFilteredSegments(selection.segmentsArray)
@@ -118,6 +120,28 @@ const BulkSelectionBar = ({isReview, active, onActiveChange = () => {}}) => {
         })
         .catch((error) => onBulkFailed(error))
     }
+  }
+
+  const onClickBulk = () => {
+    ModalsActions.showModalComponent(
+      ConfirmMessageModal,
+      {
+        text: (
+          <>
+            <p>You are about to confirm the selected segments in bulk.</p>
+            <p>
+              Segments confirmed this way won&apos;t be saved to the translation
+              memory.
+            </p>
+            <p>To save them to the TM, you need to confirm them one by one.</p>
+          </>
+        ),
+        successCallback: performBulkStatusChange,
+        cancelCallback: () => {},
+        successText: 'Bulk confirm',
+      },
+      'Bulk confirm segments',
+    )
   }
 
   useEffect(() => {

@@ -6,6 +6,7 @@ import SegmentStore from '../../../../stores/SegmentStore'
 import SegmentConstants from '../../../../constants/SegmentConstants'
 import SegmentActions from '../../../../actions/SegmentActions'
 import CatToolActions from '../../../../actions/CatToolActions'
+import ModalsActions from '../../../../actions/ModalsActions'
 
 jest.mock('../../../../actions/SegmentActions', () => ({
   __esModule: true,
@@ -25,6 +26,13 @@ jest.mock('../../../../actions/CatToolActions', () => ({
   },
 }))
 
+jest.mock('../../../../actions/ModalsActions', () => ({
+  __esModule: true,
+  default: {
+    showModalComponent: jest.fn(),
+  },
+}))
+
 const setSegments = (segments) =>
   act(() => {
     SegmentStore.emitChange(
@@ -37,6 +45,17 @@ const errorNotifications = () =>
   CatToolActions.addNotification.mock.calls
     .map(([notification]) => notification)
     .filter((notification) => notification.type === 'error')
+
+// Clicking the bulk-action button only opens the confirm modal; the actual status
+// change only runs once the modal's successCallback (the "Confirm" button) fires.
+// These helpers read the latest showModalComponent call to simulate the user
+// confirming or cancelling, the same way a real ConfirmMessageModal would.
+const latestBulkModalProps = () => {
+  const [, props] = ModalsActions.showModalComponent.mock.calls.at(-1)
+  return props
+}
+const confirmBulkModal = () => act(() => latestBulkModalProps().successCallback())
+const cancelBulkModal = () => act(() => latestBulkModalProps().cancelCallback())
 
 beforeEach(() => {
   global.config = {}
@@ -82,9 +101,8 @@ test('shows the plural label and translates the filtered segments when marking a
 
   expect(screen.getByText('2 Segments selected')).toBeInTheDocument()
 
-  await act(async () => {
-    fireEvent.click(screen.getByText('MARK AS TRANSLATED'))
-  })
+  fireEvent.click(screen.getByText('MARK AS TRANSLATED'))
+  await act(async () => confirmBulkModal())
 
   expect(SegmentActions.translateFilteredSegments).toHaveBeenCalledWith([1, 2])
   expect(CatToolActions.onRender).toHaveBeenCalledWith({segmentToOpen: 1})
@@ -96,9 +114,8 @@ test('approves the filtered segments and reloads the quality report when reviewi
   render(<BulkSelectionBar isReview={true} active={true} />)
   setSegments([5, 6])
 
-  await act(async () => {
-    fireEvent.click(screen.getByText('MARK AS APPROVED'))
-  })
+  fireEvent.click(screen.getByText('MARK AS APPROVED'))
+  await act(async () => confirmBulkModal())
 
   expect(SegmentActions.approveFilteredSegments).toHaveBeenCalledWith([5, 6])
   expect(CatToolActions.onRender).toHaveBeenCalledWith({segmentToOpen: 5})
@@ -117,6 +134,7 @@ test('shows a loading state while the status change is in flight', async () => {
   setSegments([1])
 
   fireEvent.click(screen.getByText('MARK AS APPROVED'))
+  confirmBulkModal()
 
   expect(screen.getByText('Applying changes')).toBeInTheDocument()
   await act(async () => resolveApprove())
@@ -167,6 +185,33 @@ test('toggles a single segment in and out of the bulk selection', () => {
   expect(screen.getByText('2 Segments selected')).toBeInTheDocument()
 })
 
+describe('confirm modal before a bulk status change', () => {
+  test('opens a confirm modal instead of changing status right away', () => {
+    render(<BulkSelectionBar isReview={false} active={true} />)
+    setSegments([1, 2])
+
+    fireEvent.click(screen.getByText('MARK AS TRANSLATED'))
+
+    expect(SegmentActions.translateFilteredSegments).not.toHaveBeenCalled()
+    expect(ModalsActions.showModalComponent).toHaveBeenCalledTimes(1)
+    const [, props, title] = ModalsActions.showModalComponent.mock.calls[0]
+    expect(title).toBe('Bulk confirm segments')
+    expect(typeof props.successCallback).toBe('function')
+    expect(typeof props.cancelCallback).toBe('function')
+  })
+
+  test('cancelling the modal leaves the selection and status untouched', () => {
+    render(<BulkSelectionBar isReview={false} active={true} />)
+    setSegments([1, 2])
+
+    fireEvent.click(screen.getByText('MARK AS TRANSLATED'))
+    cancelBulkModal()
+
+    expect(SegmentActions.translateFilteredSegments).not.toHaveBeenCalled()
+    expect(screen.getByText('2 Segments selected')).toBeInTheDocument()
+  })
+})
+
 // Refused bulk actions: SegmentActions rejects (403 from a stale/wrong-phase password, or a
 // network error), and BulkSelectionBar must raise an error notification naming the job/revision
 // and the segments that kept their previous status, rather than silently losing the selection.
@@ -184,9 +229,8 @@ describe('BulkSelectionBar refused bulk actions', () => {
     render(<BulkSelectionBar isReview={true} active={true} />)
     setSegments(SELECTED_SEGMENTS)
 
-    await act(async () => {
-      fireEvent.click(screen.getByText('MARK AS APPROVED'))
-    })
+    fireEvent.click(screen.getByText('MARK AS APPROVED'))
+    await act(async () => confirmBulkModal())
 
     expect(SegmentActions.approveFilteredSegments).toHaveBeenCalledWith(
       SELECTED_SEGMENTS,
@@ -203,9 +247,8 @@ describe('BulkSelectionBar refused bulk actions', () => {
     render(<BulkSelectionBar isReview={true} active={true} />)
     setSegments(SELECTED_SEGMENTS)
 
-    await act(async () => {
-      fireEvent.click(screen.getByText('MARK AS APPROVED'))
-    })
+    fireEvent.click(screen.getByText('MARK AS APPROVED'))
+    await act(async () => confirmBulkModal())
 
     const notifications = errorNotifications()
     expect(notifications).toHaveLength(1)
@@ -237,9 +280,8 @@ describe('BulkSelectionBar refused bulk actions', () => {
     render(<BulkSelectionBar isReview={true} active={true} />)
     setSegments(SELECTED_SEGMENTS)
 
-    await act(async () => {
-      fireEvent.click(screen.getByText('MARK AS APPROVED'))
-    })
+    fireEvent.click(screen.getByText('MARK AS APPROVED'))
+    await act(async () => confirmBulkModal())
 
     expect(screen.queryByText('Applying changes')).not.toBeInTheDocument()
     expect(screen.getByText('MARK AS APPROVED')).toBeInTheDocument()
@@ -260,9 +302,8 @@ describe('BulkSelectionBar refused bulk actions', () => {
     render(<BulkSelectionBar isReview={false} active={true} />)
     setSegments([77])
 
-    await act(async () => {
-      fireEvent.click(screen.getByText('MARK AS TRANSLATED'))
-    })
+    fireEvent.click(screen.getByText('MARK AS TRANSLATED'))
+    await act(async () => confirmBulkModal())
 
     const notifications = errorNotifications()
     expect(notifications).toHaveLength(1)
