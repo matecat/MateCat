@@ -3,28 +3,99 @@
 namespace Matecat\Core\Utils\OutsourceTo;
 
 use Matecat\TestHelpers\AbstractTest;
+use Matecat\TestHelpers\CapturesNamedLogs;
+use Monolog\Level;
+use Monolog\LogRecord;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
 use RuntimeException;
 use Utils\OutsourceTo\Translated;
+use Utils\Registry\AppConfig;
 use Utils\Session\ArraySessionStore;
 use Utils\Shop\Cart;
 use Utils\Shop\ItemHTSQuoteJob;
 
 class TranslatedTest extends AbstractTest
 {
+    use CapturesNamedLogs;
+
     /**
      * The store every cart in a test case shares — both the ones built here and the ones Translated
      * builds internally. Static because createTranslatedStub() is called statically throughout.
      */
     private static ArraySessionStore $store;
 
+    /** @var list<string> Local files that stand in for the vendor reply, removed in tearDown(). */
+    private array $replyFiles = [];
+
     protected function setUp(): void
     {
         parent::setUp();
 
         self::$store = new ArraySessionStore();
+    }
+
+    protected function tearDown(): void
+    {
+        foreach ($this->replyFiles as $file) {
+            if (file_exists($file)) {
+                unlink($file);
+            }
+        }
+        $this->replyFiles = [];
+
+        parent::tearDown();
+    }
+
+    /**
+     * Point every curl call of $translated at a local file instead of the vendor.
+     *
+     * The curl options are applied after the vendor URL, so CURLOPT_URL here wins and no request
+     * leaves the machine. It goes first in the options, so it is set even if a later option fails. Pass null as $reply to point at a missing file and get a curl error.
+     *
+     * Returns the path of the file.
+     *
+     * Example: $this->replyFromFile($translated, '{"code":1}');
+     */
+    private function replyFromFile(Translated $translated, ?string $reply): string
+    {
+        $file = sys_get_temp_dir() . '/translated_reply_' . uniqid('', true) . '.json';
+        $this->replyFiles[] = $file;
+
+        if ($reply !== null) {
+            file_put_contents($file, $reply);
+        }
+
+        $options = (new ReflectionProperty($translated, '_curlOptions'))->getValue($translated);
+        $this->setProperty($translated, '_curlOptions', [CURLOPT_URL => 'file://' . $file] + $options);
+
+        return $file;
+    }
+
+    /**
+     * A Translated built with the real constructor, ready for one quote on job $jid.
+     *
+     * It sets AppConfig globals, so call it only from a RunInSeparateProcess test.
+     */
+    private function buildTranslatedForJob(int $jid, string $password): Translated
+    {
+        AppConfig::$HTTPHOST = 'https://test.matecat.com';
+        AppConfig::$BASEURL = '/';
+        AppConfig::$BUILD_NUMBER = '1';
+
+        $translated = new Translated(self::$store);
+        $this->setProperty($translated, 'fixedDelivery', '0');
+        $this->setProperty($translated, 'typeOfService', 'professional');
+        $this->setProperty($translated, 'currency', 'EUR');
+        $this->setProperty($translated, 'timezone', '0');
+        $this->setProperty($translated, 'pid', 1);
+        $this->setProperty($translated, 'ppassword', 'pp');
+        $this->setProperty($translated, 'jobList', [['jid' => $jid, 'jpassword' => $password]]);
+        $this->setProperty($translated, '_quote_result', []);
+
+        return $translated;
     }
 
     /**
@@ -700,27 +771,136 @@ class TranslatedTest extends AbstractTest
         self::assertTrue(true);
     }
 
-    #[\PHPUnit\Framework\Attributes\RunInSeparateProcess]
+    /**
+     * The vendor says job 88 is outsourced, but no job of the volume analysis matches its
+     * password, so there is no language pair to build the cart item with: the reply is logged and
+     * the job is skipped.
+     */
+    #[RunInSeparateProcess]
     public function testProcessOutsourcedJobsSkipsWhenNoLangPairsForUncachedJob(): void
     {
-        \Utils\Registry\AppConfig::$HTTPHOST = 'https://test.matecat.com';
-        \Utils\Registry\AppConfig::$BASEURL = '/';
-        \Utils\Registry\AppConfig::$BUILD_NUMBER = '1';
-
-        $translated = new Translated(self::$store);
-        $this->setProperty($translated, 'currency', 'EUR');
-        $this->setProperty($translated, 'timezone', '0');
-        $this->setProperty($translated, 'pid', 1);
-        $this->setProperty($translated, 'ppassword', 'pp');
-        $this->setProperty($translated, 'jobList', [['jid' => 88, 'jpassword' => 'pw']]);
+        $log = $this->captureLog('outsource');
+        $translated = $this->buildTranslatedForJob(88, 'pw');
+        $this->replyFromFile($translated, (string)json_encode([
+            'code' => 1,
+            'outsourced' => 1,
+            'price' => 12.5,
+            'delivery' => '2030-01-01 10:00:00',
+            'type_of_service' => 'premium',
+            'link_to_status' => 'https://example.test/status',
+        ]));
 
         self::invokeMethod($translated, '__processOutsourcedJobs', [
             'general',
             $this->buildVolAnalysis([
-                $this->buildJob(88, 'en', 'it', [['password' => 'pw', 'total_equivalent' => 50]]),
+                $this->buildJob(88, 'en', 'it', [['password' => 'other', 'total_equivalent' => 50]]),
             ]),
         ]);
 
         self::assertFalse(self::cart('outsource_to_external_cache')->itemExists('88-pw-outsourced'));
+        self::assertTrue($log->hasDebugThatContains('"outsourced":1'));
+    }
+
+    #[RunInSeparateProcess]
+    public function testProcessOutsourcedJobsCachesAJobTheVendorReportsAsOutsourced(): void
+    {
+        $log = $this->captureLog('outsource');
+        $translated = $this->buildTranslatedForJob(41, 'pw41');
+        $this->replyFromFile($translated, (string)json_encode([
+            'code' => 1,
+            'outsourced' => 1,
+            'price' => 12.5,
+            'delivery' => '2030-01-01 10:00:00',
+            'type_of_service' => 'premium',
+            'link_to_status' => 'https://example.test/status',
+        ]));
+
+        self::invokeMethod($translated, '__processOutsourcedJobs', [
+            'general',
+            $this->buildVolAnalysis([
+                $this->buildJob(41, 'en', 'it', [['password' => 'pw41', 'total_equivalent' => 100]]),
+            ]),
+        ]);
+
+        $item = self::cart('outsource_to_external_cache')->getItem('41-pw41-outsourced');
+        self::assertNotNull($item);
+        self::assertSame('premium', $item['typeOfService']);
+        self::assertTrue($log->hasDebugThatContains('"outsourced":1'));
+    }
+
+    #[RunInSeparateProcess]
+    public function testProcessNormalJobsCachesTheQuoteTheVendorReturns(): void
+    {
+        $log = $this->captureLog('outsource');
+        $translated = $this->buildTranslatedForJob(42, 'pw42');
+        $this->replyFromFile($translated, (string)json_encode([
+            'code' => 1,
+            'quote_available' => 1,
+            'pid' => 7,
+            'showquote' => 1,
+            'show_translator_data' => 0,
+            'translation' => ['price' => 20.0, 'delivery' => '2030-01-02 10:00:00'],
+            'revision' => ['price' => 5.0, 'delivery' => '2030-01-03 10:00:00'],
+        ]));
+
+        self::invokeMethod($translated, '__processNormalJobs', [
+            'general',
+            $this->buildVolAnalysis([
+                $this->buildJob(42, 'en', 'fr', [['password' => 'pw42', 'total_equivalent' => 100]]),
+            ]),
+        ]);
+
+        $item = self::cart('outsource_to_external_cache')->getItem('42-pw42-0');
+        self::assertNotNull($item);
+        self::assertEquals(20.0, $item['price']);
+        self::assertTrue($log->hasDebugThatContains('Not Found in Cache. Call url for Quote'));
+        self::assertTrue($log->hasDebugThatContains('"quote_available":1'));
+        // An object is logged as a structured entry, under this generic message, with its fields as context.
+        self::assertTrue($log->hasRecordThatPasses(
+            fn(LogRecord $record): bool => $record->message === 'Log Entry:' && ($record->context['id'] ?? null) === '42-pw42-0',
+            Level::Debug
+        ), 'the cart item is logged');
+    }
+
+    #[RunInSeparateProcess]
+    public function testProcessNormalJobsSkipsTheQuoteWhenTheVendorReturnsAnError(): void
+    {
+        $log = $this->captureLog('outsource');
+        $translated = $this->buildTranslatedForJob(43, 'pw43');
+        $this->replyFromFile($translated, (string)json_encode(['code' => 0]));
+
+        self::invokeMethod($translated, '__processNormalJobs', [
+            'general',
+            $this->buildVolAnalysis([
+                $this->buildJob(43, 'en', 'de', [['password' => 'pw43', 'total_equivalent' => 100]]),
+            ]),
+        ]);
+
+        self::assertFalse(self::cart('outsource_to_external_cache')->itemExists('43-pw43-0'));
+        self::assertTrue($log->hasWarningThatContains('HTS returned an error. Skip quote'));
+    }
+
+    #[RunInSeparateProcess]
+    public function testProcessNormalJobsLogsACurlErrorAndSkipsTheQuote(): void
+    {
+        $log = $this->captureLog('outsource');
+        $translated = $this->buildTranslatedForJob(44, 'pw44');
+        // No file is written, so curl fails to read it.
+        $file = $this->replyFromFile($translated, null);
+
+        self::invokeMethod($translated, '__processNormalJobs', [
+            'general',
+            $this->buildVolAnalysis([
+                $this->buildJob(44, 'en', 'es', [['password' => 'pw44', 'total_equivalent' => 100]]),
+            ]),
+        ]);
+
+        self::assertFalse(self::cart('outsource_to_external_cache')->itemExists('44-pw44-0'));
+        // The curl error is an array, so it is logged under 'Log Entry:' with the array as context.
+        self::assertTrue($log->hasRecordThatPasses(
+            fn(LogRecord $record): bool => ($record->context['errno'] ?? null) === CURLE_FILE_COULDNT_READ_FILE
+                && str_contains((string)($record->context['error'] ?? ''), $file),
+            Level::Error
+        ));
     }
 }

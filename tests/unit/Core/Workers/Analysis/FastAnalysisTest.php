@@ -1564,16 +1564,18 @@ class FastAnalysisTest extends AbstractTest
      * every message it publishes. The engine lookup reads engine 0 (NONE) from the test database;
      * the insert, the queue-total bookkeeping and the queue routing are stubbed by the probe.
      *
-     * @param array<int, mixed> $pretranslateArgs
+     * @param array<int, mixed>  $pretranslateArgs
+     * @param int                $wordCount        the fast analysis word count of the segment; 0 skips it
+     * @param MatecatLogger|null $logger           where the daemon logs; a silent stub when null
      *
      * @return list<array<string, mixed>>
      */
-    private function publishedParams(array $pretranslateArgs): array
+    private function publishedParams(array $pretranslateArgs, int $wordCount = 2, ?MatecatLogger $logger = null): array
     {
         $ref    = new ReflectionClass(FastAnalysisPublishProbe::class);
         $daemon = $ref->newInstanceWithoutConstructor();
         $this->setProp($daemon, 'db', obtainTestDatabase());
-        $this->setProp($daemon, 'logger', $this->createStub(MatecatLogger::class));
+        $this->setProp($daemon, 'logger', $logger ?? $this->createStub(MatecatLogger::class));
         $this->setProp($daemon, 'projectDao', $this->createStub(ProjectDao::class));
 
         $published = [];
@@ -1602,7 +1604,7 @@ class FastAnalysisTest extends AbstractTest
             'segment_hash' => 'abc',
             'raw_word_count' => 2,
             'match_type' => 'NO_MATCH',
-            'wc' => 2,
+            'wc' => $wordCount,
             'source' => 'en-US',
             'target' => '99999991:it-IT',
             'payable_rates' => ['99999991' => '{"NO_MATCH":100}'],
@@ -1664,6 +1666,44 @@ class FastAnalysisTest extends AbstractTest
             $this->assertArrayHasKey($key->value, $params);
             $this->assertNull($params[$key->value], $key->value . ' must stay null for the worker to default it');
         }
+    }
+
+    #[Test]
+    public function insertFastAnalysisLogsAndDropsASegmentWithNoWordsToAnalyze(): void
+    {
+        // A segment whose fast analysis word count is 0 is not sent to the TM analysis queue:
+        // the daemon logs it as skipped and publishes nothing for it.
+        $logged    = [];
+        $published = $this->publishedParams([], 0, $this->capturingStructuredLogger($logged));
+
+        $this->assertSame([], $published);
+        $skipped = array_filter($logged, fn(array $entry): bool => $entry['level'] === 'debug'
+            && str_starts_with((string)$entry['message'], 'Skipped Fast Segment: '));
+        $this->assertCount(1, $skipped);
+    }
+
+    #[Test]
+    public function getSegmentsForFastVolumeAnalysisLogsAndRethrowsWhenTheQueryFails(): void
+    {
+        // The query error is logged at error level, then re-thrown for main() to classify.
+        $pdo = $this->createStub(PDO::class);
+        $pdo->method('prepare')->willThrowException(new PDOException('Segments query failed'));
+
+        $injected = $this->createStub(IDatabase::class);
+        $injected->method('getConnection')->willReturn($pdo);
+
+        $logged = [];
+        $daemon = $this->daemonWithDb($injected);
+        $this->setProp($daemon, 'logger', $this->capturingStructuredLogger($logged));
+
+        try {
+            $this->invoke($daemon, '_getSegmentsForFastVolumeAnalysis', 7);
+            $this->fail('The PDOException must reach the caller');
+        } catch (PDOException $e) {
+            $this->assertSame('Segments query failed', $e->getMessage());
+        }
+
+        $this->assertSame([['level' => 'error', 'message' => 'Segments query failed', 'context' => []]], $logged);
     }
 
     private function stubDatabase(): IDatabase
