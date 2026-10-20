@@ -7,7 +7,7 @@ import {
   getTmDataStructureToSendServer,
   isOwnerOfKey,
   orderTmKeys,
-} from './TranslationMemoryGlossaryTab'
+} from './ResourceManagement'
 import {ImportTMX} from './ImportTMX'
 import {ImportGlossary} from './ImportGlossary'
 import {ExportTMX} from './ExportTMX'
