@@ -31,30 +31,20 @@ const listSegments = (segments) =>
       } more`
     : segments.join(', ')
 
-const BulkSelectionBar = ({isReview}) => {
+const BulkSelectionBar = ({isReview, active, onActiveChange = () => {}}) => {
   const [selection, setSelection] = useState({count: 0, segmentsArray: []})
   const [changingStatus, setChangingStatus] = useState(false)
 
+  // Report whether there's a selection to show, independently of `active`:
+  // the parent needs this signal to decide when to open/keep-open the
+  // shared header wrapper in the first place, so it can't come from
+  // `active` itself (that's the parent telling us, not us telling it).
+  useEffect(() => {
+    onActiveChange(selection.count > 0)
+  }, [selection.count, onActiveChange])
+
   const segmentsArrayRef = useRef(selection.segmentsArray)
   segmentsArrayRef.current = selection.segmentsArray
-
-  const countInBulkElements = (segments) => {
-    let segmentsArray = selection.segmentsArray
-    if (segments && segments.size > 0) {
-      segments.map(function (segment) {
-        let index = segmentsArray.indexOf(segment.get('sid'))
-        if (segment.get('inBulk') && index === -1) {
-          segmentsArray.push(segment.get('sid'))
-        } else if (!segment.get('inBulk') && index > -1) {
-          segmentsArray.splice(index, 1)
-        }
-      })
-    }
-    setSelection({
-      count: segmentsArray.length,
-      segmentsArray: segmentsArray,
-    })
-  }
 
   const setSegmentsinBulk = useCallback((segments) => {
     setSelection({count: segments.length, segmentsArray: segments})
@@ -128,11 +118,9 @@ const BulkSelectionBar = ({isReview}) => {
         })
         .catch((error) => onBulkFailed(error))
     }
-    // SegmentActions.closeSegment(SegmentStore.getCurrentSegmentId());
   }
 
   useEffect(() => {
-    // SegmentStore.addListener(SegmentConstants.RENDER_SEGMENTS, countInBulkElements);
     SegmentStore.addListener(
       SegmentConstants.TOGGLE_SEGMENT_ON_BULK,
       toggleSegment,
@@ -147,7 +135,6 @@ const BulkSelectionBar = ({isReview}) => {
     )
 
     return () => {
-      // SegmentStore.removeListener(SegmentConstants.RENDER_SEGMENTS, countInBulkElements);
       SegmentStore.removeListener(
         SegmentConstants.TOGGLE_SEGMENT_ON_BULK,
         toggleSegment,
@@ -172,7 +159,11 @@ const BulkSelectionBar = ({isReview}) => {
       config.revisionNumber &&
       config.revisionNumber === 2,
   })
-  return selection.count > 0 ? (
+  // Driven by `active` (not `selection.count` directly) so the parent can
+  // keep this mounted through its own close animation, same as
+  // Search/SegmentsFilter/QaComponent — the count may already be 0 while
+  // that collapse is still playing out.
+  return active ? (
     <div className="bulk-approve-bar">
       <div className="bulk-back-info">
         <div className="bulk-back">
