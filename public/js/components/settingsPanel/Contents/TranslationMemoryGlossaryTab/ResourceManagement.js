@@ -14,6 +14,10 @@ import IconAdd from '../../../../../img/icons/IconAdd'
 import UsersPlus from '../../../../../img/icons/UsersPlus'
 import {Button, BUTTON_TYPE} from '../../../common/Button/Button'
 import {TranslationMemoryGlossaryTabContext} from './TranslationMemoryGlossaryTabContext'
+import {
+  getSavedTemplateTm,
+  toTemplateTmEntry,
+} from './TranslationMemoryGlossaryTabUtils'
 
 const COLUMNS_TABLE_ACTIVE = [
   {name: 'Lookup'},
@@ -106,8 +110,13 @@ export const getTmDataStructureToSendServer = ({tmKeys = [], keysOrdered}) => {
 }
 
 export const ResourceManagement = () => {
-  const {tmKeys, setTmKeys, modifyingCurrentTemplate, currentProjectTemplate} =
-    useContext(SettingsPanelContext)
+  const {
+    tmKeys,
+    setTmKeys,
+    modifyingCurrentTemplate,
+    currentProjectTemplate,
+    projectTemplates,
+  } = useContext(SettingsPanelContext)
   const {userInfo} = useContext(ApplicationWrapperContext)
   const getPublicMatches = currentProjectTemplate.getPublicMatches
   const publicTmPenalty = currentProjectTemplate.publicTmPenalty
@@ -179,7 +188,9 @@ export const ResourceManagement = () => {
       ...prevTemplate,
       tm: orderTmKeys(tmKeys, keysOrdered)
         .filter(({isActive}) => isActive)
-        .map(({id, isActive, ...rest}) => rest), // eslint-disable-line
+        .map((tmKey) =>
+          toTemplateTmEntry(tmKey, getSavedTemplateTm(projectTemplates)),
+        ),
     }))
 
     // Cattol page updateJobKeys

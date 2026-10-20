@@ -10,6 +10,10 @@ export {
   orderTmKeys,
   getTmDataStructureToSendServer,
 } from './ResourceManagement'
+export {
+  getSavedTemplateTm,
+  toTemplateTmEntry,
+} from './TranslationMemoryGlossaryTabUtils'
 
 export const TranslationMemoryGlossaryTab = () => {
   const [activeSubTab, setActiveSubTab] = useState(
