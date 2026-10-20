@@ -118,6 +118,9 @@ export const ResourceManagement = () => {
     projectTemplates,
   } = useContext(SettingsPanelContext)
   const {userInfo} = useContext(ApplicationWrapperContext)
+  // Read when a job keys update resolves, so it must not restart the effect
+  const userInfoRef = useRef(userInfo)
+  userInfoRef.current = userInfo
   const getPublicMatches = currentProjectTemplate.getPublicMatches
   const publicTmPenalty = currentProjectTemplate.publicTmPenalty
   const tmPrioritization = currentProjectTemplate.tmPrioritization
@@ -382,7 +385,7 @@ export const ResourceManagement = () => {
             CatToolActions.onTMKeysChangeStatus()
             SegmentActions.getContributions(
               SegmentStore.getCurrentSegmentId(),
-              userInfo.metadata[METADATA_KEY],
+              userInfoRef.current.metadata[METADATA_KEY],
               true,
             )
           })
@@ -421,7 +424,7 @@ export const ResourceManagement = () => {
     current.tmKeys = tmKeys
     current.getPublicMatches = getPublicMatches
     current.tmPrioritization = tmPrioritization
-  }, [tmKeys, getPublicMatches, tmPrioritization, publicTmPenalty])
+  }, [tmKeys, getPublicMatches, tmPrioritization, publicTmPenalty, setTmKeys])
 
   const onAddSharedResource = () =>
     setSpecialRows([
