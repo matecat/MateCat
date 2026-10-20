@@ -20,6 +20,7 @@ export const ChunksJobContainer = ({
   chunks,
   expanded = false,
   visibleLimit = 5,
+  striped = false,
   ...props
 }) => {
   const [showDownloadProgress, setShowDownloadProgress] = useState(false)
@@ -245,7 +246,15 @@ export const ChunksJobContainer = ({
   }
 
   return (
-    <div className="chunks-job-container job-container-background">
+    <div
+      className={[
+        'chunks-job-container',
+        'job-container-background',
+        striped && 'job-container-background--striped',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <div className="chunks-job-container-line">
         <div className="chunks-job-container-line-sx">
           <Checkbox
@@ -298,4 +307,5 @@ ChunksJobContainer.propTypes = {
   chunks: PropTypes.array.isRequired,
   expanded: PropTypes.bool,
   visibleLimit: PropTypes.number,
+  striped: PropTypes.bool,
 }

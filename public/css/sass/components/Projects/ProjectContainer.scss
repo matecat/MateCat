@@ -84,11 +84,10 @@
   z-index: 1;
 
   // continue the .job-container-background zebra stripe (see JobContainer.scss)
-  // into the show-more bar instead of always showing white under it
-  .job-container-background:nth-last-child(
-      1 of .job-container-background
-    ):nth-of-type(odd)
-    ~ & {
+  // into the show-more bar instead of always showing white under it —
+  // ProjectContainer.js computes which row is striped (position-based CSS
+  // selectors can't, once AnimatedCollapse re-scopes the "extra" rows)
+  &.project-container-show-more--striped {
     background-color: colors.$grey25;
   }
 

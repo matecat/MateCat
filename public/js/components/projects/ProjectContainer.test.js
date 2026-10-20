@@ -662,3 +662,56 @@ test('hides a chunk group entirely, including its header, when the budget runs o
   expect(screen.getByTestId(plainJobs[5].id)).toBeInTheDocument()
   expect(screen.getAllByTestId(410)).toHaveLength(3)
 })
+
+test('keeps the zebra stripe correct for a row revealed inside the AnimatedCollapse wrapper', async () => {
+  window.ResizeObserver = ResizeObserver
+  executeMswServer()
+
+  const jobTemplate = fakeProjectsData.project.data.jobs[0]
+  // Row 1 (plain job, id 500) + row 2 (a 4-chunk group, id 501) spend the
+  // whole 5-row budget (1 + 4), so row 3 (plain job, id 502) lands beyond
+  // it and is only revealed once expanded — i.e. inside AnimatedCollapse,
+  // where :nth-of-type's local count restarts and can't see that it's
+  // really an odd-numbered (unstriped) row rather than the first
+  // (striped, under the old CSS-only rule) row of a fresh group.
+  const row1 = {...jobTemplate, id: 500, password: 'pwd500'}
+  const row2Chunks = new Array(4).fill(null).map((_, index) => ({
+    ...jobTemplate,
+    id: 501,
+    password: `pwd501-${index}`,
+  }))
+  const row3 = {...jobTemplate, id: 502, password: 'pwd502'}
+
+  const {props} = getFakeProperties({
+    ...fakeProjectsData.project,
+    data: {
+      ...fakeProjectsData.project.data,
+      jobs: [row1, ...row2Chunks, row3],
+    },
+  })
+
+  render(
+    <ApplicationWrapperContext.Provider
+      value={{isUserLogged: true, userInfo: userMock}}
+    >
+      <ProjectsBulkActionsContext.Provider
+        value={{jobsBulk: [], onCheckedProject, onCheckedJob}}
+      >
+        <ProjectContainer {...props} />
+      </ProjectsBulkActionsContext.Provider>
+    </ApplicationWrapperContext.Provider>,
+  )
+
+  expect(screen.getByTestId(500)).not.toHaveClass(
+    'job-container-background--striped',
+  )
+  // eslint-disable-next-line testing-library/no-node-access
+  const chunkGroupRoot = screen.getAllByTestId(501)[0].closest('.chunks-job-container')
+  expect(chunkGroupRoot).toHaveClass('job-container-background--striped')
+
+  await userEvent.click(screen.getByTestId('project-jobs-show-more'))
+
+  expect(screen.getByTestId(502)).not.toHaveClass(
+    'job-container-background--striped',
+  )
+})
