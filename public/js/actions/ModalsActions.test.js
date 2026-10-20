@@ -18,6 +18,7 @@ jest.mock('../constants/ModalKeys', () => ({
     SPLIT_JOB: 'SplitJob',
     CONFIRM_MESSAGE: 'ConfirmMessage',
     DOWNLOAD_ALERT: 'DownloadAlert',
+    ALERT: 'Alert',
   },
 }))
 jest.mock('../constants/OnBoardingConstants', () => ({
@@ -205,6 +206,47 @@ describe('ModalsActions', () => {
     return Promise.resolve().then(() => {
       expect(successCallback).toHaveBeenCalled()
     })
+  })
+
+  // Runs the merge confirm with mergeJobChunks rejecting, and returns the alert it opens.
+  const failMerge = async (rejection) => {
+    mergeJobChunks.mockRejectedValueOnce(rejection)
+    const successCallback = jest.fn()
+    ModalsActions.openMergeModal({id: 1}, {id: 2}, successCallback)
+
+    AppDispatcher.dispatch.mock.calls[0][0].props.successCallback()
+    await new Promise(process.nextTick)
+
+    expect(successCallback).not.toHaveBeenCalled()
+    const alert = AppDispatcher.dispatch.mock.calls
+      .map(([action]) => action)
+      .find((action) => action.component === 'Alert')
+    expect(alert).toMatchObject({
+      actionType: 'SHOW_MODAL',
+      title: 'Merge failed',
+    })
+    return alert
+  }
+
+  test('openMergeModal shows the server message in an alert when the merge fails', async () => {
+    const alert = await failMerge({
+      response: {ok: false, status: 409},
+      errors: [
+        {code: 0, message: 'This job is being changed by another request'},
+      ],
+    })
+
+    expect(alert.props.text.props.children).toBe(
+      'This job is being changed by another request',
+    )
+  })
+
+  test('openMergeModal shows a generic message when the merge fails without an error list', async () => {
+    const alert = await failMerge(new TypeError('Failed to fetch'))
+
+    expect(alert.props.text.props.children).toBe(
+      'Something went wrong. Please try again.',
+    )
   })
 
   test('openMergeModal cancelCallback closes modal', () => {
