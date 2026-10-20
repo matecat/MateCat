@@ -6,6 +6,7 @@ import SegmentStore from '../../../../stores/SegmentStore'
 import SegmentConstants from '../../../../constants/SegmentConstants'
 import SegmentActions from '../../../../actions/SegmentActions'
 import CatToolActions from '../../../../actions/CatToolActions'
+import ModalsActions from '../../../../actions/ModalsActions'
 
 jest.mock('../../../../actions/SegmentActions', () => ({
   __esModule: true,
@@ -25,6 +26,13 @@ jest.mock('../../../../actions/CatToolActions', () => ({
   },
 }))
 
+jest.mock('../../../../actions/ModalsActions', () => ({
+  __esModule: true,
+  default: {
+    showModalComponent: jest.fn(),
+  },
+}))
+
 const setSegments = (segments) =>
   act(() => {
     SegmentStore.emitChange(
@@ -38,32 +46,63 @@ const errorNotifications = () =>
     .map(([notification]) => notification)
     .filter((notification) => notification.type === 'error')
 
+// Clicking the bulk-action button only opens the confirm modal; the actual status
+// change only runs once the modal's successCallback (the "Confirm" button) fires.
+// These helpers read the latest showModalComponent call to simulate the user
+// confirming or cancelling, the same way a real ConfirmMessageModal would.
+const latestBulkModalProps = () => {
+  const [, props] = ModalsActions.showModalComponent.mock.calls.at(-1)
+  return props
+}
+const confirmBulkModal = () => act(() => latestBulkModalProps().successCallback())
+const cancelBulkModal = () => act(() => latestBulkModalProps().cancelCallback())
+
 beforeEach(() => {
   global.config = {}
   jest.clearAllMocks()
 })
 
-test('renders nothing when there is no bulk selection', () => {
+test('renders nothing when not active, regardless of selection', () => {
   const {container} = render(<BulkSelectionBar isReview={false} />)
+  setSegments([1, 2])
   expect(container).toBeEmptyDOMElement()
 })
 
+test('reports whether there is a selection via onActiveChange, independently of the active prop', () => {
+  const onActiveChange = jest.fn()
+  render(
+    <BulkSelectionBar
+      isReview={false}
+      active={false}
+      onActiveChange={onActiveChange}
+    />,
+  )
+  expect(onActiveChange).toHaveBeenLastCalledWith(false)
+
+  setSegments([1, 2])
+  expect(onActiveChange).toHaveBeenLastCalledWith(true)
+
+  act(() => {
+    SegmentStore.emitChange(SegmentConstants.REMOVE_SEGMENTS_ON_BULK)
+  })
+  expect(onActiveChange).toHaveBeenLastCalledWith(false)
+})
+
 test('shows the singular label for a single selected segment', () => {
-  render(<BulkSelectionBar isReview={false} />)
+  render(<BulkSelectionBar isReview={false} active={true} />)
   setSegments([1])
   expect(screen.getByText('1 Segment selected')).toBeInTheDocument()
 })
 
 test('shows the plural label and translates the filtered segments when marking as translated', async () => {
   SegmentActions.translateFilteredSegments.mockResolvedValue()
-  render(<BulkSelectionBar isReview={false} />)
+  render(<BulkSelectionBar isReview={false} active={true} />)
   setSegments([1, 2])
 
   expect(screen.getByText('2 Segments selected')).toBeInTheDocument()
 
-  await act(async () => {
-    fireEvent.click(screen.getByText('MARK AS TRANSLATED'))
-  })
+  fireEvent.click(screen.getByText('MARK AS TRANSLATED'))
+  await act(async () => confirmBulkModal())
 
   expect(SegmentActions.translateFilteredSegments).toHaveBeenCalledWith([1, 2])
   expect(CatToolActions.onRender).toHaveBeenCalledWith({segmentToOpen: 1})
@@ -72,12 +111,11 @@ test('shows the plural label and translates the filtered segments when marking a
 
 test('approves the filtered segments and reloads the quality report when reviewing', async () => {
   SegmentActions.approveFilteredSegments.mockResolvedValue()
-  render(<BulkSelectionBar isReview={true} />)
+  render(<BulkSelectionBar isReview={true} active={true} />)
   setSegments([5, 6])
 
-  await act(async () => {
-    fireEvent.click(screen.getByText('MARK AS APPROVED'))
-  })
+  fireEvent.click(screen.getByText('MARK AS APPROVED'))
+  await act(async () => confirmBulkModal())
 
   expect(SegmentActions.approveFilteredSegments).toHaveBeenCalledWith([5, 6])
   expect(CatToolActions.onRender).toHaveBeenCalledWith({segmentToOpen: 5})
@@ -92,17 +130,18 @@ test('shows a loading state while the status change is in flight', async () => {
       resolveApprove = resolve
     }),
   )
-  render(<BulkSelectionBar isReview={true} />)
+  render(<BulkSelectionBar isReview={true} active={true} />)
   setSegments([1])
 
   fireEvent.click(screen.getByText('MARK AS APPROVED'))
+  confirmBulkModal()
 
   expect(screen.getByText('Applying changes')).toBeInTheDocument()
   await act(async () => resolveApprove())
 })
 
 test('clears the selection when the back button is clicked', () => {
-  render(<BulkSelectionBar isReview={false} />)
+  render(<BulkSelectionBar isReview={false} active={true} />)
   setSegments([1, 2, 3])
 
   fireEvent.click(screen.getByText('back'))
@@ -111,7 +150,9 @@ test('clears the selection when the back button is clicked', () => {
 })
 
 test('resets the selection when the store reports it was removed', () => {
-  render(<BulkSelectionBar isReview={false} />)
+  const {rerender} = render(
+    <BulkSelectionBar isReview={false} active={true} />,
+  )
   setSegments([1, 2, 3])
   expect(screen.getByText('3 Segments selected')).toBeInTheDocument()
 
@@ -119,11 +160,18 @@ test('resets the selection when the store reports it was removed', () => {
     SegmentStore.emitChange(SegmentConstants.REMOVE_SEGMENTS_ON_BULK)
   })
 
+  // The count resets immediately, but with `active` held true the bar stays
+  // mounted and shows it — same deferred-unmount contract as Search/
+  // SegmentsFilter/QaComponent, where the parent (not the count) decides
+  // when content actually unmounts, once its own close animation ends.
+  expect(screen.getByText('0 Segments selected')).toBeInTheDocument()
+
+  rerender(<BulkSelectionBar isReview={false} active={false} />)
   expect(screen.queryByText(/Segments selected/)).not.toBeInTheDocument()
 })
 
 test('toggles a single segment in and out of the bulk selection', () => {
-  render(<BulkSelectionBar isReview={false} />)
+  render(<BulkSelectionBar isReview={false} active={true} />)
   setSegments([1, 2])
 
   act(() => {
@@ -135,6 +183,33 @@ test('toggles a single segment in and out of the bulk selection', () => {
     SegmentStore.emitChange(SegmentConstants.TOGGLE_SEGMENT_ON_BULK, 1)
   })
   expect(screen.getByText('2 Segments selected')).toBeInTheDocument()
+})
+
+describe('confirm modal before a bulk status change', () => {
+  test('opens a confirm modal instead of changing status right away', () => {
+    render(<BulkSelectionBar isReview={false} active={true} />)
+    setSegments([1, 2])
+
+    fireEvent.click(screen.getByText('MARK AS TRANSLATED'))
+
+    expect(SegmentActions.translateFilteredSegments).not.toHaveBeenCalled()
+    expect(ModalsActions.showModalComponent).toHaveBeenCalledTimes(1)
+    const [, props, title] = ModalsActions.showModalComponent.mock.calls[0]
+    expect(title).toBe('Bulk confirm segments')
+    expect(typeof props.successCallback).toBe('function')
+    expect(typeof props.cancelCallback).toBe('function')
+  })
+
+  test('cancelling the modal leaves the selection and status untouched', () => {
+    render(<BulkSelectionBar isReview={false} active={true} />)
+    setSegments([1, 2])
+
+    fireEvent.click(screen.getByText('MARK AS TRANSLATED'))
+    cancelBulkModal()
+
+    expect(SegmentActions.translateFilteredSegments).not.toHaveBeenCalled()
+    expect(screen.getByText('2 Segments selected')).toBeInTheDocument()
+  })
 })
 
 // Refused bulk actions: SegmentActions rejects (403 from a stale/wrong-phase password, or a
@@ -151,12 +226,11 @@ describe('BulkSelectionBar refused bulk actions', () => {
   test('a bulk approve that goes through raises no error notification', async () => {
     SegmentActions.approveFilteredSegments.mockResolvedValue(undefined)
 
-    render(<BulkSelectionBar isReview={true} />)
+    render(<BulkSelectionBar isReview={true} active={true} />)
     setSegments(SELECTED_SEGMENTS)
 
-    await act(async () => {
-      fireEvent.click(screen.getByText('MARK AS APPROVED'))
-    })
+    fireEvent.click(screen.getByText('MARK AS APPROVED'))
+    await act(async () => confirmBulkModal())
 
     expect(SegmentActions.approveFilteredSegments).toHaveBeenCalledWith(
       SELECTED_SEGMENTS,
@@ -170,12 +244,11 @@ describe('BulkSelectionBar refused bulk actions', () => {
       errors: [{message: 'the review password does not open this phase'}],
     })
 
-    render(<BulkSelectionBar isReview={true} />)
+    render(<BulkSelectionBar isReview={true} active={true} />)
     setSegments(SELECTED_SEGMENTS)
 
-    await act(async () => {
-      fireEvent.click(screen.getByText('MARK AS APPROVED'))
-    })
+    fireEvent.click(screen.getByText('MARK AS APPROVED'))
+    await act(async () => confirmBulkModal())
 
     const notifications = errorNotifications()
     expect(notifications).toHaveLength(1)
@@ -204,12 +277,11 @@ describe('BulkSelectionBar refused bulk actions', () => {
       new Error('network down'),
     )
 
-    render(<BulkSelectionBar isReview={true} />)
+    render(<BulkSelectionBar isReview={true} active={true} />)
     setSegments(SELECTED_SEGMENTS)
 
-    await act(async () => {
-      fireEvent.click(screen.getByText('MARK AS APPROVED'))
-    })
+    fireEvent.click(screen.getByText('MARK AS APPROVED'))
+    await act(async () => confirmBulkModal())
 
     expect(screen.queryByText('Applying changes')).not.toBeInTheDocument()
     expect(screen.getByText('MARK AS APPROVED')).toBeInTheDocument()
@@ -227,12 +299,11 @@ describe('BulkSelectionBar refused bulk actions', () => {
     })
     config.revisionNumber = null
 
-    render(<BulkSelectionBar isReview={false} />)
+    render(<BulkSelectionBar isReview={false} active={true} />)
     setSegments([77])
 
-    await act(async () => {
-      fireEvent.click(screen.getByText('MARK AS TRANSLATED'))
-    })
+    fireEvent.click(screen.getByText('MARK AS TRANSLATED'))
+    await act(async () => confirmBulkModal())
 
     const notifications = errorNotifications()
     expect(notifications).toHaveLength(1)

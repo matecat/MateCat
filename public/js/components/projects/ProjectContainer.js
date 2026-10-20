@@ -284,7 +284,11 @@ export const ProjectContainer = ({
   // chunk group so one toggle reveals both the extra jobs and any chunk group's
   // extra parts at once. `visibleLimit` is how many of THIS group's own chunks
   // count against the shared 5-row budget before it's fully revealed.
-  const buildJobContainerElement = (item, expanded, visibleLimit) => {
+  // `striped` is computed here (not via CSS :nth-of-type) because the "extra"
+  // rows render inside AnimatedCollapse's own re-scoped sibling group once
+  // revealed, where a structural selector can't see the real top-level
+  // position.
+  const buildJobContainerElement = (item, expanded, visibleLimit, striped) => {
     const job = fromJS(Array.isArray(item) ? item[0] : item)
 
     const lastAction = getLastJobAction(job.get('id'))
@@ -306,6 +310,7 @@ export const ProjectContainer = ({
           onCheckedJob={onCheckedJob}
           expanded={expanded}
           visibleLimit={visibleLimit}
+          striped={striped}
         />
       )
     }
@@ -323,6 +328,7 @@ export const ProjectContainer = ({
         activityLogUrl={getActivityLogUrl()}
         isChecked={jobsBulk.some((jobId) => jobId === job.get('id'))}
         onCheckedJob={onCheckedJob}
+        striped={striped}
       />
     )
   }
@@ -572,8 +578,16 @@ export const ProjectContainer = ({
   const visibleChunkGroups = []
   const extraChunkGroups = []
   const chunkGroupVisibleLimit = new Map()
+  const chunkGroupStriped = new Map()
 
-  chunkGroups.forEach((item) => {
+  chunkGroups.forEach((item, index) => {
+    // 1-based position among top-level rows (jobs + chunk groups, a group
+    // counting as one row here regardless of how many chunks it has) —
+    // stripe the even ones (verified against the original
+    // :nth-of-type(odd) selector: position K+1 is odd, i.e. K itself is
+    // even, counting the header div ahead of the first row).
+    chunkGroupStriped.set(item, (index + 1) % 2 === 0)
+
     if (remainingBudget <= 0) {
       extraChunkGroups.push(item)
       if (Array.isArray(item)) chunkGroupVisibleLimit.set(item, item.length)
@@ -591,11 +605,30 @@ export const ProjectContainer = ({
   })
 
   const visibleJobContainers = visibleChunkGroups.map((item) =>
-    buildJobContainerElement(item, isExpanded, chunkGroupVisibleLimit.get(item)),
+    buildJobContainerElement(
+      item,
+      isExpanded,
+      chunkGroupVisibleLimit.get(item),
+      chunkGroupStriped.get(item),
+    ),
   )
   const extraJobContainers = extraChunkGroups.map((item) =>
-    buildJobContainerElement(item, isExpanded, chunkGroupVisibleLimit.get(item)),
+    buildJobContainerElement(
+      item,
+      isExpanded,
+      chunkGroupVisibleLimit.get(item),
+      chunkGroupStriped.get(item),
+    ),
   )
+
+  // whether the last CURRENTLY VISIBLE top-level row is striped, so the
+  // show-more bar's background can continue the pattern instead of always
+  // showing white — collapsed, that's the last visible item; expanded,
+  // it's the true last item overall.
+  const lastVisibleRow = isExpanded
+    ? chunkGroups[chunkGroups.length - 1]
+    : visibleChunkGroups[visibleChunkGroups.length - 1]
+  const isLastRowStriped = chunkGroupStriped.get(lastVisibleRow)
 
   return (
     <div ref={projectRef} className="project-container">
@@ -636,7 +669,9 @@ export const ProjectContainer = ({
         </AnimatedCollapse>
       )}
       {hasMoreJobContainers && (
-        <div className="project-container-show-more">
+        <div
+          className={`project-container-show-more${isLastRowStriped ? ' project-container-show-more--striped' : ''}`}
+        >
           <Button
             testId="project-jobs-show-more"
             mode={BUTTON_MODE.OUTLINE}

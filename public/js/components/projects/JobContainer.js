@@ -37,6 +37,7 @@ export const JobContainer = ({
   onCheckedJob,
   downloadTranslationFn,
   index,
+  striped = false,
 }) => {
   const [showDownloadProgress, setShowDownloadProgress] = useState(false)
   const [showingOutsource, setShowingOutsource] = useState()
@@ -719,7 +720,13 @@ export const JobContainer = ({
   return (
     <div
       data-testid={job.get('id')}
-      className={`job-container ${!isChunk ? 'job-container-background' : ''}`}
+      className={[
+        'job-container',
+        !isChunk && 'job-container-background',
+        !isChunk && striped && 'job-container-background--striped',
+      ]
+        .filter(Boolean)
+        .join(' ')}
     >
       <div
         className={`job-container-grid ${isChunk ? 'chunk-job-container' : ''}`}
@@ -815,4 +822,5 @@ JobContainer.propTypes = {
   isChecked: PropTypes.bool.isRequired,
   onCheckedJob: PropTypes.func.isRequired,
   index: PropTypes.number,
+  striped: PropTypes.bool,
 }
