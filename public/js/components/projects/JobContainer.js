@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types'
-import React, {useEffect, useRef, useState} from 'react'
+import React, {createRef, useEffect, useRef, useState} from 'react'
 import {Checkbox, CHECKBOX_STATE} from '../common/Checkbox'
 import JobMenu from './JobMenu'
 import Download from '../../../img/icons/Download'
@@ -654,15 +654,13 @@ export const JobContainer = ({
         <div>
           <Tooltip
             content={
-              <>
-                Jobs created with custom billing models
+              <div>
+                Jobs created with custom billing models cannot be outsourced to
+                Translated.
                 <br />
-                cannot be outsourced to Translated.
-                <br />
-                In order to outsource this job to Translated, please
-                <br />
-                recreate it using Matecat&apos;s standard billing model
-              </>
+                In order to outsource this job to Translated, please recreate it
+                using Matecat&apos;s standard billing model
+              </div>
             }
           >
             <Button

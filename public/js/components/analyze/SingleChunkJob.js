@@ -25,6 +25,12 @@ const SingleChunkJob = ({
 }) => {
   const workflowType = project.get('analysis').get('workflow_type')
   const rawChunk = job.chunks[0]
+  const chunkJob = project
+    .get('jobs')
+    .find(
+      (item) =>
+        item.get('id') === job.id && item.get('password') === rawChunk.password,
+    )
   const chunkAnalysis = {
     ...rawChunk,
     id: job.id,
@@ -32,17 +38,10 @@ const SingleChunkJob = ({
     outsource: job.outsource,
     target_name: job.target_name,
     source_name: job.source_name,
+    outsource_info: chunkJob?.get('outsource_info')?.toJS(),
   }
-
   const totalRaw = chunkAnalysis.total_raw
   const totalStandard = chunkAnalysis.total_industry || 0
-  const chunkJob = project
-    .get('jobs')
-    .find(
-      (item) =>
-        item.get('id') === chunkAnalysis.id &&
-        item.get('password') === chunkAnalysis.password,
-    )
 
   const isOutsourceOpen = openOutsource && outsourceJobId === job.id
 
