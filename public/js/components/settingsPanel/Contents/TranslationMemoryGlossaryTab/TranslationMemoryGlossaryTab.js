@@ -40,8 +40,8 @@ const COLUMNS_TABLE_INACTIVE = [
 ]
 
 const PRETRANSLATE_MATCHES = [
-  {key: 'match_100', label: 'Pre-confirm 100% matches'},
   {key: 'match_101', label: 'Pre-confirm 101% matches'},
+  {key: 'match_100', label: 'Pre-confirm 100% matches'},
 ]
 
 export const SPECIAL_ROWS_ID = {
@@ -563,7 +563,7 @@ export const TranslationMemoryGlossaryTab = () => {
                 onClick={onNewResource}
                 testId="new-resource-tm"
               >
-                <IconAdd size={16} /> New resource
+                <IconAdd size={22} /> New resource
               </Button>
             </div>
           </div>

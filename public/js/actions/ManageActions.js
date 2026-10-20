@@ -529,6 +529,7 @@ let ManageActions = {
           passwordJob: passwordJob,
           secondPassPassword: data.chunk_review.review_password,
         })
+        return data.chunk_review.review_password
       })
       .catch(() => {
         const errorNotification = {

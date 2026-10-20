@@ -1,8 +1,20 @@
 @use '../../tokens/colors';
+@use '../../commons/variables';
 
 .job-container {
   display: flex;
   flex-direction: column;
+}
+
+.job-container-background {
+  &:nth-of-type(odd) {
+    background-color: colors.$grey25;
+
+    .chunks-job-container-line,
+    .job-container-words-button {
+      background-color: colors.$grey25;
+    }
+  }
 }
 
 .job-container-grid {
@@ -14,7 +26,6 @@
   padding: 0px 24px;
   height: 64px;
   gap: 16px;
-  border-bottom: 1px solid colors.$grey100;
 
   .chunks-job-container & {
     border-bottom: unset;
@@ -37,6 +48,10 @@
   .chunks-job-container-line {
     display: flex;
     justify-content: space-between;
+    position: sticky;
+    top: 64px;
+    z-index: 1;
+    background-color: colors.$white;
 
     .chunks-job-container-line-sx {
       > :last-child {
@@ -53,6 +68,11 @@
 
   .chunks-job-container-list {
     padding-left: 8px;
+    overflow: hidden;
+  }
+
+  &:has(~ .project-container-show-more) {
+    border-bottom: unset;
   }
 }
 
@@ -71,6 +91,7 @@
     align-items: center;
     gap: 4px;
     color: colors.$black;
+    font-size: variables.$font-size-small;
 
     svg {
       color: colors.$grey400;

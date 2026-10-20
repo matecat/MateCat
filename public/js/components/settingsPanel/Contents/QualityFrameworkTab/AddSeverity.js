@@ -95,12 +95,14 @@ export const AddSeverity = ({numbersOfColumns}) => {
           type: BUTTON_TYPE.PRIMARY,
           mode: BUTTON_MODE.BASIC,
           size: BUTTON_SIZE.ICON_XSMALL,
+          tooltip: 'Add severity',
+          tooltipPosition: TOOLTIP_POSITION.RIGHT,
           testId: 'add-severity-button',
           disabled: isDisabled,
           ...(isDisabled && {
             tooltip: `You have reached the limit of ${MAX_ENTRY} severities\nallowed in a quality framework`,
+            tooltipPosition: TOOLTIP_POSITION.LEFT,
           }),
-          tooltipPosition: TOOLTIP_POSITION.LEFT,
           children: (
             <>
               <IconAdd size={16} />

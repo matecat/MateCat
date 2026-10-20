@@ -99,13 +99,15 @@ export const ModifyTeam = ({team}) => {
             <li className="member-item" key={index}>
               {!shouldShowMessage && (
                 <>
-                  {userMetadata ? (
+                  {userMetadata?.get('gplus_picture') ? (
                     <img
                       className="member-avatar"
                       src={userMetadata.get('gplus_picture')}
                     />
                   ) : (
-                    <span>{CommonUtils.getUserShortName(user)}</span>
+                    <span className="ui-user-top-image user-avatar">
+                      {CommonUtils.getUserShortName(user.toJS())}
+                    </span>
                   )}
                   <div className="member-info">
                     {(user.get('first_name') || user.get('last_name')) && (

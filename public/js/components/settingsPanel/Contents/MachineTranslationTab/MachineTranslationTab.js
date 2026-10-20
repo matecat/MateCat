@@ -123,7 +123,7 @@ export const MachineTranslationTab = () => {
         {name: 'Active'},
         {name: 'Engine name'},
         {name: 'Description'},
-        {name: 'Action'},
+        {name: ''},
       ]
 
   const addMTEngineRequest = (data) => {
@@ -351,7 +351,7 @@ export const MachineTranslationTab = () => {
               onClick={() => setAddMTVisible(true)}
               title="Add MT engine"
             >
-              <IconAdd size={16} /> Add MT engine
+              <IconAdd size={22} /> Add MT engine
             </Button>
           )}
         </div>

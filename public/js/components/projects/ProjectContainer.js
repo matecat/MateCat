@@ -43,6 +43,10 @@ import UserStore from '../../stores/UserStore'
 import ProjectsStore from '../../stores/ProjectsStore'
 import {ChunksJobContainer} from './ChunksJobContainer'
 import {fromJS} from 'immutable'
+import {AnimatedCollapse} from '../common/AnimatedCollapse'
+
+// shared row budget for the project-level "View more" toggle (see where it's used below)
+const SHOW_MORE_LIMIT = 5
 
 export const ProjectContainer = ({
   project,
@@ -246,10 +250,10 @@ export const ProjectContainer = ({
     return lastAction
   }
 
-  const getJobContainer = () => {
+  const getChunkGroups = () => {
     const jobs = project.get('jobs')
 
-    const chunks = jobs.toJS().reduce((acc, job) => {
+    return jobs.toJS().reduce((acc, job) => {
       const id = job.id
       if (
         acc.some((jobItem) =>
@@ -274,47 +278,53 @@ export const ProjectContainer = ({
 
       return [...acc, job]
     }, [])
+  }
 
-    return chunks.map((item) => {
-      const job = fromJS(Array.isArray(item) ? item[0] : item)
+  // `expanded` is the single project-level "View more" state, shared with every
+  // chunk group so one toggle reveals both the extra jobs and any chunk group's
+  // extra parts at once. `visibleLimit` is how many of THIS group's own chunks
+  // count against the shared 5-row budget before it's fully revealed.
+  const buildJobContainerElement = (item, expanded, visibleLimit) => {
+    const job = fromJS(Array.isArray(item) ? item[0] : item)
 
-      const lastAction = getLastJobAction(job.get('id'))
-      const isChunkOutsourced = thereIsChunkOutsourced(job.get('id'))
+    const lastAction = getLastJobAction(job.get('id'))
+    const isChunkOutsourced = thereIsChunkOutsourced(job.get('id'))
 
-      if (Array.isArray(item)) {
-        return (
-          <ChunksJobContainer
-            key={job.get('id')}
-            chunks={item.map((itemJS) => fromJS(itemJS))}
-            project={project}
-            changeStatusFn={changeStatusFn}
-            downloadTranslationFn={downloadTranslationFn}
-            isChunk={true}
-            lastAction={lastAction}
-            isChunkOutsourced={isChunkOutsourced}
-            activityLogUrl={getActivityLogUrl()}
-            isChecked={jobsBulk.some((jobId) => jobId === job.get('id'))}
-            onCheckedJob={onCheckedJob}
-          />
-        )
-      }
-
+    if (Array.isArray(item)) {
       return (
-        <JobContainer
+        <ChunksJobContainer
           key={job.get('id')}
-          job={job}
+          chunks={item.map((itemJS) => fromJS(itemJS))}
           project={project}
           changeStatusFn={changeStatusFn}
           downloadTranslationFn={downloadTranslationFn}
-          isChunk={false}
+          isChunk={true}
           lastAction={lastAction}
           isChunkOutsourced={isChunkOutsourced}
           activityLogUrl={getActivityLogUrl()}
           isChecked={jobsBulk.some((jobId) => jobId === job.get('id'))}
           onCheckedJob={onCheckedJob}
+          expanded={expanded}
+          visibleLimit={visibleLimit}
         />
       )
-    })
+    }
+
+    return (
+      <JobContainer
+        key={job.get('id')}
+        job={job}
+        project={project}
+        changeStatusFn={changeStatusFn}
+        downloadTranslationFn={downloadTranslationFn}
+        isChunk={false}
+        lastAction={lastAction}
+        isChunkOutsourced={isChunkOutsourced}
+        activityLogUrl={getActivityLogUrl()}
+        isChecked={jobsBulk.some((jobId) => jobId === job.get('id'))}
+        onCheckedJob={onCheckedJob}
+      />
+    )
   }
 
   const changeTeam = (value) => {
@@ -342,7 +352,7 @@ export const ProjectContainer = ({
         className="project-team-dropdown"
         align={DROPDOWN_MENU_ALIGN.RIGHT}
         toggleButtonProps={{
-          mode: BUTTON_MODE.BASIC,
+          mode: BUTTON_MODE.OUTLINE_BG,
           size: BUTTON_SIZE.SMALL,
           children: (
             <>
@@ -542,6 +552,51 @@ export const ProjectContainer = ({
     return date.toDateString()
   }
 
+  const [isExpanded, setIsExpanded] = useState(false)
+  const toggleExpanded = () => setIsExpanded((prev) => !prev)
+
+  const chunkGroups = getChunkGroups()
+
+  // Share one 5-row budget across plain jobs and a chunk group's own parts,
+  // instead of giving each its own independent limit: a job is 1 row, a
+  // chunk group is as many rows as it has chunks. Walk the groups in order,
+  // spending the budget as we go, so a group straddling the limit shows only
+  // the chunks that still fit and tucks the rest behind its own reveal.
+  const totalRowCount = chunkGroups.reduce(
+    (sum, item) => sum + (Array.isArray(item) ? item.length : 1),
+    0,
+  )
+  const hasMoreJobContainers = totalRowCount > SHOW_MORE_LIMIT
+
+  let remainingBudget = SHOW_MORE_LIMIT
+  const visibleChunkGroups = []
+  const extraChunkGroups = []
+  const chunkGroupVisibleLimit = new Map()
+
+  chunkGroups.forEach((item) => {
+    if (remainingBudget <= 0) {
+      extraChunkGroups.push(item)
+      if (Array.isArray(item)) chunkGroupVisibleLimit.set(item, item.length)
+      return
+    }
+
+    if (Array.isArray(item)) {
+      const visibleCount = Math.min(item.length, remainingBudget)
+      chunkGroupVisibleLimit.set(item, visibleCount)
+      remainingBudget -= visibleCount
+    } else {
+      remainingBudget -= 1
+    }
+    visibleChunkGroups.push(item)
+  })
+
+  const visibleJobContainers = visibleChunkGroups.map((item) =>
+    buildJobContainerElement(item, isExpanded, chunkGroupVisibleLimit.get(item)),
+  )
+  const extraJobContainers = extraChunkGroups.map((item) =>
+    buildJobContainerElement(item, isExpanded, chunkGroupVisibleLimit.get(item)),
+  )
+
   return (
     <div ref={projectRef} className="project-container">
       <div className="project-container-header">
@@ -574,7 +629,29 @@ export const ProjectContainer = ({
           {getDropdownProjectMenu(getActivityLogUrl())}
         </div>
       </div>
-      {getJobContainer()}
+      {visibleJobContainers}
+      {hasMoreJobContainers && (
+        <AnimatedCollapse expanded={isExpanded}>
+          {extraJobContainers}
+        </AnimatedCollapse>
+      )}
+      {hasMoreJobContainers && (
+        <div className="project-container-show-more">
+          <Button
+            testId="project-jobs-show-more"
+            mode={BUTTON_MODE.OUTLINE}
+            size={BUTTON_SIZE.SMALL}
+            onClick={toggleExpanded}
+          >
+            {isExpanded ? 'View less' : 'View more'}
+            <span
+              className={`project-container-show-more-icon${isExpanded ? ' is-expanded' : ''}`}
+            >
+              <IconDown size={16} />
+            </span>
+          </Button>
+        </div>
+      )}
       <div className="project-container-footer">
         {lastAction && (
           <Button

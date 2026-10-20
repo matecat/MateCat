@@ -181,7 +181,7 @@ export const LanguagesExceptions = ({breakdowns, updateExceptions}) => {
           setPendingExceptionsId((prevState) => [...prevState, uuidV4()])
         }
       >
-        <IconAdd size={20} />
+        <IconAdd size={22} />
         Add exception
       </Button>
     </div>

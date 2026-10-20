@@ -155,7 +155,7 @@ export const AddCategory = () => {
               size={BUTTON_SIZE.SMALL}
               onClick={() => setIsVisibleDescriptionInput(true)}
             >
-              <IconAdd size={20} /> Add description
+              <IconAdd size={22} /> Add description
             </Button>
           ) : (
             <input
