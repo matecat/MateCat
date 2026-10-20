@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types'
-import React, {createRef, useEffect, useRef, useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import {Checkbox, CHECKBOX_STATE} from '../common/Checkbox'
 import JobMenu from './JobMenu'
 import Download from '../../../img/icons/Download'
