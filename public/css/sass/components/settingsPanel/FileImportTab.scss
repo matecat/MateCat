@@ -48,10 +48,6 @@
   --accordion-title-font-weight: bold;
 }
 
-.filters-params-accordion-content {
-  padding: 10px 0;
-}
-
 .filters-params-option {
   display: flex;
   gap: 40px;
@@ -61,6 +57,7 @@
 
   h3 {
     margin: 0;
+    line-height: 1.2;
     font-size: variables.$font-size-base;
   }
 
@@ -118,7 +115,7 @@
 .xliff-settings-content {
   display: flex;
   gap: 30px;
-  padding: 25px 5px;
+  padding: 15px 5px;
   flex-direction: column;
 
   .button-add-rule {
