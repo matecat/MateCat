@@ -2,7 +2,7 @@
 
 .user-project-dropdown-trigger {
   position: relative;
-  padding: 10px 10px 10px 1px !important;
+  padding: 10px 10px 10px 3px !important;
   transition-property:
     color, background-color, box-shadow, opacity, padding !important;
   background-color: colors.$grey100 !important;
@@ -112,7 +112,7 @@
       background-color: unset !important;
     }
 
-    div[class*="input-component"] {
+    div[class*='input-component'] {
       width: 100%;
 
       input {

@@ -658,3 +658,11 @@ test('Modified marker shows only on the sub-tab holding the changed props', () =
     screen.getByTestId('tm-subtab-resourceManagement'),
   ).not.toHaveTextContent('●')
 })
+
+// Any aria-label renders as a hover tooltip through the global
+// [aria-label]::after rule, and showed as a shadow above the sub-tabs
+test('Sub-tab bar has no aria-label', () => {
+  render(<WrapperComponent {...contextMockValues()} />)
+
+  expect(screen.getByRole('tablist')).not.toHaveAttribute('aria-label')
+})
