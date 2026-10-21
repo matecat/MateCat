@@ -27,7 +27,6 @@ const COLUMNS_TABLE = [
   {name: ''},
 ]
 
-
 export const DEEPL_GLOSSARY_ROW_NONE = ''
 
 export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
@@ -339,7 +338,7 @@ export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
                   onClick={addGlossary}
                   title="Add glossary"
                 >
-                  <IconAdd size={18} />
+                  <IconAdd size={22} />
                   New glossary
                 </Button>
               )}
@@ -351,7 +350,7 @@ export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
                 className="settings-panel-grey-button"
                 onClick={addGlossary}
               >
-                <IconAdd size={18} />
+                <IconAdd size={22} />
                 New glossary
               </Button>
             </div>

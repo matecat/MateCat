@@ -7,7 +7,11 @@ import {
   getTmDataStructureToSendServer,
   isOwnerOfKey,
   orderTmKeys,
-} from './TranslationMemoryGlossaryTab'
+} from './ResourceManagement'
+import {
+  getSavedTemplateTm,
+  toTemplateTmEntry,
+} from './TranslationMemoryGlossaryTabUtils'
 import {ImportTMX} from './ImportTMX'
 import {ImportGlossary} from './ImportGlossary'
 import {ExportTMX} from './ExportTMX'
@@ -137,7 +141,9 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         tm: orderTmKeys(
           updatedKeys.filter(({isActive}) => isActive),
           prevTemplate.tm.map(({key}) => key),
-        ).map(({id, isActive, ...rest}) => rest), //eslint-disable-line
+        ).map((tmKey) =>
+          toTemplateTmEntry(tmKey, getSavedTemplateTm(projectTemplates)),
+        ),
       }))
     } else {
       setSpecialRows((prevState) =>
