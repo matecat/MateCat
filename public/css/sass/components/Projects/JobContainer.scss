@@ -1,8 +1,38 @@
 @use '../../tokens/colors';
+@use '../../commons/variables';
 
 .job-container {
   display: flex;
   flex-direction: column;
+  border-bottom: 1px solid colors.$grey100;
+
+  // Last among the directly-rendered rows — but if a later sibling (the
+  // AnimatedCollapse wrapper for the "extra" rows) is currently expanded
+  // and holds more .job-container/.chunks-job-container rows somewhere
+  // inside it, this one isn't really last, so keep the divider. Note:
+  // `:has()` can't nest another `:has()` inside it (invalid selector, and
+  // the whole rule gets dropped) — a plain relative selector
+  // (`~ * .job-container`) does the same descendant check without nesting.
+  &:nth-last-child(1 of .job-container, .chunks-job-container):not(
+      :has(~ * .job-container, ~ * .chunks-job-container)
+    ) {
+    border-bottom: unset;
+  }
+}
+
+.job-container-background {
+  // Striping is computed in JS (see ProjectContainer.js), not via
+  // :nth-of-type — the "extra" rows inside AnimatedCollapse live in a
+  // separate, re-scoped sibling group once revealed, so nth-of-type's
+  // local count there can't continue the real top-level position.
+  &.job-container-background--striped {
+    background-color: colors.$grey25;
+
+    .chunks-job-container-line,
+    .job-container-words-button {
+      background-color: colors.$grey25;
+    }
+  }
 }
 
 .job-container-grid {
@@ -14,11 +44,6 @@
   padding: 0px 24px;
   height: 64px;
   gap: 16px;
-  border-bottom: 1px solid colors.$grey100;
-
-  .chunks-job-container & {
-    border-bottom: unset;
-  }
 
   .job-container-id {
     display: flex;
@@ -34,9 +59,24 @@
   padding: 16px 24px;
   border-bottom: 1px solid colors.$grey100;
 
+  // same reasoning as .job-container above
+  &:nth-last-child(1 of .job-container, .chunks-job-container):not(
+      :has(~ * .job-container, ~ * .chunks-job-container)
+    ) {
+    border-bottom: unset;
+  }
+
+  .job-container {
+    border-bottom: unset;
+  }
+
   .chunks-job-container-line {
     display: flex;
     justify-content: space-between;
+    position: sticky;
+    top: 64px;
+    z-index: 1;
+    background-color: colors.$white;
 
     .chunks-job-container-line-sx {
       > :last-child {
@@ -53,6 +93,7 @@
 
   .chunks-job-container-list {
     padding-left: 8px;
+    overflow: hidden;
   }
 }
 
@@ -71,6 +112,7 @@
     align-items: center;
     gap: 4px;
     color: colors.$black;
+    font-size: variables.$font-size-small;
 
     svg {
       color: colors.$grey400;

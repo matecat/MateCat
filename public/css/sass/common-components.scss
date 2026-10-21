@@ -17,18 +17,15 @@
 }
 
 .user-initials {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
+  border: 2px solid colors.$blue500;
+  color: colors.$blue500;
   width: 24px;
   height: 24px;
+  font-size: 10px;
   border-radius: 50%;
-  background-color: #e8e8e8;
-  color: rgba(0, 0, 0, 0.6);
-  font-size: 0.75rem;
-  font-weight: 700;
-  vertical-align: middle;
-  cursor: default;
 }
 
 .cancel-label {
