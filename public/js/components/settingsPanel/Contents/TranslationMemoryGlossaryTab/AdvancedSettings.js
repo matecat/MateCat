@@ -116,7 +116,7 @@ export const AdvancedSettings = () => {
       </section>
       <section className="translation-memory-glossary-advanced-section">
         <div className="translation-memory-glossary-advanced-heading">
-          <h2>Variant matching</h2>
+          <h2 id="variant-matching-heading">Variant matching</h2>
           <p>
             Set the rule for retrieving matches from different variants of your
             project languages. Matches from other variants will be flagged in
@@ -126,7 +126,7 @@ export const AdvancedSettings = () => {
         <div
           className="translation-memory-glossary-variant-matching"
           role="radiogroup"
-          aria-label="Variant matching"
+          aria-labelledby="variant-matching-heading"
         >
           {VARIANT_MATCHING_OPTIONS.map(({dialectStrict, label}) => (
             <label key={label}>

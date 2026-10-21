@@ -43,11 +43,7 @@ SubTab.propTypes = {
 }
 
 export const TmSubTabs = ({activeSubTab, onChange}) => (
-  <div
-    className="translation-memory-glossary-subtabs"
-    role="tablist"
-    aria-label="Translation memory and termbase sections"
-  >
+  <div className="translation-memory-glossary-subtabs" role="tablist">
     {SUBTABS.map(({id, label}) => (
       <SubTab
         key={id}
