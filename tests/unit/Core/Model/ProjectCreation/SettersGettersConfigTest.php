@@ -120,6 +120,17 @@ class SettersGettersConfigTest extends AbstractTest
         $this->assertSame('dqf', $result[0]->feature_code);
     }
 
+    #[Test]
+    public function getRequestedFeaturesKeepsABasicFeatureStructAsItIs(): void
+    {
+        $feature = new BasicFeatureStruct(['feature_code' => 'dqf', 'options' => null]);
+        $this->pm->setProjectStructureValue('project_features', [$feature]);
+
+        $result = $this->pm->callGetRequestedFeatures();
+
+        $this->assertSame([$feature], $result);
+    }
+
     // ── getAnalyzeURL() ────────────────────────────────────────────
 
     /**

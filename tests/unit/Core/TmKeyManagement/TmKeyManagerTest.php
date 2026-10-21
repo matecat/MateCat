@@ -2,13 +2,21 @@
 
 namespace Matecat\Core\TmKeyManagement;
 
+use Exception;
 use Matecat\TestHelpers\AbstractTest;
+use Matecat\TestHelpers\CapturesNamedLogs;
+use Model\DataAccess\IDatabase;
+use PDOException;
+use PHPUnit\Framework\MockObject\Exception as MockObjectException;
+use Utils\TmKeyManagement\Filter;
 use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TmKeyManagement\TmKeyStruct;
 use PHPUnit\Framework\Attributes\Test;
 
 class TmKeyManagerTest extends AbstractTest
 {
+    use CapturesNamedLogs;
+
     #[Test]
     public function testSanitizePreservesCurlyBraces()
     {
@@ -73,5 +81,58 @@ class TmKeyManagerTest extends AbstractTest
         TmKeyManager::sanitize($obj);
 
         $this->assertSame('メモリ', $obj->name);
+    }
+
+    /**
+     * A string that is not valid JSON is logged and refused with code -2.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function getOwnerKeysLogsAndThrowsOnInvalidJson(): void
+    {
+        $log = $this->captureLog('engines');
+
+        // The code throws a plain Exception, which is also the parent of PHPUnit's own failures,
+        // so a fail() inside the try would be caught here. Keep the exception and assert after.
+        $thrown = null;
+        try {
+            TmKeyManager::getOwnerKeys(['{not json']);
+        } catch (Exception $e) {
+            $thrown = $e;
+        }
+
+        $this->assertNotNull($thrown, 'An invalid JSON string must be refused.');
+        $this->assertSame(-2, $thrown->getCode());
+        $this->assertTrue($log->hasErrorThatContains('Invalid JSON.'));
+    }
+
+    /**
+     * A new client key is still merged into the job when it cannot be saved to the user's
+     * keyring: the error is logged and the merge goes on.
+     *
+     * @throws Exception
+     * @throws MockObjectException
+     */
+    #[Test]
+    public function mergeJsonKeysLogsTheErrorAndKeepsTheNewKeyWhenTheKeyringCannotBeRead(): void
+    {
+        $log = $this->captureLog('engines');
+
+        $database = $this->createStub(IDatabase::class);
+        $database->method('getConnection')->willThrowException(new PDOException('Keyring read failed'));
+
+        $merged = TmKeyManager::mergeJsonKeys(
+            '[{"key":"0123456789abcdef0123","name":"New key","r":true,"w":true,"tm":true,"glos":true}]',
+            '[]',
+            $database,
+            Filter::OWNER,
+            9_937_001
+        );
+
+        $this->assertTrue($log->hasErrorThatContains('Keyring read failed'));
+        $this->assertCount(1, $merged);
+        $this->assertSame('0123456789abcdef0123', $merged[0]->key);
+        $this->assertTrue($merged[0]->owner);
     }
 }

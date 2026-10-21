@@ -48,7 +48,7 @@ class AIAssistantWorkerTest extends AbstractTest
         $amq = $this->createStub(AMQHandler::class);
         $amq->method('getRedisClient')->willReturn($this->redisMock);
 
-        $methods = ['_checkDatabaseConnection', '_doLog', 'publishToNodeJsClients'];
+        $methods = ['_checkDatabaseConnection', 'publishToNodeJsClients'];
         if ($altTransClient) {
             $methods[] = 'createAlternativeTranslationsClient';
         }

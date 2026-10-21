@@ -4,7 +4,6 @@
  * @author ostico domenico@translated.net / ostico@gmail.com
  * Date: 19/06/19
  * Time: 19.25
- *
  */
 
 namespace Utils\AsyncTasks\Workers\Traits;
@@ -65,7 +64,7 @@ trait ProjectWordCount
             $stmt->execute(['pid' => $pid]);
             $results = $stmt->fetchAll();
         } catch (PDOException $e) {
-            LoggerFactory::doJsonLog($e->getMessage());
+            LoggerFactory::getLogger('fast_analysis', 'fastAnalysis.log')->error($e->getMessage());
 
             throw new RuntimeException($e);
         }

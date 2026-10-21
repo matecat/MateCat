@@ -3,10 +3,16 @@
 namespace Matecat\Core\Workers;
 
 use Matecat\TestHelpers\AbstractTest;
+use Model\ProjectCreation\ProjectCreationError;
 use Model\ProjectCreation\ProjectManager;
+use Model\ProjectCreation\ProjectStructure;
 use PDOException;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\MockObject;
+use ReflectionMethod;
+use ReflectionProperty;
+use RuntimeException;
 use Model\DataAccess\Database;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\ProjectCreationWorker;
@@ -38,7 +44,7 @@ class ProjectCreationWorkerTest extends AbstractTest
 
         return $this->getMockBuilder(ProjectCreationWorker::class)
             ->setConstructorArgs([$amq, obtainTestDatabase()])
-            ->onlyMethods(['_checkDatabaseConnection', '_doLog', 'createProjectManager', 'publishProjectResults'])
+            ->onlyMethods(['_checkDatabaseConnection', 'createProjectManager', 'publishProjectResults'])
             ->getMock();
     }
 
@@ -140,12 +146,94 @@ class ProjectCreationWorkerTest extends AbstractTest
 
         $worker = $this->getMockBuilder(ProjectCreationWorker::class)
             ->setConstructorArgs([$amq, obtainTestDatabase()])
-            ->onlyMethods(['_checkDatabaseConnection', '_doLog', 'publishProjectResults'])
+            ->onlyMethods(['_checkDatabaseConnection', 'publishProjectResults'])
             ->getMock();
 
         $worker->expects($this->never())->method('publishProjectResults');
 
-        $ref = new \ReflectionMethod($worker, '_publishResults');
+        $ref = new ReflectionMethod($worker, '_publishResults');
         $ref->invoke($worker);
+    }
+
+    #[Test]
+    public function publishResultsPublishesEachStructureOnce(): void
+    {
+        $amq = $this->createStub(AMQHandler::class);
+
+        $worker = $this->getMockBuilder(ProjectCreationWorker::class)
+            ->setConstructorArgs([$amq, obtainTestDatabase()])
+            ->onlyMethods(['_checkDatabaseConnection', 'publishProjectResults'])
+            ->getMock();
+
+        // A second message that fails before assigning its structure must not publish the first one again.
+        $worker->expects($this->once())->method('publishProjectResults');
+
+        (new ReflectionProperty($worker, 'projectStructure'))->setValue($worker, new ProjectStructure([]));
+        $publish = new ReflectionMethod($worker, '_publishResults');
+        $publish->invoke($worker);
+        $publish->invoke($worker);
+    }
+
+    /**
+     * @return ProjectCreationWorker&MockObject
+     */
+    private function workerPublishing(ProjectStructure $structure): ProjectCreationWorker
+    {
+        $worker = $this->getMockBuilder(ProjectCreationWorker::class)
+            ->setConstructorArgs([$this->createStub(AMQHandler::class), obtainTestDatabase()])
+            ->onlyMethods(['_checkDatabaseConnection', 'publishProjectResults'])
+            ->getMock();
+
+        (new ReflectionProperty($worker, 'projectStructure'))->setValue($worker, $structure);
+
+        return $worker;
+    }
+
+    #[Test]
+    public function publishResultsRecordsAFailureThatLeftNoError(): void
+    {
+        // What a ProjectManager constructor that throws leaves behind: no id, no error.
+        $structure = new ProjectStructure([]);
+        $worker    = $this->workerPublishing($structure);
+        $worker->expects($this->once())->method('publishProjectResults')->with($structure);
+
+        (new ReflectionMethod($worker, '_publishResults'))->invoke($worker);
+
+        self::assertSame(
+            [['code' => ProjectCreationError::CREATION_FAILED->value, 'message' => 'Project creation failed. Please try again.']],
+            $structure->result['errors']
+        );
+    }
+
+    #[Test]
+    public function publishResultsLeavesACreatedProjectWithoutErrors(): void
+    {
+        $structure                       = new ProjectStructure([]);
+        $structure->result['id_project'] = 9073002;
+        $worker                          = $this->workerPublishing($structure);
+        $worker->expects($this->once())->method('publishProjectResults');
+
+        (new ReflectionMethod($worker, '_publishResults'))->invoke($worker);
+
+        self::assertSame([], $structure->result['errors']);
+    }
+
+    #[Test]
+    public function publishResultsEndsTheQueueWhenThePublishFails(): void
+    {
+        $failure = new RuntimeException('Redis down');
+        $worker  = $this->workerPublishing(new ProjectStructure([]));
+        $worker->method('publishProjectResults')->willThrowException($failure);
+
+        try {
+            (new ReflectionMethod($worker, '_publishResults'))->invoke($worker);
+            self::fail('Expected EndQueueException');
+        } catch (EndQueueException $e) {
+            // Acked, not requeued: a second run would delete the project the first one committed.
+            self::assertSame(ProjectCreationWorker::ERR_REQUEUE_END, $e->getCode());
+            self::assertSame($failure, $e->getPrevious());
+        }
+
+        self::assertFalse((new ReflectionProperty($worker, 'projectStructure'))->isInitialized($worker));
     }
 }

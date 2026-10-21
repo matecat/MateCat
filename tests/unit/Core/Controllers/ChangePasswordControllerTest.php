@@ -2,6 +2,8 @@
 
 namespace Matecat\Core\Controllers;
 
+use Controller\API\Commons\Exceptions\ConflictError;
+use Controller\API\Commons\JobRestructureLock;
 use Controller\API\V2\ChangePasswordController;
 use Exception;
 use InvalidArgumentException;
@@ -9,6 +11,7 @@ use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
+use Matecat\TestHelpers\FakeLockRedisClient;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
@@ -22,6 +25,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use ReflectionException;
+use Throwable;
 use Utils\Logger\MatecatLogger;
 
 /**
@@ -32,8 +36,23 @@ use Utils\Logger\MatecatLogger;
  */
 class TestableChangePasswordController extends ChangePasswordController
 {
+    public FakeLockRedisClient $redis;
+
     public function __construct()
     {
+        $this->redis = new FakeLockRedisClient();
+    }
+
+    /** Runs once the caller is authorized and before the job is held: a request committing in that window. */
+    public ?\Closure $beforeTheJobIsHeld = null;
+
+    protected function restructureLock(): JobRestructureLock
+    {
+        if ($this->beforeTheJobIsHeld !== null) {
+            ($this->beforeTheJobIsHeld)();
+        }
+
+        return new JobRestructureLock($this->redis);
     }
 
     protected function registerValidators(): void
@@ -56,7 +75,7 @@ class ChangePasswordControllerTest extends AbstractTest
     private Response&MockObject $responseMock;
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     protected function setUp(): void
     {
@@ -143,7 +162,7 @@ class ChangePasswordControllerTest extends AbstractTest
     // ─── changePassword() validation failures ───
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changePassword_throws_when_id_is_empty(): void
@@ -157,7 +176,7 @@ class ChangePasswordControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changePassword_throws_when_password_is_empty(): void
@@ -171,7 +190,7 @@ class ChangePasswordControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changePassword_throws_when_undo_without_new_password(): void
@@ -189,7 +208,7 @@ class ChangePasswordControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changePassword_throws_when_the_password_matches_no_phase_of_the_job(): void
@@ -210,7 +229,7 @@ class ChangePasswordControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changePassword_throws_on_invalid_res(): void
@@ -230,7 +249,7 @@ class ChangePasswordControllerTest extends AbstractTest
     // ─── changePassword() happy path: project password change ───
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changePassword_project_returns_payload_with_id_and_new_pwd(): void
@@ -268,7 +287,7 @@ class ChangePasswordControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changePassword_project_undo_uses_supplied_new_password(): void
@@ -302,7 +321,7 @@ class ChangePasswordControllerTest extends AbstractTest
     // ─── changePassword() happy path: job password change ───
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changePassword_job_returns_payload_and_persists_new_password(): void
@@ -337,7 +356,54 @@ class ChangePasswordControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
+     */
+    #[Test]
+    public function changePassword_job_refuses_a_chunk_renamed_before_the_job_was_held(): void
+    {
+        $jobId = $this->jobId(self::BASE);
+        $this->setRequestParams(['res' => 'job', 'id' => (string) $jobId, 'password' => self::JOB_PASSWORD]);
+
+        $this->controller->beforeTheJobIsHeld = function () use ($jobId): void {
+            obtainTestDatabase()->getConnection()
+                ->prepare("UPDATE jobs SET password = 'cp_moved' WHERE id = ? AND password = ?")
+                ->execute([$jobId, self::JOB_PASSWORD]);
+        };
+        $this->responseMock->expects($this->never())->method('json');
+
+        try {
+            $this->controller->changePassword();
+            self::fail('a rotation that renames nothing must be refused');
+        } catch (ConflictError $e) {
+            self::assertSame('This job was changed by another request, reload it and try again', $e->getMessage());
+        }
+
+        self::assertSame([], $this->controller->redis->keys, 'the job is released');
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function changePassword_review_refuses_a_review_row_renamed_before_the_job_was_held(): void
+    {
+        $jobId = $this->jobId(self::BASE);
+        $this->seedChunkReview(self::BASE, self::JOB_PASSWORD, 'cp_revpw', 2);
+        $this->setRequestParams(['res' => 'job', 'id' => (string) $jobId, 'password' => 'cp_revpw']);
+
+        $this->controller->beforeTheJobIsHeld = function () use ($jobId): void {
+            obtainTestDatabase()->getConnection()
+                ->prepare("UPDATE qa_chunk_reviews SET review_password = 'cp_revmoved' WHERE id_job = ? AND review_password = 'cp_revpw'")
+                ->execute([$jobId]);
+        };
+        $this->responseMock->expects($this->never())->method('json');
+
+        $this->expectException(ConflictError::class);
+        $this->controller->changePassword();
+    }
+
+    /**
+     * @throws Throwable
      */
     #[Test]
     public function changePassword_job_revision_updates_review_password(): void
@@ -369,7 +435,7 @@ class ChangePasswordControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changeThePassword_job_throws_when_job_not_found(): void
@@ -389,10 +455,164 @@ class ChangePasswordControllerTest extends AbstractTest
         ]);
     }
 
+    // ─── the per-job restructure lock ───
+
+    /**
+     * A merge reading the chunk passwords while this rotation runs would sweep the credentials it read
+     * and miss the one renamed here: the rotation holds the job, and lets it go once swept.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function changePassword_job_holds_the_job_and_releases_it_after(): void
+    {
+        $jobId = $this->jobId(self::BASE);
+
+        $this->setRequestParams([
+            'res' => 'job',
+            'id' => (string) $jobId,
+            'password' => self::JOB_PASSWORD,
+        ]);
+
+        $this->controller->changePassword();
+
+        $this->assertSame(
+            ['set job_restructure:' . $jobId, 'del job_restructure:' . $jobId],
+            $this->controller->redis->log
+        );
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function changePassword_job_revision_holds_the_job_and_releases_it_after(): void
+    {
+        $jobId = $this->jobId(self::BASE);
+        $this->seedChunkReview(self::BASE, self::JOB_PASSWORD, 'cp_revpw', 2);
+
+        $this->setRequestParams([
+            'res' => 'job',
+            'id' => (string) $jobId,
+            'password' => 'cp_revpw',
+        ]);
+
+        $this->controller->changePassword();
+
+        $this->assertSame(
+            ['set job_restructure:' . $jobId, 'del job_restructure:' . $jobId],
+            $this->controller->redis->log
+        );
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function changePassword_job_answers_conflict_and_rotates_nothing_while_the_job_is_held(): void
+    {
+        $jobId = $this->jobId(self::BASE);
+        $this->controller->redis->keys['job_restructure:' . $jobId] = 1;
+
+        $this->setRequestParams([
+            'res' => 'job',
+            'id' => (string) $jobId,
+            'password' => self::JOB_PASSWORD,
+        ]);
+
+        try {
+            $this->controller->changePassword();
+            $this->fail('a held job must be refused');
+        } catch (ConflictError) {
+        }
+
+        $this->assertInstanceOf(
+            JobStruct::class,
+            (new JobDao(obtainTestDatabase()))->getByIdAndPassword($jobId, self::JOB_PASSWORD),
+            'the password must not have been rotated'
+        );
+        $this->assertSame([], $this->controller->redis->deleted, 'the holder keeps its lock');
+    }
+
+    /**
+     * The rotation fails after the job was taken: the transaction rolls back and the job is let go.
+     * A review row on source page 1 matches the password but names no revision phase, which makes the
+     * review branch throw once it holds the job.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function changePassword_job_releases_the_job_when_the_rotation_fails(): void
+    {
+        $jobId = $this->jobId(self::BASE);
+        $this->seedChunkReview(self::BASE, self::JOB_PASSWORD, 'cp_revpw', 1);
+
+        $this->setRequestParams([
+            'res' => 'job',
+            'id' => (string) $jobId,
+            'password' => 'cp_revpw',
+        ]);
+
+        try {
+            $this->controller->changePassword();
+            $this->fail('a review row outside every revision phase must fail the rotation');
+        } catch (Exception $e) {
+            $this->assertSame('The matched review row does not belong to a revision phase', $e->getMessage());
+        }
+
+        $this->assertSame(
+            ['set job_restructure:' . $jobId, 'del job_restructure:' . $jobId],
+            $this->controller->redis->log
+        );
+        $this->assertSame([], $this->controller->redis->keys);
+    }
+
+    /**
+     * A password that opens nothing must not hold the job: anyone logged in could otherwise keep its
+     * owner from splitting it.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function changeThePassword_job_not_found_never_takes_the_job(): void
+    {
+        try {
+            $this->invokePrivate('changeThePassword', [
+                $this->controller->getUser(),
+                'job',
+                $this->jobId(self::BASE),
+                'wrong_job_password_zzz',
+                'whatever_new',
+            ]);
+            $this->fail('an unknown password must be refused');
+        } catch (Exception $e) {
+            $this->assertSame('Job not found', $e->getMessage());
+        }
+
+        $this->assertSame([], $this->controller->redis->log);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function changePassword_project_does_not_take_any_job(): void
+    {
+        $this->setRequestParams([
+            'res' => 'prj',
+            'id' => (string) $this->projectId(self::BASE),
+            'password' => self::PROJECT_PASSWORD,
+        ]);
+
+        $this->controller->changePassword();
+
+        $this->assertSame([], $this->controller->redis->log);
+    }
+
     // ─── changeThePassword() / checkUserPermissions() failure branches ───
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changeThePassword_project_throws_not_found_for_wrong_password(): void
@@ -412,7 +632,7 @@ class ChangePasswordControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function checkUserPermissions_throws_when_user_not_in_team(): void
@@ -432,7 +652,7 @@ class ChangePasswordControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function checkUserPermissions_passes_for_team_member(): void
@@ -455,7 +675,7 @@ class ChangePasswordControllerTest extends AbstractTest
      * authenticates through cannot keep serving the replaced credential until their TTL expires
      * (callers cache them for up to a day).
      *
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changePassword_job_evicts_the_cached_translate_password(): void
@@ -502,7 +722,7 @@ class ChangePasswordControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function changePassword_job_revision_evicts_the_cached_review_password(): void

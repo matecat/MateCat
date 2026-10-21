@@ -47,7 +47,7 @@ class PropagationWorkerTest extends AbstractTest
 
         return $this->getMockBuilder(PropagationWorker::class)
             ->setConstructorArgs([$amq, $dbMock, $versionDao])
-            ->onlyMethods(['_checkDatabaseConnection', '_doLog'])
+            ->onlyMethods(['_checkDatabaseConnection'])
             ->getMock();
     }
 

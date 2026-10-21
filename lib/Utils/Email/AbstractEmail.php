@@ -69,7 +69,7 @@ abstract class AbstractEmail
             ['persistent' => WorkerClient::$_HANDLER->persistent]
         );
 
-        LoggerFactory::doJsonLog('Message has been sent');
+        LoggerFactory::getLogger('mail', 'mail.log')->info('Message has been sent');
     }
 
     /**

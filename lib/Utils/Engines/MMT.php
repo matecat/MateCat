@@ -13,7 +13,6 @@ use Model\Projects\ProjectDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
-use Psr\Log\InvalidArgumentException;
 use ReflectionException;
 use RuntimeException;
 use SplFileObject;
@@ -100,7 +99,6 @@ class MMT extends AbstractEngine
      *
      * @return array<string, mixed>|null
      * @throws MMTServiceApiException
-     * @throws InvalidArgumentException
      * @throws RuntimeException
      */
     public function getAvailableLanguages(): ?array
@@ -219,7 +217,6 @@ class MMT extends AbstractEngine
     /**
      * @param array<string, mixed> $_config
      * @return bool
-     * @throws \Psr\Log\InvalidArgumentException
      */
     public function set($_config): bool
     {
@@ -286,7 +283,6 @@ class MMT extends AbstractEngine
 
     /**
      * @throws MMTServiceApiException
-     * @throws InvalidArgumentException
      * @throws RuntimeException
      */
     public function memoryExists(MemoryKeyStruct $memoryKey): ?array
@@ -603,7 +599,6 @@ class MMT extends AbstractEngine
      *
      * @return array<string, mixed>|null
      * @throws MMTServiceApiException
-     * @throws InvalidArgumentException
      * @throws RuntimeException
      */
     public function getAllMemories(): ?array
@@ -638,7 +633,6 @@ class MMT extends AbstractEngine
      * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
-     * @throws InvalidArgumentException
      * @throws RuntimeException
      */
     public function updateMemory(string $id, string $name): ?array
@@ -655,7 +649,6 @@ class MMT extends AbstractEngine
      * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
-     * @throws InvalidArgumentException
      * @throws RuntimeException
      */
     public function importGlossary(string $id, array $data): ?array
@@ -672,7 +665,6 @@ class MMT extends AbstractEngine
      * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
-     * @throws InvalidArgumentException
      * @throws RuntimeException
      */
     public function updateGlossary(string $id, array $data): ?array
@@ -688,7 +680,6 @@ class MMT extends AbstractEngine
      * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
-     * @throws InvalidArgumentException
      * @throws RuntimeException
      */
     public function importJobStatus(string $uuid): ?array
@@ -727,7 +718,6 @@ class MMT extends AbstractEngine
      *
      * @return float|null
      * @throws MMTServiceApiException
-     * @throws InvalidArgumentException
      * @throws RuntimeException
      */
     public function getQualityEstimation(

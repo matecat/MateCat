@@ -304,22 +304,64 @@ class ChunkReviewModelTest extends AbstractTest
     }
 
     #[Test]
-    public function updateChunkReviewCountersAndPassFailDispatchesEvent(): void
+    public function updateChunkReviewCountersAndPassFailQueuesEachPublishUnderTheRowKey(): void
     {
         $this->stmtStub->method('execute')->willReturn(true);
-        // FeatureSet::forProject will query metadata, then dispatch triggers no listeners
-        $this->stmtStub->method('fetchAll')->willReturn([]);
-
-        $project = new ProjectStruct();
-        $project->id = 10;
-        $project->id_qa_model = null;
+        $queued = $this->queueOnCommit();
 
         $model = new ChunkReviewModel($this->chunkReviewStruct, $this->dbStub);
-        // The dispatch call will go through FeatureSet::forProject which loads from DB.
-        // With empty fetchAll, no features are loaded beyond mandatory ones, so
-        // the dispatch will silently succeed (no listeners for ChunkReviewUpdatedEvent).
-        $model->updateChunkReviewCountersAndPassFail(1.0, 5, 100, $project, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
-        $this->assertTrue(true);
+        $model->updateChunkReviewCountersAndPassFail(1.0, 5, 100, $this->nullLqaProject, $this->operator());
+        $model->updateChunkReviewCountersAndPassFail(2.0, 5, 100, $this->nullLqaProject, $this->operator());
+
+        // Every write queues the publish under the row's key, so the commit runs it once.
+        $this->assertSame(
+            ['chunk_review_updated:42', 'chunk_review_updated:42'],
+            array_values(array_filter(array_column($queued->getArrayCopy(), 1)))
+        );
+    }
+
+    /**
+     * The publish re-reads the committed row by its id: $this->chunk_review still holds the counters
+     * from before the delta.
+     */
+    #[Test]
+    public function thePublishReadsTheCommittedRowById(): void
+    {
+        $executed = [];
+        $this->stmtStub->method('execute')->willReturnCallback(function (?array $params = null) use (&$executed) {
+            $executed[] = $params;
+
+            return true;
+        });
+        $this->stmtStub->method('fetchAll')->willReturn([]);
+        $queued = $this->queueOnCommit();
+
+        $model = new ChunkReviewModel($this->chunkReviewStruct, $this->dbStub);
+        $model->updateChunkReviewCountersAndPassFail(1.0, 5, 100, $this->nullLqaProject, $this->operator());
+
+        $executed = [];
+        $this->publish($queued);
+
+        $this->assertSame([['id' => 42]], $executed);
+    }
+
+    /**
+     * The score is committed by the time the publish runs, so a failure there is logged, not thrown at
+     * the commit that already succeeded.
+     */
+    #[Test]
+    public function aFailingPublishIsNotThrown(): void
+    {
+        $this->stmtStub->method('execute')->willReturn(true);
+        $queued = $this->queueOnCommit();
+
+        $model = new ChunkReviewModel($this->chunkReviewStruct, $this->dbStub);
+        $model->updateChunkReviewCountersAndPassFail(1.0, 5, 100, $this->nullLqaProject, $this->operator());
+
+        $this->stmtStub->method('fetchAll')->willThrowException(new \PDOException('server has gone away'));
+        $this->publish($queued);
+
+        $this->addToAssertionCount(1);
     }
 
     // -----------------------------------------------------------------------
@@ -347,6 +389,21 @@ class ChunkReviewModelTest extends AbstractTest
         $model->recountAndUpdatePassFailResult($this->nullLqaProject, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
 
         $this->assertNull($this->chunkReviewStruct->is_pass);
+    }
+
+    #[Test]
+    public function recountAndUpdatePassFailResultQueuesThePublishUnderTheRowKey(): void
+    {
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('rowCount')->willReturn(1);
+        $this->stmtStub->method('fetchAll')->willReturn([]);
+        $this->stmtStub->method('fetch')->willReturn([0 => null]);
+        $queued = $this->queueOnCommit();
+
+        $model = new ChunkReviewModel($this->chunkReviewStruct, $this->dbStub);
+        $model->recountAndUpdatePassFailResult($this->nullLqaProject, $this->operator());
+
+        $this->assertContains('chunk_review_updated:42', array_column($queued->getArrayCopy(), 1));
     }
 
     #[Test]
@@ -475,6 +532,47 @@ class ChunkReviewModelTest extends AbstractTest
             $this->anyStatementContains($captured, 'ste.final_revision = 1'),
             'the original recount must not have been switched to the final revision derivation'
         );
+    }
+
+    /**
+     * Swaps the inline onCommit() of the database mock for one that only records the callback and its
+     * callback dedupe key, so a test can see what was queued and run it when it chooses.
+     *
+     * @return \ArrayObject<int, array{callable(): void, ?string}>
+     */
+    private function queueOnCommit(): \ArrayObject
+    {
+        $queued = new \ArrayObject();
+
+        $db = $this->createStub(IDatabase::class);
+        $db->method('getConnection')->willReturn($this->pdoStub);
+        $db->method('transaction')->willReturnCallback(static fn(callable $work) => $work());
+        $db->method('onCommit')->willReturnCallback(
+            static function (callable $callback, bool $critical = false, ?string $callbackDedupeKey = null) use ($queued): void {
+                $queued[] = [$callback, $callbackDedupeKey];
+            }
+        );
+        $this->dbStub = $db;
+
+        return $queued;
+    }
+
+    /**
+     * Runs the queued publish alone, without the cache eviction the write also queued.
+     *
+     * @param \ArrayObject<int, array{callable(): void, ?string}> $queued
+     */
+    private function publish(\ArrayObject $queued): void
+    {
+        foreach ($queued as [$callback, $callbackDedupeKey]) {
+            if ($callbackDedupeKey !== null) {
+                $callback();
+
+                return;
+            }
+        }
+
+        $this->fail('no publish was queued');
     }
 
     private function operator(): UserStruct

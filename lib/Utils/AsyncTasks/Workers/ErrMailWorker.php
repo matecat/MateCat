@@ -32,16 +32,6 @@ class ErrMailWorker extends AbstractWorker
 {
 
     /**
-     * Override to set another logger on the same queue
-     *
-     * @return string
-     */
-    public function getLoggerName(): string
-    {
-        return "err_mail.log";
-    }
-
-    /**
      * Concrete Method to start the activity of the worker
      *
      * @param AbstractElement $queueElement
@@ -74,8 +64,8 @@ class ErrMailWorker extends AbstractWorker
     protected function _sendErrMailReport(Params $mailConf): bool
     {
         if (empty($mailConf->server_configuration)) {
-            $this->_doLog("--- (Worker " . $this->_workerPid . ") : Wrong configuration data found. Ensure that 'TaskRunner\\Commons\\Params->server_configuration' exists and contains valid data.");
-            $this->_doLog("--- (Worker " . $this->_workerPid . ") : Message not sent.");
+            $this->logger->debug("--- (Worker " . $this->_workerPid . ") : Wrong configuration data found. Ensure that 'TaskRunner\\Commons\\Params->server_configuration' exists and contains valid data.");
+            $this->logger->debug("--- (Worker " . $this->_workerPid . ") : Message not sent.");
             throw new EmptyElementException("No eMail in configuration file found. Ensure that 'TaskRunner\\Commons\\Params->server_configuration' exists and contains valid data.");
         } else {
             $mail = $this->createMailer();
@@ -95,7 +85,7 @@ class ErrMailWorker extends AbstractWorker
                     $mail->addAddress($email, $uName);
                 }
             } else {
-                $this->_doLog(
+                $this->logger->debug(
                     "--- (Worker " . $this->_workerPid . ") : No eMail list found. Ensure that 'TaskRunner\\Commons\\Params->email_list' exists and contains a valid mail list. One per row."
                 );
                 throw new EmptyElementException("No eMail list found. Ensure that 'TaskRunner\\Commons\\Params->email_list' exists and contains a valid mail list. One per row.");
@@ -138,12 +128,12 @@ class ErrMailWorker extends AbstractWorker
         $mail->msgHTML($mail->Body);
 
         if (!$mail->send()) {
-            $this->_doLog("--- (Worker " . $this->_workerPid . ") : Mailer error: " . $mail->ErrorInfo);
-            $this->_doLog("--- (Worker " . $this->_workerPid . ") : Message could not be sent: \n\n" . $mail->AltBody);
+            $this->logger->debug("--- (Worker " . $this->_workerPid . ") : Mailer error: " . $mail->ErrorInfo);
+            $this->logger->debug("--- (Worker " . $this->_workerPid . ") : Message could not be sent: \n\n" . $mail->AltBody);
             throw new ReQueueException('Mailer error: ' . $mail->ErrorInfo);
         }
 
-        $this->_doLog("--- (Worker " . $this->_workerPid . ") : Message has been sent.");
+        $this->logger->debug("--- (Worker " . $this->_workerPid . ") : Message has been sent.");
 
         return true;
     }

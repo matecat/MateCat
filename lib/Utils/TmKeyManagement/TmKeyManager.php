@@ -11,6 +11,7 @@ use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PDOException;
+use TypeError;
 use Utils\Logger\LoggerFactory;
 use Utils\Validation\UserSuppliedName;
 
@@ -154,8 +155,7 @@ class TmKeyManager
             $tmKey = json_decode($tmKey, true);
 
             if (is_null($tmKey)) {
-                LoggerFactory::doJsonLog(__METHOD__ . " -> Invalid JSON.");
-                LoggerFactory::doJsonLog(var_export($tmKey, true));
+                LoggerFactory::getLogger('engines')->error(__METHOD__ . " -> Invalid JSON.");
                 throw new Exception ("Invalid JSON: " . var_export($jsonTmKeys_array, true), -2);
             }
 
@@ -211,7 +211,7 @@ class TmKeyManager
      *
      * @return TmKeyStruct
      *
-     * @throws \TypeError
+     * @throws TypeError
      * @throws DomainException
      */
     public static function sanitize(TmKeyStruct $obj): TmKeyStruct
@@ -316,7 +316,7 @@ class TmKeyManager
      * @return TmKeyStruct[] TmKeyStruct[]
      *
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      * @see TmKeyStruct
      *
      */
@@ -523,7 +523,7 @@ class TmKeyManager
                             $_keyDao->create($dh);
                         }
                     } catch (Exception $e) {
-                        LoggerFactory::doJsonLog($e->getMessage());
+                        LoggerFactory::getLogger('engines')->error($e->getMessage());
                     }
                 }
             }
@@ -602,7 +602,7 @@ class TmKeyManager
      * @param IDatabase $database
      *
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function shareKey(array $emailList, MemoryKeyStruct $memoryKeyToUpdate, UserStruct $user, IDatabase $database): void
     {

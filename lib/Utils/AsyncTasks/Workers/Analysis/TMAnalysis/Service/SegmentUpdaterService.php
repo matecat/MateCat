@@ -6,16 +6,23 @@ use Exception;
 use Model\DataAccess\IDatabase;
 use Model\Translations\SegmentTranslationDao;
 use PDOException;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\SegmentUpdaterServiceInterface;
-use Utils\Logger\LoggerFactory;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
-class SegmentUpdaterService implements SegmentUpdaterServiceInterface
+class SegmentUpdaterService
 {
     private IDatabase $db;
 
-    public function __construct(IDatabase $db)
+    /**
+     * Where the service logs. The worker passes its queue logger, so these lines land in the
+     * analysis-queue log. The default NullLogger drops them (unit tests).
+     */
+    private LoggerInterface $logger;
+
+    public function __construct(IDatabase $db, LoggerInterface $logger = new NullLogger())
     {
         $this->db = $db;
+        $this->logger = $logger;
     }
 
     /**
@@ -47,8 +54,7 @@ class SegmentUpdaterService implements SegmentUpdaterServiceInterface
             $stmt->execute([':id_segment' => $idSegment, ':id_job' => $idJob]);
             $affectedRows = $stmt->rowCount();
         } catch (PDOException $e) {
-            LoggerFactory::doJsonLog($e->getMessage());
-            LoggerFactory::doJsonLog("**** DB failure in forceSetSegmentAnalyzed for segment $idSegment. NOT incrementing counters.");
+            $this->logger->error("DB failure in forceSetSegmentAnalyzed for segment $idSegment. NOT incrementing counters: " . $e->getMessage());
             return 0;
         }
 

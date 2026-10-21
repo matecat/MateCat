@@ -48,7 +48,7 @@ class Health
             return (AppConfig::$VOLUME_ANALYSIS_ENABLED && !self::fastAnalysisIsRunning($redisHandler) && !self::tmAnalysisIsRunning($redisHandler));
         } catch (Exception) {
             $msg = "****** No REDIS instances found. ******";
-            LoggerFactory::doJsonLog($msg);
+            LoggerFactory::getLogger()->error($msg);
 
             return false;
         }

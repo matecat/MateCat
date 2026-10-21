@@ -3,8 +3,12 @@
 namespace Model\FilesStorage;
 
 use Exception;
+use InvalidArgumentException;
 use Model\DataAccess\IDatabase;
 use PDO;
+use PDOException;
+use RuntimeException;
+use TypeError;
 use Utils\Logger\LoggerFactory;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
@@ -39,7 +43,7 @@ abstract class AbstractFilesStorage implements IFilesStorage
     /**
      * @param FilesystemAdapter|null $filesystem
      *
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function __construct(?FilesystemAdapter $filesystem = null)
     {
@@ -140,7 +144,7 @@ abstract class AbstractFilesStorage implements IFilesStorage
             $files = $this->filesystem->iterateDirectory($path);
         } catch (Exception) {
             //directory does not exist
-            LoggerFactory::doJsonLog("Directory $path does not exists. If you are creating a project check the source language.");
+            $this->logger->warning("Directory $path does not exists. If you are creating a project check the source language.");
         }
 
         foreach ($files as $file) {
@@ -176,7 +180,7 @@ abstract class AbstractFilesStorage implements IFilesStorage
      * @param string $linkFile
      *
      * @return bool
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
     public function deleteHashFromUploadDir(string $uploadDirPath, string $linkFile): bool
     {
@@ -195,7 +199,7 @@ abstract class AbstractFilesStorage implements IFilesStorage
             if ($fileInfo->getFilename() != $linkFile &&
                 stripos($fileInfo->getFilename(), $shaSum) !== false) {
                 $this->filesystem->unlink($fileInfo->getPathname());
-                LoggerFactory::doJsonLog("Deleted Hash " . $fileInfo->getPathname());
+                $this->logger->debug("Deleted Hash " . $fileInfo->getPathname());
 
                 return true;
             }
@@ -208,7 +212,7 @@ abstract class AbstractFilesStorage implements IFilesStorage
      * @param string|null $create_date
      *
      * @return string
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function getDatePath(?string $create_date = null): string
     {
@@ -343,7 +347,7 @@ abstract class AbstractFilesStorage implements IFilesStorage
      * @param bool $getXliffPath
      *
      * @return array<int, array<string, mixed>>
-     * @throws \PDOException
+     * @throws PDOException
      */
     public function getFilesForJob(IDatabase $database, int $id_job, bool $getXliffPath = true): array
     {

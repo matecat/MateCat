@@ -149,15 +149,6 @@ class JobSplitMergeService
     }
 
     /**
-     * Wrapper around static JobDao::deleteOnMerge() — overridable in tests.
-     * @throws PDOException
-     */
-    protected function deleteOnMerge(JobStruct $job): void
-    {
-        (new JobDao($this->dbHandler))->deleteOnMerge($job);
-    }
-
-    /**
      * Wrapper around the job credential cache sweep — overridable in tests.
      *
      * @throws Exception
@@ -412,9 +403,14 @@ class JobSplitMergeService
     {
         $this->getCart()?->emptyCart();
 
-        $this->dbHandler->transaction(function () use ($data, $actingUser): void {
-            $this->splitJob($data, $actingUser);
-        });
+        $chunks = $this->dbHandler->transaction(
+            fn(): array => $this->splitJob($data, $actingUser)
+        );
+
+        // Queued once the split has committed. From inside the scope the broker round trip kept the
+        // transaction, and the job rows it locks, open for as long as it took; and a worker quick
+        // enough to take the frame before the commit recounted the job the split was replacing.
+        $this->enqueuePeeRecount($chunks);
     }
 
     /**
@@ -425,10 +421,12 @@ class JobSplitMergeService
      *
      * @param UserStruct $actingUser The user performing the split, and the one re-inviting its translator
      *
+     * @return list<JobStruct> the chunks written, for the PEE recount applySplit() queues after the commit
+     *
      * @throws Exception
      * @throws TypeError
      */
-    public function splitJob(SplitMergeProjectData $data, UserStruct $actingUser): void
+    public function splitJob(SplitMergeProjectData $data, UserStruct $actingUser): array
     {
         // init JobDao
         $jobDao = $this->createJobDao();
@@ -452,7 +450,7 @@ class JobSplitMergeService
         $chunks = $data->splitResult['chunks'];
 
         // update the first chunk of the job to split
-        $jobDao->updateStdWcAndTotalWc((int)$jobToSplit->id, $chunks[0]['standard_word_count'], $chunks[0]['raw_word_count']);
+        $jobDao->updateStdWcAndTotalWc((int)$jobToSplit->id, (string)$jobToSplit->password, $chunks[0]['standard_word_count'], $chunks[0]['raw_word_count']);
 
         $jobsMetadataDao = $this->createJobMetadataDao();
 
@@ -558,10 +556,31 @@ class JobSplitMergeService
             $translatorModel->update();
         }
 
-        foreach ($newJobList as $job) {
-            /**
-             * Async worker to re-count avg-PEE and total-TTE for split jobs
-             */
+        $this->createJobDao()->destroyCacheByProjectId($data->idProject);
+
+        $projectStruct = $this->getProjectForCacheInvalidation($jobToSplit);
+        $this->createProjectDao()->destroyCache($projectStruct->id ?? throw new RuntimeException('Missing project id'), $projectStruct->password);
+        $this->destroyAnalysisCacheByProjectId($data->idProject);
+
+        $this->getCart()?->deleteCart();
+
+        $this->features->dispatch(new PostJobSplittedEvent($data, $actingUser));
+
+        return $newJobList;
+    }
+
+    /**
+     * Async worker to re-count avg-PEE and total-TTE for the chunks of a split job.
+     *
+     * A chunk that could not be queued is logged and skipped: the split has already committed.
+     *
+     * @param list<JobStruct> $chunks
+     *
+     * @throws Exception only from the logger, for a log level it does not know
+     */
+    private function enqueuePeeRecount(array $chunks): void
+    {
+        foreach ($chunks as $job) {
             try {
                 $this->enqueueWorker('JOBS', JobsWorker::class, $job->getArrayCopy());
             } catch (Exception $e) {
@@ -572,16 +591,6 @@ class JobSplitMergeService
                 $this->log($output, $e);
             }
         }
-
-        $this->createJobDao()->destroyCacheByProjectId($data->idProject);
-
-        $projectStruct = $this->getProjectForCacheInvalidation($jobToSplit);
-        $this->createProjectDao()->destroyCache($projectStruct->id ?? throw new RuntimeException('Missing project id'), $projectStruct->password);
-        $this->destroyAnalysisCacheByProjectId($data->idProject);
-
-        $this->getCart()?->deleteCart();
-
-        $this->features->dispatch(new PostJobSplittedEvent($data, $actingUser));
     }
 
     /**
@@ -642,7 +651,7 @@ class JobSplitMergeService
         $totalAvgPee = 0;
         $totalTimeToEdit = 0;
 
-        // The merge revokes credentials: deleteOnMerge() drops the row of every chunk but the first,
+        // The merge revokes credentials: deleteChunk() drops the row of every chunk but the first,
         // and the first one's password is rotated when it had a translator. Read them before the write,
         // the structs are the ones it mutates.
         $mergedPasswords = [];
@@ -657,7 +666,7 @@ class JobSplitMergeService
         $first_job['total_time_to_edit'] = $totalTimeToEdit;
 
         $this->dbHandler->transaction(function () use ($data, $jobStructs, $actingUser, $first_job, $jobsMetadataDao, $mergedPasswords, $standard_word_count, $total_raw_wc): void {
-            // deleteOnMerge() below drops the row of every chunk but the first. Their metadata is
+            // The loop below deletes the row of every chunk but the first. Their metadata is
             // keyed by the password that row carries, so it would outlive them as rows nothing can
             // reach — every key, not the three this used to name. Inside the scope, because a merge
             // that fails after this point must not leave the settings already deleted.
@@ -680,17 +689,20 @@ class JobSplitMergeService
                 $this->updateForMerge($first_job, '');
             }
 
-            $this->deleteOnMerge($first_job);
+            $jobDao = $this->createJobDao();
+
+            // Every chunk but the first, each by its own credential. They were read holding the job, so
+            // one that is gone means the merge works on rows that changed under it: refuse it whole.
+            foreach ($jobStructs as $i => $_jStruct) {
+                if ($i > 0 && $jobDao->deleteChunk($_jStruct) === 0) {
+                    throw new RuntimeException('A chunk of job ' . $_jStruct->id . ' is gone: merge aborted');
+                }
+            }
 
             $wCountManager = $this->createCounterModel();
             $wCountManager->initializeJobWordCount((int)$first_job['id'], (string)$first_job['password']);
 
             $chunk = new JobStruct($first_job->toArray());
-            $this->features->dispatch(new PostJobMergedEvent($data, $chunk, $actingUser));
-
-            $jobDao = $this->createJobDao();
-
-            $jobDao->updateStdWcAndTotalWc((int)$first_job['id'], $standard_word_count, $total_raw_wc);
 
             // Every password the merge revoked keeps resolving out of the cache until its entry expires,
             // and the surviving one now answers with the pre-merge row. The sweep reads the database, so
@@ -701,12 +713,20 @@ class JobSplitMergeService
             // critical because a revoked job credential still answering out of the cache is a security
             // problem, not the stale read an ordinary eviction failure leaves behind. The sweep covers
             // the project data and the project's job list too, which publish the passwords in their value.
+            // Registered before the PostJobMergedEvent dispatch, so it drains after the merge's own
+            // evictions but ahead of the hooks' deferred work (a render and a broker publish per chunk
+            // review), which would otherwise delay the sweep, or skip it altogether when that work dies of
+            // a fatal error the drain cannot catch, such as the memory or time limit.
             foreach ($mergedPasswords as $mergedPassword) {
                 $this->dbHandler->onCommit(
                     fn() => $this->sweepCredentialCaches($chunk, $mergedPassword, (string)$chunk->password),
                     critical: true
                 );
             }
+
+            $this->features->dispatch(new PostJobMergedEvent($data, $chunk, $actingUser));
+
+            $jobDao->updateStdWcAndTotalWc((int)$first_job['id'], (string)$first_job['password'], $standard_word_count, $total_raw_wc);
 
             // These stay inside the scope so the DAOs' own deferral applies to them. Outside it they
             // would fire the moment they are called, which is right while the merge owns the outermost
