@@ -667,9 +667,8 @@ const SegmentActions = {
         text: (
           <>
             This segment is locked and shouldn&apos;t be edited. If you really
-            need
-            to make a change, click the padlock icon to the left of the segment
-            to unlock it.
+            need to make a change, click the padlock icon to the left of the
+            segment to unlock it.
             <br />
             The project owner will be notified of any edits.
           </>
@@ -1753,7 +1752,7 @@ const SegmentActions = {
         SegmentActions.setNextUntranslatedSegmentFromServer(data.nextSegmentId)
         const segment = SegmentStore.getSegmentByIdToJS(id_segment)
         if (!segment) return
-        if (config.alternativesEnabled && !segment.alternatives) {
+        if (config.alternativesEnabled) {
           SegmentActions.getTranslationMismatches(id_segment)
         }
       })

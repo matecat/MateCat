@@ -136,6 +136,14 @@ ul.suggestion-item.graysmall:last-child {
   &:hover {
     text-decoration: none;
   }
+
+  button {
+    text-decoration: underline;
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
 }
 
 .graysmall .b {
