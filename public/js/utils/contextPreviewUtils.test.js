@@ -1408,7 +1408,7 @@ describe('updateNodeTranslation — visible placeholders', () => {
       {sid: 1, target: `Ciao ${ph('x-twig', '{{name}}')}`},
     ])
     expect(status).toBe('ok')
-    expect(p.textContent).toBe('Ciao {{name}}')
+    expect(p).toHaveTextContent(/^Ciao \{\{name\}\}$/)
   })
 
   it('reports a mismatch when duplicates differ only by a placeholder', () => {
