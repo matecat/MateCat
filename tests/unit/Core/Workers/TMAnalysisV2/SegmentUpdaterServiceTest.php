@@ -3,13 +3,11 @@
 namespace Matecat\Core\Workers\TMAnalysisV2;
 
 use Matecat\TestHelpers\AbstractTest;
-use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use PDO;
 use PDOException;
 use PHPUnit\Framework\Attributes\Test;
 use Throwable;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\SegmentUpdaterServiceInterface;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\SegmentUpdaterService;
 
 class SegmentUpdaterServiceTest extends AbstractTest
@@ -28,13 +26,6 @@ class SegmentUpdaterServiceTest extends AbstractTest
         $this->assertNotFalse($source, "Could not read source file: {$path}");
 
         return $source;
-    }
-
-    #[Test]
-    public function test_service_can_be_instantiated_and_implements_interface(): void
-    {
-        $service = new SegmentUpdaterService(obtainTestDatabase());
-        $this->assertInstanceOf(SegmentUpdaterServiceInterface::class, $service);
     }
 
     #[Test]
@@ -100,18 +91,6 @@ class SegmentUpdaterServiceTest extends AbstractTest
             '->setAnalysisValue(',
             $source,
             'setAnalysisValue() must delegate to SegmentTranslationDao.'
-        );
-    }
-
-    #[Test]
-    public function test_service_implements_segment_updater_service_interface(): void
-    {
-        $source = $this->readSource($this->segmentUpdaterServicePath());
-
-        $this->assertStringContainsString(
-            'implements SegmentUpdaterServiceInterface',
-            $source,
-            'SegmentUpdaterService must declare implements SegmentUpdaterServiceInterface.'
         );
     }
 
@@ -300,15 +279,6 @@ class SegmentUpdaterServiceTest extends AbstractTest
         } finally {
             $this->cleanupTestSegmentTranslation();
         }
-    }
-
-    #[Test]
-    public function constructor_accepts_idatabase_instance(): void
-    {
-        $db = $this->createStub(IDatabase::class);
-        $service = new SegmentUpdaterService($db);
-
-        $this->assertInstanceOf(SegmentUpdaterServiceInterface::class, $service);
     }
 
     // ── Coverage for SKIPPED detection and exception paths ────────────

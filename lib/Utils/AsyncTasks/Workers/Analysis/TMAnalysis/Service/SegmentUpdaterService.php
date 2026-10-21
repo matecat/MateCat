@@ -8,9 +8,8 @@ use Model\Translations\SegmentTranslationDao;
 use PDOException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\SegmentUpdaterServiceInterface;
 
-class SegmentUpdaterService implements SegmentUpdaterServiceInterface
+class SegmentUpdaterService
 {
     private IDatabase $db;
 

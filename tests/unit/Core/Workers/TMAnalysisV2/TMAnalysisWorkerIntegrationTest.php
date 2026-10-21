@@ -6,23 +6,18 @@ use Matecat\TestHelpers\AbstractTest;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Matecat\SubFiltering\Enum\InjectableFiltersTags;
 use Model\Jobs\JobsMetadataMarshaller;
-use Model\DataAccess\Database;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use Predis\Client;
 use ReflectionClass;
 use Utils\ActiveMQ\AMQHandler;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\AnalysisRedisServiceInterface;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\EngineServiceInterface;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\MatchProcessorServiceInterface;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\ProjectCompletionServiceInterface;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\SegmentUpdaterServiceInterface;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\AnalysisRedisService;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\DefaultEngineResolver;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\EngineService;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\MatchProcessorService;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\ProjectCompletionService;
+use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\SegmentUpdaterService;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysisWorker;
 use Utils\AsyncTasks\Workers\Service\MatchSorter;
 use Utils\TaskRunner\Commons\AbstractWorker;
@@ -137,11 +132,11 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
     public function constructor_with_injected_services_keeps_same_instances(): void
     {
         $amqHandler = $this->createMock(AMQHandler::class);
-        $redisService = $this->createMock(AnalysisRedisServiceInterface::class);
-        $segmentUpdater = $this->createMock(SegmentUpdaterServiceInterface::class);
-        $projectCompletion = $this->createMock(ProjectCompletionServiceInterface::class);
-        $engineService = $this->createMock(EngineServiceInterface::class);
-        $matchProcessor = $this->createMock(MatchProcessorServiceInterface::class);
+        $redisService = $this->createMock(AnalysisRedisService::class);
+        $segmentUpdater = $this->createMock(SegmentUpdaterService::class);
+        $projectCompletion = $this->createMock(ProjectCompletionService::class);
+        $engineService = $this->createMock(EngineService::class);
+        $matchProcessor = $this->createMock(MatchProcessorService::class);
 
         $worker = new TMAnalysisWorker(
             $amqHandler,
@@ -233,11 +228,11 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
     public function process_runs_full_flow_with_injected_services_and_mocked_redis_paths(): void
     {
         $amqHandler = $this->createMock(AMQHandler::class);
-        $redisService = $this->createMock(AnalysisRedisServiceInterface::class);
-        $segmentUpdater = $this->createMock(SegmentUpdaterServiceInterface::class);
-        $projectCompletion = $this->createMock(ProjectCompletionServiceInterface::class);
-        $engineService = $this->createMock(EngineServiceInterface::class);
-        $matchProcessor = $this->createMock(MatchProcessorServiceInterface::class);
+        $redisService = $this->createMock(AnalysisRedisService::class);
+        $segmentUpdater = $this->createMock(SegmentUpdaterService::class);
+        $projectCompletion = $this->createMock(ProjectCompletionService::class);
+        $engineService = $this->createMock(EngineService::class);
+        $matchProcessor = $this->createMock(MatchProcessorService::class);
 
         $worker = new IntegrationTestableTMAnalysisWorker(
             $amqHandler,
@@ -367,9 +362,9 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
      * FakeEngines loaded from DB (IDs 900/901), and stubbed infra services.
      */
     private function createWorkerWithRealServices(
-        ?AnalysisRedisServiceInterface $redisService = null,
-        ?SegmentUpdaterServiceInterface $segmentUpdater = null,
-        ?ProjectCompletionServiceInterface $projectCompletion = null,
+        ?AnalysisRedisService $redisService = null,
+        ?SegmentUpdaterService $segmentUpdater = null,
+        ?ProjectCompletionService $projectCompletion = null,
     ): IntegrationTestableTMAnalysisWorker {
         $this->ensureFakeEnginesExist();
 
@@ -378,9 +373,9 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
         $worker = new IntegrationTestableTMAnalysisWorker(
             $amqHandler,
             obtainTestDatabase(),
-            $redisService ?? $this->createStub(AnalysisRedisServiceInterface::class),
-            $segmentUpdater ?? $this->createStub(SegmentUpdaterServiceInterface::class),
-            $projectCompletion ?? $this->createStub(ProjectCompletionServiceInterface::class),
+            $redisService ?? $this->createStub(AnalysisRedisService::class),
+            $segmentUpdater ?? $this->createStub(SegmentUpdaterService::class),
+            $projectCompletion ?? $this->createStub(ProjectCompletionService::class),
             new EngineService(new DefaultEngineResolver(obtainTestDatabase()), obtainTestDatabase()),
             new MatchProcessorService(new MatchSorter(), obtainTestDatabase()),
         );
@@ -396,7 +391,7 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
     /**
      * Configure redis stub for non-init-winner path (most common test scenario).
      */
-    private function configureRedisStubAsLoser(AnalysisRedisServiceInterface $redisService): void
+    private function configureRedisStubAsLoser(AnalysisRedisService $redisService): void
     {
         $redisService->method('acquireInitLock')->willReturn(null);
         $redisService->method('waitForInitialization')->willReturn(true);
@@ -413,11 +408,11 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
         FakeTMEngine::$cannedMatches = [$this->cannedTmMatch(0.85)];
         FakeMTEngine::$cannedTranslation = $this->cannedMtResult();
 
-        $redisService = $this->createStub(AnalysisRedisServiceInterface::class);
+        $redisService = $this->createStub(AnalysisRedisService::class);
         $this->configureRedisStubAsLoser($redisService);
 
         $capturedTmData = null;
-        $segmentUpdater = $this->createMock(SegmentUpdaterServiceInterface::class);
+        $segmentUpdater = $this->createMock(SegmentUpdaterService::class);
         $segmentUpdater->expects($this->once())
             ->method('setAnalysisValue')
             ->willReturnCallback(function (array $tmData) use (&$capturedTmData) {
@@ -460,11 +455,11 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
         FakeTMEngine::$cannedMatches = [$this->cannedTmMatch(1.0, true)];
         FakeMTEngine::$cannedTranslation = $this->cannedMtResult();
 
-        $redisService = $this->createStub(AnalysisRedisServiceInterface::class);
+        $redisService = $this->createStub(AnalysisRedisService::class);
         $this->configureRedisStubAsLoser($redisService);
 
         $capturedTmData = null;
-        $segmentUpdater = $this->createMock(SegmentUpdaterServiceInterface::class);
+        $segmentUpdater = $this->createMock(SegmentUpdaterService::class);
         $segmentUpdater->expects($this->once())
             ->method('setAnalysisValue')
             ->willReturnCallback(function (array $tmData) use (&$capturedTmData) {
@@ -506,11 +501,11 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
         FakeTMEngine::$cannedMatches = [];
         FakeMTEngine::$cannedTranslation = $this->cannedMtResult('Ciao mondo (MT)', 0.6);
 
-        $redisService = $this->createStub(AnalysisRedisServiceInterface::class);
+        $redisService = $this->createStub(AnalysisRedisService::class);
         $this->configureRedisStubAsLoser($redisService);
 
         $capturedTmData = null;
-        $segmentUpdater = $this->createMock(SegmentUpdaterServiceInterface::class);
+        $segmentUpdater = $this->createMock(SegmentUpdaterService::class);
         $segmentUpdater->expects($this->once())
             ->method('setAnalysisValue')
             ->willReturnCallback(function (array $tmData) use (&$capturedTmData) {
@@ -550,7 +545,7 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
         FakeTMEngine::$cannedMatches = [];
         FakeMTEngine::$cannedTranslation = [];
 
-        $redisService = $this->createStub(AnalysisRedisServiceInterface::class);
+        $redisService = $this->createStub(AnalysisRedisService::class);
         $this->configureRedisStubAsLoser($redisService);
 
         $worker = $this->createWorkerWithRealServices($redisService);
@@ -589,11 +584,11 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
         $mtqeConfig->analysis_ignore_100 = false;
         $mtqeConfig->analysis_ignore_101 = false;
 
-        $redisService = $this->createStub(AnalysisRedisServiceInterface::class);
+        $redisService = $this->createStub(AnalysisRedisService::class);
         $this->configureRedisStubAsLoser($redisService);
 
         $capturedTmData = null;
-        $segmentUpdater = $this->createMock(SegmentUpdaterServiceInterface::class);
+        $segmentUpdater = $this->createMock(SegmentUpdaterService::class);
         $segmentUpdater->expects($this->once())
             ->method('setAnalysisValue')
             ->willReturnCallback(function (array $tmData) use (&$capturedTmData) {
@@ -638,11 +633,11 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
         $mtqeConfig = new MTQEWorkflowParams();
         $mtqeConfig->analysis_ignore_101 = true;
 
-        $redisService = $this->createStub(AnalysisRedisServiceInterface::class);
+        $redisService = $this->createStub(AnalysisRedisService::class);
         $this->configureRedisStubAsLoser($redisService);
 
         $capturedTmData = null;
-        $segmentUpdater = $this->createMock(SegmentUpdaterServiceInterface::class);
+        $segmentUpdater = $this->createMock(SegmentUpdaterService::class);
         $segmentUpdater->expects($this->once())
             ->method('setAnalysisValue')
             ->willReturnCallback(function (array $tmData) use (&$capturedTmData) {
@@ -691,11 +686,11 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
         $mtqeConfig->analysis_ignore_100 = true;
         $mtqeConfig->analysis_ignore_101 = false;
 
-        $redisService = $this->createStub(AnalysisRedisServiceInterface::class);
+        $redisService = $this->createStub(AnalysisRedisService::class);
         $this->configureRedisStubAsLoser($redisService);
 
         $capturedTmData = null;
-        $segmentUpdater = $this->createMock(SegmentUpdaterServiceInterface::class);
+        $segmentUpdater = $this->createMock(SegmentUpdaterService::class);
         $segmentUpdater->expects($this->once())
             ->method('setAnalysisValue')
             ->willReturnCallback(function (array $tmData) use (&$capturedTmData) {

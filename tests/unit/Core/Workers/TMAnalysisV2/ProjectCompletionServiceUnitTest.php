@@ -10,8 +10,8 @@ use Monolog\Logger;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use RuntimeException;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\AnalysisRedisServiceInterface;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\ProjectCompletionRepositoryInterface;
+use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\AnalysisRedisService;
+use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\ProjectCompletionRepository;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\ProjectCompletionService;
 
 class ProjectCompletionServiceUnitTest extends AbstractTest
@@ -22,27 +22,27 @@ class ProjectCompletionServiceUnitTest extends AbstractTest
      * Unconfigured it would return null without ever calling the closure, so the finalization body
      * would not run and the assertions below would pass against a method that did nothing.
      *
-     * @return ProjectCompletionRepositoryInterface&MockObject
+     * @return ProjectCompletionRepository&MockObject
      */
-    private function makeRepositoryMock(): ProjectCompletionRepositoryInterface
+    private function makeRepositoryMock(): ProjectCompletionRepository
     {
-        $repo = $this->createMock(ProjectCompletionRepositoryInterface::class);
+        $repo = $this->createMock(ProjectCompletionRepository::class);
         $repo->method('transaction')->willReturnCallback(static fn(callable $work) => $work());
 
         return $repo;
     }
 
-    private function makeRepositoryStub(): ProjectCompletionRepositoryInterface
+    private function makeRepositoryStub(): ProjectCompletionRepository
     {
-        $repo = $this->createStub(ProjectCompletionRepositoryInterface::class);
+        $repo = $this->createStub(ProjectCompletionRepository::class);
         $repo->method('transaction')->willReturnCallback(static fn(callable $work) => $work());
 
         return $repo;
     }
 
-    private function makeRedisStub(array $wordCounts = [], ?string $lockToken = 'completion-token'): AnalysisRedisServiceInterface
+    private function makeRedisStub(array $wordCounts = [], ?string $lockToken = 'completion-token'): AnalysisRedisService
     {
-        $redis = $this->createStub(AnalysisRedisServiceInterface::class);
+        $redis = $this->createStub(AnalysisRedisService::class);
         $redis->method('getProjectWordCounts')->willReturn($wordCounts);
         $redis->method('acquireCompletionLock')->willReturn($lockToken);
 
@@ -83,7 +83,7 @@ class ProjectCompletionServiceUnitTest extends AbstractTest
     {
         // Defensive: if num_analyzed > project_segments (double-count from issue #4),
         // the <= 0 condition still triggers completion instead of leaving the project stuck.
-        $redis = $this->createMock(AnalysisRedisServiceInterface::class);
+        $redis = $this->createMock(AnalysisRedisService::class);
         $redis->method('getProjectWordCounts')->willReturn(['project_segments' => 10, 'num_analyzed' => 12]);
         $redis->method('acquireCompletionLock')->willReturn('completion-token');
         $redis->expects($this->once())->method('removeProjectFromQueue')->with('queue', 99);
@@ -124,7 +124,7 @@ class ProjectCompletionServiceUnitTest extends AbstractTest
         $logger = new Logger('test');
         $logger->pushHandler($handler);
 
-        $redis = $this->createMock(AnalysisRedisServiceInterface::class);
+        $redis = $this->createMock(AnalysisRedisService::class);
         $redis->method('getProjectWordCounts')->willReturn(['project_segments' => 10, 'num_analyzed' => 10]);
         $redis->method('acquireCompletionLock')->willReturn('completion-token');
         $redis->expects($this->once())->method('releaseCompletionLock')->with(7, 'completion-token');
@@ -148,7 +148,7 @@ class ProjectCompletionServiceUnitTest extends AbstractTest
     #[Test]
     public function tryCloseProject_happy_path_commits_and_destroys_caches(): void
     {
-        $redis = $this->createMock(AnalysisRedisServiceInterface::class);
+        $redis = $this->createMock(AnalysisRedisService::class);
         $redis->method('getProjectWordCounts')->willReturn(['project_segments' => 10, 'num_analyzed' => 10]);
         $redis->method('acquireCompletionLock')->willReturn('completion-token');
         $redis->expects($this->once())->method('removeProjectFromQueue')->with('queue', 100);
@@ -209,7 +209,7 @@ class ProjectCompletionServiceUnitTest extends AbstractTest
     public function tryCloseProject_releases_lock_when_mysql_says_segments_remain(): void
     {
         // Redis says all done (drift from lost INCRBY), but MySQL disagrees.
-        $redis = $this->createMock(AnalysisRedisServiceInterface::class);
+        $redis = $this->createMock(AnalysisRedisService::class);
         $redis->method('getProjectWordCounts')->willReturn(['project_segments' => 10, 'num_analyzed' => 10]);
         $redis->method('acquireCompletionLock')->willReturn('completion-token');
         $redis->expects($this->once())->method('releaseCompletionLock')->with(42, 'completion-token');
@@ -236,7 +236,7 @@ class ProjectCompletionServiceUnitTest extends AbstractTest
         // Core-fix proof (last-segment race): the first gate read still sees segments
         // pending (inter-worker commit skew), but a later read confirms completion. The
         // project must FINALIZE — not release the lock and hang at FAST_OK.
-        $redis = $this->createMock(AnalysisRedisServiceInterface::class);
+        $redis = $this->createMock(AnalysisRedisService::class);
         $redis->method('getProjectWordCounts')->willReturn(['project_segments' => 10, 'num_analyzed' => 10]);
         $redis->method('acquireCompletionLock')->willReturn('completion-token');
         // It finalized rather than gave up, so the lock is NEVER released here.
@@ -272,7 +272,7 @@ class ProjectCompletionServiceUnitTest extends AbstractTest
     {
         // maxGateRetries < 1 skips the gate loop entirely, so $rollup stays null. The
         // defensive post-loop guard must release the lock and bail without finalizing.
-        $redis = $this->createMock(AnalysisRedisServiceInterface::class);
+        $redis = $this->createMock(AnalysisRedisService::class);
         $redis->method('getProjectWordCounts')->willReturn(['project_segments' => 10, 'num_analyzed' => 10]);
         $redis->method('acquireCompletionLock')->willReturn('completion-token');
         $redis->expects($this->once())->method('releaseCompletionLock')->with(88, 'completion-token');
@@ -293,7 +293,7 @@ class ProjectCompletionServiceUnitTest extends AbstractTest
         // Redis says complete → enters the locked block and acquires the completion lock.
         // The gate query returns [] (no rows at all), so array_pop yields null → the
         // "empty rollup" branch must release the lock and bail without finalizing.
-        $redis = $this->createMock(AnalysisRedisServiceInterface::class);
+        $redis = $this->createMock(AnalysisRedisService::class);
         $redis->method('getProjectWordCounts')->willReturn(['project_segments' => 10, 'num_analyzed' => 10]);
         $redis->method('acquireCompletionLock')->willReturn('completion-token');
         $redis->expects($this->once())->method('releaseCompletionLock')->with(55, 'completion-token');
@@ -313,7 +313,7 @@ class ProjectCompletionServiceUnitTest extends AbstractTest
     #[Test]
     public function tryCloseProject_releases_the_lock_when_the_scope_fails(): void
     {
-        $redis = $this->createMock(AnalysisRedisServiceInterface::class);
+        $redis = $this->createMock(AnalysisRedisService::class);
         $redis->method('getProjectWordCounts')->willReturn(['project_segments' => 10, 'num_analyzed' => 10]);
         $redis->method('acquireCompletionLock')->willReturn('completion-token');
         $redis->expects($this->once())->method('releaseCompletionLock')->with(100, 'completion-token');
@@ -334,7 +334,7 @@ class ProjectCompletionServiceUnitTest extends AbstractTest
     #[Test]
     public function tryCloseProject_handles_a_failed_rollback_gracefully(): void
     {
-        $redis = $this->createMock(AnalysisRedisServiceInterface::class);
+        $redis = $this->createMock(AnalysisRedisService::class);
         $redis->method('getProjectWordCounts')->willReturn(['project_segments' => 10, 'num_analyzed' => 10]);
         $redis->method('acquireCompletionLock')->willReturn('completion-token');
         $redis->expects($this->once())->method('releaseCompletionLock')->with(100, 'completion-token');
@@ -342,7 +342,7 @@ class ProjectCompletionServiceUnitTest extends AbstractTest
         // A rollback that fails surfaces out of the scope instead of the original failure. The
         // service used to guard its own rollback call against exactly this; now the double fault
         // arrives as an ordinary throw and the outer catch has to be the one that absorbs it.
-        $repo = $this->createStub(ProjectCompletionRepositoryInterface::class);
+        $repo = $this->createStub(ProjectCompletionRepository::class);
         $repo->method('transaction')
             ->willThrowException(new RuntimeException('No active transaction'));
 
@@ -376,7 +376,7 @@ class ProjectCompletionServiceUnitTest extends AbstractTest
     #[Test]
     public function getProjectSegmentsTranslationSummary_delegates_to_repository(): void
     {
-        $redis = $this->createStub(AnalysisRedisServiceInterface::class);
+        $redis = $this->createStub(AnalysisRedisService::class);
         $expected = [['id_job' => 1, 'eq_wc' => 500]];
 
         $repo = $this->makeRepositoryStub();

@@ -5,18 +5,17 @@ namespace Matecat\Core\Workers\TMAnalysisV2;
 use Exception;
 use Matecat\TestHelpers\AbstractTest;
 use Model\Analysis\Constants\InternalMatchesConstants;
-use Model\DataAccess\Database;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\Stub;
 use ReflectionClass;
 use ReflectionParameter;
 use ReflectionProperty;
 use Utils\ActiveMQ\AMQHandler;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\AnalysisRedisServiceInterface;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\EngineServiceInterface;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\MatchProcessorServiceInterface;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\ProjectCompletionServiceInterface;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\SegmentUpdaterServiceInterface;
+use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\AnalysisRedisService;
+use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\EngineService;
+use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\MatchProcessorService;
+use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\ProjectCompletionService;
+use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\SegmentUpdaterService;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysisWorker;
 use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\Context;
@@ -42,13 +41,13 @@ class TestableTMAnalysisWorker extends TMAnalysisWorker
 }
 
 /**
- * In-memory, stateful fake of AnalysisRedisServiceInterface for behavioral tests that must
+ * In-memory, stateful fake of AnalysisRedisService for behavioral tests that must
  * observe the LIVE analyzed counter surviving (or being reset by) a mid-run re-init. The
  * RedisClientSpy used by AnalysisRedisServiceTest only records calls (it holds no state), so
  * it cannot demonstrate the counter being reset downward. This fake tracks the total, the
  * analyzed counter and a per-(segment,job) dedup set, mirroring the real Redis semantics.
  */
-class StatefulFakeRedisService implements AnalysisRedisServiceInterface
+class StatefulFakeRedisService extends AnalysisRedisService
 {
     /** @var array<int, int> */
     public array $tot = [];
@@ -57,6 +56,11 @@ class StatefulFakeRedisService implements AnalysisRedisServiceInterface
     /** @var array<int, array<string, true>> */
     private array $dedup = [];
     public int $initializeCalls = 0;
+
+    /** Skips the parent constructor: every method is overridden, so no Redis client is needed. */
+    public function __construct()
+    {
+    }
 
     public function reconnect(): void {}
 
@@ -153,20 +157,20 @@ class StatefulFakeRedisService implements AnalysisRedisServiceInterface
 class TMAnalysisWorkerTest extends AbstractTest
 {
     private function buildWorker(
-        ?AnalysisRedisServiceInterface $redis = null,
-        ?SegmentUpdaterServiceInterface $updater = null,
-        ?ProjectCompletionServiceInterface $completion = null,
-        ?EngineServiceInterface $engine = null,
-        ?MatchProcessorServiceInterface $processor = null,
+        ?AnalysisRedisService $redis = null,
+        ?SegmentUpdaterService $updater = null,
+        ?ProjectCompletionService $completion = null,
+        ?EngineService $engine = null,
+        ?MatchProcessorService $processor = null,
     ): TestableTMAnalysisWorker {
         $worker = new TestableTMAnalysisWorker(
             $this->createStub(AMQHandler::class),
             obtainTestDatabase(),
-            $redis ?? $this->createStub(AnalysisRedisServiceInterface::class),
-            $updater ?? $this->createStub(SegmentUpdaterServiceInterface::class),
-            $completion ?? $this->createStub(ProjectCompletionServiceInterface::class),
-            $engine ?? $this->createStub(EngineServiceInterface::class),
-            $processor ?? $this->createStub(MatchProcessorServiceInterface::class),
+            $redis ?? $this->createStub(AnalysisRedisService::class),
+            $updater ?? $this->createStub(SegmentUpdaterService::class),
+            $completion ?? $this->createStub(ProjectCompletionService::class),
+            $engine ?? $this->createStub(EngineService::class),
+            $processor ?? $this->createStub(MatchProcessorService::class),
         );
 
         $worker->setContext(Context::buildFromArray([
@@ -218,7 +222,7 @@ class TMAnalysisWorkerTest extends AbstractTest
         return $element;
     }
 
-    private function stubLockLoserInit(AnalysisRedisServiceInterface&Stub $redis): void
+    private function stubLockLoserInit(AnalysisRedisService&Stub $redis): void
     {
         $redis->method('acquireInitLock')->willReturn(null);
         $redis->method('waitForInitialization')->willReturn(true);
@@ -227,9 +231,9 @@ class TMAnalysisWorkerTest extends AbstractTest
     }
 
     private function stubMatchPipeline(
-        EngineServiceInterface&Stub $engine,
-        MatchProcessorServiceInterface&Stub $processor,
-        AnalysisRedisServiceInterface&Stub $redis,
+        EngineService&Stub $engine,
+        MatchProcessorService&Stub $processor,
+        AnalysisRedisService&Stub $redis,
     ): void {
         $match = ['match' => '75', 'created_by' => 'TM', 'suggestion' => 'Ciao mondo'];
 
@@ -264,11 +268,11 @@ class TMAnalysisWorkerTest extends AbstractTest
     #[Test]
     public function process_happy_path_calls_all_key_services(): void
     {
-        $redis      = $this->createMock(AnalysisRedisServiceInterface::class);
-        $engine     = $this->createMock(EngineServiceInterface::class);
-        $processor  = $this->createMock(MatchProcessorServiceInterface::class);
-        $updater    = $this->createMock(SegmentUpdaterServiceInterface::class);
-        $completion = $this->createMock(ProjectCompletionServiceInterface::class);
+        $redis      = $this->createMock(AnalysisRedisService::class);
+        $engine     = $this->createMock(EngineService::class);
+        $processor  = $this->createMock(MatchProcessorService::class);
+        $updater    = $this->createMock(SegmentUpdaterService::class);
+        $completion = $this->createMock(ProjectCompletionService::class);
 
         $redis->method('acquireInitLock')->willReturn(null);
         $redis->method('waitForInitialization')->willReturn(true);
@@ -307,11 +311,11 @@ class TMAnalysisWorkerTest extends AbstractTest
     #[Test]
     public function process_when_setAnalysisValue_returns_zero_skips_increment_and_close(): void
     {
-        $redis      = $this->createMock(AnalysisRedisServiceInterface::class);
-        $completion = $this->createMock(ProjectCompletionServiceInterface::class);
-        $engine     = $this->createStub(EngineServiceInterface::class);
-        $processor  = $this->createStub(MatchProcessorServiceInterface::class);
-        $updater    = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis      = $this->createMock(AnalysisRedisService::class);
+        $completion = $this->createMock(ProjectCompletionService::class);
+        $engine     = $this->createStub(EngineService::class);
+        $processor  = $this->createStub(MatchProcessorService::class);
+        $updater    = $this->createStub(SegmentUpdaterService::class);
 
         $this->stubLockLoserInit($redis);
         $this->stubMatchPipeline($engine, $processor, $redis);
@@ -334,11 +338,11 @@ class TMAnalysisWorkerTest extends AbstractTest
     #[Test]
     public function process_when_setAnalysisValue_returns_minus_one_still_calls_increment_and_close(): void
     {
-        $redis      = $this->createMock(AnalysisRedisServiceInterface::class);
-        $completion = $this->createMock(ProjectCompletionServiceInterface::class);
-        $engine     = $this->createStub(EngineServiceInterface::class);
-        $processor  = $this->createStub(MatchProcessorServiceInterface::class);
-        $updater    = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis      = $this->createMock(AnalysisRedisService::class);
+        $completion = $this->createMock(ProjectCompletionService::class);
+        $engine     = $this->createStub(EngineService::class);
+        $processor  = $this->createStub(MatchProcessorService::class);
+        $updater    = $this->createStub(SegmentUpdaterService::class);
 
         $this->stubLockLoserInit($redis);
         $this->stubMatchPipeline($engine, $processor, $redis);
@@ -361,11 +365,11 @@ class TMAnalysisWorkerTest extends AbstractTest
     #[Test]
     public function process_when_setAnalysisValue_returns_positive_calls_increment_and_close(): void
     {
-        $redis      = $this->createMock(AnalysisRedisServiceInterface::class);
-        $completion = $this->createMock(ProjectCompletionServiceInterface::class);
-        $engine     = $this->createStub(EngineServiceInterface::class);
-        $processor  = $this->createStub(MatchProcessorServiceInterface::class);
-        $updater    = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis      = $this->createMock(AnalysisRedisService::class);
+        $completion = $this->createMock(ProjectCompletionService::class);
+        $engine     = $this->createStub(EngineService::class);
+        $processor  = $this->createStub(MatchProcessorService::class);
+        $updater    = $this->createStub(SegmentUpdaterService::class);
 
         $this->stubLockLoserInit($redis);
         $this->stubMatchPipeline($engine, $processor, $redis);
@@ -391,11 +395,11 @@ class TMAnalysisWorkerTest extends AbstractTest
         // Winner branch: we acquire the init lock and run doInit(). The summary query
         // returns a rollup with project_segments <= 0 (segment rows not visible yet), so
         // doInit must release the init lock for retry and NEVER persist a zero total.
-        $redis      = $this->createMock(AnalysisRedisServiceInterface::class);
-        $completion = $this->createStub(ProjectCompletionServiceInterface::class);
-        $engine     = $this->createStub(EngineServiceInterface::class);
-        $processor  = $this->createStub(MatchProcessorServiceInterface::class);
-        $updater    = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis      = $this->createMock(AnalysisRedisService::class);
+        $completion = $this->createStub(ProjectCompletionService::class);
+        $engine     = $this->createStub(EngineService::class);
+        $processor  = $this->createStub(MatchProcessorService::class);
+        $updater    = $this->createStub(SegmentUpdaterService::class);
 
         $redis->method('acquireInitLock')->willReturn('init-token');
         $completion->method('getProjectSegmentsTranslationSummary')
@@ -422,11 +426,11 @@ class TMAnalysisWorkerTest extends AbstractTest
         // Winner branch: doInit() acquires the lock then the summary query throws. The
         // failure must be swallowed (segment still analyzed on its own) and the lock
         // released so init can be retried — the exception must NOT escape process().
-        $redis      = $this->createMock(AnalysisRedisServiceInterface::class);
-        $completion = $this->createStub(ProjectCompletionServiceInterface::class);
-        $engine     = $this->createStub(EngineServiceInterface::class);
-        $processor  = $this->createStub(MatchProcessorServiceInterface::class);
-        $updater    = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis      = $this->createMock(AnalysisRedisService::class);
+        $completion = $this->createStub(ProjectCompletionService::class);
+        $engine     = $this->createStub(EngineService::class);
+        $processor  = $this->createStub(MatchProcessorService::class);
+        $updater    = $this->createStub(SegmentUpdaterService::class);
 
         $redis->method('acquireInitLock')->willReturn('init-token');
         $completion->method('getProjectSegmentsTranslationSummary')
@@ -455,11 +459,11 @@ class TMAnalysisWorkerTest extends AbstractTest
         // false (winner abandoned init), so we attempt re-init — but the second
         // acquireInitLock also fails (another loser won it). We log "init not ready" and
         // wait again without throwing.
-        $redis      = $this->createMock(AnalysisRedisServiceInterface::class);
-        $completion = $this->createStub(ProjectCompletionServiceInterface::class);
-        $engine     = $this->createStub(EngineServiceInterface::class);
-        $processor  = $this->createStub(MatchProcessorServiceInterface::class);
-        $updater    = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis      = $this->createMock(AnalysisRedisService::class);
+        $completion = $this->createStub(ProjectCompletionService::class);
+        $engine     = $this->createStub(EngineService::class);
+        $processor  = $this->createStub(MatchProcessorService::class);
+        $updater    = $this->createStub(SegmentUpdaterService::class);
 
         $redis->expects($this->exactly(2))->method('acquireInitLock')->willReturn(null);
         $redis->method('waitForInitialization')->willReturn(false);
@@ -480,8 +484,8 @@ class TMAnalysisWorkerTest extends AbstractTest
     #[Test]
     public function process_with_empty_raw_word_count_throws_EmptyElementException(): void
     {
-        $redis   = $this->createStub(AnalysisRedisServiceInterface::class);
-        $updater = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis   = $this->createStub(AnalysisRedisService::class);
+        $updater = $this->createStub(SegmentUpdaterService::class);
 
         $this->stubLockLoserInit($redis);
         $updater->method('forceSetSegmentAnalyzed')->willReturn(0);
@@ -495,9 +499,9 @@ class TMAnalysisWorkerTest extends AbstractTest
     #[Test]
     public function process_when_init_lock_winner_calls_initializeProjectCounters(): void
     {
-        $redis      = $this->createMock(AnalysisRedisServiceInterface::class);
-        $completion = $this->createStub(ProjectCompletionServiceInterface::class);
-        $updater    = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis      = $this->createMock(AnalysisRedisService::class);
+        $completion = $this->createStub(ProjectCompletionService::class);
+        $updater    = $this->createStub(SegmentUpdaterService::class);
 
         $redis->method('acquireInitLock')->willReturn('init-token');
         $completion->method('getProjectSegmentsTranslationSummary')
@@ -518,8 +522,8 @@ class TMAnalysisWorkerTest extends AbstractTest
     #[Test]
     public function process_when_init_lock_loser_calls_waitForInitialization(): void
     {
-        $redis   = $this->createMock(AnalysisRedisServiceInterface::class);
-        $updater = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis   = $this->createMock(AnalysisRedisService::class);
+        $updater = $this->createStub(SegmentUpdaterService::class);
 
         $redis->method('acquireInitLock')->willReturn(null);
         $redis->method('waitForInitialization')->willReturn(true);
@@ -546,10 +550,10 @@ class TMAnalysisWorkerTest extends AbstractTest
     #[Test]
     public function process_mt_match_with_score_gte_09_gets_ice_mt_band(): void
     {
-        $redis     = $this->createStub(AnalysisRedisServiceInterface::class);
-        $engine    = $this->createStub(EngineServiceInterface::class);
-        $processor = $this->createStub(MatchProcessorServiceInterface::class);
-        $updater   = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis     = $this->createStub(AnalysisRedisService::class);
+        $engine    = $this->createStub(EngineService::class);
+        $processor = $this->createStub(MatchProcessorService::class);
+        $updater   = $this->createStub(SegmentUpdaterService::class);
 
         $this->stubLockLoserInit($redis);
         $redis->method('getWorkingProjects')->willReturn([]);
@@ -582,10 +586,10 @@ class TMAnalysisWorkerTest extends AbstractTest
     #[Test]
     public function process_mt_match_without_mtqe_gets_plain_mt_band(): void
     {
-        $redis     = $this->createStub(AnalysisRedisServiceInterface::class);
-        $engine    = $this->createStub(EngineServiceInterface::class);
-        $processor = $this->createStub(MatchProcessorServiceInterface::class);
-        $updater   = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis     = $this->createStub(AnalysisRedisService::class);
+        $engine    = $this->createStub(EngineService::class);
+        $processor = $this->createStub(MatchProcessorService::class);
+        $updater   = $this->createStub(SegmentUpdaterService::class);
 
         $this->stubLockLoserInit($redis);
         $redis->method('getWorkingProjects')->willReturn([]);
@@ -618,10 +622,10 @@ class TMAnalysisWorkerTest extends AbstractTest
     #[Test]
     public function process_mt_match_score_08_with_mtqe_gets_top_quality_band(): void
     {
-        $redis     = $this->createStub(AnalysisRedisServiceInterface::class);
-        $engine    = $this->createStub(EngineServiceInterface::class);
-        $processor = $this->createStub(MatchProcessorServiceInterface::class);
-        $updater   = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis     = $this->createStub(AnalysisRedisService::class);
+        $engine    = $this->createStub(EngineService::class);
+        $processor = $this->createStub(MatchProcessorService::class);
+        $updater   = $this->createStub(SegmentUpdaterService::class);
 
         $this->stubLockLoserInit($redis);
         $redis->method('getWorkingProjects')->willReturn([]);
@@ -654,10 +658,10 @@ class TMAnalysisWorkerTest extends AbstractTest
     #[Test]
     public function process_mt_match_score_05_with_mtqe_gets_higher_quality_band(): void
     {
-        $redis     = $this->createStub(AnalysisRedisServiceInterface::class);
-        $engine    = $this->createStub(EngineServiceInterface::class);
-        $processor = $this->createStub(MatchProcessorServiceInterface::class);
-        $updater   = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis     = $this->createStub(AnalysisRedisService::class);
+        $engine    = $this->createStub(EngineService::class);
+        $processor = $this->createStub(MatchProcessorService::class);
+        $updater   = $this->createStub(SegmentUpdaterService::class);
 
         $this->stubLockLoserInit($redis);
         $redis->method('getWorkingProjects')->willReturn([]);
@@ -690,10 +694,10 @@ class TMAnalysisWorkerTest extends AbstractTest
     #[Test]
     public function process_mt_match_score_below_05_with_mtqe_gets_standard_quality_band(): void
     {
-        $redis     = $this->createStub(AnalysisRedisServiceInterface::class);
-        $engine    = $this->createStub(EngineServiceInterface::class);
-        $processor = $this->createStub(MatchProcessorServiceInterface::class);
-        $updater   = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis     = $this->createStub(AnalysisRedisService::class);
+        $engine    = $this->createStub(EngineService::class);
+        $processor = $this->createStub(MatchProcessorService::class);
+        $updater   = $this->createStub(SegmentUpdaterService::class);
 
         $this->stubLockLoserInit($redis);
         $redis->method('getWorkingProjects')->willReturn([]);
@@ -728,10 +732,10 @@ class TMAnalysisWorkerTest extends AbstractTest
     #[Test]
     public function process_tm_100_non_ice_public_gets_tm_100_public_band(): void
     {
-        $redis     = $this->createStub(AnalysisRedisServiceInterface::class);
-        $engine    = $this->createStub(EngineServiceInterface::class);
-        $processor = $this->createStub(MatchProcessorServiceInterface::class);
-        $updater   = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis     = $this->createStub(AnalysisRedisService::class);
+        $engine    = $this->createStub(EngineService::class);
+        $processor = $this->createStub(MatchProcessorService::class);
+        $updater   = $this->createStub(SegmentUpdaterService::class);
 
         $this->stubLockLoserInit($redis);
         $redis->method('getWorkingProjects')->willReturn([]);
@@ -765,10 +769,10 @@ class TMAnalysisWorkerTest extends AbstractTest
     #[Test]
     public function process_tm_100_private_with_mtqe_gets_tm_100_mt_qe_band(): void
     {
-        $redis     = $this->createStub(AnalysisRedisServiceInterface::class);
-        $engine    = $this->createStub(EngineServiceInterface::class);
-        $processor = $this->createStub(MatchProcessorServiceInterface::class);
-        $updater   = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis     = $this->createStub(AnalysisRedisService::class);
+        $engine    = $this->createStub(EngineService::class);
+        $processor = $this->createStub(MatchProcessorService::class);
+        $updater   = $this->createStub(SegmentUpdaterService::class);
 
         $this->stubLockLoserInit($redis);
         $redis->method('getWorkingProjects')->willReturn([]);
@@ -801,10 +805,10 @@ class TMAnalysisWorkerTest extends AbstractTest
     #[Test]
     public function process_tm_100_public_with_mtqe_gets_tm_100_public_mt_qe_band(): void
     {
-        $redis     = $this->createStub(AnalysisRedisServiceInterface::class);
-        $engine    = $this->createStub(EngineServiceInterface::class);
-        $processor = $this->createStub(MatchProcessorServiceInterface::class);
-        $updater   = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis     = $this->createStub(AnalysisRedisService::class);
+        $engine    = $this->createStub(EngineService::class);
+        $processor = $this->createStub(MatchProcessorService::class);
+        $updater   = $this->createStub(SegmentUpdaterService::class);
 
         $this->stubLockLoserInit($redis);
         $redis->method('getWorkingProjects')->willReturn([]);
@@ -837,10 +841,10 @@ class TMAnalysisWorkerTest extends AbstractTest
     #[Test]
     public function process_tm_below_50_gets_no_match_band(): void
     {
-        $redis     = $this->createStub(AnalysisRedisServiceInterface::class);
-        $engine    = $this->createStub(EngineServiceInterface::class);
-        $processor = $this->createStub(MatchProcessorServiceInterface::class);
-        $updater   = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis     = $this->createStub(AnalysisRedisService::class);
+        $engine    = $this->createStub(EngineService::class);
+        $processor = $this->createStub(MatchProcessorService::class);
+        $updater   = $this->createStub(SegmentUpdaterService::class);
 
         $this->stubLockLoserInit($redis);
         $redis->method('getWorkingProjects')->willReturn([]);
@@ -873,10 +877,10 @@ class TMAnalysisWorkerTest extends AbstractTest
     #[Test]
     public function process_tm_95_gets_tm_95_99_band(): void
     {
-        $redis     = $this->createStub(AnalysisRedisServiceInterface::class);
-        $engine    = $this->createStub(EngineServiceInterface::class);
-        $processor = $this->createStub(MatchProcessorServiceInterface::class);
-        $updater   = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis     = $this->createStub(AnalysisRedisService::class);
+        $engine    = $this->createStub(EngineService::class);
+        $processor = $this->createStub(MatchProcessorService::class);
+        $updater   = $this->createStub(SegmentUpdaterService::class);
 
         $this->stubLockLoserInit($redis);
         $redis->method('getWorkingProjects')->willReturn([]);
@@ -909,10 +913,10 @@ class TMAnalysisWorkerTest extends AbstractTest
     #[Test]
     public function process_tm_60_gets_tm_50_74_band(): void
     {
-        $redis     = $this->createStub(AnalysisRedisServiceInterface::class);
-        $engine    = $this->createStub(EngineServiceInterface::class);
-        $processor = $this->createStub(MatchProcessorServiceInterface::class);
-        $updater   = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis     = $this->createStub(AnalysisRedisService::class);
+        $engine    = $this->createStub(EngineService::class);
+        $processor = $this->createStub(MatchProcessorService::class);
+        $updater   = $this->createStub(SegmentUpdaterService::class);
 
         $this->stubLockLoserInit($redis);
         $redis->method('getWorkingProjects')->willReturn([]);
@@ -947,10 +951,10 @@ class TMAnalysisWorkerTest extends AbstractTest
     #[Test]
     public function process_picks_first_match_when_all_are_mt_or_below_75(): void
     {
-        $redis     = $this->createStub(AnalysisRedisServiceInterface::class);
-        $engine    = $this->createStub(EngineServiceInterface::class);
-        $processor = $this->createStub(MatchProcessorServiceInterface::class);
-        $updater   = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis     = $this->createStub(AnalysisRedisService::class);
+        $engine    = $this->createStub(EngineService::class);
+        $processor = $this->createStub(MatchProcessorService::class);
+        $updater   = $this->createStub(SegmentUpdaterService::class);
 
         $this->stubLockLoserInit($redis);
         $redis->method('getWorkingProjects')->willReturn([]);
@@ -989,10 +993,10 @@ class TMAnalysisWorkerTest extends AbstractTest
     #[Test]
     public function process_requeue_exception_when_setAnalysisValue_throws(): void
     {
-        $redis     = $this->createStub(AnalysisRedisServiceInterface::class);
-        $engine    = $this->createStub(EngineServiceInterface::class);
-        $processor = $this->createStub(MatchProcessorServiceInterface::class);
-        $updater   = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis     = $this->createStub(AnalysisRedisService::class);
+        $engine    = $this->createStub(EngineService::class);
+        $processor = $this->createStub(MatchProcessorService::class);
+        $updater   = $this->createStub(SegmentUpdaterService::class);
 
         $this->stubLockLoserInit($redis);
         $this->stubMatchPipeline($engine, $processor, $redis);
@@ -1008,10 +1012,10 @@ class TMAnalysisWorkerTest extends AbstractTest
     #[Test]
     public function process_NotSupportedMTException_returns_empty_tm_matches(): void
     {
-        $redis     = $this->createStub(AnalysisRedisServiceInterface::class);
-        $engine    = $this->createStub(EngineServiceInterface::class);
-        $processor = $this->createStub(MatchProcessorServiceInterface::class);
-        $updater   = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis     = $this->createStub(AnalysisRedisService::class);
+        $engine    = $this->createStub(EngineService::class);
+        $processor = $this->createStub(MatchProcessorService::class);
+        $updater   = $this->createStub(SegmentUpdaterService::class);
 
         $this->stubLockLoserInit($redis);
         $redis->method('getWorkingProjects')->willReturn([]);
@@ -1034,10 +1038,10 @@ class TMAnalysisWorkerTest extends AbstractTest
     #[Test]
     public function process_suggestion_source_set_to_mt_when_created_by_contains_mt(): void
     {
-        $redis     = $this->createStub(AnalysisRedisServiceInterface::class);
-        $engine    = $this->createStub(EngineServiceInterface::class);
-        $processor = $this->createStub(MatchProcessorServiceInterface::class);
-        $updater   = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis     = $this->createStub(AnalysisRedisService::class);
+        $engine    = $this->createStub(EngineService::class);
+        $processor = $this->createStub(MatchProcessorService::class);
+        $updater   = $this->createStub(SegmentUpdaterService::class);
 
         $this->stubLockLoserInit($redis);
         $redis->method('getWorkingProjects')->willReturn([]);
@@ -1070,10 +1074,10 @@ class TMAnalysisWorkerTest extends AbstractTest
     #[Test]
     public function process_suggestion_source_set_to_tm_when_created_by_has_no_mt(): void
     {
-        $redis     = $this->createStub(AnalysisRedisServiceInterface::class);
-        $engine    = $this->createStub(EngineServiceInterface::class);
-        $processor = $this->createStub(MatchProcessorServiceInterface::class);
-        $updater   = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis     = $this->createStub(AnalysisRedisService::class);
+        $engine    = $this->createStub(EngineService::class);
+        $processor = $this->createStub(MatchProcessorService::class);
+        $updater   = $this->createStub(SegmentUpdaterService::class);
 
         $this->stubLockLoserInit($redis);
         $redis->method('getWorkingProjects')->willReturn([]);
@@ -1106,9 +1110,9 @@ class TMAnalysisWorkerTest extends AbstractTest
     #[Test]
     public function process_forceSetSegmentAnalyzed_true_increments_and_closes(): void
     {
-        $redis      = $this->createMock(AnalysisRedisServiceInterface::class);
-        $updater    = $this->createStub(SegmentUpdaterServiceInterface::class);
-        $completion = $this->createMock(ProjectCompletionServiceInterface::class);
+        $redis      = $this->createMock(AnalysisRedisService::class);
+        $updater    = $this->createStub(SegmentUpdaterService::class);
+        $completion = $this->createMock(ProjectCompletionService::class);
 
         $this->stubLockLoserInit($redis);
         $redis->method('getWorkingProjects')->willReturn([]);
@@ -1128,9 +1132,9 @@ class TMAnalysisWorkerTest extends AbstractTest
     #[Test]
     public function process_forceSetSegmentAnalyzed_Skipped_increments_and_closes(): void
     {
-        $redis = $this->createMock(AnalysisRedisServiceInterface::class);
-        $updater = $this->createStub(SegmentUpdaterServiceInterface::class);
-        $completion = $this->createMock(ProjectCompletionServiceInterface::class);
+        $redis = $this->createMock(AnalysisRedisService::class);
+        $updater = $this->createStub(SegmentUpdaterService::class);
+        $completion = $this->createMock(ProjectCompletionService::class);
 
         $this->stubLockLoserInit($redis);
         $redis->method('getWorkingProjects')->willReturn([]);
@@ -1150,10 +1154,10 @@ class TMAnalysisWorkerTest extends AbstractTest
     #[Test]
     public function process_decrements_waiting_projects_from_found_pid_onwards(): void
     {
-        $redis     = $this->createStub(AnalysisRedisServiceInterface::class);
-        $engine    = $this->createStub(EngineServiceInterface::class);
-        $processor = $this->createStub(MatchProcessorServiceInterface::class);
-        $updater   = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis     = $this->createStub(AnalysisRedisService::class);
+        $engine    = $this->createStub(EngineService::class);
+        $processor = $this->createStub(MatchProcessorService::class);
+        $updater   = $this->createStub(SegmentUpdaterService::class);
 
         $this->stubLockLoserInit($redis);
 
@@ -1208,10 +1212,10 @@ class TMAnalysisWorkerTest extends AbstractTest
     #[Test]
     public function process_eq_word_count_capped_at_raw_word_count(): void
     {
-        $redis     = $this->createStub(AnalysisRedisServiceInterface::class);
-        $engine    = $this->createStub(EngineServiceInterface::class);
-        $processor = $this->createStub(MatchProcessorServiceInterface::class);
-        $updater   = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis     = $this->createStub(AnalysisRedisService::class);
+        $engine    = $this->createStub(EngineService::class);
+        $processor = $this->createStub(MatchProcessorService::class);
+        $updater   = $this->createStub(SegmentUpdaterService::class);
 
         $this->stubLockLoserInit($redis);
         $redis->method('getWorkingProjects')->willReturn([]);
@@ -1246,10 +1250,10 @@ class TMAnalysisWorkerTest extends AbstractTest
     #[Test]
     public function process_empty_matches_after_sort_throws_EmptyElementException(): void
     {
-        $redis     = $this->createStub(AnalysisRedisServiceInterface::class);
-        $engine    = $this->createStub(EngineServiceInterface::class);
-        $processor = $this->createStub(MatchProcessorServiceInterface::class);
-        $updater   = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis     = $this->createStub(AnalysisRedisService::class);
+        $engine    = $this->createStub(EngineService::class);
+        $processor = $this->createStub(MatchProcessorService::class);
+        $updater   = $this->createStub(SegmentUpdaterService::class);
 
         $this->stubLockLoserInit($redis);
         $redis->method('getWorkingProjects')->willReturn([]);
@@ -1268,8 +1272,8 @@ class TMAnalysisWorkerTest extends AbstractTest
     #[Test]
     public function process_endQueueCallback_when_requeue_exceeds_max(): void
     {
-        $redis   = $this->createStub(AnalysisRedisServiceInterface::class);
-        $updater = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis   = $this->createStub(AnalysisRedisService::class);
+        $updater = $this->createStub(SegmentUpdaterService::class);
 
         $this->stubLockLoserInit($redis);
         $redis->method('getWorkingProjects')->willReturn([]);
@@ -1291,10 +1295,10 @@ class TMAnalysisWorkerTest extends AbstractTest
     #[Test]
     public function process_malformed_payable_rates_json_falls_back_to_empty_array(): void
     {
-        $redis     = $this->createStub(AnalysisRedisServiceInterface::class);
-        $engine    = $this->createStub(EngineServiceInterface::class);
-        $processor = $this->createStub(MatchProcessorServiceInterface::class);
-        $updater   = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis     = $this->createStub(AnalysisRedisService::class);
+        $engine    = $this->createStub(EngineService::class);
+        $processor = $this->createStub(MatchProcessorService::class);
+        $updater   = $this->createStub(SegmentUpdaterService::class);
 
         $this->stubLockLoserInit($redis);
         $redis->method('getWorkingProjects')->willReturn([]);
@@ -1341,9 +1345,9 @@ class TMAnalysisWorkerTest extends AbstractTest
         // in-flight increments and stranding the project below PROJECT_TOT_SEGMENTS (real
         // incident: counter 3036 vs total 3039). The guard skips the re-seed when the total is
         // already present in Redis — and must not even run the expensive summary query.
-        $redis      = $this->createMock(AnalysisRedisServiceInterface::class);
-        $completion = $this->createMock(ProjectCompletionServiceInterface::class);
-        $updater    = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis      = $this->createMock(AnalysisRedisService::class);
+        $completion = $this->createMock(ProjectCompletionService::class);
+        $updater    = $this->createStub(SegmentUpdaterService::class);
 
         // Winner re-acquires the init lock mid-run …
         $redis->method('acquireInitLock')->willReturn('init-token');
@@ -1370,9 +1374,9 @@ class TMAnalysisWorkerTest extends AbstractTest
         // The idempotency guard must NOT break legitimate first-time init (or crashed-winner
         // recovery): when Redis has no total yet, doInit seeds the counters from the
         // DB-derived summary. Proves the guard's early-return does not swallow real inits.
-        $redis      = $this->createMock(AnalysisRedisServiceInterface::class);
-        $completion = $this->createStub(ProjectCompletionServiceInterface::class);
-        $updater    = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $redis      = $this->createMock(AnalysisRedisService::class);
+        $completion = $this->createStub(ProjectCompletionService::class);
+        $updater    = $this->createStub(SegmentUpdaterService::class);
 
         $redis->method('acquireInitLock')->willReturn('init-token');
         // No total present in Redis → this is a genuine first init.
@@ -1406,11 +1410,11 @@ class TMAnalysisWorkerTest extends AbstractTest
         $pid  = 100;
         $fake = new StatefulFakeRedisService();
 
-        $completion = $this->createStub(ProjectCompletionServiceInterface::class);
+        $completion = $this->createStub(ProjectCompletionService::class);
         $completion->method('getProjectSegmentsTranslationSummary')
             ->willReturn([['project_segments' => 3039, 'num_analyzed' => 0]]);
 
-        $updater = $this->createStub(SegmentUpdaterServiceInterface::class);
+        $updater = $this->createStub(SegmentUpdaterService::class);
         $updater->method('forceSetSegmentAnalyzed')->willReturn(0);
 
         // ── Run A: first init (raw_word_count 0 isolates doInit via EmptyElementException) ──

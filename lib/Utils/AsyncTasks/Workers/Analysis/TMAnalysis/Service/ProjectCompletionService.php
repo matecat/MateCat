@@ -8,15 +8,12 @@ use Psr\Log\NullLogger;
 use Random\RandomException;
 use RuntimeException;
 use Throwable;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\AnalysisRedisServiceInterface;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\ProjectCompletionRepositoryInterface;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\ProjectCompletionServiceInterface;
 use Utils\Constants\ProjectStatus;
 
-class ProjectCompletionService implements ProjectCompletionServiceInterface
+class ProjectCompletionService
 {
-    private AnalysisRedisServiceInterface $redisService;
-    private ProjectCompletionRepositoryInterface $repository;
+    private AnalysisRedisService $redisService;
+    private ProjectCompletionRepository $repository;
 
     /**
      * Where the service logs. The worker passes its queue logger, so these lines land in the
@@ -35,16 +32,9 @@ class ProjectCompletionService implements ProjectCompletionServiceInterface
      */
     private int $gateRetrySleepMicros;
 
-    /**
-     * @param AnalysisRedisServiceInterface $redisService
-     * @param ProjectCompletionRepositoryInterface $repository
-     * @param LoggerInterface $logger
-     * @param int $maxGateRetries
-     * @param int $gateRetrySleepMicros
-     */
     public function __construct(
-        AnalysisRedisServiceInterface $redisService,
-        ProjectCompletionRepositoryInterface $repository,
+        AnalysisRedisService $redisService,
+        ProjectCompletionRepository $repository,
         LoggerInterface $logger = new NullLogger(),
         int $maxGateRetries = 6,
         int $gateRetrySleepMicros = 1_000_000,
@@ -57,6 +47,8 @@ class ProjectCompletionService implements ProjectCompletionServiceInterface
     }
 
     /**
+     * Finalize the project when its analysis is complete. Failures after the completion lock is taken are logged, not thrown.
+     *
      * @throws RandomException when no random source is available for the completion lock token
      */
     public function tryCloseProject(int $pid, string $projectPassword, string $queueKey, FeatureSet $featureSet): void
@@ -194,6 +186,8 @@ class ProjectCompletionService implements ProjectCompletionServiceInterface
     }
 
     /**
+     * Returns per-job word count summary with a ROLLUP totals row (last element).
+     *
      * @return array<int, array<string, mixed>>
      * @throws RuntimeException
      */

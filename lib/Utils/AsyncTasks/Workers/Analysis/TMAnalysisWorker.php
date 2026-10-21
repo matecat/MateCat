@@ -17,11 +17,6 @@ use Predis\Response\ServerException as PredisServerException;
 use Random\RandomException;
 use ReflectionException;
 use Utils\ActiveMQ\AMQHandler;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\AnalysisRedisServiceInterface;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\EngineServiceInterface;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\MatchProcessorServiceInterface;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\ProjectCompletionServiceInterface;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\SegmentUpdaterServiceInterface;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\AnalysisRedisService;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\DefaultEngineResolver;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\EngineService;
@@ -45,6 +40,7 @@ use Utils\TaskRunner\Exceptions\NotSupportedMTException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\TmKeyManagement\TmKeyManager;
 use Throwable;
+use TypeError;
 
 class TMAnalysisWorker extends AbstractWorker
 {
@@ -58,11 +54,11 @@ class TMAnalysisWorker extends AbstractWorker
      */
     protected ?array $_matches = null;
 
-    private AnalysisRedisServiceInterface $redisService;
-    private SegmentUpdaterServiceInterface $segmentUpdater;
-    private ProjectCompletionServiceInterface $projectCompletion;
-    private EngineServiceInterface $engineService;
-    private MatchProcessorServiceInterface $matchProcessor;
+    private AnalysisRedisService $redisService;
+    private SegmentUpdaterService $segmentUpdater;
+    private ProjectCompletionService $projectCompletion;
+    private EngineService $engineService;
+    private MatchProcessorService $matchProcessor;
 
     /**
      * @throws ReflectionException
@@ -71,11 +67,11 @@ class TMAnalysisWorker extends AbstractWorker
     public function __construct(
         AMQHandler $queueHandler,
         IDatabase $database,
-        ?AnalysisRedisServiceInterface $redisService = null,
-        ?SegmentUpdaterServiceInterface $segmentUpdater = null,
-        ?ProjectCompletionServiceInterface $projectCompletion = null,
-        ?EngineServiceInterface $engineService = null,
-        ?MatchProcessorServiceInterface $matchProcessor = null,
+        ?AnalysisRedisService $redisService = null,
+        ?SegmentUpdaterService $segmentUpdater = null,
+        ?ProjectCompletionService $projectCompletion = null,
+        ?EngineService $engineService = null,
+        ?MatchProcessorService $matchProcessor = null,
         ?MatecatLogger $logger = null,
     ) {
         parent::__construct($queueHandler, $database, $logger);
@@ -103,6 +99,7 @@ class TMAnalysisWorker extends AbstractWorker
      * @throws ReQueueException
      * @throws EmptyElementException
      * @throws Exception
+     * @throws TypeError
      */
     public function process(AbstractElement $queueElement): void
     {

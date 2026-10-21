@@ -345,7 +345,7 @@ class ConcurrencyRegressionTest extends AbstractTest
     {
         $this->assertTrue(
             true,
-            'Pattern 9 (Executor Predis catch) is N/A for V2 service files — V2 uses injected AnalysisRedisServiceInterface, not Executor. Covered by TMAnalysisWorkerConcurrencyTest::test_executor_catches_predis_connection_exception_before_throwable.'
+            'Pattern 9 (Executor Predis catch) is N/A for V2 service files — V2 uses injected AnalysisRedisService, not Executor. Covered by TMAnalysisWorkerConcurrencyTest::test_executor_catches_predis_connection_exception_before_throwable.'
         );
     }
 
@@ -703,21 +703,6 @@ class ConcurrencyRegressionTest extends AbstractTest
             'use Predis\Response\ServerException as PredisServerException;',
             $source,
             'TMAnalysisWorker must import Predis\Response\ServerException.'
-        );
-    }
-
-    #[Test]
-    public function test_analysis_redis_service_interface_declares_reconnect(): void
-    {
-        $path = realpath(self::projectRoot() . '/lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Interface/AnalysisRedisServiceInterface.php');
-        $this->assertNotFalse($path);
-
-        $source = $this->readSource($path);
-
-        $this->assertStringContainsString(
-            'public function reconnect(): void;',
-            $source,
-            'AnalysisRedisServiceInterface must declare reconnect() for connection reset between retries.'
         );
     }
 

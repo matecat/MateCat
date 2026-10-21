@@ -4,11 +4,7 @@
 namespace Matecat\Core\Workers\TMAnalysisV2;
 
 use Matecat\TestHelpers\AbstractTest;
-use Model\DataAccess\Database;
 use PHPUnit\Framework\Attributes\Test;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\EngineServiceInterface;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\DefaultEngineResolver;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\EngineService;
 
 class EngineServiceTest extends AbstractTest
 {
@@ -29,32 +25,13 @@ class EngineServiceTest extends AbstractTest
     }
 
     #[Test]
-    public function test_service_can_be_instantiated(): void
-    {
-        $service = new EngineService(new DefaultEngineResolver(obtainTestDatabase()), obtainTestDatabase());
-        $this->assertInstanceOf(EngineService::class, $service);
-        $this->assertInstanceOf(EngineServiceInterface::class, $service);
-    }
-
-    #[Test]
-    public function test_implements_engine_service_interface_in_source(): void
-    {
-        $source = $this->readSource($this->engineServicePath());
-        $this->assertStringContainsString(
-            'implements EngineServiceInterface',
-            $source,
-            'EngineService class declaration must implement EngineServiceInterface.'
-        );
-    }
-
-    #[Test]
     public function test_getTMMatches_uses_engine_resolver_for_engine_creation(): void
     {
         $source = $this->readSource($this->engineServicePath());
         $this->assertStringContainsString(
             '$this->engineResolver->getInstance(',
             $source,
-            'EngineService::getTMMatches must use injected EngineResolverInterface for engine creation.'
+            'EngineService::getTMMatches must use injected DefaultEngineResolver for engine creation.'
         );
     }
 
