@@ -4,6 +4,8 @@ import {JobContainer} from './JobContainer'
 import {Checkbox, CHECKBOX_STATE} from '../common/Checkbox'
 import IconDown from '../../../img/icons/IconDown'
 import JobMenu from './JobMenu'
+import useShowMore from '../../hooks/useShowMore'
+import {AnimatedCollapse} from '../common/AnimatedCollapse'
 import Download from '../../../img/icons/Download'
 import CommonUtils from '../../utils/commonUtils'
 import ModalsActions from '../../actions/ModalsActions'
@@ -14,12 +16,24 @@ import Tooltip from '../common/Tooltip'
 import ProjectsStore from '../../stores/ProjectsStore'
 import ManageConstants from '../../constants/ManageConstants'
 
-export const ChunksJobContainer = ({chunks, ...props}) => {
+export const ChunksJobContainer = ({
+  chunks,
+  expanded = false,
+  visibleLimit = 5,
+  striped = false,
+  ...props
+}) => {
   const [showDownloadProgress, setShowDownloadProgress] = useState(false)
 
   const sourceTargetTextRef = useRef()
 
   const job = useMemo(() => chunks[0], [chunks])
+
+  const {
+    visibleItems: visibleChunks,
+    extraItems: extraChunks,
+    hasMore: hasMoreChunks,
+  } = useShowMore(chunks, visibleLimit)
 
   const {project} = props
 
@@ -220,7 +234,7 @@ export const ChunksJobContainer = ({chunks, ...props}) => {
         jobTMXUrl={jobTMXUrl}
         exportXliffUrl={exportXliffUrl}
         originalUrl={originalUrl}
-        getDownloadLabel={getDownloadLabel()}
+        downloadLabel={getDownloadLabel()}
         openMergeModalFn={openMergeModal}
         archiveJobFn={archiveJob}
         activateJobFn={activateJob}
@@ -232,7 +246,15 @@ export const ChunksJobContainer = ({chunks, ...props}) => {
   }
 
   return (
-    <div className="chunks-job-container">
+    <div
+      className={[
+        'chunks-job-container',
+        'job-container-background',
+        striped && 'job-container-background--striped',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <div className="chunks-job-container-line">
         <div className="chunks-job-container-line-sx">
           <Checkbox
@@ -256,7 +278,7 @@ export const ChunksJobContainer = ({chunks, ...props}) => {
         <div className="chunks-job-container-line-dx">{getJobMenu()}</div>
       </div>
       <div className="chunks-job-container-list">
-        {chunks.map((job, index) => (
+        {visibleChunks.map((job, index) => (
           <JobContainer
             key={`${job.get('id')}-${index + 1}`}
             job={job}
@@ -264,6 +286,18 @@ export const ChunksJobContainer = ({chunks, ...props}) => {
             {...props}
           />
         ))}
+        {hasMoreChunks && (
+          <AnimatedCollapse expanded={expanded}>
+            {extraChunks.map((job, index) => (
+              <JobContainer
+                key={`${job.get('id')}-${index + visibleChunks.length + 1}`}
+                job={job}
+                index={index + visibleChunks.length + 1}
+                {...props}
+              />
+            ))}
+          </AnimatedCollapse>
+        )}
       </div>
     </div>
   )
@@ -271,4 +305,7 @@ export const ChunksJobContainer = ({chunks, ...props}) => {
 
 ChunksJobContainer.propTypes = {
   chunks: PropTypes.array.isRequired,
+  expanded: PropTypes.bool,
+  visibleLimit: PropTypes.number,
+  striped: PropTypes.bool,
 }

@@ -99,7 +99,7 @@ export const TeamDropdown = ({isManage = true, showModals = true}) => {
               className={`${team.id === selectedTeam?.id ? 'active' : ''}`}
               onClick={() => onChangeTeam(team)}
             >
-              {team.name}
+              <span>{team.name}</span>
               {team.type !== 'personal' && (
                 <div
                   className="container-icon-settings"

@@ -167,7 +167,7 @@ ul.suggestion-item.graysmall:last-child {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.1s linear;
-  position: absolute;
+  position: absolute !important;
   top: 14px;
   right: 20px;
 }

@@ -27,20 +27,27 @@ const simulateContentResize = (height) => {
   })
 }
 
-// Simulates the browser finishing the #header-bars-wrapper height-collapse animation,
-// which is what actually unmounts the panel that just closed (see SubHeaderContainer.js).
-// Built by hand rather than via fireEvent.transitionEnd: jsdom has no native
-// TransitionEvent, so testing-library falls back to a plain Event whose constructor
-// silently drops unrecognized init keys like propertyName.
-const dispatchTransitionEnd = (propertyName) => {
+// Simulates the browser finishing a slot's own height-collapse animation, which is what
+// actually unmounts that slot's content once it closes (see useAnimatedSlot in
+// SubHeaderContainer.js). Each slot (the panel group, and independently the bulk-selection
+// bar) animates on its own, so the event must target the right slot — defaults to the panel
+// group slot since that's what most tests exercise. Built by hand rather than via
+// fireEvent.transitionEnd: jsdom has no native TransitionEvent, so testing-library falls
+// back to a plain Event whose constructor silently drops unrecognized init keys like
+// propertyName.
+const dispatchTransitionEnd = (
+  propertyName,
+  target = screen.getByTestId('panel-slot'),
+) => {
   act(() => {
     const event = new Event('transitionend', {bubbles: true})
     event.propertyName = propertyName
-    // eslint-disable-next-line testing-library/no-node-access
-    document.getElementById('header-bars-wrapper').dispatchEvent(event)
+    target.dispatchEvent(event)
   })
 }
-const endCloseTransition = () => dispatchTransitionEnd('height')
+const endPanelCloseTransition = () => dispatchTransitionEnd('height')
+const endSelectionCloseTransition = () =>
+  dispatchTransitionEnd('height', screen.getByTestId('selection-slot'))
 
 jest.mock('./search/Search', () => ({active}) => (
   <div data-testid="search" data-active={String(!!active)} />
@@ -51,9 +58,22 @@ jest.mock('./segment_filter/SegmentsFilter', () => ({active}) => (
 jest.mock('./QAComponent', () => ({active}) => (
   <div data-testid="qa-component" data-active={String(!!active)} />
 ))
-jest.mock('./bulk_selection_bar/BulkSelectionBar', () => ({active}) => (
-  <div data-testid="bulk-selection-bar" data-active={String(!!active)} />
-))
+// Captures onActiveChange so tests can simulate the real BulkSelectionBar
+// reporting a bulk selection, the same way Search/SegmentsFilter/QaComponent
+// are driven here via the store instead of their own real internals.
+let bulkSelectionOnActiveChange
+jest.mock('./bulk_selection_bar/BulkSelectionBar', () => ({
+  active,
+  onActiveChange,
+}) => {
+  bulkSelectionOnActiveChange = onActiveChange
+  return <div data-testid="bulk-selection-bar" data-active={String(!!active)} />
+})
+
+const setBulkSelection = (hasSelection) =>
+  act(() => {
+    bulkSelectionOnActiveChange(hasSelection)
+  })
 
 beforeEach(() => {
   global.config = {isReview: false, searchable_statuses: []}
@@ -64,9 +84,12 @@ test('always renders search, qa and the bulk selection bar', () => {
   expect(screen.getByTestId('search')).toBeInTheDocument()
   expect(screen.getByTestId('qa-component')).toBeInTheDocument()
   expect(screen.getByTestId('bulk-selection-bar')).toBeInTheDocument()
+  // Not active by default: it only mounts once a real bulk selection is
+  // reported via onActiveChange, same as Search/SegmentsFilter/QaComponent
+  // don't open themselves without a store event.
   expect(screen.getByTestId('bulk-selection-bar')).toHaveAttribute(
     'data-active',
-    'true',
+    'false',
   )
 })
 
@@ -98,7 +121,7 @@ test('shows the requested container and hides the others when told to via the st
     'true',
   )
   // search stays mounted until the close-transition confirms the panel collapsed
-  endCloseTransition()
+  endPanelCloseTransition()
   expect(screen.getByTestId('search')).toHaveAttribute('data-active', 'false')
 
   act(() => {
@@ -121,7 +144,7 @@ test('toggles a container open and closed via the store', () => {
   act(() => {
     CatToolStore.emit(CatToolConstants.TOGGLE_CONTAINER, 'search')
   })
-  endCloseTransition()
+  endPanelCloseTransition()
   expect(screen.getByTestId('search')).toHaveAttribute('data-active', 'false')
 })
 
@@ -136,7 +159,7 @@ test('closes every container when the subheader is closed', () => {
   act(() => {
     CatToolStore.emit(CatToolConstants.CLOSE_SUBHEADER)
   })
-  endCloseTransition()
+  endPanelCloseTransition()
   expect(screen.getByTestId('search')).toHaveAttribute('data-active', 'false')
   expect(screen.getByTestId('qa-component')).toHaveAttribute(
     'data-active',
@@ -164,7 +187,7 @@ describe('close-transition unmount timing', () => {
     // height-collapse animation has anything left to animate
     expect(screen.getByTestId('search')).toHaveAttribute('data-active', 'true')
 
-    endCloseTransition()
+    endPanelCloseTransition()
     expect(screen.getByTestId('search')).toHaveAttribute('data-active', 'false')
   })
 
@@ -220,8 +243,114 @@ describe('close-transition unmount timing', () => {
       'true',
     )
 
-    endCloseTransition()
+    endPanelCloseTransition()
     expect(screen.getByTestId('qa-component')).toHaveAttribute(
+      'data-active',
+      'false',
+    )
+  })
+})
+
+describe('the bulk selection bar is independent of the other panels', () => {
+  test('mounts and opens the wrapper on its own, with no other panel open', () => {
+    render(<SubHeaderContainer filtersEnabled={true} />)
+
+    setBulkSelection(true)
+
+    expect(screen.getByTestId('bulk-selection-bar')).toHaveAttribute(
+      'data-active',
+      'true',
+    )
+    expect(screen.getByTestId('search')).toHaveAttribute(
+      'data-active',
+      'false',
+    )
+  })
+
+  test('stays open alongside a panel that is opened afterwards', () => {
+    render(<SubHeaderContainer filtersEnabled={true} />)
+
+    setBulkSelection(true)
+    act(() => {
+      CatToolStore.emit(CatToolConstants.SHOW_CONTAINER, 'search')
+    })
+
+    expect(screen.getByTestId('bulk-selection-bar')).toHaveAttribute(
+      'data-active',
+      'true',
+    )
+    expect(screen.getByTestId('search')).toHaveAttribute('data-active', 'true')
+  })
+
+  test('closing every panel via the store does not close the bulk selection bar', () => {
+    render(<SubHeaderContainer filtersEnabled={true} />)
+
+    setBulkSelection(true)
+    act(() => {
+      CatToolStore.emit(CatToolConstants.SHOW_CONTAINER, 'search')
+    })
+    act(() => {
+      CatToolStore.emit(CatToolConstants.CLOSE_SUBHEADER)
+    })
+    endPanelCloseTransition()
+
+    expect(screen.getByTestId('search')).toHaveAttribute(
+      'data-active',
+      'false',
+    )
+    expect(screen.getByTestId('bulk-selection-bar')).toHaveAttribute(
+      'data-active',
+      'true',
+    )
+  })
+
+  // Regression: with one shared slot for both the panel group and the bulk bar, closing
+  // the panel group while the bulk bar stayed open never changed that shared slot's total
+  // height (the bulk bar's content alone kept it non-zero), so no height transition ever
+  // fired to tell the panel group its own close had finished — the panel stayed stuck open.
+  test('closing the panel still works while the bulk selection bar stays open', () => {
+    render(<SubHeaderContainer filtersEnabled={true} />)
+
+    act(() => {
+      CatToolStore.emit(CatToolConstants.SHOW_CONTAINER, 'search')
+    })
+    setBulkSelection(true)
+    expect(screen.getByTestId('search')).toHaveAttribute('data-active', 'true')
+
+    act(() => {
+      CatToolStore.emit(CatToolConstants.TOGGLE_CONTAINER, 'search')
+    })
+    endPanelCloseTransition()
+
+    expect(screen.getByTestId('search')).toHaveAttribute(
+      'data-active',
+      'false',
+    )
+    expect(screen.getByTestId('bulk-selection-bar')).toHaveAttribute(
+      'data-active',
+      'true',
+    )
+  })
+
+  test('stays mounted until its own close transition ends, then unmounts', () => {
+    render(<SubHeaderContainer filtersEnabled={true} />)
+
+    setBulkSelection(true)
+    expect(screen.getByTestId('bulk-selection-bar')).toHaveAttribute(
+      'data-active',
+      'true',
+    )
+
+    setBulkSelection(false)
+    // same deferred-unmount contract as the other panels: still mounted right
+    // after being told to close, until the height-collapse transition ends
+    expect(screen.getByTestId('bulk-selection-bar')).toHaveAttribute(
+      'data-active',
+      'true',
+    )
+
+    endSelectionCloseTransition()
+    expect(screen.getByTestId('bulk-selection-bar')).toHaveAttribute(
       'data-active',
       'false',
     )
@@ -276,8 +405,7 @@ describe('wrapper height tracks the active panel directly, not a class toggle', 
       value,
     })
   }
-  // eslint-disable-next-line testing-library/no-node-access
-  const getWrapper = () => document.getElementById('header-bars-wrapper')
+  const getPanelSlot = () => screen.getByTestId('panel-slot')
 
   afterEach(() => {
     delete window.HTMLElement.prototype.scrollHeight
@@ -291,7 +419,7 @@ describe('wrapper height tracks the active panel directly, not a class toggle', 
       CatToolStore.emit(CatToolConstants.SHOW_CONTAINER, 'search')
     })
 
-    expect(getWrapper()).toHaveStyle({height: '180px'})
+    expect(getPanelSlot()).toHaveStyle({height: '180px'})
   })
 
   test('transitions straight to the new height when switching panels, since the wrapper never closes', () => {
@@ -300,13 +428,13 @@ describe('wrapper height tracks the active panel directly, not a class toggle', 
     act(() => {
       CatToolStore.emit(CatToolConstants.SHOW_CONTAINER, 'search')
     })
-    expect(getWrapper()).toHaveStyle({height: '180px'})
+    expect(getPanelSlot()).toHaveStyle({height: '180px'})
 
     setScrollHeight(260)
     act(() => {
       CatToolStore.emit(CatToolConstants.SHOW_CONTAINER, 'segmentFilter')
     })
-    expect(getWrapper()).toHaveStyle({height: '260px'})
+    expect(getPanelSlot()).toHaveStyle({height: '260px'})
   })
 
   test('collapses back to 0px once everything closes', () => {
@@ -319,7 +447,7 @@ describe('wrapper height tracks the active panel directly, not a class toggle', 
     act(() => {
       CatToolStore.emit(CatToolConstants.CLOSE_SUBHEADER)
     })
-    expect(getWrapper()).toHaveStyle({height: '0px'})
+    expect(getPanelSlot()).toHaveStyle({height: '0px'})
   })
 
   // Regression: qaComponent used to sit outside this measured/animated wrapper entirely —
@@ -333,7 +461,7 @@ describe('wrapper height tracks the active panel directly, not a class toggle', 
       CatToolStore.emit(CatToolConstants.SHOW_CONTAINER, 'qaComponent')
     })
 
-    expect(getWrapper()).toHaveStyle({height: '220px'})
+    expect(getPanelSlot()).toHaveStyle({height: '220px'})
   })
 })
 
@@ -348,8 +476,7 @@ describe('wrapper overflow unclips once the open transition settles', () => {
       value,
     })
   }
-  // eslint-disable-next-line testing-library/no-node-access
-  const getWrapper = () => document.getElementById('header-bars-wrapper')
+  const getPanelSlot = () => screen.getByTestId('panel-slot')
 
   afterEach(() => {
     delete window.HTMLElement.prototype.scrollHeight
@@ -363,7 +490,7 @@ describe('wrapper overflow unclips once the open transition settles', () => {
       CatToolStore.emit(CatToolConstants.SHOW_CONTAINER, 'search')
     })
 
-    expect(getWrapper()).toHaveStyle({overflow: 'hidden'})
+    expect(getPanelSlot()).toHaveStyle({overflow: 'hidden'})
   })
 
   test('switches to overflow visible once the open transition finishes', () => {
@@ -375,7 +502,7 @@ describe('wrapper overflow unclips once the open transition settles', () => {
 
     dispatchTransitionEnd('height') // the browser confirming the open transition finished
 
-    expect(getWrapper()).toHaveStyle({overflow: 'visible'})
+    expect(getPanelSlot()).toHaveStyle({overflow: 'visible'})
   })
 
   test('clips again once it starts closing', () => {
@@ -385,12 +512,12 @@ describe('wrapper overflow unclips once the open transition settles', () => {
       CatToolStore.emit(CatToolConstants.SHOW_CONTAINER, 'search')
     })
     dispatchTransitionEnd('height')
-    expect(getWrapper()).toHaveStyle({overflow: 'visible'})
+    expect(getPanelSlot()).toHaveStyle({overflow: 'visible'})
 
     act(() => {
       CatToolStore.emit(CatToolConstants.CLOSE_SUBHEADER)
     })
-    expect(getWrapper()).toHaveStyle({overflow: 'hidden'})
+    expect(getPanelSlot()).toHaveStyle({overflow: 'hidden'})
   })
 
   // Regression: isOpen never goes false while switching directly between two panels, so
@@ -404,16 +531,16 @@ describe('wrapper overflow unclips once the open transition settles', () => {
       CatToolStore.emit(CatToolConstants.SHOW_CONTAINER, 'search')
     })
     dispatchTransitionEnd('height')
-    expect(getWrapper()).toHaveStyle({overflow: 'visible'})
+    expect(getPanelSlot()).toHaveStyle({overflow: 'visible'})
 
     setScrollHeight(260)
     act(() => {
       CatToolStore.emit(CatToolConstants.SHOW_CONTAINER, 'segmentFilter')
     })
-    expect(getWrapper()).toHaveStyle({overflow: 'hidden'})
+    expect(getPanelSlot()).toHaveStyle({overflow: 'hidden'})
 
     dispatchTransitionEnd('height')
-    expect(getWrapper()).toHaveStyle({overflow: 'visible'})
+    expect(getPanelSlot()).toHaveStyle({overflow: 'visible'})
   })
 
   // Regression: the same mounted panel's content quietly growing (e.g. a search-results
@@ -428,11 +555,11 @@ describe('wrapper overflow unclips once the open transition settles', () => {
       CatToolStore.emit(CatToolConstants.SHOW_CONTAINER, 'search')
     })
     dispatchTransitionEnd('height')
-    expect(getWrapper()).toHaveStyle({overflow: 'visible'})
+    expect(getPanelSlot()).toHaveStyle({overflow: 'visible'})
 
     simulateContentResize(240)
 
-    expect(getWrapper()).toHaveStyle({overflow: 'visible'})
-    expect(getWrapper()).toHaveStyle({height: '180px'}) // unchanged: scrollHeight, not stubbed
+    expect(getPanelSlot()).toHaveStyle({overflow: 'visible'})
+    expect(getPanelSlot()).toHaveStyle({height: '180px'}) // unchanged: scrollHeight, not stubbed
   })
 })
