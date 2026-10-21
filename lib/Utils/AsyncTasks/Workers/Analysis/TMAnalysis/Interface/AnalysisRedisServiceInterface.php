@@ -2,6 +2,8 @@
 
 namespace Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface;
 
+use Random\RandomException;
+
 interface AnalysisRedisServiceInterface
 {
     /**
@@ -12,15 +14,20 @@ interface AnalysisRedisServiceInterface
     public function reconnect(): void;
 
     /**
+     * Take the project's init lock, so only one worker initializes its counters.
+     *
+     * @return string|null the token to pass to releaseInitLock(), or null while another worker holds the lock
+     * @throws RandomException when no random source is available for the token
      * @phpstan-impure
      */
-    public function acquireInitLock(int $pid): bool;
+    public function acquireInitLock(int $pid): ?string;
 
     /**
      * Release the init semaphore eagerly so the next worker can re-attempt init
      * without waiting out the lock TTL. Called on failed/incomplete doInit().
+     * Does nothing when the lock expired and another worker took it: that lock is not ours.
      */
-    public function releaseInitLock(int $pid): void;
+    public function releaseInitLock(int $pid, string $token): void;
 
     /**
      * Atomically initialize all project counters in a single MULTI/EXEC transaction.
@@ -55,9 +62,20 @@ interface AnalysisRedisServiceInterface
 
     public function removeProjectFromQueue(string $queueKey, int $pid): void;
 
-    public function acquireCompletionLock(int $pid): bool;
+    /**
+     * Take the project's completion lock, so only one worker finalizes it.
+     *
+     * @return string|null the token to pass to releaseCompletionLock(), or null while another worker holds the lock
+     * @throws RandomException when no random source is available for the token
+     * @phpstan-impure
+     */
+    public function acquireCompletionLock(int $pid): ?string;
 
-    public function releaseCompletionLock(int $pid): void;
+    /**
+     * Release the completion lock so the next worker can retry finalizing without waiting out the TTL.
+     * Does nothing when the lock expired and another worker took it: that lock is not ours.
+     */
+    public function releaseCompletionLock(int $pid, string $token): void;
 
     /**
      * @return array{project_segments: mixed, num_analyzed: mixed, eq_wc: float, st_wc: float}

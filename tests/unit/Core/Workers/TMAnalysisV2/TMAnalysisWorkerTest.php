@@ -60,14 +60,14 @@ class StatefulFakeRedisService implements AnalysisRedisServiceInterface
 
     public function reconnect(): void {}
 
-    public function acquireInitLock(int $pid): bool
+    public function acquireInitLock(int $pid): ?string
     {
         // Always grant the lock: models the 30s INIT_LOCK TTL having expired mid-run, so a
         // second worker re-acquires it and drives doInit() again.
-        return true;
+        return 'init-token';
     }
 
-    public function releaseInitLock(int $pid): void {}
+    public function releaseInitLock(int $pid, string $token): void {}
 
     public function initializeProjectCounters(int $pid, int $projectSegments, int $numAnalyzed): void
     {
@@ -129,12 +129,12 @@ class StatefulFakeRedisService implements AnalysisRedisServiceInterface
 
     public function removeProjectFromQueue(string $queueKey, int $pid): void {}
 
-    public function acquireCompletionLock(int $pid): bool
+    public function acquireCompletionLock(int $pid): ?string
     {
-        return false;
+        return null;
     }
 
-    public function releaseCompletionLock(int $pid): void {}
+    public function releaseCompletionLock(int $pid, string $token): void {}
 
     /**
      * @return array{project_segments: mixed, num_analyzed: mixed, eq_wc: float, st_wc: float}
@@ -220,7 +220,7 @@ class TMAnalysisWorkerTest extends AbstractTest
 
     private function stubLockLoserInit(AnalysisRedisServiceInterface&Stub $redis): void
     {
-        $redis->method('acquireInitLock')->willReturn(false);
+        $redis->method('acquireInitLock')->willReturn(null);
         $redis->method('waitForInitialization')->willReturn(true);
         $redis->method('getProjectTotalSegments')->willReturn(50);
         $redis->method('getProjectAnalyzedCount')->willReturn(10);
@@ -270,7 +270,7 @@ class TMAnalysisWorkerTest extends AbstractTest
         $updater    = $this->createMock(SegmentUpdaterServiceInterface::class);
         $completion = $this->createMock(ProjectCompletionServiceInterface::class);
 
-        $redis->method('acquireInitLock')->willReturn(false);
+        $redis->method('acquireInitLock')->willReturn(null);
         $redis->method('waitForInitialization')->willReturn(true);
         $redis->method('getProjectTotalSegments')->willReturn(50);
         $redis->method('getProjectAnalyzedCount')->willReturn(10);
@@ -397,13 +397,13 @@ class TMAnalysisWorkerTest extends AbstractTest
         $processor  = $this->createStub(MatchProcessorServiceInterface::class);
         $updater    = $this->createStub(SegmentUpdaterServiceInterface::class);
 
-        $redis->method('acquireInitLock')->willReturn(true);
+        $redis->method('acquireInitLock')->willReturn('init-token');
         $completion->method('getProjectSegmentsTranslationSummary')
             ->willReturn([['project_segments' => 0, 'num_analyzed' => 0]]);
         $this->stubMatchPipeline($engine, $processor, $redis);
         $updater->method('setAnalysisValue')->willReturn(1);
 
-        $redis->expects($this->once())->method('releaseInitLock')->with(100);
+        $redis->expects($this->once())->method('releaseInitLock')->with(100, 'init-token');
         $redis->expects($this->never())->method('initializeProjectCounters');
 
         $worker = $this->buildWorker(
@@ -428,13 +428,13 @@ class TMAnalysisWorkerTest extends AbstractTest
         $processor  = $this->createStub(MatchProcessorServiceInterface::class);
         $updater    = $this->createStub(SegmentUpdaterServiceInterface::class);
 
-        $redis->method('acquireInitLock')->willReturn(true);
+        $redis->method('acquireInitLock')->willReturn('init-token');
         $completion->method('getProjectSegmentsTranslationSummary')
             ->willThrowException(new \RuntimeException('summary query failed'));
         $this->stubMatchPipeline($engine, $processor, $redis);
         $updater->method('setAnalysisValue')->willReturn(1);
 
-        $redis->expects($this->once())->method('releaseInitLock')->with(100);
+        $redis->expects($this->once())->method('releaseInitLock')->with(100, 'init-token');
         $redis->expects($this->never())->method('initializeProjectCounters');
 
         $worker = $this->buildWorker(
@@ -461,7 +461,7 @@ class TMAnalysisWorkerTest extends AbstractTest
         $processor  = $this->createStub(MatchProcessorServiceInterface::class);
         $updater    = $this->createStub(SegmentUpdaterServiceInterface::class);
 
-        $redis->expects($this->exactly(2))->method('acquireInitLock')->willReturn(false);
+        $redis->expects($this->exactly(2))->method('acquireInitLock')->willReturn(null);
         $redis->method('waitForInitialization')->willReturn(false);
         $this->stubMatchPipeline($engine, $processor, $redis);
         $updater->method('setAnalysisValue')->willReturn(1);
@@ -499,7 +499,7 @@ class TMAnalysisWorkerTest extends AbstractTest
         $completion = $this->createStub(ProjectCompletionServiceInterface::class);
         $updater    = $this->createStub(SegmentUpdaterServiceInterface::class);
 
-        $redis->method('acquireInitLock')->willReturn(true);
+        $redis->method('acquireInitLock')->willReturn('init-token');
         $completion->method('getProjectSegmentsTranslationSummary')
             ->willReturn([['project_segments' => 10, 'num_analyzed' => 0]]);
 
@@ -521,7 +521,7 @@ class TMAnalysisWorkerTest extends AbstractTest
         $redis   = $this->createMock(AnalysisRedisServiceInterface::class);
         $updater = $this->createStub(SegmentUpdaterServiceInterface::class);
 
-        $redis->method('acquireInitLock')->willReturn(false);
+        $redis->method('acquireInitLock')->willReturn(null);
         $redis->method('waitForInitialization')->willReturn(true);
         $redis->method('getProjectTotalSegments')->willReturn(50);
         $redis->method('getProjectAnalyzedCount')->willReturn(10);
@@ -1346,7 +1346,7 @@ class TMAnalysisWorkerTest extends AbstractTest
         $updater    = $this->createStub(SegmentUpdaterServiceInterface::class);
 
         // Winner re-acquires the init lock mid-run …
-        $redis->method('acquireInitLock')->willReturn(true);
+        $redis->method('acquireInitLock')->willReturn('init-token');
         // … but the project counters already exist (this run initialized them earlier).
         $redis->method('getProjectTotalSegments')->willReturn(3039);
 
@@ -1374,7 +1374,7 @@ class TMAnalysisWorkerTest extends AbstractTest
         $completion = $this->createStub(ProjectCompletionServiceInterface::class);
         $updater    = $this->createStub(SegmentUpdaterServiceInterface::class);
 
-        $redis->method('acquireInitLock')->willReturn(true);
+        $redis->method('acquireInitLock')->willReturn('init-token');
         // No total present in Redis → this is a genuine first init.
         $redis->method('getProjectTotalSegments')->willReturn(null);
         $completion->method('getProjectSegmentsTranslationSummary')

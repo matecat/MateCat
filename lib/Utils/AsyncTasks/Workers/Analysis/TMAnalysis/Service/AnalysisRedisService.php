@@ -6,10 +6,12 @@ use Exception;
 use Predis\Client;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Random\RandomException;
 use ReflectionException;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\Analysis\RedisKeys;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\AnalysisRedisServiceInterface;
+use Utils\Redis\RedisLock;
 
 class AnalysisRedisService implements AnalysisRedisServiceInterface
 {
@@ -35,6 +37,9 @@ class AnalysisRedisService implements AnalysisRedisServiceInterface
 
     private Client $redis;
 
+    /** Takes and releases the init and completion locks, on the same client as $redis. */
+    private RedisLock $lock;
+
     /**
      * Where the service logs. The worker passes its queue logger, so these lines land in the
      * analysis-queue log. The default NullLogger drops them (unit tests).
@@ -51,6 +56,7 @@ class AnalysisRedisService implements AnalysisRedisServiceInterface
     public function __construct(AMQHandler $queueHandler, LoggerInterface $logger = new NullLogger())
     {
         $this->redis = $queueHandler->getRedisClient();
+        $this->lock = new RedisLock($this->redis);
         $this->logger = $logger;
     }
 
@@ -59,14 +65,12 @@ class AnalysisRedisService implements AnalysisRedisServiceInterface
         $this->redis->disconnect();
     }
 
-    public function acquireInitLock(int $pid): bool
+    /**
+     * @throws RandomException
+     */
+    public function acquireInitLock(int $pid): ?string
     {
-        return (bool)$this->redis->set(
-            RedisKeys::PROJECT_INIT_SEMAPHORE . $pid,
-            1,
-            'EX', self::INIT_LOCK_TTL_SECONDS,
-            'NX'
-        );
+        return $this->lock->acquire(RedisKeys::PROJECT_INIT_SEMAPHORE . $pid, self::INIT_LOCK_TTL_SECONDS);
     }
 
     /**
@@ -74,9 +78,9 @@ class AnalysisRedisService implements AnalysisRedisServiceInterface
      * segment count not yet available, so the next worker for this PID can re-attempt
      * initialization immediately instead of waiting out the TTL.
      */
-    public function releaseInitLock(int $pid): void
+    public function releaseInitLock(int $pid, string $token): void
     {
-        $this->redis->del(RedisKeys::PROJECT_INIT_SEMAPHORE . $pid);
+        $this->lock->release(RedisKeys::PROJECT_INIT_SEMAPHORE . $pid, $token);
     }
 
     /**
@@ -238,19 +242,17 @@ class AnalysisRedisService implements AnalysisRedisServiceInterface
         $this->redis->lrem($queueKey, 0, (string)$pid);
     }
 
-    public function acquireCompletionLock(int $pid): bool
+    /**
+     * @throws RandomException
+     */
+    public function acquireCompletionLock(int $pid): ?string
     {
-        return (bool)$this->redis->set(
-            RedisKeys::PROJECT_ENDING_SEMAPHORE . $pid,
-            1,
-            'EX', self::COMPLETION_LOCK_TTL_SECONDS,
-            'NX'
-        );
+        return $this->lock->acquire(RedisKeys::PROJECT_ENDING_SEMAPHORE . $pid, self::COMPLETION_LOCK_TTL_SECONDS);
     }
 
-    public function releaseCompletionLock(int $pid): void
+    public function releaseCompletionLock(int $pid, string $token): void
     {
-        $this->redis->del(RedisKeys::PROJECT_ENDING_SEMAPHORE . $pid);
+        $this->lock->release(RedisKeys::PROJECT_ENDING_SEMAPHORE . $pid, $token);
     }
 
     /**

@@ -115,7 +115,7 @@ class ProjectCompletionServiceTest extends AbstractTest
         $this->assertNotFalse($scopePos, 'Expected the finalization transaction scope in tryCloseProject.');
 
         // The commit happens where the closure returns, so the anchor is the line that closes it.
-        $scopeEndPos = strpos($source, "\n                });", $scopePos);
+        $scopeEndPos = strpos($source, "\n            });", $scopePos);
         $this->assertNotFalse($scopeEndPos, 'Expected the finalization scope to be closed.');
 
         $removePos = strpos($source, 'removeProjectFromQueue(', $methodPos);
@@ -232,7 +232,7 @@ class ProjectCompletionServiceTest extends AbstractTest
             ->willReturn(['project_segments' => 5, 'num_analyzed' => 5]);
 
         $redisService->method('acquireCompletionLock')
-            ->willReturn(false);
+            ->willReturn(null);
 
         $redisService->expects($this->never())
             ->method('removeProjectFromQueue');
@@ -267,7 +267,7 @@ class ProjectCompletionServiceTest extends AbstractTest
             'eq_wc'            => 10.0,
             'st_wc'            => 8.0,
         ]);
-        $redisService->method('acquireCompletionLock')->willReturn(true);
+        $redisService->method('acquireCompletionLock')->willReturn('completion-token');
 
         $repository = $this->createStub(ProjectCompletionRepositoryInterface::class);
         $repository->method('transaction')->willReturnCallback(static fn(callable $work) => $work());

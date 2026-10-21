@@ -14,6 +14,7 @@ use Model\Projects\ProjectDao;
 use Model\WordCount\CounterModel;
 use Predis\Connection\ConnectionException as PredisConnectionException;
 use Predis\Response\ServerException as PredisServerException;
+use Random\RandomException;
 use ReflectionException;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\AnalysisRedisServiceInterface;
@@ -316,6 +317,9 @@ class TMAnalysisWorker extends AbstractWorker
         );
     }
 
+    /**
+     * @throws RandomException when no random source is available for the init lock token
+     */
     private function initializeTMAnalysis(QueueElement $queueElement): void
     {
         $params = $queueElement->params;
@@ -323,8 +327,9 @@ class TMAnalysisWorker extends AbstractWorker
         $jid = $params->id_job;
         $pid = (int)$params->pid;
 
-        if ($this->redisService->acquireInitLock($pid)) {
-            $this->doInit($pid);
+        $initLockToken = $this->redisService->acquireInitLock($pid);
+        if ($initLockToken !== null) {
+            $this->doInit($pid, $initLockToken);
         } else {
             $ready = $this->redisService->waitForInitialization($pid);
             if (!$ready) {
@@ -332,8 +337,9 @@ class TMAnalysisWorker extends AbstractWorker
                 // init semaphore is gone (failed doInit released it, or a crash let its TTL
                 // expire) with no counters written. Try to become the initializer ourselves.
                 $this->logger->debug("--- (Worker $this->_workerPid) : init not ready for PID $pid, attempting re-init");
-                if ($this->redisService->acquireInitLock($pid)) {
-                    $this->doInit($pid);
+                $initLockToken = $this->redisService->acquireInitLock($pid);
+                if ($initLockToken !== null) {
+                    $this->doInit($pid, $initLockToken);
                 } else {
                     // Another loser beat us to re-init. Wait again.
                     $this->redisService->waitForInitialization($pid);
@@ -348,7 +354,7 @@ class TMAnalysisWorker extends AbstractWorker
         $this->logger->debug("--- (Worker $this->_workerPid) : fetched data for segment $sid-$jid. Project ID is $pid");
     }
 
-    private function doInit(int $pid): void
+    private function doInit(int $pid, string $initLockToken): void
     {
         // Idempotency guard. A second doInit for the same run is reached when the 30s
         // INIT_LOCK TTL expires mid-analysis (run longer than the TTL) and another worker
@@ -375,7 +381,7 @@ class TMAnalysisWorker extends AbstractWorker
             // suppresses any re-init. Release the lock so the next segment retries init.
             if ($projectSegments <= 0) {
                 $this->logger->debug("--- (Worker $this->_workerPid) : segment count for PID $pid not available yet (got $projectSegments). Releasing init lock for retry.");
-                $this->redisService->releaseInitLock($pid);
+                $this->redisService->releaseInitLock($pid, $initLockToken);
 
                 return;
             }
@@ -390,7 +396,7 @@ class TMAnalysisWorker extends AbstractWorker
             // segment is analyzed on its own and must not be nacked just because project
             // init failed — a later segment will initialize the counters. Completion
             // correctness stays gated by the DB-authoritative check in tryCloseProject.
-            $this->redisService->releaseInitLock($pid);
+            $this->redisService->releaseInitLock($pid, $initLockToken);
             $this->logger->debug("--- (Worker $this->_workerPid) : doInit failed for PID $pid: {$e->getMessage()}. Init lock released for retry.");
         }
     }
@@ -498,7 +504,7 @@ class TMAnalysisWorker extends AbstractWorker
      *    logged and swallowed so it never blocks tryCloseProject.
      *
      * 3. tryCloseProject — ALWAYS RUNS after increment succeeds. Has its own
-     *    internal catch-all (never throws). Idempotent via completion lock.
+     *    internal catch-all around the close itself. Idempotent via completion lock.
      *
      * These side effects run AFTER the DB commit precisely because the analyzed-count
      * increment must never be lost or replayed against an already-DONE segment (which
@@ -559,7 +565,7 @@ class TMAnalysisWorker extends AbstractWorker
             );
         }
 
-        // 3. Always attempt project completion (has internal catch-all, never throws)
+        // 3. Always attempt project completion (has internal catch-all around the close itself)
         $this->projectCompletion->tryCloseProject(
             $pid,
             $projectPassword,
