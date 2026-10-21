@@ -175,3 +175,12 @@ test('Exact variant only is checked when dialect strict is on', () => {
   expect(screen.getByTestId('variant-matching-exact')).toBeChecked()
   expect(screen.getByTestId('variant-matching-all')).not.toBeChecked()
 })
+
+// Any aria-label renders as a hover tooltip through the global
+// [aria-label]::after rule, so the group is named by its heading instead
+test('Variant matching radios are named by their heading, not an aria-label', () => {
+  renderAdvancedSettings()
+
+  const group = screen.getByRole('radiogroup', {name: 'Variant matching'})
+  expect(group).not.toHaveAttribute('aria-label')
+})
