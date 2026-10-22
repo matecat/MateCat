@@ -1,4 +1,5 @@
 import {saveAs} from 'file-saver'
+import {getFilenameFromContentDisposition} from '../../utils/contentDisposition'
 // import {Base64} from 'js-base64'
 
 /**
@@ -21,10 +22,10 @@ export const downloadFile = async ({
     },
   )
   if (!response.ok) return Promise.reject(response)
-  const header = response.headers.get('Content-Disposition')
-  const parts = header.split(';')
-  let filename = parts[1].split('=')[1]
-  filename = filename.replace(/"/g, '')
+  const filename = getFilenameFromContentDisposition(
+    response.headers.get('Content-Disposition'),
+    'download',
+  )
   const blob = await response.blob()
   saveAs(blob, filename)
   return Promise.resolve()

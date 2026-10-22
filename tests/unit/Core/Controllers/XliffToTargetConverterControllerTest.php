@@ -106,6 +106,32 @@ class XliffToTargetConverterControllerTest extends AbstractTest
         $this->assertStringNotContainsString('"evil"', $disposition);
     }
 
+    /**
+     * A name outside ASCII reaches the client whole through `filename*`, with an ASCII copy in `filename`.
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function convertSendsANonAsciiDownloadFilenameEncoded(): void
+    {
+        $path = $this->writeTempXliff('<xliff>dummy</xliff>');
+        $filters = $this->makeFiltersStub([
+            'successful' => true,
+            'fileName' => 'спасибо.docx',
+            'document_content' => 'BINARY-CONTENT',
+        ]);
+
+        $headers = [];
+        $controller = $this->makeControllerCapturingHeaders($path, $filters, $headers);
+
+        $controller->convert();
+
+        $this->assertSame(
+            "attachment; filename=\"_______.docx\"; filename*=UTF-8''" . rawurlencode('спасибо.docx'),
+            $headers['Content-Disposition'] ?? ''
+        );
+    }
+
     /** @throws ReflectionException */
     #[Test]
     public function convertReturnsErrorMessageWhenConversionFails(): void
