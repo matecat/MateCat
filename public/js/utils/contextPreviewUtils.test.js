@@ -1338,6 +1338,90 @@ describe('stripSegmentTags — &nbsp; normalisation', () => {
   })
 })
 
+// ─── stripSegmentTags — visible placeholders ─────────────────────────────────
+
+const ph = (ctype, original, id = 'mtc_1') =>
+  `<ph id="${id}" ctype="${ctype}" equiv-text="base64:${btoa(original)}"/>`
+
+describe('stripSegmentTags — visible placeholders', () => {
+  it('strips every placeholder when keepPlaceholders is not set', () => {
+    expect(stripSegmentTags(`Hello ${ph('x-twig', '{{name}}')}!`)).toBe(
+      'Hello !',
+    )
+  })
+
+  it.each([
+    ['x-twig', '{{name}}'],
+    ['x-ruby-on-rails', '%{count}'],
+    ['x-snails', '##USER##'],
+    ['x-curly-brackets', '{0}'],
+    ['x-objective-c-ns-string', '%@'],
+    ['x-percentages', '%%name%%'],
+    ['x-sprintf', '%s'],
+    ['x-square-sprintf', '[%s:name]'],
+    ['x-percent-variable', '%name%'],
+    ['x-smart-count', '||||'],
+    ['x-double-square-brackets', '[[name]]'],
+    ['x-dollar-curly-brackets', '${name}'],
+  ])('keeps a %s placeholder as its original text', (ctype, original) => {
+    expect(
+      stripSegmentTags(`Hello ${ph(ctype, original)} there`, {
+        keepPlaceholders: true,
+      }),
+    ).toBe(`Hello ${original} there`)
+  })
+
+  it('decodes an x-xml placeholder to its markup as text', () => {
+    expect(
+      stripSegmentTags(`Line${ph('x-xml', '&lt;br/&gt;')}end`, {
+        keepPlaceholders: true,
+      }),
+    ).toBe('Line<br/>end')
+  })
+
+  it.each(['x-html', 'x-original_ph'])(
+    'still strips an unlisted %s placeholder',
+    (ctype) => {
+      expect(
+        stripSegmentTags(`Hello ${ph(ctype, '<b>')}there`, {
+          keepPlaceholders: true,
+        }),
+      ).toBe('Hello there')
+    },
+  )
+
+  it('keeps placeholders while stripping the surrounding g and x tags', () => {
+    expect(
+      stripSegmentTags(
+        `<g id="1">Hi ${ph('x-twig', '{{a}}', 'mtc_1')}</g><x id="2"/> and ${ph('x-sprintf', '%d', 'mtc_2')}`,
+        {keepPlaceholders: true},
+      ),
+    ).toBe('Hi {{a}} and %d')
+  })
+})
+
+describe('updateNodeTranslation — visible placeholders', () => {
+  it('writes the placeholder text into the preview node', () => {
+    document.body.innerHTML = '<p data-context-sids="1">Hello name</p>'
+    const p = document.body.querySelector('p')
+    const status = updateNodeTranslation(p, [
+      {sid: 1, target: `Ciao ${ph('x-twig', '{{name}}')}`},
+    ])
+    expect(status).toBe('ok')
+    expect(p).toHaveTextContent(/^Ciao \{\{name\}\}$/)
+  })
+
+  it('reports a mismatch when duplicates differ only by a placeholder', () => {
+    document.body.innerHTML = '<p data-context-sids="1,2">Hello</p>'
+    const p = document.body.querySelector('p')
+    const status = updateNodeTranslation(p, [
+      {sid: 1, internal_id: 'a', target: `Ciao ${ph('x-twig', '{{a}}')}`},
+      {sid: 2, internal_id: 'b', target: `Ciao ${ph('x-twig', '{{b}}')}`},
+    ])
+    expect(status).toBe('mismatch')
+  })
+})
+
 // ─── tagSegments — segment source ending with &nbsp; ─────────────────────────
 
 describe('tagSegments — segment source ending with &nbsp;', () => {
