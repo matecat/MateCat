@@ -448,12 +448,20 @@
     }
     &:hover {
       &:after {
-        content: '\00d7';
-        color: red;
+        content: '×';
+        color: #788190;
+        font-weight: bold;
         position: absolute;
-        font-size: variables.$font-size-base;
-        margin-left: 5px;
-        margin-top: -18px;
+        font-size: 18px;
+        margin-top: -14px;
+        background-color: white;
+        width: 18px;
+        height: 18px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #d7d8db;
       }
     }
   }
