@@ -2,6 +2,7 @@ import {
   classifyCompressibleTag,
   hasCompressibleTags,
   createTagNumberer,
+  getGEquivText,
 } from './compressibleTagUtils'
 
 const open1 =
@@ -107,5 +108,122 @@ describe('createTagNumberer', () => {
     const n = createTagNumberer()
     expect(n(dOpen, 5).index).toBe(5)
     expect(n(open1).index).toBe(6)
+  })
+})
+
+// g/x tags with equiv-text (XLIFF 1.2). base64 payloads:
+//   WyMkZHA0XQ==                       -> [#$dp4]
+//   e3sjJmd0OyBlbWFpbC1zdWJqZWN0fX0=   -> {{#&gt; email-subject}}
+const gEquiv = '<g id="1" equiv-text="base64:WyMkZHA0XQ==">'
+const gEquiv2 = '<g id="2" equiv-text="base64:WyMkZHA0XQ==">'
+const gPlain = '<g id="3">'
+const gSelfClosing = '<g id="4" equiv-text="base64:WyMkZHA0XQ=="/>'
+const gClose = '</g>'
+const xEquiv =
+  '<ph id="mtc_1" ctype="x-original_x" x-orig="AAA" equiv-text="base64:e3sjJmd0OyBlbWFpbC1zdWJqZWN0fX0="/>'
+const xNoEquiv = '<ph id="mtc_2" ctype="x-original_x" x-orig="AAA"/>'
+
+describe('getGEquivText', () => {
+  test('decodes the equiv-text of an opening g tag', () => {
+    expect(getGEquivText(gEquiv)).toBe('[#$dp4]')
+  })
+
+  test('null for a g without equiv-text, a self-closing g and a close', () => {
+    expect(getGEquivText(gPlain)).toBeNull()
+    expect(getGEquivText(gSelfClosing)).toBeNull()
+    expect(getGEquivText(gClose)).toBeNull()
+    expect(getGEquivText(undefined)).toBeNull()
+  })
+})
+
+describe('classifyCompressibleTag - g and x tags', () => {
+  test('an opening g with equiv-text is a g open', () => {
+    expect(classifyCompressibleTag(gEquiv)).toMatchObject({
+      kind: 'g',
+      role: 'open',
+      id: '1',
+    })
+  })
+
+  test('an x-original_x ph with equiv-text is a single x tag', () => {
+    expect(classifyCompressibleTag(xEquiv)).toMatchObject({
+      kind: 'x',
+      role: 'single',
+    })
+  })
+
+  test('pc tags report the pc kind', () => {
+    expect(classifyCompressibleTag(open1).kind).toBe('pc')
+  })
+
+  test('plain g, self-closing g, </g> and x without equiv-text are not compressible', () => {
+    expect(classifyCompressibleTag(gPlain)).toBeNull()
+    expect(classifyCompressibleTag(gSelfClosing)).toBeNull()
+    expect(classifyCompressibleTag(gClose)).toBeNull()
+    expect(classifyCompressibleTag(xNoEquiv)).toBeNull()
+  })
+})
+
+describe('hasCompressibleTags - g and x tags', () => {
+  test('true for a g or an x carrying equiv-text', () => {
+    expect(hasCompressibleTags(`a ${gEquiv}b${gClose}`)).toBe(true)
+    expect(hasCompressibleTags(`a ${xEquiv} b`)).toBe(true)
+  })
+
+  test('false for g/x tags without equiv-text', () => {
+    expect(hasCompressibleTags(`${gPlain}b${gClose}`)).toBe(false)
+    expect(hasCompressibleTags(gSelfClosing)).toBe(false)
+    expect(hasCompressibleTags(xNoEquiv)).toBe(false)
+  })
+})
+
+describe('createTagNumberer - g and x tags', () => {
+  test('a g pair shares one number; its </g> is the close', () => {
+    const n = createTagNumberer()
+    expect(n(gEquiv)).toEqual({index: 0, role: 'open'})
+    expect(n(gClose)).toEqual({index: 0, role: 'close'})
+  })
+
+  test('an x tag takes a number of its own with no partner', () => {
+    const n = createTagNumberer()
+    expect(n(xEquiv)).toEqual({index: 0, role: 'single'})
+    expect(n(xEquiv)).toEqual({index: 1, role: 'single'})
+  })
+
+  test('a plain g nested in an equiv-text g does not steal its </g>', () => {
+    const n = createTagNumberer()
+    expect(n(gEquiv)).toEqual({index: 0, role: 'open'})
+    expect(n(gPlain)).toBeNull()
+    expect(n(gClose)).toBeNull() // closes the plain g
+    expect(n(gClose)).toEqual({index: 0, role: 'close'})
+  })
+
+  test('an equiv-text g nested in a plain g keeps its own close', () => {
+    const n = createTagNumberer()
+    expect(n(gPlain)).toBeNull()
+    expect(n(gEquiv)).toEqual({index: 0, role: 'open'})
+    expect(n(gClose)).toEqual({index: 0, role: 'close'})
+    expect(n(gClose)).toBeNull()
+  })
+
+  test('pc, g and x share one counter in document order', () => {
+    const n = createTagNumberer()
+    expect(n(gEquiv).index).toBe(0)
+    expect(n(open1).index).toBe(1)
+    expect(n(close1).index).toBe(1)
+    expect(n(gClose).index).toBe(0)
+    expect(n(xEquiv).index).toBe(2)
+    expect(n(gEquiv2).index).toBe(3)
+  })
+
+  test('an orphan </g> is not numbered', () => {
+    expect(createTagNumberer()(gClose)).toBeNull()
+  })
+
+  test('an inherited g index is honoured and keeps the counter monotonic', () => {
+    const n = createTagNumberer()
+    expect(n(gEquiv, 4)).toEqual({index: 4, role: 'open'})
+    expect(n(gClose)).toEqual({index: 4, role: 'close'})
+    expect(n(xEquiv).index).toBe(5)
   })
 })

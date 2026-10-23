@@ -4,7 +4,8 @@ import {
   createTagNumberer,
 } from '../compressibleTagUtils'
 
-const isPcTag = (tag) => !!classifyCompressibleTag(tag?.data?.encodedText)
+const isPcTag = (tag) =>
+  classifyCompressibleTag(tag?.data?.encodedText)?.kind === 'pc'
 
 // pc (compressible) tags can't be matched by raw content/id like other tags:
 // every closing pc tag encodes to the same generic markup (XLIFF's `</pc>` has

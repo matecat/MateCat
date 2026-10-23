@@ -32,13 +32,67 @@ const restoreTempTags = (tags, text) =>
   })
 import {isUndefined} from 'lodash'
 import matchTagStructure from './matchTag'
-import {createTagNumberer} from './compressibleTagUtils'
+import {createTagNumberer, getGEquivText} from './compressibleTagUtils'
+
+// The signatures whose matches can be compressible (see compressibleTagUtils).
+const NUMBERED_TAG_KEYS = ['ph', 'g', 'gCl']
+
+// transformTagsToHtml replaces one signature at a time, so a single numberer fed
+// from its callbacks would number every ph before any g. Number them here in
+// document order instead, and queue each signature's results in that order for
+// its own replace to consume.
+const numberTagsInDocumentOrder = (text) => {
+  const found = []
+  NUMBERED_TAG_KEYS.forEach((key) => {
+    const {regex} = tagSignatures[key]
+    const globalRegex = new RegExp(
+      regex.source,
+      regex.flags.includes('g') ? regex.flags : regex.flags + 'g',
+    )
+    let match
+    while ((match = globalRegex.exec(text)) !== null) {
+      found.push({key, offset: match.index, encodedText: match[0]})
+    }
+  })
+  found.sort((a, b) => a.offset - b.offset)
+  const numberTag = createTagNumberer()
+  const queues = Object.fromEntries(NUMBERED_TAG_KEYS.map((key) => [key, []]))
+  found.forEach(({key, encodedText}) =>
+    queues[key].push(numberTag(encodedText)),
+  )
+  return queues
+}
+
+// A closing tag shows only its number (no content); open and single tags show
+// their number followed by their content. Every numbered tag takes the ph style,
+// so a numbered g looks like a pc tag rather than a g.
+const numberedTagToHtml = (isRtl, {index, role}, tagText) => {
+  const {style, styleRTL} = tagSignatures.ph
+  const styleClass = isRtl && styleRTL ? styleRTL : style
+  const pairedClass =
+    role === 'open' || role === 'close' ? ' tag-paired-' + role : ''
+  const openSpan =
+    '<span contenteditable="false" class="tag small ' +
+    styleClass +
+    ' tag-numbered' +
+    pairedClass +
+    '">' +
+    '<span class="index-counter">' +
+    (index + 1) +
+    '</span>'
+  if (role === 'close') return openSpan + '</span>'
+  return openSpan + '<span data-text="true">' + tagText + '</span></span>'
+}
+
+// Forza conversione angolari in &lt o &gt [XLIFF 2.0] Tag senza dataref
+const escapeAngleBrackets = (text) =>
+  text.replace(/</g, '&lt').replace(/>/g, '&gt')
 
 export const transformTagsToHtml = (text, isRtl = 0) => {
   isRtl = !!isRtl
   if (text) {
-    const numberPc = createTagNumberer()
     try {
+      const numbers = numberTagsInDocumentOrder(text)
       for (let key in tagSignatures) {
         const {
           placeholderRegex,
@@ -57,39 +111,20 @@ export const transformTagsToHtml = (text, isRtl = 0) => {
           )
           text = text.replace(globalRegex, (match, text) => {
             let tagText = decodeNeeded
-              ? Base64.decode(text).replace(/</g, '&lt').replace(/>/g, '&gt') // Forza conversione angolari in &lt o &gt [XLIFF 2.0] Tag senza dataref
+              ? escapeAngleBrackets(Base64.decode(text))
               : selfClosing
                 ? text
                 : match
-            if (type === 'ph') {
-              // Only ph tags that carry an XLIFF pc tag are numbered/compressible.
-              // Open and close of a pair share the same number; tag-paired-{role}
-              // drives the open/close styling. Other ph tags render plain.
-              const pc = numberPc(match)
-              if (!pc) {
-                return (
-                  '<span contenteditable="false" class="tag small ' +
-                  (isRtl && styleRTL ? styleRTL : style) +
-                  '">' +
-                  tagText +
-                  '</span>'
-                )
-              }
-              const openSpan =
-                '<span contenteditable="false" class="tag small ' +
-                (isRtl && styleRTL ? styleRTL : style) +
-                ' tag-paired-' +
-                pc.role +
-                '">' +
-                '<span class="index-counter">' +
-                (pc.index + 1) +
-                '</span>'
-              // A closing pc tag shows only its number (no equiv-text content).
-              if (pc.role === 'close') {
-                return openSpan + '</span>'
-              }
-              return (
-                openSpan + '<span data-text="true">' + tagText + '</span></span>'
+            // Only compressible tags are numbered; a plain <g> keeps its raw
+            // markup here and gets its id from matchTag below.
+            const numbered = numbers[key]?.shift()
+            if (numbered) {
+              return numberedTagToHtml(
+                isRtl,
+                numbered,
+                type === 'g'
+                  ? escapeAngleBrackets(getGEquivText(match))
+                  : tagText,
               )
             }
             return (
@@ -104,6 +139,14 @@ export const transformTagsToHtml = (text, isRtl = 0) => {
           let globalRegex = new RegExp(regex)
           text = text.replace(globalRegex, (match) => {
             let tagText = placeholder ? placeholder : match
+            const numbered = numbers[key]?.shift()
+            if (numbered) {
+              return numberedTagToHtml(
+                isRtl,
+                numbered,
+                tagText,
+              )
+            }
             return (
               '<span contenteditable="false" class="tag small ' +
               (isRtl && styleRTL ? styleRTL : style) +
@@ -257,13 +300,18 @@ export const transformTagsToLexiqaText = (text) => {
       const offsetStart = data.originalOffset - decodeShrink - difference
       const offsetEnd = offsetStart + data.encodedText.length
 
+      // Must match the text the tag shows in the editor, or transformLexiqaPoints
+      // maps the warnings back to the wrong offsets: a <g> and its </g> show the
+      // <g>'s equiv-text when it has one, otherwise its id.
       const placeholderText = isToReplaceForLexiqa(data.name)
         ? lexiqaText
         : decodeNeeded
           ? data.decodedText
-          : data.id !== ''
-            ? data.id
-            : data.placeholder
+          : data.name === 'g' || data.name === 'gCl'
+            ? data.placeholder
+            : data.id !== ''
+              ? data.id
+              : data.placeholder
 
       const shouldIgnoreAngleBrackets = convertToLexiqaIgnoreAnglesBrackets
 

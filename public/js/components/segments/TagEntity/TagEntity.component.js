@@ -23,15 +23,22 @@ const selectCorrectStyle = (
 ) => {
   const {segmentOpened} = getUpdatedSegmentInfo()
   const {
-    data: {id: entityId, placeholder: entityPlaceholder, name: entityName},
+    data: {
+      id: entityId,
+      placeholder: entityPlaceholder,
+      name: entityName,
+      index,
+    },
   } = contentState.getEntity(entityKey)
 
-  // Basic style accordin to language direction
+  // Basic style accordin to language direction. Every compressible (numbered)
+  // tag looks like a pc tag, so a numbered g takes the ph style too.
+  const styleName = index >= 0 ? 'ph' : entityName
   const baseStyle =
-    tagSignatures[entityName] &&
-    (isRTL && tagSignatures[entityName].styleRTL
-      ? tagSignatures[entityName].styleRTL
-      : tagSignatures[entityName].style)
+    tagSignatures[styleName] &&
+    (isRTL && tagSignatures[styleName].styleRTL
+      ? tagSignatures[styleName].styleRTL
+      : tagSignatures[styleName].style)
 
   // Check if tag is in an active segment
   const tagInactive = !segmentOpened ? 'tag-inactive' : ''
@@ -68,7 +75,7 @@ export const highlightOnWarnings = ({
   // is computed client-side by tag identity/numbering instead (see
   // checkForMissingTag.js) and is exact, since its entries are the source's
   // own tag objects.
-  if (classifyCompressibleTag(encodedText)) {
+  if (classifyCompressibleTag(encodedText)?.kind === 'pc') {
     if (isTarget) return ''
     const isMissingInTarget = (missingTagsInTarget || []).some(
       (tag) => tag?.data?.encodedText === encodedText,
@@ -142,22 +149,25 @@ const markSearch = (text, searchParams, {start, end}) => {
   return text
 }
 
-const getChildrenContent = (
-  index,
-  entityName,
-  tagRole,
-  {tagsCompressed, children},
-) => {
-  const isPhTag = entityName === 'ph'
+// `tag-numbered` scopes the compressed styling; `tag-paired-open|close` shapes
+// the two halves of a pair. A single (x) tag has no partner, so no paired class.
+const getTagRoleClass = (isNumbered, tagRole) => {
+  if (!isNumbered) return ''
+  const paired =
+    tagRole === 'open' || tagRole === 'close' ? ` tag-paired-${tagRole}` : ''
+  return ` tag-numbered${paired}`
+}
 
-  if (isPhTag && index >= 0) {
-    // A closing pc tag always shows only its number (never the equiv-text /
-    // closing content). An opening tag shows its content unless compressed.
-    const isPcClose = tagRole === 'close'
+const getChildrenContent = (index, tagRole, {tagsCompressed, children}) => {
+  if (index >= 0) {
+    // A closing tag always shows only its number (never the equiv-text /
+    // closing content). An opening or single tag shows its content unless
+    // compressed.
+    const isClose = tagRole === 'close'
     return (
       <>
         <span className="index-counter">{index + 1}</span>
-        {!tagsCompressed && !isPcClose && children}
+        {!tagsCompressed && !isClose && children}
       </>
     )
   }
@@ -506,25 +516,20 @@ const TagEntity = ({
     entityKey === state.entityKey ? tagStyle : selectCorrectStyle(props)
   const {openSplit} = getUpdatedSegmentInfo()
   const {
-    data: {
-      id: entityId,
-      placeholder: entityPlaceholder,
-      index,
-      name: entityName,
-      tagRole,
-    },
+    data: {id: entityId, placeholder: entityPlaceholder, index, tagRole},
   } = contentState.getEntity(entityKey)
   const decoratedText = Array.isArray(children)
     ? children[0].props.text
     : children.props.decoratedText
 
-  const isCompressedPh = entityName === 'ph' && tagsCompressed && index >= 0
-  const tagRoleClass =
-    entityName === 'ph' && tagRole ? ` tag-paired-${tagRole}` : ''
-  // A closing pc tag shows only its number, so it never needs a content tooltip.
-  const isPcClose = entityName === 'ph' && tagRole === 'close'
+  // Only compressible tags carry an index (see compressibleTagUtils).
+  const isNumbered = index >= 0
+  const isCompressed = tagsCompressed && isNumbered
+  const tagRoleClass = getTagRoleClass(isNumbered, tagRole)
+  // A closing tag shows only its number, so it never needs a content tooltip.
+  const isClose = isNumbered && tagRole === 'close'
   const showTooltip =
-    ((shouldTooltipOnHover && tooltipAvailable) || isCompressedPh) && !isPcClose
+    ((shouldTooltipOnHover && tooltipAvailable) || isCompressed) && !isClose
 
   return (
     <Tooltip
@@ -541,7 +546,7 @@ const TagEntity = ({
         <span
           ref={tagRef}
           className={`tag ${style}${focused ? ' tag-focused' : ''}${
-            isCompressedPh ? ' tag-compressed' : ''
+            isCompressed ? ' tag-compressed' : ''
           }${tagRoleClass} ${tagWarningStyle}`}
           data-offset-key={offsetkey}
           unselectable="on"
@@ -566,13 +571,13 @@ const TagEntity = ({
             markSearch(decoratedText, searchParams, props)}
           {searchParams.active ? (
             <span style={{display: 'none'}}>
-              {getChildrenContent(index, entityName, tagRole, {
+              {getChildrenContent(index, tagRole, {
                 tagsCompressed,
                 children,
               })}
             </span>
           ) : (
-            getChildrenContent(index, entityName, tagRole, {
+            getChildrenContent(index, tagRole, {
               tagsCompressed,
               children,
             })

@@ -29,14 +29,17 @@ export const TagEntityLite = ({
 
   const getStyle = () => {
     const {
-      data: {name: entityName},
+      data: {name: entityName, index},
     } = contentState.getEntity(entityKey)
 
+    // Every compressible (numbered) tag looks like a pc tag, so a numbered g
+    // takes the ph style too.
+    const styleName = index >= 0 ? 'ph' : entityName
     const baseStyle =
-      tagSignatures[entityName] &&
-      (isRTL && tagSignatures[entityName].styleRTL
-        ? tagSignatures[entityName].styleRTL
-        : tagSignatures[entityName].style)
+      tagSignatures[styleName] &&
+      (isRTL && tagSignatures[styleName].styleRTL
+        ? tagSignatures[styleName].styleRTL
+        : tagSignatures[styleName].style)
 
     return baseStyle
   }
@@ -48,18 +51,23 @@ export const TagEntityLite = ({
   } = contentState.getEntity(entityKey)
 
   const isPhTag = entityName === 'ph'
-  const isCompressedPh = isPhTag && tagsCompressed && index >= 0
-  const tagRoleClass = isPhTag && tagRole ? ` tag-paired-${tagRole}` : ''
+  // Only compressible tags carry an index (see compressibleTagUtils).
+  const isNumbered = index >= 0
+  const isCompressed = isNumbered && tagsCompressed
+  const isPaired = isNumbered && (tagRole === 'open' || tagRole === 'close')
+  const tagRoleClass = isNumbered
+    ? ` tag-numbered${isPaired ? ` tag-paired-${tagRole}` : ''}`
+    : ''
 
-  const isPcClose = isPhTag && tagRole === 'close'
+  const isClose = isNumbered && tagRole === 'close'
 
   const getChildrenContent = () => {
-    if (isPhTag && index >= 0) {
-      // A closing pc tag always shows only its number.
+    if (isNumbered) {
+      // A closing tag always shows only its number.
       return (
         <>
           <span className="index-counter">{index + 1}</span>
-          {!tagsCompressed && !isPcClose && (
+          {!tagsCompressed && !isClose && (
             <span className="tag-text-lite">{children}</span>
           )}
         </>
@@ -73,7 +81,7 @@ export const TagEntityLite = ({
       <span
         ref={tagRef}
         className={`tag ${style}${
-          isCompressedPh ? ' tag-compressed' : ''
+          isCompressed ? ' tag-compressed' : ''
         }${tagRoleClass}`}
         data-offset-key={offsetkey}
         unselectable="on"
@@ -84,7 +92,7 @@ export const TagEntityLite = ({
     </span>
   )
 
-  if (isPhTag && placeholder && !isPcClose) {
+  if ((isPhTag || isNumbered) && placeholder && !isClose) {
     return (
       <Tooltip
         stylePointerElement={{display: 'inline-block', position: 'relative'}}

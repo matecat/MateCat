@@ -482,12 +482,11 @@
 }
 
 // Body-level toggle for HTML-rendered (closed) segments
-// Scoped to pc-carrying ph tags ONLY. Targeting every .tag-ph would also hide
-// the Draft.js-rendered text (span[data-text='true']) of normal/semantic ph tags
-// in the open editor, making them vanish when compaction is on.
+// Scoped to compressible (numbered) tags ONLY. Targeting every .tag-ph would also
+// hide the Draft.js-rendered text (span[data-text='true']) of normal/semantic ph
+// tags in the open editor, making them vanish when compaction is on.
 body.tags-compressed {
-  .tag.tag-ph.tag-paired-open,
-  .tag.tag-ph.tag-paired-close {
+  .tag.tag-numbered {
     .index-counter {
       margin-left: 0;
       margin-right: 0;
@@ -499,10 +498,11 @@ body.tags-compressed {
   }
 }
 
-// Ensure inline layout for index + text inside HTML-rendered ph tags only.
+// Ensure inline layout for index + text inside HTML-rendered ph and numbered tags.
 // Scoped to tag-container-lite so it does not override display:flow-root
 // in the Draft.js editor (where flex handles inline layout automatically).
-.tag-container-lite .tag.tag-ph {
+.tag-container-lite .tag.tag-ph,
+.tag-container-lite .tag.tag-numbered {
   .index-counter,
   span[data-text='true'] {
     display: inline;

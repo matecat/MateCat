@@ -1,5 +1,6 @@
 import React from 'react'
 import {render, act} from '@testing-library/react'
+import {renderToStaticMarkup as toStaticMarkup} from 'react-dom/server'
 import {TagEntityLite} from './TagEntityLite'
 
 let mockCompressed = false
@@ -302,5 +303,35 @@ describe('TagEntityLite', () => {
       container.querySelector('.tag'),
     ).toHaveClass('tag-paired-close')
     expect(container.querySelector('[data-testid="tooltip-wrapper"]')).toBeNull()
+  })
+})
+
+describe('TagEntityLite - numbered g tags', () => {
+  const classesOf = (contentState) => {
+    const html = toStaticMarkup(
+      <TagEntityLite
+        entityKey="1"
+        contentState={contentState}
+        offsetkey="1-0-0"
+        isRTL={false}
+      >
+        <span>text</span>
+      </TagEntityLite>,
+    )
+    return html.match(/class="tag ([^"]*)"/)[1].split(/\s+/)
+  }
+
+  test('a numbered g tag takes the pc (ph) style, not the g style', () => {
+    const classes = classesOf(mockContentState('g', 0, '[#$dp4]', 'open'))
+    expect(classes).toEqual(
+      expect.arrayContaining(['tag-selfclosed', 'tag-ph', 'tag-paired-open']),
+    )
+    expect(classes).not.toContain('tag-open')
+  })
+
+  test('a plain g tag keeps the g style', () => {
+    const classes = classesOf(mockContentState('g', undefined, '1'))
+    expect(classes).toContain('tag-open')
+    expect(classes).not.toContain('tag-ph')
   })
 })
