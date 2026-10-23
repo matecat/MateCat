@@ -13,33 +13,33 @@ export const TagEntityLite = ({
 }) => {
   const tagRef = useRef()
   const containerRef = useRef()
-  const [phTagsCompressed, setPhTagsCompressed] = useState(
-    CatToolStore.isPhTagsCompressed(),
+  const [tagsCompressed, setTagsCompressed] = useState(
+    CatToolStore.isTagsCompressed(),
   )
 
   useEffect(() => {
-    const handler = () => setPhTagsCompressed(CatToolStore.isPhTagsCompressed())
-    CatToolStore.addListener(
-      CatToolConstants.TOGGLE_PH_TAGS_COMPRESSED,
-      handler,
-    )
+    const handler = () => setTagsCompressed(CatToolStore.isTagsCompressed())
+    CatToolStore.addListener(CatToolConstants.TOGGLE_TAGS_COMPRESSED, handler)
     return () =>
       CatToolStore.removeListener(
-        CatToolConstants.TOGGLE_PH_TAGS_COMPRESSED,
+        CatToolConstants.TOGGLE_TAGS_COMPRESSED,
         handler,
       )
   }, [])
 
   const getStyle = () => {
     const {
-      data: {name: entityName},
+      data: {name: entityName, index},
     } = contentState.getEntity(entityKey)
 
+    // Every compressible (numbered) tag looks like a pc tag, so a numbered g
+    // takes the ph style too.
+    const styleName = index >= 0 ? 'ph' : entityName
     const baseStyle =
-      tagSignatures[entityName] &&
-      (isRTL && tagSignatures[entityName].styleRTL
-        ? tagSignatures[entityName].styleRTL
-        : tagSignatures[entityName].style)
+      tagSignatures[styleName] &&
+      (isRTL && tagSignatures[styleName].styleRTL
+        ? tagSignatures[styleName].styleRTL
+        : tagSignatures[styleName].style)
 
     return baseStyle
   }
@@ -47,22 +47,27 @@ export const TagEntityLite = ({
   const style = getStyle()
 
   const {
-    data: {index, name: entityName, placeholder, pcRole},
+    data: {index, name: entityName, placeholder, tagRole},
   } = contentState.getEntity(entityKey)
 
   const isPhTag = entityName === 'ph'
-  const isCompressedPh = isPhTag && phTagsCompressed && index >= 0
-  const pcRoleClass = isPhTag && pcRole ? ` tag-pc-${pcRole}` : ''
+  // Only compressible tags carry an index (see compressibleTagUtils).
+  const isNumbered = index >= 0
+  const isCompressed = isNumbered && tagsCompressed
+  const isPaired = isNumbered && (tagRole === 'open' || tagRole === 'close')
+  const tagRoleClass = isNumbered
+    ? ` tag-numbered${isPaired ? ` tag-paired-${tagRole}` : ''}`
+    : ''
 
-  const isPcClose = isPhTag && pcRole === 'close'
+  const isClose = isNumbered && tagRole === 'close'
 
   const getChildrenContent = () => {
-    if (isPhTag && index >= 0) {
-      // A closing pc tag always shows only its number.
+    if (isNumbered) {
+      // A closing tag always shows only its number.
       return (
         <>
           <span className="index-counter">{index + 1}</span>
-          {!phTagsCompressed && !isPcClose && (
+          {!tagsCompressed && !isClose && (
             <span className="tag-text-lite">{children}</span>
           )}
         </>
@@ -76,8 +81,8 @@ export const TagEntityLite = ({
       <span
         ref={tagRef}
         className={`tag ${style}${
-          isCompressedPh ? ' tag-compressed' : ''
-        }${pcRoleClass}`}
+          isCompressed ? ' tag-compressed' : ''
+        }${tagRoleClass}`}
         data-offset-key={offsetkey}
         unselectable="on"
         suppressContentEditableWarning={true}
@@ -87,7 +92,7 @@ export const TagEntityLite = ({
     </span>
   )
 
-  if (isPhTag && placeholder && !isPcClose) {
+  if ((isPhTag || isNumbered) && placeholder && !isClose) {
     return (
       <Tooltip
         stylePointerElement={{display: 'inline-block', position: 'relative'}}
