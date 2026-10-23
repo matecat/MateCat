@@ -774,7 +774,9 @@ class SegmentExtractor
         $segmentToBeHashed = $rawContent;
 
         if (!empty($dataRefMap)) {
-            $dataRefReplacer = new DataRefReplacer($dataRefMap);
+            // Hash the original data, not the disp/equiv display values: two segments with the same
+            // display value but different original data must not share a hash
+            $dataRefReplacer = new DataRefReplacer($dataRefMap, useDisplayValues: false);
             $segmentToBeHashed = $dataRefReplacer->replace($rawContent);
         }
 
