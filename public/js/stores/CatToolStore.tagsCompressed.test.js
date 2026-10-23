@@ -1,8 +1,6 @@
 jest.mock('./AppDispatcher', () => ({
   dispatch: jest.fn(),
-  register: jest.fn((cb) => {
-    module.exports.__dispatchHandler = cb
-  }),
+  register: jest.fn(),
 }))
 
 const localStorageMock = (() => {
