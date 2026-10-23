@@ -33,6 +33,12 @@ class AIAssistantWorker extends AbstractWorker
     const string FEEDBACK_ACTION = 'feedback';
     const string ALTERNATIVE_TRANSLATIONS_ACTION = 'alternative_translations';
 
+    /**
+     * What the browser gets when an AI call fails. The real reason stays in the log: the message reaches the
+     * network tab and the tracking events, and must not reveal which AI provider answers or what it said.
+     */
+    const string AI_SERVICE_UNAVAILABLE_MESSAGE = 'The AI service is not available right now';
+
     private Client $redis;
 
     /**
@@ -140,12 +146,19 @@ class AIAssistantWorker extends AbstractWorker
             }
 
             $this->emitMessage("ai_assistant_alternative_translations", $payload['id_client'], $payload['id_segment'], $alternativeTranslations, false, true);
-        } catch (Exception $exception) {
+        } catch (Throwable $exception) {
             if ($errorCode === self::codeErrorsMap['NO_ERROR']) {
                 $errorCode = self::codeErrorsMap['ERROR_GENERATING_ALTERNATIVE_TRANSLATIONS'];
             }
 
-            $this->emitErrorMessage("ai_assistant_alternative_translations", $exception->getMessage(), $payload, $errorCode);
+            $this->_doLog('AI ASSISTANT: alternative translations failed for id_segment ' . $payload['id_segment'] . ': ' . $exception->getMessage());
+
+            // An empty result is our own message, safe to send; anything else may come from the provider
+            $message = $errorCode === self::codeErrorsMap['NO_ALTERNATIVE_TRANSLATIONS_FOUND']
+                ? $exception->getMessage()
+                : self::AI_SERVICE_UNAVAILABLE_MESSAGE;
+
+            $this->emitErrorMessage("ai_assistant_alternative_translations", $message, $payload, $errorCode);
         }
     }
 
@@ -181,8 +194,9 @@ class AIAssistantWorker extends AbstractWorker
             $message = is_array($result) ? $result : null;
 
             $this->emitMessage("ai_assistant_feedback", $payload['id_client'], $payload['id_segment'], $message, false, true);
-        } catch (Exception $e) {
-            $this->emitErrorMessage("ai_assistant_feedback", $e->getMessage(), $payload);
+        } catch (Throwable $e) {
+            $this->_doLog('AI ASSISTANT: feedback failed for id_segment ' . $payload['id_segment'] . ': ' . $e->getMessage());
+            $this->emitErrorMessage("ai_assistant_feedback", self::AI_SERVICE_UNAVAILABLE_MESSAGE, $payload);
         }
     }
 
@@ -204,16 +218,20 @@ class AIAssistantWorker extends AbstractWorker
         $this->generateLock($payload['id_segment'], $payload['id_job'], $payload['password'], $lockValue);
         $this->_doLog("Generated lock for id_segment " . $payload['id_segment']);
 
+        // True once the stream reached [DONE], reported an error, or lost the lock to a newer request.
+        // Anything else (a rejected request answers with a plain JSON body, not an SSE event) is a failure
+        // the browser must hear about, or the panel keeps loading.
+        $streamClosed = false;
+        $buffer = '';
+
         try {
             $explainer = $this->createContextExplainer();
-
-            $buffer = '';
 
             $explainer->findContextForAWord(
                 $payload['word'],
                 $phrase,
                 $payload['localized_target'],
-                function ($curl_info, $data) use (&$txt, &$buffer, $payload, $lockValue) {
+                function ($curl_info, $data) use (&$txt, &$buffer, &$streamClosed, $payload, $lockValue) {
                     $this->_doLog("Start: " . AppConfig::$OPEN_AI_MODEL . " " . substr(AppConfig::$OPENAI_API_KEY, 0, 8) . "...");
 
                     $currentLockValue = $this->getLockValue(
@@ -224,6 +242,7 @@ class AIAssistantWorker extends AbstractWorker
 
                     if ($currentLockValue !== $lockValue) {
                         $this->_doLog("Lock invalid for id_segment " . $payload['id_segment']);
+                        $streamClosed = true;
                         return strlen($data);
                     }
 
@@ -241,6 +260,7 @@ class AIAssistantWorker extends AbstractWorker
 
                         if ($json === '[DONE]') {
                             $this->_doLog("Stream completed for id_segment " . $payload['id_segment']);
+                            $streamClosed = true;
 
                             $this->emitMessage(
                                 "ai_assistant_explain_meaning",
@@ -279,11 +299,12 @@ class AIAssistantWorker extends AbstractWorker
                         }
 
                         if (isset($arr['error']['message'])) {
-                            $message = "OpenAI error: " . $arr['error']['message'];
+                            $this->_doLog("OpenAI error for id_segment " . $payload['id_segment'] . ": " . json_encode($arr['error']));
+                            $streamClosed = true;
 
                             $this->emitErrorMessage(
                                 "ai_assistant_explain_meaning",
-                                $message,
+                                self::AI_SERVICE_UNAVAILABLE_MESSAGE,
                                 $payload
                             );
 
@@ -296,6 +317,16 @@ class AIAssistantWorker extends AbstractWorker
             );
         } catch (Throwable $e) {
             $this->_doLog("Failed: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+        }
+
+        if (!$streamClosed) {
+            $this->_doLog("Stream ended without [DONE] for id_segment " . $payload['id_segment'] . ", unread data: " . $buffer);
+
+            // A newer request may have taken the lock with no chunk left to notice: the browser shows that
+            // request now, and this error would overwrite it
+            if ($this->getLockValue($payload['id_segment'], $payload['id_job'], $payload['password']) === $lockValue) {
+                $this->emitErrorMessage("ai_assistant_explain_meaning", self::AI_SERVICE_UNAVAILABLE_MESSAGE, $payload);
+            }
         }
     }
 

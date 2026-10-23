@@ -86,7 +86,7 @@ Return your classification and a brief explanation (2–3 lines) in JSON format.
                 ],
             ],
             'temperature' => 1.0,
-            'max_tokens' => $realMaxTokens,
+            'max_completion_tokens' => $realMaxTokens,
             'frequency_penalty' => 0,
             'presence_penalty' => 0,
             "stream" => false,
@@ -115,12 +115,45 @@ Return your classification and a brief explanation (2–3 lines) in JSON format.
         $response = $this->openAi->chat($opts);
         $response = json_decode((string)$response, true);
 
-        $message = $response['choices'][0]['message']['content'];
-        $feedback = json_decode($message);
+        // Turn every body without feedback into an Exception, so the worker reports it to the user.
+        // The worker only logs these messages: the browser gets a generic one.
+        if (!is_array($response)) {
+            throw new Exception('OpenAI returned a response that is not valid JSON');
+        }
+
+        if (isset($response['error'])) {
+            $code = $response['error']['code'] ?? null;
+            $text = $response['error']['message'] ?? null;
+            throw new Exception(
+                'OpenAI returned an error (' . (is_string($code) ? $code : 'no error code') . '): '
+                . (is_string($text) ? $text : 'no error message')
+            );
+        }
+
+        $choice = $response['choices'][0] ?? [];
+        $message = $choice['message'] ?? [];
+
+        if (!empty($message['refusal'])) {
+            $refusal = is_string($message['refusal']) ? ': ' . $message['refusal'] : '';
+            throw new Exception('OpenAI refused to evaluate the translation' . $refusal);
+        }
+
+        if (($choice['finish_reason'] ?? null) === 'length') {
+            throw new Exception('OpenAI ran out of completion tokens before writing the feedback');
+        }
+
+        $content = $message['content'] ?? null;
+        $feedback = json_decode(is_string($content) ? $content : '', true);
+        $category = $feedback['category'] ?? null;
+        $comment = $feedback['comment'] ?? null;
+
+        if (!is_string($category) || !is_string($comment)) {
+            throw new Exception('OpenAI returned feedback without a category and a comment');
+        }
 
         return [
-            'category' => $this->formatFeedbackString($feedback->category),
-            'comment' => $this->formatFeedbackString($feedback->comment),
+            'category' => $this->formatFeedbackString($category),
+            'comment' => $this->formatFeedbackString($comment),
         ];
     }
 
@@ -160,6 +193,10 @@ Return your classification and a brief explanation (2–3 lines) in JSON format.
                     "content" => $content
                 ],
             ],
+            'max_completion_tokens' => $realMaxTokens,
+            'temperature' => 1.0,
+            'frequency_penalty' => 0,
+            'presence_penalty' => 0,
             "stream" => true,
         ];
 
