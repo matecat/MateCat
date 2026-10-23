@@ -440,12 +440,38 @@ export const VISIBLE_PLACEHOLDER_CTYPES = new Set([
   'x-dollar-curly-brackets',
 ])
 
+/**
+ * XLIFF 2.0 `<ph>` ctypes whose equiv-text is the code's `disp`/`equiv`
+ * value when the original tag (kept in `x-orig`) carries one, and its raw
+ * original data otherwise. Only the former is shown in the preview.
+ */
+const DISPLAY_VALUE_PH_CTYPES = new Set([
+  'x-ph_data_ref',
+  'x-original_ph_no_data_ref',
+])
+const DISPLAY_VALUE_ATTR_REGEX = /\s(?:disp|equiv)\s*=\s*(["'])(?!\1)/
+
 const PH_TAG_REGEX = /<ph\b[^>]*?\/>/g
 const PLACEHOLDER_SENTINEL_REGEX = /(\d+)/g
 
 /**
- * Replaces each `<ph>` whose ctype is in VISIBLE_PLACEHOLDER_CTYPES with a
- * sentinel, so the tag stripping that follows cannot touch it.
+ * @param {string} tag
+ * @param {string|undefined} ctype
+ * @returns {boolean} whether the tag's equiv-text is a non-empty `disp` or
+ *   `equiv` value of an XLIFF 2.0 `<ph>`
+ */
+const hasDisplayValue = (tag, ctype) => {
+  if (!DISPLAY_VALUE_PH_CTYPES.has(ctype)) return false
+  const originalTag = tag.match(/\bx-orig="([^"]+)"/)?.[1]
+  return (
+    !!originalTag && DISPLAY_VALUE_ATTR_REGEX.test(Base64.decode(originalTag))
+  )
+}
+
+/**
+ * Replaces each `<ph>` whose ctype is in VISIBLE_PLACEHOLDER_CTYPES, or that
+ * carries an XLIFF 2.0 `disp`/`equiv` value, with a sentinel, so the tag
+ * stripping that follows cannot touch it.
  *
  * @param {string} text
  * @returns {{text: string, placeholders: string[]}} the still-encoded
@@ -456,7 +482,11 @@ const protectVisiblePlaceholders = (text) => {
   const protectedText = text.replace(PH_TAG_REGEX, (tag) => {
     const ctype = tag.match(/\bctype="([^"]+)"/)?.[1]
     const equivText = tag.match(/\bequiv-text="base64:([^"]+)"/)?.[1]
-    if (!equivText || !VISIBLE_PLACEHOLDER_CTYPES.has(ctype)) return tag
+    if (
+      !equivText ||
+      !(VISIBLE_PLACEHOLDER_CTYPES.has(ctype) || hasDisplayValue(tag, ctype))
+    )
+      return tag
     placeholders.push(Base64.decode(equivText))
     return `${placeholders.length - 1}`
   })
