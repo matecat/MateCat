@@ -24,7 +24,7 @@ describe('TagSuggestion', () => {
 
   test('renders an index counter badge when index is defined', () => {
     const suggestion = {
-      data: {name: 'ph', placeholder: 'PH_1', index: 2, pcRole: 'open'},
+      data: {name: 'ph', placeholder: 'PH_1', index: 2, tagRole: 'open'},
     }
     render(
       <TagSuggestion

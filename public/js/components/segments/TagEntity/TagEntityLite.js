@@ -13,19 +13,16 @@ export const TagEntityLite = ({
 }) => {
   const tagRef = useRef()
   const containerRef = useRef()
-  const [phTagsCompressed, setPhTagsCompressed] = useState(
-    CatToolStore.isPhTagsCompressed(),
+  const [tagsCompressed, setTagsCompressed] = useState(
+    CatToolStore.isTagsCompressed(),
   )
 
   useEffect(() => {
-    const handler = () => setPhTagsCompressed(CatToolStore.isPhTagsCompressed())
-    CatToolStore.addListener(
-      CatToolConstants.TOGGLE_PH_TAGS_COMPRESSED,
-      handler,
-    )
+    const handler = () => setTagsCompressed(CatToolStore.isTagsCompressed())
+    CatToolStore.addListener(CatToolConstants.TOGGLE_TAGS_COMPRESSED, handler)
     return () =>
       CatToolStore.removeListener(
-        CatToolConstants.TOGGLE_PH_TAGS_COMPRESSED,
+        CatToolConstants.TOGGLE_TAGS_COMPRESSED,
         handler,
       )
   }, [])
@@ -47,14 +44,14 @@ export const TagEntityLite = ({
   const style = getStyle()
 
   const {
-    data: {index, name: entityName, placeholder, pcRole},
+    data: {index, name: entityName, placeholder, tagRole},
   } = contentState.getEntity(entityKey)
 
   const isPhTag = entityName === 'ph'
-  const isCompressedPh = isPhTag && phTagsCompressed && index >= 0
-  const pcRoleClass = isPhTag && pcRole ? ` tag-pc-${pcRole}` : ''
+  const isCompressedPh = isPhTag && tagsCompressed && index >= 0
+  const tagRoleClass = isPhTag && tagRole ? ` tag-paired-${tagRole}` : ''
 
-  const isPcClose = isPhTag && pcRole === 'close'
+  const isPcClose = isPhTag && tagRole === 'close'
 
   const getChildrenContent = () => {
     if (isPhTag && index >= 0) {
@@ -62,7 +59,7 @@ export const TagEntityLite = ({
       return (
         <>
           <span className="index-counter">{index + 1}</span>
-          {!phTagsCompressed && !isPcClose && (
+          {!tagsCompressed && !isPcClose && (
             <span className="tag-text-lite">{children}</span>
           )}
         </>
@@ -77,7 +74,7 @@ export const TagEntityLite = ({
         ref={tagRef}
         className={`tag ${style}${
           isCompressedPh ? ' tag-compressed' : ''
-        }${pcRoleClass}`}
+        }${tagRoleClass}`}
         data-offset-key={offsetkey}
         unselectable="on"
         suppressContentEditableWarning={true}

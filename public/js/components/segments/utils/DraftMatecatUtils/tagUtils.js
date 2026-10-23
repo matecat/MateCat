@@ -32,12 +32,12 @@ const restoreTempTags = (tags, text) =>
   })
 import {isUndefined} from 'lodash'
 import matchTagStructure from './matchTag'
-import {createPcNumberer} from './pcTagUtils'
+import {createTagNumberer} from './compressibleTagUtils'
 
 export const transformTagsToHtml = (text, isRtl = 0) => {
   isRtl = !!isRtl
   if (text) {
-    const numberPc = createPcNumberer()
+    const numberPc = createTagNumberer()
     try {
       for (let key in tagSignatures) {
         const {
@@ -63,7 +63,7 @@ export const transformTagsToHtml = (text, isRtl = 0) => {
                 : match
             if (type === 'ph') {
               // Only ph tags that carry an XLIFF pc tag are numbered/compressible.
-              // Open and close of a pair share the same number; tag-pc-{role}
+              // Open and close of a pair share the same number; tag-paired-{role}
               // drives the open/close styling. Other ph tags render plain.
               const pc = numberPc(match)
               if (!pc) {
@@ -78,7 +78,7 @@ export const transformTagsToHtml = (text, isRtl = 0) => {
               const openSpan =
                 '<span contenteditable="false" class="tag small ' +
                 (isRtl && styleRTL ? styleRTL : style) +
-                ' tag-pc-' +
+                ' tag-paired-' +
                 pc.role +
                 '">' +
                 '<span class="index-counter">' +

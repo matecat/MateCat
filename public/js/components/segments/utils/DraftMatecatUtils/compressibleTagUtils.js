@@ -28,7 +28,7 @@ const ID_RE = /\bid="([^"]*)"/
  * @returns {{role:'open'|'close', hasDataRef:boolean, ctype:string, id:string, baseId:string}|null}
  *          null when the tag is not a pc-carrying ph tag.
  */
-export const classifyPcPhTag = (encodedText) => {
+export const classifyCompressibleTag = (encodedText) => {
   if (!encodedText) return null
   const ctype = encodedText.match(CTYPE_RE)?.[1]
   const info = ctype && PC_CTYPES[ctype]
@@ -45,7 +45,7 @@ const PC_CTYPE_TEST_RE =
  * Cheap predicate: does the encoded segment string contain at least one
  * pc-carrying ph tag? Used to decide whether to show the compress/expand button.
  */
-export const hasCompressiblePhTags = (segmentString) =>
+export const hasCompressibleTags = (segmentString) =>
   !!segmentString && PC_CTYPE_TEST_RE.test(segmentString)
 
 /**
@@ -57,7 +57,7 @@ export const hasCompressiblePhTags = (segmentString) =>
  *        tag that inherited it from the matching source tag), it is honoured and
  *        the internal counter is kept monotonic.
  */
-export const createPcNumberer = () => {
+export const createTagNumberer = () => {
   let next = 0
   const byBaseId = new Map() // dataRef: baseId -> index
   const stack = [] // non-dataRef: open indexes awaiting a close
@@ -65,7 +65,7 @@ export const createPcNumberer = () => {
     if (n + 1 > next) next = n + 1
   }
   return (encodedText, inheritedIndex) => {
-    const c = classifyPcPhTag(encodedText)
+    const c = classifyCompressibleTag(encodedText)
     if (!c) return null
     let index
     if (inheritedIndex !== undefined && inheritedIndex !== null) {

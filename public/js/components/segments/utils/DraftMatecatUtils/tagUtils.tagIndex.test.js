@@ -18,10 +18,10 @@ const semanticPh =
   '<ph id="mtc_3" ctype="x-html" equiv-text="base64:Jmx0O3AmZ3Q7"/>'
 
 describe('transformTagsToHtml - pc-carrying ph tags', () => {
-  test('a pc open tag is numbered and tagged tag-pc-open', () => {
+  test('a pc open tag is numbered and tagged tag-paired-open', () => {
     const result = transformTagsToHtml(pcOpen)
     expect(result).toBe(
-      '<span contenteditable="false" class="tag small tag-selfclosed tag-ph tag-pc-open">' +
+      '<span contenteditable="false" class="tag small tag-selfclosed tag-ph tag-paired-open">' +
         '<span class="index-counter">1</span>' +
         '<span data-text="true">&lt;p&gt;</span>' +
         '</span>',
@@ -31,7 +31,7 @@ describe('transformTagsToHtml - pc-carrying ph tags', () => {
   test('a closing pc tag shows only the number (no content)', () => {
     const result = transformTagsToHtml(pcClose)
     expect(result).toBe(
-      '<span contenteditable="false" class="tag small tag-selfclosed tag-ph tag-pc-close">' +
+      '<span contenteditable="false" class="tag small tag-selfclosed tag-ph tag-paired-close">' +
         '<span class="index-counter">1</span>' +
         '</span>',
     )
@@ -40,8 +40,8 @@ describe('transformTagsToHtml - pc-carrying ph tags', () => {
 
   test('open and close of a pair share the same number, distinct roles', () => {
     const result = transformTagsToHtml(pcOpen + 'inner' + pcClose)
-    expect(result).toContain('tag-pc-open')
-    expect(result).toContain('tag-pc-close')
+    expect(result).toContain('tag-paired-open')
+    expect(result).toContain('tag-paired-close')
     // both numbered 1
     const counters = result.match(/<span class="index-counter">(\d+)<\/span>/g)
     expect(counters).toEqual([
@@ -62,8 +62,8 @@ describe('transformTagsToHtml - pc-carrying ph tags', () => {
     const result = transformTagsToHtml(pcOpenDataRef + 'x' + pcCloseDataRef)
     const counters = result.match(/index-counter">(\d+)</g)
     expect(counters).toEqual(['index-counter">1<', 'index-counter">1<'])
-    expect(result).toContain('tag-pc-open')
-    expect(result).toContain('tag-pc-close')
+    expect(result).toContain('tag-paired-open')
+    expect(result).toContain('tag-paired-close')
   })
 
   test('semantic (non-pc) ph tags are NOT numbered and render plain', () => {
@@ -74,7 +74,7 @@ describe('transformTagsToHtml - pc-carrying ph tags', () => {
     )
     expect(result).not.toContain('index-counter')
     expect(result).not.toContain('data-text')
-    expect(result).not.toContain('tag-pc-')
+    expect(result).not.toContain('tag-paired-')
   })
 
   test('mixed pc and semantic ph: only pc gets numbered', () => {

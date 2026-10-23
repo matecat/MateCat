@@ -34,37 +34,37 @@ beforeEach(() => {
   localStorageMock.clear()
   localStorageMock.getItem.mockReset()
   localStorageMock.setItem.mockClear()
-  document.body.classList.remove('ph-tags-compressed')
+  document.body.classList.remove('tags-compressed')
   global.config = {userMail: 'test@example.com'}
 })
 
-describe('CatToolStore - phTagsCompressed', () => {
-  test('initializes phTagsCompressed to true when localStorage is empty (collapsed by default)', () => {
+describe('CatToolStore - tagsCompressed', () => {
+  test('initializes tagsCompressed to true when localStorage is empty (collapsed by default)', () => {
     CatToolStore = require('./CatToolStore').default
-    expect(CatToolStore.isPhTagsCompressed()).toBe(true)
-    expect(document.body).toHaveClass('ph-tags-compressed')
+    expect(CatToolStore.isTagsCompressed()).toBe(true)
+    expect(document.body).toHaveClass('tags-compressed')
   })
 
-  test('initializes phTagsCompressed to true from localStorage', () => {
+  test('initializes tagsCompressed to true from localStorage', () => {
     localStorageMock.getItem.mockImplementation((key) => {
       if (key === 'phTagsCompressed-test@example.com') return 'true'
       return null
     })
     CatToolStore = require('./CatToolStore').default
-    expect(CatToolStore.isPhTagsCompressed()).toBe(true)
-    expect(document.body).toHaveClass('ph-tags-compressed')
+    expect(CatToolStore.isTagsCompressed()).toBe(true)
+    expect(document.body).toHaveClass('tags-compressed')
   })
 
-  test('initializes phTagsCompressed to false when localStorage is "false"', () => {
+  test('initializes tagsCompressed to false when localStorage is "false"', () => {
     localStorageMock.getItem.mockImplementation((key) => {
       if (key === 'phTagsCompressed-test@example.com') return 'false'
       return null
     })
     CatToolStore = require('./CatToolStore').default
-    expect(CatToolStore.isPhTagsCompressed()).toBe(false)
+    expect(CatToolStore.isTagsCompressed()).toBe(false)
   })
 
-  test('TOGGLE_PH_TAGS_COMPRESSED toggles state from false to true', () => {
+  test('TOGGLE_TAGS_COMPRESSED toggles state from false to true', () => {
     localStorageMock.getItem.mockImplementation((key) => {
       if (key === 'phTagsCompressed-test@example.com') return 'false'
       return null
@@ -74,17 +74,17 @@ describe('CatToolStore - phTagsCompressed', () => {
     AppDispatcher = require('./AppDispatcher')
 
     const handler = AppDispatcher.register.mock.calls[0][0]
-    handler({actionType: CatToolConstants.TOGGLE_PH_TAGS_COMPRESSED})
+    handler({actionType: CatToolConstants.TOGGLE_TAGS_COMPRESSED})
 
-    expect(CatToolStore.isPhTagsCompressed()).toBe(true)
+    expect(CatToolStore.isTagsCompressed()).toBe(true)
     expect(localStorageMock.setItem).toHaveBeenCalledWith(
       'phTagsCompressed-test@example.com',
       true,
     )
-    expect(document.body).toHaveClass('ph-tags-compressed')
+    expect(document.body).toHaveClass('tags-compressed')
   })
 
-  test('TOGGLE_PH_TAGS_COMPRESSED toggles state from true to false', () => {
+  test('TOGGLE_TAGS_COMPRESSED toggles state from true to false', () => {
     localStorageMock.getItem.mockImplementation((key) => {
       if (key === 'phTagsCompressed-test@example.com') return 'true'
       return null
@@ -94,17 +94,17 @@ describe('CatToolStore - phTagsCompressed', () => {
     AppDispatcher = require('./AppDispatcher')
 
     const handler = AppDispatcher.register.mock.calls[0][0]
-    handler({actionType: CatToolConstants.TOGGLE_PH_TAGS_COMPRESSED})
+    handler({actionType: CatToolConstants.TOGGLE_TAGS_COMPRESSED})
 
-    expect(CatToolStore.isPhTagsCompressed()).toBe(false)
+    expect(CatToolStore.isTagsCompressed()).toBe(false)
     expect(localStorageMock.setItem).toHaveBeenCalledWith(
       'phTagsCompressed-test@example.com',
       false,
     )
-    expect(document.body).not.toHaveClass('ph-tags-compressed')
+    expect(document.body).not.toHaveClass('tags-compressed')
   })
 
-  test('TOGGLE_PH_TAGS_COMPRESSED emits change event', () => {
+  test('TOGGLE_TAGS_COMPRESSED emits change event', () => {
     localStorageMock.getItem.mockImplementation((key) => {
       if (key === 'phTagsCompressed-test@example.com') return 'false'
       return null
@@ -114,13 +114,10 @@ describe('CatToolStore - phTagsCompressed', () => {
     AppDispatcher = require('./AppDispatcher')
 
     const listener = jest.fn()
-    CatToolStore.addListener(
-      CatToolConstants.TOGGLE_PH_TAGS_COMPRESSED,
-      listener,
-    )
+    CatToolStore.addListener(CatToolConstants.TOGGLE_TAGS_COMPRESSED, listener)
 
     const handler = AppDispatcher.register.mock.calls[0][0]
-    handler({actionType: CatToolConstants.TOGGLE_PH_TAGS_COMPRESSED})
+    handler({actionType: CatToolConstants.TOGGLE_TAGS_COMPRESSED})
 
     expect(listener).toHaveBeenCalledWith(true)
   })
@@ -132,6 +129,6 @@ describe('CatToolStore - phTagsCompressed', () => {
       return null
     })
     CatToolStore = require('./CatToolStore').default
-    expect(CatToolStore.isPhTagsCompressed()).toBe(true)
+    expect(CatToolStore.isTagsCompressed()).toBe(true)
   })
 })

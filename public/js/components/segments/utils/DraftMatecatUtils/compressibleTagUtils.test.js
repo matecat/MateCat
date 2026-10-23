@@ -1,8 +1,8 @@
 import {
-  classifyPcPhTag,
-  hasCompressiblePhTags,
-  createPcNumberer,
-} from './pcTagUtils'
+  classifyCompressibleTag,
+  hasCompressibleTags,
+  createTagNumberer,
+} from './compressibleTagUtils'
 
 const open1 =
   '<ph id="mtc_1" ctype="x-original_pc_open" equiv-text="base64:AAA"/>'
@@ -19,25 +19,25 @@ const dClose2 =
 const semantic = '<ph id="mtc_3" ctype="x-html" equiv-text="base64:KKK"/>'
 const noCtype = '<ph id="mtc_9" equiv-text="base64:LLL"/>'
 
-describe('classifyPcPhTag', () => {
+describe('classifyCompressibleTag', () => {
   test('classifies non-dataRef open/close', () => {
-    expect(classifyPcPhTag(open1)).toMatchObject({
+    expect(classifyCompressibleTag(open1)).toMatchObject({
       role: 'open',
       hasDataRef: false,
     })
-    expect(classifyPcPhTag(close1)).toMatchObject({
+    expect(classifyCompressibleTag(close1)).toMatchObject({
       role: 'close',
       hasDataRef: false,
     })
   })
 
   test('classifies dataRef open/close and derives base id', () => {
-    expect(classifyPcPhTag(dOpen)).toMatchObject({
+    expect(classifyCompressibleTag(dOpen)).toMatchObject({
       role: 'open',
       hasDataRef: true,
       baseId: 'source1',
     })
-    expect(classifyPcPhTag(dClose)).toMatchObject({
+    expect(classifyCompressibleTag(dClose)).toMatchObject({
       role: 'close',
       hasDataRef: true,
       baseId: 'source1',
@@ -45,36 +45,36 @@ describe('classifyPcPhTag', () => {
   })
 
   test('returns null for semantic ph tags and ph without ctype', () => {
-    expect(classifyPcPhTag(semantic)).toBeNull()
-    expect(classifyPcPhTag(noCtype)).toBeNull()
-    expect(classifyPcPhTag('')).toBeNull()
-    expect(classifyPcPhTag(undefined)).toBeNull()
+    expect(classifyCompressibleTag(semantic)).toBeNull()
+    expect(classifyCompressibleTag(noCtype)).toBeNull()
+    expect(classifyCompressibleTag('')).toBeNull()
+    expect(classifyCompressibleTag(undefined)).toBeNull()
   })
 })
 
-describe('hasCompressiblePhTags', () => {
+describe('hasCompressibleTags', () => {
   test('true when at least one pc-carrying ph tag is present', () => {
-    expect(hasCompressiblePhTags(open1 + semantic)).toBe(true)
-    expect(hasCompressiblePhTags(dOpen)).toBe(true)
+    expect(hasCompressibleTags(open1 + semantic)).toBe(true)
+    expect(hasCompressibleTags(dOpen)).toBe(true)
   })
 
   test('false when only semantic / no pc ph tags', () => {
-    expect(hasCompressiblePhTags(semantic + noCtype)).toBe(false)
-    expect(hasCompressiblePhTags('plain text')).toBe(false)
-    expect(hasCompressiblePhTags('')).toBe(false)
-    expect(hasCompressiblePhTags(undefined)).toBe(false)
+    expect(hasCompressibleTags(semantic + noCtype)).toBe(false)
+    expect(hasCompressibleTags('plain text')).toBe(false)
+    expect(hasCompressibleTags('')).toBe(false)
+    expect(hasCompressibleTags(undefined)).toBe(false)
   })
 })
 
-describe('createPcNumberer', () => {
+describe('createTagNumberer', () => {
   test('open and close of a pair share the same index', () => {
-    const n = createPcNumberer()
+    const n = createTagNumberer()
     expect(n(open1)).toEqual({index: 0, role: 'open'})
     expect(n(close1)).toEqual({index: 0, role: 'close'})
   })
 
   test('sequential non-dataRef pairs increment', () => {
-    const n = createPcNumberer()
+    const n = createTagNumberer()
     expect(n(open1).index).toBe(0)
     expect(n(close1).index).toBe(0)
     expect(n(open1).index).toBe(1)
@@ -82,7 +82,7 @@ describe('createPcNumberer', () => {
   })
 
   test('nested non-dataRef pairs pair by stack (0,1,1,0)', () => {
-    const n = createPcNumberer()
+    const n = createTagNumberer()
     expect(n(open1).index).toBe(0)
     expect(n(open1).index).toBe(1)
     expect(n(close1).index).toBe(1)
@@ -90,7 +90,7 @@ describe('createPcNumberer', () => {
   })
 
   test('dataRef pairs by base id, independent of order', () => {
-    const n = createPcNumberer()
+    const n = createTagNumberer()
     expect(n(dOpen).index).toBe(0)
     expect(n(dOpen2).index).toBe(1)
     expect(n(dClose).index).toBe(0)
@@ -98,13 +98,13 @@ describe('createPcNumberer', () => {
   })
 
   test('non-pc ph tags return null and do not consume a number', () => {
-    const n = createPcNumberer()
+    const n = createTagNumberer()
     expect(n(semantic)).toBeNull()
     expect(n(open1).index).toBe(0)
   })
 
   test('inherited index is honoured and keeps the counter monotonic', () => {
-    const n = createPcNumberer()
+    const n = createTagNumberer()
     expect(n(dOpen, 5).index).toBe(5)
     expect(n(open1).index).toBe(6)
   })

@@ -1,6 +1,6 @@
 import matchTag from './matchTag'
 import {Modifier, SelectionState, ContentState} from 'draft-js'
-import {createPcNumberer} from './pcTagUtils'
+import {createTagNumberer} from './compressibleTagUtils'
 
 /**
  *
@@ -45,7 +45,7 @@ const createNewEntitiesFromMap = (
               ...tag.data,
               ...(tagSource?.data?.index !== undefined && {
                 index: tagSource.data.index,
-                pcRole: tagSource.data.pcRole,
+                tagRole: tagSource.data.tagRole,
               }),
             },
           }
@@ -160,11 +160,11 @@ const createNewEntitiesFromMap = (
 }
 
 // Numbers ONLY the ph tags that carry an XLIFF pc tag. Open and close of a pair
-// get the same 0-based index (rendered as index + 1); a `pcRole` of 'open'/'close'
+// get the same 0-based index (rendered as index + 1); a `tagRole` of 'open'/'close'
 // drives the CSS. Non-pc ph tags are left untouched (no index => not compactable).
-// Any `index`/`pcRole` already present (inherited from the source tag map) is honoured.
+// Any `index`/`tagRole` already present (inherited from the source tag map) is honoured.
 const addIncrementalIndex = (tagRange) => {
-  const numberer = createPcNumberer()
+  const numberer = createTagNumberer()
   return tagRange.map((cur) => {
     if (cur.data.name !== 'ph') return cur
     const result = numberer(cur.data.encodedText, cur.data.index)
@@ -174,7 +174,7 @@ const addIncrementalIndex = (tagRange) => {
       data: {
         ...cur.data,
         index: result.index,
-        pcRole: result.role,
+        tagRole: result.role,
       },
     }
   })

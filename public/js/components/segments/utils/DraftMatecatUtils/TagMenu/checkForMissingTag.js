@@ -1,7 +1,10 @@
 import {getErrorCheckTag} from '../tagModel'
-import {classifyPcPhTag, createPcNumberer} from '../pcTagUtils'
+import {
+  classifyCompressibleTag,
+  createTagNumberer,
+} from '../compressibleTagUtils'
 
-const isPcTag = (tag) => !!classifyPcPhTag(tag?.data?.encodedText)
+const isPcTag = (tag) => !!classifyCompressibleTag(tag?.data?.encodedText)
 
 // pc (compressible) tags can't be matched by raw content/id like other tags:
 // every closing pc tag encodes to the same generic markup (XLIFF's `</pc>` has
@@ -10,11 +13,11 @@ const isPcTag = (tag) => !!classifyPcPhTag(tag?.data?.encodedText)
 // otherwise the document-order pairing index (the same numbering shown as the
 // tag's "1", "2"... label) — combined with open/close role.
 const buildPcKeyedEntries = (tagMap) => {
-  const numberer = createPcNumberer()
+  const numberer = createTagNumberer()
   return [...tagMap]
     .sort((a, b) => a.offset - b.offset)
     .map((tag) => {
-      const classified = classifyPcPhTag(tag?.data?.encodedText)
+      const classified = classifyCompressibleTag(tag?.data?.encodedText)
       if (!classified) return null
       const numbered = numberer(tag.data.encodedText)
       const key = classified.hasDataRef

@@ -57,7 +57,7 @@ jest.mock('../../stores/CatToolStore', () => ({
       characterCounterCountTags: false,
     })),
     getHaveKeysGlossary: jest.fn(() => false),
-    isPhTagsCompressed: jest.fn(() => false),
+    isTagsCompressed: jest.fn(() => false),
     addListener: jest.fn(),
     removeListener: jest.fn(),
     getJobFilesInfo: jest.fn(() => ({})),

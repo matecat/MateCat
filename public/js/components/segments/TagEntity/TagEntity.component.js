@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react'
 import {debounce, find} from 'lodash'
 import {tagSignatures, getTooltipTag} from '../utils/DraftMatecatUtils/tagModel'
-import {classifyPcPhTag} from '../utils/DraftMatecatUtils/pcTagUtils'
+import {classifyCompressibleTag} from '../utils/DraftMatecatUtils/compressibleTagUtils'
 import SegmentStore from '../../../stores/SegmentStore'
 import CatToolStore from '../../../stores/CatToolStore'
 import SegmentConstants from '../../../constants/SegmentConstants'
@@ -68,7 +68,7 @@ export const highlightOnWarnings = ({
   // is computed client-side by tag identity/numbering instead (see
   // checkForMissingTag.js) and is exact, since its entries are the source's
   // own tag objects.
-  if (classifyPcPhTag(encodedText)) {
+  if (classifyCompressibleTag(encodedText)) {
     if (isTarget) return ''
     const isMissingInTarget = (missingTagsInTarget || []).some(
       (tag) => tag?.data?.encodedText === encodedText,
@@ -145,19 +145,19 @@ const markSearch = (text, searchParams, {start, end}) => {
 const getChildrenContent = (
   index,
   entityName,
-  pcRole,
-  {phTagsCompressed, children},
+  tagRole,
+  {tagsCompressed, children},
 ) => {
   const isPhTag = entityName === 'ph'
 
   if (isPhTag && index >= 0) {
     // A closing pc tag always shows only its number (never the equiv-text /
     // closing content). An opening tag shows its content unless compressed.
-    const isPcClose = pcRole === 'close'
+    const isPcClose = tagRole === 'close'
     return (
       <>
         <span className="index-counter">{index + 1}</span>
-        {!phTagsCompressed && !isPcClose && children}
+        {!tagsCompressed && !isPcClose && children}
       </>
     )
   }
@@ -219,7 +219,7 @@ const TagEntity = ({
       tagWarningStyle: '',
       tooltipAvailable: getTooltipTag().includes(entityName),
       shouldTooltipOnHover: false,
-      phTagsCompressed: CatToolStore.isPhTagsCompressed(),
+      tagsCompressed: CatToolStore.isTagsCompressed(),
       clicked: false,
       focused: false,
       searchParams: getSearchParams(),
@@ -292,8 +292,8 @@ const TagEntity = ({
     }
   }, [patchState])
 
-  const onPhTagsCompressedToggle = useCallback(() => {
-    patchState({phTagsCompressed: CatToolStore.isPhTagsCompressed()})
+  const onTagsCompressedToggle = useCallback(() => {
+    patchState({tagsCompressed: CatToolStore.isTagsCompressed()})
   }, [patchState])
 
   const highlightTags = useCallback(
@@ -426,8 +426,8 @@ const TagEntity = ({
     )
     SegmentStore.addListener(SegmentConstants.FOCUS_TAGS, focusTag)
     CatToolStore.addListener(
-      CatToolConstants.TOGGLE_PH_TAGS_COMPRESSED,
-      onPhTagsCompressedToggle,
+      CatToolConstants.TOGGLE_TAGS_COMPRESSED,
+      onTagsCompressedToggle,
     )
 
     const shouldTooltipOnHover = measureShouldTooltipOnHover(tagRef.current)
@@ -462,8 +462,8 @@ const TagEntity = ({
       )
       SegmentStore.removeListener(SegmentConstants.FOCUS_TAGS, focusTag)
       CatToolStore.removeListener(
-        CatToolConstants.TOGGLE_PH_TAGS_COMPRESSED,
-        onPhTagsCompressedToggle,
+        CatToolConstants.TOGGLE_TAGS_COMPRESSED,
+        onTagsCompressedToggle,
       )
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -499,7 +499,7 @@ const TagEntity = ({
     shouldTooltipOnHover,
     searchParams,
     focused,
-    phTagsCompressed,
+    tagsCompressed,
   } = state
 
   const style =
@@ -511,17 +511,18 @@ const TagEntity = ({
       placeholder: entityPlaceholder,
       index,
       name: entityName,
-      pcRole,
+      tagRole,
     },
   } = contentState.getEntity(entityKey)
   const decoratedText = Array.isArray(children)
     ? children[0].props.text
     : children.props.decoratedText
 
-  const isCompressedPh = entityName === 'ph' && phTagsCompressed && index >= 0
-  const pcRoleClass = entityName === 'ph' && pcRole ? ` tag-pc-${pcRole}` : ''
+  const isCompressedPh = entityName === 'ph' && tagsCompressed && index >= 0
+  const tagRoleClass =
+    entityName === 'ph' && tagRole ? ` tag-paired-${tagRole}` : ''
   // A closing pc tag shows only its number, so it never needs a content tooltip.
-  const isPcClose = entityName === 'ph' && pcRole === 'close'
+  const isPcClose = entityName === 'ph' && tagRole === 'close'
   const showTooltip =
     ((shouldTooltipOnHover && tooltipAvailable) || isCompressedPh) && !isPcClose
 
@@ -541,7 +542,7 @@ const TagEntity = ({
           ref={tagRef}
           className={`tag ${style}${focused ? ' tag-focused' : ''}${
             isCompressedPh ? ' tag-compressed' : ''
-          }${pcRoleClass} ${tagWarningStyle}`}
+          }${tagRoleClass} ${tagWarningStyle}`}
           data-offset-key={offsetkey}
           unselectable="on"
           suppressContentEditableWarning={true}
@@ -565,14 +566,14 @@ const TagEntity = ({
             markSearch(decoratedText, searchParams, props)}
           {searchParams.active ? (
             <span style={{display: 'none'}}>
-              {getChildrenContent(index, entityName, pcRole, {
-                phTagsCompressed,
+              {getChildrenContent(index, entityName, tagRole, {
+                tagsCompressed,
                 children,
               })}
             </span>
           ) : (
-            getChildrenContent(index, entityName, pcRole, {
-              phTagsCompressed,
+            getChildrenContent(index, entityName, tagRole, {
+              tagsCompressed,
               children,
             })
           )}

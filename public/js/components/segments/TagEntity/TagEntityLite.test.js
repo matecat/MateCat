@@ -6,7 +6,7 @@ let mockCompressed = false
 let mockStoreListeners = {}
 
 jest.mock('../../../stores/CatToolStore', () => ({
-  isPhTagsCompressed: () => mockCompressed,
+  isTagsCompressed: () => mockCompressed,
   addListener: jest.fn((event, handler) => {
     mockStoreListeners[event] = handler
   }),
@@ -16,7 +16,7 @@ jest.mock('../../../stores/CatToolStore', () => ({
 }))
 
 jest.mock('../../../constants/CatToolConstants', () => ({
-  TOGGLE_PH_TAGS_COMPRESSED: 'TOGGLE_PH_TAGS_COMPRESSED',
+  TOGGLE_TAGS_COMPRESSED: 'TOGGLE_TAGS_COMPRESSED',
 }))
 
 jest.mock('../utils/DraftMatecatUtils/tagModel', () => ({
@@ -36,9 +36,9 @@ jest.mock('../../common/Tooltip', () => ({
   ),
 }))
 
-const mockContentState = (entityName, index, placeholder = 'test', pcRole) => ({
+const mockContentState = (entityName, index, placeholder = 'test', tagRole) => ({
   getEntity: () => ({
-    data: {name: entityName, index, placeholder, pcRole},
+    data: {name: entityName, index, placeholder, tagRole},
   }),
 })
 
@@ -176,7 +176,7 @@ describe('TagEntityLite', () => {
 
     mockCompressed = true
     act(() => {
-      mockStoreListeners['TOGGLE_PH_TAGS_COMPRESSED']?.()
+      mockStoreListeners['TOGGLE_TAGS_COMPRESSED']?.()
     })
 
     expect(
@@ -279,7 +279,7 @@ describe('TagEntityLite', () => {
     expect(container.querySelector('.tag-text-lite')).toBeTruthy()
     expect(
       container.querySelector('.tag'),
-    ).toHaveClass('tag-pc-open')
+    ).toHaveClass('tag-paired-open')
     expect(
       container.querySelector('[data-testid="tooltip-wrapper"]'),
     ).toBeTruthy()
@@ -300,7 +300,7 @@ describe('TagEntityLite', () => {
     expect(container.querySelector('.tag-text-lite')).toBeNull()
     expect(
       container.querySelector('.tag'),
-    ).toHaveClass('tag-pc-close')
+    ).toHaveClass('tag-paired-close')
     expect(container.querySelector('[data-testid="tooltip-wrapper"]')).toBeNull()
   })
 })
