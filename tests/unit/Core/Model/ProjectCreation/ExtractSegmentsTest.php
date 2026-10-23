@@ -318,6 +318,28 @@ class ExtractSegmentsTest extends AbstractTest
     }
 
     /**
+     * Two XLIFF 2.0 segments with the same source and the same disp, but whose dataRef points to different
+     * originalData, must not share a hash: the hash drives propagation, and their exported targets differ.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function testXliff20SegmentHashIgnoresDispAndKeepsTheOriginalData(): void
+    {
+        $fid = 1;
+        $this->pm->callExtractSegments($fid, [
+            'path_cached_xliff' => self::FIXTURES_DIR . 'xliff20-same-disp-different-original-data.xlf',
+            'original_filename' => 'xliff20-same-disp-different-original-data.xlf',
+        ]);
+
+        $segments = $this->pm->getTestProjectStructure()->segments[$fid];
+
+        $this->assertCount(2, $segments);
+        $this->assertSame($segments[0]->segment, $segments[1]->segment);
+        $this->assertNotEquals($segments[0]->segment_hash, $segments[1]->segment_hash);
+    }
+
+    /**
      * Verify that seg-source translations are keyed by mrk ID (not numeric).
      * This locks behavior before extracting resolveAndStorePreTranslation().
      *

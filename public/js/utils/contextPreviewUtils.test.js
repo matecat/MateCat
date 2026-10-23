@@ -1399,6 +1399,93 @@ describe('stripSegmentTags — visible placeholders', () => {
     },
   )
 
+  describe('XLIFF 2.0 ph with disp/equiv', () => {
+    const xliff20Ph = (ctype, display, originalTag) =>
+      `<ph id="1" ctype="${ctype}" equiv-text="base64:${btoa(display)}"` +
+      (originalTag ? ` x-orig="${btoa(originalTag)}"` : '') +
+      '/>'
+
+    it.each([
+      ['disp', '<ph id="1" dataRef="d1" disp="[Name]"/>'],
+      ['equiv', '<ph id="1" dataRef="d1" equiv="[Name]"/>'],
+      ['disp and equiv', '<ph id="1" dataRef="d1" disp="[Name]" equiv="N"/>'],
+    ])('keeps an x-ph_data_ref with %s as its display text', (_, tag) => {
+      expect(
+        stripSegmentTags(
+          `Hello ${xliff20Ph('x-ph_data_ref', '[Name]', tag)}!`,
+          {keepPlaceholders: true},
+        ),
+      ).toBe('Hello [Name]!')
+    })
+
+    it('keeps an x-original_ph_no_data_ref with disp as its display text', () => {
+      expect(
+        stripSegmentTags(
+          `Hello ${xliff20Ph('x-original_ph_no_data_ref', '[Name]', '<ph id="1" disp="[Name]"/>')}!`,
+          {keepPlaceholders: true},
+        ),
+      ).toBe('Hello [Name]!')
+    })
+
+    it('strips an x-ph_data_ref whose equiv-text is its raw original data', () => {
+      expect(
+        stripSegmentTags(
+          `Line${xliff20Ph('x-ph_data_ref', '&lt;br&gt;', '<ph id="1" dataRef="d1"/>')}end`,
+          {keepPlaceholders: true},
+        ),
+      ).toBe('Lineend')
+    })
+
+    it('strips an x-ph_data_ref whose disp is empty', () => {
+      expect(
+        stripSegmentTags(
+          `Line${xliff20Ph('x-ph_data_ref', '&lt;br&gt;', '<ph id="1" dataRef="d1" disp=""/>')}end`,
+          {keepPlaceholders: true},
+        ),
+      ).toBe('Lineend')
+    })
+
+    it('strips an x-original_ph_no_data_ref without x-orig', () => {
+      expect(
+        stripSegmentTags(
+          `Line${xliff20Ph('x-original_ph_no_data_ref', '<ph id="1"/>')}end`,
+          {keepPlaceholders: true},
+        ),
+      ).toBe('Lineend')
+    })
+
+    it('does not mistake equiv-text in the original tag for equiv', () => {
+      expect(
+        stripSegmentTags(
+          `Line${xliff20Ph('x-ph_data_ref', 'x', '<ph id="1" dataRef="d1" equiv-text="x"/>')}end`,
+          {keepPlaceholders: true},
+        ),
+      ).toBe('Lineend')
+    })
+
+    it('ignores disp on a paired-code ctype', () => {
+      expect(
+        stripSegmentTags(
+          `A ${xliff20Ph('x-pc_open_data_ref', '[b]', '<pc id="2" dataRefStart="d2" dispStart="[b]">')}bold`,
+          {keepPlaceholders: true},
+        ),
+      ).toBe('A bold')
+    })
+
+    it('writes the display text into the preview node', () => {
+      document.body.innerHTML = '<p data-context-sids="1">Hello name</p>'
+      const p = document.body.querySelector('p')
+      const status = updateNodeTranslation(p, [
+        {
+          sid: 1,
+          target: `Ciao ${xliff20Ph('x-ph_data_ref', '[Nome]', '<ph id="1" dataRef="d1" disp="[Nome]"/>')}`,
+        },
+      ])
+      expect(status).toBe('ok')
+      expect(p).toHaveTextContent(/^Ciao \[Nome\]$/)
+    })
+  })
+
   it('keeps placeholders while stripping the surrounding g and x tags', () => {
     expect(
       stripSegmentTags(
