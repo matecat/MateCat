@@ -11,6 +11,7 @@ use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PDOException;
+use TypeError;
 use Utils\Logger\LoggerFactory;
 use Utils\Validation\UserSuppliedName;
 
@@ -109,6 +110,34 @@ class TmKeyManager
     }
 
     /**
+     * Returns the keys the job owner linked to a job, with the owner's grants.
+     * Unlike getJobTmKeys(), it never includes a translator's or revisor's own keys.
+     *
+     * @param string $jsonTmKeys A json string representing an array of TmKeyStruct objects
+     * @param string $grant_level One of "r", "w", "rw"
+     * @param string $type One of "tm", "glos", "tm,glos"
+     *
+     * @return list<string>
+     * @throws Exception
+     */
+    public static function getOwnerJobTmKeys(string $jsonTmKeys, string $grant_level = 'rw', string $type = "tm"): array
+    {
+        $tmKeys = json_decode($jsonTmKeys, true, 512, JSON_THROW_ON_ERROR);
+        $filter = new Filter();
+        $filter->setGrants($grant_level)
+            ->setTmType($type);
+
+        $keys = [];
+        foreach (array_filter($tmKeys, [$filter, 'byOwner']) as $tmKey) {
+            if (!empty($tmKey['key'])) {
+                $keys[] = (string)$tmKey['key'];
+            }
+        }
+
+        return $keys;
+    }
+
+    /**
      * Generates a list of penalty objects based on the provided translation memory keys.
      *
      * @param string $jsonTmKeys A JSON string representing the translation memory keys.
@@ -154,8 +183,7 @@ class TmKeyManager
             $tmKey = json_decode($tmKey, true);
 
             if (is_null($tmKey)) {
-                LoggerFactory::doJsonLog(__METHOD__ . " -> Invalid JSON.");
-                LoggerFactory::doJsonLog(var_export($tmKey, true));
+                LoggerFactory::getLogger('engines')->error(__METHOD__ . " -> Invalid JSON.");
                 throw new Exception ("Invalid JSON: " . var_export($jsonTmKeys_array, true), -2);
             }
 
@@ -211,7 +239,7 @@ class TmKeyManager
      *
      * @return TmKeyStruct
      *
-     * @throws \TypeError
+     * @throws TypeError
      * @throws DomainException
      */
     public static function sanitize(TmKeyStruct $obj): TmKeyStruct
@@ -316,7 +344,7 @@ class TmKeyManager
      * @return TmKeyStruct[] TmKeyStruct[]
      *
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      * @see TmKeyStruct
      *
      */
@@ -523,7 +551,7 @@ class TmKeyManager
                             $_keyDao->create($dh);
                         }
                     } catch (Exception $e) {
-                        LoggerFactory::doJsonLog($e->getMessage());
+                        LoggerFactory::getLogger('engines')->error($e->getMessage());
                     }
                 }
             }
@@ -602,7 +630,7 @@ class TmKeyManager
      * @param IDatabase $database
      *
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function shareKey(array $emailList, MemoryKeyStruct $memoryKeyToUpdate, UserStruct $user, IDatabase $database): void
     {

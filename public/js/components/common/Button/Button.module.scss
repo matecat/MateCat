@@ -17,7 +17,6 @@ a.button-component-container {
   cursor: pointer;
   border-radius: variables.$border-radius-default;
   width: auto;
-  font-weight: 700;
   transition-property: color, background-color, box-shadow, opacity;
   transition-duration: 0.3s;
   transition-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
@@ -146,35 +145,30 @@ a.button-component-container {
     padding: 6px 12px;
     gap: 6px;
     font: variables.$font-style-xsmall;
-    font-weight: 700;
   }
   &.small {
     height: 32px;
     padding: 6px 12px;
     gap: 6px;
     font: variables.$font-style-small;
-    font-weight: 700;
   }
   &.standard {
     height: 40px;
     padding: 10px 16px;
     font: variables.$font-style-small;
     gap: 6px;
-    font-weight: 700;
   }
   &.medium {
     height: 48px;
     padding: 12px 20px;
     font: variables.$font-style-base;
     gap: 8px;
-    font-weight: 700;
   }
   &.big {
     height: 54px;
     padding: 14px 28px;
     gap: 10px;
     font: variables.$font-style-big;
-    font-weight: 700;
   }
   &.iconXSmall {
     width: 24px;

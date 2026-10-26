@@ -20,7 +20,13 @@ jest.mock('../../../../stores/SegmentStore', () => ({
 }))
 
 jest.mock('../../../common/Select', () => ({
-  Select: ({options, activeOptions, onToggleOption, onCloseSelect, children}) => (
+  Select: ({
+    options,
+    activeOptions,
+    onToggleOption,
+    onCloseSelect,
+    children,
+  }) => (
     <div>
       <div data-testid="active-options">
         {(activeOptions ?? []).map((option) => option?.id).join(',')}
@@ -48,7 +54,7 @@ const renderTagging = ({
   modifyingCurrentTemplate = jest.fn(),
 } = {}) =>
   render(
-    <CreateProjectContext.Provider value={{SELECT_HEIGHT: 200}}>
+    <CreateProjectContext.Provider value={{}}>
       <SettingsPanelContext.Provider
         value={{currentProjectTemplate, modifyingCurrentTemplate}}
       >

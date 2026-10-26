@@ -50,6 +50,10 @@
         .footer .tab {
           border-bottom-left-radius: variables.$border-radius-default;
           border-bottom-right-radius: variables.$border-radius-default;
+
+          &:not(:has(.segment-footer-tab-more-button)) {
+            overflow: hidden;
+          }
         }
       }
     }
@@ -88,8 +92,7 @@
   z-index: 2;
   width: 100%;
   padding-left: 5%;
-  background-color: colors.$grey100;
-  border-bottom: 1px colors.$grey150 solid;
+  background-color: colors.$grey50;
 
   @media screen and (max-width: 1180px) {
     padding-left: 6%;
@@ -141,8 +144,19 @@
 .project-bar-blink {
   animation: blinkBackground 1.2s;
   animation-iteration-count: 3;
-  border-top-left-radius: 8px;
-  border-bottom-left-radius: 8px;
+
+  &::before {
+    animation: blinkBackground 1.2s;
+    animation-iteration-count: 3;
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 100%;
+    left: -8px;
+    border-top-left-radius: variables.$border-radius-default;
+    border-bottom-left-radius: variables.$border-radius-default;
+    background-color: rgba(42, 140, 252, 0.4);
+  }
 }
 
 .project-bar-blink-wordcounter {
@@ -150,8 +164,8 @@
   animation-iteration-count: 3;
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
-  border-top-right-radius: 8px;
-  border-bottom-right-radius: 8px;
+  border-top-right-radius: variables.$border-radius-default;
+  border-bottom-right-radius: variables.$border-radius-default;
 }
 
 @keyframes blinkBackground {
@@ -161,6 +175,7 @@
 
   50% {
     background-color: rgba(42, 140, 252, 0.4);
+    color: colors.$grey700;
   }
 
   100% {
@@ -189,6 +204,7 @@
     flex-direction: row;
     align-items: center;
     max-width: 80%;
+    position: relative;
   }
   .button-notes {
     color: colors.$white !important;

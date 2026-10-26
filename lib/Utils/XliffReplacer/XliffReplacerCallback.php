@@ -115,8 +115,11 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface
         //
         // To skip these characters, the QA class needs the replaced versions of the segment and the target
         // for the _addThisElementToDomMap() function.
+        //
+        // The tags are compared by their original data: a target tag whose disp/equiv is missing or localized
+        // is still the same tag, and the exported file restores it from the original data anyway.
         if (!empty($dataRefMap)) {
-            $dataRefReplacer = new DataRefReplacer($dataRefMap);
+            $dataRefReplacer = new DataRefReplacer($dataRefMap, useDisplayValues: false);
             $segment = $dataRefReplacer->replace($segment);
             $translation = $dataRefReplacer->replace($translation);
         }

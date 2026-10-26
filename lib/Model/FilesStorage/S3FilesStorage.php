@@ -7,8 +7,10 @@ use Exception;
 use Matecat\SimpleS3\Client;
 use Matecat\SimpleS3\ClientInterface;
 use Matecat\SimpleS3\Components\Cache\RedisCache;
+use InvalidArgumentException;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use ReflectionException;
+use TypeError;
 use UnexpectedValueException;
 use Utils\Logger\LoggerFactory;
 use Utils\Redis\RedisHandler;
@@ -60,7 +62,7 @@ class S3FilesStorage extends AbstractFilesStorage
      * Create the bucket if not exists
      *
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function __construct(?FilesystemAdapter $filesystem = null, ?ClientInterface $s3Client = null)
     {
@@ -262,7 +264,6 @@ class S3FilesStorage extends AbstractFilesStorage
      * @param string|null $originalPath
      *
      * @return string
-     * @throws \Psr\Log\InvalidArgumentException
      */
     private function storeOriginalFileAndGetXliffDestination(string $prefix, string $xliffPath, string $bucketName, ?string $originalPath = null): string
     {
@@ -776,7 +777,7 @@ class S3FilesStorage extends AbstractFilesStorage
      * @param string $projectID
      *
      * @return bool
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function linkZipToProject(string $create_date, string $zipHash, string $projectID): bool
     {
@@ -812,7 +813,7 @@ class S3FilesStorage extends AbstractFilesStorage
      * @param string $zipName
      *
      * @return string
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function getOriginalZipPath(string $projectDate, string $projectID, string $zipName): string
     {
@@ -824,7 +825,7 @@ class S3FilesStorage extends AbstractFilesStorage
      * @param string $projectID
      *
      * @return string
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function getOriginalZipDir(string $projectDate, string $projectID): string
     {

@@ -162,7 +162,7 @@ class WarningDaoRealSqlTest extends AbstractTest
         $this->setWarningDirectly($this->firstSeg + 3, 1);
         $this->assertSame(2, (int)$this->cachedCount()?->count);
 
-        $this->dao->destroyWarningsCache($this->jobId);
+        $this->dao->destroyCachesByJobId($this->jobId);
         $this->assertSame(3, (int)$this->cachedCount()?->count);
     }
 
@@ -266,7 +266,7 @@ class WarningDaoRealSqlTest extends AbstractTest
         $this->setWarningDirectly($this->firstSeg + 3, 1);
         $this->assertCount(2, $this->cachedWarnings());
 
-        $this->dao->destroyWarningsCache($this->jobId);
+        $this->dao->destroyCachesByJobId($this->jobId);
         $this->assertCount(3, $this->cachedWarnings());
     }
 

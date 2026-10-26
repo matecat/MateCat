@@ -21,6 +21,7 @@ import UserStore from '../../stores/UserStore'
 import {getUserData} from '../../api/getUserData'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import ModalsActions from '../../actions/ModalsActions'
+import CommonUtils from '../../utils/commonUtils'
 
 const PreferencesModal = (props) => {
   const {userInfo, setUserInfo, logout} = useContext(ApplicationWrapperContext)
@@ -163,7 +164,7 @@ const PreferencesModal = (props) => {
               <div className={'user-api-buttons'}>
                 <Button
                   type={BUTTON_TYPE.PRIMARY}
-                  size={BUTTON_SIZE.MEDIUM}
+                  size={BUTTON_SIZE.STANDARD}
                   onClick={() => deleteKey()}
                   tabIndex="0"
                 >
@@ -171,7 +172,7 @@ const PreferencesModal = (props) => {
                 </Button>
                 <Button
                   mode={BUTTON_MODE.OUTLINE}
-                  size={BUTTON_SIZE.MEDIUM}
+                  size={BUTTON_SIZE.STANDARD}
                   onClick={(e) => undoDelete(e)}
                   className={'btn-cancel'}
                   tabIndex="0"
@@ -221,7 +222,7 @@ const PreferencesModal = (props) => {
                 <div className={'user-api-buttons'}>
                   <Button
                     type={BUTTON_TYPE.PRIMARY}
-                    size={BUTTON_SIZE.MEDIUM}
+                    size={BUTTON_SIZE.STANDARD}
                     onClick={(e) => copyToClipboard(e)}
                     tabIndex="0"
                   >
@@ -230,7 +231,7 @@ const PreferencesModal = (props) => {
                   </Button>
                   <Button
                     type={BUTTON_TYPE.PRIMARY}
-                    size={BUTTON_SIZE.MEDIUM}
+                    size={BUTTON_SIZE.STANDARD}
                     onClick={() => confirmDeleteHandler()}
                     tabIndex="0"
                   >
@@ -241,7 +242,7 @@ const PreferencesModal = (props) => {
                 <div className="user-api-buttons">
                   <Button
                     type={BUTTON_TYPE.PRIMARY}
-                    size={BUTTON_SIZE.MEDIUM}
+                    size={BUTTON_SIZE.STANDARD}
                     onClick={() => confirmDeleteHandler()}
                     tabIndex="0"
                   >
@@ -304,7 +305,7 @@ const PreferencesModal = (props) => {
               {config.isAnInternalUser ? (
                 <Button
                   type={BUTTON_TYPE.PRIMARY}
-                  size={BUTTON_SIZE.MEDIUM}
+                  size={BUTTON_SIZE.STANDARD}
                   onClick={() => generateKey()}
                   tabIndex="0"
                 >
@@ -342,7 +343,7 @@ const PreferencesModal = (props) => {
   }
 
   let avatar = (
-    <div className="avatar-user pull-left">{config.userShortName}</div>
+    <span className="user-generic">{CommonUtils.getUserShortName(user)}</span>
   )
   if (metadata && metadata[`${metadata.oauth_provider}_picture`]) {
     avatar = (

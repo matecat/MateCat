@@ -136,12 +136,10 @@ export const Header = ({
         {/*Profile menu*/}
         <UserMenu />
       </div>
-      <div id="header-bars-wrapper">
-        <SubHeaderContainer
-          userInfo={userInfo}
-          filtersEnabled={SegmentFilter.enabled()}
-        />
-      </div>
+      <SubHeaderContainer
+        userInfo={userInfo}
+        filtersEnabled={SegmentFilter.enabled()}
+      />
     </header>
   )
 }

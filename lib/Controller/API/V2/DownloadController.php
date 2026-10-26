@@ -972,7 +972,6 @@ class DownloadController extends AbstractDownloadController
      * @param string $tmpDir
      *
      * @throws Exception
-     * @throws \Psr\Log\InvalidArgumentException
      * @throws ReflectionException
      *
      * @codeCoverageIgnore integration-only: downloads an object from S3 to a tmp path.

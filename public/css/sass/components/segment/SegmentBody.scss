@@ -173,8 +173,7 @@ section.readonly .status-container a.status:hover {
   outline: none;
   color: colors.$black;
   border: 1px solid colors.$grey200;
-  box-shadow: inset 0 1px 2px colors.$grey300;
-  -webkit-box-shadow: inset 0 1px 2px colors.$grey300;
+  border-radius: variables.$border-radius-default;
   /*font-variant-ligatures: none;*/
   cursor: text;
 }
@@ -194,7 +193,7 @@ section.readonly .status-container a.status:hover {
   float: left;
   width: 99%;
   height: 100%;
-  padding-bottom: 5px;
+  padding-bottom: 10px;
   padding-top: 5px;
   font-size: variables.$font-size-small;
 }

@@ -29,6 +29,7 @@ use Utils\Constants\TranslationStatus;
 use Utils\Contribution\GetContributionRequest;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
+use Utils\Logger\MatecatLogger;
 use Utils\LQA\PostProcess;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractElement;
@@ -44,9 +45,13 @@ class GetContributionWorker extends AbstractWorker
 {
     private MatchSorterInterface $matchSorter;
 
-    public function __construct(AMQHandler $queueHandler, IDatabase $database, ?MatchSorterInterface $matchSorter = null)
-    {
-        parent::__construct($queueHandler, $database);
+    public function __construct(
+        AMQHandler $queueHandler,
+        IDatabase $database,
+        ?MatchSorterInterface $matchSorter = null,
+        ?MatecatLogger $logger = null,
+    ) {
+        parent::__construct($queueHandler, $database, $logger);
         $this->matchSorter = $matchSorter ?? new MatchSorter();
     }
 
@@ -176,7 +181,7 @@ class GetContributionWorker extends AbstractWorker
         ];
 
         $this->publishToNodeJsClients($_object);
-        $this->_doLog($_object);
+        $this->logger->debug($_object);
     }
 
 
@@ -227,7 +232,7 @@ class GetContributionWorker extends AbstractWorker
                     // Note: DomDocument class forces the conversion of some entities like &#10; to the original character "\n"
                     $match['translation'] = $QA->getTrgNormalized();
                 } else {
-                    $this->_doLog($QA->getErrors());
+                    $this->logger->debug($QA->getErrors());
                 }
             }
 
@@ -372,6 +377,7 @@ class GetContributionWorker extends AbstractWorker
         $_config['context_before'] = $contributionStruct->getContexts()->context_before;
         $_config['context_after'] = $contributionStruct->getContexts()->context_after;
         $_config['id_user'] = $this->_extractAvailableKeysForUser($contributionStruct);
+        $_config['mt_key'] = TmKeyManager::getOwnerJobTmKeys($contributionStruct->getJobStruct()->tm_keys, 'r');
         $_config['num_result'] = $contributionStruct->resultNum;
         $_config['isConcordance'] = $contributionStruct->concordanceSearch;
         $_config['lara_style'] = $contributionStruct->lara_style;
@@ -525,7 +531,7 @@ class GetContributionWorker extends AbstractWorker
                         $mt_result = $mtResponse->get_matches_as_array(1)[0] ?? [];
                     }
                 } catch (Exception $e) {
-                    $this->_doLog($e->getMessage());
+                    $this->logger->debug($e->getMessage());
                 }
             }
         }

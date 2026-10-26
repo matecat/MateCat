@@ -27,6 +27,23 @@ section.muted .segment-side-buttons {
 }
 
 // --- Main filter container ---
+#header-bars-wrapper {
+  background-color: colors.$grey50;
+}
+
+// Each slot (the search/filter/QA panel group, and independently the bulk-selection bar)
+// animates its own height closed. Height is driven imperatively (SubHeaderContainer.js
+// measures the slot's mounted content via ResizeObserver and sets this element's inline
+// height), not by a class toggle: that's what lets switching directly between Search and
+// Filters animate smoothly between their two heights, not just the open (0 -> content) /
+// close (content -> 0) transitions. The two slots animate independently so one can stay
+// open while the other closes, and vice versa.
+#header-bars-wrapper .header-bars-slot {
+  height: 0;
+  overflow: hidden;
+  transition: height 300ms ease;
+}
+
 #header-bars-wrapper .filter-wrapper {
   position: relative;
   width: 100%;
@@ -37,7 +54,6 @@ section.muted .segment-side-buttons {
 #header-bars-wrapper .filter-container {
   background-color: colors.$white;
   height: 50px;
-  box-shadow: 0 1px 3px colors.$grey700;
   border-radius: 0 0 2px 2px;
   display: block;
   color: colors.$grey700;

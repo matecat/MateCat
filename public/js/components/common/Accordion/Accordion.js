@@ -55,10 +55,7 @@ export const Accordion = ({
     else if (!expanded) panelRef.current.style.maxHeight = 0
   }, [expanded, contentHeight])
 
-  const titleClassName = [
-    styles.title,
-    expanded && styles['title--expanded'],
-  ]
+  const titleClassName = [styles.title, expanded && styles['title--expanded']]
     .filter(Boolean)
     .join(' ')
 
@@ -72,9 +69,7 @@ export const Accordion = ({
         {title} <ChevronDown size={24} />
       </div>
       <div ref={panelRef} className={styles.content}>
-        <div ref={contentRef} className={styles.insideContent}>
-          {isRenderingContent && children}
-        </div>
+        <div ref={contentRef}>{isRenderingContent && children}</div>
       </div>
     </div>
   )

@@ -12,7 +12,6 @@ use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\MatchProcessorServiceInterface;
 use Utils\AsyncTasks\Workers\Interface\MatchSorterInterface;
 use Utils\Constants\Ices;
 use Utils\Constants\TranslationStatus;
@@ -20,7 +19,7 @@ use Utils\LQA\ICUSourceSegmentDetector;
 use Utils\LQA\PostProcess;
 use Utils\TaskRunner\Commons\Params;
 
-class MatchProcessorService implements MatchProcessorServiceInterface
+class MatchProcessorService implements MatchSorterInterface
 {
     private MatchSorterInterface $matchSorter;
     private IDatabase $database;
@@ -286,22 +285,14 @@ class MatchProcessorService implements MatchProcessorServiceInterface
      * An ICE_MT match on an MT QE workflow is approved, and locked when the workflow parameters ask for it.
      *
      * @param array<string, mixed> $tmData translation data array
-     * @param object $params queue element params (must expose: target, pretranslate_100, mt_qe_workflow_enabled)
-     * @phpstan-param object&object{
-     *     target: string,
-     *     pretranslate_100: mixed,
-     *     mt_qe_workflow_enabled: mixed,
-     *     pretranslate_101?: bool|string|null,
-     *     pretranslate_101_status?: string|null,
-     *     pretranslate_101_lock?: bool|string|null,
-     *     pretranslate_100_status?: string|null,
-     *     pretranslate_100_lock?: bool|string|null,
-     *     mt_qe_workflow_parameters?: Params|MTQEWorkflowParams|null
-     * } $params
+     * @param Params $params queue element params. Reads target (string), pretranslate_100 and mt_qe_workflow_enabled.
+     *                      Optional: pretranslate_101 and the two locks (bool, string or null), pretranslate_101_status
+     *                      and pretranslate_100_status (string or null), mt_qe_workflow_parameters (Params,
+     *                      MTQEWorkflowParams or null)
      *
      * @return array<string, mixed>
      */
-    public function determinePreTranslateStatus(array $tmData, object $params): array
+    public function determinePreTranslateStatus(array $tmData, Params $params): array
     {
         $status101 = $params->pretranslate_101_status ?? null;
 

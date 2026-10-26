@@ -72,10 +72,8 @@ class RevisionFactory
      * IMPORTANT
      *
      * This method is invoked to update/reset the features before invoking filter callbacks.
-     * This is needed because, by default, 'mandatory_plugins' section, in the configuration ini file,
-     * always load 'review_extended' or 'second_pass_review' (which has 'review_extended' as dependency) when the application bootstraps.
-     *
-     * If the old 'review_improved' feature is enabled for the project, a singleton instance every time would return 'review_extended'
+     * This is needed because, by default, the AUTOLOAD_PLUGINS setting in the configuration ini file
+     * always loads 'second_pass_review' when the application bootstraps.
      *
      * This works because revision plugins are by default not forcedly injected on projects ($forceOnProject == false).
      *
@@ -97,7 +95,7 @@ class RevisionFactory
         }
 
         /**
-         * This return should never happen if the review_extended plugin is loaded as mandatory (or as dependency of mandatory second_pass_review plugin)
+         * This return should never happen while the second_pass_review plugin is in AUTOLOAD_PLUGINS
          */
         return self::getInstance(
             new SecondPassReview(new BasicFeatureStruct(['feature_code' => SecondPassReview::FEATURE_CODE]))

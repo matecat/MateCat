@@ -9,6 +9,7 @@ use Matecat\SubFiltering\Utils\DataRefReplacer;
 use Matecat\XliffParser\XliffParser;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Model\Concerns\LogsMessages;
+use Model\Conversion\ZipArchiveHandler;
 use Model\DataAccess\IDatabase;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
@@ -147,13 +148,17 @@ class SegmentExtractor
             $xliffInfo = (new XliffProprietaryDetect())->getInfoByStringData($xliff_file_content);
             $projectStructure->current_xliff_info[$fid] = $xliffInfo;
         } catch (Throwable $e) {
-            throw new Exception("Failed to parse " . $file_info['original_filename'], ($e->getCode() != 0 ? $e->getCode() : ProjectCreationError::XLIFF_PARSE_FAILURE->value), $e);
+            if ($e->getCode() === ProjectCreationError::INVALID_XLIFF_PARAMETERS->value) {
+                throw new ProjectCreationException(ProjectCreationError::INVALID_XLIFF_PARAMETERS, $e->getMessage() . " in Failed to parse " . $file_info['original_filename'], $e);
+            }
+
+            throw new ProjectCreationException(ProjectCreationError::XLIFF_IMPORT_ERROR, "XLIFF import error: Failed to parse " . $file_info['original_filename'], $e);
         }
 
         // Checking that parsing went well
         if (isset($xliff['parser-errors']) || !isset($xliff['files'])) {
-            $this->log("Failed to parse " . $file_info['original_filename'] . join("\n", $xliff['parser-errors']));
-            throw new Exception("Failed to parse " . $file_info['original_filename'], ProjectCreationError::XLIFF_PARSE_FAILURE->value);
+            $this->log("Failed to parse " . $file_info['original_filename'] . join("\n", $xliff['parser-errors'] ?? []));
+            throw new ProjectCreationException(ProjectCreationError::XLIFF_IMPORT_ERROR, "XLIFF import error: Failed to parse " . $file_info['original_filename']);
         }
 
         // needed to check if a file has only one segment
@@ -177,7 +182,10 @@ class SegmentExtractor
         // use generic
         if (count($projectStructure->segments[$fid]) == 0 || $_fileCounter_Show_In_Cattool == 0) {
             $this->log("Segment import - no segments found in {$file_info[ 'original_filename' ]}\n");
-            throw new Exception($file_info['original_filename'], ProjectCreationError::NO_TRANSLATABLE_TEXT->value);
+            throw new ProjectCreationException(
+                ProjectCreationError::NO_TRANSLATABLE_TEXT,
+                "No text to translate in the file " . ZipArchiveHandler::getFileName($file_info['original_filename']) . "."
+            );
         } else {
             // increment global counter
             $this->showInCattoolSegsCounter += $_fileCounter_Show_In_Cattool;
@@ -403,7 +411,8 @@ class SegmentExtractor
             $cattoolCount += $counters['show_in_cattool'];
         } // end foreach seg-source
 
-        $this->extractNotesAndContexts($xliff_trans_unit, $trans_unit_reference, $projectStructure);
+        $this->addNotesToProjectStructure($xliff_trans_unit, $trans_unit_reference, $projectStructure);
+        $this->addTUnitContextsToProjectStructure($xliff_trans_unit, $trans_unit_reference, $projectStructure);
 
         return $cattoolCount;
     }
@@ -457,7 +466,8 @@ class SegmentExtractor
             );
         }
 
-        $this->extractNotesAndContexts($xliff_trans_unit, $trans_unit_reference, $projectStructure);
+        $this->addNotesToProjectStructure($xliff_trans_unit, $trans_unit_reference, $projectStructure);
+        $this->addTUnitContextsToProjectStructure($xliff_trans_unit, $trans_unit_reference, $projectStructure);
 
         $counters = $this->buildAndAppendSegment(
             fid: $fid,
@@ -764,7 +774,9 @@ class SegmentExtractor
         $segmentToBeHashed = $rawContent;
 
         if (!empty($dataRefMap)) {
-            $dataRefReplacer = new DataRefReplacer($dataRefMap);
+            // Hash the original data, not the disp/equiv display values: two segments with the same
+            // display value but different original data must not share a hash
+            $dataRefReplacer = new DataRefReplacer($dataRefMap, useDisplayValues: false);
             $segmentToBeHashed = $dataRefReplacer->replace($rawContent);
         }
 
@@ -796,28 +808,6 @@ class SegmentExtractor
     }
 
     /**
-     * Extract notes and context-group data from a trans-unit.
-     *
-     * Wraps addNotesToProjectStructure() and addTUnitContextsToProjectStructure()
-     * with consistent error handling.
-     *
-     * @param array<string, mixed> $xliff_trans_unit
-     * @param string $trans_unit_reference
-     * @param ProjectStructure $projectStructure
-     *
-     * @throws Exception
-     */
-    private function extractNotesAndContexts(array $xliff_trans_unit, string $trans_unit_reference, ProjectStructure $projectStructure): void
-    {
-        try {
-            $this->addNotesToProjectStructure($xliff_trans_unit, $trans_unit_reference, $projectStructure);
-            $this->addTUnitContextsToProjectStructure($xliff_trans_unit, $trans_unit_reference, $projectStructure);
-        } catch (Exception $exception) {
-            $projectStructure->addError($exception->getCode(), $exception->getMessage());
-        }
-    }
-
-    /**
      * Add notes from a trans-unit to the projectStructure.
      *
      * @param array<string, mixed> $trans_unit
@@ -831,7 +821,7 @@ class SegmentExtractor
         $internal_id = $trans_unit_reference;
         if (isset($trans_unit['notes'])) {
             if (count($trans_unit['notes']) > self::SEGMENT_NOTES_LIMIT) {
-                throw new Exception('File upload failed: a segment can have a maximum of ' . self::SEGMENT_NOTES_LIMIT . ' notes.', ProjectCreationError::TOO_MANY_NOTES->value);
+                throw new ProjectCreationException(ProjectCreationError::TOO_MANY_NOTES, 'File upload failed: a segment can have a maximum of ' . self::SEGMENT_NOTES_LIMIT . ' notes.');
             }
 
             foreach ($trans_unit['notes'] as $note) {
@@ -853,7 +843,7 @@ class SegmentExtractor
                 }
 
                 if (strlen($noteContent) > self::SEGMENT_NOTES_MAX_SIZE) {
-                    throw new Exception(' you reached the maximum size for a single segment note (' . self::SEGMENT_NOTES_MAX_SIZE . ' bytes)');
+                    throw new ProjectCreationException(ProjectCreationError::SEGMENT_NOTE_TOO_LARGE, 'File upload failed: a segment note can be at most ' . self::SEGMENT_NOTES_MAX_SIZE . ' bytes.');
                 }
 
                 if (!isset($projectStructure->notes[$internal_id]['entries'])) {
@@ -979,6 +969,9 @@ class SegmentExtractor
                 $config['id_user'][] = $tm_info['key'];
             }
         }
+
+        // every key passed at project creation belongs to the owner
+        $config['mt_key'] = $config['id_user'] ?? [];
 
         $config['source'] = $xliff_file_attributes['source-language'];
         $config['target'] = $xliff_file_attributes['target-language'];

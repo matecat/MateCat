@@ -109,9 +109,9 @@ class SetContributionWorker extends AbstractWorker
 
         try {
             $this->_update($config, $contributionStruct, $jobStruct->id_mt_engine);
-            $this->_doLog("Key UPDATE -- Job: $contributionStruct->id_job, Segment: $contributionStruct->id_segment ");
+            $this->logger->debug("Key UPDATE -- Job: $contributionStruct->id_job, Segment: $contributionStruct->id_segment ");
         } catch (ReQueueException $e) {
-            $this->_doLog($e->getMessage());
+            $this->logger->debug($e->getMessage());
             throw $e;
         }
     }
@@ -165,7 +165,7 @@ class SetContributionWorker extends AbstractWorker
         $responseStatus = (is_object($res) && isset($res->responseStatus) && is_numeric($res->responseStatus)) ? (int)$res->responseStatus : null;
 
         if ($responseStatus !== null && $responseStatus >= 200 && $responseStatus < 300) {
-            $this->_doLog("Update complete");
+            $this->logger->debug("Update complete");
         } elseif ($responseStatus !== null && $responseStatus >= 400 && $responseStatus < 500) {
             $this->_raiseEndQueueException('Update', $config);
         } else {
@@ -204,13 +204,13 @@ class SetContributionWorker extends AbstractWorker
         $config['newtranslation'] = $contributionStruct->translation;
         $config['spiceMatch'] = $contributionStruct->contextIsSpice;
 
-        $this->_doLog("Executing Update on " . get_class($engine));
+        $this->logger->debug("Executing Update on " . get_class($engine));
 
         $res = $engine->update($config);
         $responseStatus = (is_object($res) && isset($res->responseStatus) && is_numeric($res->responseStatus)) ? (int)$res->responseStatus : null;
 
         if ($responseStatus !== null && $responseStatus >= 200 && $responseStatus < 300) {
-            $this->_doLog("Update complete");
+            $this->logger->debug("Update complete");
         } elseif ($responseStatus !== null && $responseStatus >= 400 && $responseStatus < 500) {
             $this->_raiseEndQueueException('Update', $config);
         } else {
@@ -238,11 +238,12 @@ class SetContributionWorker extends AbstractWorker
 
         $config = [];
         if (!empty($tm_keys)) {
-            $config['keys'] = [];
             foreach ($tm_keys as $tm_info) {
                 $config['id_user'][] = $tm_info->key;
             }
         }
+
+        $config['mt_key'] = TmKeyManager::getOwnerJobTmKeys($jobStruct->tm_keys, 'w');
 
         return $config;
     }

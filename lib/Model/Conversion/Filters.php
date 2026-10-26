@@ -9,7 +9,6 @@ use Model\FilesStorage\AbstractFilesStorage;
 use Model\Filters\DTO\IDto;
 use Model\Jobs\JobStruct;
 use PDO;
-use Psr\Log\InvalidArgumentException;
 use RuntimeException;
 use Utils\Logger\LoggerFactory;
 use Utils\Network\MultiCurlHandler;
@@ -29,7 +28,6 @@ class Filters
      *
      * @return array<int|string, array<string, mixed>>
      *
-     * @throws InvalidArgumentException
      * @throws RuntimeException
      */
     protected function sendToFilters(array $dataGroups, string $endpoint): array
@@ -167,7 +165,6 @@ class Filters
      *
      * @return mixed
      *
-     * @throws InvalidArgumentException
      * @throws RuntimeException
      */
     public function sourceToXliff(
@@ -220,7 +217,6 @@ class Filters
      *
      * @return array<int|string, array<string, mixed>>
      *
-     * @throws InvalidArgumentException
      * @throws RuntimeException
      */
     public function xliffToTarget(array $xliffsData): array
@@ -383,8 +379,6 @@ class Filters
      *   $STORAGE_DIR/conversion_errors/YYYYMMDD/HHmmSS-filename.ext
      *
      * @param string $sentFile
-     *
-     * @throws InvalidArgumentException
      */
     protected function backupFailedConversion(string &$sentFile): void
     {

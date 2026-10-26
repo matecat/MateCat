@@ -83,9 +83,9 @@ class WarningDao extends AbstractDao
      * @throws ReflectionException
      * @throws Exception
      */
-    public function destroyWarningsCache(int $id_job): bool
+    public function destroyCachesByJobId(int $id_job): void
     {
-        return $this->_deleteCacheByKey(self::warningsKeyMap($id_job), false);
+        $this->_deleteCacheByKey(self::warningsKeyMap($id_job), false);
     }
 
     /**

@@ -352,7 +352,7 @@ export const MTGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
                 onClick={addGlossary}
                 title="Add glossary"
               >
-                <IconAdd size={18} />
+                <IconAdd size={22} />
                 New glossary
               </Button>
             )}
@@ -365,7 +365,7 @@ export const MTGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
               onClick={addGlossary}
               title="Add glossary"
             >
-              <IconAdd size={18} />
+              <IconAdd size={22} />
               New glossary
             </Button>
           </div>

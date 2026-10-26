@@ -3,6 +3,7 @@
 namespace Utils\Engines;
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\ValidationError as ControllerValidationError;
 use Exception;
 use Model\DataAccess\IDatabase;
 use Model\Analysis\Constants\InternalMatchesConstants;
@@ -89,6 +90,7 @@ class MyMemory extends AbstractEngine
         'prop' => null,
         'get_mt' => 1,
         'id_user' => null,
+        'mt_key' => null,
         'num_result' => 3,
         'mt_only' => false,
         'isConcordance' => false,
@@ -252,10 +254,10 @@ class MyMemory extends AbstractEngine
       *
       * @return GetMemoryResponse
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       * @throws AuthenticationError
       * @throws NotFoundException
       * @throws ValidationError
+      * @throws ControllerValidationError
       * @throws EndQueueException
       * @throws ReQueueException
       */
@@ -298,12 +300,7 @@ class MyMemory extends AbstractEngine
             $parameters['context_before'] = $_config['context_before'] ?? '';
         }
 
-        if (!empty($_config['id_user'])) {
-            if (!is_array($_config['id_user'])) {
-                $_config['id_user'] = [$_config['id_user']];
-            }
-            $parameters['key'] = implode(",", $_config['id_user']);
-        }
+        $this->addKeyParameters($parameters, $_config);
 
         // Here we pass the subfiltering configuration to the API.
         // This value can be an array or null, if null, no filters will be loaded, if the array is empty, the default filters list will be loaded.
@@ -328,7 +325,6 @@ class MyMemory extends AbstractEngine
       *
       * @return SetContributionResponse|null
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
      public function set($_config): ?SetContributionResponse
      {
@@ -405,14 +401,28 @@ class MyMemory extends AbstractEngine
             $parameters['context_before'] = $config['context_before'] ?? '';
         }
 
-        if (!empty($config['id_user'])) {
-            if (!is_array($config['id_user'])) {
-                $config['id_user'] = [$config['id_user']];
-            }
-            $parameters['key'] = implode(",", $config['id_user']);
-        }
+        $this->addKeyParameters($parameters, $config);
 
         return $parameters;
+    }
+
+    /**
+     * Add the TM key parameters to a MyMemory request.
+     *
+     * `key` holds every key the current user can use on the job: the owner's keys and the user's own.
+     * `mt_key` holds only the keys the job owner linked to the job, so MyMemory can tell them apart.
+     * Both are comma-separated lists and are left out when empty.
+     *
+     * @param array<string, mixed> $parameters
+     * @param array<string, mixed> $config
+     */
+    private function addKeyParameters(array &$parameters, array $config): void
+    {
+        foreach (['key' => 'id_user', 'mt_key' => 'mt_key'] as $parameter => $configKey) {
+            if (!empty($config[$configKey])) {
+                $parameters[$parameter] = implode(",", (array)$config[$configKey]);
+            }
+        }
     }
 
     /**
@@ -439,12 +449,7 @@ class MyMemory extends AbstractEngine
             $parameters['context_before'] = $_config['context_before'] ?? '';
         }
 
-        if (!empty($_config['id_user'])) {
-            if (!is_array($_config['id_user'])) {
-                $_config['id_user'] = [$_config['id_user']];
-            }
-            $parameters['key'] = implode(",", $_config['id_user']);
-        }
+        $this->addKeyParameters($parameters, $_config);
 
         $this->call("update_relative_url", $parameters, true);
 
@@ -457,7 +462,6 @@ class MyMemory extends AbstractEngine
       *
       * @return bool
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
      public function delete($_config): bool
      {
@@ -500,7 +504,6 @@ class MyMemory extends AbstractEngine
       *
       * @return FileImportAndStatusResponse
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
      public function entryStatus(string $uuid): TMSAbstractResponse
      {
@@ -527,7 +530,6 @@ class MyMemory extends AbstractEngine
       *
       * @return FileImportAndStatusResponse
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
      public function glossaryImport(string $file, string $key, string $name = ''): FileImportAndStatusResponse
      {
@@ -557,7 +559,6 @@ class MyMemory extends AbstractEngine
       *
       * @return ExportResponse
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
      public function glossaryExport(string $key, string $keyName, string $userEmail, string $userName): ExportResponse
      {
@@ -580,7 +581,6 @@ class MyMemory extends AbstractEngine
       *
       * @return CheckGlossaryResponse
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
      public function glossaryCheck(string $source, string $target, string $sourceLanguage, string $targetLanguage, ?array $keys = []): CheckGlossaryResponse
      {
@@ -602,7 +602,6 @@ class MyMemory extends AbstractEngine
       *
       * @return DomainsResponse
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
      public function glossaryDomains(?array $keys = []): DomainsResponse
      {
@@ -623,7 +622,6 @@ class MyMemory extends AbstractEngine
       *
       * @return DeleteGlossaryResponse
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
      public function glossaryDelete(string $idSegment, string $idJob, string $password, array $term): DeleteGlossaryResponse
      {
@@ -649,7 +647,6 @@ class MyMemory extends AbstractEngine
       *
       * @return GetGlossaryResponse
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
      public function glossaryGet(string $id_job, string $id_segment, string $source, string $sourceLanguage, string $targetLanguage, ?array $keys = []): GetGlossaryResponse
      {
@@ -676,7 +673,6 @@ class MyMemory extends AbstractEngine
       *
       * @return SearchGlossaryResponse
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
      public function glossarySearch(string $source, string $sourceLanguage, string $targetLanguage, ?array $keys = []): SearchGlossaryResponse
      {
@@ -700,7 +696,6 @@ class MyMemory extends AbstractEngine
       *
       * @return KeysGlossaryResponse
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
      public function glossaryKeys(string $sourceLanguage, string $targetLanguage, ?array $keys = []): KeysGlossaryResponse
      {
@@ -723,7 +718,6 @@ class MyMemory extends AbstractEngine
       *
       * @return SetGlossaryResponse
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
      public function glossarySet(string $idSegment, string $idJob, string $password, array $term): SetGlossaryResponse
      {
@@ -748,7 +742,6 @@ class MyMemory extends AbstractEngine
       *
       * @return UpdateGlossaryResponse
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
      public function glossaryUpdate(string $idSegment, string $idJob, string $password, array $term): UpdateGlossaryResponse
      {
@@ -772,7 +765,6 @@ class MyMemory extends AbstractEngine
       *
       * @return FileImportAndStatusResponse
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
      public function importMemory(string $filePath, string $memoryKey, UserStruct $user): FileImportAndStatusResponse
      {
@@ -791,7 +783,6 @@ class MyMemory extends AbstractEngine
       *
       * @return FileImportAndStatusResponse
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
      public function getImportStatus(string $uuid): FileImportAndStatusResponse
      {
@@ -926,7 +917,6 @@ class MyMemory extends AbstractEngine
      * @throws RuntimeException
      * @throws TypeError
      * @throws Exception
-     * @throws \Psr\Log\InvalidArgumentException
      */
     private function callAnalyzeUrl(array $segments): void
     {
@@ -953,7 +943,6 @@ class MyMemory extends AbstractEngine
       *
       * @return TagProjectionResponse
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
      public function getTagProjection(array $config): TagProjectionResponse
      {

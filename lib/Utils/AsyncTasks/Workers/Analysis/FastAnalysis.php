@@ -4,6 +4,7 @@ namespace Utils\AsyncTasks\Workers\Analysis;
 
 use DateTime;
 use Exception;
+use InvalidArgumentException;
 use Model\Analysis\AnalysisDao;
 use Model\Analysis\PayableRates as PayableRates;
 use Model\DataAccess\Database;
@@ -25,7 +26,6 @@ use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use PDO;
 use PDOException;
-use Psr\Log\InvalidArgumentException as LogInvalidArgumentException;
 use ReflectionException;
 use RuntimeException;
 use Stomp\Exception\ConnectionException;
@@ -44,6 +44,7 @@ use Utils\Engines\MyMemory;
 use Utils\Engines\NONE;
 use Utils\Engines\Results\MyMemory\AnalyzeResponse;
 use Utils\Logger\LoggerFactory;
+use Utils\Redis\RedisLock;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractDaemon;
 use Utils\TaskRunner\Commons\Context;
@@ -56,7 +57,6 @@ use Utils\TaskRunner\Exceptions\DaemonTerminatedException;
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 04/12/15
  * Time: 13.05
- *
  */
 class FastAnalysis extends AbstractDaemon
 {
@@ -101,7 +101,6 @@ class FastAnalysis extends AbstractDaemon
      *
      * @return AMQHandler the freshly built handler (also stored in $this->queueHandler)
      * @throws ConnectionException
-     * @throws LogInvalidArgumentException
      */
     private function _rebuildQueueHandler(): AMQHandler
     {
@@ -207,6 +206,14 @@ class FastAnalysis extends AbstractDaemon
     protected array $actual_project_row;
 
     /**
+     * The release token of each processing lock taken by the current batch, keyed by project id.
+     * Example: [1606 => '9f86d081884c7d65...'] after _getLockProjectForVolumeAnalysis() locked project 1606.
+     *
+     * @var array<int, string>
+     */
+    private array $processingLockTokens = [];
+
+    /**
      * @var AbstractFilesStorage
      */
     protected AbstractFilesStorage $files_storage;
@@ -306,11 +313,14 @@ class FastAnalysis extends AbstractDaemon
     /** Redis key prefix for the per-project fast-analysis processing lock. */
     const string PROCESSING_LOCK_KEY_PREFIX = '_fPid:';
 
+    /** How long a processing lock lives when nothing releases it: 24 hours. */
+    const int PROCESSING_LOCK_TTL_SECONDS = 60 * 60 * 24;
+
     /**
      * Reload Configuration every cycle
      *
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     protected function _updateConfiguration(): void
     {
@@ -322,7 +332,6 @@ class FastAnalysis extends AbstractDaemon
 
     /**
      * @throws PDOException
-     * @throws LogInvalidArgumentException
      */
     protected function _checkDatabaseConnection(): void
     {
@@ -346,10 +355,9 @@ class FastAnalysis extends AbstractDaemon
     }
 
     /**
-     * @throws \TypeError
+     * @throws TypeError
      * @throws Exception
-     * @throws \InvalidArgumentException
-     * @throws LogInvalidArgumentException
+     * @throws InvalidArgumentException
      */
     protected function __construct(string $configFile = null, ?string $contextIndex = null)
     {
@@ -458,7 +466,7 @@ class FastAnalysis extends AbstractDaemon
                                 // dead ERR_EMPTY_RESPONSE path, kept to remember how to reset the status
                                 $this->logger->debug($e->getMessage());
                                 self::_updateProject($pid, ProjectStatus::STATUS_NEW);
-                                $this->requireQueueHandler()->getRedisClient()->del(['_fPid:' . $pid]);
+                                $this->_releaseProcessingLock($pid);
                                 sleep(3);
                                 continue 2; // next project
                             case self::ACTION_RETRY_COUNTED:
@@ -529,7 +537,7 @@ class FastAnalysis extends AbstractDaemon
                             // will not reappear, so skip it. There is no row to hold a BUSY status;
                             // just drop the (now inert) processing lock left by the picker.
                             $this->logger->error("Fast analysis skipped: project $pid no longer exists.");
-                            $this->requireQueueHandler()->getRedisClient()->del([self::PROCESSING_LOCK_KEY_PREFIX . $pid]);
+                            $this->_releaseProcessingLock($pid);
                             continue;
                         }
 
@@ -805,7 +813,6 @@ class FastAnalysis extends AbstractDaemon
     /**
      * @throws ReflectionException
      * @throws RuntimeException
-     * @throws LogInvalidArgumentException
      * @throws Exception
      */
     public function cleanShutDown(): void
@@ -827,7 +834,6 @@ class FastAnalysis extends AbstractDaemon
 
     /**
      * @throws PDOException
-     * @throws LogInvalidArgumentException
      * @throws ReflectionException
      */
     protected function _updateProject(int $pid, string $status): void
@@ -889,7 +895,37 @@ class FastAnalysis extends AbstractDaemon
         }
 
         // release the processing lock in both branches so the next cycle can re-pick it
-        $redis->del([self::PROCESSING_LOCK_KEY_PREFIX . $pid]);
+        $this->_releaseProcessingLock($pid);
+    }
+
+    /**
+     * Release the processing lock this batch took on $pid, so the next cycle can re-pick the project.
+     * It does nothing when the lock expired and another daemon took it, or when this batch never took it.
+     *
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    private function _releaseProcessingLock(int $pid): void
+    {
+        $token = $this->processingLockTokens[$pid] ?? null;
+        if ($token === null) {
+            return;
+        }
+
+        // Forget the token only once the release went through, so a retry after a Redis error can still release.
+        $this->_processingLock()->release(self::PROCESSING_LOCK_KEY_PREFIX . $pid, $token);
+        unset($this->processingLockTokens[$pid]);
+    }
+
+    /**
+     * Built on every call: _rebuildQueueHandler() can replace the handler, and with it the Redis client.
+     *
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    private function _processingLock(): RedisLock
+    {
+        return new RedisLock($this->requireQueueHandler()->getRedisClient());
     }
 
     /**
@@ -944,7 +980,6 @@ class FastAnalysis extends AbstractDaemon
      * @param list<mixed> $bind_values
      *
      * @throws PDOException
-     * @throws LogInvalidArgumentException
      */
     protected function _executeInsert(array $tuple_list, array $bind_values): void
     {
@@ -1066,7 +1101,7 @@ class FastAnalysis extends AbstractDaemon
                     $this->segments[$k]['match_type'] = $match_type;
                     $this->segments[$k]['fast_exact_match_type'] = $v['match_type'];
                 } elseif ($perform_Tms_Analysis) {
-                    LoggerFactory::doJsonLog('Skipped Fast Segment: ' . var_export($this->segments[$k], true));
+                    $this->logger->debug('Skipped Fast Segment: ' . var_export($this->segments[$k], true));
                     // this segment must not be sent to the TM analysis queue
                     unset($this->segments[$k]);
                 } else {
@@ -1391,7 +1426,7 @@ HD;
             $stmt->execute([$pid]);
             $results = $stmt->fetchAll();
         } catch (PDOException $e) {
-            LoggerFactory::doJsonLog($e->getMessage());
+            $this->logger->error($e->getMessage());
             throw $e;
         }
 
@@ -1454,8 +1489,6 @@ HD;
      * @param $id_mt_engine int
      *
      * @return Context|null
-     *
-     * @throws LogInvalidArgumentException
      */
     protected function _getQueueAddressesByPriority(int $queueLen, int $id_mt_engine): ?Context
     {
@@ -1511,16 +1544,19 @@ HD;
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         });
 
+        // The previous batch is finished: none of its tokens is needed any more.
+        $this->processingLockTokens = [];
+
         foreach ($results as $position => $project) {
-            // R1: acquire the lock atomically — SET key 1 NX EX 86400. A split setnx + expire could
-            // crash between the two calls, leaving _fPid:$pid with no TTL → the project locked until
-            // a manual Redis delete. SET … NX returns null when the key already exists.
-            $acquired = $this->requireQueueHandler()->getRedisClient()->set('_fPid:' . $project['id'], 1, 'EX', 60 * 60 * 24, 'NX');
-            if (!$acquired) {
+            $pid = (int)$project['id'];
+            $token = $this->_processingLock()->acquire(self::PROCESSING_LOCK_KEY_PREFIX . $pid, self::PROCESSING_LOCK_TTL_SECONDS);
+            if ($token === null) {
                 unset($results[$position]);
             } else {
+                $this->processingLockTokens[$pid] = $token;
+
                 try {
-                    $this->_updateProject((int)$project['id'], ProjectStatus::STATUS_BUSY);
+                    $this->_updateProject($pid, ProjectStatus::STATUS_BUSY);
                 } catch (Throwable $e) {
                     // The BUSY write failed: release the processing lock AND drop the project
                     // from this batch. Leaving it in $results would hand main() a project that is
@@ -1529,7 +1565,7 @@ HD;
                     // counter pollution). Catch Throwable, not just Exception: a TypeError/Error
                     // from the DAO path must still release the lock, never strand it for the 24h TTL.
                     $this->logger->debug("*** Project {$project['id']}: BUSY update failed ({$e->getMessage()}). Releasing lock, skipping this cycle.");
-                    $this->requireQueueHandler()->getRedisClient()->del('_fPid:' . $project['id']);
+                    $this->_releaseProcessingLock($pid);
                     unset($results[$position]);
                 }
             }

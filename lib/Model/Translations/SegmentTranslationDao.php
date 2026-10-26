@@ -219,7 +219,7 @@ class SegmentTranslationDao extends AbstractDao
         }
 
         foreach (array_unique(array_map(fn(SegmentTranslationStruct $row) => (int)$row->id_job, $translation_struct)) as $id_job) {
-            (new WarningDao($this->database))->destroyWarningsCache($id_job);
+            (new WarningDao($this->database))->destroyCachesByJobId($id_job);
         }
 
         return $rowCount;
@@ -301,7 +301,7 @@ class SegmentTranslationDao extends AbstractDao
 
         $rc = $stmt->rowCount();
         if ($rc > 0) {
-            (new WarningDao($this->database))->destroyWarningsCache((int)$data['id_job']);
+            (new WarningDao($this->database))->destroyCachesByJobId((int)$data['id_job']);
         }
 
         if ($rc === 0) {
@@ -503,7 +503,7 @@ class SegmentTranslationDao extends AbstractDao
             throw new PDOException("Error when (UPDATE) the translation for the segment {$translation['id_segment']} - Error: {$e->getCode()}");
         }
 
-        (new WarningDao($this->database))->destroyWarningsCache((int)$translation_struct->id_job);
+        (new WarningDao($this->database))->destroyCachesByJobId((int)$translation_struct->id_job);
 
         return $stmt->rowCount();
     }
@@ -529,7 +529,7 @@ class SegmentTranslationDao extends AbstractDao
         }
 
         $rowCount = $this->updateStruct($translation_struct, $values);
-        (new WarningDao($this->database))->destroyWarningsCache((int)$translation_struct->id_job);
+        (new WarningDao($this->database))->destroyCachesByJobId((int)$translation_struct->id_job);
 
         return $rowCount;
     }

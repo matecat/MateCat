@@ -813,7 +813,7 @@ class SegmentDaoRealSqlTest extends AbstractTest
         );
         $this->assertSame([], $cached());
 
-        (new WarningDao($this->realSqlDb))->destroyWarningsCache($this->idJob);
+        (new WarningDao($this->realSqlDb))->destroyCachesByJobId($this->idJob);
         $result = $cached();
         $this->assertCount(1, $result);
         $this->assertSame(2, $result[0]['translations_available']);

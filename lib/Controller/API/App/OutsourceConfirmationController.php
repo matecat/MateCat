@@ -12,12 +12,17 @@ namespace Controller\API\App;
 
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Exceptions\AuthorizationError;
+use Controller\API\Commons\Exceptions\ConflictError;
+use Controller\API\Commons\JobRestructureLock;
 use Exception;
 use Model\Jobs\JobDao;
 use Model\Outsource\ConfirmationDao;
 use Model\Outsource\TranslatedConfirmationStruct;
 use Model\Translators\TranslatorsModel;
+use Predis\PredisException;
+use Random\RandomException;
 use ReflectionException;
+use Throwable;
 use Utils\Registry\AppConfig;
 use Utils\Tools\SimpleJWT;
 
@@ -25,10 +30,12 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController
 {
 
     /**
-     * @throws ReflectionException
      * @throws AuthorizationError
-     * @throws Exception
-     * @throws \TypeError
+     * @throws ConflictError when a split, a merge or a password change holds the job
+     * @throws ReflectionException
+     * @throws PredisException
+     * @throws RandomException
+     * @throws Throwable
      */
     public function confirm(): void
     {
@@ -57,7 +64,12 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController
         $confirmationStruct = new TranslatedConfirmationStruct($payload);
 
         if (!empty($jTranslatorStruct)) {
-            $translatorModel->changeJobPassword();
+            // Serialized with the split, merge and password change of the same job, which rotate
+            // the same password.
+            $this->restructureLock()->run(
+                (int)$jStruct->id,
+                fn() => $translatorModel->changeJobPassword()
+            );
             $confirmationStruct->password = $jStruct->password;
         }
 
@@ -73,6 +85,16 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController
             'errors' => [],
             'confirm' => $confirmationArray
         ]);
+    }
+
+    /**
+     * Seam: the per-job lock confirm() takes. Overridable in tests to keep them off Redis.
+     *
+     * @throws Exception when the Redis connection cannot be configured
+     */
+    protected function restructureLock(): JobRestructureLock
+    {
+        return JobRestructureLock::forDefaultConnection();
     }
 
 }

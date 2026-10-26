@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Matecat\Core\DAO\TestJobDAO;
 
+use Controller\API\Commons\Exceptions\ConflictError;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\IDatabase;
 use Model\DataAccess\ShapelessConcreteStruct;
@@ -157,11 +158,43 @@ class JobDaoTest extends AbstractTest
 
         $this->stmtStub->method('execute')->willReturn(true);
         $this->stmtStub->method('fetchAll')->willReturn([]);
+        $this->stmtStub->method('rowCount')->willReturn(1);
 
         $dao = new JobDao($this->dbStub);
         $result = $dao->changePassword($job, 'newpass');
 
         $this->assertSame('newpass', $result->password);
+    }
+
+    public function testChangePasswordRefusesAChunkNoLongerCarryingTheOldPassword(): void
+    {
+        $job = $this->makeJobStruct();
+        $oldPassword = $job->password;
+
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('rowCount')->willReturn(0);
+
+        $dao = new JobDao($this->dbStub);
+
+        try {
+            $dao->changePassword($job, 'newpass');
+            $this->fail('a rotation that renames nothing must be refused');
+        } catch (ConflictError) {
+        }
+
+        $this->assertSame($oldPassword, $job->password, 'the struct keeps the password it was read with');
+    }
+
+    public function testChangePasswordToTheSamePasswordWritesNothing(): void
+    {
+        $job = $this->makeJobStruct();
+
+        $pdo = $this->createMock(PDO::class);
+        $pdo->expects($this->never())->method('prepare');
+        $db = $this->createStub(IDatabase::class);
+        $db->method('getConnection')->willReturn($pdo);
+
+        $this->assertSame($job, (new JobDao($db))->changePassword($job, (string)$job->password));
     }
 
     public function testChangePasswordThrowsWhenEmpty(): void
@@ -268,7 +301,7 @@ class JobDaoTest extends AbstractTest
         $this->stmtStub->method('rowCount')->willReturn(1);
 
         $dao = new JobDao($this->dbStub);
-        $result = $dao->updateStdWcAndTotalWc(1, 500, 600);
+        $result = $dao->updateStdWcAndTotalWc(1, 'pw', 500, 600);
 
         $this->assertSame(1, $result);
     }
@@ -519,26 +552,14 @@ class JobDaoTest extends AbstractTest
         $this->assertSame($originalPassword, $result->password);
     }
 
-    public function testInstanceDeleteOnMergeReturnsTrue(): void
+    public function testInstanceDeleteChunkReturnsTheDeletedRows(): void
     {
         $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('rowCount')->willReturn(1);
 
-        $job = $this->makeJobStruct();
         $dao = new JobDao($this->dbStub);
-        $result = $dao->deleteOnMerge($job);
 
-        $this->assertTrue($result);
-    }
-
-    public function testInstanceDeleteOnMergeReturnsFalse(): void
-    {
-        $this->stmtStub->method('execute')->willReturn(false);
-
-        $job = $this->makeJobStruct();
-        $dao = new JobDao($this->dbStub);
-        $result = $dao->deleteOnMerge($job);
-
-        $this->assertFalse($result);
+        $this->assertSame(1, $dao->deleteChunk($this->makeJobStruct()));
     }
 
     public function testInstanceGetFilesInfoInJobReturnsArray(): void

@@ -4,10 +4,9 @@ namespace Matecat\Core\Workers\TMAnalysisV2;
 
 use Exception;
 use Matecat\TestHelpers\AbstractTest;
-use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use PHPUnit\Framework\Attributes\Test;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\EngineResolverInterface;
+use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\DefaultEngineResolver;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\EngineService;
 use Utils\Engines\AbstractEngine;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
@@ -20,7 +19,7 @@ class EngineServiceUnitTest extends AbstractTest
 {
     private function makeEngineService(AbstractEngine $tmEngine, ?AbstractEngine $mtEngine = null): EngineService
     {
-        $resolver = $this->createStub(EngineResolverInterface::class);
+        $resolver = $this->createStub(DefaultEngineResolver::class);
         $resolver->method('getInstance')->willReturnCallback(function (int $id) use ($tmEngine, $mtEngine) {
             if ($id === 900) {
                 return $tmEngine;

@@ -123,7 +123,7 @@ class GetWarningControllerTest extends AbstractTest
         $conn->exec("DELETE FROM projects WHERE id = " . self::TEST_PROJECT_ID);
 
         // global() caches under the job id: a list left by an earlier test would mask this one's rows.
-        (new WarningDao($db))->destroyWarningsCache(self::TEST_JOB_ID);
+        (new WarningDao($db))->destroyCachesByJobId(self::TEST_JOB_ID);
     }
 
     /**

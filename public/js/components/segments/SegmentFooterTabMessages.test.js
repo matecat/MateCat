@@ -142,6 +142,38 @@ describe('SegmentFooterTabMessages', () => {
     expect(screen.queryByText('sizeRestriction:')).not.toBeInTheDocument()
   })
 
+  test('does not render resname and restype metadata', () => {
+    renderComponent({
+      metadata: [
+        {meta_key: 'resname', meta_value: 'Sheet1!A2'},
+        {meta_key: 'restype', meta_value: 'x-cell'},
+        {meta_key: 'author', meta_value: 'Jane'},
+      ],
+    })
+
+    expect(screen.getByText('author:')).toBeInTheDocument()
+    expect(screen.queryByText('resname:')).not.toBeInTheDocument()
+    expect(screen.queryByText('Sheet1!A2')).not.toBeInTheDocument()
+    expect(screen.queryByText('restype:')).not.toBeInTheDocument()
+    expect(screen.queryByText('x-cell')).not.toBeInTheDocument()
+  })
+
+  // SegmentFooter opens the Messages tab when getNotes returns anything, so a
+  // segment carrying only resname/restype must produce no notes at all.
+  test('returns no notes when the only metadata is resname and restype', () => {
+    const notes = segmentNotes.getNotes({
+      notes: null,
+      metadata: [
+        {meta_key: 'resname', meta_value: 'Sheet1!A2'},
+        {meta_key: 'restype', meta_value: 'x-cell'},
+      ],
+      segment: {sid: 1},
+      contextGroups: null,
+    })
+
+    expect(notes).toEqual([])
+  })
+
   test('renders a note when item.json is a non-empty object (no visible output but no crash)', () => {
     const {container} = renderComponent({
       notes: [{json: {key1: 'value1'}}],

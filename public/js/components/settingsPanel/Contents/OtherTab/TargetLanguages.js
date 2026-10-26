@@ -1,9 +1,10 @@
 import React, {useContext} from 'react'
 import {Select} from '../../../common/Select'
 import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
+import {SELECT_HEIGHT} from '../../../../constants/Constants'
 
 export const TargetLanguages = () => {
-  const {SELECT_HEIGHT, languages, targetLangs, setTargetLangs} =
+  const {languages, targetLangs, setTargetLangs} =
     useContext(CreateProjectContext)
 
   return (
