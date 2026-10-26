@@ -43,7 +43,7 @@
     flex-direction: column;
     width: 100%;
     // Keep the action buttons and the Analyze button in reach with many files
-    max-height: 408px;
+    max-height: clamp(200px, calc(100vh - 540px), 408px);
     overflow-y: auto;
     overflow-x: hidden;
     // Room between the scrollbar and the delete buttons
