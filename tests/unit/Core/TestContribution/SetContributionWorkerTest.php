@@ -276,7 +276,6 @@ class SetContributionWorkerTest extends AbstractTest
     public function execContribution_sends_only_the_owner_keys_as_mt_key()
     {
         $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub(), obtainTestDatabase());
-        $_worker->attach($this);
 
         $stubEngine = $this
             ->getMockBuilder(MyMemory::class)
