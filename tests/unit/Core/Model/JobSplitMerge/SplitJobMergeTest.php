@@ -28,6 +28,7 @@ use Utils\Logger\MatecatLogger;
 use Utils\Shop\Cart;
 use Model\Translators\JobsTranslatorsStruct;
 use Model\Users\UserStruct;
+use Model\Translations\WarningDao;
 
 /**
  * Step 12 — Tests for JobSplitMergeService::splitJob() and mergeALL()
@@ -48,6 +49,9 @@ class SplitJobMergeTest extends AbstractTest
 
     /** @var string[] The order in which the cart and the transaction scope were reached */
     private array $callOrder = [];
+
+    /** @var list<int> */
+    private array $evictedWarningsJobIds = [];
 
     protected function setUp(): void
     {
@@ -88,6 +92,14 @@ class SplitJobMergeTest extends AbstractTest
 
         $this->jobDaoMock = $this->createMock(JobDao::class);
         $this->service->setJobDao($this->jobDaoMock);
+
+        $warningDao = $this->createStub(WarningDao::class);
+        $warningDao->method('destroyWarningsCache')->willReturnCallback(function (int $jobId): bool {
+            $this->evictedWarningsJobIds[] = $jobId;
+
+            return true;
+        });
+        $this->service->setWarningDao($warningDao);
 
         $this->cartMock = $this->createMock(Cart::class);
         $this->service->setCart($this->cartMock);
@@ -439,7 +451,7 @@ class SplitJobMergeTest extends AbstractTest
         $this->assertTrue($this->service->wasDestroyAnalysisCacheCalled());
         $this->assertEquals(999, $this->service->getDestroyAnalysisCacheProjectId());
         // The chunks own new segment ranges: their cached warnings_count must go.
-        $this->assertSame([(int)$ps->jobToSplit], $this->service->destroyedWarningsCountJobIds);
+        $this->assertSame([(int)$ps->jobToSplit], $this->evictedWarningsJobIds);
     }
 
     /**
@@ -763,7 +775,7 @@ class SplitJobMergeTest extends AbstractTest
 
         $this->assertTrue($this->service->wasDestroyAnalysisCacheCalled());
         $this->assertEquals(999, $this->service->getDestroyAnalysisCacheProjectId());
-        $this->assertSame([(int)$chunks[0]->id], $this->service->destroyedWarningsCountJobIds);
+        $this->assertSame([(int)$chunks[0]->id], $this->evictedWarningsJobIds);
 
         // Both chunk passwords are swept: the first one's row was rewritten, and the second one's row
         // was deleted, so neither answers what the cache still holds for it.

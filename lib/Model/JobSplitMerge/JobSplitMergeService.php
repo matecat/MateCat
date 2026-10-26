@@ -128,16 +128,9 @@ class JobSplitMergeService
         (new AnalysisDao($this->dbHandler))->destroyCacheProjectStatsVolumeAnalysis($projectId);
     }
 
-    /**
-     * Split and merge move segments between chunks without touching segment_translations, so the
-     * cached `warnings_count` of a chunk would keep counting segments it no longer owns.
-     *
-     * @throws ReflectionException
-     * @throws Exception
-     */
-    protected function destroyWarningsCountCacheByJobId(int $jobId): void
+    protected function createWarningDao(): WarningDao
     {
-        (new WarningDao($this->dbHandler))->destroyWarningsCountCache($jobId);
+        return new WarningDao($this->dbHandler);
     }
 
     /**
@@ -591,7 +584,9 @@ class JobSplitMergeService
         $projectStruct = $this->getProjectForCacheInvalidation($jobToSplit);
         $this->createProjectDao()->destroyCache($projectStruct->id ?? throw new RuntimeException('Missing project id'), $projectStruct->password);
         $this->destroyAnalysisCacheByProjectId($data->idProject);
-        $this->destroyWarningsCountCacheByJobId((int)$jobToSplit->id);
+        // Split and merge move segments between chunks without touching segment_translations, so the
+        // cached warnings of a chunk would keep listing segments it no longer owns.
+        $this->createWarningDao()->destroyWarningsCache((int)$jobToSplit->id);
 
         $this->getCart()?->deleteCart();
 
@@ -728,7 +723,7 @@ class JobSplitMergeService
             $projectStruct = $this->getProjectForCacheInvalidation($jobStructs[0]);
             $this->createProjectDao()->destroyCache($projectStruct->id ?? throw new RuntimeException('Missing project id'), $projectStruct->password);
             $this->destroyAnalysisCacheByProjectId($data->idProject);
-            $this->destroyWarningsCountCacheByJobId((int)$jobStructs[0]->id);
+            $this->createWarningDao()->destroyWarningsCache((int)$jobStructs[0]->id);
         });
     }
 }

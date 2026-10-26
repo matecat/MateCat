@@ -222,7 +222,7 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
     public function getWarningsCount(WarningDao $dao): object
     {
         return $this->memoize(__METHOD__, function () use ($dao) {
-            $count = $dao->setCacheTTL(60 * 10)->getWarningsCountByJob((int)$this->id, (string)$this->password);
+            $count = $dao->setCacheTTL(WarningDao::WARNINGS_CACHE_TTL)->getWarningsCountByJob((int)$this->id, (string)$this->password);
             $ret = [];
             $ret['warnings_count'] = 0;
             if ($count !== null) {

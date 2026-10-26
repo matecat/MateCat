@@ -58,9 +58,9 @@ class GetWarningController extends KleinController
         // the one answer a caller (OMP flags jobs for PMs off it) must never get by mistake.
         // A wrong password is a 404, anything else an error the client can see.
         $this->getChunkAndLoadProjectFeatures($id_job, $password);
-        $warnings = (new WarningDao($this->getDatabase()))->getWarningsByJobIdAndPassword((int) $id_job, $password);
-        // Uncached on purpose: a warning added on the last segment before delivery must show up at once.
-        $tMismatch = (new SegmentDao($this->getDatabase()))->getTranslationsMismatches((int) $id_job, $password);
+        // Cached, but evicted by every write that changes a warning, a status or a translation of the job.
+        $warnings = (new WarningDao($this->getDatabase()))->setCacheTTL(WarningDao::WARNINGS_CACHE_TTL)->getWarningsByJobIdAndPassword((int) $id_job, $password);
+        $tMismatch = (new SegmentDao($this->getDatabase()))->setCacheTTL(WarningDao::WARNINGS_CACHE_TTL)->getTranslationsMismatches((int) $id_job, $password);
 
         $qa = new QAGlobalWarning($warnings, $tMismatch);
 

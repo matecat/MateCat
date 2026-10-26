@@ -13,6 +13,7 @@ use Model\QualityReport\QualityReportSegmentStruct;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentStruct;
 use Model\Segments\SegmentUIStruct;
+use Model\Translations\WarningDao;
 use PDO;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
@@ -785,6 +786,37 @@ class SegmentDaoRealSqlTest extends AbstractTest
 
         $result = $this->dao->getTranslationsMismatches($this->idJob, $this->password, null);
         $this->assertIsArray($result);
+    }
+
+    #[Test]
+    public function getTranslationsMismatches_global_list_is_cached_under_the_job_warnings_key_until_evicted(): void
+    {
+        $hash = 'cachedhash000000';
+        $this->insertTranslation($this->segIds[0], TranslationStatus::STATUS_TRANSLATED, [
+            'segment_hash' => $hash,
+            'translation'  => 'same',
+        ]);
+        $this->insertTranslation($this->segIds[1], TranslationStatus::STATUS_TRANSLATED, [
+            'segment_hash' => $hash,
+            'translation'  => 'same',
+        ]);
+
+        $cached = fn(): array => (new SegmentDao($this->realSqlDb))
+            ->setCacheTTL(WarningDao::WARNINGS_CACHE_TTL)
+            ->getTranslationsMismatches($this->idJob, $this->password);
+
+        $this->assertSame([], $cached());
+
+        // A write that bypasses the DAO evicts nothing: the cached list must still be served.
+        $this->realSqlDb->getConnection()->exec(
+            "UPDATE segment_translations SET translation = 'different' WHERE id_segment = {$this->segIds[1]} AND id_job = {$this->idJob}"
+        );
+        $this->assertSame([], $cached());
+
+        (new WarningDao($this->realSqlDb))->destroyWarningsCache($this->idJob);
+        $result = $cached();
+        $this->assertCount(1, $result);
+        $this->assertSame(2, $result[0]['translations_available']);
     }
 
     // =========================================================================================

@@ -125,11 +125,11 @@ class WarningDaoTest extends AbstractTest
     }
 
     #[Test]
-    public function test_warningsCountKeyMap_is_addressed_by_job_id_only(): void
+    public function test_warningsKeyMap_is_addressed_by_job_id_only(): void
     {
         $this->assertSame(
-            WarningDao::class . '::getWarningsCountByJob-42',
-            WarningDao::warningsCountKeyMap(42)
+            WarningDao::class . '::warnings-42',
+            WarningDao::warningsKeyMap(42)
         );
     }
 

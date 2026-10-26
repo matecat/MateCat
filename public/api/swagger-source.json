@@ -764,7 +764,7 @@
           "Job"
         ],
         "summary": "Job QA warnings",
-        "description": "Lists the segments of a job that have QA issues, grouped by severity (ERROR, WARNING, INFO) and by category. Unlike `warnings_count` in the job info, it tells a blocking tag error apart from a non-blocking warning such as a fuzzy match confirmed without changes. The response is not cached: an issue is listed as soon as the segment is saved.",
+        "description": "Lists the segments of a job that have QA issues, grouped by severity (ERROR, WARNING, INFO) and by category. Unlike `warnings_count` in the job info, it tells a blocking tag error apart from a non-blocking warning such as a fuzzy match confirmed without changes. The response is cached for up to 5 minutes, and the cache is cleared whenever a segment of the job is saved, so a new or fixed issue shows up at once.",
         "parameters": [
           {
             "name": "id_job",

@@ -25,7 +25,14 @@ class WarningDao extends AbstractDao
         ";
 
     /**
-     * Segments counted by `warnings_count`: flagged, and in a status a PM looks at.
+     * `warnings_count`, the warnings list of `/warnings` and the job's translation mismatches are
+     * all cached this long, under one key map per job, and evicted by every write that can change them.
+     */
+    public const int WARNINGS_CACHE_TTL = 5 * 60;
+
+    /**
+     * Segments counted by `warnings_count`: the same ones `getWarningsByJobIdAndPassword()` lists,
+     * so the count and the `/warnings` endpoint never disagree.
      */
     protected const string _query_warnings_count_by_job = "
         SELECT COUNT(st.id_segment) AS count,
@@ -36,18 +43,18 @@ class WarningDao extends AbstractDao
           JOIN jobs ON st.id_job = jobs.id AND st.id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
          WHERE jobs.id = :id_job
            AND jobs.password = :password
-           AND st.warning = 1
-           AND st.status IN ( :translated, :approved )
+           AND ( st.warning & 1 ) = 1
+           AND st.status != :status_new
          GROUP BY jobs.id, jobs.password
     ";
 
     /**
-     * Every chunk and every password of one job id lives in the same map, so a write that only
-     * knows the job id can evict all of them at once.
+     * The count, the warnings list and the translation mismatches of every chunk and every password
+     * of one job id live in the same map, so a write that only knows the job id evicts all of them at once.
      */
-    public static function warningsCountKeyMap(int $id_job): string
+    public static function warningsKeyMap(int $id_job): string
     {
-        return self::class . "::getWarningsCountByJob-" . $id_job;
+        return self::class . "::warnings-" . $id_job;
     }
 
     /**
@@ -64,22 +71,21 @@ class WarningDao extends AbstractDao
         return $this->_fetchObjectMap($stmt, WarningsCountStruct::class, [
             'id_job'     => $id_job,
             'password'   => $password,
-            'translated' => TranslationStatus::STATUS_TRANSLATED,
-            'approved'   => TranslationStatus::STATUS_APPROVED,
-        ], self::warningsCountKeyMap($id_job))[0] ?? null;
+            'status_new' => TranslationStatus::STATUS_NEW,
+        ], self::warningsKeyMap($id_job))[0] ?? null;
     }
 
     /**
-     * Called by every write that can change `segment_translations.warning` or `.status`, and by
-     * split/merge, which move segments between chunks. Inside an open transaction the eviction is
-     * queued for the commit.
+     * Called by every write that can change `segment_translations.warning`, `.status`, `.translation`
+     * or `.serialized_errors_list`, and by split/merge, which move segments between chunks. Inside an
+     * open transaction the eviction is queued for the commit.
      *
      * @throws ReflectionException
      * @throws Exception
      */
-    public function destroyWarningsCountCache(int $id_job): bool
+    public function destroyWarningsCache(int $id_job): bool
     {
-        return $this->_deleteCacheByKey(self::warningsCountKeyMap($id_job), false);
+        return $this->_deleteCacheByKey(self::warningsKeyMap($id_job), false);
     }
 
     /**
@@ -126,13 +132,13 @@ class WarningDao extends AbstractDao
 		-- following is a condition on bitmask to filter by severity ERROR
 		  AND warning & 1 = 1 ";
 
-        $stmt = $this->database->getConnection()->prepare($query);
+        $stmt = $this->_getStatementForQuery($query);
 
         return $this->_fetchObjectMap($stmt, GlobalWarningStruct::class, [
             'id_job'         => $jid,
             'password'       => $jpassword,
             'segment_status' => TranslationStatus::STATUS_NEW,
-        ]);
+        ], self::warningsKeyMap($jid));
     }
 
 }

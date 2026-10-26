@@ -166,7 +166,7 @@ class PropagationWorker extends AbstractWorker
             }
 
             // Propagation copies `warning` and `status` onto other segments of the job.
-            (new WarningDao($this->database))->destroyWarningsCountCache((int)$propagatorSegment['id_job']);
+            (new WarningDao($this->database))->destroyWarningsCache((int)$propagatorSegment['id_job']);
         }
     }
 

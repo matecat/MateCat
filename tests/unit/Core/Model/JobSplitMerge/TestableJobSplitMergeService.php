@@ -11,6 +11,7 @@ use Model\JobSplitMerge\JobSplitMergeService;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use Model\Translations\WarningDao;
 use Model\Translators\TranslatorsModel;
 use Model\Users\UserDao;
 use Model\WordCount\CounterModel;
@@ -207,12 +208,16 @@ class TestableJobSplitMergeService extends JobSplitMergeService
         $this->destroyAnalysisCacheProjectId = $projectId;
     }
 
-    /** @var list<int> */
-    public array $destroyedWarningsCountJobIds = [];
+    private ?WarningDao $warningDaoOverride = null;
 
-    protected function destroyWarningsCountCacheByJobId(int $jobId): void
+    public function setWarningDao(WarningDao $dao): void
     {
-        $this->destroyedWarningsCountJobIds[] = $jobId;
+        $this->warningDaoOverride = $dao;
+    }
+
+    protected function createWarningDao(): WarningDao
+    {
+        return $this->warningDaoOverride ?? parent::createWarningDao();
     }
 
     public function wasDestroyAnalysisCacheCalled(): bool
