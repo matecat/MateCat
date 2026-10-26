@@ -9,6 +9,7 @@ use Model\Files\FileStruct;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\QualityReport\QualityReportSegmentStruct;
+use Model\Translations\WarningDao;
 use PDO;
 use PDOException;
 use ReflectionException;
@@ -720,7 +721,9 @@ class SegmentDao extends AbstractDao
      */
     public function getTranslationsMismatches(int $jid, string $jpassword, int $sid = null): array
     {
-        $jStructs = (new JobDao($this->database))->getNotDeletedById($jid, $this->cacheTTL);
+        // The global list is cached under the job's warnings map, which split/merge and every translation
+        // write evict; the chunk list is not, so it is read fresh to never pair those rows with stale ranges.
+        $jStructs = (new JobDao($this->database))->getNotDeletedById($jid, $sid === null ? 0 : $this->cacheTTL);
         $filtered = array_filter($jStructs, function ($item) use ($jpassword) {
             return $item->password == $jpassword;
         });
@@ -786,7 +789,8 @@ class SegmentDao extends AbstractDao
                     'st_approved' => TranslationStatus::STATUS_APPROVED,
                     'st_approved2' => TranslationStatus::STATUS_APPROVED2,
                     'st_translated' => TranslationStatus::STATUS_TRANSLATED,
-                ]
+                ],
+                WarningDao::warningsKeyMap((int)$currentJob->id)
             );
 
             // create a specific array with segment id as a key

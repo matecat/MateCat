@@ -778,6 +778,48 @@
         }
       }
     },
+    "/api/v3/jobs/{id_job}/{password}/warnings": {
+      "get": {
+        "tags": [
+          "Job"
+        ],
+        "summary": "Job QA warnings",
+        "description": "Lists the segments of a job that have QA issues, grouped by severity (ERROR, WARNING, INFO) and by category. Unlike `warnings_count` in the job info, it tells a blocking tag error apart from a non-blocking warning such as a fuzzy match confirmed without changes. The response is cached for up to 5 minutes, and the cache is cleared whenever a segment of the job is saved, so a new or fixed issue shows up at once.",
+        "parameters": [
+          {
+            "name": "id_job",
+            "in": "path",
+            "description": "The id of the job",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "password",
+            "in": "path",
+            "description": "The password of the job",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "QA warnings of the job",
+            "schema": {
+              "$ref": "#/definitions/JobWarnings"
+            }
+          },
+          "401": {
+            "description": "Not authenticated"
+          },
+          "404": {
+            "description": "Job not found, or wrong password"
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
     "/api/v3/translation/{id_job}/{password}": {
       "get": {
         "tags": [
@@ -8028,6 +8070,108 @@
             },
             "completed": {
               "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    "JobWarnings": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "description": "Always empty",
+          "items": {}
+        },
+        "errors": {
+          "type": "array",
+          "description": "Always empty",
+          "items": {}
+        },
+        "details": {
+          "type": "object",
+          "description": "Segments with QA issues, by severity",
+          "properties": {
+            "ERROR": {
+              "$ref": "#/definitions/JobWarningsLevel"
+            },
+            "WARNING": {
+              "$ref": "#/definitions/JobWarningsLevel"
+            },
+            "INFO": {
+              "$ref": "#/definitions/JobWarningsLevel"
+            }
+          }
+        }
+      },
+      "example": {
+        "data": [],
+        "errors": [],
+        "details": {
+          "ERROR": {
+            "Categories": {
+              "TAGS": [
+                "1234"
+              ]
+            }
+          },
+          "WARNING": {
+            "Categories": {
+              "FUZZY": [
+                "1240"
+              ],
+              "MISMATCH": [
+                "1251"
+              ]
+            }
+          },
+          "INFO": {
+            "Categories": []
+          }
+        }
+      }
+    },
+    "JobWarningsLevel": {
+      "type": "object",
+      "properties": {
+        "Categories": {
+          "type": "object",
+          "description": "Segment ids (as strings) for each category. Only categories with at least one segment are present; with none, `Categories` is an empty array.",
+          "properties": {
+            "TAGS": {
+              "type": "array",
+              "description": "Tag issues (missing, extra or reordered tags), and any check without a category of its own",
+              "items": {
+                "type": "string"
+              }
+            },
+            "MISMATCH": {
+              "type": "array",
+              "description": "Whitespace, symbol or new-line mismatches between source and target. Under WARNING, it also lists the first segment of each group of identical sources translated differently in the job",
+              "items": {
+                "type": "string"
+              }
+            },
+            "SIZE": {
+              "type": "array",
+              "description": "Translation longer than the segment's size restriction",
+              "items": {
+                "type": "string"
+              }
+            },
+            "ICU": {
+              "type": "array",
+              "description": "Invalid ICU message syntax in the translation",
+              "items": {
+                "type": "string"
+              }
+            },
+            "FUZZY": {
+              "type": "array",
+              "description": "Fuzzy match confirmed without changes",
+              "items": {
+                "type": "string"
+              }
             }
           }
         }
