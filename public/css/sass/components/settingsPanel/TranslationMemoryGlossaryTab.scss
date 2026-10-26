@@ -335,37 +335,6 @@
 .tm-key-row-menu-button {
   justify-content: unset;
 
-  .menu-button-wrapper {
-    button {
-      color: colors.$black !important;
-      background: colors.$grey100 !important;
-      text-align: center;
-      border: 1px solid colors.$grey300 !important;
-      height: 32px !important;
-      font-size: variables.$font-size-xsmall !important;
-
-      &:hover {
-        background-color: colors.$grey50 !important;
-      }
-    }
-
-    > :last-child {
-      padding: 4px 8px;
-    }
-
-    /* > :first-child {
-      min-width: 140px;
-      border-radius: 2px;
-      height: 28px;
-    }
-
-    > :last-child {
-      border: none;
-      background-color: unset;
-      color: colors.$grey700;
-    } */
-  }
-
   .just-button-import-tmx {
     min-width: 140px;
     border-radius: 2px;
