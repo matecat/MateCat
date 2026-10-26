@@ -82,10 +82,6 @@
   border-top-color: colors.$grey150;
 }
 
-#file .virtual-list > :first-child .sticky-project-bar + div .projectbar {
-  padding-bottom: 23px;
-}
-
 .sticky-project-bar {
   position: sticky;
   top: 0;
