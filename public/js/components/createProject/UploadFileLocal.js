@@ -194,6 +194,7 @@ function FileItem({file: f, onDelete}) {
 }
 
 function ActionButtons({files, deleteFile, deleteAllFiles}) {
+  const errorCount = files.filter((f) => f.error).length
   return (
     <div className="upload-files-buttons">
       <span>
@@ -211,7 +212,7 @@ function ActionButtons({files, deleteFile, deleteAllFiles}) {
       <Button type={BUTTON_TYPE.WARNING} onClick={deleteAllFiles}>
         <IconClose /> Clear all
       </Button>
-      {files.filter((f) => f.error).length > 0 && (
+      {errorCount > 0 && (
         <Button
           type={BUTTON_TYPE.WARNING}
           onClick={() => files.forEach((f) => f.error && deleteFile(f))}
@@ -219,6 +220,15 @@ function ActionButtons({files, deleteFile, deleteAllFiles}) {
           <IconClose /> Clear all failed
         </Button>
       )}
+      <span className="upload-files-counter">
+        Files uploaded: {files.length} / {config.maxNumberFiles}
+        {errorCount > 0 && (
+          <span className="upload-files-counter-errors">
+            {' '}
+            · {errorCount} with {errorCount === 1 ? 'error' : 'errors'}
+          </span>
+        )}
+      </span>
     </div>
   )
 }

@@ -102,6 +102,15 @@
     align-items: center;
     gap: 8px;
     padding-top: 16px;
-    align-self: flex-start;
+    align-self: stretch;
+    .upload-files-counter {
+      margin-left: auto;
+      font-size: variables.$font-size-small;
+      color: colors.$grey500;
+      white-space: nowrap;
+    }
+    .upload-files-counter-errors {
+      color: colors.$red500;
+    }
   }
 }

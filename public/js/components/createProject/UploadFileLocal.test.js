@@ -669,6 +669,8 @@ describe('UploadFileLocal', () => {
           'Too many files uploaded. Please remove this file to continue.',
         ),
       ).toBeInTheDocument()
+      expect(screen.getByText('Files uploaded: 3 / 2')).toBeInTheDocument()
+      expect(screen.getByText('· 1 with error')).toBeInTheDocument()
       const addButton = screen.getByRole('button', {name: /files per project/})
       expect(addButton).toBeDisabled()
       expect(addButton).toHaveAttribute(
