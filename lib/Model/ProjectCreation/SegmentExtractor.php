@@ -970,6 +970,9 @@ class SegmentExtractor
             }
         }
 
+        // every key passed at project creation belongs to the owner
+        $config['mt_key'] = $config['id_user'] ?? [];
+
         $config['source'] = $xliff_file_attributes['source-language'];
         $config['target'] = $xliff_file_attributes['target-language'];
         $config['email'] = AppConfig::$MYMEMORY_API_KEY;

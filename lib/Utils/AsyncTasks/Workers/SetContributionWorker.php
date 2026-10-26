@@ -238,11 +238,12 @@ class SetContributionWorker extends AbstractWorker
 
         $config = [];
         if (!empty($tm_keys)) {
-            $config['keys'] = [];
             foreach ($tm_keys as $tm_info) {
                 $config['id_user'][] = $tm_info->key;
             }
         }
+
+        $config['mt_key'] = TmKeyManager::getOwnerJobTmKeys($jobStruct->tm_keys, 'w');
 
         return $config;
     }

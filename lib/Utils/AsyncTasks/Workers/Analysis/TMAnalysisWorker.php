@@ -448,6 +448,8 @@ class TMAnalysisWorker extends AbstractWorker
             $_config['penalty_key'] = $penaltyMap;
         }
 
+        $_config['mt_key'] = TmKeyManager::getOwnerJobTmKeys($params->tm_keys, 'r');
+
         $_config['num_result'] = 3;
         $_config['id_mt_engine'] = $params->id_mt_engine;
         $_config['id_tms'] = $params->id_tms;

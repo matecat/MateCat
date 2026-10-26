@@ -83,6 +83,21 @@ class TmKeyManagerTest extends AbstractTest
         $this->assertSame('メモリ', $obj->name);
     }
 
+    #[Test]
+    public function testGetOwnerJobTmKeysReturnsOnlyOwnerKeysWithTheGrant()
+    {
+        $tmKeys = json_encode([
+            ['tm' => true, 'glos' => true, 'owner' => true, 'uid_transl' => null, 'uid_rev' => null, 'key' => 'owner_rw', 'r' => true, 'w' => true, 'r_transl' => null, 'w_transl' => null, 'r_rev' => null, 'w_rev' => null],
+            ['tm' => true, 'glos' => true, 'owner' => true, 'uid_transl' => null, 'uid_rev' => null, 'key' => 'owner_r', 'r' => true, 'w' => false, 'r_transl' => null, 'w_transl' => null, 'r_rev' => null, 'w_rev' => null],
+            ['tm' => true, 'glos' => true, 'owner' => false, 'uid_transl' => 42, 'uid_rev' => null, 'key' => 'translator', 'r' => false, 'w' => false, 'r_transl' => true, 'w_transl' => true, 'r_rev' => null, 'w_rev' => null],
+            ['tm' => false, 'glos' => true, 'owner' => true, 'uid_transl' => null, 'uid_rev' => null, 'key' => 'owner_glossary', 'r' => true, 'w' => true, 'r_transl' => null, 'w_transl' => null, 'r_rev' => null, 'w_rev' => null],
+        ]);
+
+        $this->assertSame(['owner_rw', 'owner_r'], TmKeyManager::getOwnerJobTmKeys($tmKeys, 'r'));
+        $this->assertSame(['owner_rw'], TmKeyManager::getOwnerJobTmKeys($tmKeys, 'w'));
+        $this->assertSame([], TmKeyManager::getOwnerJobTmKeys('[]', 'r'));
+    }
+
     /**
      * A string that is not valid JSON is logged and refused with code -2.
      *

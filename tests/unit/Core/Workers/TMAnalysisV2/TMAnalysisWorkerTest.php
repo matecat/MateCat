@@ -1210,6 +1210,24 @@ class TMAnalysisWorkerTest extends AbstractTest
     }
 
     #[Test]
+    public function buildEngineConfig_sends_the_owner_keys_with_read_grant_as_mt_key(): void
+    {
+        $worker = $this->buildWorker();
+
+        $element = $this->makeQueueElement([
+            'tm_keys' => json_encode([
+                ['tm' => true, 'glos' => true, 'owner' => true, 'uid_transl' => null, 'uid_rev' => null, 'key' => 'owner_r', 'r' => true, 'w' => false, 'r_transl' => null, 'w_transl' => null, 'r_rev' => null, 'w_rev' => null, 'penalty' => 0],
+                ['tm' => true, 'glos' => true, 'owner' => true, 'uid_transl' => null, 'uid_rev' => null, 'key' => 'owner_w', 'r' => false, 'w' => true, 'r_transl' => null, 'w_transl' => null, 'r_rev' => null, 'w_rev' => null, 'penalty' => 0],
+            ]),
+        ]);
+
+        // The testable worker stubs buildEngineConfig(); call the real one.
+        $config = (new \ReflectionMethod(TMAnalysisWorker::class, 'buildEngineConfig'))->invoke($worker, $element);
+
+        $this->assertSame(['owner_r'], $config['mt_key']);
+    }
+
+    #[Test]
     public function process_eq_word_count_capped_at_raw_word_count(): void
     {
         $redis     = $this->createStub(AnalysisRedisService::class);
