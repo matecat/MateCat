@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useMemo} from 'react'
 import CommonUtils from '../../utils/commonUtils'
-import {getPrintableFileSize} from './UploadFileUtils'
+import {getFileLimitTooltip, getPrintableFileSize} from './UploadFileUtils'
 import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
 import {DeleteIcon} from '../segments/SegmentFooterTabGlossary/GlossaryConstants'
 import IconClose from '../../../img/icons/IconClose'
@@ -133,6 +133,7 @@ function GDriveActionButtons({files, onAddFiles, onClearAll}) {
         type={BUTTON_TYPE.PRIMARY}
         onClick={onAddFiles}
         disabled={files.length >= config.maxNumberFiles}
+        tooltip={getFileLimitTooltip(files)}
       >
         <DriveIcon />
         Add from Google Drive
