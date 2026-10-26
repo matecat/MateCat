@@ -1,12 +1,13 @@
 import React, {useContext, useMemo} from 'react'
 import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
+import {TOOLTIP_POSITION} from '../common/Tooltip'
 import {DeleteIcon} from '../segments/SegmentFooterTabGlossary/GlossaryConstants'
 import FileUploadIconBig from '../../../img/icons/FileUploadIconBig'
 import CommonUtils from '../../utils/commonUtils'
 import IconAdd from '../../../img/icons/IconAdd'
 import IconClose from '../../../img/icons/IconClose'
 import {PROGRESS_BAR_SIZE, ProgressBar} from '../common/ProgressBar'
-import {getPrintableFileSize} from './UploadFileUtils'
+import {getFileLimitTooltip, getPrintableFileSize} from './UploadFileUtils'
 import {CreateProjectContext} from './CreateProjectContext'
 import {useFileUploadManager} from './hooks/useFileUploadManager'
 import {useDragAndDrop} from './hooks/useDragAndDrop'
@@ -125,9 +126,14 @@ function EmptyState({isDragging}) {
 }
 
 function FileList({files, deleteFile}) {
+  // Files with errors first: the list scrolls, and they block the Analyze button
+  const sortedFiles = [
+    ...files.filter((f) => f.error),
+    ...files.filter((f) => !f.error),
+  ]
   return (
     <div className="upload-files-list">
-      {files.map((f, idx) => (
+      {sortedFiles.map((f, idx) => (
         <FileItem key={idx} file={f} onDelete={() => deleteFile(f)} />
       ))}
     </div>
@@ -179,6 +185,7 @@ function FileItem({file: f, onDelete}) {
         onClick={onDelete}
         style={{marginLeft: 'auto'}}
         tooltip="Remove file"
+        tooltipPosition={TOOLTIP_POSITION.LEFT}
       >
         <DeleteIcon />
       </Button>
@@ -196,6 +203,7 @@ function ActionButtons({files, deleteFile, deleteAllFiles}) {
         type={BUTTON_TYPE.PRIMARY}
         onClick={() => document.getElementById('fileInput').click()}
         disabled={files.length >= config.maxNumberFiles}
+        tooltip={getFileLimitTooltip(files)}
       >
         <IconAdd />
         Add files...

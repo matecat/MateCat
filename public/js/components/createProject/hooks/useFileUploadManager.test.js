@@ -515,7 +515,7 @@ describe('useFileUploadManager', () => {
     unmount()
   })
 
-  test('handleFiles shows a limit-reached error when the file count exactly equals maxNumberFiles', async () => {
+  test('handleFiles shows no error banner when the file count exactly equals maxNumberFiles', async () => {
     global.config = {...global.config, maxNumberFiles: 1}
     const props = baseProps()
     const {result, unmount} = renderHook((p) => useFileUploadManager(p), {
@@ -526,9 +526,7 @@ describe('useFileUploadManager', () => {
     await act(async () => {
       result.current.handleFiles([file])
     })
-    expect(CreateProjectActions.showError).toHaveBeenCalledWith(
-      expect.stringContaining('No more files can be loaded'),
-    )
+    expect(CreateProjectActions.showError).not.toHaveBeenCalled()
     global.config = {...global.config, maxNumberFiles: 10}
     await act(async () => {
       result.current.deleteAllFiles()
