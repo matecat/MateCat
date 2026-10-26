@@ -45,7 +45,7 @@ class OwnerFeatureDao extends AbstractDao
                 " ( :uid, :feature_code, :options, :create_date, :last_update, :enabled, :id_team );"
             );
 
-            LoggerFactory::doJsonLog($obj->toArray());
+            LoggerFactory::getLogger('dao')->debug($obj->toArray());
 
             $values = array_diff_key($obj->toArray(), ['id' => null]);
 

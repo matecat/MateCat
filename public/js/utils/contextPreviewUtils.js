@@ -2,6 +2,7 @@ import {
   excludeSomeTagsTransformToText,
   removeTagsFromText,
 } from '../components/segments/utils/DraftMatecatUtils/tagUtils'
+import {Base64} from 'js-base64'
 import {findElementByMetadata} from './contextPreviewLookup'
 
 const containerMaps = new WeakMap()
@@ -115,7 +116,7 @@ export const updateNodeTranslation = (el, segments) => {
     group.sort((a, b) => Number(a.sid) - Number(b.sid))
     const targets = group.map((s) => {
       if (!s.target) return null
-      const stripped = stripSegmentTags(s.target)
+      const stripped = stripSegmentTags(s.target, {keepPlaceholders: true})
         .replace(/[\s\u200b]+/g, ' ')
         .trim()
       return stripped || null
@@ -159,7 +160,9 @@ export const checkNodeTranslationStatus = (el, segments) => {
     group.sort((a, b) => Number(a.sid) - Number(b.sid))
     const targets = group.map((s) => {
       if (!s.target) return null
-      const stripped = stripSegmentTags(s.target).replace(/[\s\u200B]+/g, ' ').trim()
+      const stripped = stripSegmentTags(s.target, {keepPlaceholders: true})
+        .replace(/[\s\u200B]+/g, ' ')
+        .trim()
       return stripped || null
     })
     if (targets.some((t) => t === null)) return 'no-target'
@@ -418,20 +421,103 @@ export const findSegmentSidsByClick = (
 }
 
 /**
+ * Placeholder ctypes whose original text stays visible in the preview
+ * instead of being stripped with the other inline tags.
+ */
+export const VISIBLE_PLACEHOLDER_CTYPES = new Set([
+  'x-xml',
+  'x-twig',
+  'x-ruby-on-rails',
+  'x-snails',
+  'x-curly-brackets',
+  'x-objective-c-ns-string',
+  'x-percentages',
+  'x-sprintf',
+  'x-square-sprintf',
+  'x-percent-variable',
+  'x-smart-count',
+  'x-double-square-brackets',
+  'x-dollar-curly-brackets',
+])
+
+/**
+ * XLIFF 2.0 `<ph>` ctypes whose equiv-text is the code's `disp`/`equiv`
+ * value when the original tag (kept in `x-orig`) carries one, and its raw
+ * original data otherwise. Only the former is shown in the preview.
+ */
+const DISPLAY_VALUE_PH_CTYPES = new Set([
+  'x-ph_data_ref',
+  'x-original_ph_no_data_ref',
+])
+const DISPLAY_VALUE_ATTR_REGEX = /\s(?:disp|equiv)\s*=\s*(["'])(?!\1)/
+
+const PH_TAG_REGEX = /<ph\b[^>]*?\/>/g
+const PLACEHOLDER_SENTINEL_REGEX = /(\d+)/g
+
+/**
+ * @param {string} tag
+ * @param {string|undefined} ctype
+ * @returns {boolean} whether the tag's equiv-text is a non-empty `disp` or
+ *   `equiv` value of an XLIFF 2.0 `<ph>`
+ */
+const hasDisplayValue = (tag, ctype) => {
+  if (!DISPLAY_VALUE_PH_CTYPES.has(ctype)) return false
+  const originalTag = tag.match(/\bx-orig="([^"]+)"/)?.[1]
+  return (
+    !!originalTag && DISPLAY_VALUE_ATTR_REGEX.test(Base64.decode(originalTag))
+  )
+}
+
+/**
+ * Replaces each `<ph>` whose ctype is in VISIBLE_PLACEHOLDER_CTYPES, or that
+ * carries an XLIFF 2.0 `disp`/`equiv` value, with a sentinel, so the tag
+ * stripping that follows cannot touch it.
+ *
+ * @param {string} text
+ * @returns {{text: string, placeholders: string[]}} the still-encoded
+ *   equiv-text of each placeholder, indexed by sentinel
+ */
+const protectVisiblePlaceholders = (text) => {
+  const placeholders = []
+  const protectedText = text.replace(PH_TAG_REGEX, (tag) => {
+    const ctype = tag.match(/\bctype="([^"]+)"/)?.[1]
+    const equivText = tag.match(/\bequiv-text="base64:([^"]+)"/)?.[1]
+    if (
+      !equivText ||
+      !(VISIBLE_PLACEHOLDER_CTYPES.has(ctype) || hasDisplayValue(tag, ctype))
+    )
+      return tag
+    placeholders.push(Base64.decode(equivText))
+    return `${placeholders.length - 1}`
+  })
+  return {text: protectedText, placeholders}
+}
+
+/**
  * Strips XLIFF inline tags (`<g>`, `<x/>`, `<ph>`, etc.) and MateCat
  * whitespace placeholders (`##$_0A$##`, `##$_A0$##`, …) from a segment
  * string, then collapses whitespace.
  *
  * The result is the "visible text" that should appear in the rendered HTML.
  *
+ * With `keepPlaceholders`, a `<ph>` whose ctype is in
+ * VISIBLE_PLACEHOLDER_CTYPES is replaced by its original text (e.g.
+ * `{{name}}`) instead of being stripped. Use it only for text shown to the
+ * user, not for matching segments against the document.
+ *
  * @param {string} text  Raw segment source or target from MateCat
+ * @param {Object}  [options]
+ * @param {boolean} [options.keepPlaceholders=false]
  * @returns {string}
  */
-export const stripSegmentTags = (text) => {
+export const stripSegmentTags = (text, {keepPlaceholders = false} = {}) => {
   if (!text) return ''
+  const {text: source, placeholders} = keepPlaceholders
+    ? protectVisiblePlaceholders(text)
+    : {text, placeholders: []}
   const decoded = decodeHtmlEntities(
     removeTagsFromText(
-      excludeSomeTagsTransformToText(text, [
+      excludeSomeTagsTransformToText(source, [
         'g',
         'gCl',
         'gSc',
@@ -440,7 +526,7 @@ export const stripSegmentTags = (text) => {
         'x',
         'ph',
       ]).replace(/##\$_[^$]+\$##/g, ' '),
-    ),
+    ).replace(PLACEHOLDER_SENTINEL_REGEX, (_, index) => placeholders[index]),
   )
   return decoded.replace(/&nbsp;/gi, ' ').replace(/\s+/g, ' ').trim()
 }

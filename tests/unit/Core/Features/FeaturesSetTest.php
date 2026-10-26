@@ -21,7 +21,6 @@ class FeaturesSetTest extends AbstractTest
 
     protected static array $airbnbDependencies = [
         FeatureCodes::TRANSLATION_VERSIONS,
-//            FeatureCodes::REVIEW_EXTENDED  // FIX: Undefined index: review_extended
     ];
 
     protected static array $abstractReviewDependencies = [

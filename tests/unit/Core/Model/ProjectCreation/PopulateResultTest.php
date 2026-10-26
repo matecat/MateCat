@@ -14,15 +14,11 @@ use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 
 /**
- * Unit tests for {@see \Model\ProjectCreation\ProjectManager::determineStatusAndPopulateResult()}.
+ * Unit tests for {@see \Model\ProjectCreation\ProjectManager::populateResult()}.
  *
- * Verifies:
- * - Status is set to NEW when VOLUME_ANALYSIS_ENABLED and segments > 0
- * - Status is set to NOT_TO_ANALYZE when VOLUME_ANALYSIS_ENABLED is false
- * - Status is set to EMPTY when show_in_cattool_segs_counter is 0
- * - Result structure is fully populated with correct keys
+ * Verifies the result structure is fully populated with correct keys.
  */
-class DetermineStatusAndPopulateResultTest extends AbstractTest
+class PopulateResultTest extends AbstractTest
 {
     private TestableProjectManager $pm;
     private bool $originalVolumeAnalysis;
@@ -63,68 +59,6 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
         parent::tearDown();
     }
 
-    // ── Status determination ────────────────────────────────────────
-
-    /**
-     * @throws ReflectionException
-     */
-    #[Test]
-    public function statusIsNewWhenVolumeAnalysisEnabledAndSegmentsExist(): void
-    {
-        AppConfig::$VOLUME_ANALYSIS_ENABLED = true;
-        $this->pm->setShowInCattoolSegsCounter(5);
-
-        $this->pm->callDetermineStatusAndPopulateResult();
-
-        $ps = $this->pm->getTestProjectStructure();
-        $this->assertSame(ProjectStatus::STATUS_NEW, $ps->status);
-    }
-
-    /**
-     * @throws ReflectionException
-     */
-    #[Test]
-    public function statusIsNotToAnalyzeWhenVolumeAnalysisDisabled(): void
-    {
-        AppConfig::$VOLUME_ANALYSIS_ENABLED = false;
-        $this->pm->setShowInCattoolSegsCounter(5);
-
-        $this->pm->callDetermineStatusAndPopulateResult();
-
-        $ps = $this->pm->getTestProjectStructure();
-        $this->assertSame(ProjectStatus::STATUS_NOT_TO_ANALYZE, $ps->status);
-    }
-
-    /**
-     * @throws ReflectionException
-     */
-    #[Test]
-    public function statusIsEmptyWhenNoShowInCattoolSegments(): void
-    {
-        AppConfig::$VOLUME_ANALYSIS_ENABLED = true;
-        $this->pm->setShowInCattoolSegsCounter(0);
-
-        $this->pm->callDetermineStatusAndPopulateResult();
-
-        $ps = $this->pm->getTestProjectStructure();
-        $this->assertSame(ProjectStatus::STATUS_EMPTY, $ps->status);
-    }
-
-    /**
-     * @throws ReflectionException
-     */
-    #[Test]
-    public function statusIsEmptyOverridesNotToAnalyze(): void
-    {
-        AppConfig::$VOLUME_ANALYSIS_ENABLED = false;
-        $this->pm->setShowInCattoolSegsCounter(0);
-
-        $this->pm->callDetermineStatusAndPopulateResult();
-
-        $ps = $this->pm->getTestProjectStructure();
-        $this->assertSame(ProjectStatus::STATUS_EMPTY, $ps->status);
-    }
-
     // ── Result structure population ─────────────────────────────────
 
     /**
@@ -133,8 +67,7 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
     #[Test]
     public function resultCodeIsSetToOne(): void
     {
-        $this->pm->setShowInCattoolSegsCounter(1);
-        $this->pm->callDetermineStatusAndPopulateResult();
+        $this->pm->callPopulateResult();
 
         $result = $this->pm->getTestProjectStructure()->result;
         $this->assertSame(1, $result['code']);
@@ -146,8 +79,7 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
     #[Test]
     public function resultDataIsOK(): void
     {
-        $this->pm->setShowInCattoolSegsCounter(1);
-        $this->pm->callDetermineStatusAndPopulateResult();
+        $this->pm->callPopulateResult();
 
         $result = $this->pm->getTestProjectStructure()->result;
         $this->assertSame('OK', $result['data']);
@@ -159,8 +91,7 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
     #[Test]
     public function resultContainsProjectPassword(): void
     {
-        $this->pm->setShowInCattoolSegsCounter(1);
-        $this->pm->callDetermineStatusAndPopulateResult();
+        $this->pm->callPopulateResult();
 
         $result = $this->pm->getTestProjectStructure()->result;
         $this->assertSame('proj_pass', $result['ppassword']);
@@ -172,8 +103,7 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
     #[Test]
     public function resultContainsJobPasswords(): void
     {
-        $this->pm->setShowInCattoolSegsCounter(1);
-        $this->pm->callDetermineStatusAndPopulateResult();
+        $this->pm->callPopulateResult();
 
         $result = $this->pm->getTestProjectStructure()->result;
         $jobPass = $result['password'];
@@ -186,8 +116,7 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
     #[Test]
     public function resultContainsJobIds(): void
     {
-        $this->pm->setShowInCattoolSegsCounter(1);
-        $this->pm->callDetermineStatusAndPopulateResult();
+        $this->pm->callPopulateResult();
 
         $result = $this->pm->getTestProjectStructure()->result;
         $jobList = $result['id_job'];
@@ -200,8 +129,7 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
     #[Test]
     public function resultContainsProjectId(): void
     {
-        $this->pm->setShowInCattoolSegsCounter(1);
-        $this->pm->callDetermineStatusAndPopulateResult();
+        $this->pm->callPopulateResult();
 
         $result = $this->pm->getTestProjectStructure()->result;
         $this->assertSame(999, $result['id_project']);
@@ -213,8 +141,7 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
     #[Test]
     public function resultContainsProjectName(): void
     {
-        $this->pm->setShowInCattoolSegsCounter(1);
-        $this->pm->callDetermineStatusAndPopulateResult();
+        $this->pm->callPopulateResult();
 
         $result = $this->pm->getTestProjectStructure()->result;
         $this->assertSame('Test Project', $result['project_name']);
@@ -226,8 +153,7 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
     #[Test]
     public function resultContainsSourceLanguage(): void
     {
-        $this->pm->setShowInCattoolSegsCounter(1);
-        $this->pm->callDetermineStatusAndPopulateResult();
+        $this->pm->callPopulateResult();
 
         $result = $this->pm->getTestProjectStructure()->result;
         $this->assertSame('en-US', $result['source_language']);
@@ -239,8 +165,7 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
     #[Test]
     public function resultContainsTargetLanguage(): void
     {
-        $this->pm->setShowInCattoolSegsCounter(1);
-        $this->pm->callDetermineStatusAndPopulateResult();
+        $this->pm->callPopulateResult();
 
         $result = $this->pm->getTestProjectStructure()->result;
         $this->assertNotNull($result['target_language']);
@@ -252,10 +177,9 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
     #[Test]
     public function resultStatusMatchesProjectStructureStatus(): void
     {
-        AppConfig::$VOLUME_ANALYSIS_ENABLED = true;
-        $this->pm->setShowInCattoolSegsCounter(10);
+        $this->pm->setProjectStructureValue('status', ProjectStatus::STATUS_NEW);
 
-        $this->pm->callDetermineStatusAndPopulateResult();
+        $this->pm->callPopulateResult();
 
         $ps = $this->pm->getTestProjectStructure();
         $this->assertSame($ps->status, $ps->result['status']);
@@ -267,10 +191,24 @@ class DetermineStatusAndPopulateResultTest extends AbstractTest
     #[Test]
     public function resultContainsJobSegments(): void
     {
-        $this->pm->setShowInCattoolSegsCounter(1);
-        $this->pm->callDetermineStatusAndPopulateResult();
+        $this->pm->callPopulateResult();
 
         $result = $this->pm->getTestProjectStructure()->result;
         $this->assertArrayHasKey('job_segments', $result);
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function resultContainsAnalyzeUrlOnlyWhenVolumeAnalysisIsEnabled(): void
+    {
+        AppConfig::$VOLUME_ANALYSIS_ENABLED = false;
+        $this->pm->callPopulateResult();
+        $this->assertArrayNotHasKey('analyze_url', $this->pm->getTestProjectStructure()->result);
+
+        AppConfig::$VOLUME_ANALYSIS_ENABLED = true;
+        $this->pm->callPopulateResult();
+        $this->assertNotEmpty($this->pm->getTestProjectStructure()->result['analyze_url']);
     }
 }

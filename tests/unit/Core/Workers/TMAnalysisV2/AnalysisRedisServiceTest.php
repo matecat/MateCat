@@ -3,6 +3,7 @@
 namespace Matecat\Core\Workers\TMAnalysisV2;
 
 use Matecat\TestHelpers\AbstractTest;
+use Matecat\TestHelpers\FakeLockRedisClient;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\Generator\Generator;
 use Predis\Client;
@@ -97,29 +98,62 @@ class AnalysisRedisServiceTest extends AbstractTest
         $this->service = new AnalysisRedisService($amqHandlerMock);
     }
 
-    #[Test]
-    public function acquireInitLock_returnsTrue_whenRedisSetReturnsOk(): void
+    /**
+     * A service on an in-memory Redis that runs the lock commands as Redis would, for the lock tests.
+     */
+    private function serviceOnLockRedis(FakeLockRedisClient $redis): AnalysisRedisService
     {
-        $pid = 42;
-        $this->redisSpy->setReturn('set', 'OK');
+        $amqHandlerMock = (new Generator())->testDouble(AMQHandler::class, true);
+        $amqHandlerMock->method('getRedisClient')->willReturn($redis);
 
-        $this->assertTrue($this->service->acquireInitLock($pid));
-
-        $calls = $this->redisSpy->getCallsFor('set');
-        $this->assertCount(1, $calls);
-        $this->assertSame(
-            [RedisKeys::PROJECT_INIT_SEMAPHORE . $pid, 1, 'EX', 30, 'NX'],
-            $calls[0]['args']
-        );
+        return new AnalysisRedisService($amqHandlerMock);
     }
 
     #[Test]
-    public function acquireInitLock_returnsFalse_whenRedisSetReturnsNull(): void
+    public function acquireInitLock_takesTheSemaphoreAtomicallyWithAShortTtl(): void
     {
-        $pid = 42;
+        $redis = new FakeLockRedisClient();
 
-        $this->assertFalse($this->service->acquireInitLock($pid));
-        $this->assertCount(1, $this->redisSpy->getCallsFor('set'));
+        $token = $this->serviceOnLockRedis($redis)->acquireInitLock(42);
+
+        $this->assertNotNull($token);
+        // One SET NX EX: the key never exists without an expiry. 30s is short enough for the
+        // next worker to take over from a crashed initializer.
+        $this->assertSame([[RedisKeys::PROJECT_INIT_SEMAPHORE . 42, $token, 'EX', 30, 'NX']], $redis->setCalls);
+    }
+
+    #[Test]
+    public function acquireInitLock_returnsNull_whileAnotherWorkerHoldsIt(): void
+    {
+        $service = $this->serviceOnLockRedis(new FakeLockRedisClient());
+        $service->acquireInitLock(42);
+
+        $this->assertNull($service->acquireInitLock(42));
+    }
+
+    #[Test]
+    public function releaseInitLock_deletesTheSemaphoreItHolds(): void
+    {
+        $redis   = new FakeLockRedisClient();
+        $service = $this->serviceOnLockRedis($redis);
+        $token   = $service->acquireInitLock(42);
+
+        $service->releaseInitLock(42, $token);
+
+        $this->assertSame([RedisKeys::PROJECT_INIT_SEMAPHORE . 42], $redis->deleted);
+        $this->assertNotNull($service->acquireInitLock(42), 'the next worker can take the lock at once');
+    }
+
+    #[Test]
+    public function releaseInitLock_keepsTheLockOfTheWorkerThatTookItOverAfterTheTtl(): void
+    {
+        $redis   = new FakeLockRedisClient();
+        $service = $this->serviceOnLockRedis($redis);
+        $redis->keys[RedisKeys::PROJECT_INIT_SEMAPHORE . 42] = 'token-of-the-next-worker';
+
+        $service->releaseInitLock(42, 'expired-token');
+
+        $this->assertSame('token-of-the-next-worker', $redis->keys[RedisKeys::PROJECT_INIT_SEMAPHORE . 42]);
     }
 
     #[Test]
@@ -236,42 +270,49 @@ class AnalysisRedisServiceTest extends AbstractTest
     }
 
     #[Test]
-    public function acquireCompletionLock_returnsTrue_whenRedisSetReturnsOk(): void
+    public function acquireCompletionLock_takesTheSemaphoreAtomicallyWithABoundedTtl(): void
     {
-        $pid = 42;
-        $this->redisSpy->setReturn('set', 'OK');
+        $redis = new FakeLockRedisClient();
 
-        $this->assertTrue($this->service->acquireCompletionLock($pid));
+        $token = $this->serviceOnLockRedis($redis)->acquireCompletionLock(42);
 
-        $calls = $this->redisSpy->getCallsFor('set');
-        $this->assertCount(1, $calls);
-        $this->assertSame(
-            // Bounded TTL (300s) for crash-safety; wide margin over the finalization
-            // critical section it guards. NX preserved. Was 86400s.
-            [RedisKeys::PROJECT_ENDING_SEMAPHORE . $pid, 1, 'EX', 300, 'NX'],
-            $calls[0]['args']
-        );
+        $this->assertNotNull($token);
+        // 300s: a wide margin over the finalization it guards, yet a worker that crashed while
+        // holding it blocks the project for minutes, not the 24h it used to.
+        $this->assertSame([[RedisKeys::PROJECT_ENDING_SEMAPHORE . 42, $token, 'EX', 300, 'NX']], $redis->setCalls);
     }
 
     #[Test]
-    public function acquireCompletionLock_returnsFalse_whenRedisSetReturnsNull(): void
+    public function acquireCompletionLock_returnsNull_whileAnotherWorkerHoldsIt(): void
     {
-        $pid = 42;
+        $service = $this->serviceOnLockRedis(new FakeLockRedisClient());
+        $service->acquireCompletionLock(42);
 
-        $this->assertFalse($this->service->acquireCompletionLock($pid));
-        $this->assertCount(1, $this->redisSpy->getCallsFor('set'));
+        $this->assertNull($service->acquireCompletionLock(42));
     }
 
     #[Test]
-    public function releaseCompletionLock_callsDelWithSemaphoreKey(): void
+    public function releaseCompletionLock_deletesTheSemaphoreItHolds(): void
     {
-        $pid = 42;
+        $redis   = new FakeLockRedisClient();
+        $service = $this->serviceOnLockRedis($redis);
+        $token   = $service->acquireCompletionLock(42);
 
-        $this->service->releaseCompletionLock($pid);
+        $service->releaseCompletionLock(42, $token);
 
-        $calls = $this->redisSpy->getCallsFor('del');
-        $this->assertCount(1, $calls);
-        $this->assertSame([RedisKeys::PROJECT_ENDING_SEMAPHORE . $pid], $calls[0]['args']);
+        $this->assertSame([RedisKeys::PROJECT_ENDING_SEMAPHORE . 42], $redis->deleted);
+    }
+
+    #[Test]
+    public function releaseCompletionLock_keepsTheLockOfTheWorkerThatTookItOverAfterTheTtl(): void
+    {
+        $redis   = new FakeLockRedisClient();
+        $service = $this->serviceOnLockRedis($redis);
+        $redis->keys[RedisKeys::PROJECT_ENDING_SEMAPHORE . 42] = 'token-of-the-next-worker';
+
+        $service->releaseCompletionLock(42, 'expired-token');
+
+        $this->assertSame('token-of-the-next-worker', $redis->keys[RedisKeys::PROJECT_ENDING_SEMAPHORE . 42]);
     }
 
     #[Test]
@@ -392,18 +433,6 @@ class AnalysisRedisServiceTest extends AbstractTest
 
         // Should timeout because second key is missing
         $this->assertFalse($result);
-    }
-
-    #[Test]
-    public function releaseInitLock_callsDelWithInitSemaphoreKey(): void
-    {
-        $pid = 42;
-
-        $this->service->releaseInitLock($pid);
-
-        $calls = $this->redisSpy->getCallsFor('del');
-        $this->assertCount(1, $calls);
-        $this->assertSame([RedisKeys::PROJECT_INIT_SEMAPHORE . $pid], $calls[0]['args']);
     }
 
     #[Test]

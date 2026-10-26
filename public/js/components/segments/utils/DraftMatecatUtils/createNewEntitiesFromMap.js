@@ -1,6 +1,6 @@
 import matchTag from './matchTag'
 import {Modifier, SelectionState, ContentState} from 'draft-js'
-import {createPcNumberer} from './pcTagUtils'
+import {createTagNumberer} from './compressibleTagUtils'
 
 /**
  *
@@ -35,9 +35,13 @@ const createNewEntitiesFromMap = (
         tagRange.map((tag) => {
           // Only match by id when the tag has a non-empty id
           // (XLIFF2 ph tags have empty ids — matching on "" would
-          // incorrectly pair all of them with the first source tag)
+          // incorrectly pair all of them with the first source tag).
+          // The name matters too: a <g> and its </g> share the same id.
           const tagSource = tag.data.id
-            ? sourceTagMap.find(({data}) => data.id === tag.data.id)
+            ? sourceTagMap.find(
+                ({data}) =>
+                  data.id === tag.data.id && data.name === tag.data.name,
+              )
             : undefined
           return {
             ...tag,
@@ -45,7 +49,7 @@ const createNewEntitiesFromMap = (
               ...tag.data,
               ...(tagSource?.data?.index !== undefined && {
                 index: tagSource.data.index,
-                pcRole: tagSource.data.pcRole,
+                tagRole: tagSource.data.tagRole,
               }),
             },
           }
@@ -159,14 +163,18 @@ const createNewEntitiesFromMap = (
   }
 }
 
-// Numbers ONLY the ph tags that carry an XLIFF pc tag. Open and close of a pair
-// get the same 0-based index (rendered as index + 1); a `pcRole` of 'open'/'close'
-// drives the CSS. Non-pc ph tags are left untouched (no index => not compactable).
-// Any `index`/`pcRole` already present (inherited from the source tag map) is honoured.
+// Numbers ONLY the compressible tags (see compressibleTagUtils). Open and close of
+// a pair get the same 0-based index (rendered as index + 1); a `tagRole` of
+// 'open'/'close'/'single' drives the CSS. Any other tag is left untouched (no
+// index => not compactable). Every <g> and </g> reaches the numberer, since a
+// </g> is paired with its opener by position.
+// Any `index`/`tagRole` already present (inherited from the source tag map) is honoured.
+const NUMBERED_TAG_NAMES = ['ph', 'g', 'gCl']
+
 const addIncrementalIndex = (tagRange) => {
-  const numberer = createPcNumberer()
+  const numberer = createTagNumberer()
   return tagRange.map((cur) => {
-    if (cur.data.name !== 'ph') return cur
+    if (!NUMBERED_TAG_NAMES.includes(cur.data.name)) return cur
     const result = numberer(cur.data.encodedText, cur.data.index)
     if (!result) return cur
     return {
@@ -174,7 +182,7 @@ const addIncrementalIndex = (tagRange) => {
       data: {
         ...cur.data,
         index: result.index,
-        pcRole: result.role,
+        tagRole: result.role,
       },
     }
   })

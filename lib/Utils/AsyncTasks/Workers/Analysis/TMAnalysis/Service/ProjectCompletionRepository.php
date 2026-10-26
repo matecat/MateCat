@@ -15,10 +15,8 @@ use PDOException;
 use ReflectionException;
 use RuntimeException;
 use Throwable;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\ProjectCompletionRepositoryInterface;
-use Utils\Logger\LoggerFactory;
 
-class ProjectCompletionRepository implements ProjectCompletionRepositoryInterface
+class ProjectCompletionRepository
 {
     public function __construct(
         private IDatabase $db,
@@ -30,14 +28,17 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
     }
 
     /**
-     * @Override
-     * {@inheritdoc}
+     * Run a callback inside a database transaction.
+     *
+     * The repository keeps owning its connection; what it does not own is the decision about when a
+     * transaction opens and closes. Handing out begin/commit/rollback instead made this class a
+     * second place transaction control lives, invisible to every reader and to static analysis.
      *
      * @template T
      *
      * @param callable(): T $work
      *
-     * @return T
+     * @return T The value returned by the callback
      *
      * @throws Throwable Re-throws the original exception after the transaction is aborted
      */
@@ -76,8 +77,6 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
 
             return $stmt->fetchAll();
         } catch (PDOException $e) {
-            LoggerFactory::doJsonLog($e->getMessage());
-
             throw new RuntimeException($e->getMessage(), 0, $e);
         }
     }
@@ -130,7 +129,7 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
     }
 
     /**
-     * @throws \PDOException
+     * @throws PDOException
      */
     public function initializeJobWordCount(int $jobId, string $password): void
     {

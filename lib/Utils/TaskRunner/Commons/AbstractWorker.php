@@ -12,10 +12,10 @@ namespace Utils\TaskRunner\Commons;
 use Exception;
 use Model\DataAccess\IDatabase;
 use PDOException;
-use SplObserver;
-use SplSubject;
 use Stomp\Transport\Message;
 use Utils\ActiveMQ\AMQHandler;
+use Utils\Logger\LoggerFactory;
+use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EmptyElementException;
 use Utils\TaskRunner\Exceptions\EndQueueException;
@@ -25,7 +25,7 @@ use Utils\TaskRunner\Exceptions\ReQueueException;
  * Class AbstractWorker
  * @package TaskRunner\Commons
  */
-abstract class AbstractWorker implements SplSubject
+abstract class AbstractWorker
 {
 
     const int ERR_REQUEUE_END = 1;
@@ -33,18 +33,10 @@ abstract class AbstractWorker implements SplSubject
     const int ERR_EMPTY_ELEMENT = 3;
 
     /**
-     * Observer container
-     *
-     * @var SplObserver[]
+     * Where the worker logs. The Executor passes its queue logger, so the worker's lines land in
+     * the queue's log file. A worker built without one (a test) logs to general_log.txt.
      */
-    protected array $_observer;
-
-    /**
-     * The last log message
-     *
-     * @var string|array<mixed>
-     */
-    protected string|array $_logMsg;
+    protected MatecatLogger $logger;
 
     /**
      * This process ID
@@ -84,13 +76,19 @@ abstract class AbstractWorker implements SplSubject
     /**
      * AbstractWorker constructor.
      *
-     * @param AMQHandler $queueHandler
-     * @param IDatabase  $database Per-process DB handle, supplied by the composition root (Executor/daemon).
+     * @param AMQHandler         $queueHandler
+     * @param IDatabase          $database Per-process DB handle, supplied by the composition root (Executor/daemon).
+     * @param MatecatLogger|null $logger   The queue logger, supplied by the Executor.
+     *
+     * A subclass that overrides the constructor must accept `?MatecatLogger $logger = null` and pass it on:
+     * the Executor builds every worker with the named argument `logger:`, and a constructor without it
+     * fails with "Unknown named parameter $logger".
      */
-    public function __construct(AMQHandler $queueHandler, IDatabase $database)
+    public function __construct(AMQHandler $queueHandler, IDatabase $database, ?MatecatLogger $logger = null)
     {
         $this->_queueHandler = $queueHandler;
         $this->database = $database;
+        $this->logger = $logger ?? LoggerFactory::getLogger();
     }
 
     /**
@@ -128,17 +126,6 @@ abstract class AbstractWorker implements SplSubject
     }
 
     /**
-     * Override this method in the concrete worker if you need the worker to log in a file
-     * different from the one in context object
-     *
-     * @return string
-     */
-    public function getLoggerName(): string
-    {
-        return $this->_myContext->loggerName;
-    }
-
-    /**
      * Execution method
      *
      * @param $queueElement AbstractElement
@@ -151,68 +138,16 @@ abstract class AbstractWorker implements SplSubject
     abstract public function process(AbstractElement $queueElement): void;
 
     /**
-     * Attach an SplObserver
-     * @link  http://php.net/manual/en/splsubject.attach.php
+     * Kept only for the aligner plugin's workers, which still call it. New code calls the logger
+     * directly, at the level the line needs: $this->logger->error('segment update failed').
      *
-     * @param SplObserver $observer <p>
-     *                              The <b>SplObserver</b> to attach.
-     *                              </p>
-     *
-     * @return void
-     * @since 5.1.0
-     */
-    public function attach(SplObserver $observer): void
-    {
-        $this->_observer[spl_object_hash($observer)] = $observer;
-    }
-
-    /**
-     * Detach an observer
-     * @link  http://php.net/manual/en/splsubject.detach.php
-     *
-     * @param SplObserver $observer <p>
-     *                              The <b>SplObserver</b> to detach.
-     *                              </p>
-     *
-     * @return void
-     * @since 5.1.0
-     */
-    public function detach(SplObserver $observer): void
-    {
-        unset($this->_observer[spl_object_hash($observer)]);
-    }
-
-    /**
-     * Notify an observer
-     * @link  http://php.net/manual/en/splsubject.notify.php
-     * @return void
-     * @since 5.1.0
-     */
-    public function notify(): void
-    {
-        foreach ($this->_observer as $observer) {
-            $observer->update($this);
-        }
-    }
-
-    /**
-     * Method used by the Observer to get the logging message
-     * @return string|array<mixed>
-     */
-    public function getLogMsg(): array|string
-    {
-        return $this->_logMsg;
-    }
-
-    /**
-     * Method to be called when a concrete worker must log
+     * @deprecated use $this->logger
      *
      * @param array<mixed>|string $msg
      */
     protected function _doLog(array|string $msg): void
     {
-        $this->_logMsg = $msg;
-        $this->notify();
+        $this->logger->debug($msg);
     }
 
     /**
@@ -226,10 +161,8 @@ abstract class AbstractWorker implements SplSubject
     protected function _checkForReQueueEnd(QueueElement $queueElement): void
     {
         if ($queueElement->reQueueNum >= $this->maxRequeueNum) {
-            $this->_doLog("--- (Worker " . $this->_workerPid . ") : Frame Re-queue max value reached, acknowledge and skip.");
+            $this->logger->debug("--- (Worker " . $this->_workerPid . ") : Frame Re-queue max value reached, acknowledge and skip.");
             $this->_endQueueCallback($queueElement);
-        } else {
-//            $this->_doLog( "--- (Worker " . $this->_workerPid . ") :  Frame re-queued {$queueElement->reQueueNum} times." );
         }
     }
 
@@ -261,8 +194,8 @@ abstract class AbstractWorker implements SplSubject
         try {
             $db->ping();
         } catch (PDOException $e) {
-            $this->_doLog("--- (Worker " . $this->_workerPid . ") : {$e->getMessage()} ");
-            $this->_doLog("--- (Worker " . $this->_workerPid . ") : Database connection reloaded. ");
+            $this->logger->debug("--- (Worker " . $this->_workerPid . ") : {$e->getMessage()} ");
+            $this->logger->debug("--- (Worker " . $this->_workerPid . ") : Database connection reloaded. ");
             $db->close();
             //reconnect
             $db->getConnection();
@@ -281,7 +214,7 @@ abstract class AbstractWorker implements SplSubject
             $message = '';
         }
         $this->_getAmqHandlerForPublish()->publishToNodeJsClients(AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message($message, ['persistent' => 'false']));
-        $this->_doLog($message);
+        $this->logger->debug($message);
     }
 
     /**

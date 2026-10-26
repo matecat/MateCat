@@ -664,10 +664,15 @@ const SegmentActions = {
     ModalsActions.showModalComponent(
       MODAL_KEY.ALERT,
       {
-        text:
-          "Segment is locked and shouldn't be edited. " +
-          'If you must edit it, click on the padlock icon to the left of the segment. ' +
-          'The owner of the project will be notified of any edits.',
+        text: (
+          <>
+            This segment is locked and shouldn&apos;t be edited. If you really
+            need to make a change, click the padlock icon to the left of the
+            segment to unlock it.
+            <br />
+            The project owner will be notified of any edits.
+          </>
+        ),
       },
       'Locked segment',
     )
@@ -1747,7 +1752,7 @@ const SegmentActions = {
         SegmentActions.setNextUntranslatedSegmentFromServer(data.nextSegmentId)
         const segment = SegmentStore.getSegmentByIdToJS(id_segment)
         if (!segment) return
-        if (config.alternativesEnabled && !segment.alternatives) {
+        if (config.alternativesEnabled) {
           SegmentActions.getTranslationMismatches(id_segment)
         }
       })

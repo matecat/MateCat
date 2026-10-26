@@ -2,6 +2,7 @@
 
 namespace Model\Jobs;
 
+use Controller\API\Commons\Exceptions\ConflictError;
 use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\ShapelessConcreteStruct;
@@ -243,6 +244,7 @@ class JobDao extends AbstractDao
      *
      * @return JobStruct
      * @throws ReflectionException
+     * @throws ConflictError when no chunk carries the old password any more
      * @throws Exception
      * @throws TypeError when the struct carries no id, so the metadata cannot be carried over
      */
@@ -250,6 +252,12 @@ class JobDao extends AbstractDao
     {
         if (empty($new_password)) {
             throw new PDOException("Invalid empty value: password.");
+        }
+
+        // Nothing to rename. MySQL counts the rows an UPDATE changes, not the ones it matches, so
+        // writing the same password could count 0 and be refused below as a chunk that is gone.
+        if ($new_password === $jStruct->password) {
+            return $jStruct;
         }
 
         $conn = $this->database->getConnection();
@@ -260,6 +268,14 @@ class JobDao extends AbstractDao
             'old_password' => $jStruct->password,
             'last_update' => date("Y-m-d H:i:s"),
         ]);
+
+        // Every caller read the chunk before it held the job, so a merge or another rotation can
+        // commit in between and leave no row with the old password. Renaming nothing and answering
+        // 200 would hand out a password that opens no job. Thrown inside the caller's transaction,
+        // it rolls the rotation back whole.
+        if ($stmt->rowCount() === 0) {
+            throw new ConflictError('This job was changed by another request, reload it and try again');
+        }
 
         // job_metadata is keyed by (id_job, password, key), so the rename above leaves every setting
         // the job has at an address nothing can reach any more: dialect_strict, mandatory_issues, the
@@ -329,17 +345,29 @@ class JobDao extends AbstractDao
     }
 
     /**
-     * @param JobStruct $jStruct
+     * Write the PEE and TTE recounted for a chunk, only while it still covers the segments it was
+     * recounted over.
+     *
+     * The recount runs from a queue frame carrying the chunk as it was when the frame was queued. A
+     * split or a merge committed in between moves the chunk's segment range, and the totals of the
+     * old range would land on the new one; the range in the WHERE leaves that row alone instead.
+     * A chunk keeps its id and password across a re-split, so they alone cannot tell the two apart.
+     *
+     * @return int the rows changed: 0 when the chunk is gone or its range has moved since, and also when
+     *             the totals equal the stored ones, because the connection counts changed rows, not matched
+     *
      * @throws PDOException
      */
-    public function updateJobWeightedPeeAndTTE(JobStruct $jStruct): void
+    public function updateJobWeightedPeeAndTTE(JobStruct $jStruct): int
     {
         $sql = " UPDATE jobs 
                     SET avg_post_editing_effort = :avg_post_editing_effort, 
                         total_time_to_edit = :total_time_to_edit,
                         last_update = :last_update 
                     WHERE id = :id 
-                    AND password = :password ";
+                    AND password = :password
+                    AND job_first_segment = :job_first_segment
+                    AND job_last_segment = :job_last_segment ";
 
         $stmt = $this->database->getConnection()->prepare($sql);
         $stmt->execute([
@@ -347,9 +375,14 @@ class JobDao extends AbstractDao
             'total_time_to_edit' => $jStruct->total_time_to_edit,
             'last_update' => date("Y-m-d H:i:s"),
             'id' => $jStruct->id,
-            'password' => $jStruct->password
+            'password' => $jStruct->password,
+            'job_first_segment' => $jStruct->job_first_segment,
+            'job_last_segment' => $jStruct->job_last_segment,
         ]);
+        $written = $stmt->rowCount();
         $stmt->closeCursor();
+
+        return $written;
     }
 
     /**
@@ -461,25 +494,35 @@ class JobDao extends AbstractDao
     }
 
     /**
+     * One chunk, addressed by its full key.
+     *
+     * `WHERE id = ?` alone resolves through the non-unique `id` index, which locks the next key and the
+     * gap after the job too. When the job has the highest id that gap runs to the end of the table, and
+     * every project created meanwhile waits on it to insert its own jobs, for as long as the split or
+     * merge transaction calling this stays open.
+     *
      * @param int $jobId
+     * @param string $password
      * @param int $standard_analysis_wc
      * @param int $total_raw_wc
      *
      * @return int
      * @throws PDOException
      */
-    public function updateStdWcAndTotalWc(int $jobId, int $standard_analysis_wc, int $total_raw_wc): int
+    public function updateStdWcAndTotalWc(int $jobId, string $password, int $standard_analysis_wc, int $total_raw_wc): int
     {
         $query = "UPDATE jobs 
                     SET 
                         last_update = :last_update,
                         total_raw_wc = :total_raw_wc, 
                         standard_analysis_wc = :standard_analysis_wc
-                    WHERE id= :id
+                    WHERE id = :id
+                      AND password = :password
                 ";
 
         $values = [
             'id' => $jobId,
+            'password' => $password,
             'standard_analysis_wc' => $standard_analysis_wc,
             'last_update' => date("Y-m-d H:i:s"),
             'total_raw_wc' => $total_raw_wc,
@@ -886,21 +929,25 @@ class JobDao extends AbstractDao
     }
 
     /**
-     * @param JobStruct $first_job
+     * Delete one chunk, by its exact (id, password).
      *
-     * @return bool
+     * The merge drops every chunk but the first one through here. Matched on the unique
+     * (id, password) key, the statement locks that row only. `password != ?` scanned the non-unique
+     * `id` key instead, and locked the gap after the job's last row: up to the supremum when the job
+     * holds the highest id, which blocked every new project's `jobs` insert until the merge committed.
+     *
+     * @return int the rows deleted: 0 when the chunk is already gone
      * @throws PDOException
      */
-    public function deleteOnMerge(JobStruct $first_job): bool
+    public function deleteChunk(JobStruct $chunk): int
     {
-        $conn = $this->database->getConnection();
-        $query = "DELETE FROM jobs WHERE id = :id AND password != :first_job_password "; //use the new password
-        $stmt = $conn->prepare($query);
-
-        return $stmt->execute([
-            'id' => $first_job->id,
-            'first_job_password' => $first_job->password
+        $stmt = $this->database->getConnection()->prepare("DELETE FROM jobs WHERE id = :id AND password = :password");
+        $stmt->execute([
+            'id' => $chunk->id,
+            'password' => $chunk->password,
         ]);
+
+        return $stmt->rowCount();
     }
 
     /**

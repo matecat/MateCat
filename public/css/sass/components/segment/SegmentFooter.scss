@@ -324,3 +324,18 @@ section.loaded .submenu {
 .sub-editor .cc-search .search-target {
   width: 44.2%;
 }
+
+.alternatives .deleted,
+.suggestion_source .deleted,
+.suggestion_source del {
+  background: rgba(255, 46, 0, 0.3);
+  color: colors.$red600;
+  text-decoration: line-through;
+}
+
+.alternatives .added,
+.suggestion_source .added,
+.suggestion_source ins {
+  background: rgba(18, 230, 130, 0.12);
+  color: colors.$green1000;
+}

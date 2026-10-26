@@ -2,7 +2,11 @@ import React, {useContext} from 'react'
 import Check from '../../../img/icons/Check'
 import {Select} from '../common/Select'
 import {CreateProjectContext} from './CreateProjectContext'
-import {orderTmKeys} from '../settingsPanel/Contents/TranslationMemoryGlossaryTab'
+import {
+  getSavedTemplateTm,
+  orderTmKeys,
+  toTemplateTmEntry,
+} from '../settingsPanel/Contents/TranslationMemoryGlossaryTab'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import HelpCircle from '../../../img/icons/HelpCircle'
 import IconAdd from '../../../img/icons/IconAdd'
@@ -64,7 +68,9 @@ export const TmGlossarySelect = () => {
           tm: orderTmKeys(
             updatedKeys.filter(({isActive}) => isActive),
             prevTemplate.tm.map(({key}) => key),
-          ).map(({id, isActive, ...rest}) => rest), //eslint-disable-line
+          ).map((tmKey) =>
+            toTemplateTmEntry(tmKey, getSavedTemplateTm(projectTemplates)),
+          ),
         }))
       }}
     >

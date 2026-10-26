@@ -420,7 +420,7 @@ class Utils
 
         WorkerClient::enqueue('MAIL', ErrMailWorker::class, $queue_element, ['persistent' => WorkerClient::$_HANDLER->persistent]);
 
-        LoggerFactory::doJsonLog('Message has been sent');
+        LoggerFactory::getLogger('mail', 'mail.log')->info('Message has been sent');
     }
 
     /**
@@ -703,7 +703,7 @@ class Utils
                     }
                     $outcome = unlink($fileInfo->getPathname());
                     if (!$outcome) {
-                        LoggerFactory::doJsonLog("fail deleting " . $fileInfo->getPathname());
+                        LoggerFactory::getLogger('files')->warning("fail deleting " . $fileInfo->getPathname());
                     }
                 }
             }
