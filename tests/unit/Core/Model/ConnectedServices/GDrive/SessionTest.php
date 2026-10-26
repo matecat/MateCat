@@ -7,6 +7,7 @@ use Google_Client;
 use Google_Service_Drive;
 use Google_Service_Drive_Permission;
 use Google_Service_Drive_Resource_Permissions;
+use Matecat\SimpleS3\ClientInterface;
 use Matecat\TestHelpers\AbstractTest;
 use Model\ConnectedServices\ConnectedServiceDao;
 use Model\ConnectedServices\ConnectedServiceStruct;
@@ -15,6 +16,9 @@ use Model\ConnectedServices\GDrive\Session;
 use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\FilesStorage\AbstractFilesStorage;
+use Model\FilesStorage\FilesystemAdapter;
+use Model\FilesStorage\FsFilesStorage;
+use Model\FilesStorage\S3FilesStorage;
 use Model\Filters\FiltersConfigTemplateStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
@@ -611,7 +615,7 @@ class SessionTest extends AbstractTest
     public function getFileStructureForJsonOutputRemovesNonExistentLocalFiles(): void
     {
         $originalStorageMethod = \Utils\Registry\AppConfig::$FILE_STORAGE_METHOD;
-        \Utils\Registry\AppConfig::$FILE_STORAGE_METHOD = 'local';
+        \Utils\Registry\AppConfig::$FILE_STORAGE_METHOD = 'fs';
 
         try {
             $sessionData = $this->createSessionData();
@@ -637,7 +641,7 @@ class SessionTest extends AbstractTest
     public function getFileStructureForJsonOutputReturnsExistingLocalFile(): void
     {
         $originalStorageMethod = \Utils\Registry\AppConfig::$FILE_STORAGE_METHOD;
-        \Utils\Registry\AppConfig::$FILE_STORAGE_METHOD = 'local';
+        \Utils\Registry\AppConfig::$FILE_STORAGE_METHOD = 'fs';
 
         $originalCacheRepo = \Utils\Registry\AppConfig::$CACHE_REPOSITORY;
         $tempCacheDir = sys_get_temp_dir() . '/matecat-test-gdrive-cache-' . uniqid();
@@ -655,7 +659,7 @@ class SessionTest extends AbstractTest
                 ],
             ];
 
-            // Create the directory structure that getGDriveFilePath expects:
+            // A file cached before the storage names were hashed keeps its original name:
             // {cache_repo}/ab/c1/23abc123abc123abc123__en-US/package/orig/mydoc.docx
             $fileDir = $tempCacheDir . '/ab/c1/23abc123abc123abc123__en-US/package/orig';
             mkdir($fileDir, 0777, true);
@@ -992,6 +996,124 @@ class SessionTest extends AbstractTest
         $this->assertDirectoryDoesNotExist($testDir);
     }
 
+    /**
+     * A file cached under its content hash is found without knowing its name; the legacy copy beside it is ignored.
+     */
+    #[Test]
+    public function getFileStructureForJsonOutputFindsAFileCachedUnderItsContentHash(): void
+    {
+        $originalCacheRepo = \Utils\Registry\AppConfig::$CACHE_REPOSITORY;
+        $tempCacheDir = sys_get_temp_dir() . '/matecat-test-gdrive-hashed-' . uniqid();
+        \Utils\Registry\AppConfig::$CACHE_REPOSITORY = $tempCacheDir;
+
+        try {
+            $cacheHash = sha1('content');
+            $sessionData = $this->createSessionData();
+            $sessionData[Session::SESSION_KEY] = [
+                Session::FILE_LIST => [
+                    'file1' => [
+                        Session::FILE_NAME => 'спасибо.docx',
+                        Session::FILE_HASH => ['cacheHash' => $cacheHash],
+                    ],
+                ],
+            ];
+
+            $tree = implode('/', AbstractFilesStorage::composeCachePath($cacheHash));
+            $origDir = $tempCacheDir . '/' . $tree . '__en-US/package/orig';
+            mkdir($origDir, 0777, true);
+            file_put_contents($origDir . '/' . $cacheHash . '.docx', 'hashed');
+            file_put_contents($origDir . '/0-legacy.docx', 'legacy copy, longer');
+
+            $session = new Session($this->dbStub, new ArraySessionStore($sessionData), null, new FsFilesStorage(), $sessionData['user'] ?? null);
+            $result = $session->getFileStructureForJsonOutput();
+
+            $this->assertSame([['fileId' => 'file1', 'fileName' => 'спасибо.docx', 'fileSize' => strlen('hashed'), 'fileExtension' => 'docx']], $result['files']);
+        } finally {
+            \Utils\Registry\AppConfig::$CACHE_REPOSITORY = $originalCacheRepo;
+            self::deleteRecursiveDir($tempCacheDir);
+        }
+    }
+
+    #[Test]
+    public function getFileStructureForJsonOutputReadsSizeAndTypeFromS3(): void
+    {
+        $originalMimeTypes = \Utils\Registry\AppConfig::$MIME_TYPES;
+        \Utils\Registry\AppConfig::$MIME_TYPES = ['application/vnd.openxmlformats-officedocument.wordprocessingml.document' => ['docx']];
+
+        try {
+            $result = $this->getS3FileStructure('mydoc.DOCX', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+
+            $this->assertSame([['fileId' => 'file1', 'fileName' => 'mydoc.DOCX', 'fileSize' => 1234, 'fileExtension' => 'docx']], $result['response']['files']);
+            $this->assertSame([$result['key']], $result['requestedKeys']);
+        } finally {
+            \Utils\Registry\AppConfig::$MIME_TYPES = $originalMimeTypes;
+        }
+    }
+
+    #[Test]
+    public function getFileStructureForJsonOutputFallsBackToTheFileExtensionForAnUnknownS3Type(): void
+    {
+        $result = $this->getS3FileStructure('mydoc.odt', 'application/x-unknown');
+
+        $this->assertSame('odt', $result['response']['files'][0]['fileExtension']);
+    }
+
+    #[Test]
+    public function getFileStructureForJsonOutputRemovesFilesMissingFromS3(): void
+    {
+        $result = $this->getS3FileStructure('mydoc.odt', 'application/x-unknown', false);
+
+        $this->assertSame([], $result['response']);
+        $this->assertFalse($result['session']->hasFiles());
+        $this->assertSame([], $result['requestedKeys']);
+    }
+
+    /**
+     * @return array{response: array<string, mixed>, key: string, requestedKeys: list<string>, session: Session}
+     */
+    private function getS3FileStructure(string $fileName, string $contentType, bool $stored = true): array
+    {
+        $originalBucket = \Utils\Registry\AppConfig::$AWS_STORAGE_BASE_BUCKET;
+        \Utils\Registry\AppConfig::$AWS_STORAGE_BASE_BUCKET = 'test-bucket';
+
+        try {
+            $cacheHash = sha1('content');
+            $key = 'cache-package/' . implode('/', AbstractFilesStorage::composeCachePath($cacheHash)) . '__en-US/orig/' . $cacheHash . '.docx';
+            $requestedKeys = [];
+
+            $client = $this->createStub(ClientInterface::class);
+            $client->method('__call')->willReturnCallback(function (string $name, array $args) use ($key, $stored, $contentType, &$requestedKeys) {
+                if ($name === 'getItemsInABucket') {
+                    return $stored ? [$key] : [];
+                }
+                if ($name === 'getItem') {
+                    $requestedKeys[] = $args[0]['key'];
+
+                    return ['ContentLength' => 1234, 'ContentType' => $contentType];
+                }
+
+                return null;
+            });
+
+            $sessionData = $this->createSessionData();
+            $sessionData[Session::SESSION_KEY] = [
+                Session::FILE_LIST => [
+                    'file1' => [
+                        Session::FILE_NAME => $fileName,
+                        Session::FILE_HASH => ['cacheHash' => $cacheHash],
+                    ],
+                ],
+            ];
+
+            $storage = new S3FilesStorage($this->createStub(FilesystemAdapter::class), $client);
+            $session = new Session($this->dbStub, new ArraySessionStore($sessionData), null, $storage, $sessionData['user'] ?? null);
+
+            return ['response' => $session->getFileStructureForJsonOutput(), 'key' => $key, 'requestedKeys' => $requestedKeys, 'session' => $session];
+        } finally {
+            \Utils\Registry\AppConfig::$AWS_STORAGE_BASE_BUCKET = $originalBucket;
+        }
+    }
+
     #[Test]
     public function getCacheFileDirReturnsCorrectPath(): void
     {
@@ -1011,46 +1133,6 @@ class SessionTest extends AbstractTest
         $this->assertStringContainsString('it-IT', $result);
         $this->assertStringContainsString('cache-package', $result);
         $this->assertMatchesRegularExpression('#/ab/|/c1/|/23#', $result);
-    }
-
-    #[Test]
-    public function getGDriveFilePathBuildsPath(): void
-    {
-        $sessionData = $this->createSessionData();
-        $sessionData['actualSourceLang'] = 'en-US';
-
-        $session = new Session($this->dbStub, new ArraySessionStore($sessionData), null, null, $sessionData['user'] ?? null);
-
-        $file = [
-            Session::FILE_NAME => 'mydoc.docx',
-            Session::FILE_HASH => ['cacheHash' => 'xyz789'],
-        ];
-
-        $method = new \ReflectionMethod($session, 'getGDriveFilePath');
-        $result = $method->invoke($session, $file);
-
-        $this->assertStringEndsWith('package' . DIRECTORY_SEPARATOR . 'orig' . DIRECTORY_SEPARATOR . 'mydoc.docx', $result);
-        $this->assertMatchesRegularExpression('#/xy/|/z7/|/89#', $result);
-    }
-
-    #[Test]
-    public function getGDriveFilePathForS3BuildsPath(): void
-    {
-        $sessionData = $this->createSessionData();
-        $sessionData['actualSourceLang'] = 'en-US';
-
-        $session = new Session($this->dbStub, new ArraySessionStore($sessionData), null, null, $sessionData['user'] ?? null);
-
-        $file = [
-            Session::FILE_NAME => 's3doc.pdf',
-            Session::FILE_HASH => ['cacheHash' => 'hash-for-s3'],
-        ];
-
-        $method = new \ReflectionMethod($session, 'getGDriveFilePathForS3');
-        $result = $method->invoke($session, $file);
-
-        $this->assertStringEndsWith('orig' . DIRECTORY_SEPARATOR . 's3doc.pdf', $result);
-        $this->assertMatchesRegularExpression('#/ha/|/sh/|/-for-s3#', $result);
     }
 
     #[Test]

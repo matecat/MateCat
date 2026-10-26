@@ -1,3 +1,5 @@
+import {getFilenameFromContentDisposition} from '../../utils/contentDisposition'
+
 /**
  * Export CSV from quality report page
  *
@@ -29,9 +31,11 @@ export const exportQualityReport = async ({
   })
   if (!response.ok) return Promise.reject(response)
   const blob = await response.blob()
-  const temp = response.headers.get('Content-Disposition').split('filename')[1]
   return {
     blob,
-    filename: temp.substring(temp.indexOf('"') + 1, temp.lastIndexOf('"')),
+    filename: getFilenameFromContentDisposition(
+      response.headers.get('Content-Disposition'),
+      `quality-report.${format}`,
+    ),
   }
 }

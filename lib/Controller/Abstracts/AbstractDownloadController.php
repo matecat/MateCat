@@ -14,6 +14,7 @@ use Model\Projects\ProjectStruct;
 use ReflectionException;
 use TypeError;
 use Utils\Registry\AppConfig;
+use Utils\Tools\ContentDisposition;
 use View\API\Commons\ZipContentObject;
 use ZipArchive;
 
@@ -191,11 +192,8 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
                 ob_start("ob_gzhandler");  // compress page before sending
                 $this->nocache();
 
-                $safeFilename = self::sanitizeContentDispositionFilename($this->_filename);
                 header("Content-Type: $this->mimeType");
-                header(
-                    "Content-Disposition: attachment; filename=\"$safeFilename\""
-                ); // enclose file name in double quotes in order to avoid duplicate header error. Reference https://github.com/prior/prawnto/pull/16
+                header("Content-Disposition: " . ContentDisposition::build($this->_filename));
                 header("Expires: 0");
                 header("Connection: close");
                 header("Content-Length: " . strlen($this->outputContent));
@@ -296,7 +294,7 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
      */
     public static function sanitizeContentDispositionFilename(string $filename): string
     {
-        return str_replace(['"', '\\', "\r", "\n", "\0"], '', $filename);
+        return ContentDisposition::sanitize($filename);
     }
 
     /**
