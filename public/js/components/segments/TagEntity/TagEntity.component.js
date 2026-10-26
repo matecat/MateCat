@@ -150,7 +150,7 @@ const markSearch = (text, searchParams, {start, end}) => {
 }
 
 // `tag-numbered` scopes the compressed styling; `tag-paired-open|close` shapes
-// the two halves of a pair. A single (x) tag has no partner, so no paired class.
+// the two halves of a pair.
 const getTagRoleClass = (isNumbered, tagRole) => {
   if (!isNumbered) return ''
   const paired =
@@ -161,7 +161,7 @@ const getTagRoleClass = (isNumbered, tagRole) => {
 const getChildrenContent = (index, tagRole, {tagsCompressed, children}) => {
   if (index >= 0) {
     // A closing tag always shows only its number (never the equiv-text /
-    // closing content). An opening or single tag shows its content unless
+    // closing content). An opening tag shows its content unless
     // compressed.
     const isClose = tagRole === 'close'
     return (

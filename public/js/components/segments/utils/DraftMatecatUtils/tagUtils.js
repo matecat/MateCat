@@ -63,8 +63,8 @@ const numberTagsInDocumentOrder = (text) => {
   return queues
 }
 
-// A closing tag shows only its number (no content); open and single tags show
-// their number followed by their content. Every numbered tag takes the ph style,
+// A closing tag shows only its number (no content); an open tag shows its
+// number followed by its content. Every numbered tag takes the ph style,
 // so a numbered g looks like a pc tag rather than a g.
 const numberedTagToHtml = (isRtl, {index, role}, tagText) => {
   const {style, styleRTL} = tagSignatures.ph
