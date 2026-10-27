@@ -136,13 +136,65 @@ class MyMemoryMethodsTest extends AbstractTest
             'responseDetails' => '',
         ]);
 
-        $this->engineStruct->others['entry_status_relative_url'] = 'entry/status';
         $mock   = $this->makeMock($jsonReturn);
         $result = $mock->entryStatus($uuid);
 
         $this->assertInstanceOf(GetMemoryResponse::class, $result);
         $this->assertEquals(200, $result->responseStatus);
         $this->assertNull($result->error);
+    }
+
+    /**
+     * The shipped schema only defines "glossary_entry_status_relative_url": entryStatus() used to read
+     * "entry_status_relative_url", got the "Bad method call" array back and failed with a TypeError.
+     */
+    #[Test]
+    public function test_entryStatus_uses_glossary_key_from_shipped_schema(): void
+    {
+        $uuid = 'abc123-entry-uuid';
+
+        $this->engineStruct->others = ['glossary_entry_status_relative_url' => 'v2/entry/status'];
+
+        $calledUrl = null;
+        $mock      = $this->makeUrlRecordingMock(json_encode([
+            'responseData'   => ['id' => 42],
+            'responseStatus' => 200,
+        ]), $calledUrl);
+
+        $result = $mock->entryStatus($uuid);
+
+        $this->assertInstanceOf(GetMemoryResponse::class, $result);
+        $this->assertEquals(200, $result->responseStatus);
+        $this->assertStringContainsString('/v2/entry/status?uuid=' . $uuid, (string)$calledUrl);
+    }
+
+    #[Test]
+    public function test_entryStatus_throws_exception_when_url_is_not_configured(): void
+    {
+        $this->engineStruct->others = [];
+
+        $mock = $this->makeMock('{}');
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('MyMemory entry status url is not configured');
+
+        $mock->entryStatus('abc123-entry-uuid');
+    }
+
+    private function makeUrlRecordingMock(string $jsonReturn, ?string &$calledUrl): MyMemory
+    {
+        $mock = @$this->getMockBuilder(MyMemory::class)
+            ->setConstructorArgs([$this->engineStruct, $this->createStub(\Model\DataAccess\IDatabase::class)])
+            ->onlyMethods(['_call'])
+            ->getMock();
+
+        $mock->method('_call')->willReturnCallback(function (string $url) use (&$calledUrl, $jsonReturn) {
+            $calledUrl = $url;
+
+            return $jsonReturn;
+        });
+
+        return $mock;
     }
 
     #[Test]
