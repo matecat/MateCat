@@ -83,14 +83,12 @@ test('lists the formats of a group alphabetically, ignoring case', () => {
     ],
   }
 
-  const {container} = render(
-    <SupportedFilesModal supportedFiles={supportedFiles} />,
-  )
+  render(<SupportedFilesModal supportedFiles={supportedFiles} />)
 
   expect(
-    [...container.querySelectorAll('.file-list span')].map(
-      (s) => s.textContent,
-    ),
+    screen
+      .getAllByText(/^(Android xml|docx|epub|pdf|xml)$/)
+      .map((el) => el.textContent),
   ).toEqual(['Android xml', 'docx', 'epub', 'pdf', 'xml'])
 })
 
