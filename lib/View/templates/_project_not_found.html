@@ -7,20 +7,16 @@
     <link rel="icon" type="image/png" sizes="16x16" href="${basepath}public/img/meta/favicon-16x16.svg"/>
     <title>Project not found</title>
 </head>
-<body>
+<body class="status-page">
 
-<div class="iepopup">
-    <a href="${basepath}" class="logoblack"></a>
-    <br />
-    <strong style="font-size:160%">Sorry, we can't find the project you're looking for.</strong>
-    <br />
-    <br />
-    <img src="${basepath}public/img/jobcancelled.png" />
-    <br />
-    <p>Double check the URL or contact your PM.<br />
-        If you continue to get this page, email us at <a href="mailto:${support_mail}">${support_mail}</a>.
-    </p>
-</div>
+<main class="status-page__card">
+    <a href="${basepath}" class="status-page__logo" aria-label="Matecat"></a>
+    <h1 class="status-page__title">Sorry, we can't find the project you're looking for.</h1>
+    <div class="status-page__text">
+        <p>Double check the URL or contact your PM.</p>
+        <p>If you continue to get this page, email us at <a href="mailto:${support_mail}">${support_mail}</a>.</p>
+    </div>
+</main>
 
 </body>
 </html>

@@ -1,0 +1,78 @@
+@use '../../tokens/colors';
+@use '../../tokens/spacing';
+@use '../../commons/variables';
+@use '../../commons/matecat_fonts';
+@use '../../commons/reset';
+
+/* Job cancelled/archived and job/project not found pages (body.status-page) */
+
+body.status-page {
+  min-width: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: spacing.$space-6 spacing.$space-4;
+  background: colors.$grey50;
+}
+
+.status-page__card {
+  width: 100%;
+  // Wide enough for the reactivation sentence to fit on one line with a typical owner email
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: spacing.$space-6;
+  padding: spacing.$space-10 spacing.$space-8;
+  background: colors.$white;
+  border: 1px solid colors.$grey200;
+  border-radius: variables.$border-radius-big;
+  box-shadow: 0 2px 8px rgba(colors.$black, 0.06);
+}
+
+.status-page__logo {
+  display: block;
+  width: 180px;
+  height: 40px;
+  background: url(/public/img/logo_matecat_big.svg) no-repeat center / contain;
+}
+
+.status-page__title {
+  font: variables.$font-style-heading4;
+  color: colors.$grey1300;
+}
+
+.status-page__text {
+  display: flex;
+  flex-direction: column;
+  gap: spacing.$space-2;
+  font: variables.$font-style-base;
+  color: colors.$grey600;
+
+  a {
+    color: colors.$blue500;
+
+    &:hover {
+      color: colors.$blue600;
+    }
+  }
+}
+
+.status-page__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  padding: 12px 20px;
+  font: variables.$font-style-base;
+  color: colors.$white;
+  background: colors.$blue500;
+  border-radius: variables.$border-radius-default;
+  text-decoration: none;
+
+  &:hover,
+  &:active {
+    color: colors.$white;
+    background: colors.$blue600;
+  }
+}
