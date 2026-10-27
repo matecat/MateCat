@@ -203,24 +203,26 @@
     position: relative;
   }
   .button-notes {
-    color: colors.$white !important;
-    font-weight: bold;
-    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    height: 28px;
     padding: 6px 12px;
-    border-radius: 2px;
-    font-size: variables.$font-size-small;
+    margin-left: 15px;
+    color: colors.$white;
+    font: variables.$font-style-xsmall;
+    font-weight: variables.$font-weight-bold;
+    white-space: nowrap;
+    border-radius: variables.$border-radius-default;
     background: colors.$blue500;
     user-select: none;
     cursor: pointer;
-    min-width: 95px;
-    margin-left: 15px;
     &:hover {
       background-color: colors.$blue600;
     }
     svg {
-      display: block;
-      margin-top: 1px;
-      float: left;
+      flex-shrink: 0;
     }
   }
   .projectbar-wordcounter {
