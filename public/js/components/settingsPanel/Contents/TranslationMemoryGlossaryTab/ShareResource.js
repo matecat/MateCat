@@ -3,7 +3,6 @@ import PropTypes from 'prop-types'
 import {shareTmKey} from '../../../../api/shareTmKey'
 import CommonUtils from '../../../../utils/commonUtils'
 
-import Close from '../../../../../img/icons/Close'
 import {getInfoTmKey} from '../../../../api/getInfoTmKey'
 import ModalsActions from '../../../../actions/ModalsActions'
 import ShareTmModal from '../../../modals/ShareTmModal'
@@ -15,6 +14,7 @@ import {
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../../../common/Button/Button'
+import IconClose from '../../../../../img/icons/IconClose'
 
 export const ShareResource = ({row, onClose, onShare}) => {
   const [emails, setEmails] = useState('')
@@ -173,7 +173,7 @@ export const ShareResource = ({row, onClose, onShare}) => {
             htmlType={BUTTON_HTML_TYPE.RESET}
             disabled={isFormDisabled}
           >
-            <Close size={18} />
+            <IconClose size={16} />
           </Button>
         </div>
       </form>

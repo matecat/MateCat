@@ -24,7 +24,7 @@ export const SubTemplateCreateUpdateControl = () => {
         }
         disabled={templateName === ''}
       >
-        <Checkmark size={14} />
+        <Checkmark size={18} />
         Confirm
       </Button>
 
@@ -33,7 +33,7 @@ export const SubTemplateCreateUpdateControl = () => {
         type={BUTTON_TYPE.WARNING}
         onClick={cancel}
       >
-        <IconClose size={11} />
+        <IconClose size={18} />
       </Button>
     </>
   )

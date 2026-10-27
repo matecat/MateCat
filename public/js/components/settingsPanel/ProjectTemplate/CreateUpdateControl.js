@@ -24,12 +24,16 @@ export const CreateUpdateControl = () => {
           templateModifier === TEMPLATE_MODIFIERS.CREATE ? create : updateName
         }
       >
-        <Checkmark size={14} />
+        <Checkmark size={18} />
         Confirm
       </Button>
 
-      <Button type={BUTTON_TYPE.WARNING} onClick={cancel}>
-        <IconClose size={11} />
+      <Button
+        type={BUTTON_TYPE.WARNING}
+        size={BUTTON_SIZE.ICON_STANDARD}
+        onClick={cancel}
+      >
+        <IconClose size={18} />
       </Button>
     </>
   )

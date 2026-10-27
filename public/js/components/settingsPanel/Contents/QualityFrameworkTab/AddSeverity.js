@@ -115,7 +115,7 @@ export const AddSeverity = ({numbersOfColumns}) => {
           disabled: !name || typeof error === 'string',
           children: (
             <>
-              <Checkmark size={14} />
+              <Checkmark size={18} />
               Confirm
             </>
           ),

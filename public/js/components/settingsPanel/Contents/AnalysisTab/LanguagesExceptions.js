@@ -225,6 +225,7 @@ const LanguageException = ({
 
   return (
     <div
+      data-testid="analysis-tab-exceptions-row"
       className={`analysis-tab-exceptionsRow ${exception && !isExceptionSaved(exception) ? 'analysis-value-not-saved' : ''}`}
     >
       <div className="analysis-tab-languages">
@@ -294,6 +295,7 @@ const LanguageException = ({
           setValue(value)
           setModified(true)
         }}
+        dataTestid="analysis-tab-exception-value"
       />
       {confirmed && !modified ? (
         <div className="analysis-tab-buttons">
@@ -315,7 +317,7 @@ const LanguageException = ({
               setModified(false)
             }}
           >
-            <Checkmark size={12} />
+            <Checkmark size={18} />
             Confirm
           </Button>
           <Button
@@ -323,7 +325,7 @@ const LanguageException = ({
             className="close-button"
             onClick={removeException}
           >
-            <IconClose />
+            <IconClose size={18} />
           </Button>
         </div>
       )}
