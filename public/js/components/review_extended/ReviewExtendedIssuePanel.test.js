@@ -1,5 +1,5 @@
 import React from 'react'
-import {act, fireEvent, render, screen} from '@testing-library/react'
+import {act, fireEvent, render, screen, waitFor} from '@testing-library/react'
 import ReviewExtendedIssuePanel from './ReviewExtendedIssuePanel'
 import {SegmentContext} from '../segments/SegmentContext'
 import SegmentActions from '../../actions/SegmentActions'
@@ -205,21 +205,21 @@ describe('ReviewExtendedIssuePanel', () => {
         makeSegment({sid: '123-2', original_sid: '123', splitted: true}),
       )
 
-      await act(async () => {
-        fireEvent.click(screen.getAllByRole('button', {name: 'MIN'})[0])
-      })
+      fireEvent.click(screen.getAllByRole('button', {name: 'MIN'})[0])
 
-      expect(sendSegmentVersionIssue).toHaveBeenCalledWith(
-        expect.objectContaining({
-          idSegment: '123',
-          issueDetails: expect.objectContaining({
-            target_text: 'mondo',
-            start_node: 0,
-            start_offset: 0,
-            send_node: 0,
-            end_offset: 0,
+      await waitFor(() =>
+        expect(sendSegmentVersionIssue).toHaveBeenCalledWith(
+          expect.objectContaining({
+            idSegment: '123',
+            issueDetails: expect.objectContaining({
+              target_text: 'mondo',
+              start_node: 0,
+              start_offset: 0,
+              send_node: 0,
+              end_offset: 0,
+            }),
           }),
-        }),
+        ),
       )
     })
 
