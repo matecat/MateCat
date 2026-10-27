@@ -524,6 +524,7 @@ class AppConfig
             'potm' => ['class' => 'extppt'],
             'odp' => ['class' => 'extppt'],
             'otp' => ['class' => 'extppt'],
+            'epub' => ['class' => 'exttxt'],
         ],
         'Markup and Structured Data' => [
             'htm' => ['class' => 'exthtm'],

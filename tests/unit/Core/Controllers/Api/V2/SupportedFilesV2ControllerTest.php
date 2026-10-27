@@ -171,7 +171,7 @@ class SupportedFilesV2ControllerTest extends AbstractTest
                 array_keys(array_filter(array_count_values($flat), static fn(int $n): bool => $n > 1))
             )
         );
-        self::assertCount(76, $flat);
+        self::assertCount(77, $flat);
     }
 
     /**

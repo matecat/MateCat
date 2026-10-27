@@ -287,6 +287,7 @@ const CommonUtils = {
       case 'webp':
         return <FileTypeImage size={size} />
       case 'txt':
+      case 'epub':
         return <FileTypeFile size={size} />
       case 'xlf':
       case 'ttx':
