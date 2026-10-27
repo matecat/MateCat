@@ -3,24 +3,57 @@
 @use "../../tokens/colors";
 @use 'commons/variables';
 
+$activity-log-control-height: 36px;
+
+// The column select and the query input sit side by side, so they share one
+// height, border, radius and focus treatment.
+@mixin activity-log-control {
+  box-sizing: border-box;
+  height: $activity-log-control-height;
+  padding: 0 12px;
+  font-size: variables.$font-size-xsmall;
+  color: colors.$grey1300;
+  background-color: colors.$white;
+  border: 1px solid colors.$grey300;
+  border-radius: variables.$border-radius-default;
+  box-shadow: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:hover {
+    border-color: colors.$grey500;
+  }
+}
+
 .activity-log-content {
   display: flex;
   flex-direction: column;
   text-align: left;
-  padding: 50px 25px;
-  gap: 15px;
+  padding: 40px 24px 24px;
+  gap: 16px;
   height: calc(100vh - 120px);
+  box-sizing: border-box;
 
   h1,
-  h2 {
+  h2,
+  h3 {
     margin: 0;
+  }
+
+  > h3 {
+    color: colors.$grey1300;
   }
 }
 
 .activity-log-table {
-  height: 100%;
+  // Shrink to the rows it has, scroll once they outgrow the page
+  flex: 0 1 auto;
+  min-height: 0;
   overflow-y: auto;
   border: 1px solid colors.$grey200;
+  border-radius: variables.$border-radius-default;
+  background-color: colors.$white;
 
   .activity-log-table-columns-name,
   .activity-log-table-columns-content {
@@ -31,6 +64,9 @@
     > * {
       display: flex;
       align-items: center;
+      box-sizing: border-box;
+      min-width: 0;
+      padding: 10px 12px;
 
       > span {
         white-space: nowrap;
@@ -43,34 +79,46 @@
   .activity-log-table-columns-name {
     position: sticky;
     top: 0;
+    z-index: 1;
+    background-color: colors.$grey50;
+    border-bottom: 1px solid colors.$grey200;
     font-weight: bold;
+    color: colors.$grey1300;
   }
 
   .activity-log-table-columns-content {
+    color: colors.$grey1300;
+    border-bottom: 1px solid colors.$grey100;
+    transition: background-color 0.15s ease;
+
     > * {
-      height: 40px;
-      border: 1px solid colors.$grey200;
-      border-top: unset;
-      padding: 10px;
-      border-left: unset;
+      min-height: 44px;
     }
 
-    > *:last-child {
-      border-right: unset;
+    &:last-child {
+      border-bottom: none;
     }
 
-    &:nth-child(odd) {
-      background-color: colors.$grey50;
+    &:hover {
+      background-color: colors.$grey25;
     }
   }
 
   .activity-table-column-order {
-    background-color: colors.$grey75;
-    border: 1px solid colors.$grey200;
-    padding: 5px;
+    gap: 4px;
     justify-content: space-between;
     cursor: pointer;
     user-select: none;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background-color: colors.$grey100;
+    }
+
+    svg {
+      flex-shrink: 0;
+      color: colors.$grey500;
+    }
   }
 
   .activity-table-column-order-asc {
@@ -80,8 +128,11 @@
   }
 
   .activity-table-column-empty-state {
-    padding: 20px;
+    padding: 32px 20px;
     text-align: center;
+    font-size: variables.$font-size-small;
+    font-weight: normal;
+    color: colors.$grey500;
   }
 }
 
@@ -89,36 +140,41 @@
   display: flex;
   justify-content: space-between;
   align-items: end;
+  gap: 16px;
 
   .activity-log-filter-column-container {
     display: flex;
     align-items: end;
-    gap: 5px;
+    gap: 8px;
 
     .select-with-label__wrapper {
-      width: 160px;
+      width: 180px;
 
       label {
+        font-size: variables.$font-size-xsmall;
         color: colors.$grey700;
       }
 
       .select {
-        font-size: variables.$font-size-xsmall;
-        padding: 5px;
-
-        &:hover {
-          border-color: rgba(colors.$grey200, 0.8);
-          box-shadow: none;
-        }
+        @include activity-log-control;
+        padding-right: 32px;
       }
     }
 
     .activity-log-filter-column-input {
-      width: 250px;
-      font-size: variables.$font-size-xsmall;
-      border-radius: 2px;
-      border: 1px solid colors.$grey300;
-      padding: 7px;
+      @include activity-log-control;
+      width: 260px;
+
+      &::placeholder {
+        color: colors.$grey400;
+        opacity: 1;
+      }
+
+      &:focus {
+        outline: none;
+        border-color: colors.$grey1300;
+        box-shadow: 0 0 0 1px colors.$grey1300;
+      }
     }
   }
 }
