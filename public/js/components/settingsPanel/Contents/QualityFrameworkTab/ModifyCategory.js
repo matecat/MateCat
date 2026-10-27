@@ -150,7 +150,7 @@ export const ModifyCategory = ({target, category, setIsEditingName}) => {
             onClick={updateLabel}
             disabled={!label || typeof error === 'string'}
           >
-            <Checkmark size={14} />
+            <Checkmark size={18} />
             Confirm
           </Button>
         </div>

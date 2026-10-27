@@ -315,7 +315,7 @@ const LanguageException = ({
               setModified(false)
             }}
           >
-            <Checkmark size={12} />
+            <Checkmark size={18} />
             Confirm
           </Button>
           <Button
@@ -323,7 +323,7 @@ const LanguageException = ({
             className="close-button"
             onClick={removeException}
           >
-            <IconClose />
+            <IconClose size={18} />
           </Button>
         </div>
       )}

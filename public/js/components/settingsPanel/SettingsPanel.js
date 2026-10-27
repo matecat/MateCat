@@ -27,7 +27,7 @@ import {
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../common/Button/Button'
-import Close from '../../../img/icons/Close'
+import IconClose from '../../../img/icons/IconClose'
 
 let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
   'openTab',
@@ -339,7 +339,7 @@ export const SettingsPanel = ({
                   mode={BUTTON_MODE.GHOST}
                   onClick={close}
                 >
-                  <Close size={20} />
+                  <IconClose size={20} />
                 </Button>
               </div>
               {isEnabledProjectTemplateComponent && <ProjectTemplate />}

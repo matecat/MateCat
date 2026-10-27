@@ -3,13 +3,13 @@ import PropTypes from 'prop-types'
 import useImport, {IMPORT_TYPE} from './hooks/useImport'
 
 import Checkmark from '../../../../../img/icons/Checkmark'
-import Close from '../../../../../img/icons/Close'
 import {
   Button,
   BUTTON_HTML_TYPE,
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../../../common/Button/Button'
+import IconClose from '../../../../../img/icons/IconClose'
 
 export const ImportGlossary = ({row, onClose}) => {
   const {files, uuids, status, onSubmit, onReset, onChangeFiles} = useImport({
@@ -52,7 +52,7 @@ export const ImportGlossary = ({row, onClose}) => {
               size={BUTTON_SIZE.ICON_SMALL}
               onClick={() => formRef.current.reset()}
             >
-              <Close size={18} />
+              <IconClose size={16} />
             </Button>
           </div>
         )}
@@ -95,7 +95,7 @@ export const ImportGlossary = ({row, onClose}) => {
               htmlType={BUTTON_HTML_TYPE.SUBMIT}
               disabled={isFormDisabled || isErrorUpload}
             >
-              <Checkmark size={12} />
+              <Checkmark size={16} />
               Confirm
             </Button>
           )}
@@ -106,7 +106,7 @@ export const ImportGlossary = ({row, onClose}) => {
             htmlType={BUTTON_HTML_TYPE.RESET}
             disabled={isFormDisabled}
           >
-            <Close size={18} />
+            <IconClose size={16} />
           </Button>
         </div>
       </form>

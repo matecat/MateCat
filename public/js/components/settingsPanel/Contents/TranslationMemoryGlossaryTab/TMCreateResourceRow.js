@@ -9,7 +9,6 @@ import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {getInfoTmKey} from '../../../../api/getInfoTmKey'
 
 import Checkmark from '../../../../../img/icons/Checkmark'
-import Close from '../../../../../img/icons/Close'
 import CatToolActions from '../../../../actions/CatToolActions'
 import {
   Button,
@@ -17,6 +16,7 @@ import {
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../../../common/Button/Button'
+import IconClose from '../../../../../img/icons/IconClose'
 
 export const TMCreateResourceRow = ({row}) => {
   const {tmKeys, setTmKeys, modifyingCurrentTemplate} =
@@ -363,7 +363,7 @@ export const TMCreateResourceRow = ({row}) => {
           htmlType={BUTTON_HTML_TYPE.SUBMIT}
           testId="create-tmkey-confirm"
         >
-          <Checkmark size={12} />
+          <Checkmark size={16} />
           Confirm
         </Button>
 
@@ -373,7 +373,7 @@ export const TMCreateResourceRow = ({row}) => {
           htmlType={BUTTON_HTML_TYPE.RESET}
           onClick={onReset}
         >
-          <Close size={18} />
+          <IconClose size={16} />
         </Button>
       </div>
     </form>

@@ -2,8 +2,8 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import Checkmark from '../../../../../img/icons/Checkmark'
-import Close from '../../../../../img/icons/Close'
 import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../../../common/Button/Button'
+import IconClose from '../../../../../img/icons/IconClose'
 
 export const DeleteResource = ({row, onClose, onConfirm, footerContent}) => {
   const onClickConfirm = () => {
@@ -32,7 +32,7 @@ export const DeleteResource = ({row, onClose, onConfirm, footerContent}) => {
             size={BUTTON_SIZE.SMALL}
             onClick={onClickConfirm}
           >
-            <Checkmark size={12} />
+            <Checkmark size={16} />
             Confirm
           </Button>
 
@@ -41,7 +41,7 @@ export const DeleteResource = ({row, onClose, onConfirm, footerContent}) => {
             size={BUTTON_SIZE.ICON_SMALL}
             onClick={onClickClose}
           >
-            <Close size={18} />
+            <IconClose size={16} />
           </Button>
         </div>
       </div>

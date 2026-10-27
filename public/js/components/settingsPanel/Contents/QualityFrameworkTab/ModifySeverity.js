@@ -141,7 +141,7 @@ export const ModifySeverity = ({
             onClick={updateLabel}
             disabled={!labelState || typeof error === 'string'}
           >
-            <Checkmark size={14} />
+            <Checkmark size={18} />
             Confirm
           </Button>
         </div>

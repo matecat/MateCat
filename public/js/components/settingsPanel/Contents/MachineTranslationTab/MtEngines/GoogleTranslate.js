@@ -81,9 +81,10 @@ export const GoogleTranslate = ({
           <div className="provider-field container-actions">
             <Button
               type={BUTTON_TYPE.WARNING}
+              size={BUTTON_SIZE.ICON_STANDARD}
               onClick={() => setAddMTVisible(false)}
             >
-              <IconClose size={11} />
+              <IconClose size={18} />
             </Button>
             <Button
               type={BUTTON_TYPE.PRIMARY}
@@ -91,7 +92,7 @@ export const GoogleTranslate = ({
               disabled={isRequestInProgress}
               onClick={handleSubmit(onSubmit)}
             >
-              <Checkmark size={12} />
+              <Checkmark size={18} />
               Confirm
             </Button>
           </div>
