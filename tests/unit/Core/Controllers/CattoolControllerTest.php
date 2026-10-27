@@ -333,11 +333,15 @@ class CattoolControllerTest extends AbstractTest
     #[Test]
     public function cancelled_builds_view_and_reaches_render(): void
     {
-        $this->assertRendersAfter(fn() => $this->invokePrivate('cancelled', [[
-            'team' => null,
-            'owner_email' => $this->ownerEmail(self::BASE),
-            'jobOwnerIsMe' => false,
-        ]]));
+        $this->assertRendersAfter(fn() => $this->invokePrivate('cancelled', [
+            $this->jobId(self::BASE),
+            'jobpw',
+            [
+                'team' => null,
+                'owner_email' => $this->ownerEmail(self::BASE),
+                'jobOwnerIsMe' => true,
+            ],
+        ]));
     }
 
     #[Test]

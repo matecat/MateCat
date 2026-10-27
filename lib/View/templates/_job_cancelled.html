@@ -6,27 +6,45 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="icon" type="image/png" sizes="32x32" href="${basepath}public/img/meta/favicon-32x32.svg"/>
     <link rel="icon" type="image/png" sizes="16x16" href="${basepath}public/img/meta/favicon-16x16.svg"/>
+
+    <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
+        /*<![CDATA[*/
+        // One serialised document rather than a value per line: PHPTAL does not escape inside a script
+        // block, so anything interpolated here lands in JavaScript syntax verbatim. See BootstrapConfig.
+        var config = ${structure config_json};
+        /*]]>*/
+    </script>
 </head>
 <body class="status-page">
 
 <main class="status-page__card">
     <a href="${basepath}" class="status-page__logo" aria-label="Matecat"></a>
     <h1 class="status-page__title">This job has been cancelled.</h1>
-
-    <tal:block tal:condition="php: isset(owner) and owner == owner_email">
-        <div class="status-page__text">
-            <p>If you need to access it, go to your "My projects" page to reactivate it.</p>
-        </div>
-    </tal:block>
-
-    <tal:block tal:condition="php: !isset(owner) or owner !== owner_email">
-        <div class="status-page__text">
-            <p>If you need to access it, please ask <a href="mailto:${owner_email}">${owner_email}</a> to reactivate it</p>
-            <p>If you continue to get this page, email us at <a href="mailto:${support_mail}">${support_mail}</a>.</p>
-        </div>
-    </tal:block>
-
+    <a tal:condition="true:jobOwnerIsMe" id="reactivate-job" href="#" class="status-page__action">Reactivate it</a>
+    <div tal:condition="not:jobOwnerIsMe" class="status-page__text">
+        <p>If you need to access it, please ask <a href="mailto:${owner_email}">${owner_email}</a> to reactivate it</p>
+        <p>If you continue to get this page, email us at <a href="mailto:${support_mail}">${support_mail}</a>.</p>
+    </div>
 </main>
+<script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
+  document.getElementById('reactivate-job')?.addEventListener('click', function(e) {
+    e.preventDefault();
+    const url = '/api/v3/jobs/' + config.jid + '/' + config.password+'/active'
+    fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+    })
+        .then(response => response.json())
+        .then(data => {
+          if (data.data === 'OK') {
+            setTimeout(function() {
+              location.reload(true);
+            }, 300);
+          }
+        })
+        .catch(error => console.error('Error:', error));
+  });
+
+</script>
 </body>
 </html>
-
