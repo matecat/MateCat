@@ -249,4 +249,53 @@ describe('JobMetadataModal', () => {
       }),
     ).toBeInTheDocument()
   })
+
+  describe('line breaks in plain-text instructions', () => {
+    test('renders CRLF and LF newlines as line breaks', () => {
+      const {container} = render(
+        <JobMetadataModal
+          showCurrent={true}
+          currentFile={1}
+          files={[
+            fileWith({
+              instructions:
+                '**Project domain**: UI\r\n\r\n**Owner**: Uber\nCost center',
+            }),
+          ]}
+        />,
+      )
+
+      expect(
+        container.querySelectorAll('.instructions-container br'),
+      ).toHaveLength(3)
+    })
+
+    test('keeps line breaks in the project instructions', () => {
+      const {container} = render(
+        <JobMetadataModal
+          files={[]}
+          projectInfo={'Client: Freight\r\nDomain: UI'}
+        />,
+      )
+
+      expect(
+        container.querySelectorAll('.instructions-container br'),
+      ).toHaveLength(1)
+    })
+
+    // Plugins render markdown to paragraphs first, with a newline between each block.
+    test('does not add breaks between blocks of already rendered markup', () => {
+      const {container} = render(
+        <JobMetadataModal
+          showCurrent={true}
+          currentFile={1}
+          files={[fileWith({instructions: '<p>First</p>\n<p>Second</p>'})]}
+        />,
+      )
+
+      expect(
+        container.querySelector('.instructions-container br'),
+      ).not.toBeInTheDocument()
+    })
+  })
 })
