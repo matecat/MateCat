@@ -4,7 +4,7 @@
 @use '../../commons/matecat_fonts';
 @use '../../commons/reset';
 
-/* Job cancelled/archived and job/project not found pages (body.status-page) */
+/* Job cancelled/archived, job/project not found, HTTP error, maintenance and configuration pages (body.status-page) */
 
 body.status-page {
   min-width: auto;
@@ -56,6 +56,19 @@ body.status-page {
       color: colors.$blue600;
     }
   }
+
+  pre {
+    margin: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    text-align: start;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+}
+
+.status-page__text .status-page__code {
+  font: variables.$font-style-small;
 }
 
 .status-page__action {
