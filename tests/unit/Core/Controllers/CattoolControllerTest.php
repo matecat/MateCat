@@ -345,6 +345,33 @@ class CattoolControllerTest extends AbstractTest
     }
 
     #[Test]
+    public function renderView_offers_the_owner_reactivation_of_a_cancelled_job(): void
+    {
+        $this->setJobStatusOwner('cancelled');
+
+        // The cancelled page used to receive only the owner's email, so the owner was told to ask
+        // themselves. It now gets what the archived page gets: who owns the job, and the credential
+        // the reactivate call needs.
+        $params = $this->renderViewFor('/translate/CtrlTestProject/en-it/', 'jobpw');
+
+        $this->assertSame('job_cancelled.html', $this->controller->capturedViewTemplate);
+        $this->assertTrue($params['jobOwnerIsMe']);
+        $this->assertSame($this->jobId(self::BASE), $params['jid']);
+        $this->assertSame('jobpw', $params['password']);
+    }
+
+    #[Test]
+    public function renderView_hands_a_cancelled_revision_page_the_review_password(): void
+    {
+        $this->setJobStatusOwner('cancelled');
+
+        $params = $this->renderViewFor('/revise/CtrlTestProject/en-it/', 'revpw');
+
+        $this->assertSame('job_cancelled.html', $this->controller->capturedViewTemplate);
+        $this->assertSame('revpw', $params['password']);
+    }
+
+    #[Test]
     public function archived_builds_view_and_reaches_render(): void
     {
         $this->assertRendersAfter(fn() => $this->invokePrivate('archived', [
@@ -438,6 +465,13 @@ class CattoolControllerTest extends AbstractTest
         $this->renderViewFor('/revise2/CtrlTestProject/en-it/', 'no_such_pw_value');
 
         $this->assertSame('job_not_found.html', $this->controller->capturedViewTemplate);
+    }
+
+    private function setJobStatusOwner(string $status): void
+    {
+        $this->seedConnection()->exec(
+            "UPDATE jobs SET status_owner = '$status' WHERE id = " . $this->jobId(self::BASE)
+        );
     }
 
     private function seedSecondRevisionPhase(): void
