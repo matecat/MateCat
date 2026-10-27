@@ -25,6 +25,8 @@ class ReviseTranslationIssuesController extends KleinController
 {
     use ChunkNotFoundHandlerTrait;
 
+    private SegmentTranslation $translationValidator;
+
     protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
@@ -34,7 +36,8 @@ class ReviseTranslationIssuesController extends KleinController
             $this->chunk = $validator->getJob();
         });
         $this->appendValidator($validator);
-        $this->appendValidator(new SegmentTranslation($this));
+        $this->translationValidator = new SegmentTranslation($this);
+        $this->appendValidator($this->translationValidator);
     }
 
     /**
@@ -46,7 +49,7 @@ class ReviseTranslationIssuesController extends KleinController
     {
         $records = (new TranslationVersionDao($this->getDatabase()))->setCacheTTL(0)->getVersionsForRevision(
             $this->request->param('id_job'),
-            $this->request->param('id_segment')
+            $this->translationValidator->getTranslation()->id_segment ?? throw new NotFoundException('Translation not found')
         );
 
         $chunk = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail($this->params['id_job'], $this->params['password']);

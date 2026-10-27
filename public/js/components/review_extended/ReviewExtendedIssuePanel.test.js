@@ -191,6 +191,38 @@ describe('ReviewExtendedIssuePanel', () => {
       expect(setCreationIssueLoader).toHaveBeenCalledWith(false)
     })
 
+    test('files an issue on a split part against the whole segment', async () => {
+      renderPanel(
+        {
+          selection: {
+            selected_string: 'mondo',
+            start_node: 0,
+            start_offset: 5,
+            end_node: 0,
+            end_offset: 10,
+          },
+        },
+        makeSegment({sid: '123-2', original_sid: '123', splitted: true}),
+      )
+
+      await act(async () => {
+        fireEvent.click(screen.getAllByRole('button', {name: 'MIN'})[0])
+      })
+
+      expect(sendSegmentVersionIssue).toHaveBeenCalledWith(
+        expect.objectContaining({
+          idSegment: '123',
+          issueDetails: expect.objectContaining({
+            target_text: 'mondo',
+            start_node: 0,
+            start_offset: 0,
+            send_node: 0,
+            end_offset: 0,
+          }),
+        }),
+      )
+    })
+
     test('calls editSegmentIssue instead when issueEditing is set, and clears editing on success', async () => {
       const setIssueEditing = jest.fn()
       renderPanel(
