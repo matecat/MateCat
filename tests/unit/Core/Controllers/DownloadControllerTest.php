@@ -17,7 +17,11 @@ use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use ReflectionException;
 use Throwable;
+use Utils\ActiveMQ\AMQHandler;
+use Utils\ActiveMQ\WorkerClient;
 use Utils\Logger\MatecatLogger;
+use Utils\Registry\AppConfig;
+use Utils\Tools\Utils;
 use View\API\Commons\ZipContentObject;
 
 /**
@@ -29,9 +33,9 @@ use View\API\Commons\ZipContentObject;
  * remote_files rows use ids 9029020/9029021 (still inside the reserved block).
  * Per-suite owner email: ctrltest_9029000@example.org.
  *
- * The full file-streaming download path (processDownload happy branch) requires
- * real XLIFF files on disk, the external converter service, ob_* / exit() and
- * Redis; it is exercised only at its DB-failure boundary here. The pure helpers
+ * The conversion back to the original format requires the external converter
+ * service, so processDownload() is exercised at its DB-failure boundary and on the
+ * forceXliff path (XLIFF from a temporary file repository, no conversion). The pure helpers
  * (filename / path / globalsight cleanup / zip-content assembly) and the
  * DB-backed remote-file lookup are fully covered.
  */
@@ -394,6 +398,67 @@ class DownloadControllerTest extends AbstractTest
     public function forcedXliffOfOcrFileIsNotRenamedToDocx(): void
     {
         $this->assertSame('scan.pdf.xlf', $this->singleFileDownloadNameFor('scan.pdf', 'matecat_converter', true));
+    }
+
+    /**
+     * The whole forceXliff path of processDownload() for a single-file job: the XLIFF is read from a
+     * temporary file repository, the seeded translation is merged in, and no conversion back is requested.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function processDownloadNamesTheForcedXliffOfASingleFileJobWithOneXlfExtension(): void
+    {
+        $fileId     = $this->fileId(self::BASE);
+        $jobId      = $this->jobId(self::BASE);
+        $repository = sys_get_temp_dir() . '/ctrltest_' . self::BASE . '_' . uniqid();
+        $xliffDir   = $repository . '/files/20261027/' . $fileId . '/xliff';
+        mkdir($xliffDir, 0775, true);
+        file_put_contents(
+            $xliffDir . '/report.docx.sdlxliff',
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">'
+            . '<file original="report.docx" source-language="en-US" target-language="it-IT" datatype="plaintext">'
+            . '<body><trans-unit id="1"><source>Hello world</source><target>Hello world</target></trans-unit></body>'
+            . '</file></xliff>'
+        );
+
+        $conn = $this->seedConnection();
+        $conn->exec("UPDATE files SET filename = 'report.docx', sha1_original_file = '20261027/ctrltesthash', is_converted = 1 WHERE id = $fileId");
+        $conn->exec("INSERT IGNORE INTO files_job (id_job, id_file) VALUES ($jobId, $fileId)");
+
+        $savedFilesRepository = AppConfig::$FILES_REPOSITORY;
+        $savedTmpDownload     = AppConfig::$TMP_DOWNLOAD;
+        $savedStorageMethod   = AppConfig::$FILE_STORAGE_METHOD;
+        $savedHandler         = WorkerClient::$_HANDLER;
+        $savedQueues          = WorkerClient::$_QUEUES;
+
+        try {
+            AppConfig::$FILES_REPOSITORY    = $repository . '/files';
+            AppConfig::$TMP_DOWNLOAD        = $repository . '/download';
+            AppConfig::$FILE_STORAGE_METHOD = 'fs';
+            // _saveActivity() enqueues the activity log: keep it offline
+            WorkerClient::init($this->createMock(AMQHandler::class));
+
+            $this->setProp('id_job', $jobId);
+            $this->setProp('password', 'jobpw');
+            $this->setProp('forceXliff', true);
+            $this->setProp('featureSet', new FeatureSet(obtainTestDatabase()));
+
+            $this->invokePrivate('processDownload');
+
+            $this->assertSame('report.docx.xlf', $this->controller->getFilename());
+            $outputContent = $this->reflector->getProperty('outputContent')->getValue($this->controller);
+            $this->assertStringContainsString('Ciao mondo', $outputContent);
+        } finally {
+            AppConfig::$FILES_REPOSITORY    = $savedFilesRepository;
+            AppConfig::$TMP_DOWNLOAD        = $savedTmpDownload;
+            AppConfig::$FILE_STORAGE_METHOD = $savedStorageMethod;
+            WorkerClient::$_HANDLER         = $savedHandler;
+            WorkerClient::$_QUEUES          = $savedQueues;
+            $conn->exec("DELETE FROM files_job WHERE id_job = $jobId");
+            Utils::deleteDir($repository);
+        }
     }
 
     /**
