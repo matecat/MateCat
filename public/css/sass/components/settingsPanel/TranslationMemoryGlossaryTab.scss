@@ -209,14 +209,14 @@
 
   .settings-panel-table-rowHeading,
   .settings-panel-row-content {
-    grid-template-columns: 8% 5% minmax(0, 1fr) 20% 5% 14% 18%;
+    grid-template-columns: 8% 5% minmax(0, 1fr) 20% 5% 14% auto;
   }
 
   .settings-panel-row {
     border: unset;
 
     .row-content-default-memory {
-      grid-template-columns: 8% 5% minmax(0, 1fr) 5% 14% 18%;
+      grid-template-columns: 8% 5% minmax(0, 1fr) 5% 14% auto;
       padding: 0 10px !important;
       background-color: transparent;
 
@@ -387,7 +387,7 @@
 .translation-memory-glossary-tab-delete {
   display: flex;
   flex-direction: column;
-  padding: 10px 26px 10px 36px;
+  padding: 10px;
   min-height: 50px;
 
   .message-share-tmx-email {
@@ -516,7 +516,7 @@
 }
 
 .translation-memory-glossary-tab-share {
-  padding: 10px 26px 10px 10px;
+  padding: 10px;
 
   .translation-memory-glossary-tab-input-text {
     width: 260px;
