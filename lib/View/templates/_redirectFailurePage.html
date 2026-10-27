@@ -1,22 +1,17 @@
-<!DOCTYPE HTML>
-<html lang="en">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <div metal:use-macro="${php: Utils\Registry\AppConfig::$TRACKING_CODES_VIEW_PATH}/CSP-HeaderMeta.html/CSP_NONCE"/>
     <title>Session expired - Matecat</title>
-
-
 </head>
-<body class="offline">
-<header>
-    <div class="wrapper ">
-        <a href="/" class="logo"></a>
+<body class="status-page">
+<main class="status-page__card">
+    <a href="/" class="status-page__logo" aria-label="Matecat"></a>
+    <h1 class="status-page__title">Session expired</h1>
+    <div class="status-page__text">
+        <p>Oops! We can't find the content you're looking for.</p>
     </div>
-</header>
-<div class="claim">
-    <div class="cat"></div>
-    <h1>Session expired</h1>
-    <h2>Oops! We can't find the content you're looking for.</h2>
-</div>
+</main>
 </body>
 </html>
