@@ -15,23 +15,19 @@
         /*]]>*/
     </script>
 </head>
-<body>
+<body class="status-page">
 
-<div class="iepopup job_archived">
-
-    <a href="${basepath}" class="logoblack"></a><br/>
-
-    <strong style="font-size:160%">This job has been archived.</strong><br/><br/>
-    <img src="${basepath}public/img/jobarchived.png"/><br/>
-    <p tal:condition="true:jobOwnerIsMe">
-        <a id="reactivate-job" href="#" class="translated">Reactivate it</a>
-    </p>
-    <p tal:condition="not:jobOwnerIsMe">If you need to access it, please ask <a href="mailto:${owner_email}">${owner_email}</a>
-        to reactivate it<br/>
-        If you continue to get this page, email us at <a href="mailto:${support_mail}">${support_mail}</a>.</p>
-</div>
+<main class="status-page__card">
+    <a href="${basepath}" class="status-page__logo" aria-label="Matecat"></a>
+    <h1 class="status-page__title">This job has been archived.</h1>
+    <a tal:condition="true:jobOwnerIsMe" id="reactivate-job" href="#" class="status-page__action">Reactivate it</a>
+    <div tal:condition="not:jobOwnerIsMe" class="status-page__text">
+        <p>If you need to access it, please ask <a href="mailto:${owner_email}">${owner_email}</a> to reactivate it</p>
+        <p>If you continue to get this page, email us at <a href="mailto:${support_mail}">${support_mail}</a>.</p>
+    </div>
+</main>
 <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
-  document.getElementById('reactivate-job').addEventListener('click', function(e) {
+  document.getElementById('reactivate-job')?.addEventListener('click', function(e) {
     e.preventDefault();
     const url = '/api/v3/jobs/' + config.jid + '/' + config.password+'/active'
     fetch(url, {
