@@ -13,7 +13,6 @@ import {getApiErrorMessage} from '../../utils/getApiErrorMessage'
 import ModalsActions from '../../actions/ModalsActions'
 import IconEdit from '../../../img/icons/IconEdit'
 import Checkmark from '../../../img/icons/Checkmark'
-import Close from '../../../img/icons/Close'
 import {EMAIL_PATTERN} from '../../constants/Constants'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import UserConstants from '../../constants/UserConstants'
@@ -133,17 +132,19 @@ export const ModifyTeam = ({team}) => {
                 <div className="container-confirm-form">
                   <Button
                     type={BUTTON_TYPE.PRIMARY}
+                    size={BUTTON_SIZE.SMALL}
                     onClick={() => removeUser(user)}
                   >
-                    <Checkmark size={12} />
+                    <Checkmark size={16} />
                     Confirm
                   </Button>
 
                   <Button
                     type={BUTTON_TYPE.WARNING}
+                    size={BUTTON_SIZE.SMALL}
                     onClick={() => setRemoveUserId()}
                   >
-                    <Close size={18} />
+                    <IconClose size={16} />
                   </Button>
                 </div>
               ) : (
@@ -277,6 +278,7 @@ export const ModifyTeam = ({team}) => {
                 onKeyDown={handleEnterKeyConfirmName}
               />
               <Button type={BUTTON_TYPE.PRIMARY} onClick={saveTeamName}>
+                <Checkmark size={18} />
                 Confirm
               </Button>
               <Button
@@ -288,7 +290,7 @@ export const ModifyTeam = ({team}) => {
                   setTeamName(teamState.get('name'))
                 }}
               >
-                <IconClose />
+                <IconClose size={18} />
               </Button>
             </div>
           ) : (

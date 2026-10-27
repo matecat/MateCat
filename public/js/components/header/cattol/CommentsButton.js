@@ -143,7 +143,7 @@ export const CommentsButton = () => {
           toggleButtonProps={{
             children: (
               <>
-                <CommentsIcon size={24} />
+                <CommentsIcon />
                 {counterResolvedComments > 0 && (
                   <div
                     className={`button-badge button-badge-success ${counterOpenComments > 0 ? 'button-badge-left' : ''}`}

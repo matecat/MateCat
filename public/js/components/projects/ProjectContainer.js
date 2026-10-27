@@ -179,21 +179,21 @@ export const ProjectContainer = ({
             <>
               <Button
                 type={BUTTON_TYPE.PRIMARY}
-                size={BUTTON_SIZE.XSMALL}
+                size={BUTTON_SIZE.SMALL}
                 htmlType={BUTTON_HTML_TYPE.SUBMIT}
                 form={changeNameFormId}
               >
-                <Checkmark size={14} />
+                <Checkmark size={16} />
                 Confirm
               </Button>
 
               <Button
                 type={BUTTON_TYPE.WARNING}
-                size={BUTTON_SIZE.XSMALL}
+                size={BUTTON_SIZE.ICON_SMALL}
                 htmlType={BUTTON_HTML_TYPE.RESET}
                 form={changeNameFormId}
               >
-                <IconClose size={11} />
+                <IconClose size={16} />
               </Button>
             </>
           )}

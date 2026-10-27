@@ -25,8 +25,8 @@ import CommentsIcon from '../../../img/icons/CommentsIcon'
 import ProjectsStore from '../../stores/ProjectsStore'
 import ManageConstants from '../../constants/ManageConstants'
 import OutsourceContainer from '../outsource/OutsourceContainer'
-import Close from '../../../img/icons/Close'
 import IconRedirect from '../../../img/icons/IconRedirect'
+import IconClose from '../../../img/icons/IconClose'
 
 export const JobContainer = ({
   job,
@@ -490,11 +490,11 @@ export const JobContainer = ({
           <Button
             ref={qrIconRef}
             type={BUTTON_TYPE.ICON}
-            size={BUTTON_SIZE.ICON_XSMALL}
+            size={BUTTON_SIZE.ICON_SMALL}
             onClick={() => window.open(url, '_blank')}
             style={{...(classQuality && {color: classQuality})}}
           >
-            <QR size={18} />
+            <QR size={20} />
           </Button>
         </Tooltip>
       )
@@ -511,11 +511,11 @@ export const JobContainer = ({
           <Button
             ref={warningsIconRef}
             type={BUTTON_TYPE.ICON}
-            size={BUTTON_SIZE.ICON_XSMALL}
+            size={BUTTON_SIZE.ICON_SMALL}
             onClick={() => window.open(url, '_blank')}
             style={{color: 'red'}}
           >
-            <AlertIcon />
+            <AlertIcon size={20} />
           </Button>
         </Tooltip>
       )
@@ -536,10 +536,10 @@ export const JobContainer = ({
           <Button
             ref={commentsIconRef}
             type={BUTTON_TYPE.ICON}
-            size={BUTTON_SIZE.ICON_XSMALL}
+            size={BUTTON_SIZE.ICON_SMALL}
             onClick={() => window.open(translatedUrl, '_blank')}
           >
-            <CommentsIcon />
+            <CommentsIcon size={20} />
           </Button>
         </Tooltip>
       )
@@ -635,7 +635,7 @@ export const JobContainer = ({
                 onClick={removeTranslator}
                 testId="remove-translator-button"
               >
-                <Close size={18} />
+                <IconClose size={16} />
               </Button>
             )}
           </div>
@@ -765,7 +765,7 @@ export const JobContainer = ({
         </div>
         <div>
           <Tooltip
-            content={`Total: ${Math.round(stats.equivalent.total)} / Weighted: ${Math.round(stats.raw.total)}`}
+            content={`Weighted: ${Math.round(stats.equivalent.total)} / Total: ${Math.round(stats.raw.total)}`}
           >
             <Button
               ref={wordsButtonRef}

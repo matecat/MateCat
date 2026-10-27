@@ -150,7 +150,7 @@ const NotificationItem = ({
           size={BUTTON_SIZE.ICON_XSMALL}
           onClick={hideNotification}
         >
-          <IconClose size={10} />
+          <IconClose size={16} />
         </Button>
       )}
     </div>
