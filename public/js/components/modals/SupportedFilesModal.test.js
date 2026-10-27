@@ -72,6 +72,28 @@ test('lists the groups with the most formats first', () => {
   ).toEqual(['Documents', 'Subtitling', 'Images'])
 })
 
+test('lists the formats of a group alphabetically, ignoring case', () => {
+  const supportedFiles = {
+    Documents: [
+      [{ext: 'xml'}],
+      [{ext: 'pdf'}],
+      [{ext: 'Android xml'}],
+      [{ext: 'epub'}],
+      [{ext: 'docx'}],
+    ],
+  }
+
+  const {container} = render(
+    <SupportedFilesModal supportedFiles={supportedFiles} />,
+  )
+
+  expect(
+    [...container.querySelectorAll('.file-list span')].map(
+      (s) => s.textContent,
+    ),
+  ).toEqual(['Android xml', 'docx', 'epub', 'pdf', 'xml'])
+})
+
 test('fetches the list itself when opened before the page has loaded it', async () => {
   getSupportedFiles.mockResolvedValue({Documents: [[{ext: 'docx'}]]})
 
