@@ -387,7 +387,7 @@
 .translation-memory-glossary-tab-delete {
   display: flex;
   flex-direction: column;
-  padding: 10px 36px;
+  padding: 10px 26px 10px 36px;
   min-height: 50px;
 
   .message-share-tmx-email {
@@ -407,6 +407,20 @@
       gap: 10px;
       align-items: center;
       margin-right: 20px;
+    }
+
+    input[type='file']::file-selector-button {
+      color: #000;
+      background: colors.$grey100;
+      padding: 4px 8px;
+      text-align: center;
+      border: 1px solid colors.$grey300;
+      border-radius: variables.$border-radius-default;
+      margin-right: 10px;
+
+      &:hover {
+        background-color: colors.$grey50;
+      }
     }
   }
 
@@ -502,7 +516,7 @@
 }
 
 .translation-memory-glossary-tab-share {
-  padding: 10px 36px 10px 10px;
+  padding: 10px 26px 10px 10px;
 
   .translation-memory-glossary-tab-input-text {
     width: 260px;

@@ -8,12 +8,12 @@
 
 .outsource-container {
   display: flex;
-  padding: 8px 24px 24px 24px;
+  padding: 24px;
   flex-direction: column;
   align-items: flex-end;
   gap: 8px;
   align-self: stretch;
-  border-bottom: 1px solid colors.$grey100;
+  border: 1px solid colors.$grey100;
   background: colors.$grey50;
 
   &.transitionOutsource-enter {
@@ -60,7 +60,7 @@
     padding: 5px 46px 9px 12px;
     border-radius: variables.$border-radius-default;
     color: colors.$black;
-    background: colors.$black100
+    background: colors.$black100;
   }
 
   .dropdown__list {
@@ -103,7 +103,7 @@
     font-weight: 700;
     font-size: variables.$font-size-big;
     line-height: 28px;
-    margin-bottom: 8px ;
+    margin-bottom: 8px;
   }
   .delivery-order,
   .container-reduced {
@@ -206,7 +206,7 @@
                 align-items: flex-start;
                 flex: 1 0 0;
               }
-              &.translator-delivery h2{
+              &.translator-delivery h2 {
                 line-height: normal;
               }
               .select-with-label__wrapper {
@@ -373,7 +373,8 @@
     align-self: stretch;
     justify-content: space-between;
 
-    .fiducial-logo, svg {
+    .fiducial-logo,
+    svg {
       color: colors.$grey400;
     }
 
@@ -425,7 +426,6 @@
         width: 60%;
         align-items: center;
         border-right: 1px solid colors.$grey100;
-
       }
 
       .translator-avatar {
@@ -452,10 +452,10 @@
         color: colors.$blue500;
       }
 
-      .translator-words, .translator-feedback {
+      .translator-words,
+      .translator-feedback {
         font: variables.$font-size-xsmall;
       }
-
 
       .source-target-outsource {
         display: flex;
@@ -463,7 +463,6 @@
         font: variables.$font-style-base;
         font-weight: 700;
       }
-
 
       .job-payment {
         text-align: right;
@@ -678,7 +677,6 @@
           }
         }
       }
-
     }
 
     .delivery-order-not-available {
@@ -749,7 +747,6 @@
           }
         }
       }
-
     }
   }
 
@@ -917,7 +914,6 @@
         align-items: center;
         gap: 16px;
 
-
         .item {
           display: flex;
           align-items: center;
@@ -941,7 +937,6 @@
             }
           }
         }
-
       }
     }
   }
