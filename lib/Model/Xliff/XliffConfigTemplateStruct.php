@@ -32,7 +32,7 @@ class XliffConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonS
 
     /**
      * @param string $json
-     * @param int|null $uid
+     * @param int $uid the authenticated user, always the owner
      *
      * @return $this
      * @throws Exception
@@ -40,7 +40,7 @@ class XliffConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonS
      * @throws InvalidArgumentException when the name is empty, holds a character the connection
      *                                  cannot carry, or will not fit the column
      */
-    public function hydrateFromJSON(string $json, ?int $uid = null): XliffConfigTemplateStruct
+    public function hydrateFromJSON(string $json, int $uid): XliffConfigTemplateStruct
     {
         $decoded_json = json_decode($json, true);
 
@@ -48,11 +48,12 @@ class XliffConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonS
             throw new DomainException("Cannot instantiate a new XliffConfigStruct. Invalid data provided.", 400);
         }
 
-        if (empty($uid) && empty($decoded_json['uid'])) {
+        // the owner is always the authenticated user: a `uid` in the payload is never read
+        if (empty($uid)) {
             throw new DomainException("Cannot instantiate a new XliffConfigStruct. Invalid user id provided.", 400);
         }
 
-        $this->uid = $decoded_json['uid'] ?? $uid;
+        $this->uid = $uid;
         // Here rather than in the controller, so create and update are covered by one call: both
         // hydrate through this method. The schema bounds the length, but only the composed form
         // lets UNIQUE(uid, name) see a clash between two spellings of the same name.

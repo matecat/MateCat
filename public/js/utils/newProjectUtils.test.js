@@ -21,7 +21,7 @@ import CreateProjectActions from '../actions/CreateProjectActions'
 import ModalsActions from '../actions/ModalsActions'
 import CommonUtils from './commonUtils'
 import UserStore from '../stores/UserStore'
-import {handleCreationStatus} from './newProjectUtils'
+import {handleCreationStatus, omitTemplateOwner} from './newProjectUtils'
 
 const flush = async () => {
   await Promise.resolve()
@@ -109,4 +109,20 @@ test('shows the error notification when the API call rejects with errors', async
 
   expect(CreateProjectActions.hideErrors).toHaveBeenCalled()
   expect(CreateProjectActions.showError).toHaveBeenCalledWith('Failed')
+})
+
+describe('omitTemplateOwner', () => {
+  test('drops the uid and keeps every other field', () => {
+    const template = {uid: 56, name: 'my rules', rules: {xliff12: []}}
+
+    expect(omitTemplateOwner(template)).toEqual({
+      name: 'my rules',
+      rules: {xliff12: []},
+    })
+    expect(template.uid).toBe(56)
+  })
+
+  test('returns undefined when there is no unsaved template', () => {
+    expect(omitTemplateOwner(undefined)).toBeUndefined()
+  })
 })

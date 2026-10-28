@@ -11,13 +11,6 @@
         "minLength": 1,
         "maxLength": 255
     },
-    "uid": {
-      "type": [
-        "integer",
-        "null"
-      ],
-      "nullable": true
-    },
     "rules": {
       "type": [
         "object"
