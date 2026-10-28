@@ -333,7 +333,8 @@ describe('ProjectsBulkActions submit flows', () => {
     expect(ManageActions.changeJobStatus).toHaveBeenCalledTimes(10)
   })
 
-  test('generating revise 2 skips jobs that already have two revise passwords', () => {
+  test('generating revise 2 skips jobs that already have two revise passwords', async () => {
+    ManageActions.getSecondPassReview.mockResolvedValueOnce('review2-pass')
     const alreadyGenerated = {
       id: 4,
       password: 'p4',
@@ -358,8 +359,59 @@ describe('ProjectsBulkActions submit flows', () => {
       undefined,
       1,
       'pass1',
+      {notify: false},
     )
-    expect(CatToolActions.addNotification).toHaveBeenCalledWith(
+    await waitFor(() =>
+      expect(CatToolActions.addNotification).toHaveBeenCalledWith(
+        expect.objectContaining({title: 'Revise 2 links generated'}),
+      ),
+    )
+  })
+
+  test('generating revise 2 reports failed jobs in one error notification instead of the success one', async () => {
+    ManageActions.getSecondPassReview
+      .mockResolvedValueOnce('review2-pass')
+      .mockResolvedValueOnce(undefined)
+    renderComponent({projects: [project1]})
+    fireEvent.click(screen.getByLabelText('Select all visible jobs'))
+    fireEvent.click(screen.getByLabelText('Generate revise 2'))
+
+    await waitFor(() =>
+      expect(CatToolActions.addNotification).toHaveBeenCalledTimes(1),
+    )
+    expect(ManageActions.getSecondPassReview).toHaveBeenCalledTimes(2)
+    expect(CatToolActions.addNotification).toHaveBeenCalledWith({
+      title: 'Generate revise 2',
+      text: 'The Revise 2 link could not be generated for 1 of 2 jobs. Please try again.',
+      type: 'error',
+      position: 'bl',
+      timer: 10000,
+    })
+  })
+
+  test('generating revise 2 for a single job that fails shows the single-job error text', async () => {
+    ManageActions.getSecondPassReview.mockResolvedValueOnce(undefined)
+    render(
+      <ProjectsBulkActions
+        projects={[{id: 300, id_team: 1, jobs: [job1]}]}
+        teams={teams}
+        isSelectedTeamPersonal={false}
+      >
+        <TestConsumer />
+      </ProjectsBulkActions>,
+    )
+    fireEvent.click(screen.getByLabelText('Select all visible jobs'))
+    fireEvent.click(screen.getByLabelText('Generate revise 2'))
+
+    await waitFor(() =>
+      expect(CatToolActions.addNotification).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'error',
+          text: 'The Revise 2 link could not be generated. Please try again.',
+        }),
+      ),
+    )
+    expect(CatToolActions.addNotification).not.toHaveBeenCalledWith(
       expect.objectContaining({title: 'Revise 2 links generated'}),
     )
   })

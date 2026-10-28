@@ -402,32 +402,54 @@ export const ProjectsBulkActions = ({
           timer: 10000,
         })
         break
-      case JOBS_ACTIONS.GENERATE_REVISE_2.id:
-        jobs.forEach((job) => {
-          const {id: idProject, password: passwordProject} = projects.find(
-            (project) => project.jobs.some((jobItem) => jobItem.id === job.id),
+      case JOBS_ACTIONS.GENERATE_REVISE_2.id: {
+        const requests = jobs
+          .filter(
+            (job) => !(job.revise_passwords && job.revise_passwords.length > 1),
           )
-          const wasAlreadyGenerated2Pass =
-            job.revise_passwords && job.revise_passwords.length > 1
-
-          if (!wasAlreadyGenerated2Pass)
-            ManageActions.getSecondPassReview(
+          .map((job) => {
+            const {id: idProject, password: passwordProject} = projects.find(
+              (project) =>
+                project.jobs.some((jobItem) => jobItem.id === job.id),
+            )
+            return ManageActions.getSecondPassReview(
               idProject,
               passwordProject,
               job.id,
               job.password,
+              {notify: false},
             )
-        })
+          })
 
-        CatToolActions.addNotification({
-          title: 'Revise 2 links generated',
-          text: 'The Revise 2 links for the selected jobs have been generated successfully.',
-          type: 'warning',
-          position: 'bl',
-          allowHtml: true,
-          timer: 10000,
+        // getSecondPassReview resolves without a password when the request fails
+        Promise.all(requests).then((reviewPasswords) => {
+          const failed = reviewPasswords.filter((password) => !password).length
+
+          if (failed > 0) {
+            CatToolActions.addNotification({
+              title: 'Generate revise 2',
+              text:
+                requests.length === 1
+                  ? 'The Revise 2 link could not be generated. Please try again.'
+                  : `The Revise 2 link could not be generated for ${failed} of ${requests.length} jobs. Please try again.`,
+              type: 'error',
+              position: 'bl',
+              timer: 10000,
+            })
+            return
+          }
+
+          CatToolActions.addNotification({
+            title: 'Revise 2 links generated',
+            text: 'The Revise 2 links for the selected jobs have been generated successfully.',
+            type: 'warning',
+            position: 'bl',
+            allowHtml: true,
+            timer: 10000,
+          })
         })
         break
+      }
       case JOBS_ACTIONS.CHANGE_PASSWORD.id: {
         // The password sent is the current one of the resource being changed: the server rotates
         // the password that was presented, so a revision step needs its own current password and a

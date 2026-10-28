@@ -518,6 +518,7 @@ let ManageActions = {
     passwordProject,
     idJob,
     passwordJob,
+    {notify = true} = {},
   ) {
     return getSecondPassReview(idProject, passwordProject, idJob, passwordJob)
       .then((data) => {
@@ -532,6 +533,8 @@ let ManageActions = {
         return data.chunk_review.review_password
       })
       .catch(() => {
+        // A bulk caller reports every failure in one notification of its own
+        if (!notify) return
         const errorNotification = {
           title: 'Generate revise 2',
           text: 'The Revise 2 link could not be generated. Please try again.',
