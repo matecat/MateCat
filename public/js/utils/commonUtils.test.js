@@ -137,9 +137,9 @@ describe('getFileIcon', () => {
     expect(el.type).toBeTruthy()
   })
 
-  it('gives epub the same icon as txt', () => {
+  it('gives epub the same icon as the other desktop publishing formats', () => {
     expect(CommonUtils.getFileIcon('epub').type).toBe(
-      CommonUtils.getFileIcon('txt').type,
+      CommonUtils.getFileIcon('idml').type,
     )
   })
 })

@@ -287,7 +287,6 @@ const CommonUtils = {
       case 'webp':
         return <FileTypeImage size={size} />
       case 'txt':
-      case 'epub':
         return <FileTypeFile size={size} />
       case 'xlf':
       case 'ttx':
@@ -302,6 +301,7 @@ const CommonUtils = {
       case 'mif':
       case 'idml':
       case 'icml':
+      case 'epub':
       case 'tex':
         return <FileTypePub size={size} /> //TODO add specific icons for these file types
       case 'zip':
