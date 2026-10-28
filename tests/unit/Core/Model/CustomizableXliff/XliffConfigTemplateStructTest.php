@@ -15,9 +15,9 @@ class XliffConfigTemplateStructTest extends AbstractTest
     public function hydrateFromJsonWithMinimalData(): void
     {
         $struct = new XliffConfigTemplateStruct();
-        $json = json_encode(['name' => 'test-template', 'uid' => 42]);
+        $json = json_encode(['name' => 'test-template']);
 
-        $result = $struct->hydrateFromJSON($json);
+        $result = $struct->hydrateFromJSON($json, 42);
 
         $this->assertSame('test-template', $result->name);
         $this->assertSame(42, $result->uid);
@@ -25,14 +25,14 @@ class XliffConfigTemplateStructTest extends AbstractTest
     }
 
     #[Test]
-    public function hydrateFromJsonWithUidFallback(): void
+    public function hydrateFromJsonIgnoresAUidInThePayload(): void
     {
         $struct = new XliffConfigTemplateStruct();
-        $json = json_encode(['name' => 'test-template']);
+        $json = json_encode(['name' => 'test-template', 'uid' => 56]);
 
-        $result = $struct->hydrateFromJSON($json, 99);
+        $result = $struct->hydrateFromJSON($json, 42);
 
-        $this->assertSame(99, $result->uid);
+        $this->assertSame(42, $result->uid);
     }
 
     #[Test]
@@ -41,14 +41,13 @@ class XliffConfigTemplateStructTest extends AbstractTest
         $struct = new XliffConfigTemplateStruct();
         $json = json_encode([
             'name' => 'full-template',
-            'uid' => 1,
             'id' => 10,
             'created_at' => '2026-01-01',
             'modified_at' => '2026-01-02',
             'deleted_at' => '2026-01-03',
         ]);
 
-        $result = $struct->hydrateFromJSON($json);
+        $result = $struct->hydrateFromJSON($json, 1);
 
         $this->assertSame(10, $result->id);
         $this->assertSame('2026-01-01', $result->created_at);
@@ -63,7 +62,7 @@ class XliffConfigTemplateStructTest extends AbstractTest
         $this->expectExceptionCode(400);
 
         $struct = new XliffConfigTemplateStruct();
-        $struct->hydrateFromJSON(json_encode(['uid' => 1]));
+        $struct->hydrateFromJSON(json_encode(['rules' => []]), 1);
     }
 
     #[Test]
@@ -73,7 +72,7 @@ class XliffConfigTemplateStructTest extends AbstractTest
         $this->expectExceptionCode(400);
 
         $struct = new XliffConfigTemplateStruct();
-        $struct->hydrateFromJSON(json_encode(['name' => 'test']));
+        $struct->hydrateFromJSON(json_encode(['name' => 'test', 'uid' => 1]), 0);
     }
 
     #[Test]
@@ -82,7 +81,6 @@ class XliffConfigTemplateStructTest extends AbstractTest
         $struct = new XliffConfigTemplateStruct();
         $json = json_encode([
             'name' => 'with-rules',
-            'uid' => 1,
             'rules' => [
                 'xliff12' => [
                     ['states' => ['translated'], 'analysis' => 'pre-translated'],
@@ -91,7 +89,7 @@ class XliffConfigTemplateStructTest extends AbstractTest
             ],
         ]);
 
-        $result = $struct->hydrateFromJSON($json);
+        $result = $struct->hydrateFromJSON($json, 1);
 
         $this->assertInstanceOf(XliffRulesModel::class, $result->rules);
     }
@@ -109,11 +107,10 @@ class XliffConfigTemplateStructTest extends AbstractTest
 
         $json = json_encode([
             'name' => 'string-rules',
-            'uid' => 1,
             'rules' => $rulesJson,
         ]);
 
-        $result = $struct->hydrateFromJSON($json);
+        $result = $struct->hydrateFromJSON($json, 1);
 
         $this->assertInstanceOf(XliffRulesModel::class, $result->rules);
     }

@@ -518,12 +518,18 @@ const NewProject = () => {
         analysisTemplates.templates,
       ),
     )
-    const xliffParametersTemplate = JSON.stringify(
-      getTemplateUnsavedById(
-        XliffConfigTemplateId,
-        fileImportXliffSettingsTemplates.templates,
-      ),
+    const unsavedXliffTemplate = getTemplateUnsavedById(
+      XliffConfigTemplateId,
+      fileImportXliffSettingsTemplates.templates,
     )
+    // the owner is the logged user: the server refuses a uid in xliff_parameters
+    /* eslint-disable no-unused-vars */
+    const {uid: xliffTemplateUid, ...unsavedXliffTemplateWithoutUid} =
+      unsavedXliffTemplate ?? {}
+    /* eslint-enable no-unused-vars */
+    const xliffParametersTemplate = unsavedXliffTemplate
+      ? JSON.stringify(unsavedXliffTemplateWithoutUid)
+      : undefined
 
     const {mmt_glossaries, lara_glossaries, deepl_id_glossary, ...mtExtra} =
       mt?.extra ?? {}

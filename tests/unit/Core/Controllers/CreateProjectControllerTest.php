@@ -28,6 +28,7 @@ use Utils\Logger\MatecatLogger;
 use Model\ConnectedServices\GDrive\Session;
 use Utils\Session\ArraySessionStore;
 use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
 
 class TestableCreateProjectControllerApi extends CreateProjectController
 {
@@ -975,9 +976,6 @@ class CreateProjectControllerTest extends AbstractTest
             file_get_contents(self::projectRoot() . '/tests/resources/files/json/files/xliff_params.json'),
             true
         );
-        // hydrateFromJSON() requires an owning uid embedded in the payload.
-        $xliff['uid'] = $this->user->uid;
-
         $result = $this->invokePrivate('validateXliffParameters', [json_encode($xliff), null]);
 
         $this->assertIsArray($result);
@@ -994,13 +992,31 @@ class CreateProjectControllerTest extends AbstractTest
     {
         $xliff = [
             'name'  => 'locked draft',
-            'uid'   => $this->user->uid,
             'rules' => ['xliff12' => [['states' => ['translated'], 'analysis' => 'pre-translated', 'editor' => 'draft', 'lock' => true]]],
         ];
 
         $this->expectException(DomainException::class);
         $this->expectExceptionCode(400);
         $this->expectExceptionMessage('A rule with editor status DRAFT can not be locked.');
+
+        $this->invokePrivate('validateXliffParameters', [json_encode($xliff), null]);
+    }
+
+    /**
+     * The owner is the logged user: a uid in xliff_parameters is refused by the schema.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateXliffParameters_refuses_a_uid_in_the_payload(): void
+    {
+        $xliff = json_decode(
+            file_get_contents(self::projectRoot() . '/tests/resources/files/json/files/xliff_params.json'),
+            true
+        );
+        $xliff['uid'] = $this->user->uid + 1;
+
+        $this->expectException(JSONValidatorException::class);
 
         $this->invokePrivate('validateXliffParameters', [json_encode($xliff), null]);
     }
