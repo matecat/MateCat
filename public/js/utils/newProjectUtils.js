@@ -48,3 +48,18 @@ const postProjectCreation = (data) => {
     }
   }
 }
+
+/**
+ * The template without its owner: the server takes the uid from the logged user
+ * and refuses one in the payload.
+ *
+ * @param {Object|undefined} template
+ * @returns {Object|undefined}
+ */
+export const omitTemplateOwner = (template) => {
+  if (!template) return template
+  /* eslint-disable no-unused-vars */
+  const {uid, ...withoutOwner} = template
+  /* eslint-enable no-unused-vars */
+  return withoutOwner
+}

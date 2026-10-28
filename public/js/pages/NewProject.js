@@ -41,7 +41,7 @@ import useProjectTemplates, {SCHEMA_KEYS} from '../hooks/useProjectTemplates'
 import {TemplateSelect} from '../components/settingsPanel/ProjectTemplate/TemplateSelect'
 import {getMMTKeys} from '../api/getMMTKeys'
 import {AlertDeleteResourceProjectTemplates} from '../components/modals/AlertDeleteResourceProjectTemplates'
-import {handleCreationStatus} from '../utils/newProjectUtils'
+import {handleCreationStatus, omitTemplateOwner} from '../utils/newProjectUtils'
 import {getPretranslateParams} from '../utils/editorStatusLock'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
 import {mountPage} from './mountPage'
@@ -518,18 +518,14 @@ const NewProject = () => {
         analysisTemplates.templates,
       ),
     )
-    const unsavedXliffTemplate = getTemplateUnsavedById(
-      XliffConfigTemplateId,
-      fileImportXliffSettingsTemplates.templates,
+    const xliffParametersTemplate = JSON.stringify(
+      omitTemplateOwner(
+        getTemplateUnsavedById(
+          XliffConfigTemplateId,
+          fileImportXliffSettingsTemplates.templates,
+        ),
+      ),
     )
-    // the owner is the logged user: the server refuses a uid in xliff_parameters
-    /* eslint-disable no-unused-vars */
-    const {uid: xliffTemplateUid, ...unsavedXliffTemplateWithoutUid} =
-      unsavedXliffTemplate ?? {}
-    /* eslint-enable no-unused-vars */
-    const xliffParametersTemplate = unsavedXliffTemplate
-      ? JSON.stringify(unsavedXliffTemplateWithoutUid)
-      : undefined
 
     const {mmt_glossaries, lara_glossaries, deepl_id_glossary, ...mtExtra} =
       mt?.extra ?? {}
