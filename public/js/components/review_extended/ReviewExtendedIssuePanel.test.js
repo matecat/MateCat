@@ -1,5 +1,5 @@
 import React from 'react'
-import {act, fireEvent, render, screen} from '@testing-library/react'
+import {act, fireEvent, render, screen, waitFor} from '@testing-library/react'
 import ReviewExtendedIssuePanel from './ReviewExtendedIssuePanel'
 import {SegmentContext} from '../segments/SegmentContext'
 import SegmentActions from '../../actions/SegmentActions'
@@ -189,6 +189,38 @@ describe('ReviewExtendedIssuePanel', () => {
       expect(CatToolActions.reloadQualityReport).toHaveBeenCalled()
       expect(submitIssueCallback).toHaveBeenCalled()
       expect(setCreationIssueLoader).toHaveBeenCalledWith(false)
+    })
+
+    test('files an issue on a split part against the whole segment', async () => {
+      renderPanel(
+        {
+          selection: {
+            selected_string: 'mondo',
+            start_node: 0,
+            start_offset: 5,
+            end_node: 0,
+            end_offset: 10,
+          },
+        },
+        makeSegment({sid: '123-2', original_sid: '123', splitted: true}),
+      )
+
+      fireEvent.click(screen.getAllByRole('button', {name: 'MIN'})[0])
+
+      await waitFor(() =>
+        expect(sendSegmentVersionIssue).toHaveBeenCalledWith(
+          expect.objectContaining({
+            idSegment: '123',
+            issueDetails: expect.objectContaining({
+              target_text: 'mondo',
+              start_node: 0,
+              start_offset: 0,
+              send_node: 0,
+              end_offset: 0,
+            }),
+          }),
+        ),
+      )
     })
 
     test('calls editSegmentIssue instead when issueEditing is set, and clears editing on success', async () => {
