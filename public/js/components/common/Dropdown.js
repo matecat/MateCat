@@ -11,8 +11,8 @@ import React, {
 import PropTypes from 'prop-types'
 
 import Check from '../../../img/icons/Check'
-import Search from '../../../img/icons/Search'
 import TEXT_UTILS from '../../utils/textUtils'
+import IconSearch from '../../../img/icons/IconSearch'
 
 export const Dropdown = forwardRef(
   (
@@ -48,17 +48,25 @@ export const Dropdown = forwardRef(
     const textInputRef = useRef()
     const queryFilterRef = useRef('')
     const itemsOnTopRef = useRef(activeOptions)
+    const setListMaxHeightDelayRef = useRef()
 
     useImperativeHandle(ref, () => ({
       getListRef: () => listRef?.current,
       setListMaxHeight: (value) => {
         if (listRef?.current) {
-          listRef.current.style.maxHeight = `${value}px`
-          listRef.current.parentElement.style.height = `${
-            listRef.current.offsetHeight
-              ? listRef.current.offsetHeight + 'px'
-              : 'auto'
-          }`
+          listRef.current.parentElement.parentElement.style.opacity = 1
+          clearTimeout(setListMaxHeightDelayRef.current)
+          setListMaxHeightDelayRef.current = setTimeout(() => {
+            if (!listRef.current) return
+            listRef.current.parentElement.style.opacity = 1
+            listRef.current.style.maxHeight = `${value}px`
+            listRef.current.parentElement.style.height = `${
+              listRef.current.offsetHeight
+                ? listRef.current.offsetHeight + 'px'
+                : 'auto'
+            }`
+          }, 40)
+
           listRef.current.parentElement.ontransitionend = () =>
             (listRef.current.parentElement.style.height = 'auto')
         }
@@ -171,6 +179,11 @@ export const Dropdown = forwardRef(
 
       return () => clearTimeout(timer)
     }, [showSearchBar])
+
+    useEffect(
+      () => () => clearTimeout(setListMaxHeightDelayRef.current),
+      [],
+    )
 
     // keyboard shortcuts
     useEffect(() => {
@@ -435,6 +448,7 @@ export const Dropdown = forwardRef(
       >
         {(showSearchBar || multipleSelect === 'modal') && (
           <div data-testid="dropdown-search" className="dropdown__search-bar">
+            <IconSearch size={20} />
             <input
               className="dropdown__search-bar-input"
               placeholder={searchPlaceholder}
@@ -444,7 +458,6 @@ export const Dropdown = forwardRef(
               onChange={updateQueryFilter}
               onFocus={onSearchBarFocus}
             />
-            <Search size={20} />
           </div>
         )}
         {rowTooltip && (
