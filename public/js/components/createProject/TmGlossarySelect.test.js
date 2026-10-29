@@ -68,11 +68,14 @@ describe('TmGlossarySelect', () => {
     ).toBeInTheDocument()
   })
 
-  test('clicking CREATE RESOURCE opens settings and closes the dropdown', () => {
+  test('clicking CREATE RESOURCE opens settings on the TM/glossary tab and closes the dropdown', () => {
     const {container, contextValue} = renderWithContext()
     fireEvent.click(container.querySelector('.select'))
     fireEvent.click(screen.getByText('CREATE RESOURCE'))
-    expect(contextValue.setOpenSettings).toHaveBeenCalledWith({isOpen: true})
+    expect(contextValue.setOpenSettings).toHaveBeenCalledWith({
+      isOpen: true,
+      tab: 'tm',
+    })
   })
 
   test('toggling an inactive option activates it and calls modifyingCurrentTemplate', () => {
