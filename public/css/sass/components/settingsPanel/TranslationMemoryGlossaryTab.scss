@@ -124,11 +124,6 @@
   gap: 8px;
 }
 
-.translation-memory-glossary-pretranslate-status-label {
-  font-size: variables.$font-size-small;
-  color: colors.$grey700;
-}
-
 .translation-memory-glossary-variant-matching {
   display: flex;
   align-items: center;
@@ -194,6 +189,7 @@
   border: 1px solid colors.$grey200;
   padding: 6px;
   width: 350px;
+  font-size: variables.$font-size-xsmall;
 }
 
 .translation-memory-glossary-tab {
@@ -374,8 +370,8 @@
 
 .tm-key-create-resource-row-input {
   width: 100%;
-  padding: 4px;
-  border-radius: 3px;
+  padding: 4px 8px;
+  border-radius: variables.$border-radius-default;
   border: solid 1px colors.$grey150;
 
   &.error {
@@ -389,7 +385,7 @@
 .translation-memory-glossary-tab-delete {
   display: flex;
   flex-direction: column;
-  padding: 10px;
+  padding: 10px 10px 10px 40px;
   min-height: 50px;
 
   .message-share-tmx-email {
@@ -518,8 +514,6 @@
 }
 
 .translation-memory-glossary-tab-share {
-  padding: 10px;
-
   .translation-memory-glossary-tab-input-text {
     width: 260px;
   }

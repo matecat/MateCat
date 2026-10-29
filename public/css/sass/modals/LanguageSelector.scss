@@ -1,5 +1,5 @@
 /* Language Selector Modal */
-@use "../tokens/colors";
+@use '../tokens/colors';
 @use 'commons/variables';
 
 #matecat-modal-languages {
@@ -95,7 +95,7 @@
         align-items: center;
         width: 100%;
         text-align: left;
-        border-radius: 2px;
+        border-radius: variables.$border-radius-default;
         border: 1px solid $medium-gray;
         padding: 6px 16px;
         &:hover {
@@ -121,10 +121,6 @@
       width: 100%;
       & > span {
         display: inline-block;
-        & > * {
-          margin-top: 2px;
-          margin-bottom: 2px;
-        }
       }
     }
     .language-to .language-search .tag {
@@ -244,7 +240,7 @@
         position: relative;
         padding: 8px 12px;
         margin: 4px;
-        border-radius: 2px;
+        border-radius: variables.$border-radius-default;
 
         &.selected {
           background: $dark-blue;
@@ -280,7 +276,6 @@
             border-color: transparent transparent transparent $medium-blue;
           }
         }
-
       }
       li.lang-item .language-dropdown-item-container .code-badge-selected {
         background-color: colors.$white;
