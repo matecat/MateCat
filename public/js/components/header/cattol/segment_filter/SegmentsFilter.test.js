@@ -523,3 +523,35 @@ test('lists the locked filters first, then the 101% ones', () => {
       ).toBeTruthy(),
     )
 })
+
+test('offers the "with issues" filter only in review mode', () => {
+  config.isReview = false
+  const {rerender} = renderFilter()
+  fireEvent.click(screen.getByText('Others'))
+  expect(screen.queryByTestId('option-with_issues')).not.toBeInTheDocument()
+
+  config.isReview = true
+  rerender(<SegmentsFilter active={true} />)
+  expect(screen.getByTestId('option-with_issues')).toHaveTextContent(
+    'With issues',
+  )
+})
+
+test('selecting "with issues" submits the filter with that sample type', () => {
+  config.isReview = true
+  jest.useFakeTimers()
+  renderFilter()
+
+  fireEvent.click(document.querySelector('.filter-activities .select'))
+  fireEvent.click(screen.getByTestId('option-with_issues'))
+  act(() => {
+    jest.advanceTimersByTime(100)
+  })
+
+  expect(SegmentFilterUtils.filterSubmit).toHaveBeenLastCalledWith(
+    expect.objectContaining({sample: {type: 'with_issues'}}),
+    expect.objectContaining({samplingType: 'with_issues'}),
+  )
+
+  jest.useRealTimers()
+})
