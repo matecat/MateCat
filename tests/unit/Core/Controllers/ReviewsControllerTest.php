@@ -375,6 +375,43 @@ class ReviewsControllerTest extends AbstractTest
     }
 
     /**
+     * A failed R2 write must reach the router's error handler, which answers with a non-2xx status:
+     * that status is the only thing the dashboard has to tell a failure from a success. Caught here,
+     * the client would get a 200 with no review password and report nothing.
+     *
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws \PHPUnit\Framework\MockObject\Exception
+     */
+    #[Test]
+    public function createReview_propagates_a_failed_write_and_sends_no_review(): void
+    {
+        $feature = $this->createMock(AbstractRevisionFeature::class);
+        $feature->method('createQaChunkReviewRecords')
+            ->willThrowException(new PDOException('Simulated R2 failure'));
+
+        $factory = $this->createMock(RevisionFactory::class);
+        $factory->method('getRevisionFeature')->willReturn($feature);
+
+        $this->controller->revisionFactoryStub = $factory;
+
+        $project           = new ProjectStruct();
+        $project->id       = $this->projectId(self::BASE);
+        $project->password = 'projpw';
+        $this->setProp('project', $project);
+
+        $this->setProp('chunk', new JobStruct());
+        $this->setProp('nextSourcePage', 3);
+
+        $this->responseMock->expects($this->never())->method('json');
+
+        $this->expectException(PDOException::class);
+        $this->expectExceptionMessage('Simulated R2 failure');
+
+        $this->controller->createReview();
+    }
+
+    /**
      * `createReview()` writes a chunk review for one revision phase, so the read of that phase
      * describes a set the database no longer holds. Each phase carries its own key map — one per
      * phase, so that evicting a phase cannot take the others or the unfiltered read down with it —
