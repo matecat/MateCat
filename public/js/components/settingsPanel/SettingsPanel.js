@@ -147,7 +147,8 @@ export const SettingsPanel = ({
         (value) => value === tabOpenFromQueryString,
       )
         ? tabOpenFromQueryString === tab.id
-        : (tabOpen ?? SETTINGS_PANEL_TABS.translationMemoryGlossary === tab.id),
+        : (tabOpen ?? SETTINGS_PANEL_TABS.translationMemoryGlossary) ===
+          tab.id,
     }))
 
     tabOpenFromQueryString = false
