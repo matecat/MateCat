@@ -48,3 +48,72 @@ describe('Dropdown row tooltip', () => {
     expect(screen.queryByLabelText('TRANSLATED')).not.toBeInTheDocument()
   })
 })
+
+describe('Dropdown search bar', () => {
+  test('renders the search icon and input when showSearchBar is true', () => {
+    render(
+      <Dropdown
+        wrapper={{current: document.body}}
+        options={[{id: '1', name: 'TRANSLATED'}]}
+        showSearchBar
+      />,
+    )
+
+    expect(screen.getByTestId('dropdown-search')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('Search...')).toBeInTheDocument()
+  })
+})
+
+describe('Dropdown imperative setListMaxHeight', () => {
+  beforeEach(() => {
+    jest.useFakeTimers()
+  })
+
+  afterEach(() => {
+    jest.useRealTimers()
+  })
+
+  test('applies the max height to the list after the deferred delay', () => {
+    const ref = React.createRef()
+    render(
+      <Dropdown
+        ref={ref}
+        wrapper={{current: document.body}}
+        options={[{id: '1', name: 'TRANSLATED'}]}
+      />,
+    )
+
+    const list = ref.current.getListRef()
+    // eslint-disable-next-line testing-library/no-node-access
+    const listWrapper = list.parentElement
+
+    ref.current.setListMaxHeight(200)
+
+    // The outer wrapper fades in synchronously...
+    // eslint-disable-next-line testing-library/no-node-access
+    expect(listWrapper.parentElement).toHaveStyle({opacity: '1'})
+    // ...but the max-height itself is only applied after the deferred delay.
+    expect(list).toHaveStyle({maxHeight: ''})
+
+    jest.advanceTimersByTime(40)
+
+    expect(list).toHaveStyle({maxHeight: '200px'})
+    expect(listWrapper).toHaveStyle({opacity: '1', height: 'auto'})
+  })
+
+  test('does not throw when the dropdown unmounts before the deferred delay fires', () => {
+    const ref = React.createRef()
+    const {unmount} = render(
+      <Dropdown
+        ref={ref}
+        wrapper={{current: document.body}}
+        options={[{id: '1', name: 'TRANSLATED'}]}
+      />,
+    )
+
+    ref.current.setListMaxHeight(200)
+    unmount()
+
+    expect(() => jest.advanceTimersByTime(40)).not.toThrow()
+  })
+})
