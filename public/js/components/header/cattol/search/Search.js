@@ -624,7 +624,7 @@ const Search = (props) => {
       name: (
         <>
           <div className={'status-dot approved-2ndpass-color'} />
-          APPROVED
+          APPROVED 2
         </>
       ),
       id: 'APPROVED-2',

@@ -26,7 +26,7 @@ import {OptionsContainer} from './OptionsContainer'
 import {ApplicationThreshold} from './ApplicationThreshold'
 import defaultMTOptions from '../../Contents/defaultTemplates/mtOptions.json'
 import {normalizeTemplatesWithNullProps} from '../../../../hooks/useTemplates'
-import {Button, BUTTON_TYPE} from '../../../common/Button/Button'
+import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../../../common/Button/Button'
 import IconClose from '../../../../../img/icons/IconClose'
 import IconAdd from '../../../../../img/icons/IconAdd'
 
@@ -325,9 +325,10 @@ export const MachineTranslationTab = () => {
             />
             <Button
               type={BUTTON_TYPE.WARNING}
+              size={BUTTON_SIZE.ICON_STANDARD}
               onClick={() => setAddMTVisible(false)}
             >
-              <IconClose size={11} />
+              <IconClose size={18} />
             </Button>
           </div>
           {activeAddEngine ? (

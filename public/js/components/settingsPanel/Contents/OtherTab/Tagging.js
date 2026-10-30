@@ -163,7 +163,7 @@ export const Tagging = () => {
                   />
                 ) : (
                   <div className="codes-container">
-                    {code.split(',').map((code) => (
+                    {code?.split(',').map((code) => (
                       <div key={code} className="code-badge">
                         {code}
                       </div>

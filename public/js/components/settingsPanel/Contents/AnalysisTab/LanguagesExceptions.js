@@ -300,11 +300,11 @@ const LanguageException = ({
       {confirmed && !modified ? (
         <div className="analysis-tab-buttons">
           <Button
-            size={BUTTON_SIZE.SMALL}
-            mode={BUTTON_MODE.GHOST}
+            size={BUTTON_SIZE.ICON_STANDARD}
+            mode={BUTTON_MODE.OUTLINE}
             onClick={removeException}
           >
-            <IconClose />
+            <IconClose size={20} />
           </Button>
         </div>
       ) : (
@@ -322,6 +322,7 @@ const LanguageException = ({
           </Button>
           <Button
             type={BUTTON_TYPE.WARNING}
+            size={BUTTON_SIZE.ICON_STANDARD}
             className="close-button"
             onClick={removeException}
           >

@@ -14,7 +14,12 @@
     border: 1px solid colors.$grey200;
     border-radius: variables.$border-radius-default 0 0
       variables.$border-radius-default;
+    border-right: unset;
     text-align: center;
+
+    &:disabled {
+      border-color: colors.$grey200 !important;
+    }
   }
 
   .container-controls {
@@ -25,16 +30,21 @@
       height: 16px !important;
       line-height: 1 !important;
       padding: 0 !important;
-      background: colors.$grey100 !important;
-      border: 1px solid colors.$grey400 !important;
+      background: colors.$grey75 !important;
+      border: 1px solid colors.$grey200 !important;
       border-radius: 0 0 variables.$border-radius-default 0;
 
-      &:hover {
+      &:disabled {
+        border-color: colors.$grey75 !important;
+      }
+
+      &:hover:not(:disabled) {
         background-color: colors.$grey50 !important;
       }
     }
 
     button:first-child {
+      border-top: unset !important;
       transform: rotate(180deg);
       border-radius: 0 0 0 variables.$border-radius-default;
     }

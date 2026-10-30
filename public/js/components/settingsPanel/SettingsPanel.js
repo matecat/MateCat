@@ -120,7 +120,7 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
 export const SettingsPanel = ({
   onClose,
   isOpened,
-  tabOpen = SETTINGS_PANEL_TABS.translationMemoryGlossary,
+  tabOpen,
   user,
   tmKeys,
   setTmKeys,
@@ -147,7 +147,8 @@ export const SettingsPanel = ({
         (value) => value === tabOpenFromQueryString,
       )
         ? tabOpenFromQueryString === tab.id
-        : tabOpen === tab.id,
+        : (tabOpen ?? SETTINGS_PANEL_TABS.translationMemoryGlossary) ===
+          tab.id,
     }))
 
     tabOpenFromQueryString = false
@@ -171,6 +172,20 @@ export const SettingsPanel = ({
   })
 
   const wrapperRef = useRef()
+
+  useEffect(() => {
+    if (!tabOpen) return
+
+    setTabs(() => {
+      const updatedState = DEFAULT_CONTENTS().map((tab) => ({
+        ...tab,
+        isOpened: tabOpen === tab.id,
+      }))
+
+      tabOpenFromQueryString = false
+      return updatedState
+    })
+  }, [tabOpen])
 
   useEffect(() => {
     setIsVisible(typeof isOpened !== 'undefined' ? isOpened : true)

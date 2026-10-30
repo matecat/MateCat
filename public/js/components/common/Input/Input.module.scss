@@ -6,6 +6,7 @@
   gap: 4px;
 
   label {
+    color: colors.$grey700;
     cursor: pointer;
     // body carries a legacy `text-align: center`, so the label has to opt out
     text-align: left;
@@ -27,8 +28,8 @@
     box-sizing: border-box;
     width: 100%;
     height: 40px;
-    color: colors.$grey700;
-    border: 1px solid colors.$grey100;
+    color: colors.$black;
+    border: 1px solid colors.$grey200;
     font-size: 16px;
     line-height: 24px;
     font-weight: 400;
@@ -47,12 +48,13 @@
       opacity: 1;
     }
     &:hover {
-      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.0784313725) inset;
+      border-color: colors.$grey400;
     }
     &:focus,
     &:active {
+      border-color: colors.$grey400;
+      box-shadow: 0 0 0 1px colors.$grey400;
       outline: none;
-      box-shadow: inset 0 0 0 2px colors.$black;
     }
     &.isCompressed {
       padding: 10px;
@@ -68,16 +70,16 @@
     &.hasError,
     &.hasError:hover,
     &.hasError:focus {
-      box-shadow: inset 0 0 0 2px colors.$red500 !important;
+      box-shadow: inset 0 0 0 1px colors.$red500 !important;
     }
     &:disabled {
       background-color: colors.$grey75;
       box-shadow: none;
-      color: colors.$grey200;
+      color: colors.$grey400;
       cursor: not-allowed;
 
       &::placeholder {
-        color: colors.$grey200;
+        color: colors.$grey400;
       }
     }
   }
