@@ -97,6 +97,10 @@
     text-overflow: ellipsis;
     display: block;
   }
+
+  &:not(.select--is-disabled):hover {
+    border-color: colors.$grey400;
+  }
 }
 
 .select--is-focused {
