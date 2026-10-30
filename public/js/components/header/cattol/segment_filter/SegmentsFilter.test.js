@@ -542,7 +542,7 @@ test('selecting "with issues" submits the filter with that sample type', () => {
   jest.useFakeTimers()
   renderFilter()
 
-  fireEvent.click(document.querySelector('.filter-activities .select'))
+  fireEvent.click(screen.getByText('Others'))
   fireEvent.click(screen.getByTestId('option-with_issues'))
   act(() => {
     jest.advanceTimersByTime(100)
