@@ -166,7 +166,7 @@ class FsFilesStorage extends AbstractFilesStorage
         $path = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . self::OBJECTS_SAFE_DELIMITER . $lang . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig";
 
         //return file
-        $filePath = $this->getSingleFileInPath($path);
+        $filePath = $this->getSingleFileInPath($path, $hash . '.');
 
         //an unconverted xliff is never stored in orig dir; look for it in xliff dir
         if (!$filePath) {
@@ -190,7 +190,7 @@ class FsFilesStorage extends AbstractFilesStorage
         $path = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . self::OBJECTS_SAFE_DELIMITER . $lang . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "work";
 
         //return file
-        return $this->getSingleFileInPath($path);
+        return $this->getSingleFileInPath($path, $hash . '.');
     }
 
     /**
@@ -599,9 +599,15 @@ class FsFilesStorage extends AbstractFilesStorage
             throw new InvalidArgumentException("Invalid date string: '$projectDate'");
         }
 
-        $datePath = $date->format('Ymd');
+        $zipDir = $this->zipDir . DIRECTORY_SEPARATOR . $date->format('Ymd') . DIRECTORY_SEPARATOR . $projectID;
 
-        return $this->zipDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $projectID . DIRECTORY_SEPARATOR . $zipName;
+        $storedPath = $zipDir . DIRECTORY_SEPARATOR . static::getStorageFileName($zipName);
+        if ($this->filesystem->fileExists($storedPath)) {
+            return $storedPath;
+        }
+
+        // a zip stored before the names were hashed keeps its original name
+        return $zipDir . DIRECTORY_SEPARATOR . $zipName;
     }
 
     /**

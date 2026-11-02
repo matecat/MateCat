@@ -7,6 +7,7 @@ use Matecat\SimpleS3\ClientInterface;
 use Matecat\TestHelpers\AbstractTest;
 use Model\FilesStorage\FilesystemAdapter;
 use Model\FilesStorage\S3FilesStorage;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use UnexpectedValueException;
 use Utils\Registry\AppConfig;
@@ -157,6 +158,42 @@ class S3FilesStorageUnitTest extends AbstractTest
     }
 
     #[Test]
+    public function test_getOriginalZipPath_returns_the_hashed_zip_when_stored(): void
+    {
+        $checkedKeys = [];
+        $client = $this->stubClient(function (string $name, array $args) use (&$checkedKeys) {
+            if ($name === 'hasItem') {
+                $checkedKeys[] = $args[0]['key'];
+
+                return true;
+            }
+
+            return null;
+        });
+
+        $fs = $this->createS3WithMocks($client);
+        $expected = 'originalZip' . DIRECTORY_SEPARATOR . '20230115' . DIRECTORY_SEPARATOR . '42' . DIRECTORY_SEPARATOR . sha1('archive.zip') . '.zip';
+
+        $this->assertSame($expected, $fs->getOriginalZipPath('2023-01-15', '42', 'archive.zip'));
+        $this->assertSame([$expected], $checkedKeys);
+    }
+
+    #[Test]
+    public function test_getOriginalZipPath_returns_the_legacy_zip_when_not_hashed(): void
+    {
+        $client = $this->stubClient(function (string $name) {
+            return $name === 'hasItem' ? false : null;
+        });
+
+        $fs = $this->createS3WithMocks($client);
+
+        $this->assertSame(
+            'originalZip' . DIRECTORY_SEPARATOR . '20230115' . DIRECTORY_SEPARATOR . '42' . DIRECTORY_SEPARATOR . 'архив.zip',
+            $fs->getOriginalZipPath('2023-01-15', '42', 'архив.zip')
+        );
+    }
+
+    #[Test]
     public function test_getOriginalZipDir_valid_date(): void
     {
         $fs = $this->createS3WithMocks();
@@ -277,6 +314,33 @@ class S3FilesStorageUnitTest extends AbstractTest
         $fs = $this->createS3WithMocks($client);
         $result = $fs->getXliffFromCache('abcdef1234567890abcdef1234567890abcdef12', 'en-US');
         $this->assertSame('cache-package/ab/cd/rest__en-US/work/file.xliff', $result);
+    }
+
+    /**
+     * A cache package written before the names were hashed, then written again: the content-hash objects win.
+     */
+    #[Test]
+    public function test_cache_readers_prefer_the_content_hash_objects(): void
+    {
+        $hash = 'abcdef1234567890abcdef1234567890abcdef12';
+        $client = $this->stubClient(function (string $name, array $args) use ($hash) {
+            if ($name === 'getItemsInABucket') {
+                $folder = str_contains($args[0]['prefix'], '/orig') ? 'orig' : 'work';
+                $ext = $folder === 'orig' ? '.docx' : '.docx.sdlxliff';
+
+                return [
+                    "cache-package/ab/cd/rest__en-US/$folder/0-legacy$ext",
+                    "cache-package/ab/cd/rest__en-US/$folder/$hash$ext",
+                ];
+            }
+
+            return null;
+        });
+
+        $fs = $this->createS3WithMocks($client);
+
+        $this->assertSame("cache-package/ab/cd/rest__en-US/orig/$hash.docx", $fs->getOriginalFromCache($hash, 'en-US'));
+        $this->assertSame("cache-package/ab/cd/rest__en-US/work/$hash.docx.sdlxliff", $fs->getXliffFromCache($hash, 'en-US'));
     }
 
     #[Test]
@@ -692,6 +756,100 @@ class S3FilesStorageUnitTest extends AbstractTest
         $hash = 'abcdef1234567890abcdef1234567890abcdef12';
         $result = $fs->moveFromCacheToFileDir('20230115' . DIRECTORY_SEPARATOR . $hash, 'en-US', '13');
         $this->assertTrue($result);
+    }
+
+    /**
+     * @return array<string, array{string, bool, string}>
+     */
+    public static function queueFileProvider(): array
+    {
+        $prefix = 'queue-projects/0f8fad5b-d9cb-469f-a165-70867728950e/';
+        $longStem = str_repeat('a', 220);
+
+        return [
+            'hashed name' => ['File.XLF', true, $prefix . sha1('File.XLF') . '.xlf'],
+            'legacy name lowercases the extension' => ['File.XLF', false, $prefix . 'File.xlf'],
+            'legacy long name is the sha1 of its stem' => [$longStem . '.sdlxliff', false, $prefix . sha1($longStem) . '.sdlxliff'],
+            'legacy name without an extension' => ['README', false, $prefix . 'README'],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('queueFileProvider')]
+    public function test_downloadQueueFile(string $fileName, bool $hashedExists, string $expectedKey): void
+    {
+        $downloads = [];
+        $client = $this->stubClient(function (string $name, array $args) use ($hashedExists, &$downloads) {
+            if ($name === 'hasItem') {
+                return $hashedExists;
+            }
+            if ($name === 'downloadItem') {
+                $downloads[] = $args[0];
+
+                return true;
+            }
+
+            return null;
+        });
+
+        $fs = $this->createS3WithMocks($client);
+        $fs->downloadQueueFile('/queue/{0F8FAD5B-D9CB-469F-A165-70867728950E}', $fileName);
+
+        $this->assertSame([[
+            'bucket' => AppConfig::$AWS_STORAGE_BASE_BUCKET,
+            'key' => $expectedKey,
+            'save_as' => '/queue/{0F8FAD5B-D9CB-469F-A165-70867728950E}/' . $fileName,
+        ]], $downloads);
+    }
+
+    #[Test]
+    public function test_getItem_reads_the_object_from_the_bucket(): void
+    {
+        $client = $this->stubClient(function (string $name, array $args) {
+            return $name === 'getItem' ? ['ContentLength' => 10, 'key' => $args[0]['key'], 'bucket' => $args[0]['bucket']] : null;
+        });
+
+        $fs = $this->createS3WithMocks($client);
+
+        $this->assertSame(['ContentLength' => 10, 'key' => 'files/x.docx', 'bucket' => AppConfig::$AWS_STORAGE_BASE_BUCKET], $fs->getItem('files/x.docx'));
+    }
+
+    /**
+     * A package holding a legacy object next to a content-hash one: the project gets exactly one of each, the hashed.
+     */
+    #[Test]
+    public function test_moveFromCacheToFileDir_copies_one_preferred_object_per_folder(): void
+    {
+        $hash = 'abcdef1234567890abcdef1234567890abcdef12';
+        $copied = [];
+        $client = $this->stubClient(function (string $name, array $args) use ($hash, &$copied) {
+            if ($name === 'getItemsInABucket') {
+                if (str_contains($args[0]['prefix'], '/orig')) {
+                    return ['cache-package/ab/cd/rest__en-US/orig/legacy.docx', "cache-package/ab/cd/rest__en-US/orig/$hash.docx"];
+                }
+
+                return ["cache-package/ab/cd/rest__en-US/work/$hash.docx.sdlxliff", 'cache-package/ab/cd/rest__en-US/work/legacy.docx.sdlxliff'];
+            }
+            if ($name === 'copyInBatch') {
+                $copied = $args[0]['files'];
+
+                return true;
+            }
+
+            return null;
+        });
+
+        $fs = $this->createS3WithMocks($client);
+
+        $this->assertTrue($fs->moveFromCacheToFileDir('20230115' . DIRECTORY_SEPARATOR . $hash, 'en-US', '13'));
+        $this->assertSame(
+            ["cache-package/ab/cd/rest__en-US/orig/$hash.docx", "cache-package/ab/cd/rest__en-US/work/$hash.docx.sdlxliff"],
+            $copied['source']
+        );
+        $this->assertSame(
+            ["files/20230115/13/orig/$hash.docx", "files/20230115/13/xliff/$hash.docx.sdlxliff"],
+            $copied['target']
+        );
     }
 
     #[Test]

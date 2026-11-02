@@ -13,6 +13,7 @@ use Klein\Exceptions\LockedResponseException;
 use Klein\Exceptions\ResponseAlreadySentException;
 use Klein\Response;
 use Model\FilesStorage\AbstractFilesStorage;
+use Utils\Tools\ContentDisposition;
 
 class KleinResponseFileStream
 {
@@ -43,10 +44,8 @@ class KleinResponseFileStream
         $this->response->body('');
         $this->response->noCache();
 
-        $filename = AbstractFilesStorage::basename_fix($filename);
-
         $this->response->header('Content-type', $mimeType);
-        $this->response->header('Content-Disposition', $disposition . '; filename="' . $filename . '"');
+        $this->response->header('Content-Disposition', ContentDisposition::build(AbstractFilesStorage::basename_fix($filename), $disposition));
         $this->response->header('Expires', "0");
         $this->response->header('Connection', "close");
 
