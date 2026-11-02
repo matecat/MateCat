@@ -311,28 +311,7 @@ class DownloadController extends AbstractDownloadController
                     throw new \RuntimeException("Failed to read output file: $outputPath");
                 }
                 $output_content[$fileID]['document_content'] = $fileContent;
-                $output_content[$fileID]['output_filename'] = $current_filename;
-
-                if ($this->forceXliff) {
-                    //clean the output filename by removing
-                    // the unique hash identifier 55e5739b467109.05614837_.out.Test_English.doc.sdlxliff
-                    $output_content[$fileID]['output_filename'] = $current_filename . ".xlf";
-
-                    if ($fileType['proprietary_short_name'] === 'matecat_converter') {
-                        // Set the XLIFF extension to .xlf
-                        // Internally, Matecat continues using .sdlxliff as default
-                        // extension for the XLIFF behind the projects.
-                        // Changing this behavior requires a huge refactoring that
-                        // it's scheduled for future versions.
-                        // We quickly fixed the behavior from the user standpoint
-                        // using the following line of code, that changes the XLIFF's
-                        // extension just a moment before it is downloaded by the user.
-                        $output_content[$fileID]['output_filename'] = preg_replace("|\\.sdlxliff$|i", ".xlf", $output_content[$fileID]['output_filename'])
-                            ?? $output_content[$fileID]['output_filename'];
-                        $output_content[$fileID]['output_filename'] = preg_replace("#(\\.xlf)+#i", ".xlf", $output_content[$fileID]['output_filename'])
-                            ?? $output_content[$fileID]['output_filename'];
-                    }
-                }
+                $output_content[$fileID]['output_filename'] = $this->outputFilename($current_filename, $fileType['proprietary_short_name']);
 
                 /**
                  * Conversion Enforce
@@ -391,7 +370,7 @@ class DownloadController extends AbstractDownloadController
 
                 $output_content[$fileID]['document_content'] = $this->ifGlobalSightXliffRemoveTargetMarks(
                     $convertResult[$fileID] ['document_content'],
-                    $files_to_be_converted[$fileID]['output_filename'] ?? ''
+                    $files_to_be_converted[$fileID]['output_filename']
                 );
 
                 //in the case of .strings, they are required to be in UTF-16
@@ -472,15 +451,7 @@ class DownloadController extends AbstractDownloadController
                             throw new Exception('Unexpected output content');
                         }
 
-                        $filename = $this->generateFilename($oContent->output_filename);
-                        $pathinfo = pathinfo($filename);
-
-                        if (($pathinfo['extension'] ?? '') == 'zip') {
-                            $this->setFilename($filename);
-                        } else {
-                            $this->setFilename(self::forceOcrExtension($filename . ($this->forceXliff ? ".xlf" : null)));
-                        }
-
+                        $this->setFilename($this->singleFileDownloadName($oContent->output_filename));
                         $this->setOutputContent($oContent);
                     }
 
@@ -616,6 +587,61 @@ class DownloadController extends AbstractDownloadController
         }
 
         return $this->thereIsARemoteFile;
+    }
+
+    /**
+     * Name of a single job file in the download, both standalone and inside a multi-file zip.
+     * With forceXliff this is where the one and only .xlf extension is added.
+     *
+     * @param string $filename the file name as uploaded
+     * @param string|null $proprietaryShortName from XliffProprietaryDetect::getInfo()
+     *
+     * @return string
+     */
+    private function outputFilename(string $filename, ?string $proprietaryShortName): string
+    {
+        if (!$this->forceXliff) {
+            return $filename;
+        }
+
+        //clean the output filename by removing
+        // the unique hash identifier 55e5739b467109.05614837_.out.Test_English.doc.sdlxliff
+        $filename .= ".xlf";
+
+        if ($proprietaryShortName === 'matecat_converter') {
+            // Set the XLIFF extension to .xlf
+            // Internally, Matecat continues using .sdlxliff as default
+            // extension for the XLIFF behind the projects.
+            // Changing this behavior requires a huge refactoring that
+            // it's scheduled for future versions.
+            // We quickly fixed the behavior from the user standpoint
+            // using the following line of code, that changes the XLIFF's
+            // extension just a moment before it is downloaded by the user.
+            $filename = preg_replace("|\\.sdlxliff$|i", ".xlf", $filename) ?? $filename;
+            $filename = preg_replace("#(\\.xlf)+#i", ".xlf", $filename) ?? $filename;
+        }
+
+        return $filename;
+    }
+
+    /**
+     * Download name of a job with a single output file.
+     * The .xlf extension of a forced XLIFF is already part of $outputFilename (see outputFilename()).
+     *
+     * @param string $outputFilename
+     *
+     * @return string
+     * @throws Exception
+     */
+    private function singleFileDownloadName(string $outputFilename): string
+    {
+        $filename = $this->generateFilename($outputFilename);
+
+        if ($this->pathinfoString($filename, PATHINFO_EXTENSION) == 'zip') {
+            return $filename;
+        }
+
+        return self::forceOcrExtension($filename);
     }
 
     /**
