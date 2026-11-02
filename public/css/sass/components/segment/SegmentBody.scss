@@ -1,6 +1,8 @@
 @use '../../tokens/colors';
 @use 'commons/variables';
 
+$footerTabHeight: 36px;
+
 .wrap .outersource {
   display: flex;
 }
@@ -227,7 +229,7 @@ section.readonly .status-container a.status:hover {
   z-index: 1;
   position: absolute;
   width: 8px;
-  height: 100%;
+  height: calc(100% + $footerTabHeight);
   right: 0;
   top: 0;
   overflow: hidden;

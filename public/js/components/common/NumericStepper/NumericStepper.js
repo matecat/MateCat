@@ -8,6 +8,7 @@ import styles from './NumericStepper.module.scss'
 export const NumericStepper = ({
   value,
   onChange,
+  onChangeCommitted = () => false,
   minimumValue,
   maximumValue,
   name,
@@ -33,10 +34,12 @@ export const NumericStepper = ({
   const increase = () => {
     const newValue = value + stepValue
     onChange(newValue <= maximumValue ? newValue : maximumValue)
+    onChangeCommitted(newValue)
   }
   const decrease = () => {
     const newValue = value - stepValue
     onChange(newValue >= minimumValue ? newValue : minimumValue)
+    onChangeCommitted(newValue)
   }
   const onChageInput = ({currentTarget: {value}}) => {
     if (/^\d+$/g.test(value)) {
@@ -48,14 +51,16 @@ export const NumericStepper = ({
   }
 
   const handlerBlur = () => {
-    const newValue = parseInt(value)
-    onChange(
-      newValue > maximumValue
+    const newValueRaw = parseInt(value)
+    const newValue =
+      newValueRaw > maximumValue
         ? maximumValue
-        : newValue < minimumValue
+        : newValueRaw < minimumValue
           ? minimumValue
-          : newValue,
-    )
+          : newValueRaw
+
+    onChange(newValue)
+    onChangeCommitted(newValue)
     setIsInFocus(false)
   }
 
@@ -100,6 +105,7 @@ export const NumericStepper = ({
 NumericStepper.propTypes = {
   value: PropTypes.number.isRequired,
   onChange: PropTypes.func.isRequired,
+  onChangeCommitted: PropTypes.func,
   minimumValue: PropTypes.number.isRequired,
   maximumValue: PropTypes.number.isRequired,
   name: PropTypes.string,

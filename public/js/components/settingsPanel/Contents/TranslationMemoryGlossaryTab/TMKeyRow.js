@@ -1,4 +1,11 @@
-import React, {createRef, Fragment, useContext, useEffect, useRef, useState} from 'react'
+import React, {
+  createRef,
+  Fragment,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {TranslationMemoryGlossaryTabContext} from './TranslationMemoryGlossaryTabContext'
@@ -491,7 +498,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           size={BUTTON_SIZE.ICON_SMALL}
           onClick={() => onChangePenalty(0)}
         >
-          <IconClose />
+          <IconClose size={18} />
         </Button>
       </div>
     ) : (

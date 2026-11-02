@@ -32,7 +32,7 @@ export const Select = ({
   optionsSelectedCopyPlural = () => {},
   resetSelectedOptions = () => {},
   checkSpaceToReverse = true,
-  maxHeightDroplist = 128,
+  maxHeightDroplist = 500,
   isPortalDropdown,
   isActiveOptionOnTop,
   dropdownClassName,
@@ -386,7 +386,7 @@ export const Select = ({
                   resetFunction()
                 }}
               >
-                <IconClose size={7} />
+                <IconClose size={12} />
               </div>
             )}
             <span>{renderSelection()}</span>

@@ -87,20 +87,6 @@
   .find-container
   .find-container-inside
   .find-element.find-dropdown-status
-  .find-dropdown
-  .select {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 5px;
-  padding-left: 9px;
-}
-
-.search-form
-  .find-wrapper
-  .find-container
-  .find-container-inside
-  .find-element.find-dropdown-status
   .find-dropdown.disabled {
   background: unset;
   opacity: 0.5 !important;
@@ -371,19 +357,9 @@
   margin-bottom: 0;
 }
 
-.search-form .select-with-icon__wrapper {
-  height: 40px;
-}
-
-.search-form .select__dropdown-wrapper {
-  min-width: 180px;
-  margin-top: 1px;
-  box-shadow: 0 2px 3px 0 rgba(34, 36, 38, 0.15);
-  border: 1px solid rgba(34, 36, 38, 0.15);
-}
-
 .search-form .custom-dropdown.select__dropdown {
-  background-color: colors.$white;
+  min-width: 120px;
+  width: max-content;
 }
 
 .search-form ul.dropdown__list {

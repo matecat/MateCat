@@ -5,7 +5,6 @@
   .add-mt-container {
     h2 {
       align-self: flex-start;
-      line-height: 40px;
       font-size: variables.$font-size-big;
     }
   }
@@ -62,6 +61,7 @@
       .provider-data {
         display: flex;
         flex-direction: column;
+        gap: 5px;
       }
     }
     .add-provider-message {
@@ -117,9 +117,6 @@
   min-width: 0;
   width: 100%;
   font-size: variables.$font-size-small;
-  &:not(:first-child) {
-    margin-top: 20px;
-  }
   &.checkbox {
     flex-direction: row;
     margin: 6px 0;
@@ -138,7 +135,7 @@
     padding: 3px 5px 3px 9px;
     font-size: variables.$font-size-small !important;
     -moz-border-radius: 2px;
-    border-radius: 2px;
+    border-radius: variables.$border-radius-default;
     border: 1px solid rgba(34, 36, 38, 0.15);
     height: 37px;
     &:hover {
@@ -156,6 +153,7 @@
     flex-direction: row;
     justify-content: flex-end;
     gap: 8px;
+    margin-top: 15px;
   }
 }
 
@@ -189,24 +187,6 @@
     background-color: colors.$white;
   }
 
-  .select-with-label__wrapper {
-    .select {
-      font-size: variables.$font-size-small;
-      padding: 9px 46px 9px 12px;
-      border: 1px solid rgba(34, 36, 38, 0.15);
-      color: black;
-      &:hover {
-        border-color: rgba(34, 36, 38, 0.35);
-      }
-    }
-
-    .select__dropdown-wrapper {
-      min-width: 280px;
-      z-index: 1;
-      margin-top: 1px;
-    }
-  }
-
   //Dropdown overrides
   .add-mt-provider .select-with-icon__wrapper {
     height: 40px;
@@ -229,6 +209,10 @@
       gap: 15px !important;
     }
   }
+
+  .translation-memory-glossary-tab-delete {
+    padding: 10px 40px 10px 30px;
+  }
 }
 .machine-translation-tab {
   .settings-panel-table-rowHeading,
@@ -239,13 +223,6 @@
   }
   .settings-panel-table-rowHeading-column:first-child {
     text-align: center;
-  }
-
-  .settings-panel-table {
-    .select {
-      padding: 2px 8px;
-      height: 24px;
-    }
   }
 
   .active-table-ModernMT,
@@ -266,16 +243,6 @@
       min-height: 40px;
       grid-template-columns: 15% minmax(0, 1fr) 12% 15% 15%;
     }
-  }
-
-  .select__dropdown--is-reversed {
-    top: 100% !important;
-  }
-
-  .select,
-  .dropdown__option--is-active-option,
-  .dropdown__option.dropdown__option--is-active-option:hover {
-    color: black;
   }
 }
 
@@ -687,20 +654,6 @@
     }
   }
 
-  .select {
-    color: colors.$black;
-    border-color: colors.$grey200;
-  }
-
-  .select-with-label__wrapper .select {
-    padding: 9px 46px 9px 12px;
-    height: auto;
-  }
-
-  .select--is-disabled {
-    background-color: colors.$grey75;
-  }
-
   input {
     height: 32px;
     padding: 4px 8px;
@@ -709,14 +662,18 @@
 }
 
 .select-intento-routing-providers {
-  h4 {
+  .dropdown__list {
+    padding-top: 0;
+  }
+
+  h5 {
     text-align: left;
     padding: 5px 10px 5px;
     margin: 0;
 
     position: sticky;
     top: -1px;
-    background: colors.$grey50;
+    background: colors.$white;
 
     &::after {
       display: block;
@@ -730,35 +687,5 @@
         rgba(colors.$grey200, 0) 100%
       );
     }
-  }
-
-  .dropdown__option {
-    padding: 5px 20px;
-  }
-
-  .dropdown__search-bar {
-    height: 34px;
-    margin: 0 12px 12px;
-
-    input:hover,
-    input:focus {
-      background-color: colors.$white !important;
-      border: 1px solid colors.$grey200 !important;
-      outline: unset !important;
-    }
-  }
-
-  .dropdown__search-bar-input {
-    width: 100%;
-    padding: 6px 8px;
-    background-color: colors.$white;
-    font-size: variables.$font-size-xsmall;
-    border-radius: variables.$border-radius-default;
-    border: 1px solid colors.$grey200 !important;
-  }
-
-  .custom-dropdown {
-    margin-top: 0;
-    padding-top: 12px;
   }
 }

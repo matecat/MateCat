@@ -87,11 +87,9 @@ export const AdvancedSettings = () => {
                 {label}
               </div>
               <div className="translation-memory-glossary-pretranslate-status">
-                <span className="translation-memory-glossary-pretranslate-status-label">
-                  State in editor
-                </span>
                 <Select
                   isPortalDropdown={true}
+                  label="State in editor"
                   name={`pretranslate-${key}-status`}
                   options={PRETRANSLATE_STATUS_OPTIONS}
                   maxHeightDroplist={260}

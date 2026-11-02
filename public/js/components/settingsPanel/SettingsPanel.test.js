@@ -176,6 +176,27 @@ describe('rendering', () => {
   })
 })
 
+describe('tabOpen', () => {
+  test('renders the tab requested via tabOpen on initial mount, not the default tm tab', () => {
+    render(<SettingsPanel {...baseProps()} tabOpen="mt" />)
+
+    expect(screen.getByTestId('mt-tab')).toBeInTheDocument()
+    expect(screen.queryByTestId('tm-tab')).not.toBeInTheDocument()
+  })
+
+  test('switches the active tab when tabOpen changes on an already-mounted panel', () => {
+    const props = baseProps()
+    const {rerender} = render(<SettingsPanel {...props} />)
+
+    expect(screen.getByTestId('tm-tab')).toBeInTheDocument()
+
+    rerender(<SettingsPanel {...props} tabOpen="qf" />)
+
+    expect(screen.getByTestId('qf-tab')).toBeInTheDocument()
+    expect(screen.queryByTestId('tm-tab')).not.toBeInTheDocument()
+  })
+})
+
 describe('closing interactions', () => {
   test('clicking the overlay hides the panel and eventually calls onClose on transition end', () => {
     const props = baseProps()

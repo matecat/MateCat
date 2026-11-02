@@ -48,6 +48,8 @@
 .select-with-label__wrapper label {
   width: 100%;
   display: flex;
+  font-size: variables.$font-size-small;
+  color: colors.$grey700;
   justify-content: space-between;
   align-items: center;
 }
@@ -56,16 +58,17 @@
   display: flex;
   align-items: center;
   margin: 0;
-  border: 1px solid colors.$grey300;
+  border: 1px solid colors.$grey200;
   border-radius: variables.$border-radius-default;
-  padding: 4px 8px;
+  padding: 8px 28px 8px 12px;
   outline: none;
   font-size: variables.$font-size-small;
-  //line-height: 16px;
+  line-height: variables.$line-height-small;
+  min-height: 40px;
   width: 100%;
   background-color: colors.$white;
   white-space: nowrap;
-  color: colors.$grey700;
+  color: colors.$grey1300;
   transition: box-shadow 0.3s cubic-bezier(0.77, 0, 0.175, 1);
 
   &::placeholder {
@@ -81,8 +84,8 @@
     align-items: center;
     justify-content: center;
     background-color: colors.$grey100;
-    width: 14px;
-    height: 14px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
 
     &:hover {
@@ -93,6 +96,10 @@
     overflow: hidden;
     text-overflow: ellipsis;
     display: block;
+  }
+
+  &:not(.select--is-disabled):hover {
+    border-color: colors.$grey400;
   }
 }
 
@@ -142,8 +149,6 @@
 }
 
 .select {
-  padding-right: 25px;
-
   &:has(.icon-reset) {
     padding-right: 50px;
   }
@@ -177,7 +182,7 @@ label
 
 // Disabled state
 .select--is-disabled {
-  //background-color: colors.$grey700;
+  background-color: colors.$grey75;
   box-shadow: none;
   color: colors.$grey400;
   cursor: not-allowed;

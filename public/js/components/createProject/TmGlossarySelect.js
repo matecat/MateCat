@@ -11,6 +11,8 @@ import {ApplicationWrapperContext} from '../common/ApplicationWrapper/Applicatio
 import HelpCircle from '../../../img/icons/HelpCircle'
 import IconAdd from '../../../img/icons/IconAdd'
 import {SELECT_HEIGHT} from '../../constants/Constants'
+import {Button, BUTTON_MODE, BUTTON_TYPE} from '../common/Button/Button'
+import {SETTINGS_PANEL_TABS} from '../settingsPanel'
 
 export const TmGlossarySelect = () => {
   const {tmKeys, setOpenSettings, modifyingCurrentTemplate, projectTemplates} =
@@ -83,16 +85,22 @@ export const TmGlossarySelect = () => {
                   You have no private resources
                 </span>
               )}
-              <button
-                className="button-top-of-list"
-                onClick={() => {
-                  setOpenSettings({isOpen: true})
-                  onClose()
-                }}
-              >
-                CREATE RESOURCE
-                <IconAdd />
-              </button>
+              <div className="tm-tb-select-button-create-resource">
+                <Button
+                  type={BUTTON_TYPE.PRIMARY}
+                  mode={BUTTON_MODE.GHOST}
+                  onClick={() => {
+                    setOpenSettings({
+                      isOpen: true,
+                      tab: SETTINGS_PANEL_TABS.translationMemoryGlossary,
+                    })
+                    onClose()
+                  }}
+                >
+                  <IconAdd size={22} />
+                  CREATE RESOURCE
+                </Button>
+              </div>
             </>
           ),
         }),

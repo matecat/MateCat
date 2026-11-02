@@ -1,26 +1,23 @@
 @use '../../tokens/colors';
 @use '../../commons/variables';
 
+$padding-top-and-bottom: 8px;
+
 // General dropdown
 .custom-dropdown {
   position: relative;
-  margin-top: 0px;
-  border-radius: 4px;
-  box-shadow: 0 0 16px rgba(colors.$grey700, 0.4);
+  margin-top: 10px;
+  border-radius: variables.$border-radius-default;
+  box-shadow: 0 5px 20px rgba(102, 102, 102, 0.4);
   width: 100%;
   height: auto;
-  background-color: colors.$grey50;
+  padding: $padding-top-and-bottom 0;
+  background-color: colors.$white;
+  font-size: variables.$font-size-small;
+
+  transition: opacity 0.2s ease-in;
+  opacity: 0;
 }
-/*.custom-dropdown::before {
-  content: '';
-  display: block;
-  position: absolute;
-  top: -6px;
-  left: 50%;
-  margin-left: -8px;
-  width: 0;
-  height: 0;
-}*/
 .custom-dropdown::before {
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
@@ -33,7 +30,8 @@
 
 // Reversed state
 .select__dropdown--is-reversed .custom-dropdown {
-  margin-top: 0;
+  margin-top: calc((10px + $padding-top-and-bottom) * -1);
+  box-shadow: 0 -5px 20px rgba(102, 102, 102, 0.4);
 }
 
 .select__dropdown--is-reversed .custom-dropdown::before {
@@ -49,14 +47,13 @@
 // Search bar
 .dropdown__search-bar {
   position: relative;
-  background-color: colors.$grey50;
   box-shadow: none;
-  padding: 0;
   border-radius: variables.$border-radius-default;
+  margin: 0 8px 15px;
 
-  input + svg {
+  svg {
     position: absolute;
-    right: 12px;
+    left: 12px;
     top: 50%;
     transform: translateY(-50%);
     color: colors.$grey600;
@@ -67,19 +64,30 @@
     color: colors.$white;
   }
 }
-.dropdown__search-bar input,
-.dropdown__search-bar input:hover,
-.dropdown__search-bar input:focus {
-  background-color: colors.$grey50;
-  border: none !important;
-  box-shadow: none;
+
+.dropdown__search-bar input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 8px 8px 8px 40px;
+  background-color: colors.$grey75;
+  outline: none;
+  border: none;
+  border-radius: variables.$border-radius-default;
+  &:hover {
+    box-shadow: inset 0 0 0 1px colors.$grey200;
+  }
+  &:focus,
+  &:focus-visible {
+    box-shadow: inset 0 0 0 1px colors.$grey400;
+    outline: none;
+  }
 }
 .dropdown__search-bar button {
   color: colors.$white;
 }
 
 .dropdown__search-bar-input::placeholder {
-  color: colors.$grey600;
+  color: colors.$grey400;
 }
 
 .dropdown__search-bar-input--highlighted {
@@ -165,14 +173,15 @@
 }
 
 .container__dropdown__list {
-  transition: height 0.2s ease;
+  transition: height 0.2s ease-out;
   height: 0;
-  overflow: hidden;
+  overflow: clip;
 }
 
 // Options list
 .dropdown__list {
   margin: 0;
+  padding: 0 8px;
   overflow-y: auto;
 }
 
@@ -181,12 +190,16 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 0 0 1px;
-  border-radius: 2px;
-  padding: 4px 8px;
+  border-radius: variables.$border-radius-default;
+  padding: 6px 12px;
   background-color: transparent;
   cursor: pointer;
   color: colors.$black;
+
+  &:not(:last-child) {
+    margin: 0 0 3px;
+  }
+
   & span {
     white-space: nowrap;
     overflow: hidden;
@@ -219,13 +232,14 @@
 
 .dropdown__option--is-highlighted-option,
 .dropdown__option:hover {
-  background-color: colors.$grey100;
+  background-color: colors.$grey50;
 }
 
 .dropdown__option--is-active-option,
 .dropdown__option.dropdown__option--is-active-option:hover {
-  color: colors.$grey700;
-  background-color: colors.$grey200;
+  color: colors.$black;
+  font-weight: bold;
+  background-color: colors.$grey100;
 
   svg {
     opacity: 1;
@@ -235,8 +249,7 @@
 
 .dropdown__option--is-no-results-found,
 .dropdown__option.dropdown__option--is-no-results-found:hover {
-  color: colors.$grey300;
-  background-color: colors.$grey50;
+  color: colors.$grey400;
   cursor: default;
 
   svg {

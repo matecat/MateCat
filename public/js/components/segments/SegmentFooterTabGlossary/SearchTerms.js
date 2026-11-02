@@ -85,7 +85,7 @@ export const SearchTerms = () => {
           }`}
           onClick={() => setSearchTerm('')}
         >
-          <IconClose />
+          <IconClose size={18} />
         </div>
         <SegmentedControl
           name="search"
@@ -109,7 +109,7 @@ export const SearchTerms = () => {
           onClick={openForm}
           disabled={isLoading}
         >
-          <IconAdd size={12} />
+          <IconAdd size={14} />
           Add term
         </Button>
       </div>
