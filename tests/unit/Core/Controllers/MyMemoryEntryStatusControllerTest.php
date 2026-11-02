@@ -8,6 +8,9 @@ use Exception;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
+use Model\DataAccess\IDatabase;
+use Model\Engines\EngineDAO;
+use Model\Engines\Structs\EngineStruct;
 use Model\FeaturesBase\FeatureSet;
 use PHPUnit\Framework\MockObject\Exception as MockObjectException;
 use ReflectionClass;
@@ -158,6 +161,51 @@ class MyMemoryEntryStatusControllerTest extends AbstractTest
 
         self::assertIsArray($decoded);
         self::assertSame('boom', $decoded['error']);
+    }
+
+    /**
+     * An engine record without an entry status url used to make entryStatus() return the
+     * "Bad method call" array: the TypeError escaped the controller's catch and the global
+     * handler answered with the raw PHP message.
+     *
+     * @throws ReflectionException
+     */
+    public function testStatusReturns500WithReadableErrorWhenEntryStatusUrlIsNotConfigured(): void
+    {
+        $engineStruct = EngineStruct::getStruct();
+        $engineStruct->id = 1;
+        $engineStruct = (new EngineDAO(obtainTestDatabase()))->read($engineStruct)[0];
+        $engineStruct->others = [];
+
+        $engine = @$this->getMockBuilder(MyMemory::class)
+            ->setConstructorArgs([$engineStruct, $this->createStub(IDatabase::class)])
+            ->onlyMethods(['_call'])
+            ->getMock();
+        $engine->expects($this->never())->method('_call');
+
+        $controller = new TestableMyMemoryEntryStatusController();
+        $controller->engineOverride = $engine;
+
+        $this->setProp($controller, 'request', new Request(['uuid' => 'abc-123']));
+        $this->setProp($controller, 'response', new Response());
+        $this->setProp($controller, 'database', obtainTestDatabase());
+        $this->setProp($controller, 'featureSet', new FeatureSet(obtainTestDatabase()));
+
+        ob_start();
+        try {
+            $controller->status();
+        } finally {
+            ob_end_clean();
+        }
+
+        $response = $controller->getResponse();
+
+        self::assertSame(500, $response->code());
+
+        $decoded = json_decode($response->body(), true);
+
+        self::assertIsArray($decoded);
+        self::assertSame('MyMemory entry status url is not configured', $decoded['error']);
     }
 
     /**
