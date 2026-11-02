@@ -570,14 +570,11 @@ class GetSegmentsControllerTest extends AbstractTest
     }
 
     /**
-     * getAllInRange() defaults to a 24h cache, but a concurrent read that started before a
-     * disable/enable write commits can still cache a stale result after that write's eviction
-     * runs, silently re-poisoning the cache for up to 24h. The controller must always pass
-     * `ttl = 0` for this specific read so a future refactor can't silently drop it and
-     * reintroduce the race.
+     * The range read is cached per project and evicted by every write in that project, so the
+     * controller names the project and leaves the DAO's TTL alone.
      */
     #[Test]
-    public function segments_reads_segment_metadata_with_ttl_zero_to_avoid_the_stale_cache_race(): void
+    public function segments_reads_segment_metadata_through_the_project_scoped_cache(): void
     {
         $this->stubRequestParams([
             'jid'      => '10',
@@ -622,7 +619,7 @@ class GetSegmentsControllerTest extends AbstractTest
         $segmentMetaDao = $this->createMock(SegmentMetadataDao::class);
         $segmentMetaDao->expects(self::once())
             ->method('getAllInRange')
-            ->with(55, 55, 0)
+            ->with(1, 55, 55, 86400)
             ->willReturn([]);
         $this->controller->fakeSegmentMetadataDao = $segmentMetaDao;
 

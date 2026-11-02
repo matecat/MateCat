@@ -521,7 +521,7 @@ class SegmentAnalysisControllerTest extends AbstractTest
         $segment = new ShapelessConcreteStruct();
         $segment->id = self::TEST_SEGMENT_1;
 
-        $result = $this->invokePrivate('getIssuesNotesAndIdRequests', [[$segment]]);
+        $result = $this->invokePrivate('getIssuesNotesAndIdRequests', [[$segment], self::TEST_PROJECT_ID]);
 
         $this->assertArrayHasKey('notesAggregate', $result);
         $this->assertArrayHasKey('issuesAggregate', $result);
@@ -715,7 +715,7 @@ class SegmentAnalysisControllerTest extends AbstractTest
             $segment = new ShapelessConcreteStruct();
             $segment->id = self::TEST_NOTE_SEGMENT;
 
-            $result = $this->invokePrivate('getIssuesNotesAndIdRequests', [[$segment]]);
+            $result = $this->invokePrivate('getIssuesNotesAndIdRequests', [[$segment], self::TEST_PROJECT_ID]);
 
             $this->assertArrayHasKey('notesAggregate', $result);
             $this->assertArrayHasKey(self::TEST_NOTE_SEGMENT, $result['notesAggregate']);
@@ -740,7 +740,7 @@ class SegmentAnalysisControllerTest extends AbstractTest
             $segment = new ShapelessConcreteStruct();
             $segment->id = self::TEST_META_SEGMENT;
 
-            $result = $this->invokePrivate('getIssuesNotesAndIdRequests', [[$segment]]);
+            $result = $this->invokePrivate('getIssuesNotesAndIdRequests', [[$segment], self::TEST_PROJECT_ID]);
 
             $this->assertArrayHasKey('idRequestsAggregate', $result);
             $this->assertArrayHasKey(self::TEST_META_SEGMENT, $result['idRequestsAggregate']);
@@ -780,7 +780,7 @@ class SegmentAnalysisControllerTest extends AbstractTest
             $segment = new ShapelessConcreteStruct();
             $segment->id = self::TEST_ISSUE_SEGMENT;
 
-            $result = $this->invokePrivate('getIssuesNotesAndIdRequests', [[$segment]]);
+            $result = $this->invokePrivate('getIssuesNotesAndIdRequests', [[$segment], self::TEST_PROJECT_ID]);
 
             $this->assertArrayHasKey('issuesAggregate', $result);
             $this->assertArrayHasKey(self::TEST_JOB_ID, $result['issuesAggregate']);

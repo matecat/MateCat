@@ -80,7 +80,7 @@ class CancelRequestController extends KleinController
         $job = $this->performChecks($id_job, $password, $id_segment);
 
         if ($this->segmentDisabledService->isDisabled($id_segment)) {
-            $this->segmentDisabledService->enable($id_segment);
+            $this->segmentDisabledService->enable($id_segment, $job->id_project);
             $this->publishSegmentStateChange($job, $id_job, $id_segment, false);
         }
 
@@ -114,7 +114,7 @@ class CancelRequestController extends KleinController
         $job = $this->performChecks($id_job, $password, $id_segment);
 
         if (!$this->segmentDisabledService->isDisabled($id_segment)) {
-            $this->segmentDisabledService->disable($id_segment);
+            $this->segmentDisabledService->disable($id_segment, $job->id_project);
             $this->publishSegmentStateChange($job, $id_job, $id_segment, true);
         }
 

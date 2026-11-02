@@ -14,7 +14,7 @@ class SegmentMetadataDao extends AbstractDao
     const string _query_get_all = "SELECT * FROM " . self::TABLE . " WHERE id_segment = ? ";
     const string _query_get = "SELECT * FROM " . self::TABLE . " WHERE id_segment = ? and meta_key = ? ";
     const string _keymap_get_by_segment_ids = "Model\\Segments\\SegmentMetadataDao::getBySegmentIds-";
-    const string _keymap_get_all_in_range = "Model\\Segments\\SegmentMetadataDao::getAllInRange";
+    const string _keymap_get_all_in_range = "Model\\Segments\\SegmentMetadataDao::getAllInRange-";
 
 /**
      * @throws ReflectionException
@@ -34,12 +34,14 @@ class SegmentMetadataDao extends AbstractDao
     }
 
     /**
+     * Cached under one hash per key and project, so a write evicts only its own project's reads.
+     *
      * @param int[] $ids
      * @return SegmentMetadataStruct[]
      * @throws ReflectionException
      * @throws Exception
      */
-    public function getBySegmentIds(array $ids, string $key, int $ttl = 86400): array
+    public function getBySegmentIds(int $id_project, array $ids, string $key, int $ttl = 86400): array
     {
         if (empty($ids)) {
             return [];
@@ -52,7 +54,7 @@ class SegmentMetadataDao extends AbstractDao
             $stmt,
             SegmentMetadataStruct::class,
             [...array_values($ids), $key],
-            self::_keymap_get_by_segment_ids . $key
+            self::_keymap_get_by_segment_ids . $key . '-' . $id_project
         );
     }
 
@@ -79,12 +81,12 @@ class SegmentMetadataDao extends AbstractDao
      * @throws TypeError
      * @throws Exception
      */
-    public function delete(int $id_segment, string $key): void
+    public function delete(int $id_segment, string $key, int $id_project): void
     {
         $stmt = $this->database->getConnection()->prepare("DELETE FROM segment_metadata WHERE id_segment = ? AND meta_key = ?");
         $stmt->execute([$id_segment, $key]);
 
-        $this->destroyCache($this->addressOf($id_segment, $key));
+        $this->destroyCache($this->addressOf($id_segment, $key), $id_project);
     }
 
     /**
@@ -93,7 +95,7 @@ class SegmentMetadataDao extends AbstractDao
      * @throws TypeError
      * @throws Exception
      */
-    public function save(SegmentMetadataStruct $metadataStruct): void
+    public function save(SegmentMetadataStruct $metadataStruct, int $id_project): void
     {
         $stmt = $this->database->getConnection()->prepare(
             "INSERT INTO segment_metadata " .
@@ -107,7 +109,7 @@ class SegmentMetadataDao extends AbstractDao
             'value' => $metadataStruct->meta_value,
         ]);
 
-        $this->destroyCache($metadataStruct);
+        $this->destroyCache($metadataStruct, $id_project);
     }
 
     /**
@@ -116,7 +118,7 @@ class SegmentMetadataDao extends AbstractDao
      * @throws TypeError
      * @throws Exception
      */
-    public function upsert(int $id_segment, string $key, string $value): void
+    public function upsert(int $id_segment, string $key, string $value, int $id_project): void
     {
         $stmt = $this->database->getConnection()->prepare(
             "INSERT INTO segment_metadata " .
@@ -131,7 +133,7 @@ class SegmentMetadataDao extends AbstractDao
             'value' => $value,
         ]);
 
-        $this->destroyCache($this->addressOf($id_segment, $key));
+        $this->destroyCache($this->addressOf($id_segment, $key), $id_project);
     }
 
     /**
@@ -141,12 +143,16 @@ class SegmentMetadataDao extends AbstractDao
      * The struct has to name the segment and the key. Every write in this DAO goes through here, so
      * a caller never holds a list of evictions it can be one short of.
      *
+     * Unlike other doors, this one also takes the project: the set and range reads are cached per
+     * project, and a metadata row carries no project column to derive it from. Looking it up here
+     * would cost a join on every write, and every writer already holds the project.
+     *
      * @throws ReflectionException
      * @throws PDOException
      * @throws TypeError when the struct names no segment or no key
      * @throws Exception
      */
-    public function destroyCache(SegmentMetadataStruct $metadata): void
+    public function destroyCache(SegmentMetadataStruct $metadata, int $id_project): void
     {
         if (!isset($metadata->id_segment)) {
             throw new TypeError('A segment metadata cache eviction needs the id of the segment.');
@@ -158,8 +164,8 @@ class SegmentMetadataDao extends AbstractDao
 
         $this->destroyCacheAll((int)$metadata->id_segment);
         $this->destroyCacheKey((int)$metadata->id_segment, $metadata->meta_key);
-        $this->destroyCacheBySegmentIds($metadata->meta_key);
-        $this->destroyCacheAllInRange();
+        $this->destroyCacheBySegmentIds($metadata->meta_key, $id_project);
+        $this->destroyCacheAllInRange($id_project);
     }
 
     /** The struct a write holds only as a pair of values. */
@@ -198,9 +204,9 @@ class SegmentMetadataDao extends AbstractDao
      * @throws ReflectionException
      * @throws Exception
      */
-    private function destroyCacheBySegmentIds(string $key): bool
+    private function destroyCacheBySegmentIds(string $key, int $id_project): bool
     {
-        $keyMap = self::_keymap_get_by_segment_ids . $key;
+        $keyMap = self::_keymap_get_by_segment_ids . $key . '-' . $id_project;
 
         return $this->_deleteCacheByKey($keyMap, false);
     }
@@ -209,21 +215,23 @@ class SegmentMetadataDao extends AbstractDao
      * @throws ReflectionException
      * @throws Exception
      */
-    private function destroyCacheAllInRange(): void
+    private function destroyCacheAllInRange(int $id_project): bool
     {
-        $this->_deleteCacheByKey(self::_keymap_get_all_in_range, false);
+        return $this->_deleteCacheByKey(self::_keymap_get_all_in_range . $id_project, false);
     }
 
     /**
-     * The default TTL is not actually in effect in production: its only current caller,
-     * `GetSegmentsController`, deliberately passes `ttl = 0` to avoid a cache-aside race where a
-     * concurrent read can re-cache a stale result after a disable/enable write's eviction runs.
+     * Cached under one hash per project, which every write in that project deletes.
+     *
+     * The query does not filter by project: segment ids are reserved file by file, so a range can
+     * hold another project's segments. Those rows are not evicted by their own project's writes and
+     * may be stale; a caller uses only the ids of its own segments.
      *
      * @return array<int, SegmentMetadataCollection>
      * @throws ReflectionException
      * @throws Exception
      */
-    public function getAllInRange(int $startSid, int $stopSid, int $ttl = 86400): array
+    public function getAllInRange(int $id_project, int $startSid, int $stopSid, int $ttl = 86400): array
     {
         $conn = $this->getDatabaseHandler();
         $stmt = $conn->getConnection()->prepare(
@@ -235,7 +243,7 @@ class SegmentMetadataDao extends AbstractDao
             $stmt,
             SegmentMetadataStruct::class,
             [$startSid, $stopSid],
-            self::_keymap_get_all_in_range
+            self::_keymap_get_all_in_range . $id_project
         );
 
         $grouped = [];
