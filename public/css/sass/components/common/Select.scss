@@ -202,7 +202,10 @@ $select-height: 40px;
 
 .select__dropdown-wrapper.select-with-label__wrapper-is-portal.select__dropdown--is-reversed {
   top: auto;
-  // `bottom` is computed and set inline by Select.js's updatePosition()
+  // `bottom` is computed and set inline by Select.js's updatePosition(),
+  // in the same document-relative space as the non-reversed translate —
+  // this is just a sane default for the instant before that first runs.
+  bottom: 0;
 }
 .select,
 .select__dropdown-wrapper {

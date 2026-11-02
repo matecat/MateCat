@@ -1,12 +1,13 @@
 @use '../../tokens/colors';
 @use '../../commons/variables';
 
+$dropdown-to-bottom-margin: 10px;
 $padding-top-and-bottom: 8px;
 
 // General dropdown
 .custom-dropdown {
   position: relative;
-  margin-top: 10px;
+  margin-top: $dropdown-to-bottom-margin;
   border-radius: variables.$border-radius-default;
   box-shadow: 0 5px 20px rgba(102, 102, 102, 0.4);
   width: 100%;
@@ -30,7 +31,7 @@ $padding-top-and-bottom: 8px;
 
 // Reversed state
 .select__dropdown--is-reversed .custom-dropdown {
-  margin-top: calc((10px + $padding-top-and-bottom) * -1);
+  margin-top: calc(($dropdown-to-bottom-margin + $padding-top-and-bottom) * -1);
   box-shadow: 0 -5px 20px rgba(102, 102, 102, 0.4);
 }
 

@@ -426,9 +426,10 @@ describe('Select', () => {
         elementRects['select-with-label__wrapper'] = {
           x: 10,
           y: 20,
+          left: 10,
+          top: 20,
           width: 200,
           height: 50,
-          top: 20,
           bottom: 70,
         }
 
@@ -442,29 +443,57 @@ describe('Select', () => {
         })
       })
 
-      test('anchors the portal wrapper to the bottom via a horizontal translate when reversed', () => {
+      test('anchors the portal wrapper to the trigger via a document-relative bottom when reversed', () => {
+        // rect is viewport-relative, as if the page were scrolled 300px:
+        // the trigger's real document position is y=700 (rect.y=400 +
+        // scrollY=300), same as the unscrolled case below — the computed
+        // bottom must come out identical regardless of scroll position,
+        // which is exactly what a document-relative (not viewport-relative)
+        // formula guarantees.
         elementRects['select-with-label__wrapper'] = {
           x: 10,
-          y: 700,
+          y: 400,
+          left: 10,
+          top: 400,
           width: 200,
           height: 60,
-          top: 700,
-          bottom: 760,
+          bottom: 460,
         }
-        jest
-          .spyOn(document.documentElement, 'scrollHeight', 'get')
-          .mockReturnValue(1000)
+        const originalInnerHeight = window.innerHeight
+        const originalScrollY = window.scrollY
+        Object.defineProperty(window, 'innerHeight', {
+          configurable: true,
+          value: 900,
+        })
+        Object.defineProperty(window, 'scrollY', {
+          configurable: true,
+          value: 300,
+        })
 
         const {container} = renderSelect({isPortalDropdown: true})
         clickTrigger(container)
 
-        // reversed (insufficient space below); bottom is anchored to the
-        // trigger via CSS, not a predicted-height translate:
-        // bottom = scrollHeight(1000) - y(700) = 300
+        // reversed (insufficient space below); the containing block (no
+        // positioned ancestor) is sized to the viewport but anchored at the
+        // document's own top-left, not the current scroll position, so
+        // `bottom` has to be expressed in the same document-relative space
+        // as `y` (scrollY + rect.top), plus the same trigger-to-dropdown
+        // gap the non-reversed case gets from CSS:
+        // y = rect.y(400) + scrollY(300) = 700
+        // bottom = innerHeight(900) - y(700) + gap(10) = 210
         expect(getDropdownWrapper(container)).toHaveStyle({
           transform: 'translateX(10px)',
           top: 'auto',
-          bottom: '300px',
+          bottom: '210px',
+        })
+
+        Object.defineProperty(window, 'innerHeight', {
+          configurable: true,
+          value: originalInnerHeight,
+        })
+        Object.defineProperty(window, 'scrollY', {
+          configurable: true,
+          value: originalScrollY,
         })
       })
     })

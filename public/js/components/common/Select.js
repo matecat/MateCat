@@ -189,6 +189,11 @@ export const Select = ({
 
     let rafId
 
+    // Matches Dropdown.scss's $dropdown-to-bottom-margin — the same gap the
+    // non-reversed (opens-below) case gets between the trigger and the
+    // dropdown.
+    const DROPDOWN_TO_TRIGGER_GAP = 10
+
     const updatePosition = () => {
       const rect = wrapperRef.current?.getBoundingClientRect()
 
@@ -198,13 +203,19 @@ export const Select = ({
         const style = wrapperDropDownRef.current.style
 
         if (isDropdownReversed) {
-          // Anchor the bottom edge to the trigger via CSS `bottom`, same as
-          // the non-portal wrapper's `bottom: 100%`, so the browser keeps it
-          // pinned there through the whole height transition instead of
-          // growing down from a one-shot predicted-height translate.
+          // `position: absolute` has no positioned ancestor here (the portal
+          // root is a plain, unpositioned div), so its containing block is
+          // the initial containing block — sized to the *viewport*, not the
+          // document, and anchored at the document's own top-left corner
+          // (not at the current scroll position). `bottom` has to be
+          // expressed in that same document-relative space: how far the
+          // trigger's document-relative top (y) sits above the containing
+          // block's document-relative bottom edge (window.innerHeight).
           style.transform = `translateX(${x}px)`
           style.top = 'auto'
-          style.bottom = `${document.documentElement.scrollHeight - y}px`
+          style.bottom = `${
+            window.innerHeight - y + DROPDOWN_TO_TRIGGER_GAP
+          }px`
         } else {
           style.transform = `translate(${x}px,${y + rect.height}px)`
           style.top = ''
