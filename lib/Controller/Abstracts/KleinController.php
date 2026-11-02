@@ -265,7 +265,7 @@ abstract class KleinController implements IController
     /**
      * @return array{id_segment: string, split_num: string|null}
      */
-    protected function parseIdSegment(string $id_segment): array
+    public function parseIdSegment(string $id_segment): array
     {
         $parsedSegment = explode("-", $id_segment);
 

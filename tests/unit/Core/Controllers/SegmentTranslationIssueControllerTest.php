@@ -31,12 +31,16 @@ class TestableSegmentTranslationIssueController extends SegmentTranslationIssueC
     /** @var TranslationIssueModel&MockObject|null */
     public ?TranslationIssueModel $mockModel = null;
 
+    public ?EntryStruct $capturedIssue = null;
+
     public function __construct()
     {
     }
 
     protected function _getSegmentTranslationIssueModel(int $id_job, string $password, EntryStruct $issue): TranslationIssueModel
     {
+        $this->capturedIssue = $issue;
+
         if ($this->mockModel !== null) {
             return $this->mockModel;
         }
@@ -745,6 +749,44 @@ class SegmentTranslationIssueControllerTest extends AbstractTest
             }));
 
         $this->controller->create();
+    }
+
+    #[Test]
+    public function createFilesAnIssueOnASplitPartAgainstTheWholeSegment(): void
+    {
+        // The validator has already resolved "1-2" to segment 1.
+        $this->setValidator();
+        $this->setRequestParams([
+            'id_segment' => '1-2',
+            'id_job' => self::JOB_ID,
+            'id_category' => 1,
+            'severity' => 'Minor',
+            'password' => self::REVIEW_PASSWORD,
+        ]);
+
+        $savedStruct = new EntryStruct();
+        $savedStruct->id = 990098;
+        $savedStruct->id_segment = 1;
+        $savedStruct->id_job = self::JOB_ID;
+        $savedStruct->id_category = 1;
+        $savedStruct->severity = 'Minor';
+        $savedStruct->source_page = 1;
+        $savedStruct->translation_version = 1;
+        $savedStruct->start_node = 0;
+        $savedStruct->start_offset = 0;
+        $savedStruct->end_node = 0;
+        $savedStruct->end_offset = 0;
+        $savedStruct->is_full_segment = false;
+        $savedStruct->penalty_points = 1;
+
+        $modelMock = $this->createMock(TranslationIssueModel::class);
+        $modelMock->method('save')->willReturn($savedStruct);
+        $this->controller->mockModel = $modelMock;
+
+        $this->controller->create();
+
+        $this->assertNotNull($this->controller->capturedIssue);
+        $this->assertSame(1, $this->controller->capturedIssue->id_segment);
     }
 
     // ─── update() full path ──────────────────────────────────────

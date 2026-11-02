@@ -83,7 +83,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         $this->validator->ensureSegmentRevisionMatchesCredentialPhase();
 
         $data = [
-            'id_segment' => $this->request->param( 'id_segment' ),
+            'id_segment' => $this->validator->translation->id_segment,
             'id_job' => $this->request->param( 'id_job' ),
             'id_category' => $this->request->param( 'id_category' ),
             'severity' => $this->request->param( 'severity' ),
@@ -136,7 +136,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
 
         $data = [
                 'id_issue'            => $this->request->param( 'id_issue' ),
-                'id_segment'          => $this->request->param( 'id_segment' ),
+                'id_segment'          => $this->validator->translation->id_segment,
                 'id_job'              => $this->request->param( 'id_job' ),
                 'id_category'         => $this->request->param( 'id_category' ),
                 'severity'            => $this->request->param( 'severity' ),

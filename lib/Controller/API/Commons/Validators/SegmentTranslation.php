@@ -26,7 +26,15 @@ class SegmentTranslation extends Base
      */
     protected function _validate(): void
     {
-        $this->translation = (new SegmentTranslationDao($this->controller->getDatabase()))->findBySegmentAndJob($this->request->param('id_segment'), $this->request->param('id_job'));
+        // A split segment reaches us as "<id_segment>-<part>". Its parts share one translation row and
+        // issues cannot be attached to a single part, so the part number is dropped.
+        $idSegment = $this->controller->parseIdSegment((string)$this->request->param('id_segment'))['id_segment'];
+
+        if (!ctype_digit($idSegment)) {
+            throw new NotFoundException('Translation not found');
+        }
+
+        $this->translation = (new SegmentTranslationDao($this->controller->getDatabase()))->findBySegmentAndJob((int)$idSegment, $this->request->param('id_job'));
         if (!$this->translation) {
             throw new NotFoundException('Translation not found');
         }

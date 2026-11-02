@@ -150,6 +150,20 @@ class SegmentTranslationTest extends AbstractTest
         $this->assertNull($validator->getTranslation());
     }
 
+    #[Test]
+    public function resolves_a_split_part_to_its_whole_segment(): void
+    {
+        $this->setRequest([
+            'id_segment' => self::ID_SEGMENT . '-2',
+            'id_job'     => (string) self::ID_JOB,
+        ]);
+
+        $validator = new SegmentTranslation($this->controller);
+        $validator->validate();
+
+        $this->assertSame(self::ID_SEGMENT, $validator->translation->id_segment);
+    }
+
     // ── failure path ─────────────────────────────────────────────────────────
 
     #[Test]
@@ -194,6 +208,22 @@ class SegmentTranslationTest extends AbstractTest
         $validator = new SegmentTranslation($this->controller);
 
         $this->expectException(NotFoundException::class);
+
+        $validator->validate();
+    }
+
+    #[Test]
+    public function throws_not_found_when_segment_id_is_not_numeric(): void
+    {
+        $this->setRequest([
+            'id_segment' => 'abc',
+            'id_job'     => (string) self::ID_JOB,
+        ]);
+
+        $validator = new SegmentTranslation($this->controller);
+
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage('Translation not found');
 
         $validator->validate();
     }

@@ -3,6 +3,7 @@
 namespace Matecat\Core\Controllers;
 
 use Controller\API\Commons\Validators\JobPasswordValidator;
+use Controller\API\Commons\Validators\SegmentTranslation;
 use Controller\API\V2\ReviseTranslationIssuesController;
 use Klein\Request;
 use Klein\Response;
@@ -108,6 +109,16 @@ class ReviseTranslationIssuesControllerTest extends AbstractTest
         $this->reflector->getProperty('request')->setValue($this->controller, $this->requestStub);
         // index() also reads $this->params['id_job'] / ['password'] (merged at dispatch time)
         $this->controller->params = $params;
+
+        // index() reads the segment from the SegmentTranslation validator, which the stubbed
+        // registerValidators() never builds. A lookup that finds nothing leaves its translation null,
+        // as a failed validation would.
+        $validator = new SegmentTranslation($this->controller);
+        try {
+            $validator->validate();
+        } catch (NotFoundException) {
+        }
+        $this->reflector->getProperty('translationValidator')->setValue($this->controller, $validator);
     }
 
     // ─── index() happy path ───
@@ -168,6 +179,33 @@ class ReviseTranslationIssuesControllerTest extends AbstractTest
         $version = $captured['versions'][0];
         $this->assertSame($this->segmentId(self::BASE), (int) $version['id_segment']);
         $this->assertArrayHasKey('issues', $version);
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    #[Test]
+    public function index_resolves_a_split_part_to_its_whole_segment(): void
+    {
+        $this->setRequestParams([
+            'id_job' => (string) $this->jobId(self::BASE),
+            'id_segment' => $this->segmentId(self::BASE) . '-2',
+            'password' => self::JOB_PASSWORD,
+        ]);
+
+        $captured = null;
+        $this->responseMock->expects($this->once())
+            ->method('json')
+            ->with($this->callback(function (array $data) use (&$captured): bool {
+                $captured = $data;
+                return true;
+            }));
+
+        $this->controller->index();
+
+        $this->assertIsArray($captured);
+        $this->assertCount(1, $captured['versions']);
+        $this->assertSame($this->segmentId(self::BASE), (int) $captured['versions'][0]['id_segment']);
     }
 
     // ─── index() failure path ───
