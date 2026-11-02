@@ -191,28 +191,26 @@ export const Select = ({
 
     const updatePosition = () => {
       const rect = wrapperRef.current?.getBoundingClientRect()
-      const listNode = dropDownRef.current?.getListRef()
 
-      if (rect && wrapperDropDownRef.current && listNode) {
+      if (rect && wrapperDropDownRef.current) {
         const x = rect.x + window.scrollX
         const y = rect.y + window.scrollY
+        const style = wrapperDropDownRef.current.style
 
-        const customDropdownNode =
-          wrapperDropDownRef.current.querySelector('.custom-dropdown')
-        const reversedGap = customDropdownNode
-          ? parseFloat(getComputedStyle(customDropdownNode).marginBottom) || 0
-          : 0
-        const contentHeight = customDropdownNode
-          ? listNode.getBoundingClientRect().bottom -
-            customDropdownNode.getBoundingClientRect().top
-          : listNode.getBoundingClientRect().height
-        const dropdownHeight =
-          contentHeight + (isDropdownReversed ? reversedGap : 0)
-
-        wrapperDropDownRef.current.style.transform = `translate(${x}px,${
-          !isDropdownReversed ? y + rect.height : y - dropdownHeight
-        }px)`
-        wrapperDropDownRef.current.style.width = `${rect.width}px`
+        if (isDropdownReversed) {
+          // Anchor the bottom edge to the trigger via CSS `bottom`, same as
+          // the non-portal wrapper's `bottom: 100%`, so the browser keeps it
+          // pinned there through the whole height transition instead of
+          // growing down from a one-shot predicted-height translate.
+          style.transform = `translateX(${x}px)`
+          style.top = 'auto'
+          style.bottom = `${document.documentElement.scrollHeight - y}px`
+        } else {
+          style.transform = `translate(${x}px,${y + rect.height}px)`
+          style.top = ''
+          style.bottom = 'auto'
+        }
+        style.width = `${rect.width}px`
       }
     }
 
@@ -229,16 +227,9 @@ export const Select = ({
     window.addEventListener('scroll', handleScroll, true)
     window.addEventListener('resize', handleScroll)
 
-    const resizeObserver = new ResizeObserver(updatePosition)
-    const listNode = dropDownRef.current?.getListRef()
-    if (listNode) {
-      resizeObserver.observe(listNode)
-    }
-
     return () => {
       window.removeEventListener('scroll', handleScroll, true)
       window.removeEventListener('resize', handleScroll)
-      resizeObserver.disconnect()
     }
   }, [isDropdownVisible, isPortalDropdown, isDropdownReversed])
 

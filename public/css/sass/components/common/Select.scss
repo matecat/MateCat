@@ -1,5 +1,8 @@
 @use '../../tokens/colors';
 @use '../../commons/variables';
+@use './Dropdown' as dropdown;
+
+$select-height: 40px;
 
 //selects
 .select {
@@ -64,7 +67,7 @@
   outline: none;
   font-size: variables.$font-size-small;
   line-height: variables.$line-height-small;
-  min-height: 40px;
+  min-height: $select-height;
   width: 100%;
   background-color: colors.$white;
   white-space: nowrap;
@@ -162,14 +165,8 @@
 
   &.select__dropdown--is-reversed {
     top: auto;
-    bottom: 100%;
+    bottom: calc($select-height + dropdown.$dropdown-to-bottom-margin);
   }
-}
-label
-  ~ .select__dropdown-wrapper:not(
-    .select__dropdown-wrapper--is-multiselect
-  ).select__dropdown--is-reversed {
-  bottom: calc(100% - 32px); // 32px = label height
 }
 
 .select__dropdown-wrapper.select__dropdown-wrapper--is-multiselect {
@@ -204,8 +201,8 @@ label
 }
 
 .select__dropdown-wrapper.select-with-label__wrapper-is-portal.select__dropdown--is-reversed {
-  top: 0;
-  bottom: auto;
+  top: auto;
+  // `bottom` is computed and set inline by Select.js's updatePosition()
 }
 .select,
 .select__dropdown-wrapper {
