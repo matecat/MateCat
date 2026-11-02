@@ -188,7 +188,7 @@ class FiltersSendToFiltersTest extends AbstractTest
         try {
             $result = $this->filters->sourceToXliff($tmpFile, 'en-US', 'it-IT');
 
-            self::assertFalse($result['isSuccess']);
+            self::assertFalse($result['successful']);
             self::assertSame('Bad format', $result['errorMessage']);
         } finally {
             @unlink($tmpFile);
@@ -209,7 +209,7 @@ class FiltersSendToFiltersTest extends AbstractTest
         try {
             $result = $this->filters->sourceToXliff($tmpFile, 'en-US', 'it-IT');
 
-            self::assertFalse($result['isSuccess']);
+            self::assertFalse($result['successful']);
             self::assertStringContainsString('FILTERS_RAPIDAPI_KEY', $result['errorMessage']);
         } finally {
             @unlink($tmpFile);
@@ -238,7 +238,7 @@ class FiltersSendToFiltersTest extends AbstractTest
         try {
             $result = $this->filters->sourceToXliff($tmpFile, 'en-US', 'it-IT');
 
-            self::assertFalse($result['isSuccess']);
+            self::assertFalse($result['successful']);
             self::assertStringContainsString('Curl error 28', $result['errorMessage']);
         } finally {
             @unlink($tmpFile);
@@ -259,7 +259,7 @@ class FiltersSendToFiltersTest extends AbstractTest
         try {
             $result = $this->filters->sourceToXliff($tmpFile, 'en-US', 'it-IT');
 
-            self::assertFalse($result['isSuccess']);
+            self::assertFalse($result['successful']);
             self::assertStringContainsString('503', $result['errorMessage']);
         } finally {
             @unlink($tmpFile);
