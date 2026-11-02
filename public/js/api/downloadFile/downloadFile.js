@@ -15,7 +15,7 @@ export const downloadFile = async ({
   checkErrors = true,
 }) => {
   const response = await fetch(
-    `${config.basepath}api/v2/translation/${idJob}/${password}?download_type=all&encoding=base64&disableErrorCheck=${checkErrors ? 0 : 1}`,
+    `${config.basepath}api/v3/jobs/${idJob}/${password}/translation?download_type=all&encoding=base64&disableErrorCheck=${checkErrors ? 0 : 1}`,
     {
       credentials: 'include',
     },
