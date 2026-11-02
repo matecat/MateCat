@@ -20,8 +20,8 @@
             *.google.tg *.google.co.th *.google.com.tj *.google.tl *.google.tm *.google.tn *.google.to *.google.com.tr *.google.tt *.google.com.tw *.google.co.tz
             *.google.com.ua *.google.co.ug *.google.co.uk *.google.com.uy *.google.co.uz *.google.com.vc *.google.co.ve *.google.co.vi *.google.com.vn
             *.google.vu *.google.ws *.google.rs *.google.co.za *.google.co.zm *.google.co.zw *.google.cat
-            *.googletagmanager.com *.live.com *.githubusercontent.com media.licdn.com *.fbcdn.net;
-      script-src-elem 'self' 'nonce-${x_nonce_unique_id}' *.googletagmanager.com;
-      child-src 'self' *.google.com *.hubspot.com;
-      font-src 'self' fonts.gstatic.com data:;
-      style-src 'self' 'unsafe-inline' *.googleapis.com"/>
+            *.googletagmanager.com *.live.com *.githubusercontent.com media.licdn.com *.fbcdn.net ${x_plugin_csp_default_src};
+      script-src-elem 'self' 'nonce-${x_nonce_unique_id}' *.googletagmanager.com ${x_plugin_csp_script_src_elem};
+      child-src 'self' *.google.com *.hubspot.com ${x_plugin_csp_child_src};
+      font-src 'self' fonts.gstatic.com data: ${x_plugin_csp_font_src};
+      style-src 'self' 'unsafe-inline' *.googleapis.com ${x_plugin_csp_style_src}"/>

@@ -30,6 +30,11 @@ use PHPTAL;
  * @property string $gdriveAuthURL
  * @property string $x_nonce_unique_id
  * @property string|null $x_self_ajax_location_hosts
+ * @property string|null $x_plugin_csp_default_src
+ * @property string|null $x_plugin_csp_script_src_elem
+ * @property string|null $x_plugin_csp_child_src
+ * @property string|null $x_plugin_csp_font_src
+ * @property string|null $x_plugin_csp_style_src
  * @property string $vite_html
  * @property PHPTalBoolean $project_completion_feature_enabled
  * @property string $job_completion_current_phase

@@ -7,6 +7,7 @@ use Matecat\Locales\LanguageDomains;
 use Matecat\Locales\Languages;
 use Model\FeaturesBase\FeatureSet;
 use Utils\Registry\AppConfig;
+use Utils\Templating\CspDirective;
 use Utils\Tools\Utils;
 
 /** @phpstan-ignore requireOnce.fileNotFound */
@@ -27,6 +28,12 @@ $x_self_ajax_location_hosts = AppConfig::$ENABLE_MULTI_DOMAIN_API && is_array($p
         ? " *.ajax." . $parsedHost['host']
         : '';
 $csp = str_replace('${x_self_ajax_location_hosts}', $x_self_ajax_location_hosts, $csp) ?: '';
+
+// Plugin sources are added by BaseKleinViewController at render time. This page is not rendered by a
+// controller, so it carries the template's own sources and none from plugins.
+foreach (CspDirective::cases() as $directive) {
+    $csp = str_replace('${' . $directive->templateVariable() . '}', '', $csp);
+}
 
 ?>
 <!DOCTYPE html>
