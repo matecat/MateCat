@@ -629,6 +629,94 @@ class GetContributionWorkerTest extends AbstractTest
         $method->invoke($this->worker, $request, $request->getJobStruct(), 'it-IT', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)), false);
     }
 
+    /**
+     * The job's dialect_strict setting is stored for the job's own target language only, so a
+     * reference-language query must not inherit it: it is always variant strict, otherwise
+     * MyMemory falls back to sibling variants (es-CL for es-DO) with a 1% penalty.
+     */
+    #[Test]
+    public function test_getMatches_forces_dialect_strict_for_cross_language(): void
+    {
+        $request = $this->makeBaseRequest(['dialect_strict' => false]);
+
+        $tmEngine = $this->getMockBuilder(MyMemory::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getConfigStruct', 'setMTPenalty', 'get'])
+            ->getMock();
+
+        $tmEngine->method('getConfigStruct')->willReturn([]);
+        $tmEngine->method('setMTPenalty')->willReturnSelf();
+        $tmEngine->expects($this->once())->method('get')->with($this->callback(function (array $config): bool {
+            return $config['target'] === 'es-DO'
+                && $config['dialect_strict'] === true
+                && $config['get_mt'] === false;
+        }))->willReturn(new GetMemoryResponse(['responseStatus' => 200, 'matches' => []]));
+
+        $request->forcedTMEngine = $tmEngine;
+
+        $method = new ReflectionMethod($this->worker, '_getMatches');
+        $method->invoke($this->worker, $request, $request->getJobStruct(), 'es-DO', new FeatureSet($this->createStub(IDatabase::class)), true);
+    }
+
+    #[Test]
+    public function test_getMatches_keeps_the_job_dialect_strict_for_the_job_target(): void
+    {
+        $request = $this->makeBaseRequest(['dialect_strict' => false]);
+
+        $tmEngine = $this->getMockBuilder(MyMemory::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getConfigStruct', 'setMTPenalty', 'get'])
+            ->getMock();
+
+        $tmEngine->method('getConfigStruct')->willReturn([]);
+        $tmEngine->method('setMTPenalty')->willReturnSelf();
+        $tmEngine->expects($this->once())->method('get')->with($this->callback(function (array $config): bool {
+            return $config['target'] === 'it-IT' && $config['dialect_strict'] === false;
+        }))->willReturn(new GetMemoryResponse(['responseStatus' => 200, 'matches' => []]));
+
+        $request->forcedTMEngine = $tmEngine;
+
+        $method = new ReflectionMethod($this->worker, '_getMatches');
+        $method->invoke($this->worker, $request, $request->getJobStruct(), 'it-IT', new FeatureSet($this->createStub(IDatabase::class)), false);
+    }
+
+    /**
+     * Picking the same reference language in both slots must query it once, not twice:
+     * two identical queries publish every match twice.
+     */
+    #[Test]
+    public function test_execGetContribution_queries_each_cross_language_once(): void
+    {
+        $worker = new WorkerHarnessGetContributionWorker(self::getStubBuilder(AMQHandler::class)->getStub(), obtainTestDatabase());
+        $worker->queueMatchResult([], []);
+        $crossLangMatch = [
+            'match' => '80%',
+            'score' => 0.8,
+            'created_by' => 'Translator',
+            'memory_key' => 'k2',
+            'segment' => 'Hello world',
+            'translation' => 'Hola mundo',
+            'raw_translation' => 'Hola mundo',
+        ];
+        $worker->queueMatchResult([], [$crossLangMatch]);
+        $worker->queueMatchResult([], [$crossLangMatch]);
+
+        $request = $this->makeBaseRequest([
+            'concordanceSearch' => false,
+            'segmentId' => null,
+            'crossLangTargets' => ['es-DO', 'es-DO', ''],
+            'resultNum' => 2,
+        ]);
+
+        $method = new ReflectionMethod($worker, '_execGetContribution');
+        $method->invoke($worker, $request);
+
+        $this->assertSame([['it-IT', false], ['es-DO', true]], $worker->getMatchesCalls);
+        $this->assertCount(2, $worker->publishedPayloads);
+        $this->assertSame('cross_language_matches', $worker->publishedPayloads[1]['_type']);
+        $this->assertCount(1, $worker->publishedPayloads[1]['data']['payload']['matches']);
+    }
+
     #[Test]
     public function test_execGetContribution_publishes_primary_and_cross_language_payloads(): void
     {
@@ -964,6 +1052,8 @@ class WorkerHarnessGetContributionWorker extends GetContributionWorker
     public array $queuedMatchResults = [];
     /** @var list<array<string, mixed>> */
     public array $publishedPayloads = [];
+    /** @var list<array{0: string, 1: bool}> */
+    public array $getMatchesCalls = [];
 
     public function queueMatchResult(array $mt, array $matches): void
     {
@@ -972,6 +1062,8 @@ class WorkerHarnessGetContributionWorker extends GetContributionWorker
 
     protected function _getMatches(GetContributionRequest $contributionStruct, JobStruct $jobStruct, string $targetLang, FeatureSet $featureSet, bool $isCrossLang = false): array
     {
+        $this->getMatchesCalls[] = [$targetLang, $isCrossLang];
+
         return array_shift($this->queuedMatchResults) ?? [[], []];
     }
 
