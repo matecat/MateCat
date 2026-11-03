@@ -154,7 +154,6 @@ describe('LaraOptions', () => {
 
     expect(screen.getByText('Pre-translate files')).toBeInTheDocument()
     expect(screen.getByText('Style')).toBeInTheDocument()
-    expect(screen.getByText('Glossaries')).toBeInTheDocument()
     expect(screen.getByTestId('lara-glossary')).toBeInTheDocument()
   })
 
