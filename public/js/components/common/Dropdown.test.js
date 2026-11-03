@@ -73,7 +73,7 @@ describe('Dropdown imperative setListMaxHeight', () => {
     jest.useRealTimers()
   })
 
-  test('applies the max height to the list after the deferred delay', () => {
+  test('clamps the list height immediately, deferring only the offsetHeight-dependent wrapper height', () => {
     const ref = React.createRef()
     render(
       <Dropdown
@@ -89,19 +89,26 @@ describe('Dropdown imperative setListMaxHeight', () => {
 
     ref.current.setListMaxHeight(200)
 
-    // The outer wrapper fades in synchronously...
+    // The max-height clamp (and the outer .custom-dropdown's fade-in)
+    // apply synchronously — the list is never rendered at its full,
+    // unclamped height even for a moment, which is what caused a visible
+    // blink with long option lists.
+    expect(list).toHaveStyle({maxHeight: '200px'})
     // eslint-disable-next-line testing-library/no-node-access
     expect(listWrapper.parentElement).toHaveStyle({opacity: '1'})
-    // ...but the max-height itself is only applied after the deferred delay.
-    expect(list).toHaveStyle({maxHeight: ''})
+    // ...but the wrapper's own height is still deferred, since reading
+    // offsetHeight needs a settled layout to reflect the clamp for real.
+    expect(listWrapper).toHaveStyle({height: ''})
 
     jest.advanceTimersByTime(40)
 
-    expect(list).toHaveStyle({maxHeight: '200px'})
+    // jsdom never lays out real content, so offsetHeight is always 0 here,
+    // falling back to 'auto' — in a real browser this would be the list's
+    // settled pixel height instead.
     expect(listWrapper).toHaveStyle({opacity: '1', height: 'auto'})
   })
 
-  test('does not throw when the dropdown unmounts before the deferred delay fires', () => {
+  test('does not throw when the dropdown unmounts before the deferred height is read', () => {
     const ref = React.createRef()
     const {unmount} = render(
       <Dropdown
