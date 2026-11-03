@@ -27,24 +27,25 @@
     flex-direction: column;
 
     button {
-      height: 16px !important;
-      line-height: 1 !important;
-      padding: 0 !important;
-      background: colors.$grey75 !important;
-      border: 1px solid colors.$grey200 !important;
+      height: 16px;
+      line-height: 1;
+      padding: 0;
+      background: colors.$grey75;
+      border: 1px solid colors.$grey200;
       border-radius: 0 0 variables.$border-radius-default 0;
 
       &:disabled {
-        border-color: colors.$grey75 !important;
+        border-color: colors.$grey200;
+        background: colors.$grey100;
       }
 
       &:hover:not(:disabled) {
-        background-color: colors.$grey50 !important;
+        background-color: colors.$grey50;
       }
     }
 
     button:first-child {
-      border-top: unset !important;
+      border-top: unset;
       transform: rotate(180deg);
       border-radius: 0 0 0 variables.$border-radius-default;
     }

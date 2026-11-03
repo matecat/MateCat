@@ -32,7 +32,7 @@ export const Select = ({
   optionsSelectedCopyPlural = () => {},
   resetSelectedOptions = () => {},
   checkSpaceToReverse = true,
-  maxHeightDroplist = 500,
+  maxHeightDroplist = 400,
   isPortalDropdown,
   isActiveOptionOnTop,
   dropdownClassName,
@@ -189,30 +189,44 @@ export const Select = ({
 
     let rafId
 
+    // Matches Dropdown.scss's $dropdown-to-bottom-margin — the same gap the
+    // non-reversed (opens-below) case gets between the trigger and the
+    // dropdown.
+    const DROPDOWN_TO_TRIGGER_GAP = 10
+
     const updatePosition = () => {
       const rect = wrapperRef.current?.getBoundingClientRect()
-      const listNode = dropDownRef.current?.getListRef()
 
-      if (rect && wrapperDropDownRef.current && listNode) {
+      if (rect && wrapperDropDownRef.current) {
         const x = rect.x + window.scrollX
-        const y = rect.y + window.scrollY
+        let y = rect.y + window.scrollY
+        const style = wrapperDropDownRef.current.style
 
-        const customDropdownNode =
-          wrapperDropDownRef.current.querySelector('.custom-dropdown')
-        const reversedGap = customDropdownNode
-          ? parseFloat(getComputedStyle(customDropdownNode).marginBottom) || 0
-          : 0
-        const contentHeight = customDropdownNode
-          ? listNode.getBoundingClientRect().bottom -
-            customDropdownNode.getBoundingClientRect().top
-          : listNode.getBoundingClientRect().height
-        const dropdownHeight =
-          contentHeight + (isDropdownReversed ? reversedGap : 0)
+        if (isDropdownReversed) {
+          // `position: absolute` has no positioned ancestor here (the portal
+          // root is a plain, unpositioned div), so its containing block is
+          // the initial containing block — sized to the *viewport*, not the
+          // document, and anchored at the document's own top-left corner
+          // (not at the current scroll position). `bottom` has to be
+          // expressed in that same document-relative space: how far the
+          // trigger's document-relative top (y) sits above the containing
+          // block's document-relative bottom edge (window.innerHeight).
 
-        wrapperDropDownRef.current.style.transform = `translate(${x}px,${
-          !isDropdownReversed ? y + rect.height : y - dropdownHeight
-        }px)`
-        wrapperDropDownRef.current.style.width = `${rect.width}px`
+          y = wrapperRef.current.lastChild?.getBoundingClientRect?.()
+            ? wrapperRef.current.lastChild.getBoundingClientRect().y
+            : rect.y
+
+          style.transform = `translateX(${x}px)`
+          style.top = 'auto'
+          style.bottom = `${
+            window.innerHeight - y + DROPDOWN_TO_TRIGGER_GAP
+          }px`
+        } else {
+          style.transform = `translate(${x}px,${y + rect.height}px)`
+          style.top = ''
+          style.bottom = 'auto'
+        }
+        style.width = `${rect.width}px`
       }
     }
 
@@ -229,16 +243,9 @@ export const Select = ({
     window.addEventListener('scroll', handleScroll, true)
     window.addEventListener('resize', handleScroll)
 
-    const resizeObserver = new ResizeObserver(updatePosition)
-    const listNode = dropDownRef.current?.getListRef()
-    if (listNode) {
-      resizeObserver.observe(listNode)
-    }
-
     return () => {
       window.removeEventListener('scroll', handleScroll, true)
       window.removeEventListener('resize', handleScroll)
-      resizeObserver.disconnect()
     }
   }, [isDropdownVisible, isPortalDropdown, isDropdownReversed])
 

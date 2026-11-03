@@ -55,11 +55,12 @@ export const Dropdown = forwardRef(
       setListMaxHeight: (value) => {
         if (listRef?.current) {
           listRef.current.parentElement.parentElement.style.opacity = 1
+          listRef.current.style.maxHeight = `${value}px`
+
           clearTimeout(setListMaxHeightDelayRef.current)
           setListMaxHeightDelayRef.current = setTimeout(() => {
             if (!listRef.current) return
             listRef.current.parentElement.style.opacity = 1
-            listRef.current.style.maxHeight = `${value}px`
             listRef.current.parentElement.style.height = `${
               listRef.current.offsetHeight
                 ? listRef.current.offsetHeight + 'px'
@@ -180,10 +181,7 @@ export const Dropdown = forwardRef(
       return () => clearTimeout(timer)
     }, [showSearchBar])
 
-    useEffect(
-      () => () => clearTimeout(setListMaxHeightDelayRef.current),
-      [],
-    )
+    useEffect(() => () => clearTimeout(setListMaxHeightDelayRef.current), [])
 
     // keyboard shortcuts
     useEffect(() => {
