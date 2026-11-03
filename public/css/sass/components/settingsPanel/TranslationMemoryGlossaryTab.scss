@@ -39,14 +39,14 @@
 .translation-memory-glossary-subtab {
   display: inline-flex;
   align-items: center;
-  padding: 12px 2px 10px;
+  padding: 4px 2px 10px;
   margin-bottom: -1px;
   border: 0;
   border-bottom: 3px solid transparent;
   background: none;
   font-family: inherit;
   font-size: variables.$font-size-small;
-  font-weight: bold;
+  font-weight: normal;
   color: colors.$grey700;
   cursor: pointer;
 
@@ -586,9 +586,23 @@
 
 .tm-key-row-menu-button,
 .tm-row-penalty {
+  // Same width and position as the "Add penalty" button it replaces, so the field
+  // starts at the button's left edge and the × ends at its right edge
   .tm-row-penalty-numeric-stepper {
     display: flex;
-    gap: 5px;
+    gap: 2px;
+    width: 104px;
+    margin: 0 auto;
+
+    > :first-child {
+      flex: 1;
+      min-width: 0;
+
+      input {
+        flex: 1;
+        min-width: 0;
+      }
+    }
   }
 
   .penalty-numeric-stepper-close-button {

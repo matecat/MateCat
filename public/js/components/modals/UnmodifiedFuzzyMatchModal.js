@@ -1,6 +1,6 @@
 import React, {useRef} from 'react'
 import ModalsActions from '../../actions/ModalsActions'
-import {Button, BUTTON_TYPE} from '../common/Button/Button'
+import {Button, BUTTON_MODE, BUTTON_TYPE} from '../common/Button/Button'
 
 export const HIDE_UNMODIFIED_FUZZY_MATCH_MODAL_STORAGE =
   'unmodified-fuzzy-match-modal' + config.id_job + '-' + config.userMail
@@ -40,12 +40,14 @@ export const UnmodifiedFuzzyMatchModal = ({
       <div className="matecat-modal-middle">
         <div className="modal-grid">
           <div className="modal-grid__body">
-            You are confirming a fuzzy match without making any changes.
-            Fuzzy matches usually need to be edited due to differences in the
-            source text. Are you sure you want to proceed?
+            You are confirming a fuzzy match without making any changes. Fuzzy
+            matches usually need to be edited due to differences in the source
+            text. Are you sure you want to proceed?
           </div>
           <div className="modal-grid__footer">
-            <Button onClick={onCancel}>Cancel</Button>
+            <Button mode={BUTTON_MODE.OUTLINE} onClick={onCancel}>
+              Cancel
+            </Button>
             <Button type={BUTTON_TYPE.PRIMARY} onClick={onConfirm}>
               Confirm anyway
             </Button>
@@ -67,4 +69,3 @@ export const UnmodifiedFuzzyMatchModal = ({
 }
 
 export default UnmodifiedFuzzyMatchModal
-

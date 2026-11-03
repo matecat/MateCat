@@ -1,6 +1,6 @@
 @use 'NewProjectPage';
-@use "../../commons/reset";
-@use "../../tokens/colors";
+@use '../../commons/reset';
+@use '../../tokens/colors';
 @use 'commons/variables';
 
 $activity-log-control-height: 36px;
@@ -43,6 +43,7 @@ $activity-log-control-height: 36px;
 
   > h3 {
     color: colors.$grey1300;
+    font-size: variables.$font-size-page-title;
   }
 }
 

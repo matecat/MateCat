@@ -5,7 +5,7 @@ import IconClose from '../../../img/icons/IconClose'
 
 const styleInput = {
   fontFamily: 'calibri, Arial, Helvetica, sans-serif',
-  fontSize: '16px',
+  fontSize: '14px',
   padding: '10px 20px',
   borderRadius: '40px',
   outlineColor: '#e5e9f1',

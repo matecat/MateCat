@@ -102,7 +102,9 @@ body #file section:not(.editor) {
 }
 
 .editor .source {
-  padding-top: 4px !important;
+  // Puts the first source line on the same line as the first target line: the target
+  // editor adds a 1px border, 5px of padding and a taller line height.
+  padding-top: 12px !important;
   font-size: variables.$font-size-base;
 }
 

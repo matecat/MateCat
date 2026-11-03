@@ -219,7 +219,8 @@ function QualitySummaryTable({qualitySummary}) {
       return {label: sev.label, total: totalSev}
     })
 
-    const totalScore = qualitySummary.get('total_issues_weight')
+    // Nothing counted yet comes back empty; show 0 like the severity totals beside it
+    const totalScore = qualitySummary.get('total_issues_weight') ?? 0
 
     return (
       <div className="qr-body">

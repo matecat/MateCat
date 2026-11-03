@@ -44,6 +44,8 @@ import ProjectsStore from '../../stores/ProjectsStore'
 import {ChunksJobContainer} from './ChunksJobContainer'
 import {fromJS} from 'immutable'
 import {AnimatedCollapse} from '../common/AnimatedCollapse'
+import Tooltip from '../common/Tooltip'
+import {Badge, BADGE_MODE, BADGE_TYPE} from '../common/Badge/Badge'
 
 // shared row budget for the project-level "View more" toggle (see where it's used below)
 const SHOW_MORE_LIMIT = 5
@@ -70,6 +72,22 @@ export const ProjectContainer = ({
   const [idTeamSelected, setIdTeamSelected] = useState(idTeamProject)
 
   const projectRef = useRef()
+  const languagePairsRef = useRef()
+  // A split job repeats its id once per chunk, and every job is one source and target
+  // pair, so the pairs are the project's distinct job ids. A project has one source
+  // language, so the tooltip names it once and lists the targets.
+  const languagePairJobs = [
+    ...new Map(
+      project
+        .get('jobs')
+        .toJS()
+        .map((job) => [job.id, job]),
+    ).values(),
+  ]
+  const languagePairCount = languagePairJobs.length
+  const languagePairsTooltip = languagePairCount
+    ? `${languagePairJobs[0].source} → ${languagePairJobs.map((job) => job.target).join(', ')}`
+    : ''
   const projectTeam = useRef()
   projectTeam.current = teams.find(
     (team) => team.get('id') === project.get('id_team'),
@@ -211,6 +229,18 @@ export const ProjectContainer = ({
           >
             <IconEdit size={16} />
           </Button>
+          <Tooltip content={languagePairsTooltip}>
+            <span
+              ref={languagePairsRef}
+              className="project-language-pairs"
+              data-testid="project-language-pairs"
+            >
+              <Badge type={BADGE_TYPE.GREY} mode={BADGE_MODE.OUTLINE}>
+                {languagePairCount} language{' '}
+                {languagePairCount === 1 ? 'pair' : 'pairs'}
+              </Badge>
+            </span>
+          </Tooltip>
         </>
       )}
     </div>

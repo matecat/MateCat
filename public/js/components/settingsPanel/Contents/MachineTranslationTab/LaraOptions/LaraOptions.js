@@ -181,7 +181,7 @@ export const LaraOptions = ({isCattoolPage}) => {
           />
         </div>
       )}
-      <h2>Glossaries</h2>
+      {/* LaraGlossary renders its own title, hidden on the editor page when empty */}
       <LaraGlossary
         id={currentProjectTemplate.mt.id}
         {...{setGlossaries, isCattoolPage}}
