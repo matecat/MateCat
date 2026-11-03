@@ -32,7 +32,7 @@ export const Select = ({
   optionsSelectedCopyPlural = () => {},
   resetSelectedOptions = () => {},
   checkSpaceToReverse = true,
-  maxHeightDroplist = 500,
+  maxHeightDroplist = 400,
   isPortalDropdown,
   isActiveOptionOnTop,
   dropdownClassName,
@@ -199,7 +199,7 @@ export const Select = ({
 
       if (rect && wrapperDropDownRef.current) {
         const x = rect.x + window.scrollX
-        const y = rect.y + window.scrollY
+        let y = rect.y + window.scrollY
         const style = wrapperDropDownRef.current.style
 
         if (isDropdownReversed) {
@@ -211,6 +211,11 @@ export const Select = ({
           // expressed in that same document-relative space: how far the
           // trigger's document-relative top (y) sits above the containing
           // block's document-relative bottom edge (window.innerHeight).
+
+          y = wrapperRef.current.lastChild?.getBoundingClientRect?.()
+            ? wrapperRef.current.lastChild.getBoundingClientRect().y
+            : rect.y
+
           style.transform = `translateX(${x}px)`
           style.top = 'auto'
           style.bottom = `${

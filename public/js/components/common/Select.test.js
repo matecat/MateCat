@@ -444,56 +444,50 @@ describe('Select', () => {
       })
 
       test('anchors the portal wrapper to the trigger via a document-relative bottom when reversed', () => {
-        // rect is viewport-relative, as if the page were scrolled 300px:
-        // the trigger's real document position is y=700 (rect.y=400 +
-        // scrollY=300), same as the unscrolled case below — the computed
-        // bottom must come out identical regardless of scroll position,
-        // which is exactly what a document-relative (not viewport-relative)
-        // formula guarantees.
+        // Not enough space below the wrapper (availableHeightBelow =
+        // innerHeight(900) - wrapper.bottom(500) - margins(16) = 384,
+        // under maxHeightDroplist's 400 default) forces reversed mode.
         elementRects['select-with-label__wrapper'] = {
           x: 10,
-          y: 400,
+          y: 440,
           left: 10,
-          top: 400,
+          top: 440,
           width: 200,
           height: 60,
-          bottom: 460,
+          bottom: 500,
+        }
+        // The anchor point is wrapperRef's last DOM child, read via
+        // getBoundingClientRect() — in jsdom that resolves to the dropdown
+        // wrapper itself (portals don't detach the same way jsdom renders
+        // them as in a real browser), so this is keyed by its own class.
+        elementRects['select__dropdown-wrapper'] = {
+          x: 10,
+          y: 448,
+          left: 10,
+          top: 448,
+          width: 200,
+          height: 32,
+          bottom: 480,
         }
         const originalInnerHeight = window.innerHeight
-        const originalScrollY = window.scrollY
         Object.defineProperty(window, 'innerHeight', {
           configurable: true,
           value: 900,
-        })
-        Object.defineProperty(window, 'scrollY', {
-          configurable: true,
-          value: 300,
         })
 
         const {container} = renderSelect({isPortalDropdown: true})
         clickTrigger(container)
 
-        // reversed (insufficient space below); the containing block (no
-        // positioned ancestor) is sized to the viewport but anchored at the
-        // document's own top-left, not the current scroll position, so
-        // `bottom` has to be expressed in the same document-relative space
-        // as `y` (scrollY + rect.top), plus the same trigger-to-dropdown
-        // gap the non-reversed case gets from CSS:
-        // y = rect.y(400) + scrollY(300) = 700
-        // bottom = innerHeight(900) - y(700) + gap(10) = 210
+        // bottom = innerHeight(900) - anchor.y(448) + gap(10) = 462
         expect(getDropdownWrapper(container)).toHaveStyle({
           transform: 'translateX(10px)',
           top: 'auto',
-          bottom: '210px',
+          bottom: '462px',
         })
 
         Object.defineProperty(window, 'innerHeight', {
           configurable: true,
           value: originalInnerHeight,
-        })
-        Object.defineProperty(window, 'scrollY', {
-          configurable: true,
-          value: originalScrollY,
         })
       })
     })
