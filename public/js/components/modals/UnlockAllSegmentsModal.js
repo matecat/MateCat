@@ -3,7 +3,7 @@ import SegmentStore from '../../stores/SegmentStore'
 import {getFilteredSegments} from '../../api/getFilteredSegments'
 import SegmentActions from '../../actions/SegmentActions'
 import ModalsActions from '../../actions/ModalsActions'
-import {Button, BUTTON_TYPE} from '../common/Button/Button'
+import {Button, BUTTON_MODE, BUTTON_TYPE} from '../common/Button/Button'
 
 export const HIDE_UNLOCK_ALL_SEGMENTS_MODAL_STORAGE =
   'unlock-segments-modal' + config.id_job
@@ -38,6 +38,7 @@ export const UnlockAllSegmentsModal = () => {
           </div>
           <div className="modal-buttons">
             <Button
+              mode={BUTTON_MODE.OUTLINE}
               onClick={() => {
                 SegmentStore.consecutiveUnlockSegments = []
                 checkboxCheck()
