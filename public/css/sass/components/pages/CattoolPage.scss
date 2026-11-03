@@ -43,14 +43,6 @@
 @use '../SettingsPanel';
 @use '../settingsPanel/TemplateSelect';
 
-
-
-
-
-
-
-
-
 body #outer {
   //overflow: hidden;
   position: relative;
@@ -136,7 +128,8 @@ body.cattool .main-container {
 }
 body.cattool .context-preview-wrapper--collapsed {
   position: fixed;
-  bottom: 88px;
+  // Footer height (50px) plus the tab's own offset, so the tab sits on the footer
+  bottom: 74px;
   left: 0;
   right: 0;
   display: flex;

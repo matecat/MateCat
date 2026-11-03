@@ -6,7 +6,7 @@
 }
 .footer-body {
   display: flex;
-  height: 64px;
+  height: 50px;
   padding: 0 10px;
   background-color: colors.$white;
 
@@ -17,60 +17,71 @@
     align-items: center;
   }
 
+  .container-left {
+    padding-left: 22px;
+  }
+
   .container-center {
     flex-grow: 1;
     justify-content: center;
-    gap: 20px;
+  }
+
+  .container-right {
+    gap: 24px;
+    padding-right: 22px;
   }
 
   .container-progress-bar {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    gap: 16px;
     flex-grow: 1;
-    max-width: 400px;
-    margin-right: 20px;
+    max-width: 520px;
     font-weight: bold;
+
+    .language {
+      white-space: nowrap;
+    }
+
+    .footer-progress {
+      flex-grow: 1;
+    }
   }
 
-  .grey-box {
+  .footer-stat-label {
+    color: colors.$grey700;
+  }
+
+  .footer-stat {
     display: flex;
-    flex-direction: column;
-    background-color: colors.$grey50;
-    border-radius: 4px;
-    padding: 5px 10px;
-    line-height: 1.2;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
 
-    > :first-child {
-      font-weight: bold;
-    }
+  .footer-count-raw {
+    color: colors.$grey700;
+  }
 
-    > :last-child {
-      color: colors.$grey700;
-    }
+  .footer-speed-etc {
+    gap: 32px;
 
-    .grey-box-row {
-      display: grid;
-      gap: 15px;
-      grid-template-columns: 80px 1fr auto;
-      text-align: left;
-
-      > :last-child:is(span) {
-        font-weight: normal;
-      }
-    }
-
-    .button-icon {
-      padding-top: 0px;
-      margin-top: -2px;
+    // Tooltip wraps its trigger in a block container; keep each pair on the line
+    > span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
   }
 
-  .grey-box-speed-etc {
-    font-weight: bold;
-    > * {
-      color: colors.$black !important;
-    }
+  .footer-divider {
+    align-self: stretch;
+    flex-shrink: 0;
+    width: 1px;
+    margin: 15px 0;
+    background-color: colors.$grey200;
   }
+
   .stats-foo {
     //height: 44px;
     background-color: colors.$white;
@@ -81,5 +92,23 @@
     z-index: 2;
     display: grid;
     min-width: 1024px;
+  }
+}
+
+// Footer tooltips render in a portal on body. A top tooltip is centred on its trigger;
+// near the right edge it has no room and collapses into a narrow column, so give it its
+// natural width and anchor the ones at the end of the footer to the trigger's right side.
+body.cattool .footer-tooltip {
+  width: max-content;
+  max-width: 260px;
+}
+
+body.cattool .footer-tooltip-end {
+  transform: translate(calc(-100% + 16px), -100%);
+
+  &::before {
+    left: auto;
+    right: 12px;
+    margin-left: 0;
   }
 }
