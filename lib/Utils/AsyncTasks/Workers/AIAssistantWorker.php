@@ -172,7 +172,6 @@ class AIAssistantWorker extends AbstractWorker
      *                       - text: The original text.
      *                       - translation: The translated text.
      *                       - context: The translation context.
-     *                       - style: The translation style.
      *                       - id_client: The client identifier.
      *                       - id_segment: The segment identifier.
      *
@@ -188,8 +187,7 @@ class AIAssistantWorker extends AbstractWorker
                 sourceLanguage: $payload['localized_source'],
                 targetLanguage: $payload['localized_target'],
                 text: $payload['text'],
-                translation: $payload['translation'],
-                style: $payload['style']
+                translation: $payload['translation']
             );
 
             $message = is_array($result) ? $result : null;
