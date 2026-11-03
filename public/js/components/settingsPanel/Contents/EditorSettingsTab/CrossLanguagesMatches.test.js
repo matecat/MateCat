@@ -254,3 +254,29 @@ test('does not touch SegmentActions when getContribution is unavailable', async 
 
   SegmentActions.getContribution = jest.fn()
 })
+
+test('a language picked in one select is not offered in the other', async () => {
+  renderComponent({}, jest.fn())
+
+  await userEvent.click(
+    screen.getByTestId('option-Primary language suggestion-fr-FR'),
+  )
+
+  expect(
+    screen.queryByTestId('option-Secondary language suggestion-fr-FR'),
+  ).not.toBeInTheDocument()
+  expect(
+    screen.getByTestId('option-Secondary language suggestion-el-GR'),
+  ).toBeInTheDocument()
+
+  await userEvent.click(
+    screen.getByTestId('option-Secondary language suggestion-el-GR'),
+  )
+
+  expect(
+    screen.queryByTestId('option-Primary language suggestion-el-GR'),
+  ).not.toBeInTheDocument()
+  expect(
+    screen.getByTestId('option-Primary language suggestion-fr-FR'),
+  ).toBeInTheDocument()
+})
