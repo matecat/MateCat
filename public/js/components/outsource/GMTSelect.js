@@ -33,21 +33,25 @@ const GMT_OPTIONS = [
 ]
 
 export const GMTSelect = ({showLabel, changeValue}) => {
-  const [timezone, setTimezone] = useState(
-    () => Cookies.get('matecat_timezone'),
+  const [timezone, setTimezone] = useState(() =>
+    Cookies.get('matecat_timezone'),
   )
 
   return (
     <Select
       name="gmt-select"
       className="gmt-select"
+      dropdownClassName="gmt-select-portal-dropdown"
       label={showLabel ? 'GMT' : null}
+      isPortalDropdown={true}
       options={GMT_OPTIONS}
       onSelect={(item) => {
         setTimezone(item.id)
         changeValue(item.id)
       }}
-      activeOption={GMT_OPTIONS.find(({id}) => id === timezone) || GMT_OPTIONS[0]}
+      activeOption={
+        GMT_OPTIONS.find(({id}) => id === timezone) || GMT_OPTIONS[0]
+      }
       tooltipPosition="bottom"
       checkSpaceToReverse={false}
       maxHeightDroplist={200}

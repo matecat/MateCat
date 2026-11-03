@@ -56,29 +56,6 @@
     }
   }
 
-  .select {
-    padding: 5px 46px 9px 12px;
-    border-radius: variables.$border-radius-default;
-    color: colors.$black;
-    background: colors.$black100;
-  }
-
-  .dropdown__list {
-    padding: 0;
-
-    li.dropdown__option {
-      height: 40px;
-    }
-  }
-
-  .select-with-icon__wrapper {
-    height: 32px;
-  }
-
-  .select__dropdown-wrapper {
-    width: 190%;
-  }
-
   .gmt {
     .gmt-outsourced {
       display: inline-block;
@@ -209,12 +186,6 @@
               &.translator-delivery h2 {
                 line-height: normal;
               }
-              .select-with-label__wrapper {
-                gap: 8px;
-                label {
-                  margin-bottom: 0;
-                }
-              }
               label {
                 font-size: variables.$font-size-xsmall;
                 line-height: 20px;
@@ -222,21 +193,33 @@
               }
 
               input[type='text'],
-              input[type='email'],
-              span.select {
-                box-shadow: inset 0 1px 3px colors.$grey200;
+              input[type='email'] {
+                box-sizing: border-box;
+                width: 100%;
+                height: 40px;
+                color: colors.$black;
                 border: 1px solid colors.$grey200;
-                font-family: Calibri, Arial, Helvetica, sans-serif;
-                border-radius: variables.$border-radius-default;
-                height: 32px;
-                background-color: colors.$black100;
-                padding: 6px 12px;
-                &:focus {
-                  border-color: colors.$blue300;
-                }
+                font-size: 16px;
+                line-height: 24px;
+                font-weight: 400;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                border-radius: 8px;
+                padding: 8px 12px;
 
+                &::placeholder {
+                  color: colors.$grey400;
+                  opacity: 1;
+                }
+                &:hover {
+                  border-color: colors.$grey400;
+                }
+                &:focus,
                 &:active {
-                  border-color: colors.$blue300;
+                  border-color: colors.$grey400;
+                  box-shadow: 0 0 0 1px colors.$grey400;
+                  outline: none;
                 }
               }
 
@@ -247,18 +230,6 @@
 
               &.translator-time {
                 width: 202px;
-
-                .selection.dropdown {
-                  width: 100%;
-                  min-width: 91px !important;
-                  border: 1px solid colors.$grey200;
-                  box-shadow: inset 0 1px 3px colors.$grey200;
-                  font-size: variables.$font-size-xsmall;
-
-                  .menu {
-                    height: 205px;
-                  }
-                }
               }
 
               &.gmt {
@@ -940,4 +911,8 @@
       }
     }
   }
+}
+
+.gmt-select-portal-dropdown {
+  min-width: 300px;
 }
