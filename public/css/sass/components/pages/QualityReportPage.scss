@@ -226,9 +226,8 @@ header
   .layout__container
   .qr-label {
   font-weight: 100;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 12px;
-  padding-right: 9px;
 }
 
 .qr-wrapper
@@ -237,7 +236,7 @@ header
   .qr-job-summary-container
   .layout__container
   .qr-info {
-  font-size: variables.$font-size-xsmall;
+  font-size: variables.$font-size-small;
 }
 
 .qr-info {
@@ -373,16 +372,6 @@ header
   .qr-job-summary-container
   .layout__container
   .qr-production-quality
-  .qr-effort:last-child {
-  padding-right: 15px !important;
-}
-
-.qr-wrapper
-  .qr-container
-  .qr-container-inside
-  .qr-job-summary-container
-  .layout__container
-  .qr-production-quality
   .qr-effort.translator {
   max-width: 95px;
 }
@@ -455,7 +444,7 @@ header
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 12px;
   font-weight: 700;
 }
@@ -506,7 +495,7 @@ header
   .qr-production-quality
   .qr-effort.qr-score
   .qr-threshold {
-  font-size: 12px;
+  font-size: 14px;
   line-height: 12px;
 }
 
@@ -596,6 +585,7 @@ header
   .qr-head
   .qr-title {
   padding-left: 24px;
+  font-size: 16px;
 }
 
 .qr-wrapper
@@ -1406,7 +1396,6 @@ header
   border-radius: 0;
   position: relative;
   z-index: 1;
-  font-size: 12px;
   padding: 4px 8px;
   font-weight: normal;
 }
