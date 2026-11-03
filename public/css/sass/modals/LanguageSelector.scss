@@ -126,9 +126,10 @@
     .language-to .language-search .tag {
       position: relative;
       display: inline-block;
-      padding: 4px 8px;
+      padding: 4px 12px;
       text-transform: capitalize;
-      border-radius: 2px;
+      // Pill, like the design system's badges
+      border-radius: 999px;
       margin: 0 2px;
       background: colors.$white;
       color: colors.$black;

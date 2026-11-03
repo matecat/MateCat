@@ -475,8 +475,21 @@
 .mt-glossary-table {
   padding-top: 4px;
 
+  // Headings close to the rows: no bottom padding here and no margin under the heading
+  // wrapper (below), leaving only the rows' own spacing
   .settings-panel-table-rowHeading {
     font-size: variables.$font-size-small;
+    font-weight: bold;
+    padding-bottom: 0;
+  }
+
+  // Each heading starts where its column's content starts: "Active" at the checkbox
+  // (12px in, like the checkbox cell), on the same line as "Glossary" (the 5px top
+  // margin is for the checkboxes in the rows below)
+  .settings-panel-table-rowHeading
+    .settings-panel-table-rowHeading-column:first-child {
+    padding-left: 12px;
+    margin-top: 0;
   }
 
   .settings-panel-table-rows-container {
@@ -486,7 +499,7 @@
   }
 
   > :first-child {
-    margin-bottom: 10px;
+    margin-bottom: 0;
   }
 }
 

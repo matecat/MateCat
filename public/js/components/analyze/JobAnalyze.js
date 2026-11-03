@@ -75,12 +75,15 @@ const JobAnalyze = ({chunks, jobInfo, project, idJob, status, jobToScroll}) => {
   return (
     <div className="job" ref={containerRef}>
       <JobAnalyzeHeader project={project} jobInfo={jobInfo} status={status} />
-      <JobTableHeader
-        rates={jobInfo.payable_rates}
-        iceMTRawWords={iceMTRawWords}
-        workflowType={project.get('analysis').get('workflow_type')}
-      />
-      <div className="chunks-analyze">{getChunks()}</div>
+      {/* Header and rows scroll sideways together when the window is too narrow */}
+      <div className="job-table-scroll">
+        <JobTableHeader
+          rates={jobInfo.payable_rates}
+          iceMTRawWords={iceMTRawWords}
+          workflowType={project.get('analysis').get('workflow_type')}
+        />
+        <div className="chunks-analyze">{getChunks()}</div>
+      </div>
     </div>
   )
 }

@@ -166,18 +166,16 @@ const FilterSegments = ({
           />
         </div>
         {secondPassReviewEnabled && (
-          <div className={`filter-status ${getFilterClassName(filter.status)}`}>
+          <div
+            className={`filter-status ${getFilterClassName(filter.issues_in_r)}`}
+          >
             <Select
               options={REVISION_OPTIONS}
               onSelect={(value) => filterSelectChanged('issues_in_r', value.id)}
-              activeOption={
-                filter.issues_in_r
-                  ? {
-                      id: filter.issues_in_r,
-                      name: filter.issues_in_r === 1 ? 'Revise 1' : 'Revise 2',
-                    }
-                  : undefined
-              }
+              // The stored id may come back as a number or a string
+              activeOption={REVISION_OPTIONS.find(
+                (option) => option.id === String(filter.issues_in_r),
+              )}
               placeholder="Revision phase"
               checkSpaceToReverse={false}
               showResetButton={true}

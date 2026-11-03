@@ -2,7 +2,7 @@ import React, {useState} from 'react'
 
 import CatToolActions from '../../actions/CatToolActions'
 import ModalsActions from '../../actions/ModalsActions'
-import {Button, BUTTON_TYPE} from '../common/Button/Button'
+import {Button, BUTTON_MODE, BUTTON_TYPE} from '../common/Button/Button'
 
 const RevisionFeedbackModal = (props) => {
   const [sending, setSending] = useState(false)
@@ -73,7 +73,7 @@ const RevisionFeedbackModal = (props) => {
       <div className="matecat-modal-bottom">
         <div className="modal-buttons">
           <Button
-            type={BUTTON_TYPE.DEFAULT}
+            mode={BUTTON_MODE.OUTLINE}
             onClick={() => ModalsActions.onCloseModal()}
           >
             {props.feedback ? 'Close' : "I'll do it later"}

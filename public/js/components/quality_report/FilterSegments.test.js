@@ -201,4 +201,18 @@ describe('FilterSegments', () => {
     })
     expect(screen.getByText('Revise 2')).toBeInTheDocument()
   })
+
+  test('shows the revision phase that was picked, not always Revise 2', async () => {
+    const user = userEvent.setup()
+    renderComponent({secondPassReviewEnabled: true})
+
+    await user.click(screen.getByText('Revision phase'))
+    await user.click(await screen.findByText('Revise 1'))
+
+    await waitFor(() => {
+      expect(screen.queryByText('Revision phase')).not.toBeInTheDocument()
+    })
+    expect(screen.getByText('Revise 1')).toBeInTheDocument()
+    expect(screen.queryByText('Revise 2')).not.toBeInTheDocument()
+  })
 })

@@ -77,8 +77,8 @@ test('renders one card per chunk with its own chunk label and totals', () => {
   const props = buildProps()
   render(<SplitChunkJob {...props} />)
 
-  expect(screen.getByText('Chunk 1')).toBeInTheDocument()
-  expect(screen.getByText('Chunk 2')).toBeInTheDocument()
+  expect(screen.getByText('1 -')).toBeInTheDocument()
+  expect(screen.getByText('2 -')).toBeInTheDocument()
   expect(screen.getByText('11')).toBeInTheDocument()
   expect(screen.getByText('6')).toBeInTheDocument()
   expect(screen.getByText('21')).toBeInTheDocument()

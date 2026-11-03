@@ -11,7 +11,6 @@ interface TranslationEvaluatorClientInterface
         string $sourceLanguage,
         string $targetLanguage,
         string $text,
-        string $translation,
-        string $style
+        string $translation
     ): bool|array;
 }

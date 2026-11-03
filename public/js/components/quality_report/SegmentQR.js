@@ -1,11 +1,4 @@
-import React, {
-  useState,
-  useMemo,
-  useRef,
-  useEffect,
-  useCallback,
-  createRef,
-} from 'react'
+import React, {useState, useMemo, useRef, useEffect, useCallback} from 'react'
 import classnames from 'classnames'
 
 import TextUtils from '../../utils/textUtils'
@@ -20,8 +13,6 @@ import SegmentQA from '../../../img/icons/SegmentQA'
 import AlertIcon from '../../../img/icons/AlertIcon'
 import InfoIcon from '../../../img/icons/InfoIcon'
 import {Badge, BADGE_TYPE} from '../common/Badge'
-import Tooltip from '../common/Tooltip'
-import ReviseIssuesIcon from '../../../img/icons/ReviseIssuesIcon'
 import {Button, BUTTON_SIZE, BUTTON_MODE} from '../common/Button/Button'
 import ChevronDown from '../../../img/icons/ChevronDown'
 import ChevronUp from '../../../img/icons/ChevronUp'
@@ -338,33 +329,6 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
               ),
             }}
           />
-          {elem.issues.length > 0 && (
-            <Tooltip
-              content={
-                <div>
-                  {elem.issues.map((issue) => (
-                    <div
-                      key={issue.issue_id}
-                      className="qr-history-issue"
-                      style={{fontWeight: '700'}}
-                    >
-                      {issue.issue_category}:{' '}
-                      <span style={{fontWeight: '400'}}>
-                        {issue.issue_severity}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              }
-            >
-              <div ref={createRef()}>
-                <Badge type={BADGE_TYPE.RED}>
-                  <ReviseIssuesIcon size={16} />
-                  Issues
-                </Badge>
-              </div>
-            </Tooltip>
-          )}
         </div>
       )
     })

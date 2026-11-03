@@ -11,6 +11,9 @@
   // card's corners and clips the job grid's horizontal overflow without trapping the
   // header's `position: sticky` below.
   overflow: clip;
+  // Let the clip reach over the 1px border, so the stuck header's page-coloured shadow
+  // can cover the card's side borders in the gap above it (Safari ignores this)
+  overflow-clip-margin: 1px;
 }
 
 .project-container-header {
@@ -22,8 +25,18 @@
   align-self: stretch;
   background-color: colors.$grey75;
   position: sticky;
-  top: 0;
+  // Stuck, it keeps a gap below the top bar and the card's rounded corners
+  top: 8px;
   z-index: 2;
+  border-radius: 17px 17px 0 0;
+  // The page-coloured shadow fills that gap and the corners, so the job rows scrolling
+  // underneath stay hidden. The three 1px shadows redraw the card border on the top and
+  // sides only: a ring on all four sides would leave a line under the stuck header.
+  box-shadow:
+    0 -1px 0 0 colors.$grey150,
+    -1px 0 0 0 colors.$grey150,
+    1px 0 0 0 colors.$grey150,
+    0 -8px 0 8px colors.$grey100;
 }
 
 .project-container-header-sx,
@@ -136,6 +149,7 @@
 .user-project-dropdown {
   border-radius: 999px !important;
   font-weight: normal !important;
+  font-size: 14px !important;
 }
 
 .project-menu-dropdown {
@@ -146,4 +160,9 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+}
+
+// The name row's 2px gap keeps the name and its edit pencil together; the badge sits apart
+.project-language-pairs {
+  margin-left: 6px;
 }

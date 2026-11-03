@@ -24,6 +24,15 @@ export const CrossLanguagesMatches = () => {
     languages.find((lang) => lang.id === multiMatchLangs?.secondary),
   )
 
+  // Each select leaves out the language picked in the other one, so the same language
+  // cannot be set twice
+  const languagesForLang1 = languages.filter(
+    (lang) => lang.id !== activeLang2?.id,
+  )
+  const languagesForLang2 = languages.filter(
+    (lang) => lang.id !== activeLang1?.id,
+  )
+
   const isFirstRender = useRef(true)
 
   useEffect(() => {
@@ -110,7 +119,7 @@ export const CrossLanguagesMatches = () => {
           label="Language 1"
           title="Primary language suggestion"
           placeholder="No language selected"
-          options={languages}
+          options={languagesForLang1}
           activeOption={activeLang1}
           showSearchBar={true}
           maxHeightDroplist={280}
@@ -141,7 +150,7 @@ export const CrossLanguagesMatches = () => {
           label="Language 2"
           title="Secondary language suggestion"
           placeholder="No language selected"
-          options={languages}
+          options={languagesForLang2}
           activeOption={activeLang2}
           showSearchBar={true}
           maxHeightDroplist={280}

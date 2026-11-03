@@ -48,7 +48,7 @@ class OpenAIClientTest extends AbstractTest
                 ]);
             });
 
-        $result = (new OpenAIClient($openAi))->evaluateTranslation('en-US', 'it-IT', 'Hello', 'Ciao', 'formal');
+        $result = (new OpenAIClient($openAi))->evaluateTranslation('en-US', 'it-IT', 'Hello', 'Ciao');
 
         $this->assertSame(['category' => 'Excellent', 'comment' => 'Fine.'], $result);
         $this->assertIsArray($sentOpts);
@@ -154,7 +154,7 @@ class OpenAIClientTest extends AbstractTest
         $this->expectException(Exception::class);
         $this->expectExceptionMessage($expectedMessage);
 
-        (new OpenAIClient($openAi))->evaluateTranslation('en-US', 'it-IT', 'Hello', 'Ciao', 'formal');
+        (new OpenAIClient($openAi))->evaluateTranslation('en-US', 'it-IT', 'Hello', 'Ciao');
     }
 
     /**
@@ -178,7 +178,7 @@ class OpenAIClientTest extends AbstractTest
             ],
         ]));
 
-        $result = (new OpenAIClient($openAi))->evaluateTranslation('en-US', 'it-IT', 'Hello', 'Ciao', 'formal');
+        $result = (new OpenAIClient($openAi))->evaluateTranslation('en-US', 'it-IT', 'Hello', 'Ciao');
 
         $this->assertSame(['category' => 'Good', 'comment' => 'Nice     work.'], $result);
     }
