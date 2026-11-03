@@ -568,6 +568,10 @@ ul {
     justify-content: space-between;
     margin: 40px 0 16px;
 
+    h3 {
+      font-size: 30px;
+    }
+
     > :last-child {
       display: flex;
       gap: 16px;
