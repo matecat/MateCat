@@ -58,6 +58,33 @@ class OpenAIClientTest extends AbstractTest
     }
 
     /**
+     * @throws Exception
+     */
+    #[Test]
+    public function evaluateTranslationSendsTheSelectedStyleInThePrompt(): void
+    {
+        $sentOpts = null;
+
+        $openAi = $this->createMock(OpenAi::class);
+        $openAi->expects($this->once())
+            ->method('chat')
+            ->willReturnCallback(function (array $opts) use (&$sentOpts) {
+                $sentOpts = $opts;
+
+                return json_encode([
+                    'choices' => [
+                        ['message' => ['content' => json_encode(['category' => 'Excellent', 'comment' => 'Fine.'])]],
+                    ],
+                ]);
+            });
+
+        (new OpenAIClient($openAi))->evaluateTranslation('en-US', 'it-IT', 'Hello', 'Ciao', 'creative');
+
+        $this->assertIsArray($sentOpts);
+        $this->assertStringContainsString('creative', $sentOpts['messages'][0]['content']);
+    }
+
+    /**
      * Raw OpenAI bodies that carry no usable feedback, each with the reason the client must report.
      *
      * @return array<string, array{string, string}>

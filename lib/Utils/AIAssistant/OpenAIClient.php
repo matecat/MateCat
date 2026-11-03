@@ -55,6 +55,8 @@ Your output must always be:
 category
 comment
 
+The user asked for a translation in the following style: {style}. Take it into account in your evaluation.
+
 Now evaluate the following:
 
 Source: {text}
