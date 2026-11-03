@@ -25,20 +25,20 @@ export const BulkAssignToMember = ({teams, projects, successCallback}) => {
   const [memberSelected, setMemberSelected] = useState({
     id: memberActuallySelected.id.toString(),
     name: (
-      <>
+      <span className="option-assign-member">
         {getImgUser(memberActuallySelected)}{' '}
         {`${memberActuallySelected.user.first_name} ${memberActuallySelected.user.last_name}`}
-      </>
+      </span>
     ),
   })
 
   const options = projectTeam.members.map((member) => ({
     id: member.id.toString(),
     name: (
-      <>
+      <span className="option-assign-member">
         {getImgUser(member)}{' '}
         {`${member.user.first_name} ${member.user.last_name}`}
-      </>
+      </span>
     ),
   }))
 
