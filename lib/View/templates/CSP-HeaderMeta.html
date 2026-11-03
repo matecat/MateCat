@@ -1,5 +1,5 @@
 <meta metal:define-macro="CSP_NONCE"
-      http-equiv="Content-Security-Policy" content="default-src 'self' 'nonce-${x_nonce_unique_id}' 'unsafe-eval' ${x_self_ajax_location_hosts}
+      http-equiv="Content-Security-Policy" content="default-src 'self' 'nonce-${x_nonce_unique_id}' ${x_self_ajax_location_hosts}
             *.google.com *.lexiqa.net *.doubleclick.net *.google-analytics.com
             *.googleusercontent.com data: *.hubspot.com *.google.com *.google.ad *.google.ae *.google.com.af *.google.com.ag *.google.al
             *.google.am *.google.co.ao *.google.com.ar *.google.as *.google.at *.google.com.au *.google.az *.google.ba *.google.com.bd *.google.be
@@ -20,8 +20,8 @@
             *.google.tg *.google.co.th *.google.com.tj *.google.tl *.google.tm *.google.tn *.google.to *.google.com.tr *.google.tt *.google.com.tw *.google.co.tz
             *.google.com.ua *.google.co.ug *.google.co.uk *.google.com.uy *.google.co.uz *.google.com.vc *.google.co.ve *.google.co.vi *.google.com.vn
             *.google.vu *.google.ws *.google.rs *.google.co.za *.google.co.zm *.google.co.zw *.google.cat
-            *.googletagmanager.com *.live.com *.githubusercontent.com media.licdn.com *.fbcdn.net ${x_plugin_csp_default_src};
-      script-src-elem 'self' 'nonce-${x_nonce_unique_id}' *.googletagmanager.com ${x_plugin_csp_script_src_elem};
-      child-src 'self' *.google.com *.hubspot.com ${x_plugin_csp_child_src};
-      font-src 'self' fonts.gstatic.com data: ${x_plugin_csp_font_src};
-      style-src 'self' 'unsafe-inline' *.googleapis.com ${x_plugin_csp_style_src}"/>
+            *.googletagmanager.com *.live.com *.githubusercontent.com media.licdn.com *.fbcdn.net ${x_plugin_csp/default-src | nothing};
+      script-src-elem 'self' 'nonce-${x_nonce_unique_id}' *.googletagmanager.com ${x_plugin_csp/script-src-elem | nothing};
+      child-src 'self' *.google.com *.hubspot.com ${x_plugin_csp/child-src | nothing};
+      font-src 'self' fonts.gstatic.com data: ${x_plugin_csp/font-src | nothing};
+      style-src 'self' 'unsafe-inline' *.googleapis.com ${x_plugin_csp/style-src | nothing}"/>

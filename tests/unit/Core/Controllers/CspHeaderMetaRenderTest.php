@@ -4,170 +4,130 @@ declare(strict_types=1);
 
 namespace Matecat\Core\Controllers;
 
-use Controller\Abstracts\BaseKleinViewController;
 use DOMDocument;
 use DOMElement;
 use Matecat\TestHelpers\AbstractTest;
-use Model\DataAccess\IDatabase;
-use Model\FeaturesBase\BasicFeatureStruct;
-use Model\FeaturesBase\FeatureSet;
-use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use ReflectionClass;
 use Utils\Registry\AppConfig;
-use Utils\Templating\CspDirective;
 use Utils\Templating\PHPTALWithAppend;
 
 /**
- * Renders the real `CSP-HeaderMeta.html` macro the way a page does: through PHPTAL, on a view whose plugin
- * placeholders were filled by BaseKleinViewController::applyPluginCspSources() from a real FeatureSet.
+ * Renders the real `CSP-HeaderMeta.html` macro the way a page does: through PHPTAL, from a template in
+ * `lib/View`, with the relative macro path every page uses and the `x_plugin_csp` map that
+ * BaseKleinViewController::render() sets from the plugins.
  *
- * Both copies of the template are covered: the core one, and the production one in `internal_scripts`,
- * which is skipped when that submodule is not checked out. The guarantee under test is that a plugin can
- * only widen the policy: every directive and every source the template grants survives, including the
- * `*.translated.com` CDN that Translated serves its files from.
+ * The guarantee under test is that a plugin can only widen the policy: the directives and the sources the
+ * template grants stay exactly as they are, and a plugin's sources are appended to the directive it names.
  */
 class CspHeaderMetaRenderTest extends AbstractTest
 {
-    private const string TEST_PROVIDER = 'test_csp_sources_provider';
-    private const string BAD_PROVIDER = 'test_csp_bad_source_provider';
-
-    /**
-     * @return array<string, array{string}>
-     */
-    public static function templateDirectories(): array
-    {
-        return [
-            'core template'       => ['lib/View/templates'],
-            'production template' => ['internal_scripts/tracking_codes'],
-        ];
-    }
+    private const array DIRECTIVES = ['default-src', 'script-src-elem', 'child-src', 'font-src', 'style-src'];
 
     #[Test]
-    #[DataProvider('templateDirectories')]
-    public function withoutPluginSourcesNoPlaceholderIsLeftInThePolicy(string $templateDir): void
+    public function withoutPluginSourcesThePolicyIsTheTemplatesOwn(): void
     {
-        $content = $this->renderPolicyContent($templateDir, []);
+        foreach (['empty map' => [], 'unset variable' => null] as $case => $map) {
+            $content = $this->renderPolicyContent($map);
+            $policy = $this->parsePolicy($content);
 
-        self::assertStringNotContainsString('${', $content);
-        self::assertStringNotContainsString('x_plugin_csp_', $content);
-    }
-
-    #[Test]
-    #[DataProvider('templateDirectories')]
-    public function pluginSourcesOnlyWidenThePolicy(string $templateDir): void
-    {
-        $baseline = $this->parsePolicy($this->renderPolicyContent($templateDir, []));
-        $widened = $this->parsePolicy($this->renderPolicyContent($templateDir, [self::TEST_PROVIDER]));
-
-        // No directive is added: one the template does not declare would shadow its default-src fallback.
-        self::assertSame(array_keys($baseline), array_keys($widened));
-
-        foreach ($baseline as $directive => $sources) {
-            // Every source the template grants is still there, in its original order, ahead of the plugin's.
-            self::assertSame($sources, array_slice($widened[$directive], 0, count($sources)), $directive);
-
-            $added = array_values(array_slice($widened[$directive], count($sources)));
-            self::assertSame(['csp-test.example.com'], $added, $directive);
-        }
-
-        self::assertCount(count(CspDirective::cases()), array_intersect(
-            array_map(fn(CspDirective $d) => $d->value, CspDirective::cases()),
-            array_keys($widened)
-        ), 'every CspDirective case must have a placeholder in the template');
-    }
-
-    #[Test]
-    public function translatedCdnIsStillAllowedWhenPluginsAddSources(): void
-    {
-        foreach ([[], [self::TEST_PROVIDER], ['airbnb'], ['airbnb', self::TEST_PROVIDER]] as $features) {
-            $policy = $this->parsePolicy($this->renderPolicyContent('internal_scripts/tracking_codes', $features));
-
-            $label = 'features: [' . implode(', ', $features) . ']';
-            self::assertContains('*.translated.com', $policy['default-src'], $label);
-            self::assertContains('*.translated.com', $policy['style-src'], $label);
-            self::assertContains('api.laratranslate.com', $policy['default-src'], $label);
+            self::assertSame(self::DIRECTIVES, array_keys($policy), $case);
+            self::assertSame($this->templatePolicy(), $policy, $case);
+            self::assertStringNotContainsString('${', $content, $case);
+            self::assertStringNotContainsString("'unsafe-eval'", $content, $case);
         }
     }
 
     #[Test]
-    #[DataProvider('templateDirectories')]
-    public function anAirbnbProjectAllowsTheScreenshotCdnOnTopOfTheTemplate(string $templateDir): void
+    public function aPluginSourceIsAppendedToItsDirectiveOnly(): void
     {
-        $policy = $this->parsePolicy($this->renderPolicyContent($templateDir, ['airbnb']));
+        $baseline = $this->templatePolicy();
+        $policy = $this->parsePolicy($this->renderPolicyContent(['default-src' => 'a.example.com wss:']));
 
-        self::assertContains('a0.muscache.com', $policy['default-src']);
-        foreach (CspDirective::cases() as $directive) {
-            if ($directive !== CspDirective::DEFAULT_SRC) {
-                self::assertNotContains('a0.muscache.com', $policy[$directive->value], $directive->value);
-            }
-        }
-
-        if ($templateDir === 'internal_scripts/tracking_codes') {
-            self::assertContains('*.translated.com', $policy['default-src']);
+        self::assertSame(self::DIRECTIVES, array_keys($policy));
+        self::assertSame([...$baseline['default-src'], 'a.example.com', 'wss:'], $policy['default-src']);
+        foreach (array_diff(self::DIRECTIVES, ['default-src']) as $directive) {
+            self::assertSame($baseline[$directive], $policy[$directive], $directive);
         }
     }
 
     #[Test]
-    #[DataProvider('templateDirectories')]
-    public function aProjectWithoutTheAirbnbFeatureDoesNotAllowTheScreenshotCdn(string $templateDir): void
+    public function aDirectiveTheTemplateDoesNotDeclareIsIgnored(): void
     {
-        $content = $this->renderPolicyContent($templateDir, []);
+        // A new img-src would shadow default-src for images and drop every host it grants.
+        $content = $this->renderPolicyContent(['img-src' => 'a.example.com', 'style-src' => 'b.example.com']);
+        $policy = $this->parsePolicy($content);
 
-        self::assertStringNotContainsString('muscache', $content);
-    }
-
-    #[Test]
-    #[DataProvider('templateDirectories')]
-    public function aPluginWithAMalformedSourceCannotBreakThePageOrThePolicy(string $templateDir): void
-    {
-        $baseline = $this->parsePolicy($this->renderPolicyContent($templateDir, ['airbnb']));
-        $withBadPlugin = $this->parsePolicy($this->renderPolicyContent($templateDir, [self::BAD_PROVIDER, 'airbnb']));
-
-        // The malformed plugin is logged and skipped; the other plugins and the template are unaffected.
-        self::assertSame($baseline, $withBadPlugin);
-        self::assertNotContains('script-src', array_keys($withBadPlugin));
+        self::assertSame(self::DIRECTIVES, array_keys($policy));
+        self::assertStringNotContainsString('a.example.com', $content);
+        self::assertContains('b.example.com', $policy['style-src']);
     }
 
     /**
-     * @param list<string> $featureCodes
+     * Every page must load the macro from the core template. A page still loading it through
+     * TRACKING_CODES_VIEW_PATH would break as soon as the platform's copy in internal_scripts is deleted.
      */
-    private function renderPolicyContent(string $templateDir, array $featureCodes): string
+    #[Test]
+    public function everyPageLoadsTheMacroFromTheCoreTemplate(): void
     {
-        $absoluteDir = AppConfig::$ROOT . '/' . $templateDir;
-        if (!is_file($absoluteDir . '/CSP-HeaderMeta.html')) {
-            self::markTestSkipped("$templateDir/CSP-HeaderMeta.html is not available (submodule not checked out)");
+        $pages = glob(AppConfig::$TEMPLATE_ROOT . '/templates/_*.html') ?: [];
+        $including = array_filter($pages, fn(string $page) => str_contains((string)file_get_contents($page), 'CSP-HeaderMeta.html'));
+
+        self::assertNotEmpty($including);
+        foreach ($including as $page) {
+            self::assertStringContainsString(
+                'metal:use-macro="templates/CSP-HeaderMeta.html/CSP_NONCE"',
+                (string)file_get_contents($page),
+                basename($page)
+            );
+            self::assertStringNotContainsString('TRACKING_CODES_VIEW_PATH}/CSP-HeaderMeta', (string)file_get_contents($page), basename($page));
         }
+    }
 
-        $featureSet = new FeatureSet(
-            $this->createStub(IDatabase::class),
-            array_map(fn(string $code) => new BasicFeatureStruct(['feature_code' => $code]), $featureCodes)
-        );
-
+    /**
+     * @param array<string, string>|null $pluginCsp null leaves the variable unset
+     */
+    private function renderPolicyContent(?array $pluginCsp): string
+    {
         $view = new PHPTALWithAppend();
+        // A source path inside lib/View, so the relative macro path resolves the way it does for a real page.
         $view->setSource(
-            '<!DOCTYPE html><html><head><tal:block metal:use-macro="${csp_dir}/CSP-HeaderMeta.html/CSP_NONCE"/></head><body></body></html>'
+            '<!DOCTYPE html><html><head><tal:block metal:use-macro="templates/CSP-HeaderMeta.html/CSP_NONCE"/></head><body></body></html>',
+            AppConfig::$TEMPLATE_ROOT . '/csp_render_test.html'
         );
-        $view->set('csp_dir', $absoluteDir);
         $view->set('x_nonce_unique_id', 'test-nonce');
         $view->set('x_self_ajax_location_hosts', null);
+        if ($pluginCsp !== null) {
+            $view->set('x_plugin_csp', $pluginCsp);
+        }
 
-        $reflector = new ReflectionClass(CspRenderHarnessController::class);
-        $controller = $reflector->newInstanceWithoutConstructor();
-        $controller->setFeatureSet($featureSet);
-        $reflector->getProperty('view')->setValue($controller, $view);
-        $reflector->getProperty('templateName')->setValue($controller, 'context_preview.html');
-        $reflector->getMethod('applyPluginCspSources')->invoke($controller);
+        return $this->metaContent($view->execute());
+    }
 
+    /**
+     * The policy the template file declares, with the plugin placeholders left out.
+     *
+     * @return array<string, list<string>>
+     */
+    private function templatePolicy(): array
+    {
+        $template = (string)file_get_contents(AppConfig::$TEMPLATE_ROOT . '/templates/CSP-HeaderMeta.html');
+        $template = (string)preg_replace('#\$\{x_plugin_csp/[a-z-]+ \| nothing\}#', '', $template);
+        $template = str_replace(['${x_nonce_unique_id}', '${x_self_ajax_location_hosts}'], ['test-nonce', ''], $template);
+
+        return $this->parsePolicy($this->metaContent($template));
+    }
+
+    private function metaContent(string $html): string
+    {
         $document = new DOMDocument();
-        @$document->loadHTML($view->execute());
+        @$document->loadHTML($html);
         foreach ($document->getElementsByTagName('meta') as $meta) {
             if ($meta instanceof DOMElement && $meta->getAttribute('http-equiv') === 'Content-Security-Policy') {
                 return $meta->getAttribute('content');
             }
         }
 
-        self::fail('The rendered macro carries no Content-Security-Policy meta');
+        self::fail('No Content-Security-Policy meta found');
     }
 
     /**
@@ -181,51 +141,11 @@ class CspHeaderMetaRenderTest extends AbstractTest
             if ($tokens === []) {
                 continue;
             }
-            $name = array_shift($tokens);
+            $name = (string)array_shift($tokens);
             self::assertArrayNotHasKey($name, $policy, "directive $name is declared twice");
             $policy[$name] = $tokens;
         }
 
         return $policy;
-    }
-}
-
-class CspRenderHarnessController extends BaseKleinViewController
-{
-    protected function registerValidators(): void
-    {
-    }
-}
-
-namespace Plugins\Features;
-
-use Model\FeaturesBase\Hook\Event\Filter\ContentSecurityPolicySourcesEvent;
-use Utils\Templating\CspDirective;
-
-/**
- * A plugin asking for one host in every directive it may extend.
- */
-class TestCspSourcesProvider extends BaseFeature
-{
-    public const string FEATURE_CODE = 'test_csp_sources_provider';
-
-    public function contentSecurityPolicySources(ContentSecurityPolicySourcesEvent $event): void
-    {
-        foreach (CspDirective::cases() as $directive) {
-            $event->addSources($directive, 'csp-test.example.com');
-        }
-    }
-}
-
-/**
- * A plugin trying to close default-src and open a directive of its own.
- */
-class TestCspBadSourceProvider extends BaseFeature
-{
-    public const string FEATURE_CODE = 'test_csp_bad_source_provider';
-
-    public function contentSecurityPolicySources(ContentSecurityPolicySourcesEvent $event): void
-    {
-        $event->addSources(CspDirective::DEFAULT_SRC, 'evil.example.com; script-src *');
     }
 }

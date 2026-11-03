@@ -4,33 +4,27 @@ declare(strict_types=1);
 
 namespace Model\FeaturesBase\Hook\Event\Filter;
 
-use InvalidArgumentException;
 use Model\FeaturesBase\Hook\FilterEvent;
-use Utils\Templating\CspDirective;
+use Utils\Logger\LoggerFactory;
 
 /**
- * Collects the hosts the loaded plugins need in the page's Content-Security-Policy, such as the CDN a
- * customer serves its context screenshots from.
+ * Collects the hosts the loaded plugins add to the page's Content-Security-Policy, by directive.
  *
- * Each plugin owns the hosts it adds: the core only checks that every token is a well-formed source, so that
- * a value cannot close the directive and open another one. The policy can only be widened here. There is no
- * way to remove or replace a source the template grants.
+ * Example: `$event->addSources('default-src', 'a0.muscache.com');`
  *
- * The event is dispatched when the page is rendered, not when the view is set up, because views such as the
- * cattool and the context preview load the project's features after `setView()`.
+ * The template reads only the directives it declares (`${x_plugin_csp/default-src | nothing}`), so any other
+ * key is ignored and a plugin can never introduce a directive. That matters because a directive the template
+ * does not declare falls back to default-src: declaring it with a plugin's hosts alone would drop every
+ * source default-src grants.
  *
- * @see \Controller\Abstracts\BaseKleinViewController::applyPluginCspSources() — dispatch site
+ * Sources are string literals written in our own plugins; they never come from users, projects or the
+ * database. The only check is the one mistake that would break the policy: a source must be a single token.
+ *
+ * @see \Controller\Abstracts\BaseKleinViewController::render() — dispatch site
  */
 final class ContentSecurityPolicySourcesEvent extends FilterEvent
 {
-    /**
-     * A host source (`host`, `*.host`, `scheme://host`, `host:port`, `host/path`) or a bare scheme (`https:`).
-     * Whitespace, `;`, `,` and quotes are all outside the character classes, which is what keeps a source from
-     * ending its directive or smuggling in a keyword such as `'unsafe-inline'`.
-     */
-    private const string SOURCE_PATTERN = '#^(?:[a-z][a-z0-9+.\-]*:(?://)?)?(?:\*|(?:\*\.)?[a-z0-9\-]+(?:\.[a-z0-9\-]+)*)(?::(?:\d{1,5}|\*))?(?:/[a-z0-9\-._~%/]*)?$|^[a-z][a-z0-9+.\-]*:$#i';
-
-    /** @var array<string, list<string>> */
+    /** @var array<string, string> directive => space-separated sources */
     private array $sources = [];
 
     public static function hookName(): string
@@ -38,42 +32,26 @@ final class ContentSecurityPolicySourcesEvent extends FilterEvent
         return 'contentSecurityPolicySources';
     }
 
-    public function __construct(
-        private readonly string $templateName,
-    ) {
-    }
-
-    /**
-     * The template being rendered (`context_preview.html`), for a plugin that needs its hosts on one page only.
-     */
-    public function getTemplateName(): string
-    {
-        return $this->templateName;
-    }
-
-    /**
-     * @throws InvalidArgumentException when a source is not a well-formed CSP source expression
-     */
-    public function addSources(CspDirective $directive, string ...$sources): void
+    public function addSources(string $directive, string ...$sources): void
     {
         foreach ($sources as $source) {
-            if (preg_match(self::SOURCE_PATTERN, $source) !== 1) {
-                throw new InvalidArgumentException("Invalid Content-Security-Policy source for $directive->value: \"$source\"");
+            // One token only: a space, ';', ',' or a quote would end the directive or add a keyword.
+            // A bad source is skipped, not thrown: FeatureSet::dispatch() only logs an exception, so throwing
+            // would also drop every source the plugin adds after this one.
+            if (preg_match('/^[^\s;,\'"]+$/D', $source) !== 1) {
+                LoggerFactory::getLogger('feature_set')->warning("Skipped Content-Security-Policy source for $directive: \"$source\"");
+                continue;
             }
 
-            $current = $this->sources[$directive->value] ?? [];
-            if (!in_array($source, $current, true)) {
-                $current[] = $source;
-            }
-            $this->sources[$directive->value] = $current;
+            $this->sources[$directive] = ltrim(($this->sources[$directive] ?? '') . ' ' . $source);
         }
     }
 
     /**
-     * @return list<string>
+     * @return array<string, string>
      */
-    public function getSources(CspDirective $directive): array
+    public function getSources(): array
     {
-        return $this->sources[$directive->value] ?? [];
+        return $this->sources;
     }
 }

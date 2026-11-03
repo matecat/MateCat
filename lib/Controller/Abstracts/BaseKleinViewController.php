@@ -31,7 +31,6 @@ use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\Templating\BootstrapConfig;
-use Utils\Templating\CspDirective;
 use Utils\Templating\PHPTalBoolean;
 use Utils\Templating\PHPTalMap;
 use Utils\Templating\PHPTALWithAppend;
@@ -72,11 +71,6 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
      * @var integer
      */
     protected int $httpCode = 500;
-
-    /**
-     * The template passed to setView(), handed to the plugins that add Content-Security-Policy sources.
-     */
-    protected string $templateName = '';
 
     /**
      * Routed entry point for every view controller.
@@ -121,7 +115,6 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
         $templatePath = AppConfig::$TEMPLATE_ROOT . "/$template_name";
         $this->view = new PHPTALWithAppend($templatePath);
         $this->httpCode = $code;
-        $this->templateName = $template_name;
 
         // Part of setting up the view, not of filling it: it holds no values of its own, it reads the
         // view's back and encodes them at the moment the template renders it. Whatever has been
@@ -190,44 +183,10 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
             ? " *.ajax." . $parsedHost['host']
             : null;
 
-        // Filled at render time by applyPluginCspSources(). Declared here because every page includes the CSP
-        // macro, and PHPTAL refuses to render a placeholder whose variable was never set.
-        foreach (CspDirective::cases() as $directive) {
-            $this->view->{$directive->templateVariable()} = null;
-        }
-
         $this->addParamsToView($params);
         $this->view->setOutputMode(PHPTAL::HTML5);
 
         $this->getFeatureSet()->dispatch(new DecorateViewEvent($this->view, $template_name, $nonce));
-    }
-
-    /**
-     * Asks the loaded plugins for the hosts they need in the page's Content-Security-Policy and writes them
-     * to the template's per-directive placeholders.
-     *
-     * Runs at render time, not in setView(): the cattool and the context preview replace the viewer's
-     * features with the project's after setView() returns, and the hosts a page needs belong to the
-     * project's plugins (a customer's screenshot CDN), whoever is looking at it.
-     *
-     * A source a plugin gets wrong is refused by the event and logged by the FeatureSet, which drops that
-     * plugin's remaining sources and leaves the page rendering on the template's own policy.
-     *
-     * @throws AuthenticationError
-     * @throws ControllerValidationError
-     * @throws EndQueueException
-     * @throws NotFoundException
-     * @throws ReQueueException
-     * @throws ValidationError
-     */
-    protected function applyPluginCspSources(): void
-    {
-        $event = $this->getFeatureSet()->dispatch(new ContentSecurityPolicySourcesEvent($this->templateName));
-
-        foreach (CspDirective::cases() as $directive) {
-            $sources = $event->getSources($directive);
-            $this->view->{$directive->templateVariable()} = $sources === [] ? null : ' ' . implode(' ', $sources);
-        }
     }
 
     /**
@@ -281,7 +240,11 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
         $this->response->code($code ?? $this->httpCode);
 
         if (isset($this->view)) {
-            $this->applyPluginCspSources();
+            // Dispatched here, not in setView(): the cattool and the context preview load the project's
+            // features after setView(), and the hosts a page needs belong to the project's plugins.
+            $this->view->{'x_plugin_csp'} = $this->getFeatureSet()
+                ->dispatch(new ContentSecurityPolicySourcesEvent())
+                ->getSources();
             $this->response->body($this->view->execute());
         }
 

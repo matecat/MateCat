@@ -203,7 +203,7 @@ class ContextReviewViewControllerTest extends AbstractTest
             $this->controller->renderView();
             $this->fail('Expected RenderTerminatedException');
         } catch (RenderTerminatedException) {
-            $this->assertSame('project_not_found.html', $this->controller->lastTemplate);
+            $this->assertSame('job_not_found.html', $this->controller->lastTemplate);
             $this->assertSame(404, $this->controller->lastViewCode);
             $this->assertNull($this->controller->featuresLoadedFor);
         }
@@ -218,7 +218,7 @@ class ContextReviewViewControllerTest extends AbstractTest
             $this->controller->renderView();
             $this->fail('Expected RenderTerminatedException');
         } catch (RenderTerminatedException) {
-            $this->assertSame('project_not_found.html', $this->controller->lastTemplate);
+            $this->assertSame('job_not_found.html', $this->controller->lastTemplate);
             $this->assertSame(404, $this->controller->lastViewCode);
         }
     }

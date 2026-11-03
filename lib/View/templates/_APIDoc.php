@@ -6,8 +6,8 @@ use Klein\App;
 use Matecat\Locales\LanguageDomains;
 use Matecat\Locales\Languages;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\ContentSecurityPolicySourcesEvent;
 use Utils\Registry\AppConfig;
-use Utils\Templating\CspDirective;
 use Utils\Tools\Utils;
 
 /** @phpstan-ignore requireOnce.fileNotFound */
@@ -20,7 +20,7 @@ try {
 $max_file_size_in_MB = AppConfig::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
 
 $csp_nonce = Utils::uuid4();
-$csp = file_get_contents(AppConfig::$ROOT . "/" . AppConfig::$TRACKING_CODES_VIEW_PATH . "/CSP-HeaderMeta.html") ?: '';
+$csp = file_get_contents(AppConfig::$TEMPLATE_ROOT . '/templates/CSP-HeaderMeta.html') ?: '';
 $csp = str_replace('${x_nonce_unique_id}', $csp_nonce, $csp);
 
 $parsedHost = parse_url(AppConfig::$HTTPHOST);
@@ -29,11 +29,18 @@ $x_self_ajax_location_hosts = AppConfig::$ENABLE_MULTI_DOMAIN_API && is_array($p
         : '';
 $csp = str_replace('${x_self_ajax_location_hosts}', $x_self_ajax_location_hosts, $csp) ?: '';
 
-// Plugin sources are added by BaseKleinViewController at render time. This page is not rendered by a
-// controller, so it carries the template's own sources and none from plugins.
-foreach (CspDirective::cases() as $directive) {
-    $csp = str_replace('${' . $directive->templateVariable() . '}', '', $csp);
-}
+// The web request already ran Bootstrap::start(); read the handle from the
+// composition root instead of re-resolving the singleton here.
+$featureSet = new FeatureSet(Bootstrap::getDatabase());
+
+// This page is not rendered by a controller, so it fills the plugin placeholders itself, the way
+// BaseKleinViewController::render() does: the platform hosts come from a plugin, not from the template.
+$pluginCsp = $featureSet->dispatch(new ContentSecurityPolicySourcesEvent())->getSources();
+$csp = preg_replace_callback(
+    '#\$\{x_plugin_csp/([a-z-]+) \| nothing\}#',
+    fn(array $m): string => $pluginCsp[$m[1]] ?? '',
+    $csp
+) ?? '';
 
 ?>
 <!DOCTYPE html>
@@ -131,9 +138,6 @@ foreach (CspDirective::cases() as $directive) {
     <?php
 
     $instance = new CustomPageView(Bootstrap::getDatabase());
-    // The web request already ran Bootstrap::start(); read the handle from the
-    // composition root instead of re-resolving the singleton here.
-    $featureSet = new FeatureSet(Bootstrap::getDatabase());
 
     if ($instance->getUser()->email !== null) {
         $featureSet->loadFromUserEmail($instance->getUser()->email);

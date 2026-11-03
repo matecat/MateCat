@@ -27,16 +27,11 @@ class ContextReviewController extends BaseKleinViewController implements IContro
     public function renderView(): void
     {
         $request = $this->validateTheRequest();
+        $job = is_array($request) ? $this->findJob((int)$request['id_project'], (string)$request['password']) : null;
 
-        if (!is_array($request)) {
-            $this->setView('project_not_found.html', [], 404);
-            $this->render();
-        }
-
-        $job = $this->findJob((int)$request['id_project'], (string)$request['password']);
-
-        if ($job === null) {
-            $this->setView('project_not_found.html', [], 404);
+        // Re-checking is_array() tells PHPStan that $request is an array past this block.
+        if (!is_array($request) || $job === null) {
+            $this->setView('job_not_found.html', [], 404);
             $this->render();
         }
 
