@@ -12,6 +12,9 @@ use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
+use Model\Translations\SegmentTranslationDao;
+use Model\Translations\SegmentTranslationStruct;
+use Model\Translations\WarningDao;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
@@ -19,6 +22,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use ReflectionException;
 use Utils\Logger\MatecatLogger;
+use Utils\Constants\TranslationStatus;
 use Utils\LQA\QA;
 
 class TestableGetWarningController extends GetWarningController
@@ -117,6 +121,9 @@ class GetWarningControllerTest extends AbstractTest
         $conn->exec("DELETE FROM jobs WHERE id = " . self::TEST_JOB_ID);
         $conn->exec("DELETE FROM files WHERE id = " . self::TEST_FILE_ID);
         $conn->exec("DELETE FROM projects WHERE id = " . self::TEST_PROJECT_ID);
+
+        // global() caches under the job id: a list left by an earlier test would mask this one's rows.
+        (new WarningDao($db))->destroyCachesByJobId(self::TEST_JOB_ID);
     }
 
     /**
@@ -391,22 +398,85 @@ class GetWarningControllerTest extends AbstractTest
     }
 
     #[Test]
-    public function global_catches_exception_and_returns_details_empty_array(): void
+    public function global_throws_not_found_instead_of_reporting_an_empty_warning_list(): void
     {
+        // An empty `details` reads as "this job has no warnings": a wrong job or password must not get one.
         $this->setRequestParams([
             'id_job' => '9999999',
             'password' => 'nonexistent_job_password',
         ]);
 
+        $this->responseMock->expects($this->never())->method('json');
+        $this->expectException(NotFoundException::class);
+
+        $this->controller->global();
+    }
+
+    #[Test]
+    public function global_reports_a_flagged_segment_by_level_and_category(): void
+    {
+        $stmt = obtainTestDatabase()->getConnection()->prepare(
+            "UPDATE segment_translations SET warning = 1, serialized_errors_list = :errors WHERE id_segment = :s AND id_job = :j"
+        );
+        $stmt->execute([
+            'errors' => json_encode([['outcome' => QA::ERR_TAG_MISMATCH, 'debug' => 'Tag mismatch']]),
+            's' => self::TEST_SEGMENT_ID,
+            'j' => self::TEST_JOB_ID,
+        ]);
+
+        $this->setRequestParams([
+            'id_job' => (string) self::TEST_JOB_ID,
+            'password' => self::TEST_JOB_PASSWORD,
+        ]);
+
         $this->responseMock->expects($this->once())
             ->method('json')
             ->with($this->callback(function (array $data): bool {
-                $this->assertArrayHasKey('details', $data);
-                $this->assertSame([], $data['details']);
+                $this->assertSame([(string) self::TEST_SEGMENT_ID], $data['details']['ERROR']['Categories']['TAGS'] ?? null);
                 return true;
             }));
 
         $this->controller->global();
+    }
+
+    #[Test]
+    public function global_serves_the_cached_list_until_a_segment_write_evicts_it(): void
+    {
+        $this->setRequestParams([
+            'id_job' => (string) self::TEST_JOB_ID,
+            'password' => self::TEST_JOB_PASSWORD,
+        ]);
+
+        $responses = [];
+        $this->responseMock->method('json')->willReturnCallback(function (array $data) use (&$responses): Response {
+            $responses[] = $data['details']['ERROR']['Categories']['TAGS'] ?? [];
+
+            return $this->responseMock;
+        });
+
+        $this->controller->global();
+
+        // A write that bypasses the DAO evicts nothing: the cached (empty) list is still served.
+        $errors = json_encode([['outcome' => QA::ERR_TAG_MISMATCH, 'debug' => 'Tag mismatch']]);
+        $stmt = obtainTestDatabase()->getConnection()->prepare(
+            "UPDATE segment_translations SET warning = 1, serialized_errors_list = :errors WHERE id_segment = :s AND id_job = :j"
+        );
+        $stmt->execute(['errors' => $errors, 's' => self::TEST_SEGMENT_ID, 'j' => self::TEST_JOB_ID]);
+        $this->controller->global();
+
+        // Saving the segment through the DAO evicts it, so the issue shows up at once.
+        $translation = new SegmentTranslationStruct();
+        $translation->id_segment = self::TEST_SEGMENT_ID;
+        $translation->id_job = self::TEST_JOB_ID;
+        $translation->status = TranslationStatus::STATUS_TRANSLATED;
+        $translation->translation = 'Ciao mondo';
+        $translation->serialized_errors_list = $errors;
+        $translation->warning = true;
+        $translation->translation_date = date('Y-m-d H:i:s');
+        (new SegmentTranslationDao(obtainTestDatabase()))->addTranslation($translation, false);
+        $this->controller->global();
+
+        $this->assertSame([[], [], [(string) self::TEST_SEGMENT_ID]], $responses);
     }
 
     // ─── registerValidators (production hook) ───
