@@ -569,7 +569,7 @@ ul {
     margin: 40px 0 16px;
 
     h3 {
-      font-size: 30px;
+      font-size: variables.$font-size-page-title;
     }
 
     > :last-child {

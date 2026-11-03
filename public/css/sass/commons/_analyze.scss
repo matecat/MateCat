@@ -69,6 +69,7 @@ body.analyze {
 
     h3 {
       text-align: left;
+      font-size: variables.$font-size-page-title;
     }
 
     .project-header {
@@ -250,7 +251,10 @@ body.analyze {
         align-self: stretch;
         border-radius: variables.$border-radius-big;
         border: 1px solid colors.$grey150;
-        overflow: hidden;
+        // `clip` (unlike `hidden`) is not a scroll container, so the header can stay sticky;
+        // the 1px margin lets the header's shadow cover the side borders above it
+        overflow: clip;
+        overflow-clip-margin: 1px;
         .project-card__header,
         .project-card__content {
           display: flex;
@@ -267,6 +271,16 @@ body.analyze {
           .project-card__chunkName {
             margin-bottom: 4px;
             font: variables.$font-style-small;
+          }
+          // A split job's chunk: "1 - <link>" on one line
+          &.project-card__header-info--chunk {
+            flex-direction: row;
+            align-items: center;
+            gap: 8px;
+            .project-card__chunkName {
+              margin-bottom: 0;
+              white-space: nowrap;
+            }
           }
           .project-card__header-link {
             display: flex;
@@ -349,9 +363,26 @@ body.analyze {
         .project-card__header {
           height: 64px;
           background: colors.$grey50;
+          // Sticks below the top bar with a small gap, like the My projects header
+          position: sticky;
+          // Sticky offsets count from inside the scroller's 40px top padding
+          // (#analyze-container), so this leaves an 8px gap below the top bar
+          top: calc(8px - 40px);
+          z-index: 2;
+          border-radius: 15px 15px 0 0;
+          // The page-coloured shadow fills the gap and the corners so rows scrolling under it
+          // stay hidden; the 1px shadows redraw the card border on the top and sides only
+          box-shadow:
+            0 -1px 0 0 colors.$grey150,
+            -1px 0 0 0 colors.$grey150,
+            1px 0 0 0 colors.$grey150,
+            0 -8px 0 8px colors.$grey100;
+          .project-card__count > div {
+            font-size: variables.$font-size-small;
+          }
         }
         .project-card__content {
-          height: 80px;
+          height: 60px;
           border-bottom: 1px solid colors.$grey100;
           background: colors.$white;
         }
