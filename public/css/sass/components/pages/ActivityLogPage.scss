@@ -1,6 +1,6 @@
 @use 'NewProjectPage';
-@use "../../commons/reset";
-@use "../../tokens/colors";
+@use '../../commons/reset';
+@use '../../tokens/colors';
 @use 'commons/variables';
 
 $activity-log-control-height: 36px;
@@ -154,26 +154,41 @@ $activity-log-control-height: 36px;
         font-size: variables.$font-size-xsmall;
         color: colors.$grey700;
       }
-
-      .select {
-        @include activity-log-control;
-        padding-right: 32px;
-      }
     }
 
     .activity-log-filter-column-input {
       @include activity-log-control;
       width: 260px;
 
+      box-sizing: border-box;
+      height: 40px;
+      color: colors.$black;
+      border: 1px solid colors.$grey200;
+      font-size: 16px;
+      line-height: 24px;
+      font-weight: 400;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      border-radius: 8px;
+      padding: 8px 12px;
+
+      &:autofill,
+      &:-webkit-autofill {
+        border: none !important;
+      }
       &::placeholder {
         color: colors.$grey400;
         opacity: 1;
       }
-
-      &:focus {
+      &:hover {
+        border-color: colors.$grey400;
+      }
+      &:focus,
+      &:active {
+        border-color: colors.$grey400;
+        box-shadow: 0 0 0 1px colors.$grey400;
         outline: none;
-        border-color: colors.$grey1300;
-        box-shadow: 0 0 0 1px colors.$grey1300;
       }
     }
   }

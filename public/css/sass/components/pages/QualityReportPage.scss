@@ -9,6 +9,7 @@
 @use '../header/ActionMenu';
 @use '../../tokens/colors';
 @use '../../commons/variables';
+@use '../../commons/aria-label-tooltip';
 
 $color-red: #fb2a0d;
 $color-orange: #fbaa0d;
@@ -2542,69 +2543,6 @@ header
   .layout__container
   .qr-segment-details-container
   .qr-segments-summary
-  .select {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 5px;
-  padding-left: 9px;
-  border-radius: 40px;
-  height: 38px;
-  line-height: 20px;
-}
-
-.qr-segments-summary .filter-status .select span {
-  display: flex;
-  align-content: center;
-  align-items: center;
-  gap: 4px;
-}
-
-.qr-wrapper
-  .qr-container
-  .qr-container-inside
-  .qr-job-summary-container
-  .layout__container
-  .qr-segment-details-container
-  .qr-segments-summary
-  li.dropdown__option {
-  padding: 8px;
-}
-
-.qr-wrapper
-  .qr-container
-  .qr-container-inside
-  .qr-job-summary-container
-  .layout__container
-  .qr-segment-details-container
-  .qr-segments-summary
-  .dropdown__option
-  span {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: variables.$font-size-small;
-}
-
-.qr-wrapper
-  .qr-container
-  .qr-container-inside
-  .qr-job-summary-container
-  .layout__container
-  .qr-segment-details-container
-  .qr-segments-summary
-  .custom-dropdown.select__dropdown {
-  background-color: colors.$white;
-  min-width: 120px;
-}
-
-.qr-wrapper
-  .qr-container
-  .qr-container-inside
-  .qr-job-summary-container
-  .layout__container
-  .qr-segment-details-container
-  .qr-segments-summary
   .filter-category {
   max-width: 200px;
 }
@@ -2618,7 +2556,7 @@ header
   .qr-segments-summary
   .filter-category
   .select__dropdown-wrapper {
-  width: unset;
+  min-width: 250px;
 }
 
 .qr-reviewType-control {
