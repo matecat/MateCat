@@ -41,7 +41,7 @@ import useProjectTemplates, {SCHEMA_KEYS} from '../hooks/useProjectTemplates'
 import {TemplateSelect} from '../components/settingsPanel/ProjectTemplate/TemplateSelect'
 import {getMMTKeys} from '../api/getMMTKeys'
 import {AlertDeleteResourceProjectTemplates} from '../components/modals/AlertDeleteResourceProjectTemplates'
-import {handleCreationStatus} from '../utils/newProjectUtils'
+import {handleCreationStatus, omitTemplateOwner} from '../utils/newProjectUtils'
 import {getPretranslateParams} from '../utils/editorStatusLock'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
 import {mountPage} from './mountPage'
@@ -519,9 +519,11 @@ const NewProject = () => {
       ),
     )
     const xliffParametersTemplate = JSON.stringify(
-      getTemplateUnsavedById(
-        XliffConfigTemplateId,
-        fileImportXliffSettingsTemplates.templates,
+      omitTemplateOwner(
+        getTemplateUnsavedById(
+          XliffConfigTemplateId,
+          fileImportXliffSettingsTemplates.templates,
+        ),
       ),
     )
 
