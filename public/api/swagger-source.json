@@ -3081,8 +3081,8 @@
         "tags": [
           "TM keys"
         ],
-        "summary": "Create (or update) a TM key.",
-        "description": "Create a new TM key or update its name. If the 'key' parameter is not provided, a new key will be created; if a valid key is provided, the key's name will be updated.",
+        "summary": "Create a new TM key, rename an existing one or add to your portfolio a key shared by a different user.",
+        "description": "If the 'key' parameter is not provided, a new key will be created. If a valid key is provided and the key is already in your list, its name will be updated; if it is not in your list yet (i.e. it was shared with you by a different user), the key will be added to your list with your chosen name.",
         "consumes": [
           "application/json"
         ],
