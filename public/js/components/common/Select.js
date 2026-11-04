@@ -32,7 +32,7 @@ export const Select = ({
   optionsSelectedCopyPlural = () => {},
   resetSelectedOptions = () => {},
   checkSpaceToReverse = true,
-  maxHeightDroplist = 400,
+  maxHeightDroplist = 420,
   isPortalDropdown,
   isActiveOptionOnTop,
   dropdownClassName,
@@ -218,9 +218,7 @@ export const Select = ({
 
           style.transform = `translateX(${x}px)`
           style.top = 'auto'
-          style.bottom = `${
-            window.innerHeight - y + DROPDOWN_TO_TRIGGER_GAP
-          }px`
+          style.bottom = `${window.innerHeight - y + DROPDOWN_TO_TRIGGER_GAP}px`
         } else {
           style.transform = `translate(${x}px,${y + rect.height}px)`
           style.top = ''

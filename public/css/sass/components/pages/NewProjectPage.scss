@@ -500,7 +500,7 @@ a {
     padding: 3px 5px 3px 9px;
     font-size: variables.$font-size-small !important;
     border-radius: variables.$border-radius-default;
-    border: 1px solid rgba(34, 36, 38, 0.15);
+    border: 1px solid colors.$grey200;
     height: 40px;
   }
 }
