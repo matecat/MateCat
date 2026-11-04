@@ -2863,57 +2863,57 @@
           {
             "name": "name",
             "in": "formData",
-            "description": "The glossary's name",
+            "description": "The glossary's name. Optional, only echoed back in the response.",
             "type": "string",
             "required": false
           },
           {
             "name": "tm_key",
             "in": "formData",
-            "description": "The tm key.",
+            "description": "The TM key the glossary is meant for. Required, but only echoed back in the response: it is not checked here.",
             "required": true,
             "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "Upload and check a glossary file",
+            "description": "Glossary file is valid",
             "schema": {
               "type": "object",
               "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "uuids": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "uuid": {
-                            "type": "string",
-                            "example": "1234-5678-90ab-cdef"
-                          },
-                          "name": {
-                            "type": "string",
-                            "example": "This is a glossary name"
-                          },
-                          "numberOfLanguages": {
-                            "type": "integer",
-                            "example": 3
-                          }
-                        }
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "x-nullable": true,
+                        "description": "The glossary name sent in the request, or null",
+                        "example": "This is a glossary name"
+                      },
+                      "tmKey": {
+                        "type": "string",
+                        "example": "a1b2c3d4e5f6a7b8c9d0"
+                      },
+                      "numberOfLanguages": {
+                        "type": "integer",
+                        "example": 3
                       }
                     }
                   }
-                },
-                "success": {
-                  "type": "boolean"
                 }
               }
             }
           },
           "400": {
-            "description": "Unexpected error",
+            "description": "Missing `tm_key`, or the file is not a valid glossary",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Authentication required",
             "schema": {
               "$ref": "#/definitions/Error"
             }
