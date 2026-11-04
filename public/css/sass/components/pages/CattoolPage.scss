@@ -91,6 +91,9 @@ body.cattool {
   overflow-y: hidden !important;
   padding: unset;
   background-color: colors.$grey50;
+  // The editor lays out below 1024px (the global body minimum in _reset.scss); with that
+  // minimum the page scrolled sideways under the footer and its scrollbar sat below it
+  min-width: 0;
 }
 
 body.cattool .page-content {
@@ -108,7 +111,6 @@ body.cattool header {
   transition: margin-top 200ms ease-out;
   -webkit-transition: margin-top 200ms ease-out;
   box-sizing: content-box;
-  min-width: 1024px;
 }
 
 body.cattool .main-container {

@@ -5,30 +5,33 @@
   width: 100%;
 }
 .footer-body {
-  display: flex;
+  // Job ID on the left; the progress bar and the counts together in the middle.
+  // The two outer 1fr tracks share what is left, so the middle pair stays centred;
+  // the bar grows to 520px before they get anything.
+  display: grid;
+  // The bar column never gets narrower than its content (codes, the bar's own minimum,
+  // the percentage), so the percentage cannot run into the counts
+  grid-template-columns:
+    minmax(max-content, 1fr) minmax(min-content, 520px) max-content
+    minmax(0, 1fr);
+  column-gap: 32px;
   height: 50px;
-  padding: 0 10px;
+  padding: 0 32px;
   background-color: colors.$white;
+  // One line at any width: rather cut the end than wrap above the bar's 50px
+  white-space: nowrap;
+  overflow: hidden;
 
   .container-left,
   .container-center,
   .container-right {
     display: flex;
     align-items: center;
-  }
-
-  .container-left {
-    padding-left: 22px;
-  }
-
-  .container-center {
-    flex-grow: 1;
-    justify-content: center;
+    min-width: 0;
   }
 
   .container-right {
     gap: 24px;
-    padding-right: 22px;
   }
 
   .container-progress-bar {
@@ -36,15 +39,22 @@
     align-items: center;
     gap: 16px;
     flex-grow: 1;
-    max-width: 520px;
-    font-weight: bold;
+    min-width: 0;
 
+    // Only the language codes are bold, not the arrow or the percentage
     .language {
       white-space: nowrap;
+
+      span:not(.to-arrow) {
+        font-weight: bold;
+      }
     }
 
     .footer-progress {
       flex-grow: 1;
+      min-width: 0;
+      // On narrow windows the bar gives way, so the percentage never runs into the counts
+      --job-progress-bar-min-width: 60px;
     }
   }
 
@@ -80,6 +90,18 @@
     width: 1px;
     margin: 15px 0;
     background-color: colors.$grey200;
+  }
+
+  // Narrow windows: tighter spacing keeps everything on the line down to ~900px.
+  // Last in the block so it wins over the gaps above.
+  @media (max-width: 1023px) {
+    column-gap: 16px;
+    padding: 0 16px;
+
+    .container-right,
+    .footer-speed-etc {
+      gap: 16px;
+    }
   }
 
   .stats-foo {

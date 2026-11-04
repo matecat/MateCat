@@ -183,6 +183,35 @@ test('shows the weighted count with the raw count in brackets', () => {
   getProgressSpy.mockRestore()
 })
 
+test('shows zero counts as 0, not as the unknown-count dash', () => {
+  global.config = {isReview: false, allow_link_to_analysis: false}
+  const getProgressSpy = jest
+    .spyOn(CatToolStore, 'getProgress')
+    .mockReturnValue({
+      raw: {total: 108},
+      equivalent: {total: 0},
+      translate_todo_total: 0,
+      translate_todo: 0,
+    })
+
+  render(
+    <CattoolFooter
+      idProject="1"
+      idJob="2"
+      password="pass"
+      languagesArray={[]}
+      source="en-US"
+      target="it-IT"
+      isCJK={false}
+    />,
+  )
+
+  expect(screen.getByText(/^Words:/)).toHaveTextContent('Words: 0 (108)')
+  expect(screen.getByText(/^To do:/)).toHaveTextContent('To do: 0 (0)')
+
+  getProgressSpy.mockRestore()
+})
+
 test('labels the count as characters for CJK languages', async () => {
   global.config = {isReview: false, allow_link_to_analysis: false}
   const getProgressSpy = jest

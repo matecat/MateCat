@@ -98,13 +98,13 @@ function QualitySummaryTable({qualitySummary}) {
     () => (
       <div className="qr-head">
         <div className="qr-title qr-issue">Categories</div>
-        <div className="qr-title qr-severity">Severities</div>
-        {severities.map(
-          (sev, i) =>
-            i > 0 && (
-              <div className="qr-title qr-severity" key={sev.label + i} />
-            ),
-        )}
+        {/* One heading over all the severity columns, centred across them */}
+        <div
+          className="qr-title qr-severities-heading"
+          style={{'--qr-severity-count': severities.length}}
+        >
+          Severities
+        </div>
         <div className="qr-title qr-total-severity">Error points</div>
       </div>
     ),
