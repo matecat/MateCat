@@ -3,6 +3,8 @@
 namespace Controller\Views;
 
 use Controller\Abstracts\BaseKleinViewController;
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\ValidationError as ControllerValidationError;
 use Controller\Exceptions\RenderTerminatedException;
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Exception;
@@ -11,6 +13,8 @@ use Klein\Exceptions\LockedResponseException;
 use Klein\Exceptions\ResponseAlreadySentException;
 use Model\ConnectedServices\Oauth\OauthClient;
 use Model\ConnectedServices\Oauth\ProviderUser;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
 use Model\Teams\TeamDao;
 use Model\Users\Authentication\OAuthSignInModel;
 use Model\Users\MetadataDao;
@@ -18,6 +22,8 @@ use Model\Users\UserDao;
 use ReflectionException;
 use TypeError;
 use Utils\Registry\AppConfig;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
 
 class OauthResponseHandlerController extends BaseKleinViewController
 {
@@ -111,6 +117,12 @@ class OauthResponseHandlerController extends BaseKleinViewController
      * @throws ResponseAlreadySentException
      * @throws LockedResponseException
      * @throws TypeError
+     * @throws AuthenticationError
+     * @throws ControllerValidationError
+     * @throws EndQueueException
+     * @throws NotFoundException
+     * @throws ReQueueException
+     * @throws ValidationError
      */
     protected function _initRemoteUser(string $code, ?string $provider = null): void
     {
