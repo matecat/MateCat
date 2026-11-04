@@ -88,7 +88,11 @@ export const CattoolFooter = ({
     )
   const removeTooltip = () => setIsShowingTooltip(false)
 
-  const formatCount = (value) => (value ? Math.round(value) : '-')
+  // A dash only while the count is unknown; zero words is a real count
+  const formatCount = (value) =>
+    value === undefined || value === null || value === ''
+      ? '-'
+      : Math.round(value)
 
   // Weighted count in black, raw count in grey brackets, the two spelled out on hover
   // (same pattern as the words button in My projects).
@@ -215,7 +219,7 @@ export const CattoolFooter = ({
         <div className="container-left">
           <p id="job_id">
             <span className="footer-stat-label">Job ID</span>{' '}
-            <strong>{idJob}</strong>
+            <span className="footer-stat-label">{idJob}</span>
           </p>
         </div>
         <div className="container-center">

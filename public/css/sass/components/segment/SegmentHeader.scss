@@ -16,7 +16,9 @@ section .header {
     font-size: 12px;
     text-decoration: none;
     font-weight: 100;
-    margin: 0 auto;
+    // Centred over the copy-source button, not over the header: the source/copy/target
+    // row (.wrap) is 99% wide, so its centre is at 49.5%; the badge is 45px wide
+    margin: 0 0 0 calc(49.5% - 22.5px);
     text-align: center;
     line-height: 24px;
   }

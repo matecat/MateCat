@@ -225,7 +225,8 @@ ul.suggestion-item.graysmall:last-child {
   bottom: 0;
   right: 0;
   margin-top: 10px;
-  margin-right: 15px;
+  // The match type badge ends on the tab's border
+  margin-right: 0;
   z-index: 0;
   gap: 4px;
 }
