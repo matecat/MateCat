@@ -3095,7 +3095,7 @@
                 "key": {
                   "type": "string",
                   "example": "1234_xxxx",
-                  "description": "In case of already existent TM key, it will be updated."
+                  "description": "The TM key to rename or to add to your list. Omit it to create a new key. If the key is already in your list, its name will be updated; if it was shared with you by a different user, it will be added to your list with your chosen name."
                 },
                 "name": {
                   "type": "string",
