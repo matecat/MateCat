@@ -40,9 +40,7 @@ services:
                 # plugins/aligner/lib/Features/Aligner.php used to be listed here and has been
                 # dropped as dead configuration, on two independent counts: `plugins/aligner` is in
                 # excludePaths below so the rule never analyses it, and the file no longer names the
-                # superglobal at all. The only $_SESSION left anywhere under plugins/aligner/lib is
-                # prose in a ConfigsController docblock, which is not a Variable node and so was
-                # never a violation.
+                # superglobal at all. No file under plugins/aligner/lib names $_SESSION any more.
 
     -
         class: Matecat\PhpStan\Rules\NoDirectSessionFunctionRule
@@ -83,7 +81,6 @@ parameters:
         # inside the submodule doesn't flood the root scan with third-party errors.
         - internal_scripts/*/vendor/* (?)
         # Legacy plugin: cannot be economically cleaned; intentionally not analyzed.
-        # Its own phpstan-baseline.neon lives in the aligner submodule, unused by matecat.
         - plugins/aligner (?)
     universalObjectCratesClasses:
         - Model\DataAccess\ShapelessConcreteStruct
