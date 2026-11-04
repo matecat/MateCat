@@ -231,16 +231,8 @@ body.analyze {
       }
     }
 
+    // Every workflow type (type-standard, type-mtqe) renders the same job cards
     .project-top {
-      &.type-mtqe {
-        .title-total-words,
-        .title-matecat-words {
-          width: 50% !important;
-        }
-      }
-    }
-
-    .project-top.type-standard {
       display: flex;
       flex-direction: column;
       gap: 16px;
