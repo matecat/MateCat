@@ -337,39 +337,55 @@ a {
   }
 }
 
+// Inline alert under the project settings: a soft tint with a border of the same
+// hue, the icon in the strong colour and the message in dark, regular text
 .error-message,
 .warning-message {
-  background: colors.$red400;
-  color: colors.$white;
-  padding: 10px 0 10px 16px;
-  margin: 10px 0;
-  font-weight: bold;
-  width: 100%;
-  -moz-border-radius: 2px;
-  border-radius: 2px;
-  border: 1px solid colors.$orange500;
   display: flex;
-  .icon {
-    float: left;
-    font-size: 25px;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  margin: 10px 0;
+  padding: 12px 16px;
+  border: 1px solid;
+  border-radius: variables.$border-radius-default;
+  color: colors.$grey1300;
+  text-align: left;
+
+  svg {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
   }
+
   p {
-    line-height: 25px;
+    margin: 0;
     font-size: variables.$font-size-small;
-    float: left;
-    margin-left: 12px;
+    line-height: 20px;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: underline;
   }
 }
+
 .error-message {
-  a {
-    color: colors.$white;
+  background: colors.$red50;
+  border-color: colors.$red100;
+
+  svg {
+    color: colors.$red600;
   }
 }
 
 .warning-message {
-  background: rgba(255, 250, 139, 0.38) !important;
-  border-color: colors.$grey600;
-  color: colors.$black;
+  background: colors.$orange50;
+  border-color: colors.$orange200;
+
+  svg {
+    color: colors.$orange700;
+  }
 }
 
 .new_project__page {
