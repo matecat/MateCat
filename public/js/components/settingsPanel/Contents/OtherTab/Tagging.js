@@ -18,6 +18,12 @@ export const taggingTypes = [
     default: true,
   },
   {
+    id: 'single_square',
+    name: 'Single square brackets',
+    code: '[text]',
+    default: false,
+  },
+  {
     id: 'dollar_curly',
     name: 'Dollar curly brackets',
     code: '${text}',
