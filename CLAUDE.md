@@ -218,14 +218,23 @@ Valid emoji Type Reference
 
 ### Creating worktrees
 
-When creating worktrees, those commands MUST be used:
+When creating worktrees, those commands MUST be used, from the project root:
 
-- `cd <project-root> && git branch --show-current`
-- `git branch <branch-name> <current-branch-name>`
+- `git branch --show-current`
+- Create the branch the worktree checks out:
+  - new work: `git branch <branch-name> <current-branch-name>`
+  - reviewing a pull request: `git fetch origin pull/<number>/head:pr-<number>`, then use `pr-<number>` as
+    `<branch-name>`
 - `git worktree add ../matecat-<branch-name> <branch-name>`
 - `cp composer.phar ../matecat-<branch-name>/composer.phar`
-- `cd ../matecat-<branch-name>/ && php composer.phar install`
-- `git submodule update --init --recursive`
+- `cd ../matecat-<branch-name>/ && php composer.phar install && git submodule update --init --recursive`
+
+Keep the last two commands in one shell call. The shell does not keep a `cd` that leaves the project root, so a
+`git submodule update` run on its own lands in the main checkout instead of the worktree.
+
+Nothing else is needed for `vendor/bin/phpunit` to run in the worktree: tests boot from the tracked
+`tests/inc/config.local.ini`, and `inc/login_secret.dat` is generated on first boot. Never symlink `vendor/` from the
+main checkout: its autoloader then resolves `lib/` to the main checkout and the tests run against the wrong code.
 
 ## API Testing
 When testing or calling HTTP/API endpoints, use the bruno-mcp MCP server first.
