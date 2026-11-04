@@ -20,7 +20,8 @@ use Utils\Logger\LoggerFactory;
  * Sources are string literals written in our own plugins; they never come from users, projects or the
  * database. The only check is the one mistake that would break the policy: a source must be a single token.
  *
- * @see \Controller\Abstracts\BaseKleinViewController::render() — dispatch site
+ * @see \Controller\Abstracts\BaseKleinViewController::render()
+ * @see lib/View/templates/_APIDoc.php
  */
 final class ContentSecurityPolicySourcesEvent extends FilterEvent
 {
@@ -35,10 +36,11 @@ final class ContentSecurityPolicySourcesEvent extends FilterEvent
     public function addSources(string $directive, string ...$sources): void
     {
         foreach ($sources as $source) {
-            // One token only: a space, ';', ',' or a quote would end the directive or add a keyword.
-            // A bad source is skipped, not thrown: FeatureSet::dispatch() only logs an exception, so throwing
-            // would also drop every source the plugin adds after this one.
-            if (preg_match('/^[^\s;,\'"]+$/D', $source) !== 1) {
+            // One token only: a space, ';', ',' or a quote would end the directive or add a keyword, and '&',
+            // '<' or '>' could spell one of those as an entity on a page that does not escape (_APIDoc.php).
+            // A bad source is skipped, not thrown: an exception would stop this plugin's hook, so every source
+            // it adds after this one would be lost.
+            if (preg_match('/^[^\s;,\'"&<>]+$/D', $source) !== 1) {
                 LoggerFactory::getLogger('feature_set')->warning("Skipped Content-Security-Policy source for $directive: \"$source\"");
                 continue;
             }

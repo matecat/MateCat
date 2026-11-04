@@ -38,7 +38,7 @@ $featureSet = new FeatureSet(Bootstrap::getDatabase());
 $pluginCsp = $featureSet->dispatch(new ContentSecurityPolicySourcesEvent())->getSources();
 $csp = preg_replace_callback(
     '#\$\{x_plugin_csp/([a-z-]+) \| nothing\}#',
-    fn(array $m): string => $pluginCsp[$m[1]] ?? '',
+    fn(array $m): string => htmlspecialchars($pluginCsp[$m[1]] ?? '', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
     $csp
 ) ?? '';
 

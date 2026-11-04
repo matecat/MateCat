@@ -34,6 +34,7 @@ class ContentSecurityPolicySourcesEventTest extends AbstractTest
             'b.example.com; script-src *',
             "'unsafe-inline'",
             "d.example.com\n",
+            'x&#59script-src-elem&#32*',
             'c.example.com'
         );
 
