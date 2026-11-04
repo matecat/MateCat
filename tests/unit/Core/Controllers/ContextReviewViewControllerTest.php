@@ -210,7 +210,7 @@ class ContextReviewViewControllerTest extends AbstractTest
     }
 
     #[Test]
-    public function renderViewSetsProjectNotFoundTemplateAnd404WhenRequestIsNotArray(): void
+    public function renderViewAnswersJobNotFound404WhenRequestIsNotArray(): void
     {
         $this->controller->forceInvalidRequest = true;
 

@@ -38,6 +38,23 @@ class CspHeaderMetaRenderTest extends AbstractTest
     }
 
     #[Test]
+    public function withoutPluginSourcesThePolicyIsTodaysPolicy(): void
+    {
+        // Literals, not the template file: a host deleted from the template by mistake must fail here.
+        $policy = $this->parsePolicy($this->renderPolicyContent(null));
+
+        self::assertSame(["'self'", "'nonce-test-nonce'", '*.googletagmanager.com'], $policy['script-src-elem']);
+        self::assertSame(["'self'", '*.google.com', '*.hubspot.com'], $policy['child-src']);
+        self::assertSame(["'self'", 'fonts.gstatic.com', 'data:'], $policy['font-src']);
+        self::assertSame(["'self'", "'unsafe-inline'", '*.googleapis.com'], $policy['style-src']);
+
+        // default-src lists about 200 Google hosts; a few anchors are enough.
+        foreach (["'self'", "'nonce-test-nonce'", '*.lexiqa.net', '*.hubspot.com', 'data:', '*.fbcdn.net'] as $source) {
+            self::assertContains($source, $policy['default-src'], $source);
+        }
+    }
+
+    #[Test]
     public function aPluginSourceIsAppendedToItsDirectiveOnly(): void
     {
         $baseline = $this->templatePolicy();
