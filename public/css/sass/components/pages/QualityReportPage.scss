@@ -2590,8 +2590,10 @@ header
   .qr-segment-details-container
   .qr-segments-summary
   .filter-category
-  .select__dropdown-wrapper {
-  min-width: 250px;
+  .select__dropdown-wrapper
+  .custom-dropdown {
+  width: max-content;
+  max-width: 280px;
 }
 
 .qr-reviewType-control {

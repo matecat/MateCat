@@ -914,5 +914,8 @@
 }
 
 .gmt-select-portal-dropdown {
-  min-width: 300px;
+  .custom-dropdown {
+    width: max-content;
+    max-width: 350px;
+  }
 }

@@ -342,6 +342,8 @@ describe('Select', () => {
         elementRects['select-with-label__wrapper'] = {
           top: 50,
           bottom: 100,
+          y: 50,
+          height: 50,
         }
         const {container} = renderSelect({
           isPortalDropdown: true,
@@ -357,6 +359,8 @@ describe('Select', () => {
         elementRects['select-with-label__wrapper'] = {
           top: 700,
           bottom: 760,
+          y: 700,
+          height: 60,
         }
         const {container} = renderSelect({
           isPortalDropdown: true,
@@ -372,6 +376,8 @@ describe('Select', () => {
         elementRects['select-with-label__wrapper'] = {
           top: 700,
           bottom: 760,
+          y: 700,
+          height: 60,
         }
         const {container} = renderSelect({
           isPortalDropdown: true,
@@ -388,6 +394,8 @@ describe('Select', () => {
         elementRects['select-with-label__wrapper'] = {
           top: 380,
           bottom: 390,
+          y: 380,
+          height: 10,
         }
         const offsetParent = {
           getBoundingClientRect: () => ({top: 200, bottom: 400}),
@@ -407,6 +415,8 @@ describe('Select', () => {
         elementRects['select-with-label__wrapper'] = {
           top: 700,
           bottom: 760,
+          y: 700,
+          height: 60,
         }
         const {container} = renderSelect({
           isPortalDropdown: true,
@@ -416,8 +426,9 @@ describe('Select', () => {
         })
         clickTrigger(container)
 
-        // availableHeightAbove = 700 - 0 + 32 (label) - 32 - 48 (searchBar) = 652
-        expect(mockSetListMaxHeight).toHaveBeenCalledWith(652)
+        // availableHeightAbove = wrapperRect.y(700) - (MARGIN_DROPDOWN(4) + 20) -
+        // labelHeight(0, unmocked) - referenceRect.top(0) = 676
+        expect(mockSetListMaxHeight).toHaveBeenCalledWith(676)
       })
     })
 

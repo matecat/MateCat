@@ -81,11 +81,6 @@ section.muted .segment-side-buttons {
   align-items: center;
 }
 
-#header-bars-wrapper .filter-dropdown .custom-dropdown.select__dropdown {
-  min-width: 120px;
-  width: max-content;
-}
-
 #header-bars-wrapper .filter-dropdown div[class*='switch-container-outer'] {
   padding: 0 10px;
 }
@@ -387,4 +382,10 @@ section.muted .segment-side-buttons {
 .sample-size-container input[type='number'] {
   width: 70px;
   padding: 8px;
+}
+
+.segment-filter-other-select-portal {
+  .custom-dropdown {
+    width: max-content;
+  }
 }

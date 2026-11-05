@@ -30,7 +30,6 @@ export const Select = ({
   onCloseSelect = () => {},
   optionsSelectedCopySingular = () => {},
   optionsSelectedCopyPlural = () => {},
-  resetSelectedOptions = () => {},
   checkSpaceToReverse = true,
   maxHeightDroplist = 420,
   isPortalDropdown,
@@ -39,6 +38,7 @@ export const Select = ({
   showResetButton = false,
   resetFunction = () => {},
   tooltipContent,
+  isActiveOptionCheckmarkVisible,
   children,
 }) => {
   const dropDownRef = useRef()
@@ -110,26 +110,42 @@ export const Select = ({
       const {setListMaxHeight} = dropDownRef.current
       const wrapperNode = wrapperRef.current
 
+      const SEARCH_BAR_HEIGHT = 56
+      const MARGIN_DROPDOWN = 4
+
+      const wrapperRect = wrapperNode.getBoundingClientRect()
+
       if (isPortalDropdown) {
-        const wrapperRect = wrapperNode.getBoundingClientRect()
         const referenceRect = offsetParent
           ? offsetParent.getBoundingClientRect()
           : {top: 0, bottom: window.innerHeight}
 
-        const availableHeightBelow =
-          referenceRect.bottom - wrapperRect.bottom - 16 // 16 = margins
+        const availableHeightBelow = Math.abs(
+          wrapperRect.y +
+            wrapperRect.height +
+            (MARGIN_DROPDOWN + 20) +
+            (showSearchBar ? SEARCH_BAR_HEIGHT : 0) -
+            referenceRect.bottom,
+        )
+
         if (availableHeightBelow > maxHeightDroplist) {
           setListMaxHeight(maxHeightDroplist)
         } else {
           if (checkSpaceToReverse) {
             setDropdownReversed(true)
           }
+
+          const labelHeight =
+            wrapperNode
+              .getElementsByTagName('label')?.[0]
+              ?.getBoundingClientRect().height ?? 0
+
           const availableHeightAbove =
-            wrapperRect.top -
-            referenceRect.top +
-            (label ? 32 : 0) -
-            32 -
-            (showSearchBar ? 48 : 0) // 32 = margins; 32 = label height; 48 = searchBar height
+            wrapperRect.y -
+            (MARGIN_DROPDOWN + 20) -
+            labelHeight -
+            referenceRect.top
+
           setListMaxHeight(
             Math.max(0, Math.min(availableHeightAbove, maxHeightDroplist)),
           )
@@ -137,39 +153,42 @@ export const Select = ({
         return
       }
 
-      const listTopPosition = wrapperNode.getBoundingClientRect().height
-
-      const wrapperTopPosition = wrapperNode.offsetTop
       const offsetParentElement = offsetParent
         ? offsetParent
         : (wrapperNode.offsetParent ?? document.body)
+
       const parentHeight = offsetParentElement.getBoundingClientRect().height
+
       const parentScrollTop =
         offsetParentElement === document.body
           ? document.documentElement.scrollTop
-          : offsetParentElement.scrollTop
-      let availableHeight =
-        parentHeight +
-        parentScrollTop -
-        wrapperTopPosition -
-        listTopPosition -
-        16 // 16 = margins
-      if (availableHeight > maxHeightDroplist) {
-        setListMaxHeight(availableHeight)
+          : offsetParentElement.offsetTop
+
+      const availableHeightBelow = Math.abs(
+        wrapperRect.y +
+          wrapperRect.height +
+          (MARGIN_DROPDOWN + 20) +
+          (showSearchBar ? SEARCH_BAR_HEIGHT : 0) -
+          (parentHeight + parentScrollTop),
+      )
+
+      if (availableHeightBelow > maxHeightDroplist) {
+        setListMaxHeight(maxHeightDroplist)
       } else {
         if (checkSpaceToReverse) {
           setDropdownReversed(true)
         }
-        availableHeight =
-          wrapperTopPosition -
-          parentScrollTop +
-          (label ? 32 : 0) -
-          32 -
-          (showSearchBar ? 48 : 0) // 32 = margins; 32 = label height; 48 = searchBar height
+
+        const labelHeight =
+          wrapperNode
+            .getElementsByTagName('label')?.[0]
+            ?.getBoundingClientRect().height ?? 0
+
+        const availableHeightAbove =
+          wrapperRect.y - (MARGIN_DROPDOWN + 20) - labelHeight - parentScrollTop
+
         setListMaxHeight(
-          availableHeight > maxHeightDroplist
-            ? availableHeight
-            : maxHeightDroplist,
+          Math.max(0, Math.min(availableHeightAbove, maxHeightDroplist)),
         )
       }
     }
@@ -347,8 +366,8 @@ export const Select = ({
           isActiveOptionOnTop,
           optionsSelectedCopySingular,
           optionsSelectedCopyPlural,
-          resetSelectedOptions,
           onClose: hideDropdown.current,
+          isActiveOptionCheckmarkVisible,
         }}
       >
         {children}
@@ -448,7 +467,6 @@ Select.propTypes = {
   onToggleOption: PropTypes.func,
   optionsSelectedCopySingular: PropTypes.func,
   optionsSelectedCopyPlural: PropTypes.func,
-  resetSelectedOptions: PropTypes.func,
   checkSpaceToReverse: PropTypes.bool,
   maxHeightDroplist: PropTypes.number,
   isPortalDropdown: PropTypes.bool,
@@ -457,5 +475,6 @@ Select.propTypes = {
   showResetButton: PropTypes.bool,
   resetFunction: PropTypes.func,
   tooltipContent: PropTypes.string,
+  isActiveOptionCheckmarkVisible: PropTypes.bool,
   children: PropTypes.func,
 }

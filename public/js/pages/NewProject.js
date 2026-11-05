@@ -972,11 +972,11 @@ const NewProject = () => {
               <TemplateSelect
                 {...{
                   label: 'Project template',
-                  maxHeightDroplist: SELECT_HEIGHT,
                   projectTemplates,
                   setProjectTemplates,
                   currentProjectTemplate,
                   subtemplatesNotSaved,
+                  dropdownClassName: 'new-project-form-select-portal',
                 }}
               />
             </div>
@@ -986,6 +986,8 @@ const NewProject = () => {
                 label="Team"
                 id="project-team"
                 name={'project-team'}
+                dropdownClassName="new-project-form-select-portal"
+                isPortalDropdown={true}
                 maxHeightDroplist={SELECT_HEIGHT}
                 showSearchBar={true}
                 options={
@@ -1031,6 +1033,8 @@ const NewProject = () => {
                 label="Subject"
                 id="project-subject"
                 name={'project-subject'}
+                dropdownClassName="new-project-form-select-portal"
+                isPortalDropdown={true}
                 maxHeightDroplist={SELECT_HEIGHT}
                 showSearchBar={true}
                 options={subjectsArray}
