@@ -29,6 +29,7 @@ import {normalizeTemplatesWithNullProps} from '../../../../hooks/useTemplates'
 import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../../../common/Button/Button'
 import IconClose from '../../../../../img/icons/IconClose'
 import IconAdd from '../../../../../img/icons/IconAdd'
+import {SELECT_HEIGHT} from '../../../../constants/Constants'
 
 let engineIdFromQueryString = new URLSearchParams(window.location.search).get(
   'engineId',
@@ -315,7 +316,7 @@ export const MachineTranslationTab = () => {
             <Select
               placeholder="Choose provider"
               id="mt-engine"
-              maxHeightDroplist={100}
+              maxHeightDroplist={400}
               options={enginesList}
               activeOption={activeAddEngine}
               onSelect={(option) => {
