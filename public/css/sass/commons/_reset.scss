@@ -1,7 +1,9 @@
 @use '../tokens/colors';
 @use 'commons/variables';
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
@@ -13,23 +15,41 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-img, picture, video, canvas, svg {
+img,
+picture,
+video,
+canvas,
+svg {
   display: block;
   max-width: 100%;
 }
 
-input, button, textarea, select {
+input,
+button,
+textarea,
+select {
   font: inherit;
 }
 
-p, h1, h2, h3, h4, h5, h6 {
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   overflow-wrap: break-word;
 }
 
 p {
   text-wrap: pretty;
 }
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   text-wrap: balance;
 }
 
@@ -39,7 +59,8 @@ ul {
   list-style: none;
 }
 
-html, body {
+html,
+body {
   height: 100%;
   font-size: variables.$font-size-small;
 }
@@ -53,7 +74,7 @@ body {
   -webkit-transition: all 100ms ease-in;
   -moz-transition: all 100ms ease-in;
   font-size: variables.$font-size-small;
-  line-height: 1.4285em;
+  line-height: 1.5;
   background: colors.$white;
   color: colors.$black;
   &.no-min-width {

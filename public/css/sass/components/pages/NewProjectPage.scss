@@ -439,6 +439,10 @@ a {
         color: black;
         max-width: 260px;
       }
+
+      > :last-child {
+        font-weight: normal;
+      }
     }
   }
 }

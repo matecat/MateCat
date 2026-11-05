@@ -2809,19 +2809,3 @@ header
   max-width: 360px;
   width: max-content;
 }
-
-.filter-idSegment {
-  input[type='text'] {
-    padding: 8px 20px !important;
-  }
-}
-
-// Select values, placeholders and options at 14px in the filter row (the shared Select
-// defaults to 16px); the ID field sets its own size inline in InputField
-.qr-wrapper .qr-filter-list {
-  .select,
-  .dropdown__option,
-  .dropdown__list li {
-    font-size: variables.$font-size-xsmall;
-  }
-}
