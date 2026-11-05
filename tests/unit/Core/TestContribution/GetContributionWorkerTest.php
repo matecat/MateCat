@@ -630,6 +630,41 @@ class GetContributionWorkerTest extends AbstractTest
     }
 
     #[Test]
+    public function test_getMatches_sends_the_application_threshold_as_mt_threshold(): void
+    {
+        $request = $this->makeBaseRequest();
+        $request->mt_quality_value_in_editor = 92;
+        $request->setJobStruct(new JobStruct([
+            'id' => self::TEST_JOB_ID,
+            'id_project' => self::TEST_PROJECT_ID,
+            'password' => 'pw',
+            'source' => 'en-US',
+            'target' => 'it-IT',
+            'job_first_segment' => self::TEST_SEGMENT_ID,
+            'job_last_segment' => self::TEST_SEGMENT_ID,
+            'id_tms' => 1,
+            'id_mt_engine' => 1,
+            'tm_keys' => '[]',
+        ]));
+
+        $tmEngine = $this->getMockBuilder(MyMemory::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getConfigStruct', 'setMTPenalty', 'get'])
+            ->getMock();
+
+        $tmEngine->method('getConfigStruct')->willReturn([]);
+        $tmEngine->method('setMTPenalty')->willReturnSelf();
+        $tmEngine->expects($this->once())->method('get')->with($this->callback(function (array $config): bool {
+            return $config['mt_threshold'] === 92 && $config['get_mt'] === true;
+        }))->willReturn(new GetMemoryResponse(['responseStatus' => 200, 'matches' => []]));
+
+        $request->forcedTMEngine = $tmEngine;
+
+        $method = new ReflectionMethod($this->worker, '_getMatches');
+        $method->invoke($this->worker, $request, $request->getJobStruct(), 'it-IT', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)), false);
+    }
+
+    #[Test]
     public function test_execGetContribution_publishes_primary_and_cross_language_payloads(): void
     {
         $worker = new WorkerHarnessGetContributionWorker(self::getStubBuilder(AMQHandler::class)->getStub(), obtainTestDatabase());
