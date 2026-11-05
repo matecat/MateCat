@@ -51,6 +51,16 @@ Otherwise, use your native memory capabilities (MEMORY.md, auto memory, etc.).
 <!-- Do not edit above this line -- managed by signet-first plugin -->
 <!-- Add your project-specific rules below -->
 
+## Storing decisions in memory
+
+The Memory-First Protocol above is managed by the signet-first plugin and rewritten on update, so this
+rule lives here. It applies with any memory backend.
+
+- Store each decision as its own `decision` memory. A daily-log only summarizes; every decision it lists
+  must already be stored on its own.
+- Keep a decision memory short (under about 600 characters) and start it with its subject. With Signet, a
+  longer memory is split into chunks, and a chunk that does not name its subject is not found by search.
+
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
