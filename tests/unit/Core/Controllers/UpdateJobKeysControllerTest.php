@@ -5,6 +5,7 @@ namespace Matecat\Core\Controllers;
 use Controller\API\App\UpdateJobKeysController;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use DomainException;
+use Exception;
 use InvalidArgumentException;
 use Klein\Request;
 use Klein\Response;
@@ -14,6 +15,7 @@ use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Users\UserStruct;
+use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -21,6 +23,8 @@ use ReflectionClass;
 use ReflectionException;
 use Utils\Constants\SourcePages;
 use Utils\Logger\MatecatLogger;
+use Utils\TMS\TMSService;
+use Utils\TmKeyManagement\TmKeyStruct;
 
 /**
  * Real-DB suite for UpdateJobKeysController.
@@ -31,8 +35,16 @@ use Utils\Logger\MatecatLogger;
  */
 class TestableUpdateJobKeysController extends UpdateJobKeysController
 {
+    /** The MyMemory service the controller checks new keys with; each test sets its answer. */
+    public ?TMSService $tmService = null;
+
     public function __construct()
     {
+    }
+
+    protected function getTmService(): TMSService
+    {
+        return $this->tmService ?? parent::getTmService();
     }
 
     protected function registerValidators(): void
@@ -88,6 +100,8 @@ class UpdateJobKeysControllerTest extends AbstractTest
         $this->setProp('userIsLogged', true);
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
         $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
+
+        $this->controller->tmService = $this->createMock(TMSService::class);
     }
 
     protected function tearDown(): void
@@ -555,6 +569,369 @@ class UpdateJobKeysControllerTest extends AbstractTest
             $this->controller->update();
         } finally {
             $this->seedConnection()->exec('DELETE FROM memory_keys WHERE uid = ' . $keyUid);
+        }
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    #[Test]
+    public function update_refuses_a_new_key_that_mymemory_does_not_know(): void
+    {
+        $this->seedChunk();
+
+        $this->controller->tmService->expects($this->once())
+            ->method('checkCorrectKey')
+            ->with('ctrlnewkey9005000aa')
+            ->willReturn(false);
+
+        $data = (string) json_encode([
+            'mine' => [[
+                'name' => 'New', 'key' => 'ctrlnewkey9005000aa',
+                'glos' => true, 'tm' => true, 'owner' => true,
+                'r' => true, 'w' => true,
+            ]],
+            'ownergroup' => [],
+            'anonymous'  => [],
+        ]);
+
+        $this->setRequestParams(['data' => $data]);
+
+        try {
+            $this->controller->update();
+            $this->fail('update() did not throw');
+        } catch (InvalidArgumentException $e) {
+            $this->assertSame(-7, $e->getCode());
+            $this->assertSame('One of the TM keys you added is not valid. Please check it and try again.', $e->getMessage());
+        } finally {
+            $storedTmKeys = $this->seedConnection()->query('SELECT tm_keys FROM jobs WHERE id = ' . $this->jobId(self::BASE))->fetchColumn();
+            $this->assertSame('[]', $storedTmKeys);
+            $keyringCount = $this->seedConnection()->query("SELECT COUNT(*) FROM memory_keys WHERE key_value = 'ctrlnewkey9005000aa'")->fetchColumn();
+            $this->assertSame(0, (int) $keyringCount);
+            $this->seedConnection()->exec("DELETE FROM memory_keys WHERE key_value IN ('ctrlnewkey9005000aa', 'ctrlnewkey9005000bb')");
+        }
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    #[Test]
+    public function update_refuses_a_new_key_when_the_check_returns_null(): void
+    {
+        $this->seedChunk();
+
+        $this->controller->tmService->expects($this->once())
+            ->method('checkCorrectKey')
+            ->with('ctrlnewkey9005000aa')
+            ->willReturn(null);
+
+        $data = (string) json_encode([
+            'mine' => [[
+                'name' => 'New', 'key' => 'ctrlnewkey9005000aa',
+                'glos' => true, 'tm' => true, 'owner' => true,
+                'r' => true, 'w' => true,
+            ]],
+            'ownergroup' => [],
+            'anonymous'  => [],
+        ]);
+
+        $this->setRequestParams(['data' => $data]);
+
+        try {
+            $this->controller->update();
+            $this->fail('update() did not throw');
+        } catch (InvalidArgumentException $e) {
+            $this->assertSame(-7, $e->getCode());
+            $this->assertSame('One of the TM keys you added is not valid. Please check it and try again.', $e->getMessage());
+        } finally {
+            $storedTmKeys = $this->seedConnection()->query('SELECT tm_keys FROM jobs WHERE id = ' . $this->jobId(self::BASE))->fetchColumn();
+            $this->assertSame('[]', $storedTmKeys);
+            $keyringCount = $this->seedConnection()->query("SELECT COUNT(*) FROM memory_keys WHERE key_value = 'ctrlnewkey9005000aa'")->fetchColumn();
+            $this->assertSame(0, (int) $keyringCount);
+            $this->seedConnection()->exec("DELETE FROM memory_keys WHERE key_value IN ('ctrlnewkey9005000aa', 'ctrlnewkey9005000bb')");
+        }
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    #[Test]
+    public function update_adds_a_new_key_that_mymemory_accepts(): void
+    {
+        $this->seedChunk();
+
+        $this->controller->tmService->expects($this->once())
+            ->method('checkCorrectKey')
+            ->with('ctrlnewkey9005000aa')
+            ->willReturn(true);
+
+        $data = (string) json_encode([
+            'mine' => [[
+                'name' => 'New', 'key' => 'ctrlnewkey9005000aa',
+                'glos' => true, 'tm' => true, 'owner' => true,
+                'r' => true, 'w' => true,
+            ]],
+            'ownergroup' => [],
+            'anonymous'  => [],
+        ]);
+
+        $this->setRequestParams(['data' => $data]);
+
+        $this->responseMock->expects($this->once())
+            ->method('json')
+            ->with($this->callback(function (array $data): bool {
+                $this->assertSame('OK', $data['data']);
+                return true;
+            }));
+
+        try {
+            $this->controller->update();
+
+            $storedTmKeys = $this->seedConnection()->query('SELECT tm_keys FROM jobs WHERE id = ' . $this->jobId(self::BASE))->fetchColumn();
+            $this->assertStringContainsString('ctrlnewkey9005000aa', (string) $storedTmKeys);
+        } finally {
+            $this->seedConnection()->exec("DELETE FROM memory_keys WHERE key_value IN ('ctrlnewkey9005000aa', 'ctrlnewkey9005000bb')");
+        }
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    #[Test]
+    public function update_does_not_check_a_key_already_in_the_job(): void
+    {
+        $ownedKey = self::OWNED_KEY;
+
+        $jobTmKeys = json_encode([
+            [
+                'tm' => true, 'glos' => true, 'owner' => true,
+                'uid_transl' => null, 'uid_rev' => null,
+                'name' => 'Owned', 'key' => $ownedKey,
+                'r' => true, 'w' => true, 'r_transl' => true, 'w_transl' => true,
+                'r_rev' => true, 'w_rev' => true,
+            ],
+        ]);
+        $this->seedConnection()->exec(
+            'UPDATE jobs SET tm_keys = ' . $this->seedConnection()->quote((string) $jobTmKeys)
+            . ' WHERE id = ' . $this->jobId(self::BASE)
+        );
+
+        $this->seedChunk();
+
+        $this->controller->tmService->expects($this->never())
+            ->method('checkCorrectKey');
+
+        $data = (string) json_encode([
+            'mine' => [[
+                'name' => 'Owned', 'key' => $ownedKey,
+                'glos' => true, 'tm' => true, 'owner' => true,
+                'r' => true, 'w' => true,
+            ]],
+            'ownergroup' => [],
+            'anonymous'  => [],
+        ]);
+
+        $this->setRequestParams(['data' => $data]);
+
+        $this->responseMock->expects($this->once())
+            ->method('json')
+            ->with($this->callback(function (array $data): bool {
+                $this->assertSame('OK', $data['data']);
+                return true;
+            }));
+
+        $this->controller->update();
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    #[Test]
+    public function update_does_not_send_a_masked_key_to_mymemory(): void
+    {
+        $ownedKey = self::OWNED_KEY;
+        $maskedKey = (new TmKeyStruct(['key' => $ownedKey]))->getCrypt();
+
+        $jobTmKeys = json_encode([
+            [
+                'tm' => true, 'glos' => true, 'owner' => true,
+                'uid_transl' => null, 'uid_rev' => null,
+                'name' => 'Owned', 'key' => $ownedKey,
+                'r' => true, 'w' => true, 'r_transl' => true, 'w_transl' => true,
+                'r_rev' => true, 'w_rev' => true,
+            ],
+        ]);
+        $this->seedConnection()->exec(
+            'UPDATE jobs SET tm_keys = ' . $this->seedConnection()->quote((string) $jobTmKeys)
+            . ' WHERE id = ' . $this->jobId(self::BASE)
+        );
+
+        $this->seedChunk();
+
+        $this->controller->tmService->expects($this->never())
+            ->method('checkCorrectKey');
+
+        $data = (string) json_encode([
+            'mine'       => [],
+            'ownergroup' => [],
+            'anonymous'  => [[
+                'name' => 'Owned', 'key' => $maskedKey,
+                'glos' => true, 'tm' => true, 'owner' => false,
+                'r' => true, 'w' => true,
+            ]],
+        ]);
+
+        $this->setRequestParams(['data' => $data]);
+
+        $this->responseMock->expects($this->once())
+            ->method('json')
+            ->with($this->callback(function (array $data): bool {
+                $this->assertSame('OK', $data['data']);
+                return true;
+            }));
+
+        $this->controller->update();
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    #[Test]
+    public function update_checks_a_new_key_added_by_a_translator(): void
+    {
+        $user             = new UserStruct();
+        $user->uid        = $this->userId(self::BASE);
+        $user->email      = 'not-the-owner_' . self::BASE . '@example.org';
+        $user->first_name = 'Other';
+        $user->last_name  = 'User';
+        $this->setProp('user', $user);
+        $this->setProp('userIsLogged', true);
+
+        $this->seedChunk();
+
+        $this->controller->tmService->expects($this->once())
+            ->method('checkCorrectKey')
+            ->with('ctrlnewkey9005000aa')
+            ->willReturn(false);
+
+        $data = (string) json_encode([
+            'mine' => [[
+                'name' => 'New', 'key' => 'ctrlnewkey9005000aa',
+                'glos' => true, 'tm' => true, 'owner' => true,
+                'r' => true, 'w' => true,
+            ]],
+            'ownergroup' => [],
+            'anonymous'  => [],
+        ]);
+
+        $this->setRequestParams(['data' => $data]);
+
+        try {
+            $this->controller->update();
+            $this->fail('update() did not throw');
+        } catch (InvalidArgumentException $e) {
+            $this->assertSame(-7, $e->getCode());
+            $this->assertSame('One of the TM keys you added is not valid. Please check it and try again.', $e->getMessage());
+        } finally {
+            $storedTmKeys = $this->seedConnection()->query('SELECT tm_keys FROM jobs WHERE id = ' . $this->jobId(self::BASE))->fetchColumn();
+            $this->assertSame('[]', $storedTmKeys);
+            $this->seedConnection()->exec("DELETE FROM memory_keys WHERE key_value IN ('ctrlnewkey9005000aa', 'ctrlnewkey9005000bb')");
+        }
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    #[Test]
+    public function update_keeps_the_job_unchanged_when_mymemory_fails(): void
+    {
+        $this->seedChunk();
+
+        $this->controller->tmService->expects($this->once())
+            ->method('checkCorrectKey')
+            ->with('ctrlnewkey9005000aa')
+            ->willThrowException(new Exception('MyMemory down', -2));
+
+        $data = (string) json_encode([
+            'mine' => [[
+                'name' => 'New', 'key' => 'ctrlnewkey9005000aa',
+                'glos' => true, 'tm' => true, 'owner' => true,
+                'r' => true, 'w' => true,
+            ]],
+            'ownergroup' => [],
+            'anonymous'  => [],
+        ]);
+
+        $this->setRequestParams(['data' => $data]);
+
+        try {
+            $this->controller->update();
+            $this->fail('update() did not throw');
+        } catch (AssertionFailedError $e) {
+            throw $e;
+        } catch (Exception $e) {
+            $this->assertSame(-2, $e->getCode());
+            $this->assertSame('MyMemory down', $e->getMessage());
+        } finally {
+            $storedTmKeys = $this->seedConnection()->query('SELECT tm_keys FROM jobs WHERE id = ' . $this->jobId(self::BASE))->fetchColumn();
+            $this->assertSame('[]', $storedTmKeys);
+            $keyringCount = $this->seedConnection()->query("SELECT COUNT(*) FROM memory_keys WHERE key_value = 'ctrlnewkey9005000aa'")->fetchColumn();
+            $this->assertSame(0, (int) $keyringCount);
+            $this->seedConnection()->exec("DELETE FROM memory_keys WHERE key_value IN ('ctrlnewkey9005000aa', 'ctrlnewkey9005000bb')");
+        }
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    #[Test]
+    public function update_checks_every_new_key_once(): void
+    {
+        $this->seedChunk();
+
+        $checkedKeys = [];
+        $this->controller->tmService->expects($this->exactly(2))
+            ->method('checkCorrectKey')
+            ->willReturnCallback(function (string $key) use (&$checkedKeys): bool {
+                $checkedKeys[] = $key;
+                return true;
+            });
+
+        $data = (string) json_encode([
+            'mine' => [
+                [
+                    'name' => 'New', 'key' => 'ctrlnewkey9005000aa',
+                    'glos' => true, 'tm' => true, 'owner' => true,
+                    'r' => true, 'w' => true,
+                ],
+                [
+                    'name' => 'New B', 'key' => 'ctrlnewkey9005000bb',
+                    'glos' => true, 'tm' => true, 'owner' => true,
+                    'r' => true, 'w' => true,
+                ],
+            ],
+            'ownergroup' => [],
+            'anonymous'  => [],
+        ]);
+
+        $this->setRequestParams(['data' => $data]);
+
+        $this->responseMock->expects($this->once())
+            ->method('json')
+            ->with($this->callback(function (array $data): bool {
+                $this->assertSame('OK', $data['data']);
+                return true;
+            }));
+
+        try {
+            $this->controller->update();
+
+            $storedTmKeys = $this->seedConnection()->query('SELECT tm_keys FROM jobs WHERE id = ' . $this->jobId(self::BASE))->fetchColumn();
+            $this->assertStringContainsString('ctrlnewkey9005000aa', (string) $storedTmKeys);
+            $this->assertStringContainsString('ctrlnewkey9005000bb', (string) $storedTmKeys);
+            $this->assertSame(['ctrlnewkey9005000aa', 'ctrlnewkey9005000bb'], $checkedKeys);
+        } finally {
+            $this->seedConnection()->exec("DELETE FROM memory_keys WHERE key_value IN ('ctrlnewkey9005000aa', 'ctrlnewkey9005000bb')");
         }
     }
 }
