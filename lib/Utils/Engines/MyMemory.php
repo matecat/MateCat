@@ -762,8 +762,8 @@ class MyMemory extends AbstractEngine
       * @param string $filePath
       * @param string $memoryKey
       * @param UserStruct $user * Not used
-      * @param bool $mtImport Whether MyMemory imports the TMX into Lara itself: true only when the user
-      *                       has no adaptive MT engine in Matecat. Example: `true` → `mt_import=true`.
+      * @param bool $mtImport true asks MyMemory to also import the TMX into Lara with its own license.
+      *                       Example: `true` → `mt_import=true`.
       *
       * @return FileImportAndStatusResponse
       * @throws RuntimeException
