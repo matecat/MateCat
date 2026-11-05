@@ -379,6 +379,7 @@ class GetContributionWorker extends AbstractWorker
         $_config['id_user'] = $this->_extractAvailableKeysForUser($contributionStruct);
         $_config['mt_key'] = TmKeyManager::getOwnerJobTmKeys($contributionStruct->getJobStruct()->tm_keys, 'r');
         $_config['num_result'] = $contributionStruct->resultNum;
+        $_config['mt_threshold'] = $contributionStruct->mt_quality_value_in_editor;
         $_config['isConcordance'] = $contributionStruct->concordanceSearch;
         $_config['lara_style'] = $contributionStruct->lara_style;
         $_config['lara_style_guideline_id'] = $contributionStruct->lara_style_guideline_id;
