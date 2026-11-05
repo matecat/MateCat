@@ -150,6 +150,7 @@ export const Tagging = () => {
           checkSpaceToReverse={true}
           onToggleOption={toggleOption}
           multipleSelect={'dropdown'}
+          isActiveOptionCheckmarkVisible={false}
           onCloseSelect={() => onClose()}
         >
           {({name, code, html}) => ({
