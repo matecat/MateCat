@@ -235,7 +235,9 @@ section.loaded .submenu {
 .loading-tab .loader.loader_on {
   left: unset;
   right: 12px;
-  top: 6px;
+  // Centred on the tab label: the 20px spinner sits on the text's centre line,
+  // 1px below the middle of the tab
+  top: calc(50% - 9px);
 }
 
 .submenu li a {
