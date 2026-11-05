@@ -135,6 +135,17 @@ test('adds the APPROVED2 status option when secondRevisionsCount is set', () => 
   expect(screen.getByRole('option', {name: 'APPROVED2'})).toBeInTheDocument()
 })
 
+test('selecting the APPROVED2 status option keeps it selected', () => {
+  global.config.secondRevisionsCount = true
+  render(<Search {...baseProps()} />)
+
+  fireEvent.change(screen.getByTestId('status-select'), {
+    target: {value: 'APPROVED2'},
+  })
+
+  expect(screen.getByTestId('status-select').value).toBe('APPROVED2')
+})
+
 test('typing in the source input enables the find button and shows the clear button', async () => {
   const user = userEvent.setup()
   render(<Search {...baseProps()} />)
