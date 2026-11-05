@@ -335,6 +335,12 @@ ul.suggestion-item.graysmall:last-child {
   -webkit-box-shadow: inset 0px 0px 0px 1px colors.$red500;
 }
 
+// The match badges end on the tab's border; an outlined badge there would lose its
+// right edge to it, so the penalty badge keeps a small gap when it closes the row
+.graysmall-details .per-red-outline:last-child {
+  margin-right: 4px;
+}
+
 .graysmall-details .per-yellow,
 .graysmall-details .per-blue,
 .graysmall-details .per-orange,
