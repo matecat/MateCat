@@ -6,13 +6,16 @@ use DomainException;
 use Matecat\TestHelpers\AbstractTest;
 use Model\Filters\DTO\Dita;
 use Model\Filters\DTO\Json;
+use Model\Filters\DTO\Markdown;
 use Model\Filters\DTO\MSExcel;
 use Model\Filters\DTO\MSPowerpoint;
 use Model\Filters\DTO\MSWord;
 use Model\Filters\DTO\Xml;
 use Model\Filters\DTO\Yaml;
 use Model\Filters\FiltersConfigTemplateStruct;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
+use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
 use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
 
@@ -32,6 +35,7 @@ class FiltersConfigTemplateStructTest extends AbstractTest
         $this->assertNull($struct->ms_excel);
         $this->assertNull($struct->ms_powerpoint);
         $this->assertNull($struct->dita);
+        $this->assertNull($struct->markdown);
     }
 
     #[Test]
@@ -66,6 +70,10 @@ class FiltersConfigTemplateStructTest extends AbstractTest
         $dita = new Dita();
         $struct->setDita($dita);
         $this->assertSame($dita, $struct->getDita());
+
+        $markdown = new Markdown();
+        $struct->setMarkdown($markdown);
+        $this->assertSame($markdown, $struct->getMarkdown());
     }
 
     #[Test]
@@ -102,6 +110,9 @@ class FiltersConfigTemplateStructTest extends AbstractTest
 
         $struct->callHydrateDtoFromArray(Dita::class, []);
         $this->assertInstanceOf(Dita::class, $struct->getDita());
+
+        $struct->callHydrateDtoFromArray(Markdown::class, []);
+        $this->assertInstanceOf(Markdown::class, $struct->getMarkdown());
     }
 
     #[Test]
@@ -116,6 +127,7 @@ class FiltersConfigTemplateStructTest extends AbstractTest
             'ms_word' => [],
             'ms_powerpoint' => [],
             'dita' => [],
+            'markdown' => [],
         ]);
 
         $this->assertInstanceOf(Json::class, $struct->getJson());
@@ -125,6 +137,7 @@ class FiltersConfigTemplateStructTest extends AbstractTest
         $this->assertInstanceOf(MSWord::class, $struct->getMsWord());
         $this->assertInstanceOf(MSPowerpoint::class, $struct->getMsPowerpoint());
         $this->assertInstanceOf(Dita::class, $struct->getDita());
+        $this->assertInstanceOf(Markdown::class, $struct->getMarkdown());
     }
 
     #[Test]
@@ -139,6 +152,7 @@ class FiltersConfigTemplateStructTest extends AbstractTest
             'ms_word' => '{}',
             'ms_powerpoint' => '{}',
             'dita' => '{}',
+            'markdown' => '{}',
         ]);
 
         $this->assertInstanceOf(Json::class, $struct->getJson());
@@ -148,6 +162,7 @@ class FiltersConfigTemplateStructTest extends AbstractTest
         $this->assertInstanceOf(MSWord::class, $struct->getMsWord());
         $this->assertInstanceOf(MSPowerpoint::class, $struct->getMsPowerpoint());
         $this->assertInstanceOf(Dita::class, $struct->getDita());
+        $this->assertInstanceOf(Markdown::class, $struct->getMarkdown());
     }
 
     #[Test]
@@ -176,10 +191,12 @@ class FiltersConfigTemplateStructTest extends AbstractTest
         $struct->hydrateAllDto([
             'json' => '{"translate_keys":[" label "]}',
             'yaml' => ['context_keys' => ['  note']],
+            'markdown' => '{"translate_frontmatter_keys":[" title "]}',
         ]);
 
         $this->assertSame([' label '], $struct->getJson()->jsonSerialize()['translate_keys']);
         $this->assertSame(['  note'], $struct->getYaml()->jsonSerialize()['context_keys']);
+        $this->assertSame([' title '], $struct->getMarkdown()->jsonSerialize()['translate_frontmatter_keys']);
     }
 
     #[Test]
@@ -225,6 +242,8 @@ class FiltersConfigTemplateStructTest extends AbstractTest
 
         $this->assertNull($struct->getJson());
         $this->assertNull($struct->getXml());
+        // a row saved before the markdown column existed reads back as NULL
+        $this->assertNull($struct->getMarkdown());
     }
 
     #[Test]
@@ -276,6 +295,7 @@ class FiltersConfigTemplateStructTest extends AbstractTest
         $this->assertInstanceOf(MSWord::class, $struct->getMsWord());
         $this->assertInstanceOf(MSPowerpoint::class, $struct->getMsPowerpoint());
         $this->assertInstanceOf(Dita::class, $struct->getDita());
+        $this->assertInstanceOf(Markdown::class, $struct->getMarkdown());
     }
 
     #[Test]
@@ -318,6 +338,7 @@ class FiltersConfigTemplateStructTest extends AbstractTest
         $this->assertArrayHasKey('ms_excel', $result);
         $this->assertArrayHasKey('ms_powerpoint', $result);
         $this->assertArrayHasKey('dita', $result);
+        $this->assertArrayHasKey('markdown', $result);
         $this->assertArrayHasKey('created_at', $result);
         $this->assertArrayHasKey('modified_at', $result);
     }
@@ -518,6 +539,95 @@ class FiltersConfigTemplateStructTest extends AbstractTest
         $serialized = json_decode(json_encode($struct->jsonSerialize()), true);
 
         $this->assertTrue($serialized['yaml']['force_double_quoting']);
+    }
+
+    /**
+     * A row read back from the DAO carries each format as a JSON string column; a NULL column
+     * (a template saved before the markdown column existed) leaves the DTO unset.
+     */
+    #[Test]
+    public function hydrateAllDto_hydrates_markdown_from_a_db_row(): void
+    {
+        $struct = new FiltersConfigTemplateStruct();
+        $struct->hydrateAllDto([
+            'markdown' => '{"extract_frontmatter":true,"do_not_translate_frontmatter_keys":["slug"]}',
+        ]);
+
+        $this->assertSame(
+            ['extract_frontmatter' => true, 'do_not_translate_frontmatter_keys' => ['slug']],
+            $struct->getMarkdown()->jsonSerialize()
+        );
+
+        $old = new FiltersConfigTemplateStruct();
+        $old->hydrateAllDto(['markdown' => null]);
+        $this->assertNull($old->getMarkdown());
+    }
+
+    #[Test]
+    public function schema_accepts_markdown_and_the_struct_serializes_it(): void
+    {
+        $payload = json_encode([
+            'name'     => 'test',
+            'uid'      => 1,
+            'markdown' => [
+                'extract_frontmatter'        => true,
+                'translate_frontmatter_keys' => ['title', 'description'],
+            ],
+        ], JSON_THROW_ON_ERROR);
+
+        $validatorObject = new JSONValidatorObject($payload);
+        (new JSONValidator('filters_extraction_parameters.json', true))->validate($validatorObject);
+
+        $struct = (new FiltersConfigTemplateStruct())->hydrateFromJSON($payload);
+        $serialized = json_decode(json_encode($struct->jsonSerialize()), true);
+
+        $this->assertSame(
+            ['extract_frontmatter' => true, 'translate_frontmatter_keys' => ['title', 'description']],
+            $serialized['markdown']
+        );
+    }
+
+    #[Test]
+    public function hydrateFromJSON_defaults_markdown_to_extraction_off(): void
+    {
+        $struct = (new FiltersConfigTemplateStruct())->hydrateFromJSON(json_encode(['name' => 'test', 'uid' => 1]));
+        $serialized = json_decode(json_encode($struct->jsonSerialize()), true);
+
+        $this->assertSame(
+            ['extract_frontmatter' => false, 'translate_frontmatter_keys' => []],
+            $serialized['markdown']
+        );
+    }
+
+    /**
+     * The two key lists are mutually exclusive: the schema rejects a payload carrying both,
+     * even when both are empty, exactly as it does for the YAML and JSON key lists.
+     *
+     * @return array<string, array{array<string, mixed>}>
+     */
+    public static function invalidMarkdownProvider(): array
+    {
+        return [
+            'both key lists'           => [['translate_frontmatter_keys' => ['title'], 'do_not_translate_frontmatter_keys' => ['slug']]],
+            'both key lists empty'     => [['translate_frontmatter_keys' => [], 'do_not_translate_frontmatter_keys' => []]],
+            'unknown property'         => [['translate_keys' => ['title']]],
+            'non-boolean toggle'       => [['extract_frontmatter' => 'yes']],
+            'non-array key list'       => [['translate_frontmatter_keys' => 'title']],
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $markdown
+     */
+    #[Test]
+    #[DataProvider('invalidMarkdownProvider')]
+    public function schema_rejects_invalid_markdown(array $markdown): void
+    {
+        // same envelope as schema_accepts_markdown_and_the_struct_serializes_it, so only the markdown block can fail
+        $payload = json_encode(['name' => 'test', 'uid' => 1, 'markdown' => $markdown], JSON_THROW_ON_ERROR);
+
+        $this->expectException(JSONValidatorException::class);
+        (new JSONValidator('filters_extraction_parameters.json', true))->validate(new JSONValidatorObject($payload));
     }
 }
 

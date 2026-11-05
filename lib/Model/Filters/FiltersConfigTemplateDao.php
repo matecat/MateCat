@@ -186,9 +186,9 @@ class FiltersConfigTemplateDao extends AbstractDao
         $name = $templateStruct->name ?? throw new Exception("FiltersConfigTemplateStruct::name must not be null when saving");
 
         $sql = "INSERT INTO " . self::TABLE .
-            " ( `uid`, `name`, `json`, `xml`, `yaml`, `ms_excel`, `ms_word`, `ms_powerpoint`, `dita`, `created_at` ) " .
+            " ( `uid`, `name`, `json`, `xml`, `yaml`, `ms_excel`, `ms_word`, `ms_powerpoint`, `dita`, `markdown`, `created_at` ) " .
             " VALUES " .
-            " ( :uid, :name, :json, :xml, :yaml, :ms_excel, :ms_word, :ms_powerpoint, :dita, :now ); ";
+            " ( :uid, :name, :json, :xml, :yaml, :ms_excel, :ms_word, :ms_powerpoint, :dita, :markdown, :now ); ";
 
         $now = (new DateTime())->format('Y-m-d H:i:s');
 
@@ -204,6 +204,7 @@ class FiltersConfigTemplateDao extends AbstractDao
             "ms_word" => json_encode($templateStruct->getMsWord()),
             "ms_powerpoint" => json_encode($templateStruct->getMsPowerpoint()),
             "dita" => json_encode($templateStruct->getDita()),
+            "markdown" => json_encode($templateStruct->getMarkdown()),
             'now' => $now,
         ]);
 
@@ -239,6 +240,7 @@ class FiltersConfigTemplateDao extends AbstractDao
             `ms_word` = :ms_word,
             `ms_powerpoint` = :ms_powerpoint,
             `dita` = :dita,
+            `markdown` = :markdown,
             `modified_at` = :now
          WHERE id = :id;";
 
@@ -255,6 +257,7 @@ class FiltersConfigTemplateDao extends AbstractDao
             "ms_word" => json_encode($templateStruct->getMsWord()),
             "ms_powerpoint" => json_encode($templateStruct->getMsPowerpoint()),
             "dita" => json_encode($templateStruct->getDita()),
+            "markdown" => json_encode($templateStruct->getMarkdown()),
             'now' => (new DateTime())->format('Y-m-d H:i:s'),
         ]);
 

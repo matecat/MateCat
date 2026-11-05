@@ -340,6 +340,11 @@ class ConversionHandler
                         $params = $this->filters_extraction_parameters->dita;
                     }
                     break;
+                case "md":
+                    if (isset($this->filters_extraction_parameters->markdown)) {
+                        $params = $this->filters_extraction_parameters->markdown;
+                    }
+                    break;
             }
         }
 

@@ -106,6 +106,31 @@ describe('EmailsBadge additional behaviors', () => {
     expect(screen.getByTestId('email-input')).toBeDisabled()
   })
 
+  it('keeps the chips of a disabled badge read-only', () => {
+    const onChange = jest.fn()
+    const {container} = render(
+      <EmailsBadge
+        name="invite"
+        value={['a@example.com']}
+        onChange={onChange}
+        disabled
+      />,
+    )
+    expect(screen.getByText('a@example.com')).toBeInTheDocument()
+    expect(
+      container.querySelector('.email-badge-tag-button-close'),
+    ).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByText('a@example.com'))
+    fireEvent.keyDown(screen.getByTestId('email-area'), {key: 'Backspace'})
+
+    expect(screen.getByText('a@example.com')).toBeInTheDocument()
+    // onChange fires on mount with the initial value; it must never drop the chip
+    onChange.mock.calls.forEach(([emails]) =>
+      expect(emails).toEqual(['a@example.com']),
+    )
+  })
+
   it('renders the error message when an error prop with a message is provided', () => {
     render(
       <EmailsBadge

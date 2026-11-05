@@ -27,6 +27,7 @@ const toClientTemplate = (template) => ({
   msExcel: template.ms_excel,
   msPowerpoint: template.ms_powerpoint,
   dita: template.dita,
+  markdown: template.markdown,
 })
 
 const Wrapper = ({templates: initialTemplates, currentProjectTemplate}) => {
@@ -101,6 +102,7 @@ describe('FiltersParams', () => {
     expect(screen.getByText('MS Excel')).toBeInTheDocument()
     expect(screen.getByText('MS PowerPoint')).toBeInTheDocument()
     expect(screen.getByText('DITA/DITAMAP')).toBeInTheDocument()
+    expect(screen.getByText('Markdown')).toBeInTheDocument()
   })
 
   test('propagates a newly selected filters template id to the project template', () => {
