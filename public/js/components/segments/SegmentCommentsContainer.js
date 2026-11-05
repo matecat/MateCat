@@ -40,6 +40,7 @@ const SegmentCommentsContainer = () => {
   ])
   const [teamUsers, setTeamUsers] = useState(() => CommentsStore.getTeamUsers())
   const [sendCommentError, setSendCommentError] = useState(false)
+  const [resolveThreadError, setResolveThreadError] = useState(false)
   const [mentionsInputValue, setMentionsInputValue] = useState('')
   const [mentionsMarkup, setMentionsMarkup] = useState('')
   const [anonymousComments, setAnonymousComments] = useState(
@@ -156,6 +157,8 @@ const SegmentCommentsContainer = () => {
 
   const resolveThread = () =>
     CommentsActions.resolveThread(originalSid, anonymousComments)
+      .then(() => setResolveThreadError(false))
+      .catch(() => setResolveThreadError(true))
 
   const handleChangeMentionsInputValue = (
     event,
@@ -336,7 +339,14 @@ const SegmentCommentsContainer = () => {
           data-count={count}
         >
           {threadWrap}
-          <div className={'comment-thread-footer'}>{resolveButton}</div>
+          <div className={'comment-thread-footer'}>
+            {resolveButton && resolveThreadError ? (
+              <span className="comment-warnings">
+                Oops, the thread could not be resolved. Please try again later.
+              </span>
+            ) : null}
+            {resolveButton}
+          </div>
         </div>,
       )
     }

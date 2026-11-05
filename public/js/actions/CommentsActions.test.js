@@ -65,21 +65,20 @@ describe('CommentsActions', () => {
     expect(result).toBe(resp)
   })
 
-  test('sendComment swallows errors', async () => {
+  test('a failed send rejects so the caller can report it', async () => {
     submitCommentApi.mockRejectedValueOnce(new Error('fail'))
 
-    await expect(
-      CommentsActions.sendComment('hello', true, 5),
-    ).resolves.toBeUndefined()
+    await expect(CommentsActions.sendComment('hello', true, 5)).rejects.toThrow(
+      'fail',
+    )
+    expect(AppDispatcher.dispatch).not.toHaveBeenCalled()
   })
 
   test('resolveThread dispatches ADD_COMMENT on success', async () => {
     const resp = {data: {entries: {comments: [{id: 2}]}}}
     markAsResolvedThread.mockResolvedValueOnce(resp)
 
-    CommentsActions.resolveThread(7)
-    await Promise.resolve()
-    await Promise.resolve()
+    await CommentsActions.resolveThread(7)
 
     expect(markAsResolvedThread).toHaveBeenCalledWith({
       idSegment: 7,
@@ -93,12 +92,11 @@ describe('CommentsActions', () => {
     })
   })
 
-  test('resolveThread swallows errors', async () => {
+  test('a failed resolve rejects and adds nothing to the thread', async () => {
     markAsResolvedThread.mockRejectedValueOnce(new Error('fail'))
 
-    expect(() => CommentsActions.resolveThread(7)).not.toThrow()
-    await Promise.resolve()
-    await Promise.resolve()
+    await expect(CommentsActions.resolveThread(7)).rejects.toThrow('fail')
+    expect(AppDispatcher.dispatch).not.toHaveBeenCalled()
   })
 
   test('updateCommentsFromSse dispatches DELETE_COMMENT for delete message', () => {
