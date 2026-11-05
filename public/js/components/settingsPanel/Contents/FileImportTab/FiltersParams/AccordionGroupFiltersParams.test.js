@@ -85,10 +85,13 @@ describe('AccordionGroupFiltersParams', () => {
   })
 
   test('lists the markdown section last', () => {
-    const {container} = setup()
+    setup()
 
-    const sections = container.querySelectorAll('.filters-params-accordion')
-    expect(sections[sections.length - 1]).toHaveTextContent('Markdown')
+    const titles = screen.getAllByText(
+      /^(JSON|XML|YAML|MS Word|MS Excel|MS PowerPoint|DITA\/DITAMAP|Markdown)$/,
+    )
+    expect(titles).toHaveLength(8)
+    expect(titles.at(-1)).toHaveTextContent('Markdown')
   })
 
   test('expands the markdown section content on click', () => {
@@ -149,6 +152,11 @@ describe('AccordionGroupFiltersParams', () => {
       templates: [baseTemplate, modifiedTemplate],
     })
 
-    expect(screen.getByText('●').parentElement).toHaveTextContent('Markdown')
+    expect(screen.getAllByText('●')).toHaveLength(1)
+    expect(
+      screen.getAllByText(
+        (_, element) => element?.textContent === '●Markdown',
+      ).length,
+    ).toBeGreaterThan(0)
   })
 })

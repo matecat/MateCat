@@ -25,7 +25,11 @@ export const Tag = ({
     <div className={[styles['email-badge-tag'], styles[status]].filter(Boolean).join(' ')}>
       {children}
       {removable && (
-        <div className={styles['email-badge-tag-button-close']} onClick={handleCLick}>
+        <div
+          className={styles['email-badge-tag-button-close']}
+          onClick={handleCLick}
+          data-testid="email-badge-tag-remove"
+        >
           <IconClose size={8} />
         </div>
       )}

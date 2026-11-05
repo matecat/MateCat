@@ -38,7 +38,8 @@ const lastUpdate = (modifyingCurrentTemplate, currentTemplate) =>
     modifyingCurrentTemplate.mock.calls.length - 1
   ][0](currentTemplate).markdown
 
-const toggle = () => document.querySelector('input[name="extract_frontmatter"]')
+// the frontmatter switch is the only checkbox in the section
+const toggle = () => screen.getByRole('checkbox')
 
 describe('Markdown', () => {
   test('renders the frontmatter options with the final copy', () => {
@@ -80,12 +81,10 @@ describe('Markdown', () => {
 
     fireEvent.click(toggle())
 
-    await waitFor(() =>
-      expect(screen.getByTestId('email-input')).not.toBeDisabled(),
-    )
+    await waitFor(() => expect(screen.getByTestId('email-input')).toBeEnabled())
     expect(
       screen.getByTestId('radio-option-do_not_translate_frontmatter_keys'),
-    ).not.toBeDisabled()
+    ).toBeEnabled()
     expect(lastUpdate(modifyingCurrentTemplate, currentTemplate)).toEqual({
       extract_frontmatter: true,
       translate_frontmatter_keys: [],

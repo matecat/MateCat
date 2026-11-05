@@ -108,7 +108,7 @@ describe('EmailsBadge additional behaviors', () => {
 
   it('keeps the chips of a disabled badge read-only', () => {
     const onChange = jest.fn()
-    const {container} = render(
+    render(
       <EmailsBadge
         name="invite"
         value={['a@example.com']}
@@ -118,7 +118,7 @@ describe('EmailsBadge additional behaviors', () => {
     )
     expect(screen.getByText('a@example.com')).toBeInTheDocument()
     expect(
-      container.querySelector('.email-badge-tag-button-close'),
+      screen.queryByTestId('email-badge-tag-remove'),
     ).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByText('a@example.com'))
