@@ -3,12 +3,30 @@
 .job-analyze-header {
   display: flex;
   height: 40px;
-  align-items: center;
+  // Same text baseline for the ID (14px) and the languages (18px); the 40px line
+  // height (after the font shorthand, which resets it) keeps them vertically centred
+  align-items: baseline;
   align-self: stretch;
   background: colors.$grey100;
   font: variables.$font-style-small;
+  line-height: 40px;
   padding: 0 24px;
   gap: 4px;
+  // Inside the card's 1px border
+  border-top-left-radius: calc(variables.$border-radius-default - 1px);
+  border-top-right-radius: calc(variables.$border-radius-default - 1px);
+  // Stays visible while a job with many chunks scrolls. Sticky offsets count from
+  // inside the scroller's 40px top padding (#analyze-container): an 8px gap
+  position: sticky;
+  top: calc(8px - 40px);
+  z-index: 4;
+  // The 1px shadows redraw the card border on the top and sides; the panel-coloured
+  // one fills the gap and the corners so rows scrolling under it stay hidden
+  box-shadow:
+    0 -1px 0 0 colors.$grey150,
+    -1px 0 0 0 colors.$grey150,
+    1px 0 0 0 colors.$grey150,
+    0 -8px 0 8px colors.$grey50;
   .job-analyze-header__id {
     color: colors.$grey700;
     font: variables.$font-style-xsmall;
@@ -92,10 +110,11 @@
     color: colors.$grey400;
     padding-right: 6px;
     border-right: 1px solid colors.$grey100;
+    // "Analysis bucket"; "Payable rate" below it stays grey
     :first-child {
       height: 85px;
       font-weight: normal;
-      color: colors.$grey400;
+      color: colors.$black;
     }
     > div {
       height: 32px;
@@ -121,6 +140,10 @@
   width: 100%;
   padding: 0 !important;
   font: variables.$font-style-small;
+  // A line between chunks, as between the chunk rows of the summary card
+  & + & {
+    border-top: 1px solid colors.$grey100;
+  }
   .chunk-analyze-info {
     display: grid;
     grid-template-columns:
@@ -168,6 +191,7 @@
       .chunk-analyze-info-index {
         color: colors.$black !important;
         font-weight: 700 !important;
+        font-size: variables.$font-size-xsmall;
       }
       .chunk-analyze-info-files {
         color: colors.$blue500 !important;
@@ -308,6 +332,23 @@
   align-self: stretch;
   max-width: 100%;
   min-width: 0;
+  // Bottom corners of the card, inside its 1px border
+  border-bottom-left-radius: calc(variables.$border-radius-default - 1px);
+  border-bottom-right-radius: calc(variables.$border-radius-default - 1px);
+
+  // Where the table fits (a 1216px card needs a ~1260px window) nothing has to
+  // scroll sideways: clip instead, which is not a scroll container, so the table
+  // header can stick under the job header while the chunks scroll
+  @media (min-width: 1280px) {
+    overflow: clip;
+
+    .job-table-header {
+      position: sticky;
+      // Right under the 40px job header (see .job-analyze-header)
+      top: calc(8px - 40px + 40px);
+      z-index: 3;
+    }
+  }
 
   // Never narrower than the column minimums, so header and rows keep the same tracks
   .job-table-header,

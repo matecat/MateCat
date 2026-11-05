@@ -6,6 +6,9 @@ use Controller\Abstracts\BaseKleinViewController;
 use Controller\Abstracts\IController;
 use Controller\API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use Exception;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
+use Utils\Tools\CatUtils;
 
 class ContextReviewController extends BaseKleinViewController implements IController
 {
@@ -16,14 +19,19 @@ class ContextReviewController extends BaseKleinViewController implements IContro
     }
 
     /**
+     * The route names its first segment `id_project`, but the cattool links here with the job id and the
+     * password it was opened with: the translate password, or the review password of either phase.
+     *
      * @throws Exception
      */
     public function renderView(): void
     {
         $request = $this->validateTheRequest();
+        $job = is_array($request) ? $this->findJob((int)$request['id_project'], (string)$request['password']) : null;
 
-        if (!is_array($request)) {
-            $this->setView('project_not_found.html', [], 404);
+        // Re-checking is_array() tells PHPStan that $request is an array past this block.
+        if (!is_array($request) || $job === null) {
+            $this->setView('job_not_found.html', [], 404);
             $this->render();
         }
 
@@ -31,7 +39,29 @@ class ContextReviewController extends BaseKleinViewController implements IContro
             'id_project' => $request['id_project'],
             'password' => $request['password'],
         ]);
+
+        // setView() loads the viewer's own features. The page shows the project's content, so it needs the
+        // project's plugins in force when it renders: a customer plugin is what adds the CDN its screenshots
+        // are served from to the Content-Security-Policy, whoever opens the preview.
+        $this->loadProjectFeatures($job);
+
         $this->render();
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function findJob(int $idJob, string $password): ?JobStruct
+    {
+        return (new CatUtils($this->getDatabase()))->getJobFromIdAndAnyPassword($idJob, $password);
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function loadProjectFeatures(JobStruct $job): void
+    {
+        $this->getFeatureSet()->loadForProject($job->getProject(new ProjectDao($this->getDatabase())));
     }
 
     /**
@@ -51,4 +81,3 @@ class ContextReviewController extends BaseKleinViewController implements IContro
     }
 
 }
-

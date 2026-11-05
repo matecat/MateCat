@@ -231,16 +231,8 @@ body.analyze {
       }
     }
 
+    // Every workflow type (type-standard, type-mtqe) renders the same job cards
     .project-top {
-      &.type-mtqe {
-        .title-total-words,
-        .title-matecat-words {
-          width: 50% !important;
-        }
-      }
-    }
-
-    .project-top.type-standard {
       display: flex;
       flex-direction: column;
       gap: 16px;
@@ -361,7 +353,7 @@ body.analyze {
           }
         }
         .project-card__header {
-          height: 64px;
+          height: 60px;
           background: colors.$grey50;
           // Sticks below the top bar with a small gap, like the My projects header
           position: sticky;
@@ -408,7 +400,8 @@ body.analyze {
         align-self: stretch;
         border-radius: variables.$border-radius-default;
         border: 1px solid colors.$grey150;
-        overflow: hidden;
+        // No overflow clipping here: it would stop the job header and the table header
+        // from sticking. The header and .job-table-scroll round their own corners instead.
       }
     }
   }

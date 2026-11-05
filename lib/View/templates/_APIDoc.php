@@ -6,6 +6,7 @@ use Klein\App;
 use Matecat\Locales\LanguageDomains;
 use Matecat\Locales\Languages;
 use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\ContentSecurityPolicySourcesEvent;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
@@ -19,7 +20,7 @@ try {
 $max_file_size_in_MB = AppConfig::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
 
 $csp_nonce = Utils::uuid4();
-$csp = file_get_contents(AppConfig::$ROOT . "/" . AppConfig::$TRACKING_CODES_VIEW_PATH . "/CSP-HeaderMeta.html") ?: '';
+$csp = file_get_contents(AppConfig::$TEMPLATE_ROOT . '/templates/CSP-HeaderMeta.html') ?: '';
 $csp = str_replace('${x_nonce_unique_id}', $csp_nonce, $csp);
 
 $parsedHost = parse_url(AppConfig::$HTTPHOST);
@@ -27,6 +28,19 @@ $x_self_ajax_location_hosts = AppConfig::$ENABLE_MULTI_DOMAIN_API && is_array($p
         ? " *.ajax." . $parsedHost['host']
         : '';
 $csp = str_replace('${x_self_ajax_location_hosts}', $x_self_ajax_location_hosts, $csp) ?: '';
+
+// The web request already ran Bootstrap::start(); read the handle from the
+// composition root instead of re-resolving the singleton here.
+$featureSet = new FeatureSet(Bootstrap::getDatabase());
+
+// This page is not rendered by a controller, so it fills the plugin placeholders itself, the way
+// BaseKleinViewController::render() does: the platform hosts come from a plugin, not from the template.
+$pluginCsp = $featureSet->dispatch(new ContentSecurityPolicySourcesEvent())->getSources();
+$csp = preg_replace_callback(
+    '#\$\{x_plugin_csp/([a-z-]+) \| nothing\}#',
+    fn(array $m): string => htmlspecialchars($pluginCsp[$m[1]] ?? '', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+    $csp
+) ?? '';
 
 ?>
 <!DOCTYPE html>
@@ -124,9 +138,6 @@ $csp = str_replace('${x_self_ajax_location_hosts}', $x_self_ajax_location_hosts,
     <?php
 
     $instance = new CustomPageView(Bootstrap::getDatabase());
-    // The web request already ran Bootstrap::start(); read the handle from the
-    // composition root instead of re-resolving the singleton here.
-    $featureSet = new FeatureSet(Bootstrap::getDatabase());
 
     if ($instance->getUser()->email !== null) {
         $featureSet->loadFromUserEmail($instance->getUser()->email);

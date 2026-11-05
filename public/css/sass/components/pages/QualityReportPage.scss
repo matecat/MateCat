@@ -229,6 +229,12 @@ header
   font-weight: 100;
   font-size: 14px;
   line-height: 12px;
+
+  // Summary labels ("Reviewed words", "TTE revise 2") stay on one line where they fit;
+  // below 1280px all five no longer do, so they wrap there
+  @media (min-width: 1280px) {
+    white-space: nowrap;
+  }
 }
 
 .qr-wrapper
@@ -272,7 +278,14 @@ header
   height: 64px;
   gap: 30px;
   border-radius: variables.$border-radius-default;
-  flex: 1 0 0;
+  // Shrinks beside the EPT box instead of pushing it out of the row on narrow windows
+  flex: 1 1 0;
+  min-width: 0;
+
+  // With two revisions there are six stats; below 1280px they only fit with tighter gaps
+  @media (max-width: 1279px) {
+    gap: 16px;
+  }
 }
 
 .qr-wrapper
@@ -340,7 +353,14 @@ header
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-grow: 1;
+  // The progress bar is what gives way when the row is tight (JobProgressBar keeps a
+  // 196px minimum elsewhere)
+  flex: 1 1 96px;
+  min-width: 96px;
+
+  div {
+    min-width: 0;
+  }
 }
 
 .qr-wrapper
@@ -764,6 +784,20 @@ header
   .qr-quality
   .severity {
   width: 21%;
+  text-align: center;
+}
+
+.qr-wrapper
+  .qr-container
+  .qr-container-inside
+  .qr-job-summary-container
+  .layout__container
+  .qr-production-quality
+  .qr-quality
+  .qr-head
+  .qr-severities-heading {
+  width: calc(21% * var(--qr-severity-count, 1));
+  padding-left: 0;
   text-align: center;
 }
 

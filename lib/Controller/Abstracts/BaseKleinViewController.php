@@ -2,6 +2,8 @@
 
 namespace Controller\Abstracts;
 
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\ValidationError as ControllerValidationError;
 use Controller\API\Commons\ViewValidators\MandatoryKeysValidator;
 use Controller\Exceptions\RenderTerminatedException;
 use Exception;
@@ -18,11 +20,16 @@ use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\ConnectedServices\Oauth\LinkedIn\LinkedInProvider;
 use Model\ConnectedServices\Oauth\Microsoft\MicrosoftProvider;
 use Model\ConnectedServices\Oauth\OauthClient;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
+use Model\FeaturesBase\Hook\Event\Filter\ContentSecurityPolicySourcesEvent;
 use Model\FeaturesBase\Hook\Event\Filter\IsAnInternalUserEvent;
 use Model\FeaturesBase\Hook\Event\Run\DecorateViewEvent;
 use PHPTAL;
 use TypeError;
 use Utils\Registry\AppConfig;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\Templating\BootstrapConfig;
 use Utils\Templating\PHPTalBoolean;
 use Utils\Templating\PHPTalMap;
@@ -213,6 +220,12 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
      *
      * @throws LockedResponseException
      * @throws RenderTerminatedException
+     * @throws AuthenticationError
+     * @throws ControllerValidationError
+     * @throws EndQueueException
+     * @throws NotFoundException
+     * @throws ReQueueException
+     * @throws ValidationError
      * @throws ResponseAlreadySentException
      * @throws InvalidArgumentException
      */
@@ -227,6 +240,11 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
         $this->response->code($code ?? $this->httpCode);
 
         if (isset($this->view)) {
+            // Dispatched here, not in setView(): the cattool and the context preview load the project's
+            // features after setView(), and the hosts a page needs belong to the project's plugins.
+            $this->view->{'x_plugin_csp'} = $this->getFeatureSet()
+                ->dispatch(new ContentSecurityPolicySourcesEvent())
+                ->getSources();
             $this->response->body($this->view->execute());
         }
 

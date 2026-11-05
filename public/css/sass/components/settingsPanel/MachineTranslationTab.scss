@@ -300,8 +300,9 @@
       grid-template-columns: 8% minmax(0, 1fr) 22% 5%;
       background-color: unset;
 
+      // Checkboxes centred under the "Active" heading: (41px label - 13px checkbox) / 2
       & > :first-child {
-        padding-left: 12px;
+        padding-left: 14px;
       }
     }
     .row-content-create {
@@ -483,12 +484,11 @@
     padding-bottom: 0;
   }
 
-  // Each heading starts where its column's content starts: "Active" at the checkbox
-  // (12px in, like the checkbox cell), on the same line as "Glossary" (the 5px top
-  // margin is for the checkboxes in the rows below)
+  // "Active" lines up with the "Glossaries" title above it, on the same line as
+  // "Glossary" (the 5px top margin is for the checkboxes in the rows below)
   .settings-panel-table-rowHeading
     .settings-panel-table-rowHeading-column:first-child {
-    padding-left: 12px;
+    padding-left: 0;
     margin-top: 0;
   }
 
