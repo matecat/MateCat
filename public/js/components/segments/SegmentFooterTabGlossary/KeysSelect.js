@@ -18,6 +18,7 @@ export const KeysSelect = ({
   return (
     <Select
       className={`glossary-select ${className}`}
+      isPortalDropdown={true}
       name="glossary-term-tm"
       label="Termbase*"
       placeholder="Select a termbase"

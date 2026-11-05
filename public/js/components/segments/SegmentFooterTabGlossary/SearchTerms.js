@@ -109,7 +109,7 @@ export const SearchTerms = () => {
           onClick={openForm}
           disabled={isLoading}
         >
-          <IconAdd size={14} />
+          <IconAdd size={18} />
           Add term
         </Button>
       </div>
