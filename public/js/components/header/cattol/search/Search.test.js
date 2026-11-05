@@ -128,11 +128,11 @@ test('renders the search form with source and target inputs when active', () => 
   expect(screen.getByText('REPLACE ALL')).toBeInTheDocument()
 })
 
-test('adds the APPROVED-2 status option when secondRevisionsCount is set', () => {
+test('adds the APPROVED2 status option when secondRevisionsCount is set', () => {
   global.config.secondRevisionsCount = true
   render(<Search {...baseProps()} />)
 
-  expect(screen.getByRole('option', {name: 'APPROVED-2'})).toBeInTheDocument()
+  expect(screen.getByRole('option', {name: 'APPROVED2'})).toBeInTheDocument()
 })
 
 test('typing in the source input enables the find button and shows the clear button', async () => {
