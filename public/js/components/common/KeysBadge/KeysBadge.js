@@ -3,9 +3,10 @@ import PropTypes from 'prop-types'
 import {EmailsBadge, SPECIALS_SEPARATORS} from '../EmailsBadge/EmailsBadge'
 
 /**
- * Pill input for the JSON and YAML extraction parameters.
+ * Pill input for the JSON, YAML and Markdown frontmatter extraction parameters.
  *
- * A JSON object key and a YAML mapping key are arbitrary strings, so " label " is a legitimate
+ * A JSON object key and a YAML mapping key (a Markdown frontmatter block is YAML) are arbitrary
+ * strings, so " label " is a legitimate
  * key distinct from "label": the value is kept verbatim and the pill spells out the padding.
  * The space bar therefore cannot close a pill here, unlike in {@link WordsBadge}.
  */

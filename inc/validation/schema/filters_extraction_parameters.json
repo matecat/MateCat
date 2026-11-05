@@ -290,6 +290,41 @@
       },
       "required": ["do_not_translate_elements"],
       "additionalProperties": false
+    },
+    "markdown": {
+      "type": "object",
+      "properties": {
+        "extract_frontmatter": {
+          "type": "boolean",
+          "nullable": true,
+          "default": false
+        },
+        "translate_frontmatter_keys": {
+          "type": "array",
+          "nullable": true
+        },
+        "do_not_translate_frontmatter_keys": {
+          "type": "array",
+          "nullable": true
+        }
+      },
+      "dependencies": {
+        "translate_frontmatter_keys": {
+          "not": {
+            "required": [
+              "do_not_translate_frontmatter_keys"
+            ]
+          }
+        },
+        "do_not_translate_frontmatter_keys": {
+          "not": {
+            "required": [
+              "translate_frontmatter_keys"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false
     }
   }
 }

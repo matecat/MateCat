@@ -304,6 +304,7 @@ CREATE TABLE `filters_config_templates` (
   `ms_word` text,
   `ms_powerpoint` text,
   `dita` text,
+  `markdown` text,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `deleted_at` timestamp NULL DEFAULT NULL,
   `modified_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,

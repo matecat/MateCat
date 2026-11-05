@@ -5801,6 +5801,51 @@
             "do_not_translate_elements"
           ],
           "additionalProperties": false
+        },
+        "markdown": {
+          "type": "object",
+          "description": "Applies to .md files. Controls the frontmatter block at the beginning of the file.",
+          "properties": {
+            "extract_frontmatter": {
+              "type": "boolean",
+              "description": "Extract the frontmatter block for translation. With no key list, every frontmatter key is translatable.",
+              "x-nullable": true,
+              "default": false
+            },
+            "translate_frontmatter_keys": {
+              "type": "array",
+              "description": "Only these frontmatter keys are translatable. Key names are case sensitive. Applies only when extract_frontmatter is true; cannot be sent together with do_not_translate_frontmatter_keys.",
+              "items": {
+                "type": "string"
+              },
+              "x-nullable": true
+            },
+            "do_not_translate_frontmatter_keys": {
+              "type": "array",
+              "description": "Every frontmatter key except these is translatable. Key names are case sensitive. Applies only when extract_frontmatter is true; cannot be sent together with translate_frontmatter_keys.",
+              "items": {
+                "type": "string"
+              },
+              "x-nullable": true
+            }
+          },
+          "dependencies": {
+            "translate_frontmatter_keys": {
+              "not": {
+                "required": [
+                  "do_not_translate_frontmatter_keys"
+                ]
+              }
+            },
+            "do_not_translate_frontmatter_keys": {
+              "not": {
+                "required": [
+                  "translate_frontmatter_keys"
+                ]
+              }
+            }
+          },
+          "additionalProperties": false
         }
       }
     },
