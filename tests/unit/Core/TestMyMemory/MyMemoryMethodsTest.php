@@ -12,6 +12,7 @@ use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\TestWith;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\CheckGlossaryResponse;
 use Utils\Engines\Results\MyMemory\DeleteGlossaryResponse;
@@ -369,11 +370,12 @@ class MyMemoryMethodsTest extends AbstractTest
     }
 
     /**
-     * The POST fields MyMemory receives for a TMX import, as `_call` gets them.
+     * The POST fields MyMemory receives for a TMX import, as `_call` gets them. Pass no flag to
+     * import as the aligner does.
      *
      * @return array<string, mixed>
      */
-    private function importMemoryPostFields(?bool $mtImport): array
+    private function importMemoryPostFields(bool ...$mtImport): array
     {
         $mock = @$this->getMockBuilder(MyMemory::class)
             ->setConstructorArgs([$this->engineStruct, $this->createStub(\Model\DataAccess\IDatabase::class)])
@@ -389,36 +391,23 @@ class MyMemoryMethodsTest extends AbstractTest
             }
         );
 
-        if ($mtImport === null) {
-            $mock->importMemory($this->tempFilePath, 'a6043e606ac9b5d7ff24', new UserStruct());
-        } else {
-            $mock->importMemory($this->tempFilePath, 'a6043e606ac9b5d7ff24', new UserStruct(), $mtImport);
-        }
+        $mock->importMemory($this->tempFilePath, 'a6043e606ac9b5d7ff24', new UserStruct(), ...$mtImport);
 
         return $postFields;
     }
 
-    #[Test]
-    public function test_importMemory_sends_mt_import_true_when_asked(): void
-    {
-        $this->assertSame('true', $this->importMemoryPostFields(true)['mt_import']);
-    }
-
-    #[Test]
-    public function test_importMemory_sends_mt_import_false_when_asked(): void
-    {
-        $this->assertSame('false', $this->importMemoryPostFields(false)['mt_import']);
-    }
-
     /**
-     * Callers that do not pass the flag, such as the aligner, send false.
+     * @param list<bool> $mtImport the flag passed, or none
      */
     #[Test]
-    public function test_importMemory_sends_mt_import_false_by_default(): void
+    #[TestWith([[true], 'true'])]
+    #[TestWith([[false], 'false'])]
+    #[TestWith([[], 'false'])]
+    public function test_importMemory_sends_mt_import(array $mtImport, string $expected): void
     {
-        $postFields = $this->importMemoryPostFields(null);
+        $postFields = $this->importMemoryPostFields(...$mtImport);
 
-        $this->assertSame('false', $postFields['mt_import']);
+        $this->assertSame($expected, $postFields['mt_import']);
         $this->assertSame('a6043e606ac9b5d7ff24', $postFields['key']);
     }
 

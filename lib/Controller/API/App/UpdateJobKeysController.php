@@ -222,6 +222,11 @@ class UpdateJobKeysController extends KleinController
      *
      * @return bool
      */
+    private function jobOwnerIsMe(?string $owner): bool
+    {
+        return $this->userIsLogged && $owner == $this->user->email;
+    }
+
     /**
      * The MyMemory service new keys are checked with. Tests replace it.
      *
@@ -261,11 +266,6 @@ class UpdateJobKeysController extends KleinController
                 throw new InvalidArgumentException('One of the TM keys you added is not valid. Please check it and try again.', -7);
             }
         }
-    }
-
-    private function jobOwnerIsMe(?string $owner): bool
-    {
-        return $this->userIsLogged && $owner == $this->user->email;
     }
 
     /**
