@@ -110,10 +110,10 @@ const Search = (props) => {
   const handleStatusChange = (value) => {
     const nextSearch = cloneDeep(search)
     nextSearch.selectStatus = value
-    if (value === 'APPROVED-2') {
+    if (value === SEGMENTS_STATUS.APPROVED2) {
       nextSearch.revisionNumber = REVISE_STEP_NUMBER.REVISE2
-      nextSearch.selectStatus = 'APPROVED'
-    } else if (value === 'APPROVED') {
+      nextSearch.selectStatus = SEGMENTS_STATUS.APPROVED2
+    } else if (value === SEGMENTS_STATUS.APPROVED) {
       nextSearch.revisionNumber = REVISE_STEP_NUMBER.REVISE1
     }
     setSearch(nextSearch)
@@ -627,7 +627,7 @@ const Search = (props) => {
           APPROVED 2
         </>
       ),
-      id: 'APPROVED-2',
+      id: SEGMENTS_STATUS.APPROVED2,
     })
   }
   let findIsDisabled = true
@@ -659,6 +659,7 @@ const Search = (props) => {
     search.searchTarget !== '' ||
     search.searchSource !== '' ||
     (search.selectStatus !== '' && search.selectStatus !== 'all')
+
   return props.active ? (
     <div className="search-form">
       <div className="find-wrapper">
@@ -754,6 +755,7 @@ const Search = (props) => {
                     ' ' +
                     statusDropdownDisabled
                   }
+                  isPortalDropdown={true}
                   isDisabled={
                     search.searchTarget === '' && search.searchSource === ''
                   }
