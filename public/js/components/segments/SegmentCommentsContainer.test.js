@@ -48,7 +48,7 @@ jest.mock('../../actions/CommentsActions', () => ({
   saveDraftComment: jest.fn(),
   sendComment: jest.fn(() => Promise.resolve()),
   deleteComment: jest.fn(),
-  resolveThread: jest.fn(),
+  resolveThread: jest.fn(() => Promise.resolve()),
 }))
 
 jest.mock('../../constants/CommentsConstants', () => ({
@@ -242,6 +242,32 @@ describe('SegmentCommentsContainer', () => {
     })
 
     expect(CommentsActions.resolveThread).toHaveBeenCalledWith(1, false)
+  })
+
+  test('a resolve that fails tells the user the thread is still open', async () => {
+    CommentsActions.resolveThread.mockReturnValueOnce(Promise.reject())
+    CommentsStore.getCommentsBySegment.mockReturnValue([buildComment()])
+    renderContainer()
+
+    fireEvent.click(screen.getByRole('button', {name: /Resolve/}))
+
+    expect(
+      await screen.findByText(/the thread could not be resolved/),
+    ).toBeInTheDocument()
+  })
+
+  test('a resolve that succeeds shows no error', async () => {
+    CommentsStore.getCommentsBySegment.mockReturnValue([buildComment()])
+    renderContainer()
+
+    fireEvent.click(screen.getByRole('button', {name: /Resolve/}))
+
+    await waitFor(() =>
+      expect(CommentsActions.resolveThread).toHaveBeenCalled(),
+    )
+    expect(
+      screen.queryByText(/the thread could not be resolved/),
+    ).not.toBeInTheDocument()
   })
 
   test('closeComments prevents default and dispatches closeSegmentComment', () => {
