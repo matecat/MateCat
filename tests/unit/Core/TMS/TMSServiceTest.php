@@ -18,6 +18,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\Stub;
 use ReflectionClass;
 use RuntimeException;
+use Utils\Engines\EngineInterface;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\CreateUserResponse;
 use Utils\Engines\Results\MyMemory\ExportResponse;
@@ -26,6 +27,21 @@ use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 use Utils\TMS\TMSFile;
 use Utils\TMS\TMSService;
+
+/**
+ * A TMSService whose adaptive MT engines are given by the test, instead of being read from the
+ * user's engine metadata.
+ */
+class AdaptiveEnginesTMSService extends TMSService
+{
+    /** @var EngineInterface[] */
+    public array $adaptiveEngines = [];
+
+    protected function getUserAdaptiveMTEngines(UserStruct $user): array
+    {
+        return $this->adaptiveEngines;
+    }
+}
 
 class TMSServiceTest extends AbstractTest
 {
@@ -707,5 +723,92 @@ class TMSServiceTest extends AbstractTest
         self::assertStringContainsString('Hello world', $content);
         self::assertStringContainsString('Ciao mondo', $content);
         self::assertStringContainsString('</tmx>', $content);
+    }
+
+    // ── addTmxInMyMemory: adaptive MT engines ───────────────────────────
+
+    /**
+     * A service whose adaptive engines are the given ones, built like the one of setUp().
+     *
+     * @param EngineInterface[] $engines
+     */
+    private function serviceWithAdaptiveEngines(array $engines): AdaptiveEnginesTMSService
+    {
+        $service = (new ReflectionClass(AdaptiveEnginesTMSService::class))->newInstanceWithoutConstructor();
+        $parent  = new ReflectionClass(TMSService::class);
+
+        foreach (['mymemory_engine', 'logger', 'output_type', 'featureSet', 'name', 'database'] as $prop) {
+            $parent->getProperty($prop)->setValue($service, $parent->getProperty($prop)->getValue($this->service));
+        }
+
+        $service->adaptiveEngines = $engines;
+
+        return $service;
+    }
+
+    private function stubSuccessfulMyMemoryImport(): void
+    {
+        $this->myMemoryStub->method('checkCorrectKey')->willReturn(true);
+        $this->myMemoryStub->method('importMemory')->willReturn(new FileImportAndStatusResponse([
+            'responseStatus'  => 200,
+            'responseData'    => ['uuid' => 'abc-123', 'status' => 0],
+            'responseDetails' => '',
+        ]));
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[Test]
+    public function addTmxInMyMemorySendsAPrivateKeyTmxToTheAdaptiveEngines(): void
+    {
+        $defaultKey = AppConfig::$DEFAULT_TM_KEY;
+        AppConfig::$DEFAULT_TM_KEY = 'default-mm-key';
+
+        try {
+            $this->stubSuccessfulMyMemoryImport();
+            $user = new UserStruct();
+
+            $engine = $this->createMock(EngineInterface::class);
+            $engine->expects($this->once())
+                ->method('importMemory')
+                ->with('/tmp/test.tmx', 'tm-key-123', $user);
+
+            touch('/tmp/test.tmx');
+            $file = new TMSFile('/tmp/test.tmx', 'tm-key-123', 'test.tmx', 0);
+
+            self::assertSame([], $this->serviceWithAdaptiveEngines([$engine])->addTmxInMyMemory($file, $user));
+            self::assertSame('abc-123', $file->getUuid());
+        } finally {
+            AppConfig::$DEFAULT_TM_KEY = $defaultKey;
+        }
+    }
+
+    /**
+     * The default key is the TM shared by everyone: its TMX goes to MyMemory only, never to an
+     * adaptive engine such as Lara.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function addTmxInMyMemoryNeverSendsADefaultKeyTmxToTheAdaptiveEngines(): void
+    {
+        $defaultKey = AppConfig::$DEFAULT_TM_KEY;
+        AppConfig::$DEFAULT_TM_KEY = 'default-mm-key';
+
+        try {
+            $this->stubSuccessfulMyMemoryImport();
+
+            $engine = $this->createMock(EngineInterface::class);
+            $engine->expects($this->never())->method('importMemory');
+
+            touch('/tmp/test.tmx');
+            $file = new TMSFile('/tmp/test.tmx', 'default-mm-key', 'test.tmx', 0);
+
+            self::assertSame([], $this->serviceWithAdaptiveEngines([$engine])->addTmxInMyMemory($file, new UserStruct()));
+            self::assertSame('abc-123', $file->getUuid());
+        } finally {
+            AppConfig::$DEFAULT_TM_KEY = $defaultKey;
+        }
     }
 }
