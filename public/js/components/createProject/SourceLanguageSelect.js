@@ -5,10 +5,7 @@ import {CreateProjectContext} from './CreateProjectContext'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import {SELECT_HEIGHT} from '../../constants/Constants'
 
-export const SourceLanguageSelect = ({
-  isRenderedInsideTab = false,
-  dropdownClassName,
-}) => {
+export const SourceLanguageSelect = ({isRenderedInsideTab = false}) => {
   const {languages, sourceLang, changeSourceLanguage, projectTemplates} =
     useContext(CreateProjectContext)
   const {isUserLogged} = useContext(ApplicationWrapperContext)
@@ -47,5 +44,4 @@ export const SourceLanguageSelect = ({
 
 SourceLanguageSelect.propTypes = {
   isRenderedInsideTab: PropTypes.bool,
-  dropdownClassName: PropTypes.string,
 }

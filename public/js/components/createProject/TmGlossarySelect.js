@@ -1,5 +1,4 @@
 import React, {useContext} from 'react'
-import Check from '../../../img/icons/Check'
 import {Select} from '../common/Select'
 import {CreateProjectContext} from './CreateProjectContext'
 import {

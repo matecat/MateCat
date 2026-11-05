@@ -51,7 +51,7 @@ export const KeysSelect = ({
     >
       {({index, onClose}) => ({
         ...(index === 0 &&
-          !keys.length && {
+          isEmptyKeys && {
             beforeRow: (
               <li
                 className="dropdown__option button-create-option"
