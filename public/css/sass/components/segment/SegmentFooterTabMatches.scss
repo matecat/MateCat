@@ -225,8 +225,7 @@ ul.suggestion-item.graysmall:last-child {
   bottom: 0;
   right: 0;
   margin-top: 10px;
-  // The match type badge ends on the tab's border
-  margin-right: 0;
+  margin-right: 15px;
   z-index: 0;
   gap: 4px;
 }
@@ -333,12 +332,6 @@ ul.suggestion-item.graysmall:last-child {
   box-shadow: inset 0px 0px 0px 1px colors.$red500;
   -moz-box-shadow: inset 0px 0px 0px 1px colors.$red500;
   -webkit-box-shadow: inset 0px 0px 0px 1px colors.$red500;
-}
-
-// The match badges end on the tab's border; an outlined badge there would lose its
-// right edge to it, so the penalty badge keeps a small gap when it closes the row
-.graysmall-details .per-red-outline:last-child {
-  margin-right: 4px;
 }
 
 .graysmall-details .per-yellow,
