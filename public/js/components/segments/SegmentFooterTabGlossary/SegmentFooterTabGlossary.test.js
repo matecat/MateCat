@@ -131,11 +131,9 @@ describe('SegmentFooterTabGlossary', () => {
       })
     })
 
-    expect(screen.getByText('No glossary available.')).toBeInTheDocument()
+    expect(screen.getByText('No termbase available.')).toBeInTheDocument()
 
-    fireEvent.click(
-      screen.getByText('+ Click here to create one'),
-    )
+    fireEvent.click(screen.getByText('Click here to create one'))
 
     expect(
       document.querySelector('input[name="glossary-term-original"]'),

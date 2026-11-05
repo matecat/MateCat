@@ -398,7 +398,10 @@ export const Dropdown = forwardRef(
             onMouseLeave={() => setRowTooltip()}
           >
             {row && !isNoResultsFound ? (
-              row
+              <>
+                {row}
+                {showActiveOptionIcon && <Check size={16} />}
+              </>
             ) : (
               <>
                 <span>{option.name}</span>

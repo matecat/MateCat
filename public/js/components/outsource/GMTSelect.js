@@ -42,7 +42,7 @@ export const GMTSelect = ({showLabel, changeValue}) => {
       name="gmt-select"
       className="gmt-select"
       dropdownClassName="gmt-select-portal-dropdown"
-      label={showLabel ? 'GMT' : null}
+      label={showLabel ? 'Time zone' : null}
       isPortalDropdown={true}
       options={GMT_OPTIONS}
       onSelect={(item) => {
@@ -53,7 +53,6 @@ export const GMTSelect = ({showLabel, changeValue}) => {
         GMT_OPTIONS.find(({id}) => id === timezone) || GMT_OPTIONS[0]
       }
       tooltipPosition="bottom"
-      checkSpaceToReverse={false}
       maxHeightDroplist={200}
     />
   )

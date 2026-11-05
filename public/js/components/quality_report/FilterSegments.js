@@ -214,9 +214,7 @@ const FilterSegments = ({
             resetFunction={() => updateFilter({issue_category: null})}
           />
         </div>
-        <div
-          className={`filter-category ${getFilterClassName(filter.severity)}`}
-        >
+        <div className={`${getFilterClassName(filter.severity)}`}>
           <Select
             options={optionsSeverities}
             onSelect={(value) => filterSelectChanged('severity', value.id)}

@@ -175,7 +175,7 @@
               flex-direction: column;
               display: flex;
               position: relative;
-              gap: 8px;
+              gap: 4px;
               width: 160px;
               &.translator-email {
                 display: flex;
@@ -188,8 +188,8 @@
               }
               label {
                 font-size: variables.$font-size-xsmall;
-                line-height: 20px;
-                font-weight: 400;
+                color: colors.$grey700;
+                text-align: left;
               }
 
               input[type='text'],
@@ -506,7 +506,7 @@
 
         label {
           font: variables.$font-style-xsmall;
-          color: colors.$grey400;
+          color: colors.$grey700;
         }
 
         .delivery-date {

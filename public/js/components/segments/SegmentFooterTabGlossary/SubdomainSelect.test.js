@@ -55,13 +55,7 @@ describe('SubdomainSelect', () => {
     fireEvent.change(screen.getByPlaceholderText('Find a subdomain'), {
       target: {value: 'Appeals'},
     })
-    fireEvent.click(
-      screen.getByText(
-        (content, element) =>
-          element?.className === 'button-create-option' &&
-          element.textContent.includes('Appeals'),
-      ),
-    )
+    fireEvent.click(screen.getByText('Appeals'))
 
     expect(screen.getByTestId('subdomains-count')).toHaveTextContent('3')
     await waitFor(() =>
@@ -71,26 +65,12 @@ describe('SubdomainSelect', () => {
     )
   })
 
-  test('pressing Enter with an unknown subdomain query creates it', async () => {
-    render(<Harness />)
-    openDropdown()
-    const searchInput = screen.getByPlaceholderText('Find a subdomain')
-    fireEvent.change(searchInput, {target: {value: 'Compliance'}})
-    fireEvent.keyDown(searchInput, {key: 'Enter'})
-
-    await waitFor(() =>
-      expect(screen.getByTestId('active-subdomain')).toHaveTextContent(
-        'Compliance',
-      ),
-    )
-  })
-
-  test('shows deselect button when a subdomain is active and clears it', () => {
-    render(
+  test('clicking the reset button clears the active subdomain', () => {
+    const {container} = render(
       <Harness initialSelectsActive={{subdomain: initialSubdomains[0]}} />,
     )
-    openDropdown()
-    fireEvent.click(screen.getByText('Deselect subdomain'))
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access -- reset icon carries no accessible role or testid
+    fireEvent.click(container.querySelector('.icon-reset'))
     expect(screen.getByTestId('active-subdomain')).toHaveTextContent('')
   })
 

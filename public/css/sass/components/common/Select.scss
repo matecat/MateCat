@@ -165,7 +165,7 @@ $select-height: 40px;
 
   &.select__dropdown--is-reversed:not(.select-dropdown__wrapper-portal) {
     top: auto;
-    bottom: calc($select-height + dropdown.$dropdown-to-bottom-margin);
+    bottom: calc($select-height + dropdown.$dropdown-top-bottom-margin);
   }
 }
 

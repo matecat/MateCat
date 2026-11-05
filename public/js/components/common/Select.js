@@ -32,7 +32,7 @@ export const Select = ({
   optionsSelectedCopyPlural = () => {},
   resetSelectedOptions = () => {},
   checkSpaceToReverse = true,
-  maxHeightDroplist = 400,
+  maxHeightDroplist = 420,
   isPortalDropdown,
   isActiveOptionOnTop,
   dropdownClassName,
@@ -192,7 +192,7 @@ export const Select = ({
     // Matches Dropdown.scss's $dropdown-to-bottom-margin — the same gap the
     // non-reversed (opens-below) case gets between the trigger and the
     // dropdown.
-    const DROPDOWN_TO_TRIGGER_GAP = 10
+    const DROPDOWN_TO_TRIGGER_GAP = 4
 
     const updatePosition = () => {
       const rect = wrapperRef.current?.getBoundingClientRect()
@@ -218,9 +218,7 @@ export const Select = ({
 
           style.transform = `translateX(${x}px)`
           style.top = 'auto'
-          style.bottom = `${
-            window.innerHeight - y + DROPDOWN_TO_TRIGGER_GAP
-          }px`
+          style.bottom = `${window.innerHeight - y + DROPDOWN_TO_TRIGGER_GAP}px`
         } else {
           style.transform = `translate(${x}px,${y + rect.height}px)`
           style.top = ''

@@ -478,11 +478,11 @@ describe('Select', () => {
         const {container} = renderSelect({isPortalDropdown: true})
         clickTrigger(container)
 
-        // bottom = innerHeight(900) - anchor.y(448) + gap(10) = 462
+        // bottom = innerHeight(900) - anchor.y(448) + gap(4) = 456
         expect(getDropdownWrapper(container)).toHaveStyle({
           transform: 'translateX(10px)',
           top: 'auto',
-          bottom: '462px',
+          bottom: '456px',
         })
 
         Object.defineProperty(window, 'innerHeight', {

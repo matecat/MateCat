@@ -52,40 +52,6 @@
   }
 }
 
-.tab.glossary
-  .domain-select
-  .select__dropdown-wrapper
-  .custom-dropdown
-  .dropdown__list
-  .domain-option {
-  border: 1px solid colors.$grey400;
-  border-radius: 12px;
-  padding: 0 6px 0 6px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 18px;
-  text-align: center;
-}
-
-.tab.glossary
-  .domain-select
-  .select__dropdown-wrapper
-  .custom-dropdown
-  .dropdown__list
-  .button-create-option {
-  color: colors.$grey400;
-  font-style: italic;
-  font-size: 14px;
-  border: none;
-  background: none;
-  cursor: pointer;
-
-  &:hover {
-    color: colors.$grey700;
-  }
-}
-
 .tab.glossary textarea {
   resize: none;
   height: 100px;
@@ -623,6 +589,7 @@ span {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 4px;
 }
 
 .tab.glossary .no_keys_glossary > p {
@@ -684,4 +651,43 @@ span {
 .tab.glossary .loading_label {
   display: block;
   margin-top: 10px;
+}
+
+.glossary-domain-subdomain-dropdown {
+  .dropdown__option--is-no-results-found {
+    display: none;
+  }
+
+  .button-create-option {
+    > div {
+      width: 100%;
+    }
+
+    .button-create-option-content {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      svg {
+        flex-shrink: 0;
+        opacity: 1;
+      }
+    }
+
+    &:has(+ .dropdown__option--is-no-results-found) {
+      margin-bottom: 0;
+    }
+
+    &:hover {
+      background-color: colors.$grey50 !important;
+    }
+  }
+}
+
+.glossary-domain-subdomain-no-records {
+  display: block;
+  text-align: left;
+  color: colors.$grey600;
+  padding: 0 8px;
+  line-height: 1.2;
 }
