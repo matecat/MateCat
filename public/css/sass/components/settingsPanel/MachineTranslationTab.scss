@@ -328,7 +328,9 @@
   .main-buttons-container {
     position: absolute;
     right: 9px;
-    margin-top: 11px;
+    // Centred on the "Active" / "Glossary" headings: their text is centred 28px below
+    // the top of the table, and the 40px button is centred there at 8px
+    margin-top: 8px;
     display: flex;
     align-items: center;
     justify-content: space-between;
