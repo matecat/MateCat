@@ -307,8 +307,10 @@ ul.suggestion-item.graysmall:last-child {
   background: colors.$orange200 !important;
   color: colors.$grey1300 !important;
 }
+// Different language variant (e.g. "en-GB > fr-FR (-1%)"): yellow, as in production.
+// The palette renumbering made $orange600 orange; the old #ebbf47 is now $orange300.
 .per-yellow-variant {
-  background: colors.$orange600 !important;
+  background: colors.$orange300 !important;
   color: colors.$white !important;
 }
 .per-grey {
