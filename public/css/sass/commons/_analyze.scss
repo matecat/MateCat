@@ -400,8 +400,12 @@ body.analyze {
         align-self: stretch;
         border-radius: variables.$border-radius-default;
         border: 1px solid colors.$grey150;
-        // No overflow clipping here: it would stop the job header and the table header
-        // from sticking. The header and .job-table-scroll round their own corners instead.
+        // Clipped to the card, so the sticky header's panel-coloured mask shadow never
+        // paints over the card above or the "Job details" title. `clip`, unlike `hidden`,
+        // is not a scroll container: the job and table headers still stick. The 1px margin
+        // lets the header's border shadows cover the card border (Safari ignores it).
+        overflow: clip;
+        overflow-clip-margin: 1px;
       }
     }
   }
