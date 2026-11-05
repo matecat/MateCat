@@ -15,11 +15,13 @@ export const SourceLanguageSelect = ({
 
   return (
     <Select
-      {...(!isRenderedInsideTab
-        ? {label: 'From'}
-        : {isPortalDropdown: true, dropdownClassName})}
+      {...(!isRenderedInsideTab && {label: 'From'})}
       id="source-lang"
       name="source-lang"
+      dropdownClassName={
+        !isRenderedInsideTab ? 'new-project-form-select-portal' : ''
+      }
+      isPortalDropdown={true}
       maxHeightDroplist={SELECT_HEIGHT}
       showSearchBar={true}
       options={languages}

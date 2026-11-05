@@ -43,6 +43,8 @@ export const TmGlossarySelect = () => {
       id="tmx-select"
       name={'tmx-select'}
       className={`${hasNoPrivateKeys ? 'select-without-private-keys' : ''}`}
+      dropdownClassName="new-project-form-select-portal"
+      isPortalDropdown={true}
       maxHeightDroplist={SELECT_HEIGHT}
       showSearchBar={true}
       isDisabled={!tmKeys || !isUserLogged || !projectTemplates?.length}
@@ -76,7 +78,7 @@ export const TmGlossarySelect = () => {
         }))
       }}
     >
-      {({index, onClose, name, key, showActiveOptionIcon}) => ({
+      {({index, onClose, name, key}) => ({
         ...(index === 0 && {
           beforeRow: (
             <>
@@ -110,7 +112,6 @@ export const TmGlossarySelect = () => {
               <span>{name}</span>
               <span>{key}</span>
             </div>
-            {showActiveOptionIcon && <Check size={16} />}
           </div>
         ),
       })}
