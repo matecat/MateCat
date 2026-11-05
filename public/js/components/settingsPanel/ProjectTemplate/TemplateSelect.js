@@ -2,7 +2,6 @@ import React, {createRef, useContext, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {Select} from '../../common/Select'
 import {IconPin} from '../../../../img/icons/IconPin'
-import Check from '../../../../img/icons/Check'
 import {ApplicationWrapperContext} from '../../common/ApplicationWrapper/ApplicationWrapperContext'
 
 export const TemplateSelect = ({
@@ -67,7 +66,7 @@ export const TemplateSelect = ({
         onSelect={onSelect}
         isDisabled={isLoadingTemplates || !isUserLogged}
       >
-        {({id, name, showActiveOptionIcon}) => {
+        {({id, name}) => {
           const {isDefault} =
             projectTemplates
               .filter(({isTemporary}) => !isTemporary)
@@ -84,7 +83,6 @@ export const TemplateSelect = ({
                     </span>
                     <IconPin />
                   </div>
-                  {showActiveOptionIcon && <Check size={16} />}
                 </>
               ),
               getElementToEllipsis: () => labelRef.current,

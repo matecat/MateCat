@@ -1,13 +1,13 @@
 @use '../../tokens/colors';
 @use '../../commons/variables';
 
-$dropdown-to-bottom-margin: 10px;
+$dropdown-top-bottom-margin: 4px;
 $padding-top-and-bottom: 8px;
 
 // General dropdown
 .custom-dropdown {
   position: relative;
-  margin-top: $dropdown-to-bottom-margin;
+  margin-top: $dropdown-top-bottom-margin;
   border-radius: variables.$border-radius-default;
   box-shadow: 0 5px 20px rgba(102, 102, 102, 0.4);
   width: 100%;
@@ -31,7 +31,9 @@ $padding-top-and-bottom: 8px;
 
 // Reversed state
 .select__dropdown--is-reversed .custom-dropdown {
-  margin-top: calc(($dropdown-to-bottom-margin + $padding-top-and-bottom) * -1);
+  margin-top: calc(
+    ($dropdown-top-bottom-margin + $padding-top-and-bottom) * -1
+  );
   box-shadow: 0 -5px 20px rgba(102, 102, 102, 0.4);
 }
 
@@ -50,7 +52,7 @@ $padding-top-and-bottom: 8px;
   position: relative;
   box-shadow: none;
   border-radius: variables.$border-radius-default;
-  margin: 0 8px 15px;
+  margin: 0 8px 8px;
 
   svg {
     position: absolute;
@@ -170,7 +172,7 @@ $padding-top-and-bottom: 8px;
 }
 
 .dropdown__tooltip-right {
-  right: 0;
+  right: 10px;
 }
 
 .container__dropdown__list {
@@ -234,6 +236,10 @@ $padding-top-and-bottom: 8px;
 .dropdown__option--is-highlighted-option,
 .dropdown__option:hover {
   background-color: colors.$grey50;
+}
+
+.dropdown__option--is-active-option {
+  gap: 4px;
 }
 
 .dropdown__option--is-active-option,
