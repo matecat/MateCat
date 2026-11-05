@@ -140,15 +140,18 @@ class TMSService
 
             $this->logger->debug($file);
 
-            // Read the engines before the MyMemory import: they decide mt_import. The default key is
-            // the TM everyone shares, so its TMX stays on MyMemory and reaches no adaptive engine.
-            $userAdaptiveEngines = $this->isSharedTmKey($file->getTmKey()) ? [] : $this->getUserAdaptiveMTEngines($user);
+            // The default key is the TM everyone shares: its TMX stays on MyMemory and reaches no
+            // adaptive engine. The engines are read before the import because they decide mt_import,
+            // checked in this order: default key → false; any adaptive engine (Lara, ModernMT) →
+            // false, Matecat imports on them itself; no engine → true, MyMemory imports into Lara.
+            $isSharedTmKey = $file->getTmKey() === AppConfig::$DEFAULT_TM_KEY;
+            $userAdaptiveEngines = $isSharedTmKey ? [] : $this->getUserAdaptiveMTEngines($user);
 
             $importStatus = $this->mymemory_engine->importMemory(
                 $file->getFilePath(),
                 $file->getTmKey(),
                 $user,
-                $this->mtImport($file->getTmKey(), $userAdaptiveEngines)
+                !$isSharedTmKey && $userAdaptiveEngines === []
             );
 
             //check for errors during the import
@@ -183,32 +186,6 @@ class TMSService
         }
 
         return $warnings;
-    }
-
-    /**
-     * Tells whether a TMX on this key belongs to the TM everyone shares, the configured default
-     * key, not to one user. Example: with `DEFAULT_TM_KEY = 'abc'`, `'abc'` → true.
-     */
-    private function isSharedTmKey(string $tmKey): bool
-    {
-        return $tmKey === AppConfig::$DEFAULT_TM_KEY;
-    }
-
-    /**
-     * Tells MyMemory whether to import the TMX into Lara itself, checked in this order:
-     * the default key → false; a user with any adaptive engine (Lara, ModernMT) → false, Matecat
-     * imports on them itself; no adaptive engine → true, MyMemory imports with its own license.
-     * Example: a private key and no engine → true.
-     *
-     * @param EngineInterface[] $userAdaptiveEngines
-     */
-    private function mtImport(string $tmKey, array $userAdaptiveEngines): bool
-    {
-        if ($this->isSharedTmKey($tmKey)) {
-            return false;
-        }
-
-        return empty($userAdaptiveEngines);
     }
 
     /**

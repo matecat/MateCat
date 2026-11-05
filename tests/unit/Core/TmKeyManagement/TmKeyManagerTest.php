@@ -12,6 +12,7 @@ use PHPUnit\Framework\MockObject\Exception as MockObjectException;
 use Utils\TmKeyManagement\Filter;
 use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TmKeyManagement\TmKeyStruct;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 
 class TmKeyManagerTest extends AbstractTest
@@ -173,90 +174,36 @@ class TmKeyManagerTest extends AbstractTest
     }
 
     /**
-     * @throws JsonException
+     * The client keys getNewKeys() reads, with the job keys it compares them to.
+     *
+     * @return array<string, array{list<string>, list<string>, list<string>}> client keys, job keys, expected
      */
-    #[Test]
-    public function getNewKeysReturnsAKeyThatIsNotInTheJob(): void
+    public static function newKeysCases(): array
     {
-        $clientJson = json_encode([['key' => 'aaaaaaaaaaaaaaaaaaa1', 'name' => 'A', 'r' => true, 'w' => true, 'tm' => true, 'glos' => true]]);
-        $jobJson = json_encode([]);
-
-        $result = TmKeyManager::getNewKeys($clientJson, $jobJson);
-
-        $this->assertSame(['aaaaaaaaaaaaaaaaaaa1'], $result);
+        return [
+            'a key not in the job'          => [['aaaaaaaaaaaaaaaaaaa1'], [], ['aaaaaaaaaaaaaaaaaaa1']],
+            'a key already in the job'      => [['aaaaaaaaaaaaaaaaaaa1'], ['aaaaaaaaaaaaaaaaaaa1'], []],
+            'the masked form of a job key'  => [[(new TmKeyStruct(['key' => 'aaaaaaaaaaaaaaaaaaa1']))->getCrypt()], ['aaaaaaaaaaaaaaaaaaa1'], []],
+            'a masked key not in the job'   => [['****************zzz9'], [], []],
+            'an empty key'                  => [[''], [], []],
+            'only the new one of two keys'  => [['aaaaaaaaaaaaaaaaaaa1', 'bbbbbbbbbbbbbbbbbbb2'], ['aaaaaaaaaaaaaaaaaaa1'], ['bbbbbbbbbbbbbbbbbbb2']],
+        ];
     }
 
     /**
+     * @param list<string> $clientKeys
+     * @param list<string> $jobKeys
+     * @param list<string> $expected
+     *
      * @throws JsonException
      */
     #[Test]
-    public function getNewKeysIgnoresAKeyAlreadyInTheJob(): void
+    #[DataProvider('newKeysCases')]
+    public function getNewKeysReturnsTheClientKeysThatAreNotInTheJob(array $clientKeys, array $jobKeys, array $expected): void
     {
-        $clientJson = json_encode([['key' => 'aaaaaaaaaaaaaaaaaaa1', 'name' => 'A', 'r' => true, 'w' => true, 'tm' => true, 'glos' => true]]);
-        $jobJson = json_encode([['key' => 'aaaaaaaaaaaaaaaaaaa1', 'owner' => true, 'r' => true, 'w' => true]]);
+        $clientJson = (string) json_encode(array_map(fn(string $k) => ['key' => $k, 'name' => 'A', 'r' => true, 'w' => true, 'tm' => true, 'glos' => true], $clientKeys));
+        $jobJson    = (string) json_encode(array_map(fn(string $k) => ['key' => $k, 'owner' => true, 'r' => true, 'w' => true], $jobKeys));
 
-        $result = TmKeyManager::getNewKeys($clientJson, $jobJson);
-
-        $this->assertSame([], $result);
-    }
-
-    /**
-     * @throws JsonException
-     */
-    #[Test]
-    public function getNewKeysIgnoresTheMaskedFormOfAJobKey(): void
-    {
-        $maskedKey = (new TmKeyStruct(['key' => 'aaaaaaaaaaaaaaaaaaa1']))->getCrypt();
-        $clientJson = json_encode([['key' => $maskedKey, 'name' => 'A', 'r' => true, 'w' => true, 'tm' => true, 'glos' => true]]);
-        $jobJson = json_encode([['key' => 'aaaaaaaaaaaaaaaaaaa1', 'owner' => true, 'r' => true, 'w' => true]]);
-
-        $result = TmKeyManager::getNewKeys($clientJson, $jobJson);
-
-        $this->assertSame([], $result);
-    }
-
-    /**
-     * @throws JsonException
-     */
-    #[Test]
-    public function getNewKeysNeverReturnsAMaskedKey(): void
-    {
-        $clientJson = json_encode([['key' => '****************zzz9', 'name' => 'A', 'r' => true, 'w' => true, 'tm' => true, 'glos' => true]]);
-        $jobJson = json_encode([]);
-
-        $result = TmKeyManager::getNewKeys($clientJson, $jobJson);
-
-        $this->assertSame([], $result);
-    }
-
-    /**
-     * @throws JsonException
-     */
-    #[Test]
-    public function getNewKeysSkipsAnEmptyKey(): void
-    {
-        $clientJson = json_encode([['key' => '', 'name' => 'A', 'r' => true, 'w' => true, 'tm' => true, 'glos' => true]]);
-        $jobJson = json_encode([]);
-
-        $result = TmKeyManager::getNewKeys($clientJson, $jobJson);
-
-        $this->assertSame([], $result);
-    }
-
-    /**
-     * @throws JsonException
-     */
-    #[Test]
-    public function getNewKeysReturnsADuplicatedKeyOnce(): void
-    {
-        $clientJson = json_encode([
-            ['key' => 'aaaaaaaaaaaaaaaaaaa1', 'name' => 'A', 'r' => true, 'w' => true, 'tm' => true, 'glos' => true],
-            ['key' => 'aaaaaaaaaaaaaaaaaaa1', 'name' => 'A', 'r' => true, 'w' => true, 'tm' => true, 'glos' => true],
-        ]);
-        $jobJson = json_encode([]);
-
-        $result = TmKeyManager::getNewKeys($clientJson, $jobJson);
-
-        $this->assertSame(['aaaaaaaaaaaaaaaaaaa1'], $result);
+        $this->assertSame($expected, TmKeyManager::getNewKeys($clientJson, $jobJson));
     }
 }
