@@ -368,6 +368,60 @@ class MyMemoryMethodsTest extends AbstractTest
         $this->assertNull($result->error);
     }
 
+    /**
+     * The POST fields MyMemory receives for a TMX import, as `_call` gets them.
+     *
+     * @return array<string, mixed>
+     */
+    private function importMemoryPostFields(?bool $mtImport): array
+    {
+        $mock = @$this->getMockBuilder(MyMemory::class)
+            ->setConstructorArgs([$this->engineStruct, $this->createStub(\Model\DataAccess\IDatabase::class)])
+            ->onlyMethods(['_call'])
+            ->getMock();
+
+        $postFields = [];
+        $mock->expects($this->once())->method('_call')->willReturnCallback(
+            function (string $url, array $curlOptions) use (&$postFields): string {
+                $postFields = $curlOptions[CURLOPT_POSTFIELDS];
+
+                return (string)json_encode(['responseData' => ['UUID' => 'u'], 'responseStatus' => 202, 'responseDetails' => '']);
+            }
+        );
+
+        if ($mtImport === null) {
+            $mock->importMemory($this->tempFilePath, 'a6043e606ac9b5d7ff24', new UserStruct());
+        } else {
+            $mock->importMemory($this->tempFilePath, 'a6043e606ac9b5d7ff24', new UserStruct(), $mtImport);
+        }
+
+        return $postFields;
+    }
+
+    #[Test]
+    public function test_importMemory_sends_mt_import_true_when_asked(): void
+    {
+        $this->assertSame('true', $this->importMemoryPostFields(true)['mt_import']);
+    }
+
+    #[Test]
+    public function test_importMemory_sends_mt_import_false_when_asked(): void
+    {
+        $this->assertSame('false', $this->importMemoryPostFields(false)['mt_import']);
+    }
+
+    /**
+     * Callers that do not pass the flag, such as the aligner, send false.
+     */
+    #[Test]
+    public function test_importMemory_sends_mt_import_false_by_default(): void
+    {
+        $postFields = $this->importMemoryPostFields(null);
+
+        $this->assertSame('false', $postFields['mt_import']);
+        $this->assertSame('a6043e606ac9b5d7ff24', $postFields['key']);
+    }
+
     #[Test]
     public function test_getImportStatus_happy_path(): void
     {

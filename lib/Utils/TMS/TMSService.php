@@ -140,10 +140,15 @@ class TMSService
 
             $this->logger->debug($file);
 
+            // Read the engines before the MyMemory import: they decide mt_import. The default key is
+            // the TM everyone shares, so its TMX stays on MyMemory and reaches no adaptive engine.
+            $userAdaptiveEngines = $this->isSharedTmKey($file->getTmKey()) ? [] : $this->getUserAdaptiveMTEngines($user);
+
             $importStatus = $this->mymemory_engine->importMemory(
                 $file->getFilePath(),
                 $file->getTmKey(),
-                $user
+                $user,
+                $this->mtImport($file->getTmKey(), $userAdaptiveEngines)
             );
 
             //check for errors during the import
@@ -162,10 +167,6 @@ class TMSService
             $file->setUuid($importStatus->id);
 
             $warnings = [];
-
-            // The default key is the TM everyone shares: its TMX stays on MyMemory and never
-            // reaches an adaptive engine such as Lara.
-            $userAdaptiveEngines = $this->isSharedTmKey($file->getTmKey()) ? [] : $this->getUserAdaptiveMTEngines($user);
             foreach ($userAdaptiveEngines as $engine) {
                 try {
                     $engine->importMemory($file->getFilePath(), $file->getTmKey(), $user);
@@ -191,6 +192,23 @@ class TMSService
     private function isSharedTmKey(string $tmKey): bool
     {
         return $tmKey === AppConfig::$DEFAULT_TM_KEY;
+    }
+
+    /**
+     * Tells MyMemory whether to import the TMX into Lara itself, checked in this order:
+     * the default key → false; a user with any adaptive engine (Lara, ModernMT) → false, Matecat
+     * imports on them itself; no adaptive engine → true, MyMemory imports with its own license.
+     * Example: a private key and no engine → true.
+     *
+     * @param EngineInterface[] $userAdaptiveEngines
+     */
+    private function mtImport(string $tmKey, array $userAdaptiveEngines): bool
+    {
+        if ($this->isSharedTmKey($tmKey)) {
+            return false;
+        }
+
+        return empty($userAdaptiveEngines);
     }
 
     /**
