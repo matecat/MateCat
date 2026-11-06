@@ -18,7 +18,6 @@ use Random\RandomException;
 use ReflectionException;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\AnalysisRedisService;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\DefaultEngineResolver;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\EngineService;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\MatchProcessorService;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\ProjectCompletionRepository;
@@ -92,7 +91,6 @@ class TMAnalysisWorker extends AbstractWorker
             $this->logger
         );
         $this->engineService = $engineService ?? new EngineService(
-            new DefaultEngineResolver($this->database),
             $this->database,
             new LaraQualityEstimator($this->database, $this->logger)
         );
