@@ -1,5 +1,11 @@
 import React from 'react'
-import {render, screen, fireEvent, act} from '@testing-library/react'
+import {
+  render,
+  screen,
+  fireEvent,
+  act,
+  createEvent,
+} from '@testing-library/react'
 import SegmentFooterTabConcordance from './SegmentFooterTabConcordance'
 import {SegmentContext} from './SegmentContext'
 import SegmentStore from '../../stores/SegmentStore'
@@ -222,5 +228,21 @@ describe('copying from the concordance tab', () => {
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
       'some concordance text',
     )
+  })
+
+  test('leaves a copy a SegmentView in the results already wrote', () => {
+    jest
+      .spyOn(document, 'getSelection')
+      .mockReturnValue({toString: () => 'chip labels'})
+    navigator.clipboard = {writeText: jest.fn(() => Promise.resolve())}
+    renderComponent()
+    const [searchField] = screen.getAllByRole('textbox')
+    // a SegmentView handles the copy first and prevents the default one
+    const copyEvent = createEvent.copy(searchField)
+    copyEvent.preventDefault()
+
+    fireEvent(searchField, copyEvent)
+
+    expect(navigator.clipboard.writeText).not.toHaveBeenCalled()
   })
 })

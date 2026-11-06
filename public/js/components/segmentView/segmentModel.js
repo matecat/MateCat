@@ -483,3 +483,109 @@ export const diffTokens = (oldTokens, newTokens) => {
     return {op: OPS[op], tokens}
   })
 }
+
+// Text tokens hold decoded text; the segment string stores it HTML-encoded.
+const encodeText = (text) =>
+  text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+
+// What a tag chip yields as plain text: whitespace chips the character they
+// stand for, every other chip its number and label.
+const plainTextOf = (token) => {
+  if (token.name === 'space') return token.raw
+  const unicodeChar = tagSignatures[token.name]?.unicodeChar
+  if (unicodeChar) return unicodeChar
+  return (
+    (token.index !== undefined && token.index !== null
+      ? String(token.index + 1)
+      : '') + token.label
+  ).replace(new RegExp(ZWSP, 'g'), '')
+}
+
+/**
+ * The part of `segment` between `start` and `end`, offsets in
+ * `markableText(segment)` (every tag one character). A tag is taken whole
+ * when its character is in the range.
+ * @returns {{raw: string, text: string}} `raw` is the slice as a segment
+ *   string (tags as their markup, text HTML-encoded, whitespace chips as
+ *   their placeholders); `text` is its plain text
+ */
+export const sliceSegment = (segment, start, end, options) => {
+  let raw = ''
+  let text = ''
+  let pos = 0
+  tokenize(segment, options).forEach((token) => {
+    if (token.type === 'text') {
+      const from = Math.max(start - pos, 0)
+      const to = Math.min(end - pos, token.text.length)
+      if (to > from) {
+        const part = token.text.slice(from, to)
+        raw += encodeText(part)
+        text += part
+      }
+      pos += token.text.length
+      return
+    }
+    if (pos >= start && pos < end) {
+      raw += token.raw
+      text += plainTextOf(token)
+    }
+    pos++
+  })
+  return {raw, text}
+}
+
+/**
+ * The attribute that carries a segment slice (base64 of the raw string) in
+ * the `text/html` flavour of a copy from a SegmentView.
+ */
+export const CLIPBOARD_ATTRIBUTE = 'data-matecat-segment'
+const CLIPBOARD_ATTRIBUTE_RE = new RegExp(
+  CLIPBOARD_ATTRIBUTE + '="([A-Za-z0-9+/=_-]*)"',
+)
+
+/**
+ * The `text/html` flavour of a copy: one element carrying the raw slice in
+ * `CLIPBOARD_ATTRIBUTE` and the plain text as content.
+ */
+export const segmentClipboardHtml = ({raw, text}) =>
+  `<span ${CLIPBOARD_ATTRIBUTE}="${Base64.encode(raw)}">${encodeText(text)}</span>`
+
+const MARKUP_TAG_KEYS = ['ph', 'gSc', 'g', 'gCl', 'bx', 'ex', 'x']
+
+const isKnownTag = (markup) =>
+  MARKUP_TAG_KEYS.some((key) => {
+    const regex = tagSignatures[key]?.regex
+    return (
+      !!regex &&
+      new RegExp(`^(?:${regex.source})$`, regex.flags.replace('g', '')).test(
+        markup,
+      )
+    )
+  })
+
+/**
+ * Reads the segment slice out of the `text/html` flavour of a paste.
+ * The slice is untrusted (any page can put this attribute on the clipboard):
+ * only markup that is exactly one of the segment's tags is kept, any other
+ * markup and any stray bracket is encoded as text.
+ * @returns {string|null} the slice as a segment string, or null when the html
+ *   does not carry one
+ */
+export const readSegmentClipboard = (html) => {
+  const match = html ? CLIPBOARD_ATTRIBUTE_RE.exec(html) : null
+  if (!match) return null
+  let raw
+  try {
+    raw = Base64.decode(match[1])
+  } catch (e) {
+    return null
+  }
+  return raw
+    .split(/(<[^<>]*>)/)
+    .map((part, i) =>
+      i % 2 === 1 && isKnownTag(part)
+        ? part
+        : part.replace(/</g, '&lt;').replace(/>/g, '&gt;'),
+    )
+    .join('')
+}

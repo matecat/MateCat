@@ -1,7 +1,8 @@
 import React from 'react'
-import {render, screen} from '@testing-library/react'
+import {fireEvent, render, screen} from '@testing-library/react'
 import {Base64} from 'js-base64'
 import SegmentView from './SegmentView'
+import {readSegmentClipboard} from './segmentModel'
 import {
   initTagSignature,
   setTagSignatureMiddleware,
@@ -121,5 +122,105 @@ describe('SegmentView', () => {
     render(<SegmentView as="p" lang="it" data-testid="root" segment="x" />)
     expect(screen.getByTestId('root')).toHaveAttribute('lang', 'it')
     expect(screen.getByText('x', {selector: 'p'})).toBeInTheDocument()
+  })
+})
+
+describe('copying from a SegmentView', () => {
+  // The text node of `root` whose content is `text`.
+  const textNode = (root, text) => {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+    while (walker.nextNode()) {
+      if (walker.currentNode.data === text) return walker.currentNode
+    }
+    throw new Error(`no text node "${text}"`)
+  }
+  const select = (start, startOffset, end, endOffset) => {
+    const range = document.createRange()
+    range.setStart(start, startOffset)
+    range.setEnd(end, endOffset)
+    document.getSelection().removeAllRanges()
+    document.getSelection().addRange(range)
+  }
+  const copy = (element) => {
+    const data = {}
+    const clipboardData = {setData: (type, value) => (data[type] = value)}
+    const prevented = !fireEvent.copy(element, {clipboardData})
+    return {prevented, data, slice: readSegmentClipboard(data['text/html'])}
+  }
+  afterEach(() => document.getSelection().removeAllRanges())
+
+  test('copies the selection as a segment slice, a partly selected chip whole', () => {
+    render(<SegmentView data-testid="view" segment='ab<x id="7"/>cd' />)
+    const root = screen.getByTestId('view')
+    // from inside "ab" to inside the chip's label
+    select(textNode(root, 'ab'), 1, textNode(root, '7'), 0)
+
+    const {prevented, data, slice} = copy(root)
+
+    expect(prevented).toBe(true)
+    expect(slice).toBe('b<x id="7"/>')
+    expect(data['text/plain']).toBe('b7')
+  })
+
+  test('copies text encoded as the segment stores it, and nbsp as its placeholder', () => {
+    render(<SegmentView data-testid="view" segment="1 &lt; 2##$_A0$##&amp;" />)
+    const root = screen.getByTestId('view')
+    const range = document.createRange()
+    range.selectNodeContents(root)
+    document.getSelection().addRange(range)
+
+    const {data, slice} = copy(root)
+
+    expect(slice).toBe('1 &lt; 2##$_A0$##&amp;')
+    expect(data['text/plain']).toBe('1 < 2\u00a0&')
+  })
+
+  test('counts marked text like any other text', () => {
+    render(
+      <SegmentView
+        data-testid="view"
+        segment='one <g id="1">two</g> three'
+        marks={[{start: 0, end: 3, className: 'searchMarker'}]}
+      />,
+    )
+    const root = screen.getByTestId('view')
+    select(textNode(root, 'two'), 0, textNode(root, ' three'), 3)
+
+    expect(copy(root).slice).toBe('two</g> th')
+  })
+
+  test('copies only the new side of a diff', () => {
+    render(
+      <SegmentView
+        data-testid="view"
+        segment='the red <x id="1"/>car'
+        compareTo='the blue <x id="1"/>car'
+      />,
+    )
+    const root = screen.getByTestId('view')
+    const range = document.createRange()
+    range.selectNodeContents(root)
+    document.getSelection().addRange(range)
+    expect(copy(root).slice).toBe('the red <x id="1"/>car')
+
+    // a selection starting inside a removed part starts where it was
+    select(textNode(root, 'blue'), 2, textNode(root, 'car'), 1)
+    expect(copy(root).slice).toBe('red <x id="1"/>c')
+  })
+
+  test('leaves a selection that runs outside the view to the browser', () => {
+    render(
+      <div>
+        <p>outside</p>
+        <SegmentView data-testid="view" segment="inside" />
+      </div>,
+    )
+    const root = screen.getByTestId('view')
+    select(textNode(document.body, 'outside'), 2, textNode(root, 'inside'), 3)
+
+    const {prevented, data} = copy(root)
+
+    expect(prevented).toBe(false)
+    expect(data).toEqual({})
   })
 })

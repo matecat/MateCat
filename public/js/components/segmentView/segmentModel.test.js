@@ -2,6 +2,9 @@ import {Base64} from 'js-base64'
 import {
   OPAQUE_TAG,
   applyMarks,
+  readSegmentClipboard,
+  segmentClipboardHtml,
+  sliceSegment,
   diffTokens,
   markableText,
   marksFromDelimiters,
@@ -260,5 +263,93 @@ describe('marksFromDelimiters', () => {
 
   test('marks nothing for an unpaired delimiter', () => {
     expect(marksFromDelimiters('a }# b #{ c', '#{', '}#').marks).toEqual([])
+  })
+})
+
+describe('sliceSegment', () => {
+  const slice = (segment, start, end, options) =>
+    sliceSegment(segment, start, end, options)
+
+  test('gives a tag as its markup and text encoded as stored', () => {
+    // markable text: "a&b", the x tag, "<c"; the x chip shows its id
+    const segment = 'a&amp;b<x id="1"/>&lt;c'
+    expect(slice(segment, 0, 6)).toEqual({raw: segment, text: 'a&b1<c'})
+    expect(slice(segment, 1, 3).raw).toBe('&amp;b')
+    expect(slice(segment, 4, 5).raw).toBe('&lt;')
+  })
+
+  test('takes a tag whole when its character is in the range', () => {
+    const segment = 'ab<x id="7"/>cd'
+    expect(slice(segment, 1, 3).raw).toBe('b<x id="7"/>')
+    expect(slice(segment, 2, 3).raw).toBe('<x id="7"/>')
+    expect(slice(segment, 3, 5).raw).toBe('cd')
+  })
+
+  test('gives whitespace chips back as their placeholders, and their character as text', () => {
+    const segment = 'a##$_A0$##b##$_09$##c##$_0A$##d'
+    expect(slice(segment, 0, 7)).toEqual({
+      raw: segment,
+      text: 'a\u00a0b\tc\nd',
+    })
+  })
+
+  test('keeps a g pair and the text inside it, or just one side of it', () => {
+    const segment = 'x<g id="1">bold</g>y'
+    expect(slice(segment, 1, 7).raw).toBe('<g id="1">bold</g>')
+    expect(slice(segment, 2, 7).raw).toBe('bold</g>')
+    expect(slice(segment, 0, 3).raw).toBe('x<g id="1">b')
+  })
+
+  test('keeps a ph whole, equiv-text included, and shows its label as text', () => {
+    const tag = ph('x-html', '&lt;br/&gt;', 'p1')
+    const {raw, text} = slice(`a ${tag}b`, 2, 3)
+    expect(raw).toBe(tag)
+    expect(text).toContain('<br/>')
+  })
+
+  test('maps the same offsets in a right-to-left segment', () => {
+    const segment = 'שלום<g id="1">עולם</g>'
+    expect(slice(segment, 4, 10, {isRtl: true}).raw).toBe('<g id="1">עולם</g>')
+  })
+
+  test('gives nothing for an empty range', () => {
+    expect(slice('abc', 1, 1)).toEqual({raw: '', text: ''})
+  })
+})
+
+describe('segment clipboard', () => {
+  const roundTrip = (raw) =>
+    readSegmentClipboard(segmentClipboardHtml({raw, text: 'shown'}))
+
+  test('reads back the slice a copy wrote', () => {
+    const raw = `a &amp; <g id="1">é</g>${ph('x-html', '&lt;b&gt;', 'p')}##$_A0$##`
+    expect(roundTrip(raw)).toBe(raw)
+  })
+
+  test('writes the plain text, encoded, as the element content', () => {
+    expect(segmentClipboardHtml({raw: 'x', text: '<b>&'})).toMatch(
+      />&lt;b&gt;&amp;<\/span>$/,
+    )
+  })
+
+  test('finds the slice in html wrapped by the browser', () => {
+    const html = `<meta charset="utf-8">${segmentClipboardHtml({raw: '<x id="1"/>', text: ''})}`
+    expect(readSegmentClipboard(html)).toBe('<x id="1"/>')
+  })
+
+  test('is null for html that carries no slice', () => {
+    expect(readSegmentClipboard('<b>bold</b>')).toBeNull()
+    expect(readSegmentClipboard(undefined)).toBeNull()
+  })
+
+  test('turns markup that is not a segment tag into text', () => {
+    expect(roundTrip('<img src=x onerror=alert(1)>a<x id="1"/>')).toBe(
+      '&lt;img src=x onerror=alert(1)&gt;a<x id="1"/>',
+    )
+    expect(roundTrip('<g id="1" foo')).toBe('&lt;g id="1" foo')
+    expect(roundTrip('<ph id="1" equiv-text="base64:PGI+">')).toBe(
+      '&lt;ph id="1" equiv-text="base64:PGI+"&gt;',
+    )
+    expect(roundTrip('a > b')).toBe('a &gt; b')
   })
 })

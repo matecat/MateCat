@@ -69,6 +69,8 @@ const SegmentQRLine = ({
   }
 
   const copyText = async (e) => {
+    // A SegmentView in here already wrote its own copy (see SegmentView)
+    if (e.defaultPrevented) return
     const internalClipboard = document.getSelection()
     if (internalClipboard) {
       e.preventDefault()

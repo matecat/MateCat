@@ -1,14 +1,66 @@
-import React, {memo, useMemo} from 'react'
+import React, {memo, useCallback, useMemo} from 'react'
 import PropTypes from 'prop-types'
 import {
   DIFF_DELETE,
   DIFF_INSERT,
   applyMarks,
   diffTokens,
+  segmentClipboardHtml,
+  sliceSegment,
   tokenize,
 } from './segmentModel'
 
 const DIFF_CLASS = {[DIFF_DELETE]: 'deleted', [DIFF_INSERT]: 'added'}
+
+const isChip = (node) =>
+  node.nodeType === Node.ELEMENT_NODE &&
+  node.getAttribute('contenteditable') === 'false'
+
+// Removed parts of a diff are not in `segment`: they count for nothing.
+const isDeleted = (node, root) =>
+  node.parentNode === root &&
+  node.nodeType === Node.ELEMENT_NODE &&
+  node.classList.contains(DIFF_CLASS[DIFF_DELETE])
+
+/**
+ * A selection boundary as an offset in `markableText(segment)`: text counts
+ * its characters, a chip one. A boundary inside a chip moves before it
+ * (`start`) or after it (`end`), so a partly selected chip counts whole; one
+ * inside a removed part of a diff moves before that part.
+ */
+const boundaryOffset = (root, container, offset, side) => {
+  for (let node = container; node && node !== root; node = node.parentNode) {
+    if (isChip(node) || isDeleted(node, root)) {
+      container = node.parentNode
+      offset =
+        Array.prototype.indexOf.call(container.childNodes, node) +
+        (side === 'end' && isChip(node) ? 1 : 0)
+    }
+  }
+  let count = 0
+  const visit = (node) => {
+    if (node === container && node.nodeType === Node.TEXT_NODE) {
+      count += offset
+      return true
+    }
+    if (node.nodeType === Node.TEXT_NODE) {
+      count += node.length
+      return false
+    }
+    if (node !== root && (isDeleted(node, root) || isChip(node))) {
+      count += isChip(node) ? 1 : 0
+      return false
+    }
+    const children = node.childNodes
+    for (let i = 0; i < children.length; i++) {
+      if (node === container && i === offset) return true
+      if (visit(children[i])) return true
+    }
+    return node === container
+  }
+  visit(root)
+  return count
+}
 
 const renderTokens = (tokens) =>
   tokens.map((token, i) => {
@@ -53,6 +105,45 @@ const SegmentView = ({
   as: Root = 'span',
   ...rootProps
 }) => {
+  const {onCopy} = rootProps
+
+  // Copy the selected part as a segment slice, so that a paste in the editor
+  // gets real tags. Only a selection that lies within this view.
+  const handleCopy = useCallback(
+    (event) => {
+      onCopy?.(event)
+      const root = event.currentTarget
+      const selection = root.ownerDocument.getSelection()
+      if (event.defaultPrevented || !selection?.rangeCount) return
+      const range = selection.getRangeAt(0)
+      if (
+        range.collapsed ||
+        !root.contains(range.startContainer) ||
+        !root.contains(range.endContainer)
+      ) {
+        return
+      }
+      const start = boundaryOffset(
+        root,
+        range.startContainer,
+        range.startOffset,
+        'start',
+      )
+      const end = boundaryOffset(
+        root,
+        range.endContainer,
+        range.endOffset,
+        'end',
+      )
+      const slice = sliceSegment(segment, start, end, {isRtl})
+      if (!slice.raw) return
+      event.clipboardData.setData('text/plain', slice.text)
+      event.clipboardData.setData('text/html', segmentClipboardHtml(slice))
+      event.preventDefault()
+    },
+    [segment, isRtl, onCopy],
+  )
+
   const content = useMemo(() => {
     const tokens = tokenize(segment, {isRtl})
     if (compareTo === undefined || compareTo === null) {
@@ -72,7 +163,11 @@ const SegmentView = ({
     )
   }, [segment, isRtl, compareTo, marks])
 
-  return <Root {...rootProps}>{content}</Root>
+  return (
+    <Root {...rootProps} onCopy={handleCopy}>
+      {content}
+    </Root>
+  )
 }
 
 SegmentView.propTypes = {

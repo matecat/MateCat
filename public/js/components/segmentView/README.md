@@ -63,6 +63,28 @@ wrapped whole.
 `marksFromDelimiters(segment, open, close, {isRtl})` turns delimited parts
 (the concordance service's `#{term}#`) into `{segment, marks}`.
 
+## Copy
+
+A copy (Ctrl/Cmd+C) of a selection that lies within one view writes:
+
+- `text/html`: `<span data-matecat-segment="…">text</span>`, the attribute
+  holding the base64 (UTF-8) of the **raw segment slice**: the selected part of
+  `segment` as a segment string (see *Input format*). Tags are their markup, a
+  partly selected chip counts whole; text is encoded as stored (`&amp;`,
+  `&lt;`, `&gt;`); whitespace chips are their placeholders (`##$_A0$##`…).
+- `text/plain`: the text as shown, except that whitespace chips are the
+  character they stand for (space, nbsp, tab, line break), not their symbol.
+
+With `compareTo` only the new side (`segment`) is copied: removed parts are
+skipped. A selection that runs outside the view is left to the browser.
+
+This clipboard format is the contract between read-only views and editors:
+the Draft editor (`buildPastedEditorState`) reads it today, and any editor that
+replaces it must read the same format. `readSegmentClipboard(html)` decodes it
+and validates it — the attribute can come from any page, so only markup that is
+exactly one of the segment's tags stays a tag, the rest becomes text.
+`sliceSegment(segment, start, end)` and `segmentClipboardHtml(slice)` write it.
+
 ## Rules
 
 - Everything comes through props. No stores, actions, dispatcher or the global
