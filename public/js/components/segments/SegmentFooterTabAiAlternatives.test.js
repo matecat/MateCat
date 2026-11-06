@@ -1,8 +1,9 @@
 import React from 'react'
-import {render, screen, act} from '@testing-library/react'
+import {render, screen, act, fireEvent} from '@testing-library/react'
 import {SegmentFooterTabAiAlternatives} from './SegmentFooterTabAiAlternatives'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
+import {readSegmentClipboard} from '../segmentView/segmentModel'
 
 // --- Mocks ---
 
@@ -219,5 +220,59 @@ describe('SegmentFooterTabAiAlternatives', () => {
     })
 
     expect(screen.getAllByTitle('Copy suggestion')).toHaveLength(2)
+  })
+
+  describe('an alternative carrying a tag', () => {
+    const tag =
+      '<ph id="1" ctype="x-html" equiv-text="base64:Jmx0O2JyLyZndDs="/>'
+
+    const receive = () => {
+      renderComponent()
+      act(() => {
+        SegmentStore.__emit(SegmentConstants.AI_ALTERNATIVES, {text: 'mondo'})
+      })
+      act(() => {
+        SegmentStore.__emit(SegmentConstants.AI_ALTERNATIVES_SUGGESTION, {
+          data: {
+            has_error: false,
+            message: [{alternative: `Ciao ${tag}Terra`, context: 'ctx'}],
+          },
+        })
+      })
+    }
+
+    afterEach(() => {
+      delete global.ClipboardItem
+    })
+
+    test('shows the tag as a chip and highlights the changed part', () => {
+      receive()
+
+      expect(screen.getByText('<br/>')).toBeInTheDocument()
+      expect(screen.getByText('Terra')).toHaveClass('ai-alternative-highlight')
+      expect(screen.getByText('Ciao')).not.toHaveClass(
+        'ai-alternative-highlight',
+      )
+    })
+
+    test('copies the changed part as a raw segment slice, tag included', async () => {
+      const written = []
+      global.ClipboardItem = function (items) {
+        this.items = items
+      }
+      Object.defineProperty(navigator, 'clipboard', {
+        value: {write: jest.fn((items) => written.push(...items))},
+        configurable: true,
+      })
+      receive()
+
+      fireEvent.click(screen.getByTitle('Copy suggestion'))
+
+      const {items} = written[0]
+      expect(await items['text/plain'].text()).toBe('<br/>Terra')
+      expect(readSegmentClipboard(await items['text/html'].text())).toBe(
+        `${tag}Terra`,
+      )
+    })
   })
 })

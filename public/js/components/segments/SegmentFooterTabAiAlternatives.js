@@ -1,4 +1,4 @@
-import React, {createRef, useEffect, useRef, useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
@@ -7,12 +7,16 @@ import SegmentStringUtils from './utils/DraftMatecatUtils/segmentStringUtils'
 import {aiAlternartiveTranslations} from '../../api/aiAlternartiveTranslations/aiAlternartiveTranslations'
 import SegmentUtils from '../../utils/segmentUtils'
 import CatToolStore from '../../stores/CatToolStore'
-import {EditorLite} from './EditorLite'
 import {LARA_STYLES} from '../settingsPanel/Contents/MachineTranslationTab/LaraOptions'
 import CommonUtils from '../../utils/commonUtils'
 import {MemoizeRequest} from '../../utils/MemoizeRequest'
 import {ButtonCopy} from '../common/ButtonCopy'
 import SegmentView from '../segmentView/SegmentView'
+import {
+  markableText,
+  segmentClipboardHtml,
+  sliceSegment,
+} from '../segmentView/segmentModel'
 
 const restoreMissingWhiteSpace = (original, alternative) => {
   if (original.endsWith(' ') && !alternative.endsWith(' ')) {
@@ -178,6 +182,25 @@ const enrichAlternatives = ({
 
 const aiCache = new MemoizeRequest()
 
+const HIGHLIGHT_CLASS = 'ai-alternative-highlight'
+
+// Copies the changed part of an alternative as a raw segment slice, as a copy
+// from a SegmentView does, so a paste in the target keeps its tags.
+const copySlice = (segment, {start, end}) => {
+  if (end <= start) return
+  const slice = sliceSegment(segment, start, end, {isRtl: !!config.isTargetRTL})
+  if (typeof ClipboardItem === 'undefined') {
+    navigator.clipboard.writeText(slice.text)
+    return
+  }
+  navigator.clipboard.write([
+    new ClipboardItem({
+      'text/plain': new Blob([slice.text], {type: 'text/plain'}),
+      'text/html': new Blob([segmentClipboardHtml(slice)], {type: 'text/html'}),
+    }),
+  ])
+}
+
 export const SegmentFooterTabAiAlternatives = ({
   code,
   active_class,
@@ -186,17 +209,8 @@ export const SegmentFooterTabAiAlternatives = ({
 }) => {
   const [alternatives, setAlternatives] = useState()
 
-  const editorLiteRefs = []
-
   const requestingParams = useRef()
   const selectedTextRef = useRef('')
-
-  const getEditorLiteRef = (index) => {
-    if (!editorLiteRefs[index]) {
-      editorLiteRefs[index] = createRef()
-    }
-    return editorLiteRefs[index]
-  }
 
   useEffect(() => {
     const requestAlternatives = ({text}) => {
@@ -355,15 +369,23 @@ export const SegmentFooterTabAiAlternatives = ({
             </div>
             <div className="ai-alternative-options">
               {alternatives.map(({before, after, changed, context}, index) => {
-                const ref = getEditorLiteRef(index)
+                const content = `${before}${changed}${after}`
+                const options = {isRtl: !!config.isTargetRTL}
+                const start = markableText(before, options).length
+                const highlight = {
+                  start,
+                  end: start + markableText(changed, options).length,
+                  className: HIGHLIGHT_CLASS,
+                }
 
                 return (
                   <div key={index}>
                     <div>
-                      <EditorLite
-                        ref={ref}
-                        highlightSnippet={{text: changed, style: 'BOLD'}}
-                        content={`${before}${changed}${after}`}
+                      <SegmentView
+                        as="div"
+                        segment={content}
+                        isRtl={!!config.isTargetRTL}
+                        marks={[highlight]}
                       />
                       <p className="ai-feature-option-alternative-description">
                         {context}{' '}
@@ -373,7 +395,7 @@ export const SegmentFooterTabAiAlternatives = ({
                       className="ai-feature-button"
                       mode={BUTTON_MODE.OUTLINE}
                       tooltip="Copy suggestion"
-                      onClick={() => ref.current.copyToClipboardHighlight()}
+                      onClick={() => copySlice(content, highlight)}
                     />
                   </div>
                 )

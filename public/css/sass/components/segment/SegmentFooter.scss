@@ -86,6 +86,11 @@
         }
       }
 
+      mark.ai-alternative-highlight {
+        background: transparent;
+        font-weight: bold;
+      }
+
       @media screen and (max-width: 1180px) {
         .ai-alternative-options {
           &:has(> :nth-child(4)):not(:has(> :nth-child(5))) {
