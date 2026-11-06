@@ -12,6 +12,7 @@ use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\TestWith;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\CheckGlossaryResponse;
 use Utils\Engines\Results\MyMemory\DeleteGlossaryResponse;
@@ -366,6 +367,48 @@ class MyMemoryMethodsTest extends AbstractTest
         $this->assertEquals(202, $result->responseStatus);
         $this->assertEquals($importUuid, $result->id);
         $this->assertNull($result->error);
+    }
+
+    /**
+     * The POST fields MyMemory receives for a TMX import, as `_call` gets them. Pass no flag to
+     * import as the aligner does.
+     *
+     * @return array<string, mixed>
+     */
+    private function importMemoryPostFields(bool ...$mtImport): array
+    {
+        $mock = @$this->getMockBuilder(MyMemory::class)
+            ->setConstructorArgs([$this->engineStruct, $this->createStub(\Model\DataAccess\IDatabase::class)])
+            ->onlyMethods(['_call'])
+            ->getMock();
+
+        $postFields = [];
+        $mock->expects($this->once())->method('_call')->willReturnCallback(
+            function (string $url, array $curlOptions) use (&$postFields): string {
+                $postFields = $curlOptions[CURLOPT_POSTFIELDS];
+
+                return (string)json_encode(['responseData' => ['UUID' => 'u'], 'responseStatus' => 202, 'responseDetails' => '']);
+            }
+        );
+
+        $mock->importMemory($this->tempFilePath, 'a6043e606ac9b5d7ff24', new UserStruct(), ...$mtImport);
+
+        return $postFields;
+    }
+
+    /**
+     * @param list<bool> $mtImport the flag passed, or none
+     */
+    #[Test]
+    #[TestWith([[true], 'true'])]
+    #[TestWith([[false], 'false'])]
+    #[TestWith([[], 'false'])]
+    public function test_importMemory_sends_mt_import(array $mtImport, string $expected): void
+    {
+        $postFields = $this->importMemoryPostFields(...$mtImport);
+
+        $this->assertSame($expected, $postFields['mt_import']);
+        $this->assertSame('a6043e606ac9b5d7ff24', $postFields['key']);
     }
 
     #[Test]
