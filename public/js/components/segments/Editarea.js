@@ -1019,13 +1019,14 @@ const Editarea = forwardRef(
     }
     // Methods for TagMenu ---- END
 
-    const pasteFragment = (text) => {
+    const pasteFragment = (text, html) => {
       const {editorState} = stateRef.current
       const {fragment: clipboardFragment, plainText: clipboardPlainText} =
         SegmentStore.getFragmentFromClipboard()
 
       const pasted = buildPastedEditorState({
         text,
+        html,
         clipboardFragment,
         clipboardPlainText,
         editorState,

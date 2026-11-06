@@ -1,10 +1,16 @@
 import DraftMatecatUtils from './index'
 import {tagSignatures} from './tagModel'
+import {readSegmentClipboard} from '../../../segmentView/segmentModel'
 
 /**
  * Works out what a paste should put in the editor.
  *
- * Two kinds of paste reach here. One is a copy made inside the editor, which
+ * A copy from a SegmentView (matches, concordance, closed segments...) carries
+ * the raw segment slice in its html; its tags, once validated, are inserted
+ * as tag entities, as when a segment is loaded. That html is only ever
+ * written by such a copy, so it is checked first.
+ *
+ * Two other kinds of paste reach here. One is a copy made inside the editor, which
  * the store kept as a fragment so the tag entities survive the round trip; it
  * is recognised by its plain text still matching what the system clipboard
  * holds. The other is a copy from anywhere else, which arrives as text and has
@@ -17,10 +23,18 @@ import {tagSignatures} from './tagModel'
  */
 export default function buildPastedEditorState({
   text,
+  html,
   clipboardFragment,
   clipboardPlainText,
   editorState,
 }) {
+  const segmentSlice = readSegmentClipboard(html)
+  if (segmentSlice !== null) {
+    const fragment = DraftMatecatUtils.buildFragmentFromText(segmentSlice)
+    if (!fragment) return editorState
+    return DraftMatecatUtils.duplicateFragment(fragment, editorState)
+  }
+
   const sameAsStoredCopy =
     clipboardFragment &&
     text &&
