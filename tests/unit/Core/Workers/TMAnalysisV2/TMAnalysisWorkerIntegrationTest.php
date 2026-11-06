@@ -14,7 +14,6 @@ use Psr\Log\NullLogger;
 use ReflectionClass;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\AnalysisRedisService;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\DefaultEngineResolver;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\EngineService;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\MatchProcessorService;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\ProjectCompletionService;
@@ -379,7 +378,6 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
             $segmentUpdater ?? $this->createStub(SegmentUpdaterService::class),
             $projectCompletion ?? $this->createStub(ProjectCompletionService::class),
             new EngineService(
-                new DefaultEngineResolver(obtainTestDatabase()),
                 obtainTestDatabase(),
                 new LaraQualityEstimator(obtainTestDatabase(), new NullLogger())
             ),
