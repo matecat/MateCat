@@ -283,4 +283,10 @@ class AbstractEngineTest extends AbstractTest
 
         self::assertInstanceOf(GetMemoryResponse::class, $result);
     }
+
+    #[Test]
+    public function hasBuiltInQualityEstimationIsFalse(): void
+    {
+        self::assertFalse($this->engine->hasBuiltInQualityEstimation());
+    }
 }
