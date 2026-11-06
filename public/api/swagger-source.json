@@ -376,7 +376,7 @@
           {
             "name": "mt_evaluation",
             "in": "formData",
-            "description": "Activate MT evaluation",
+            "description": "Activate MT evaluation. Requires an active Lara license",
             "required": false,
             "type": "boolean"
           },
