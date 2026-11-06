@@ -23,6 +23,7 @@ use Utils\Constants\EngineConstants;
 use Utils\Constants\TranslationStatus;
 use Utils\Contribution\GetContributionRequest;
 use Utils\Engines\AbstractEngine;
+use Utils\Engines\Lara\LaraQualityEstimator;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\LQA\QA\ErrObject;
@@ -552,6 +553,75 @@ class GetContributionWorkerTest extends AbstractTest
         $this->assertNotEmpty($mt);
         $this->assertSame([], $matches);
         $this->assertSame('91%', $mt['match']);
+    }
+
+    #[Test]
+    public function test_getMatches_scores_the_mt_response_with_lara(): void
+    {
+        $request = $this->makeBaseRequest([
+            'mt_quality_value_in_editor' => 100,
+            'mt_evaluation' => true,
+        ]);
+        $request->setJobStruct(new JobStruct([
+            'id' => self::TEST_JOB_ID,
+            'id_project' => self::TEST_PROJECT_ID,
+            'password' => 'pw',
+            'source' => 'en-US',
+            'target' => 'it-IT',
+            'job_first_segment' => self::TEST_SEGMENT_ID,
+            'job_last_segment' => self::TEST_SEGMENT_ID,
+            'id_tms' => 0,
+            'id_mt_engine' => 2,
+            'tm_keys' => '[]',
+        ]));
+
+        $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
+
+        $mtResponse = new GetMemoryResponse([
+            'responseStatus' => 200,
+            'matches' => [[
+                'id' => 2,
+                'segment' => 'Hello',
+                'translation' => 'Ciao MT',
+                'match' => 0.91,
+                'created-by' => 'MT',
+                'last-update-date' => '2025-01-01 10:00:00',
+                'create-date' => '2025-01-01 10:00:00',
+                'tm_properties' => '[]',
+                'target_note' => '',
+            ]],
+        ]);
+        $mtResponse->featureSet($featureSet);
+
+        $mtEngine = $this->getMockBuilder(MyMemory::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getConfigStruct', 'setMTPenalty', 'get'])
+            ->getMock();
+        $mtEngine->method('getConfigStruct')->willReturn([]);
+        $mtEngine->method('setMTPenalty')->willReturnSelf();
+        $mtEngine->expects($this->once())->method('get')->willReturn($mtResponse);
+        $request->forcedMTEngine = $mtEngine;
+
+        $estimator = $this->createMock(LaraQualityEstimator::class);
+        $estimator->expects($this->once())->method('scoreIfRequested')
+            ->with($mtEngine, $mtResponse, $this->callback(
+                static fn(array $config): bool => $config['include_score'] === true && $config['source'] === 'en-US'
+            ))
+            ->willReturnCallback(static function (AbstractEngine $engine, GetMemoryResponse $response): void {
+                $response->matches[0]->score = 0.92;
+            });
+
+        $worker = new GetContributionWorker(
+            self::getStubBuilder(AMQHandler::class)->getStub(),
+            obtainTestDatabase(),
+            qualityEstimator: $estimator
+        );
+
+        $method = new ReflectionMethod($worker, '_getMatches');
+        [$mt] = $method->invoke($worker, $request, $request->getJobStruct(), 'it-IT', $featureSet, false);
+
+        $this->assertSame('91%', $mt['match']);
+        $this->assertSame(0.92, $mt['score']);
     }
 
     #[Test]
