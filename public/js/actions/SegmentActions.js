@@ -1641,13 +1641,6 @@ const SegmentActions = {
   setNextUntranslatedSegmentFromServer(sid) {
     SegmentStore.nextUntranslatedFromServer = sid
   },
-  copyFragmentToClipboard: function (fragment, plainText) {
-    AppDispatcher.dispatch({
-      actionType: EditAreaConstants.COPY_FRAGMENT_TO_CLIPBOARD,
-      fragment,
-      plainText,
-    })
-  },
   editAreaChanged: function (sid, isTarget) {
     AppDispatcher.dispatch({
       actionType: EditAreaConstants.EDIT_AREA_CHANGED,

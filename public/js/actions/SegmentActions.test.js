@@ -690,7 +690,6 @@ describe('SegmentActions — simple dispatch actions', () => {
   })
 
   test('editarea / misc dispatchers', () => {
-    SegmentActions.copyFragmentToClipboard('f', 'p')
     SegmentActions.editAreaChanged('1', true)
     SegmentActions.highlightTags('t', 'p', 'k', true)
     SegmentActions.hideAiAssistant()
