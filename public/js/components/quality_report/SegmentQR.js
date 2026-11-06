@@ -1,14 +1,13 @@
 import React, {useState, useMemo, useRef, useEffect, useCallback} from 'react'
 import classnames from 'classnames'
 
-import TextUtils from '../../utils/textUtils'
 import SegmentQRLine from './SegmentQRLine'
 import SegmentQRIssue from './SegmentQRIssue'
 import {
   ANALYSIS_BUCKETS_LABELS,
   SEGMENTS_STATUS,
 } from '../../constants/Constants'
-import SegmentStringUtils from '../segments/utils/DraftMatecatUtils/segmentStringUtils'
+import SegmentView from '../segmentView/SegmentView'
 import SegmentQA from '../../../img/icons/SegmentQA'
 import AlertIcon from '../../../img/icons/AlertIcon'
 import InfoIcon from '../../../img/icons/InfoIcon'
@@ -34,14 +33,23 @@ const QA_ICONS = {
 const strPadLeft = (value, pad, length) =>
   (new Array(length + 1).join(pad) + value).slice(-length)
 
-const decodeTextAndTransformTags = (text, isRtl) => {
-  if (text) {
-    // Fix for more than 2 followed spaces
-    const normalized = text.replace(/ {2}/gi, '&nbsp; ')
-    return SegmentStringUtils.transformTagsToHtml(normalized, isRtl)
-  }
-  return text
-}
+// Fix for more than 2 followed spaces
+const normalizeSpaces = (text) => text.replace(/ {2}/gi, '&nbsp; ')
+
+// `compareTo` is the older text a diff starts from; a diff with nothing to
+// start from shows the text alone.
+const renderSegmentText = (text, isRtl, compareTo) =>
+  text ? (
+    <SegmentView
+      segment={normalizeSpaces(text)}
+      isRtl={!!isRtl}
+      compareTo={
+        typeof compareTo === 'string' ? normalizeSpaces(compareTo) : undefined
+      }
+    />
+  ) : (
+    text
+  )
 
 const getRevisionTranslation = (revisions, revisionNumber) => {
   if (revisions === null) return false
@@ -110,7 +118,8 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
   const [revise2DiffOn, setRevise2DiffOn] = useState(
     lastRevisions !== null && revise2 && (revise || lastTranslation !== null),
   )
-  const [htmlDiff, setHtmlDiff] = useState('')
+  // The older text the active diff compares against
+  const [diffBase, setDiffBase] = useState(null)
   const [automatedQaOpen, setAutomatedQaOpen] = useState(
     segment.get('issues').size === 0 &&
       segment.get('warnings').get('total') > 0,
@@ -126,13 +135,12 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
 
   // Initialize diff on mount
   useEffect(() => {
-    const getDiff = (src, tgt) => TextUtils.getDiffHtml(src, tgt)
     if (translateDiffOn) {
-      setHtmlDiff(getDiff(suggestion, target))
+      setDiffBase(suggestion)
     } else if (reviseDiffOn) {
-      setHtmlDiff(getDiff(target, revise))
+      setDiffBase(target)
     } else if (revise2DiffOn) {
-      setHtmlDiff(getDiff(revise || target, revise2))
+      setDiffBase(revise || target)
     }
     // eslint-disable-next-line
   }, [])
@@ -175,9 +183,9 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
       setTranslateDiffOn(true)
       setReviseDiffOn(false)
       setRevise2DiffOn(false)
-      setHtmlDiff(TextUtils.getDiffHtml(suggestion, target))
+      setDiffBase(suggestion)
     }
-  }, [translateDiffOn, suggestion, target])
+  }, [translateDiffOn, suggestion])
 
   const showReviseDiff = useCallback(() => {
     if (reviseDiffOn) {
@@ -186,9 +194,9 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
       setTranslateDiffOn(false)
       setReviseDiffOn(true)
       setRevise2DiffOn(false)
-      setHtmlDiff(TextUtils.getDiffHtml(target || suggestion, revise))
+      setDiffBase(target || suggestion)
     }
-  }, [reviseDiffOn, target, suggestion, revise])
+  }, [reviseDiffOn, target, suggestion])
 
   const showRevise2Diff = useCallback(() => {
     if (revise2DiffOn) {
@@ -197,11 +205,9 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
       setTranslateDiffOn(false)
       setReviseDiffOn(false)
       setRevise2DiffOn(true)
-      setHtmlDiff(
-        TextUtils.getDiffHtml(revise || target || suggestion, revise2),
-      )
+      setDiffBase(revise || target || suggestion)
     }
-  }, [revise2DiffOn, revise, target, suggestion, revise2])
+  }, [revise2DiffOn, revise, target, suggestion])
 
   const getAutomatedQaHtml = useCallback(() => {
     const details = segment.get('warnings').get('details').get('issues_info')
@@ -320,40 +326,36 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
           <div className="qr-history-date">
             {elem.date.replaceAll('-', '/')}
           </div>
-          <div
-            className="qr-history-version"
-            dangerouslySetInnerHTML={{
-              __html: decodeTextAndTransformTags(
-                index === 0
-                  ? elem.translation
-                  : TextUtils.getDiffHtml(
-                      segmentHistory[index - 1].translation,
-                      elem.translation,
-                    ),
-                config.isTargetRTL,
-              ),
-            }}
-          />
+          <div className="qr-history-version">
+            {renderSegmentText(
+              elem.translation,
+              config.isTargetRTL,
+              index === 0 ? undefined : segmentHistory[index - 1].translation,
+            )}
+          </div>
         </div>
       )
     })
   }
 
   // Render logic
-  const renderedSource = decodeTextAndTransformTags(source, config.isSourceRTL)
-  const renderedSuggestion = decodeTextAndTransformTags(
-    suggestion,
+  const renderedSource = renderSegmentText(source, config.isSourceRTL)
+  const renderedSuggestion = renderSegmentText(suggestion, config.isTargetRTL)
+  const renderedTarget = renderSegmentText(
+    target,
     config.isTargetRTL,
+    translateDiffOn ? diffBase : undefined,
   )
-  const renderedTarget = translateDiffOn
-    ? decodeTextAndTransformTags(htmlDiff, config.isTargetRTL)
-    : target && decodeTextAndTransformTags(target, config.isTargetRTL)
-  const renderedRevise = reviseDiffOn
-    ? decodeTextAndTransformTags(htmlDiff, config.isTargetRTL)
-    : revise && decodeTextAndTransformTags(revise, config.isTargetRTL)
-  const renderedRevise2 = revise2DiffOn
-    ? decodeTextAndTransformTags(htmlDiff, config.isTargetRTL)
-    : revise2 && decodeTextAndTransformTags(revise2, config.isTargetRTL)
+  const renderedRevise = renderSegmentText(
+    revise,
+    config.isTargetRTL,
+    reviseDiffOn ? diffBase : undefined,
+  )
+  const renderedRevise2 = renderSegmentText(
+    revise2,
+    config.isTargetRTL,
+    revise2DiffOn ? diffBase : undefined,
+  )
 
   const isDiffOn = translateDiffOn || reviseDiffOn || revise2DiffOn
   const sourceClass = classnames('segment-container', 'qr-source', {

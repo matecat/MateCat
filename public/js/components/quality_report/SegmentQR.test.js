@@ -5,18 +5,8 @@ import Immutable from 'immutable'
 
 import SegmentQR from './SegmentQR'
 
-// Mock dependencies
-jest.mock('../../utils/textUtils', () => ({
-  getDiffHtml: jest.fn((source, target) => `<diff>${target}</diff>`),
-}))
-
-jest.mock(
-  '../segments/utils/DraftMatecatUtils/segmentStringUtils',
-  () => ({
-    transformTagsToHtml: jest.fn((text) => text),
-  }),
-  {virtual: true},
-)
+const isAdded = (_, element) => element.classList.contains('added')
+const isDeleted = (_, element) => element.classList.contains('deleted')
 
 beforeEach(() => {
   global.config = {
@@ -168,8 +158,29 @@ describe('SegmentQR', () => {
     const diffButtons = screen.getAllByTitle('Show diff')
     expect(diffButtons.length).toBeGreaterThan(0)
 
-    // Click the diff button for translation
+    // On by default: the translation is compared with the suggestion
+    expect(screen.getByText('tradotto')).toHaveClass('added')
+
     await user.click(diffButtons[0])
+    expect(screen.queryByText(isAdded)).not.toBeInTheDocument()
+
+    await user.click(diffButtons[0])
+    expect(screen.getByText('tradotto')).toHaveClass('added')
+  })
+
+  test('revision diff compares the revision with the translation, not the suggestion', () => {
+    renderComponent({
+      suggestion: 'Qualcosa di diverso',
+      last_translation: 'Tradotto',
+      last_revisions: [{revision_number: 1, translation: 'Tradotto bene'}],
+    })
+    expect(screen.getByText('bene')).toHaveClass('added')
+    expect(screen.queryByText(isDeleted)).not.toBeInTheDocument()
+  })
+
+  test('shows markup carried by the segment as text', () => {
+    renderComponent({segment: '&lt;b&gt;bold&lt;/b&gt;'})
+    expect(screen.getByText('<b>bold</b>')).toBeInTheDocument()
   })
 
   test('renders automated QA when warnings exist and no issues', () => {

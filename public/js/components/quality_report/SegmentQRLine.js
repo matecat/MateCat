@@ -20,9 +20,6 @@ const SegmentQRLine = ({
   rev,
 }) => {
   const textRef = useRef()
-  const allowHTML = (string) => {
-    return {__html: string}
-  }
   const getTimeToEdit = (tte) => {
     let str_pad_left = function (string, pad, length) {
       return (new Array(length + 1).join(pad) + string).slice(-length)
@@ -115,8 +112,9 @@ const SegmentQRLine = ({
         ref={textRef}
         onCopy={copyText}
         onCut={copyText}
-        dangerouslySetInnerHTML={allowHTML(text)}
-      />
+      >
+        {text}
+      </div>
 
       {showSegmentWords ? (
         <div className="segment-content qr-spec">
