@@ -740,9 +740,6 @@ class MMT extends AbstractEngine
             }
         }
 
-        // Common config values
-        $config['secret_key'] = self::getG2FallbackSecretKey();
-
         // Branch-specific values
         if ($id_job && $this->_isAnalysis) {
             $idUsers = $config['id_user'] ?? [];
@@ -758,25 +755,6 @@ class MMT extends AbstractEngine
 
         return $config;
     }
-
-    /**
-     * @return string|null
-     */
-    public static function getG2FallbackSecretKey(): ?string
-    {
-        $configFilePath = realpath(AppConfig::$ROOT . '/inc/mmt_fallback_key.ini');
-        if ($configFilePath === false || !file_exists($configFilePath)) {
-            return null;
-        }
-
-        $secret_key = parse_ini_file($configFilePath);
-        if ($secret_key === false) {
-            return null;
-        }
-
-        return $secret_key['secret_key'] ?? null;
-    }
-
 
     /**
      * @inheritDoc

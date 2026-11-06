@@ -7,14 +7,17 @@ namespace Matecat\Core\Engines;
 use CURLFile;
 use Matecat\TestHelpers\AbstractTest;
 use Model\Engines\Structs\EngineStruct;
+use Model\Engines\Structs\GoogleTranslateStruct;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionProperty;
 use stdClass;
+use Utils\Engines\AbstractEngine;
 use Utils\Engines\NONE;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Logger\MatecatLogger;
+use Utils\Registry\AppConfig;
 
 /**
  * Testable subclass that exposes protected AbstractEngine methods
@@ -35,6 +38,11 @@ class TestableNONE extends NONE
     public function exposedGoogleTranslateFallback(array $_config): GetMemoryResponse
     {
         return $this->GoogleTranslateFallback($_config);
+    }
+
+    public function exposedGoogleTranslateFallbackStruct(array $_config): GoogleTranslateStruct
+    {
+        return $this->googleTranslateFallbackStruct($_config);
     }
 
     public function setContentType(string $type): void
@@ -280,5 +288,71 @@ class AbstractEngineTest extends AbstractTest
     public function hasBuiltInQualityEstimationIsFalse(): void
     {
         self::assertFalse($this->engine->hasBuiltInQualityEstimation());
+    }
+
+    #[Test]
+    public function getG2FallbackSecretKeyReturnsNullWhenFileMissingAndReadsIniWhenPresent(): void
+    {
+        $originalRoot = AppConfig::$ROOT;
+        $tmpRoot = sys_get_temp_dir() . '/g2-fallback-' . uniqid('', true);
+        mkdir($tmpRoot . '/inc', 0777, true);
+
+        try {
+            AppConfig::$ROOT = $tmpRoot;
+            self::assertNull(AbstractEngine::getG2FallbackSecretKey());
+
+            file_put_contents($tmpRoot . '/inc/mmt_fallback_key.ini', "secret_key = \"s3cr3t\"\n");
+            self::assertSame('s3cr3t', AbstractEngine::getG2FallbackSecretKey());
+        } finally {
+            AppConfig::$ROOT = $originalRoot;
+            @unlink($tmpRoot . '/inc/mmt_fallback_key.ini');
+            @rmdir($tmpRoot . '/inc');
+            @rmdir($tmpRoot);
+        }
+    }
+
+    #[Test]
+    public function googleTranslateFallbackStructReadsTheKeyWhenConfigHasNone(): void
+    {
+        $originalRoot = AppConfig::$ROOT;
+        $tmpRoot = sys_get_temp_dir() . '/g2-fallback-' . uniqid('', true);
+        mkdir($tmpRoot . '/inc', 0777, true);
+        file_put_contents($tmpRoot . '/inc/mmt_fallback_key.ini', "secret_key = \"s3cr3t\"\n");
+
+        try {
+            AppConfig::$ROOT = $tmpRoot;
+            $struct = $this->engine->exposedGoogleTranslateFallbackStruct(['segment' => 'test segment']);
+
+            self::assertSame('s3cr3t', $struct->extra_parameters['client_secret']);
+        } finally {
+            AppConfig::$ROOT = $originalRoot;
+            @unlink($tmpRoot . '/inc/mmt_fallback_key.ini');
+            @rmdir($tmpRoot . '/inc');
+            @rmdir($tmpRoot);
+        }
+    }
+
+    #[Test]
+    public function googleTranslateFallbackStructKeepsTheKeyTheConfigGives(): void
+    {
+        $originalRoot = AppConfig::$ROOT;
+        $tmpRoot = sys_get_temp_dir() . '/g2-fallback-' . uniqid('', true);
+        mkdir($tmpRoot . '/inc', 0777, true);
+        file_put_contents($tmpRoot . '/inc/mmt_fallback_key.ini', "secret_key = \"s3cr3t\"\n");
+
+        try {
+            AppConfig::$ROOT = $tmpRoot;
+            $struct = $this->engine->exposedGoogleTranslateFallbackStruct([
+                'segment' => 'test segment',
+                'secret_key' => 'given-key',
+            ]);
+
+            self::assertSame('given-key', $struct->extra_parameters['client_secret']);
+        } finally {
+            AppConfig::$ROOT = $originalRoot;
+            @unlink($tmpRoot . '/inc/mmt_fallback_key.ini');
+            @rmdir($tmpRoot . '/inc');
+            @rmdir($tmpRoot);
+        }
     }
 }
