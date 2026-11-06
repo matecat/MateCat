@@ -580,7 +580,7 @@ class MMTEngineMethodsTest extends AbstractTest
 
         self::assertSame(['x_mm-k1', 'x_mm-k2'], $normal['keys']);
         self::assertSame('normal', $normal['priority']);
-        self::assertArrayHasKey('secret_key', $normal);
+        self::assertArrayNotHasKey('secret_key', $normal);
 
         $engine->setAnalysis(true);
         $analysis = $this->invokeConfigureContribution($engine, [
@@ -739,29 +739,6 @@ class MMTEngineMethodsTest extends AbstractTest
             ['id' => $pid, 'id_customer' => 'nobody@example.invalid'],
             [['source' => 'en-US', 'target' => '111222:it-IT', 'segment' => 'hello world']]
         );
-    }
-
-    #[Test]
-    public function getG2FallbackSecretKeyReturnsNullWhenFileMissingAndReadsIniWhenPresent(): void
-    {
-        $originalRoot = AppConfig::$ROOT ?? null;
-
-        $tmpRoot = sys_get_temp_dir() . '/mmt-fallback-' . uniqid('', true);
-        mkdir($tmpRoot . '/inc', 0777, true);
-
-        AppConfig::$ROOT = $tmpRoot;
-        self::assertNull(MMT::getG2FallbackSecretKey());
-
-        file_put_contents($tmpRoot . '/inc/mmt_fallback_key.ini', "secret_key = \"s3cr3t\"\n");
-        self::assertSame('s3cr3t', MMT::getG2FallbackSecretKey());
-
-        @unlink($tmpRoot . '/inc/mmt_fallback_key.ini');
-        @rmdir($tmpRoot . '/inc');
-        @rmdir($tmpRoot);
-
-        if ($originalRoot !== null) {
-            AppConfig::$ROOT = $originalRoot;
-        }
     }
 
     #[Test]
