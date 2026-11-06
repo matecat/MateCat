@@ -796,6 +796,14 @@ class MMTEngineMethodsTest extends AbstractTest
 
         AppConfig::$BUILD_NUMBER = $originalBuild;
     }
+
+    #[Test]
+    public function hasBuiltInQualityEstimationIsTrue(): void
+    {
+        $engine = new MMT($this->createEngineStruct(), obtainTestDatabase());
+
+        self::assertTrue($engine->hasBuiltInQualityEstimation());
+    }
 }
 
 class TestMMT extends MMT

@@ -520,6 +520,14 @@ abstract class AbstractEngine implements EngineInterface
     }
 
     /**
+     * Engines compute no quality estimation score of their own unless they override this.
+     */
+    public function hasBuiltInQualityEstimation(): bool
+    {
+        return false;
+    }
+
+    /**
      * @param string               $raw_segment
      * @param array<string, mixed> $decoded
      * @param int                  $layerNum

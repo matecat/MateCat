@@ -737,6 +737,14 @@ class MMT extends AbstractEngine
     }
 
     /**
+     * ModernMT computes the quality estimation score itself inside its translate call.
+     */
+    public function hasBuiltInQualityEstimation(): bool
+    {
+        return true;
+    }
+
+    /**
      * @param array<string, mixed> $config
      *
      * @return array<string, mixed>
