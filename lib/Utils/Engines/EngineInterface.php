@@ -122,4 +122,12 @@ interface EngineInterface
      * @return float|null
      */
     public function getQualityEstimation(string $source, string $target, string $sentence, string $translation, string $mt_qe_engine_id = 'default'): ?float;
+
+    /**
+     * Indicates whether the engine computes its own quality estimation score inside its translate call,
+     * so Lara must not score its matches.
+     *
+     * Example: $mtEngine->hasBuiltInQualityEstimation(); // true for ModernMT, false for Lara or DeepL
+     */
+    public function hasBuiltInQualityEstimation(): bool;
 }

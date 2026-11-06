@@ -783,6 +783,15 @@ class LaraEngineTest extends AbstractTest
         $this->engine->setMockClient($client);
         self::assertSame($httpClient, $this->engine->getInternalClient());
     }
+
+    #[Test]
+    public function getLaraClientReturnsTheClientTheEngineTranslatesWith(): void
+    {
+        $client = $this->createStub(LaraClient::class);
+        $this->engine->setMockClient($client);
+
+        self::assertSame($client, $this->engine->getLaraClient());
+    }
     /**
      * @throws Exception
      */
@@ -1234,6 +1243,12 @@ class LaraEngineTest extends AbstractTest
         self::assertSame('faithful', Lara::validateLaraStyle('faithful'));
         $this->expectException(InvalidArgumentException::class);
         Lara::validateLaraStyle('invalid-style');
+    }
+
+    #[Test]
+    public function hasBuiltInQualityEstimationIsFalse(): void
+    {
+        self::assertFalse($this->engine->hasBuiltInQualityEstimation());
     }
 }
 class TestHttpClient extends HttpClient implements HttpClientInterface

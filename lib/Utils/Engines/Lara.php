@@ -114,6 +114,19 @@ class Lara extends AbstractEngine
     }
 
     /**
+     * Returns the Lara client this engine translates with, so a caller in the same run can reuse its
+     * authentication instead of building a second client.
+     *
+     * Example: $score = $laraEngine->getLaraClient()->qualityEstimation('en-US', 'it-IT', 'Hello', 'Ciao');
+     *
+     * @throws Exception
+     */
+    public function getLaraClient(): LaraClient
+    {
+        return $this->_getClient();
+    }
+
+    /**
      * Get MMTServiceApi client
      *
      * @return LaraClient
