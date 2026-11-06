@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Matecat\Core\Engines\Lara;
 
+use Exception;
 use Lara\LaraException;
 use Lara\QualityEstimationResult;
 use Matecat\TestHelpers\AbstractTest;
@@ -11,6 +12,7 @@ use Model\DataAccess\IDatabase;
 use Model\Engines\Structs\EngineStruct;
 use PHPUnit\Framework\Attributes\Test;
 use Psr\Log\LoggerInterface;
+use TypeError;
 use Utils\Engines\EngineInterface;
 use Utils\Engines\Lara;
 use Utils\Engines\Lara\LaraClient;
@@ -43,42 +45,42 @@ class LaraQualityEstimatorTest extends AbstractTest
     }
 
     #[Test]
-    public function addScoreSetsTheLaraScoreOnTheFirstMatch(): void
+    public function scoreIfRequestedSetsTheLaraScoreOnTheFirstMatch(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects($this->never())->method('warning');
 
         $estimator = $this->estimator($this->laraEngine($this->scoringClient()), $logger);
-        $estimator->addScore($this->mtEngine(), $this->response, $this->config);
+        $estimator->scoreIfRequested($this->mtEngine(), $this->response, $this->config);
 
         self::assertSame(0.83, $this->response->matches[0]->score);
         self::assertSame([42], $estimator->lookedUpOwners);
     }
 
     #[Test]
-    public function addScoreScoresAnActiveLaraEngineWithItsOwnClient(): void
+    public function scoreIfRequestedScoresAnActiveLaraEngineWithItsOwnClient(): void
     {
         $estimator = $this->estimator($this->laraEngine(null), $this->createStub(LoggerInterface::class));
-        $estimator->addScore($this->laraMtEngine($this->scoringClient()), $this->response, $this->config);
+        $estimator->scoreIfRequested($this->laraMtEngine($this->scoringClient()), $this->response, $this->config);
 
         self::assertSame(0.83, $this->response->matches[0]->score);
         self::assertSame([], $estimator->lookedUpOwners);
     }
 
     #[Test]
-    public function addScoreScoresADisabledLaraEngineWithTheOwnerActiveLaraEngine(): void
+    public function scoreIfRequestedScoresADisabledLaraEngineWithTheOwnerActiveLaraEngine(): void
     {
         $this->record->active = false;
 
         $estimator = $this->estimator($this->laraEngine($this->scoringClient()), $this->createStub(LoggerInterface::class));
-        $estimator->addScore($this->laraMtEngine(null), $this->response, $this->config);
+        $estimator->scoreIfRequested($this->laraMtEngine(null), $this->response, $this->config);
 
         self::assertSame(0.83, $this->response->matches[0]->score);
         self::assertSame([42], $estimator->lookedUpOwners);
     }
 
     #[Test]
-    public function addScoreSkipsWhenIncludeScoreIsOff(): void
+    public function scoreIfRequestedSkipsWhenIncludeScoreIsOff(): void
     {
         $this->config['include_score'] = false;
 
@@ -88,7 +90,7 @@ class LaraQualityEstimatorTest extends AbstractTest
     }
 
     #[Test]
-    public function addScoreSkipsWhenIncludeScoreIsMissing(): void
+    public function scoreIfRequestedSkipsWhenIncludeScoreIsMissing(): void
     {
         unset($this->config['include_score']);
 
@@ -98,7 +100,7 @@ class LaraQualityEstimatorTest extends AbstractTest
     }
 
     #[Test]
-    public function addScoreSkipsEnginesWithBuiltInQualityEstimation(): void
+    public function scoreIfRequestedSkipsEnginesWithBuiltInQualityEstimation(): void
     {
         $this->response->matches = [$this->match(['score' => 0.95])];
 
@@ -108,7 +110,7 @@ class LaraQualityEstimatorTest extends AbstractTest
     }
 
     #[Test]
-    public function addScoreSkipsAnErrorResponse(): void
+    public function scoreIfRequestedSkipsAnErrorResponse(): void
     {
         $this->response->responseStatus = 400;
 
@@ -118,7 +120,7 @@ class LaraQualityEstimatorTest extends AbstractTest
     }
 
     #[Test]
-    public function addScoreSkipsAResponseWithoutMatches(): void
+    public function scoreIfRequestedSkipsAResponseWithoutMatches(): void
     {
         $this->response->matches = [];
 
@@ -128,7 +130,7 @@ class LaraQualityEstimatorTest extends AbstractTest
     }
 
     #[Test]
-    public function addScoreSkipsAnEmptyTranslation(): void
+    public function scoreIfRequestedSkipsAnEmptyTranslation(): void
     {
         $this->response->matches = [$this->match(['raw_translation' => ''])];
 
@@ -138,20 +140,20 @@ class LaraQualityEstimatorTest extends AbstractTest
     }
 
     #[Test]
-    public function addScoreLeavesScoreNullAndWarnsWithoutActiveLaraEngine(): void
+    public function scoreIfRequestedLeavesScoreNullAndWarnsWithoutActiveLaraEngine(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects($this->once())->method('warning')->with(self::NO_LARA_ENGINE, ['uid' => 42, 'engine_id' => 15]);
 
         $estimator = $this->estimator(null, $logger);
-        $estimator->addScore($this->mtEngine(), $this->response, $this->config);
+        $estimator->scoreIfRequested($this->mtEngine(), $this->response, $this->config);
 
         self::assertNull($this->response->matches[0]->score);
         self::assertSame([42], $estimator->lookedUpOwners);
     }
 
     #[Test]
-    public function addScoreLeavesScoreNullAndWarnsOnLaraError(): void
+    public function scoreIfRequestedLeavesScoreNullAndWarnsOnLaraError(): void
     {
         $client = $this->createMock(LaraClient::class);
         $client->expects($this->once())->method('qualityEstimation')
@@ -164,13 +166,46 @@ class LaraQualityEstimatorTest extends AbstractTest
             ['uid' => 42, 'engine_id' => 15, 'error' => 'failed', 'code' => 429]
         );
 
-        $this->estimator($this->laraEngine($client), $logger)->addScore($this->mtEngine(), $this->response, $this->config);
+        $this->estimator($this->laraEngine($client), $logger)->scoreIfRequested($this->mtEngine(), $this->response, $this->config);
 
         self::assertNull($this->response->matches[0]->score);
     }
 
     #[Test]
-    public function addScoreLeavesScoreNullWhenResponseHasNoSingleScore(): void
+    public function scoreIfRequestedLeavesScoreNullAndWarnsWhenLaraFailsWithAnyError(): void
+    {
+        $client = $this->createMock(LaraClient::class);
+        $client->expects($this->once())->method('qualityEstimation')->willThrowException(new TypeError('timeout'));
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects($this->once())->method('warning')->with(
+            'MT quality estimation failed',
+            ['uid' => 42, 'engine_id' => 15, 'error' => 'timeout', 'code' => 0]
+        );
+
+        $this->estimator($this->laraEngine($client), $logger)->scoreIfRequested($this->mtEngine(), $this->response, $this->config);
+
+        self::assertNull($this->response->matches[0]->score);
+    }
+
+    #[Test]
+    public function scoreIfRequestedLeavesScoreNullAndWarnsWhenTheLookupFails(): void
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects($this->once())->method('warning')->with(
+            'MT quality estimation failed',
+            ['uid' => 42, 'engine_id' => 15, 'error' => 'db down', 'code' => 0]
+        );
+
+        $estimator = $this->estimator(null, $logger);
+        $estimator->lookupFailure = new Exception('db down');
+        $estimator->scoreIfRequested($this->mtEngine(), $this->response, $this->config);
+
+        self::assertNull($this->response->matches[0]->score);
+    }
+
+    #[Test]
+    public function scoreIfRequestedLeavesScoreNullWhenResponseHasNoSingleScore(): void
     {
         $client = $this->createMock(LaraClient::class);
         $client->expects($this->once())->method('qualityEstimation')
@@ -178,13 +213,13 @@ class LaraQualityEstimatorTest extends AbstractTest
             ->willReturn([]);
 
         $this->estimator($this->laraEngine($client), $this->createStub(LoggerInterface::class))
-            ->addScore($this->mtEngine(), $this->response, $this->config);
+            ->scoreIfRequested($this->mtEngine(), $this->response, $this->config);
 
         self::assertNull($this->response->matches[0]->score);
     }
 
     #[Test]
-    public function addScoreLeavesScoreNullAndWarnsWhenTheEngineHasNoOwner(): void
+    public function scoreIfRequestedLeavesScoreNullAndWarnsWhenTheEngineHasNoOwner(): void
     {
         $this->record->uid = null;
 
@@ -192,19 +227,19 @@ class LaraQualityEstimatorTest extends AbstractTest
         $logger->expects($this->once())->method('warning')->with(self::NO_LARA_ENGINE, ['uid' => null, 'engine_id' => 15]);
 
         $estimator = $this->estimator(null, $logger);
-        $estimator->addScore($this->mtEngine(), $this->response, $this->config);
+        $estimator->scoreIfRequested($this->mtEngine(), $this->response, $this->config);
 
         self::assertNull($this->response->matches[0]->score);
         self::assertSame([null], $estimator->lookedUpOwners);
     }
 
     /**
-     * Runs addScore() and checks that it stopped before looking up the owner's Lara engine or calling Lara.
+     * Runs scoreIfRequested() and checks that it stopped before looking up the owner's Lara engine or calling Lara.
      */
     private function assertSkipped(?EngineInterface $mtEngine = null): void
     {
         $estimator = $this->estimator(null, $this->createStub(LoggerInterface::class));
-        $estimator->addScore($mtEngine ?? $this->mtEngine(), $this->response, $this->config);
+        $estimator->scoreIfRequested($mtEngine ?? $this->mtEngine(), $this->response, $this->config);
 
         self::assertSame([], $estimator->lookedUpOwners);
     }
@@ -288,10 +323,15 @@ class TestableLaraQualityEstimator extends LaraQualityEstimator
     public ?Lara $ownerLaraEngine = null;
     /** @var list<int|null> */
     public array $lookedUpOwners = [];
+    public ?Exception $lookupFailure = null;
 
     protected function findOwnerLaraEngine(?int $uid): ?Lara
     {
         $this->lookedUpOwners[] = $uid;
+
+        if ($this->lookupFailure !== null) {
+            throw $this->lookupFailure;
+        }
 
         return $this->ownerLaraEngine;
     }

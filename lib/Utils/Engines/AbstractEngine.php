@@ -506,20 +506,6 @@ abstract class AbstractEngine implements EngineInterface
     }
 
     /**
-     * @param string $source
-     * @param string $target
-     * @param string $sentence
-     * @param string $translation
-     * @param string $mt_qe_engine_id
-     *
-     * @return float|null
-     */
-    public function getQualityEstimation(string $source, string $target, string $sentence, string $translation, string $mt_qe_engine_id = 'default'): ?float
-    {
-        return null;
-    }
-
-    /**
      * Engines compute no quality estimation score of their own unless they override this.
      */
     public function hasBuiltInQualityEstimation(): bool

@@ -33,7 +33,6 @@ use Utils\Engines\Lara\Headers;
 use Utils\Engines\Lara\HttpClientInterface;
 use Utils\Engines\Lara\LaraClient;
 use Utils\Engines\MMT;
-use Utils\Engines\MMT\MMTServiceApiException;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
@@ -335,12 +334,6 @@ class LaraEngineTest extends AbstractTest
                 new TextBlock('advanced translation', true),
             ]));
         $this->engine->setMockClient($client);
-        $fallback = $this->createMock(MMT::class);
-        $fallback->expects(self::once())
-            ->method('getQualityEstimation')
-            ->with('en-US', 'it-IT', 'source segment', 'advanced translation', '2')
-            ->willReturn(0.88);
-        $this->engine->setMmtFallback($fallback);
         $response = $this->engine->get([
             'segment' => 'source segment',
             'source' => 'en-US',
@@ -355,6 +348,7 @@ class LaraEngineTest extends AbstractTest
         ]);
         self::assertSame(200, $response->responseStatus);
         self::assertSame('advanced translation', $response->matches[0]->raw_translation);
+        self::assertNull($response->matches[0]->score);
         self::assertSame('ext_my_k1', $httpClient->capturedHeaders[Headers::LARA_MEMORIES_IDS] ?? null);
     }
     /**
@@ -482,29 +476,6 @@ class LaraEngineTest extends AbstractTest
         self::assertSame(200, $response->responseStatus);
         self::assertSame([], $response->matches);
     }
-    #[Test]
-    public function getQualityEstimationSuccessReturnsFloat(): void
-    {
-        $fallback = $this->createMock(MMT::class);
-        $fallback->expects(self::once())
-            ->method('getQualityEstimation')
-            ->with('en-US', 'it-IT', 'source', 'translation', '2')
-            ->willReturn(0.91);
-        $this->engine->setMmtFallback($fallback);
-        $result = $this->engine->getQualityEstimation('en-US', 'it-IT', 'source', 'translation');
-        self::assertSame(0.91, $result);
-    }
-    #[Test]
-    public function getQualityEstimationErrorReturnsNull(): void
-    {
-        $fallback = $this->createMock(MMT::class);
-        $fallback->expects(self::once())
-            ->method('getQualityEstimation')
-            ->willThrowException(new MMTServiceApiException('Error', 500, 'failed'));
-        $this->engine->setMmtFallback($fallback);
-        $result = $this->engine->getQualityEstimation('en-US', 'it-IT', 'source', 'translation');
-        self::assertNull($result);
-    }
     /**
      * @throws LaraException
      * @throws Exception
@@ -542,53 +513,6 @@ class LaraEngineTest extends AbstractTest
         self::assertSame(200, $response->responseStatus);
         self::assertSame('MT-Lara', $response->matches[0]->created_by);
         self::assertSame('creative', $response->matches[0]->style);
-    }
-    /**
-     * @throws LaraException
-     * @throws Exception
-     */
-    #[Test]
-    public function getWithProvidedTranslationAndScoreUsesQualityEstimationPath(): void
-    {
-        $fallback = $this->createMock(MMT::class);
-        $fallback->expects(self::once())
-            ->method('getQualityEstimation')
-            ->with('en-US', 'it-IT', 'source segment', 'browser translation', '2')
-            ->willReturn(0.77);
-        $this->engine->setMmtFallback($fallback);
-        $response = $this->engine->get([
-            'segment' => 'source segment',
-            'translation' => 'browser translation',
-            'reasoning' => false,
-            'source' => 'en-US',
-            'target' => 'it-IT',
-            'include_score' => true,
-            'mt_qe_engine_id' => '2',
-        ]);
-        self::assertSame(0.77, $response->matches[0]->score);
-    }
-    /**
-     * @throws LaraException
-     * @throws Exception
-     */
-    #[Test]
-    public function getWithProvidedTranslationAndScoreUsesDefaultQeEngineIdWhenMissing(): void
-    {
-        $fallback = $this->createMock(MMT::class);
-        $fallback->expects(self::once())
-            ->method('getQualityEstimation')
-            ->with('en-US', 'it-IT', 'source segment', 'browser translation', '2')
-            ->willReturn(0.66);
-        $this->engine->setMmtFallback($fallback);
-        $response = $this->engine->get([
-            'segment' => 'source segment',
-            'translation' => 'browser translation',
-            'reasoning' => false,
-            'source' => 'en-US',
-            'target' => 'it-IT',
-            'include_score' => true,
-        ]);
-        self::assertSame(0.66, $response->matches[0]->score);
     }
     /**
      * @throws LaraException
