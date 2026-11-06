@@ -3,10 +3,11 @@ import {SegmentContext} from './SegmentContext'
 
 import SegmentSource from './SegmentSource'
 import SegmentTarget from './SegmentTarget'
-import SimpleEditor from './SimpleEditor'
+import SegmentView from '../segmentView/SegmentView'
 import SegmentUtils from '../../utils/segmentUtils'
 import SearchUtils from '../header/cattol/search/searchUtils'
 import SegmentStringUtils from './utils/DraftMatecatUtils/segmentStringUtils'
+import {markableText} from '../segmentView/segmentModel'
 
 const SegmentWrapper = ({isTarget}) => {
   const {segment} = useContext(SegmentContext)
@@ -24,20 +25,27 @@ const SegmentWrapper = ({isTarget}) => {
     ? SegmentStringUtils.removeTagsFromText(textToDisplay)
     : textToDisplay
 
-  if (segment.inSearch) {
-    textToDisplay = SearchUtils.markText(textToDisplay, !isTarget, segment.sid)
-  }
+  const isRtl = isTarget ? config.isTargetRTL : config.isSourceRTL
+  const searchMarks = segment.inSearch
+    ? SearchUtils.getSearchMarks(
+        markableText(textToDisplay, {isRtl: !!isRtl}),
+        !isTarget,
+        segment.sid,
+      )
+    : undefined
 
   return (
     <div
       className={`${isTarget ? `target` : `source`} item`}
       id={`segment-${segment.sid}-${isTarget ? 'target' : 'source'}`}
     >
-      <SimpleEditor
+      <SegmentView
+        as="div"
         className={isTarget ? `targetarea editarea` : ``}
-        text={textToDisplay}
-        isTarget={isTarget}
-        isRtl={isTarget ? config.isTargetRTL : config.isSourceRTL}
+        segment={textToDisplay}
+        isRtl={!!isRtl}
+        marks={searchMarks}
+        lang={config.target_code}
       />
     </div>
   )

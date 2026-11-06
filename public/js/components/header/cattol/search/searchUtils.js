@@ -1,5 +1,4 @@
 import {isUndefined, clone} from 'lodash'
-import {find} from 'lodash/collection'
 import {findIndex} from 'lodash/array'
 
 import {
@@ -436,56 +435,13 @@ let SearchUtils = {
     this.featuredSearchResult = value
   },
 
-  prepareTextToReplace: (text) => {
-    const getIndex = (regExp, source) => {
-      const matchedIndex = []
-      let result
-      while ((result = regExp.exec(source))) {
-        const {index} = result
-        matchedIndex.push(index)
-      }
-      return matchedIndex
-    }
-
-    const LTPLACEHOLDER = '##LESSTHAN##'
-    const GTPLACEHOLDER = '##GREATERTHAN##'
-
-    const cleaned = text
-      .replace(/</g, LTPLACEHOLDER)
-      .replace(/>/g, GTPLACEHOLDER)
-    const LTP_REGEX = new RegExp(LTPLACEHOLDER, 'g')
-    const GTP_REGEX = new RegExp(GTPLACEHOLDER, 'g')
-
-    const indexes = [
-      ...getIndex(LTP_REGEX, cleaned).map((value, index) => ({
-        start: value,
-        index,
-      })),
-      ...getIndex(GTP_REGEX, cleaned).map((value, index) => ({
-        end: value,
-        index,
-      })),
-    ].flatMap((item, index, arr) =>
-      item.end ? {start: arr[item.index].start, end: item.end} : [],
-    )
-
-    return {
-      text: cleaned,
-      tagsIntervals: indexes,
-    }
-  },
-
-  restoreTextAfterReplace(text) {
-    // text = text.replace(/(\$&)/g, function ( match, text ) {
-    //     return tagsArray.shift();
-    // });
-    //text = text.replace(/>/g, '&gt;').replace(/</g, '&lt;')
-    text = text.replace(/##GREATERTHAN##/g, '>').replace(/##LESSTHAN##/g, '<')
-    return text
-  },
-
-  markText: function (textToMark, isSource, sid) {
-    if (this.occurrencesList.indexOf(sid) === -1) return textToMark
+  /**
+   * The search hits in a closed segment, as SegmentView marks: `text` is the
+   * segment's markable text (segmentModel.markableText), so a hit never lands
+   * inside a tag. The hit that is the current occurrence gets currSearchItem.
+   */
+  getSearchMarks: function (text, isSource, sid) {
+    if (this.occurrencesList.indexOf(sid) === -1) return []
     let reg
     const isCurrent = this.occurrencesList[this.featuredSearchResult] === sid
     const occurrences = this.searchResultsDictionary[sid].occurrences
@@ -502,12 +458,7 @@ let SearchUtils = {
       (!isUndefined(params.target) && !isSource)
     ) {
       let txt = params.source ? params.source : params.target
-      txt = txt
-        .replace(/&/g, '&amp;')
-        .replace(/</gi, '&lt;')
-        .replace(/>/gi, '&gt;')
       let regTxt = TextUtils.escapeRegExp(txt)
-      // regTxt = regTxt.replace(/\(/gi, "\\(").replace(/\)/gi, "\\)");
 
       reg = new RegExp('(' + regTxt + ')', 'g' + ignoreCase)
 
@@ -517,40 +468,28 @@ let SearchUtils = {
 
       // Finding double spaces
       if (txt === '  ') {
-        reg = new RegExp(/(&nbsp; )/, 'gi')
+        reg = new RegExp(/(\u00A0 )/, 'gi')
       }
     }
+    if (!reg) return []
 
-    let {text, tagsIntervals} = this.prepareTextToReplace(textToMark)
-
-    let matchIndex = 0
-    text = text.replace(reg, (match, text, index) => {
-      let intervalSpan = find(
-        tagsIntervals,
-        (item) => index > item.start && index < item.end,
-      )
-      if (!intervalSpan) {
-        let className =
-          isCurrent &&
-          occurrences[matchIndex] &&
-          occurrences[matchIndex].searchProgressiveIndex ===
-            this.featuredSearchResult
-            ? searchMarker + ' currSearchItem'
-            : searchMarker
-        matchIndex++
-        return (
-          '##LESSTHAN##mark class="' +
-          className +
-          '"##GREATERTHAN##' +
-          match +
-          '##LESSTHAN##/mark##GREATERTHAN##'
-        )
-      } else {
-        return match
-      }
-    })
-    text = this.restoreTextAfterReplace(text)
-    return text
+    const marks = []
+    for (const match of text.matchAll(reg)) {
+      if (!match[0]) continue
+      const className =
+        isCurrent &&
+        occurrences[marks.length] &&
+        occurrences[marks.length].searchProgressiveIndex ===
+          this.featuredSearchResult
+          ? searchMarker + ' currSearchItem'
+          : searchMarker
+      marks.push({
+        start: match.index,
+        end: match.index + match[0].length,
+        className,
+      })
+    }
+    return marks
   },
   resetSearch: function () {
     this.searchResults = []
