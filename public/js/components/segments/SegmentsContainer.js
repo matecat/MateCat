@@ -27,6 +27,7 @@ import SegmentStringUtils from './utils/DraftMatecatUtils/segmentStringUtils'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import ContextPreviewChannel from '../../utils/contextPreviewChannel'
 import IconSplit from '../../../img/icons/IconSplit'
+import SegmentView from '../segmentView/SegmentView'
 
 const ROW_MARGIN = 3
 const ROW_HEIGHT = 90
@@ -1014,9 +1015,6 @@ const getSegmentStructure = (segment, sideOpen) => {
     target = SegmentStringUtils.removeTagsFromText(target)
   }
 
-  source = SegmentStringUtils.transformTagsToHtml(source, config.isSourceRTL)
-  target = SegmentStringUtils.transformTagsToHtml(target, config.isTargetRTL)
-
   return (
     <section
       className={`status-draft ${sideOpen ? 'slide-right' : ''}`}
@@ -1043,10 +1041,12 @@ const getSegmentStructure = (segment, sideOpen) => {
         >
           <div className="wrap">
             <div className="outersource">
-              <div
+              <SegmentView
+                as="div"
                 className="source item"
                 tabIndex="0"
-                dangerouslySetInnerHTML={{__html: source}}
+                segment={source}
+                isRtl={!!config.isSourceRTL}
               />
               <div className="copy" title="Copy source to target">
                 <a href="#"> </a>
@@ -1054,10 +1054,12 @@ const getSegmentStructure = (segment, sideOpen) => {
               </div>
               <div className="target item">
                 <div className="textarea-container">
-                  <div
+                  <SegmentView
+                    as="div"
                     className="targetarea editarea"
                     spellCheck="true"
-                    dangerouslySetInnerHTML={{__html: target}}
+                    segment={target}
+                    isRtl={!!config.isTargetRTL}
                   />
                   <div className="toolbar">
                     <a

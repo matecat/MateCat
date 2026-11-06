@@ -151,6 +151,7 @@ describe('SegmentFooterTabAiAlternatives', () => {
     })
 
     expect(screen.getByText('Alternatives for:')).toBeInTheDocument()
+    expect(screen.getByText('“mondo”')).toBeInTheDocument()
     expect(screen.getByText('More formal')).toBeInTheDocument()
     expect(screen.getByText('Poetic')).toBeInTheDocument()
   })

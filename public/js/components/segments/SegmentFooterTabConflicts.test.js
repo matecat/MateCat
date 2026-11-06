@@ -1,6 +1,7 @@
 import React from 'react'
-import {render, fireEvent} from '@testing-library/react'
+import {render, fireEvent, screen} from '@testing-library/react'
 import SegmentFooterTabConflicts from './SegmentFooterTabConflicts'
+import {setTagSignatureMiddleware} from './utils/DraftMatecatUtils/tagModel'
 
 jest.mock('../../actions/SegmentActions', () => ({
   setFocusOnEditArea: jest.fn(),
@@ -8,24 +9,6 @@ jest.mock('../../actions/SegmentActions', () => ({
   replaceEditAreaTextContent: jest.fn(),
   modifiedTranslation: jest.fn(),
   openSegment: jest.fn(),
-}))
-
-jest.mock('./utils/DraftMatecatUtils/segmentStringUtils', () => ({
-  __esModule: true,
-  default: {
-    transformTagsToHtml: jest.fn((text) => text),
-  },
-}))
-
-jest.mock('../../utils/textUtils', () => ({
-  __esModule: true,
-  default: {
-    getDiffHtml: jest.fn((a, b) => `${a}-vs-${b}`),
-    execDiff: jest.fn((a, b) => `${a}-diff-${b}`),
-    diffMatchPatch: {
-      diff_prettyHtml: jest.fn((diffObj) => diffObj),
-    },
-  },
 }))
 
 beforeAll(() => {
@@ -44,6 +27,15 @@ const baseSegment = {
   sid: '5',
   segment: 'Hello world',
   translation: 'Ciao mondo',
+}
+
+// Spaces as plain text, as with the show-whitespace switch off
+setTagSignatureMiddleware('space', () => false)
+
+const ALTERNATIVE = {
+  id: '1',
+  translation: 'Yes world',
+  involved_id: ['99'],
 }
 
 const renderComponent = (props = {}) =>
@@ -102,6 +94,78 @@ describe('SegmentFooterTabConflicts', () => {
     })
 
     expect(container.querySelector('ul.notEditable')).toBeInTheDocument()
+  })
+
+  test.each([
+    ['editable', {editable: [ALTERNATIVE], not_editable: []}],
+    ['not editable', {editable: [], not_editable: [ALTERNATIVE]}],
+  ])(
+    'shows the %s alternative as a diff from the segment translation',
+    (kind, alternatives) => {
+      renderComponent({
+        segment: {...baseSegment, translation: 'Hi world', alternatives},
+      })
+
+      expect(screen.getByText('Hi')).toHaveClass('deleted')
+      expect(screen.getByText('Yes')).toHaveClass('added')
+    },
+  )
+
+  test('numbers alternatives from array lists, not editable after editable', () => {
+    renderComponent({
+      segment: {
+        ...baseSegment,
+        alternatives: {
+          editable: [ALTERNATIVE, {...ALTERNATIVE, id: '2'}],
+          not_editable: [{...ALTERNATIVE, id: '3'}],
+        },
+      },
+    })
+    expect(
+      screen.getAllByRole('list').map((list) => list.dataset.item),
+    ).toEqual(['1', '2', '3'])
+  })
+
+  test('renders alternatives given as plain objects, keyed like $.each', () => {
+    renderComponent({
+      segment: {
+        ...baseSegment,
+        alternatives: {
+          editable: {a: ALTERNATIVE},
+          not_editable: {b: {...ALTERNATIVE, id: '3'}},
+        },
+      },
+    })
+    // Object keys are strings and an object has no length, so the numbering
+    // has always been string concatenation.
+    expect(
+      screen.getAllByRole('list').map((list) => list.dataset.item),
+    ).toEqual(['a1', 'bundefined1'])
+  })
+
+  test('keeps a tag whole in the diff and decodes entities', () => {
+    renderComponent({
+      segment: {
+        ...baseSegment,
+        translation: 'Ciao &amp; mondo',
+        alternatives: {
+          editable: [
+            {
+              id: '1',
+              translation: 'Ciao &amp; <g id="7">mondo</g>',
+              involved_id: ['99'],
+            },
+          ],
+          not_editable: [],
+        },
+      },
+    })
+
+    expect(screen.getByText('Ciao &', {exact: false})).toBeInTheDocument()
+    const chips = screen.getAllByText(/7/)
+    expect(chips).toHaveLength(2)
+    chips.forEach((chip) => expect(chip).toHaveClass('tag'))
+    expect(screen.queryByText(/id=/)).not.toBeInTheDocument()
   })
 
   test('double clicking an alternative triggers SegmentActions', () => {

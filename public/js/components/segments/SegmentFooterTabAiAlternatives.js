@@ -12,6 +12,7 @@ import {LARA_STYLES} from '../settingsPanel/Contents/MachineTranslationTab/LaraO
 import CommonUtils from '../../utils/commonUtils'
 import {MemoizeRequest} from '../../utils/MemoizeRequest'
 import {ButtonCopy} from '../common/ButtonCopy'
+import SegmentView from '../segmentView/SegmentView'
 
 const restoreMissingWhiteSpace = (original, alternative) => {
   if (original.endsWith(' ') && !alternative.endsWith(' ')) {
@@ -266,10 +267,7 @@ export const SegmentFooterTabAiAlternatives = ({
         setAlternatives(
           enrichedAlternatives.map(({context, highlighted}, index) => ({
             ...(index === 0 && {
-              selectedText: SegmentStringUtils.transformTagsToHtml(
-                `“${selectedTextRef.current}”`,
-                config.isTargetRTL,
-              ),
+              selectedText: `“${selectedTextRef.current}”`,
             }),
             alternative: data.message[index].alternative,
             before:
@@ -338,10 +336,6 @@ export const SegmentFooterTabAiAlternatives = ({
     }
   }, [segment])
 
-  const allowHTML = (string) => {
-    return {__html: string}
-  }
-
   return (
     <div
       key={`container_${code}`}
@@ -353,11 +347,11 @@ export const SegmentFooterTabAiAlternatives = ({
           <div className="content">
             <div className="ai-feature-alternatives-for">
               <h4>Alternatives for:</h4>
-              <p
-                dangerouslySetInnerHTML={allowHTML(
-                  alternatives[0].selectedText,
-                )}
-              ></p>
+              <SegmentView
+                as="p"
+                segment={alternatives[0].selectedText}
+                isRtl={!!config.isTargetRTL}
+              />
             </div>
             <div className="ai-alternative-options">
               {alternatives.map(({before, after, changed, context}, index) => {

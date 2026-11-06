@@ -10,7 +10,7 @@ import CatToolStore from '../../stores/CatToolStore'
 import {laraTranslate} from '../../api/laraTranslate'
 import {laraAuthJob} from '../../api/laraAuth'
 import SegmentUtils from '../../utils/segmentUtils'
-import SegmentStringUtils from './utils/DraftMatecatUtils/segmentStringUtils'
+import SegmentView from '../segmentView/SegmentView'
 import SegmentActions from '../../actions/SegmentActions'
 import {Button, BUTTON_MODE} from '../common/Button/Button'
 import SwitchHorizontal from '../../../img/icons/SwitchHorizontal'
@@ -46,10 +46,6 @@ export const SegmentFooterTabLaraStyles = ({
         setTranslationStyles(
           translations.map((value, index) => {
             return {
-              translation: SegmentStringUtils.transformTagsToHtml(
-                value,
-                config.isTargetRTL,
-              ),
               translationOriginal: value,
               style: styles[index],
             }
@@ -171,10 +167,6 @@ export const SegmentFooterTabLaraStyles = ({
       })
   }
 
-  const allowHTML = (string) => {
-    return {__html: string}
-  }
-
   return (
     <div
       key={`container_${code}`}
@@ -186,7 +178,7 @@ export const SegmentFooterTabLaraStyles = ({
           <div className="content">
             <div className="ai-feature-options">
               {translationStyles.map(
-                ({style, translation, translationOriginal}) => (
+                ({style, translationOriginal}) => (
                   <div key={style.id}>
                     <div>
                       <h4>
@@ -199,7 +191,11 @@ export const SegmentFooterTabLaraStyles = ({
                           ''
                         )}
                       </h4>
-                      <p dangerouslySetInnerHTML={allowHTML(translation)}></p>
+                      <SegmentView
+                        as="p"
+                        segment={translationOriginal}
+                        isRtl={!!config.isTargetRTL}
+                      />
                     </div>
                     <Button
                       className="ai-feature-button"

@@ -15,13 +15,6 @@ jest.mock('../../stores/SegmentStore', () => {
   }
 })
 
-jest.mock('./utils/DraftMatecatUtils/segmentStringUtils', () => ({
-  __esModule: true,
-  default: {
-    transformTagsToHtml: jest.fn((text) => text),
-  },
-}))
-
 jest.mock('js-cookie', () => ({
   get: jest.fn(),
   set: jest.fn(),
@@ -112,8 +105,29 @@ describe('TabConcordanceResults', () => {
     })
 
     expect(screen.getByText('MyMemory')).toBeInTheDocument()
-    expect(screen.getByText('mondo')).toBeInTheDocument()
-    expect(screen.getByText('world')).toBeInTheDocument()
+    expect(screen.getByText('mondo', {selector: 'mark'})).toBeInTheDocument()
+    expect(screen.getByText('world', {selector: 'mark'})).toBeInTheDocument()
+  })
+
+  test('highlights the searched term as text, with tags and entities rendered', () => {
+    render(<TabConcordanceResults segment={segment} isActive={true} />)
+    act(() => {
+      SegmentStore.__emit(SegmentConstants.CONCORDANCE_RESULT, '3', [
+        {
+          id: '1',
+          segment: 'Tom #{&amp;}# <x id="4"/>#{Jerry}#',
+          translation: 'Tom e Jerry',
+          created_by: 'MyMemory',
+          source: 'en-US',
+          target: 'it-IT',
+        },
+      ])
+    })
+
+    expect(screen.getByText('&', {selector: 'mark'})).toBeInTheDocument()
+    expect(screen.getByText('Jerry', {selector: 'mark'})).toBeInTheDocument()
+    expect(screen.getByText('4')).toHaveClass('tag')
+    expect(screen.queryByText(/#\{|\}#/)).not.toBeInTheDocument()
   })
 
   test('shows the yellow variant marker when language pair differs from job', () => {

@@ -1,5 +1,4 @@
 import React, {
-  Fragment,
   useEffect,
   useImperativeHandle,
   useState,
@@ -10,7 +9,8 @@ import PropTypes from 'prop-types'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
 import Cookies from 'js-cookie'
-import SegmentStringUtils from './utils/DraftMatecatUtils/segmentStringUtils'
+import SegmentView from '../segmentView/SegmentView'
+import {marksFromDelimiters} from '../segmentView/segmentModel'
 import Tooltip from '../common/Tooltip'
 import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
 import IconDown from '../../../img/icons/IconDown'
@@ -42,24 +42,23 @@ export const TabConcordanceResults = forwardRef(({segment, isActive}, ref) => {
 
       setResults(
         dataSorted.map((item) => {
-          const source = SegmentStringUtils.transformTagsToHtml(
-            item.segment,
-            config.isSourceRTL,
-          )
-            .replace(/#\{/gi, '<mark>')
-            .replace(/\}#/gi, '</mark>')
-
-          const translation = SegmentStringUtils.transformTagsToHtml(
+          // The service wraps the searched term in #{…}#
+          const source = marksFromDelimiters(item.segment, '#{', '}#', {
+            isRtl: !!config.isSourceRTL,
+          })
+          const translation = marksFromDelimiters(
             item.translation,
-            config.isTargetRTL,
+            '#{',
+            '}#',
+            {isRtl: !!config.isTargetRTL},
           )
-            .replace(/#\{/gi, '<mark>')
-            .replace(/\}#/gi, '</mark>')
 
           return {
             ...item,
-            segment: source,
-            translation,
+            segment: source.segment,
+            sourceMarks: source.marks,
+            translation: translation.segment,
+            translationMarks: translation.marks,
           }
         }),
       )
@@ -95,32 +94,6 @@ export const TabConcordanceResults = forwardRef(({segment, isActive}, ref) => {
 
   const MAX_ITEMS_TO_DISPLAY = 3
 
-  const getContentWithMarkTag = (content) =>
-    content
-      .split('<mark>')
-      .map((value, index) =>
-        index > 0 ? {tagContent: value.split('</mark>')} : value,
-      )
-      .reduce(
-        (acc, cur) => [
-          ...acc,
-          typeof cur === 'object'
-            ? [{tagContent: cur.tagContent[0]}, cur.tagContent[1]]
-            : [cur],
-        ],
-        [],
-      )
-      .flat()
-      .map((piece, index) =>
-        typeof piece === 'object' ? (
-          <mark key={index}>{piece.tagContent}</mark>
-        ) : (
-          <Fragment key={index}>
-            <span dangerouslySetInnerHTML={{__html: piece}} />
-          </Fragment>
-        ),
-      )
-
   const renderResults = (item, index) => {
     const {sid} = segment
     return (
@@ -131,17 +104,22 @@ export const TabConcordanceResults = forwardRef(({segment, isActive}, ref) => {
         data-id={item.id}
       >
         <li className="sugg-source">
-          <span
+          <SegmentView
             id={`${sid}-tm-${item.id}-source`}
             className="suggestion_source"
-          >
-            {getContentWithMarkTag(item.segment)}
-          </span>
+            segment={item.segment}
+            marks={item.sourceMarks}
+            isRtl={!!config.isSourceRTL}
+          />
         </li>
         <li className="b sugg-target">
-          <span id={`${sid}-tm-${item.id}-translation`} className="translation">
-            {getContentWithMarkTag(item.translation)}
-          </span>
+          <SegmentView
+            id={`${sid}-tm-${item.id}-translation`}
+            className="translation"
+            segment={item.translation}
+            marks={item.translationMarks}
+            isRtl={!!config.isTargetRTL}
+          />
         </li>
         <ul className="graysmall-details">
           <li className="graydesc">

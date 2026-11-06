@@ -6,14 +6,13 @@ import $ from 'jquery'
 import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentStore from '../../stores/SegmentStore'
 import TranslationMatches from './utils/translationMatches'
-import TextUtils from '../../utils/textUtils'
 import SegmentActions from '../../actions/SegmentActions'
 import CatToolStore from '../../stores/CatToolStore'
 import CatToolConstants from '../../constants/CatToolConstants'
 import matchInfo from './matchInfo'
 import {SegmentContext} from './SegmentContext'
 import {SegmentFooterTabError} from './SegmentFooterTabError'
-import SegmentStringUtils from './utils/DraftMatecatUtils/segmentStringUtils'
+import SegmentView from '../segmentView/SegmentView'
 import {
   Button,
   BUTTON_MODE,
@@ -72,34 +71,14 @@ const SegmentFooterTabMatches = ({segment, code, active_class, tab_class}) => {
       item.penalty = this.penalty
       item.isMT = this.match === 'MT' || this.match === 'ICE_MT'
 
-      // Attention Bug: We are mixing the view mode and the raw data mode.
-      // before doing a enhanced  view you will need to add a data-original tag
-      //
-      item.suggestionDecodedHtml = SegmentStringUtils.transformTagsToHtml(
-        this.segment,
-        config.isSourceRTL,
-      )
-
-      item.translationDecodedHtml = SegmentStringUtils.transformTagsToHtml(
-        this.translation,
-        config.isTargetRTL,
-      )
       item.translation = this.translation
-
-      item.sourceDiff = item.suggestionDecodedHtml
       item.memoryKey = this.memory_key
-      if (
+      // Close matches show the source as a diff from the match source to the
+      // segment source.
+      item.diffSource =
         this.match !== 'MT' &&
         parseInt(this.match) > 70 &&
         parseInt(this.match) < 100
-      ) {
-        item.sourceDiff = TextUtils.getDiffHtml(this.segment, segment.segment)
-
-        item.sourceDiff = SegmentStringUtils.transformTagsToHtml(
-          item.sourceDiff,
-          config.isSourceRTL,
-        )
-      }
 
       if (!isUndefined(this.tm_properties)) {
         item.tm_properties = this.tm_properties
@@ -282,10 +261,6 @@ const SegmentFooterTabMatches = ({segment, code, active_class, tab_class}) => {
     }
   }
 
-  const allowHTML = (string) => {
-    return {__html: string}
-  }
-
   const toggleExtendend = () =>
     setNumContributionsToShow(
       numContributionsToShow < NUM_CONTRIBUTION_RESULTS
@@ -334,11 +309,13 @@ const SegmentFooterTabMatches = ({segment, code, active_class, tab_class}) => {
           onDoubleClick={() => suggestionDblClick(match, index + 1)}
         >
           <li className="sugg-source">
-            <span
+            <SegmentView
               id={segment.sid + '-tm-' + match.id + '-source'}
               className="suggestion_source"
-              dangerouslySetInnerHTML={allowHTML(match.sourceDiff)}
-            ></span>
+              segment={match.diffSource ? segment.segment : match.segment}
+              compareTo={match.diffSource ? match.segment : undefined}
+              isRtl={!!config.isSourceRTL}
+            />
           </li>
           <li className="b sugg-target">
             {/* Only the first three matches have a shortcut bound to them:
@@ -349,11 +326,12 @@ const SegmentFooterTabMatches = ({segment, code, active_class, tab_class}) => {
                 {SUGGESTION_SHORTCUT_LABEL + (index + 1)}
               </span>
             )}
-            <span
+            <SegmentView
               id={segment.sid + '-tm-' + match.id + '-translation'}
               className="translation"
-              dangerouslySetInnerHTML={allowHTML(match.translationDecodedHtml)}
-            ></span>
+              segment={match.translation}
+              isRtl={!!config.isTargetRTL}
+            />
             {trashIcon}
           </li>
           {getMatchInfo(match)}

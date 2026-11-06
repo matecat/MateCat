@@ -1,14 +1,10 @@
 import React from 'react'
 import {isUndefined, size} from 'lodash'
 import {fromJS} from 'immutable'
-import $ from 'jquery'
 
-import TextUtils from '../../utils/textUtils'
 import SegmentActions from '../../actions/SegmentActions'
-import SegmentStringUtils from './utils/DraftMatecatUtils/segmentStringUtils'
+import SegmentView from '../segmentView/SegmentView'
 import {Button, BUTTON_MODE, BUTTON_SIZE} from '../common/Button/Button'
-
-const allowHTML = (string) => ({__html: string})
 
 const chooseAlternative = (segment, text) => {
   SegmentActions.setFocusOnEditArea()
@@ -19,57 +15,47 @@ const chooseAlternative = (segment, text) => {
   })
 }
 
-// $.each is kept rather than forEach: it iterates arrays and plain objects
-// alike, and nothing here guarantees `editable` is an array.
+// Nothing guarantees the lists are arrays: a plain object is iterated by key,
+// as $.each did (array indexes stay numbers, object keys stay strings).
+const entriesOf = (list) =>
+  Array.isArray(list)
+    ? list.map((item, index) => [index, item])
+    : Object.entries(list ?? {})
+
 const renderAlternatives = (segment, alternatives) => {
   const segment_id = segment.sid
   let html = []
-  const source = SegmentStringUtils.transformTagsToHtml(
-    segment.segment,
-    config.isSourceRTL,
-  )
-  $.each(alternatives.editable, function (index) {
-    // Execute diff
-    const segmentTranslation = segment.translation
-    const conflictTranslation = this.translation
-    let translation = TextUtils.getDiffHtml(
-      segmentTranslation,
-      conflictTranslation,
-    )
-    translation = SegmentStringUtils.transformTagsToHtml(
-      translation,
-      config.isTargetRTL,
-    )
-    // No diff executed on source
+  entriesOf(alternatives.editable).forEach(([index, item]) => {
     html.push(
       <ul
         className="graysmall"
         data-item={index + 1}
         key={'editable' + index}
-        onDoubleClick={() => chooseAlternative(segment, this.translation)}
+        onDoubleClick={() => chooseAlternative(segment, item.translation)}
       >
         <li className="sugg-source">
-          <span
-            id={segment_id + '-tm-' + this.id + '-source'}
+          {/* No diff on the source */}
+          <SegmentView
+            id={segment_id + '-tm-' + item.id + '-source'}
             className="suggestion_source"
-            dangerouslySetInnerHTML={allowHTML(source)}
+            segment={segment.segment}
+            isRtl={!!config.isSourceRTL}
           />
         </li>
         <li className="b sugg-target">
-          <span
+          {/* Diff from the segment translation to the alternative */}
+          <SegmentView
             className="translation"
-            dangerouslySetInnerHTML={allowHTML(translation)}
-          />
-          <span
-            className="realData hide"
-            dangerouslySetInnerHTML={allowHTML(this.translation)}
+            segment={item.translation}
+            compareTo={segment.translation}
+            isRtl={!!config.isTargetRTL}
           />
         </li>
         <li className="goto">
           <Button
             mode={BUTTON_MODE.LINK}
             size={BUTTON_SIZE.LINK_SMALL}
-            onClick={() => SegmentActions.openSegment(this.involved_id[0])}
+            onClick={() => SegmentActions.openSegment(item.involved_id[0])}
           >
             Go to
           </Button>
@@ -78,45 +64,36 @@ const renderAlternatives = (segment, alternatives) => {
     )
   })
 
-  $.each(alternatives.not_editable, function (index1) {
-    // Execute diff
-    let diff_obj = TextUtils.execDiff(segment.translation, this.translation)
-    // Restore Tags
-    let translation = TextUtils.diffMatchPatch.diff_prettyHtml(diff_obj)
-    translation = translation.replace(/&amp;/g, '&')
-    translation = SegmentStringUtils.transformTagsToHtml(
-      translation,
-      config.isTargetRTL,
-    )
-    // No diff executed on source
+  entriesOf(alternatives.not_editable).forEach(([index1, item]) => {
     html.push(
       <ul
         className="graysmall notEditable"
-        data-item={index1 + alternatives.editable.length + 1}
+        data-item={index1 + alternatives.editable?.length + 1}
         key={'not-editable' + index1}
-        onDoubleClick={() => chooseAlternative(segment, this.translation)}
+        onDoubleClick={() => chooseAlternative(segment, item.translation)}
       >
         <li className="sugg-source">
-          <span
-            id={segment_id + '-tm-' + this.id + '-source'}
+          {/* No diff on the source */}
+          <SegmentView
+            id={segment_id + '-tm-' + item.id + '-source'}
             className="suggestion_source"
-            dangerouslySetInnerHTML={allowHTML(source)}
+            segment={segment.segment}
+            isRtl={!!config.isSourceRTL}
           />
         </li>
         <li className="b sugg-target">
-          <span
+          {/* Diff from the segment translation to the alternative */}
+          <SegmentView
             className="translation"
-            dangerouslySetInnerHTML={allowHTML(translation)}
-          />
-          <span
-            className="realData hide"
-            dangerouslySetInnerHTML={allowHTML(this.translation)}
+            segment={item.translation}
+            compareTo={segment.translation}
+            isRtl={!!config.isTargetRTL}
           />
         </li>
         <li className="goto">
           <a
-            data-goto={this.involved_id[0]}
-            onClick={() => SegmentActions.openSegment(this.involved_id[0])}
+            data-goto={item.involved_id[0]}
+            onClick={() => SegmentActions.openSegment(item.involved_id[0])}
           >
             Go to
           </a>

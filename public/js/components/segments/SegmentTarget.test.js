@@ -1,12 +1,11 @@
 import React from 'react'
-import {render, act} from '@testing-library/react'
+import {render, act, screen} from '@testing-library/react'
 import '@testing-library/jest-dom'
 
 import SegmentTarget from './SegmentTarget'
 import {SegmentContext} from './SegmentContext'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentActions from '../../actions/SegmentActions'
-import SegmentStringUtils from './utils/DraftMatecatUtils/segmentStringUtils'
 import OfflineUtils from '../../utils/offlineUtils'
 
 jest.mock('./Editarea', () => (props) => (
@@ -57,7 +56,6 @@ jest.mock('../../actions/SegmentActions', () => ({
 }))
 
 jest.mock('./utils/DraftMatecatUtils/segmentStringUtils', () => ({
-  transformTagsToHtml: jest.fn((text) => text),
   autoFillTagsInTarget: jest.fn(() => 'auto-filled-translation'),
 }))
 
@@ -191,13 +189,18 @@ describe('SegmentTarget', () => {
       renderTarget({
         segment: buildSegment({
           edit_area_locked: true,
-          versions: [{translation: 'versioned text'}],
+          translation: 'current',
+          versions: [{translation: 'versioned&amp;text'}],
         }),
       })
-      expect(SegmentStringUtils.transformTagsToHtml).toHaveBeenCalledWith(
-        'versioned text',
-        false,
+      // The issue selection offsets count the area's direct children, so the
+      // text must sit straight in the area, not in a wrapper.
+      expect(screen.getByText('versioned&text')).toHaveClass(
+        'targetarea',
+        'issuesHighlightArea',
+        'errorTaggingArea',
       )
+      expect(screen.queryByText('current')).not.toBeInTheDocument()
     })
 
     test('renders SegmentButtons with disabled computed from translation/offline state', () => {

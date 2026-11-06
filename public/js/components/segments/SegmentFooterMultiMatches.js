@@ -3,18 +3,15 @@ import {fromJS} from 'immutable'
 import {isUndefined} from 'lodash'
 import $ from 'jquery'
 
-import TextUtils from '../../utils/textUtils'
 import TranslationMatches from './utils/translationMatches'
 import SegmentActions from '../../actions/SegmentActions'
 import {SegmentContext} from './SegmentContext'
 import {SegmentFooterTabError} from './SegmentFooterTabError'
-import SegmentStringUtils from './utils/DraftMatecatUtils/segmentStringUtils'
-
-const allowHTML = (string) => ({__html: string})
+import SegmentView from '../segmentView/SegmentView'
 
 // $.each is kept rather than modernised: it iterates arrays and plain objects
 // alike, and nothing guarantees the shape the store hands over.
-const processContributions = (matches, segment) => {
+const processContributions = (matches) => {
   var matchesProcessed = []
   $.each(matches, function () {
     if (
@@ -47,32 +44,13 @@ const processContributions = (matches, segment) => {
     item.percentText = TranslationMatches.getPercentTextForMatch(this)
     item.percentClass = TranslationMatches.getPercentageClass(this)
 
-    // Attention Bug: We are mixing the view mode and the raw data mode.
-    // before doing a enhanced  view you will need to add a data-original tag
-    //
-    item.suggestionDecodedHtml = SegmentStringUtils.transformTagsToHtml(
-      this.segment,
-      config.isTargetRTL,
-    )
-    item.translationDecodedHtml = SegmentStringUtils.transformTagsToHtml(
-      this.translation,
-      config.isTargetRTL,
-    )
     item.translation = this.translation
-    item.sourceDiff = item.suggestionDecodedHtml
-
-    if (
+    // Close matches show the source as a diff from the match source to the
+    // segment source.
+    item.diffSource =
       this.match !== 'MT' &&
       parseInt(this.match) > 74 &&
       parseInt(this.match) < 100
-    ) {
-      item.sourceDiff = TextUtils.getDiffHtml(this.segment, segment.segment)
-
-      item.sourceDiff = SegmentStringUtils.transformTagsToHtml(
-        item.sourceDiff,
-        config.isSourceRTL,
-      )
-    }
     if (!isUndefined(this.tm_properties)) {
       item.tm_properties = this.tm_properties
     }
@@ -123,10 +101,7 @@ const SegmentFooterMultiMatches = ({
     segment.cl_contributions.matches &&
     segment.cl_contributions.matches.length > 0
   ) {
-    let tpmMatches = processContributions(
-      segment.cl_contributions.matches,
-      segment,
-    )
+    let tpmMatches = processContributions(segment.cl_contributions.matches)
     tpmMatches.forEach(function (match, index) {
       matches.push(
         <ul
@@ -138,18 +113,25 @@ const SegmentFooterMultiMatches = ({
           onDoubleClick={() => suggestionDblClick(segment, match)}
         >
           <li className="sugg-source">
-            <span
+            {/* The plain source has always used the target direction, the
+                diff the source one. */}
+            <SegmentView
               id={segment.sid + '-tm-' + match.id + '-source'}
               className="suggestion_source"
-              dangerouslySetInnerHTML={allowHTML(match.sourceDiff)}
-            ></span>
+              segment={match.diffSource ? segment.segment : match.segment}
+              compareTo={match.diffSource ? match.segment : undefined}
+              isRtl={
+                !!(match.diffSource ? config.isSourceRTL : config.isTargetRTL)
+              }
+            />
           </li>
           <li className="b sugg-target">
-            <span
+            <SegmentView
               id={segment.sid + '-tm-' + match.id + '-translation'}
               className="translation"
-              dangerouslySetInnerHTML={allowHTML(match.translationDecodedHtml)}
-            ></span>
+              segment={match.translation}
+              isRtl={!!config.isTargetRTL}
+            />
           </li>
           {getMatchInfo(match)}
         </ul>,

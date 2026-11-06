@@ -21,6 +21,7 @@ import OfflineUtils from '../../utils/offlineUtils'
 import SegmentUtils from '../../utils/segmentUtils'
 import CatToolStore from '../../stores/CatToolStore'
 import {SegmentTargetToolbar} from './SegmentTargetToolbar'
+import SegmentView from '../segmentView/SegmentView'
 
 const SegmentTarget = ({segment}) => {
   const context = useContext(SegmentContext)
@@ -143,10 +144,6 @@ const SegmentTarget = ({segment}) => {
     SegmentActions.lockEditArea(segment.sid, segment.fid)
   }
 
-  const allowHTML = (string) => {
-    return {__html: string}
-  }
-
   const getAllIssues = () => {
     let issues = []
     if (segment.versions) {
@@ -179,10 +176,6 @@ const SegmentTarget = ({segment}) => {
         segment.versions && segment.versions[0].translation
           ? segment.versions[0].translation
           : translation
-      let currentTranslationVersion = SegmentStringUtils.transformTagsToHtml(
-        text,
-        config.isTargetRTL,
-      )
       textAreaContainer = (
         <div
           className="segment-text-area-container"
@@ -193,9 +186,13 @@ const SegmentTarget = ({segment}) => {
             onMouseUp={selectIssueText}
             ref={(div) => (issuesHighlightAreaRef.current = div)}
           >
-            <div
+            {/* Rendered as the area itself: the issue selection offsets
+                (CursorUtils.getSelectionData) count its direct children. */}
+            <SegmentView
+              as="div"
               className="targetarea issuesHighlightArea errorTaggingArea"
-              dangerouslySetInnerHTML={allowHTML(currentTranslationVersion)}
+              segment={text}
+              isRtl={!!config.isTargetRTL}
             />
           </div>
           <div className="segment-actions-container">
