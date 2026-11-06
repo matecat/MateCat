@@ -6,7 +6,7 @@ import SegmentTarget from './SegmentTarget'
 import {SegmentContext} from './SegmentContext'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentActions from '../../actions/SegmentActions'
-import DraftMatecatUtils from './utils/DraftMatecatUtils'
+import SegmentStringUtils from './utils/DraftMatecatUtils/segmentStringUtils'
 import OfflineUtils from '../../utils/offlineUtils'
 
 jest.mock('./Editarea', () => (props) => (
@@ -56,7 +56,7 @@ jest.mock('../../actions/SegmentActions', () => ({
   characterCounter: jest.fn(),
 }))
 
-jest.mock('./utils/DraftMatecatUtils', () => ({
+jest.mock('./utils/DraftMatecatUtils/segmentStringUtils', () => ({
   transformTagsToHtml: jest.fn((text) => text),
   autoFillTagsInTarget: jest.fn(() => 'auto-filled-translation'),
 }))
@@ -194,7 +194,7 @@ describe('SegmentTarget', () => {
           versions: [{translation: 'versioned text'}],
         }),
       })
-      expect(DraftMatecatUtils.transformTagsToHtml).toHaveBeenCalledWith(
+      expect(SegmentStringUtils.transformTagsToHtml).toHaveBeenCalledWith(
         'versioned text',
         false,
       )

@@ -8,7 +8,7 @@ import {
   ANALYSIS_BUCKETS_LABELS,
   SEGMENTS_STATUS,
 } from '../../constants/Constants'
-import DraftMatecatUtils from '../segments/utils/DraftMatecatUtils'
+import SegmentStringUtils from '../segments/utils/DraftMatecatUtils/segmentStringUtils'
 import SegmentQA from '../../../img/icons/SegmentQA'
 import AlertIcon from '../../../img/icons/AlertIcon'
 import InfoIcon from '../../../img/icons/InfoIcon'
@@ -38,7 +38,7 @@ const decodeTextAndTransformTags = (text, isRtl) => {
   if (text) {
     // Fix for more than 2 followed spaces
     const normalized = text.replace(/ {2}/gi, '&nbsp; ')
-    return DraftMatecatUtils.transformTagsToHtml(normalized, isRtl)
+    return SegmentStringUtils.transformTagsToHtml(normalized, isRtl)
   }
   return text
 }

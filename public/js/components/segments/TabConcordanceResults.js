@@ -10,7 +10,7 @@ import PropTypes from 'prop-types'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
 import Cookies from 'js-cookie'
-import DraftMatecatUtils from './utils/DraftMatecatUtils'
+import SegmentStringUtils from './utils/DraftMatecatUtils/segmentStringUtils'
 import Tooltip from '../common/Tooltip'
 import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
 import IconDown from '../../../img/icons/IconDown'
@@ -42,14 +42,14 @@ export const TabConcordanceResults = forwardRef(({segment, isActive}, ref) => {
 
       setResults(
         dataSorted.map((item) => {
-          const source = DraftMatecatUtils.transformTagsToHtml(
+          const source = SegmentStringUtils.transformTagsToHtml(
             item.segment,
             config.isSourceRTL,
           )
             .replace(/#\{/gi, '<mark>')
             .replace(/\}#/gi, '</mark>')
 
-          const translation = DraftMatecatUtils.transformTagsToHtml(
+          const translation = SegmentStringUtils.transformTagsToHtml(
             item.translation,
             config.isTargetRTL,
           )

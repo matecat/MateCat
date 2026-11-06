@@ -42,7 +42,7 @@ jest.mock('../header/cattol/search/searchUtils', () => ({
   default: {markText: (...args) => mockMarkText(...args)},
 }))
 
-jest.mock('./utils/DraftMatecatUtils', () => ({
+jest.mock('./utils/DraftMatecatUtils/segmentStringUtils', () => ({
   __esModule: true,
   default: {removeTagsFromText: (...args) => mockRemoveTagsFromText(...args)},
 }))

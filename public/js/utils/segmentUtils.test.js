@@ -6,7 +6,7 @@ jest.mock('../stores/SegmentStore', () => ({
   getStartEditTime: jest.fn(),
   getSegmentByIdToJS: jest.fn(),
 }))
-jest.mock('../components/segments/utils/DraftMatecatUtils', () => ({
+jest.mock('../components/segments/utils/DraftMatecatUtils/segmentStringUtils', () => ({
   removeTagsFromText: jest.fn((text) => text),
   hasDataOriginalTags: jest.fn(),
   excludeSomeTagsTransformToText: jest.fn((text) => text),
@@ -18,7 +18,7 @@ jest.mock('../stores/UserStore', () => ({
 }))
 
 import SegmentStore from '../stores/SegmentStore'
-import DraftMatecatUtils from '../components/segments/utils/DraftMatecatUtils'
+import SegmentStringUtils from '../components/segments/utils/DraftMatecatUtils/segmentStringUtils'
 import UserStore from '../stores/UserStore'
 import {SEGMENTS_STATUS} from '../constants/Constants'
 import SegmentUtils from './segmentUtils'
@@ -44,15 +44,15 @@ beforeEach(() => {
     getContextAfter: jest.fn(() => 'after'),
     getIdAfter: jest.fn(() => 'id-after'),
   }
-  DraftMatecatUtils.removeTagsFromText.mockImplementation((text) => text)
-  DraftMatecatUtils.hasDataOriginalTags.mockReturnValue(false)
-  DraftMatecatUtils.decodePlaceholdersToPlainText.mockImplementation(
+  SegmentStringUtils.removeTagsFromText.mockImplementation((text) => text)
+  SegmentStringUtils.hasDataOriginalTags.mockReturnValue(false)
+  SegmentStringUtils.decodePlaceholdersToPlainText.mockImplementation(
     (text) => text,
   )
-  DraftMatecatUtils.excludeSomeTagsTransformToText.mockImplementation(
+  SegmentStringUtils.excludeSomeTagsTransformToText.mockImplementation(
     (text) => text,
   )
-  DraftMatecatUtils.getCharactersCounter.mockImplementation((text) =>
+  SegmentStringUtils.getCharactersCounter.mockImplementation((text) =>
     text ? text.length : 0,
   )
 })
@@ -87,8 +87,8 @@ test('checkCurrentSegmentTPEnabled returns false without a current segment', () 
 
 test('checkCurrentSegmentTPEnabled is true for an untagged segment with original tags', () => {
   UserStore.getUserMetadata.mockReturnValue({guess_tags: 1})
-  DraftMatecatUtils.hasDataOriginalTags.mockReturnValue(true)
-  DraftMatecatUtils.removeTagsFromText.mockReturnValue('hello')
+  SegmentStringUtils.hasDataOriginalTags.mockReturnValue(true)
+  SegmentStringUtils.removeTagsFromText.mockReturnValue('hello')
 
   const segment = {segment: '<g>hello</g>', tagged: false}
   expect(SegmentUtils.checkCurrentSegmentTPEnabled(segment)).toBe(true)
@@ -96,8 +96,8 @@ test('checkCurrentSegmentTPEnabled is true for an untagged segment with original
 
 test('checkCurrentSegmentTPEnabled falls back to the store current segment', () => {
   UserStore.getUserMetadata.mockReturnValue({guess_tags: 1})
-  DraftMatecatUtils.hasDataOriginalTags.mockReturnValue(true)
-  DraftMatecatUtils.removeTagsFromText.mockReturnValue('hello')
+  SegmentStringUtils.hasDataOriginalTags.mockReturnValue(true)
+  SegmentStringUtils.removeTagsFromText.mockReturnValue('hello')
   SegmentStore.getCurrentSegment.mockReturnValue({
     segment: '<g>hello</g>',
     tagged: false,
@@ -108,8 +108,8 @@ test('checkCurrentSegmentTPEnabled falls back to the store current segment', () 
 
 test('checkCurrentSegmentTPEnabled is false when already tagged or text is empty', () => {
   UserStore.getUserMetadata.mockReturnValue({guess_tags: 1})
-  DraftMatecatUtils.hasDataOriginalTags.mockReturnValue(true)
-  DraftMatecatUtils.removeTagsFromText.mockReturnValue('')
+  SegmentStringUtils.hasDataOriginalTags.mockReturnValue(true)
+  SegmentStringUtils.removeTagsFromText.mockReturnValue('')
 
   expect(
     SegmentUtils.checkCurrentSegmentTPEnabled({
@@ -118,7 +118,7 @@ test('checkCurrentSegmentTPEnabled is false when already tagged or text is empty
     }),
   ).toBe(false)
 
-  DraftMatecatUtils.removeTagsFromText.mockReturnValue('hello')
+  SegmentStringUtils.removeTagsFromText.mockReturnValue('hello')
   expect(
     SegmentUtils.checkCurrentSegmentTPEnabled({
       segment: '<g>hello</g>',
@@ -418,7 +418,7 @@ test('getRelativeTransUnitCharactersCounter sums characters across the same tran
     {sid: 2, internal_id: 'u1', translation: 'bb'},
     {sid: 3, internal_id: 'u2', translation: 'zzzzz'},
   ])
-  DraftMatecatUtils.getCharactersCounter.mockImplementation(
+  SegmentStringUtils.getCharactersCounter.mockImplementation(
     (text) => text.length,
   )
 
@@ -436,10 +436,10 @@ test('getRelativeTransUnitCharactersCounter can count tags as characters', () =>
     {sid: 1, internal_id: 'u1', translation: 'aaa'},
     {sid: 2, internal_id: 'u1', translation: '<g>bb</g>'},
   ])
-  DraftMatecatUtils.excludeSomeTagsTransformToText.mockImplementation(
+  SegmentStringUtils.excludeSomeTagsTransformToText.mockImplementation(
     (text) => text,
   )
-  DraftMatecatUtils.getCharactersCounter.mockImplementation(
+  SegmentStringUtils.getCharactersCounter.mockImplementation(
     (text) => text.length,
   )
 
@@ -449,6 +449,6 @@ test('getRelativeTransUnitCharactersCounter can count tags as characters', () =>
     shouldCountTagsAsChars: true,
   })
 
-  expect(DraftMatecatUtils.excludeSomeTagsTransformToText).toHaveBeenCalled()
+  expect(SegmentStringUtils.excludeSomeTagsTransformToText).toHaveBeenCalled()
   expect(result.unitCharacters).toBe('<g>bb</g>'.length)
 })

@@ -23,7 +23,7 @@ import Speech2Text from '../../utils/speech2text'
 import SegmentActions from '../../actions/SegmentActions'
 import {isUndefined} from 'lodash'
 import SegmentUtils from '../../utils/segmentUtils'
-import DraftMatecatUtils from './utils/DraftMatecatUtils'
+import SegmentStringUtils from './utils/DraftMatecatUtils/segmentStringUtils'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import ContextPreviewChannel from '../../utils/contextPreviewChannel'
 import IconSplit from '../../../img/icons/IconSplit'
@@ -1010,12 +1010,12 @@ const getSegmentStructure = (segment, sideOpen) => {
   let source = segment.segment
   let target = segment.translation
   if (SegmentUtils.checkCurrentSegmentTPEnabled(segment)) {
-    source = DraftMatecatUtils.removeTagsFromText(source)
-    target = DraftMatecatUtils.removeTagsFromText(target)
+    source = SegmentStringUtils.removeTagsFromText(source)
+    target = SegmentStringUtils.removeTagsFromText(target)
   }
 
-  source = DraftMatecatUtils.transformTagsToHtml(source, config.isSourceRTL)
-  target = DraftMatecatUtils.transformTagsToHtml(target, config.isTargetRTL)
+  source = SegmentStringUtils.transformTagsToHtml(source, config.isSourceRTL)
+  target = SegmentStringUtils.transformTagsToHtml(target, config.isTargetRTL)
 
   return (
     <section

@@ -10,7 +10,7 @@ import SegmentButtons from './SegmentButtons'
 import SegmentWarnings from './SegmentWarnings'
 import SegmentActions from '../../actions/SegmentActions'
 import {SegmentContext} from './SegmentContext'
-import DraftMatecatUtils from './utils/DraftMatecatUtils'
+import SegmentStringUtils from './utils/DraftMatecatUtils/segmentStringUtils'
 import {
   removeTagsFromText as removeTagsFromTextUtil,
   textHasTags,
@@ -86,7 +86,7 @@ const SegmentTarget = ({segment}) => {
   const autoFillTagsInTargetRef = useRef((sid) => {
     const {segment} = liveRef.current
     if (isUndefined(sid) || sid === segment.sid) {
-      const newTranslation = DraftMatecatUtils.autoFillTagsInTarget(segment)
+      const newTranslation = SegmentStringUtils.autoFillTagsInTarget(segment)
       //lock tags and run again getWarnings
       setTimeout(() => {
         SegmentActions.replaceEditAreaTextContent(
@@ -179,7 +179,7 @@ const SegmentTarget = ({segment}) => {
         segment.versions && segment.versions[0].translation
           ? segment.versions[0].translation
           : translation
-      let currentTranslationVersion = DraftMatecatUtils.transformTagsToHtml(
+      let currentTranslationVersion = SegmentStringUtils.transformTagsToHtml(
         text,
         config.isTargetRTL,
       )

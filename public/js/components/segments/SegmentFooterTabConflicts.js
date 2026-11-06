@@ -5,7 +5,7 @@ import $ from 'jquery'
 
 import TextUtils from '../../utils/textUtils'
 import SegmentActions from '../../actions/SegmentActions'
-import DraftMatecatUtils from './utils/DraftMatecatUtils'
+import SegmentStringUtils from './utils/DraftMatecatUtils/segmentStringUtils'
 import {Button, BUTTON_MODE, BUTTON_SIZE} from '../common/Button/Button'
 
 const allowHTML = (string) => ({__html: string})
@@ -24,7 +24,7 @@ const chooseAlternative = (segment, text) => {
 const renderAlternatives = (segment, alternatives) => {
   const segment_id = segment.sid
   let html = []
-  const source = DraftMatecatUtils.transformTagsToHtml(
+  const source = SegmentStringUtils.transformTagsToHtml(
     segment.segment,
     config.isSourceRTL,
   )
@@ -36,7 +36,7 @@ const renderAlternatives = (segment, alternatives) => {
       segmentTranslation,
       conflictTranslation,
     )
-    translation = DraftMatecatUtils.transformTagsToHtml(
+    translation = SegmentStringUtils.transformTagsToHtml(
       translation,
       config.isTargetRTL,
     )
@@ -84,7 +84,7 @@ const renderAlternatives = (segment, alternatives) => {
     // Restore Tags
     let translation = TextUtils.diffMatchPatch.diff_prettyHtml(diff_obj)
     translation = translation.replace(/&amp;/g, '&')
-    translation = DraftMatecatUtils.transformTagsToHtml(
+    translation = SegmentStringUtils.transformTagsToHtml(
       translation,
       config.isTargetRTL,
     )

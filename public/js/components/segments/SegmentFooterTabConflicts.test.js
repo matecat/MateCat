@@ -10,7 +10,7 @@ jest.mock('../../actions/SegmentActions', () => ({
   openSegment: jest.fn(),
 }))
 
-jest.mock('./utils/DraftMatecatUtils', () => ({
+jest.mock('./utils/DraftMatecatUtils/segmentStringUtils', () => ({
   __esModule: true,
   default: {
     transformTagsToHtml: jest.fn((text) => text),

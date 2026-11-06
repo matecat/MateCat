@@ -6,7 +6,7 @@ import SegmentTarget from './SegmentTarget'
 import SimpleEditor from './SimpleEditor'
 import SegmentUtils from '../../utils/segmentUtils'
 import SearchUtils from '../header/cattol/search/searchUtils'
-import DraftMatecatUtils from './utils/DraftMatecatUtils'
+import SegmentStringUtils from './utils/DraftMatecatUtils/segmentStringUtils'
 
 const SegmentWrapper = ({isTarget}) => {
   const {segment} = useContext(SegmentContext)
@@ -21,7 +21,7 @@ const SegmentWrapper = ({isTarget}) => {
 
   let textToDisplay = isTarget ? segment.translation : segment.segment
   textToDisplay = SegmentUtils.checkCurrentSegmentTPEnabled(segment)
-    ? DraftMatecatUtils.removeTagsFromText(textToDisplay)
+    ? SegmentStringUtils.removeTagsFromText(textToDisplay)
     : textToDisplay
 
   if (segment.inSearch) {

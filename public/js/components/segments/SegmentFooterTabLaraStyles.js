@@ -10,7 +10,7 @@ import CatToolStore from '../../stores/CatToolStore'
 import {laraTranslate} from '../../api/laraTranslate'
 import {laraAuthJob} from '../../api/laraAuth'
 import SegmentUtils from '../../utils/segmentUtils'
-import DraftMatecatUtils from './utils/DraftMatecatUtils'
+import SegmentStringUtils from './utils/DraftMatecatUtils/segmentStringUtils'
 import SegmentActions from '../../actions/SegmentActions'
 import {Button, BUTTON_MODE} from '../common/Button/Button'
 import SwitchHorizontal from '../../../img/icons/SwitchHorizontal'
@@ -46,7 +46,7 @@ export const SegmentFooterTabLaraStyles = ({
         setTranslationStyles(
           translations.map((value, index) => {
             return {
-              translation: DraftMatecatUtils.transformTagsToHtml(
+              translation: SegmentStringUtils.transformTagsToHtml(
                 value,
                 config.isTargetRTL,
               ),

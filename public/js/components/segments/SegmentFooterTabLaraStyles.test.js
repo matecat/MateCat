@@ -31,7 +31,7 @@ jest.mock('../../utils/segmentUtils', () => ({
   })),
 }))
 
-jest.mock('./utils/DraftMatecatUtils', () => ({
+jest.mock('./utils/DraftMatecatUtils/segmentStringUtils', () => ({
   __esModule: true,
   default: {
     transformTagsToHtml: jest.fn((text) => text),

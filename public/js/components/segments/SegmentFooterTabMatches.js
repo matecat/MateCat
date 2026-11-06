@@ -13,7 +13,7 @@ import CatToolConstants from '../../constants/CatToolConstants'
 import matchInfo from './matchInfo'
 import {SegmentContext} from './SegmentContext'
 import {SegmentFooterTabError} from './SegmentFooterTabError'
-import DraftMatecatUtils from './utils/DraftMatecatUtils'
+import SegmentStringUtils from './utils/DraftMatecatUtils/segmentStringUtils'
 import {
   Button,
   BUTTON_MODE,
@@ -75,12 +75,12 @@ const SegmentFooterTabMatches = ({segment, code, active_class, tab_class}) => {
       // Attention Bug: We are mixing the view mode and the raw data mode.
       // before doing a enhanced  view you will need to add a data-original tag
       //
-      item.suggestionDecodedHtml = DraftMatecatUtils.transformTagsToHtml(
+      item.suggestionDecodedHtml = SegmentStringUtils.transformTagsToHtml(
         this.segment,
         config.isSourceRTL,
       )
 
-      item.translationDecodedHtml = DraftMatecatUtils.transformTagsToHtml(
+      item.translationDecodedHtml = SegmentStringUtils.transformTagsToHtml(
         this.translation,
         config.isTargetRTL,
       )
@@ -95,7 +95,7 @@ const SegmentFooterTabMatches = ({segment, code, active_class, tab_class}) => {
       ) {
         item.sourceDiff = TextUtils.getDiffHtml(this.segment, segment.segment)
 
-        item.sourceDiff = DraftMatecatUtils.transformTagsToHtml(
+        item.sourceDiff = SegmentStringUtils.transformTagsToHtml(
           item.sourceDiff,
           config.isSourceRTL,
         )

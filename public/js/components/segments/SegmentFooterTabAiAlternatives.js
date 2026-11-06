@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
 import {Button, BUTTON_MODE, BUTTON_TYPE} from '../common/Button/Button'
-import DraftMatecatUtils from './utils/DraftMatecatUtils'
+import SegmentStringUtils from './utils/DraftMatecatUtils/segmentStringUtils'
 import {aiAlternartiveTranslations} from '../../api/aiAlternartiveTranslations/aiAlternartiveTranslations'
 import SegmentUtils from '../../utils/segmentUtils'
 import CatToolStore from '../../stores/CatToolStore'
@@ -201,7 +201,7 @@ export const SegmentFooterTabAiAlternatives = ({
     const requestAlternatives = ({text}) => {
       if (requestingParams.current) return
 
-      selectedTextRef.current = DraftMatecatUtils.excludeSomeTagsFromText(
+      selectedTextRef.current = SegmentStringUtils.excludeSomeTagsFromText(
         text,
         ['g', 'bx', 'ex', 'x'],
       )
@@ -250,13 +250,13 @@ export const SegmentFooterTabAiAlternatives = ({
 
         const enrichedAlternatives = enrichAlternatives({
           targetLanguage: config.target_code,
-          originalSentence: DraftMatecatUtils.excludeSomeTagsFromText(
+          originalSentence: SegmentStringUtils.excludeSomeTagsFromText(
             segment.translation,
             ['g', 'bx', 'ex', 'x'],
           ),
           alternatives: data.message.map((alternative) => ({
             ...alternative,
-            alternative: DraftMatecatUtils.excludeSomeTagsFromText(
+            alternative: SegmentStringUtils.excludeSomeTagsFromText(
               alternative.alternative,
               ['g', 'bx', 'ex', 'x'],
             ),
@@ -266,7 +266,7 @@ export const SegmentFooterTabAiAlternatives = ({
         setAlternatives(
           enrichedAlternatives.map(({context, highlighted}, index) => ({
             ...(index === 0 && {
-              selectedText: DraftMatecatUtils.transformTagsToHtml(
+              selectedText: SegmentStringUtils.transformTagsToHtml(
                 `“${selectedTextRef.current}”`,
                 config.isTargetRTL,
               ),

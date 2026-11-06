@@ -79,7 +79,7 @@ jest.mock('../components/segments/utils/translationMatches', () => ({
   },
 }))
 
-jest.mock('../components/segments/utils/DraftMatecatUtils', () => ({
+jest.mock('../components/segments/utils/DraftMatecatUtils/segmentStringUtils', () => ({
   __esModule: true,
   default: {
     removePlaceholdersForGlossary: jest.fn((t) => t),

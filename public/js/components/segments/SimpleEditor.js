@@ -1,8 +1,8 @@
 import React from 'react'
-import DraftMatecatUtils from './utils/DraftMatecatUtils'
+import SegmentStringUtils from './utils/DraftMatecatUtils/segmentStringUtils'
 
 const SimpleEditor = ({className = '', text, isRtl}) => {
-  let htmlText = DraftMatecatUtils.transformTagsToHtml(text, isRtl)
+  let htmlText = SegmentStringUtils.transformTagsToHtml(text, isRtl)
   return (
     <div
       data-testid="simple-editor-test"

@@ -106,7 +106,7 @@ jest.mock('../../utils/segmentUtils', () => ({
   checkCurrentSegmentTPEnabled: jest.fn(() => false),
 }))
 
-jest.mock('./utils/DraftMatecatUtils', () => ({
+jest.mock('./utils/DraftMatecatUtils/segmentStringUtils', () => ({
   removeTagsFromText: jest.fn((t) => t),
   transformTagsToHtml: jest.fn((t) => t),
 }))
