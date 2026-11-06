@@ -527,12 +527,17 @@ const Editarea = forwardRef(
       }
     })
 
-    const replaceWordAt = ({newWord, start, end}) => {
-      const startIndex = start
-      const endIndex = end
-      const selection = stateRef.current.editorState.getSelection().merge({
-        anchorOffset: startIndex,
-        focusOffset: endIndex,
+    const replaceWordAt = ({newWord, start, end, blockKey}) => {
+      const currentSelection = stateRef.current.editorState.getSelection()
+      // start/end are offsets inside the warning's block: target that block,
+      // not the one holding the caret
+      const key = blockKey ?? currentSelection.getAnchorKey()
+      const selection = currentSelection.merge({
+        anchorKey: key,
+        anchorOffset: start,
+        focusKey: key,
+        focusOffset: end,
+        isBackward: false,
       })
       const contentState = Modifier.replaceText(
         stateRef.current.editorState.getCurrentContent(),
