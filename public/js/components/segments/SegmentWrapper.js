@@ -45,7 +45,7 @@ const SegmentWrapper = ({isTarget}) => {
         segment={textToDisplay}
         isRtl={!!isRtl}
         marks={searchMarks}
-        lang={config.target_code}
+        lang={isTarget ? config.target_code : config.source_code}
       />
     </div>
   )

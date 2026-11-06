@@ -89,6 +89,18 @@ describe('SegmentWrapper on an opened segment', () => {
 })
 
 describe('SegmentWrapper on a closed segment', () => {
+  test('renders the read-only source in the source language', () => {
+    const {container} = renderWrapper(makeSegment())
+
+    const wrapper = container.querySelector('#segment-42-source')
+    expect(wrapper).not.toBeNull()
+    expect(wrapper.className).toBe('source item')
+
+    const text = screen.getByText('source text')
+    expect(text).toHaveAttribute('lang', 'en-US')
+    expect(text).not.toHaveClass('targetarea')
+  })
+
   test('renders the read-only target in the target language', () => {
     const {container} = renderWrapper(makeSegment(), {isTarget: true})
 
