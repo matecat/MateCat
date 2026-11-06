@@ -14,7 +14,6 @@ import {
   hasDataOriginalTags,
   removePlaceholdersForGlossary,
   removeTagsFromText,
-  transformTagsToHtml,
   transformTagsToText,
 } from './tagUtils'
 import {getCharactersCounter} from './textUtils'
@@ -29,7 +28,6 @@ const SegmentStringUtils = {
   hasDataOriginalTags,
   removePlaceholdersForGlossary,
   removeTagsFromText,
-  transformTagsToHtml,
   transformTagsToText,
 }
 

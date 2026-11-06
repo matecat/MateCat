@@ -88,6 +88,8 @@ const numberedTagToHtml = (isRtl, {index, role}, tagText) => {
 const escapeAngleBrackets = (text) =>
   text.replace(/</g, '&lt').replace(/>/g, '&gt')
 
+// No production caller: segments are shown with SegmentView. Kept as the
+// reference SegmentView.parity.test.js holds that component to.
 export const transformTagsToHtml = (text, isRtl = 0) => {
   isRtl = !!isRtl
   if (text) {

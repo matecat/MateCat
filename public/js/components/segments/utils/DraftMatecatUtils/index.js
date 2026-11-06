@@ -35,7 +35,6 @@ import prepareTextForLexiqa from './prepareTextForLexiqa'
 import getSelectedTextWithoutEntities from './getSelectedTextWithoutEntities'
 import replaceMultipleText from './replaceMultipleText'
 import {
-  transformTagsToHtml,
   transformTagsToText,
   decodeHtmlEntities,
   encodeHtmlEntities,
@@ -100,7 +99,6 @@ const DraftMatecatUtils = {
   getCharactersCounter,
   getSelectedTextWithoutEntities,
   replaceMultipleText,
-  transformTagsToHtml,
   transformTagsToText,
   decodeHtmlEntities,
   encodeHtmlEntities,
