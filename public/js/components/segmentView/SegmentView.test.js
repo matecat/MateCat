@@ -78,4 +78,48 @@ describe('SegmentView', () => {
       expect(screen.getByText('new')).toHaveClass('added')
     })
   })
+
+  describe('marks', () => {
+    test('wraps the marked text in a mark with its class', () => {
+      render(
+        <SegmentView
+          segment="find &amp; replace"
+          marks={[{start: 5, end: 6, className: 'searchMarker'}]}
+        />,
+      )
+      expect(screen.getByText('&', {selector: 'mark'})).toHaveClass(
+        'searchMarker',
+      )
+    })
+
+    test('never puts a mark inside a tag chip', () => {
+      render(
+        <SegmentView
+          segment={`ab${ph('cd')}ef`}
+          marks={[{start: 3, end: 5, className: 'm'}]}
+        />,
+      )
+      expect(screen.getByText('cd')).toHaveClass('tag')
+      expect(screen.getByText('ef', {selector: 'mark'})).toBeInTheDocument()
+    })
+
+    test('ignores marks when showing a diff', () => {
+      render(
+        <SegmentView
+          segment="new"
+          compareTo="old"
+          marks={[{start: 0, end: 3, className: 'm'}]}
+        />,
+      )
+      expect(
+        screen.queryByText(/.*/, {selector: 'mark'}),
+      ).not.toBeInTheDocument()
+    })
+  })
+
+  test('renders the root element asked for, with the extra props', () => {
+    render(<SegmentView as="p" lang="it" data-testid="root" segment="x" />)
+    expect(screen.getByTestId('root')).toHaveAttribute('lang', 'it')
+    expect(screen.getByText('x', {selector: 'p'})).toBeInTheDocument()
+  })
 })

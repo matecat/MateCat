@@ -1,5 +1,13 @@
 import {Base64} from 'js-base64'
-import {diffTokens, tokenize, visibleText} from './segmentModel'
+import {
+  OPAQUE_TAG,
+  applyMarks,
+  diffTokens,
+  markableText,
+  marksFromDelimiters,
+  tokenize,
+  visibleText,
+} from './segmentModel'
 import {
   initTagSignature,
   setTagSignatureMiddleware,
@@ -172,5 +180,85 @@ describe('diffTokens', () => {
     )
     expect(result.map(({op}) => op)).toEqual(['delete', 'insert'])
     expect(result[0].tokens).toEqual([{type: 'text', text: ''}])
+  })
+})
+
+describe('markableText', () => {
+  test('decodes the text and stands each tag for one opaque character', () => {
+    expect(
+      markableText(`a &amp; <g id="1">b</g>${ph('x-html', '<br>', 'p')}`),
+    ).toBe(`a & ${OPAQUE_TAG}b${OPAQUE_TAG}${OPAQUE_TAG}`)
+  })
+
+  test('stands whitespace chips for the character they show', () => {
+    expect(markableText('a##$_A0$##b##$_09$##c')).toBe('a\u00A0b\tc')
+    showWhitespace(true)
+    expect(markableText('a b')).toBe('a b')
+  })
+})
+
+describe('applyMarks', () => {
+  const marked = (segment, marks) =>
+    applyMarks(tokenize(segment), marks).map((item) =>
+      item.type === 'mark'
+        ? {mark: item.className, text: visibleTextOf(item.tokens)}
+        : visibleTextOf([item]),
+    )
+  const visibleTextOf = (tokens) =>
+    tokens.map((t) => (t.type === 'text' ? t.text : `[${t.label}]`)).join('')
+
+  test('splits text at the mark edges', () => {
+    expect(marked('foo bar baz', [{start: 4, end: 7, className: 'm'}])).toEqual(
+      ['foo ', {mark: 'm', text: 'bar'}, ' baz'],
+    )
+  })
+
+  test('wraps a tag inside a mark whole, with the text around it', () => {
+    showWhitespace(true)
+    const items = marked('foo bar', [{start: 0, end: 7, className: 'm'}])
+    expect(items).toHaveLength(1)
+    expect(items[0].mark).toBe('m')
+    expect(items[0].text).toMatch(/^foo\[.*\]bar$/)
+  })
+
+  test('counts a tag as one character for the offsets that follow it', () => {
+    expect(
+      marked('<x id="1"/>ab<x id="2"/>cd', [
+        {start: 4, end: 5, className: 'm'},
+      ]),
+    ).toEqual(['[1]', 'ab', '[2]', {mark: 'm', text: 'c'}, 'd'])
+  })
+
+  test('keeps two adjacent marks apart and ignores empty ones', () => {
+    expect(
+      marked('abcd', [
+        {start: 2, end: 4, className: 'b'},
+        {start: 1, end: 1, className: 'empty'},
+        {start: 0, end: 2, className: 'a'},
+      ]),
+    ).toEqual([
+      {mark: 'a', text: 'ab'},
+      {mark: 'b', text: 'cd'},
+    ])
+  })
+})
+
+describe('marksFromDelimiters', () => {
+  test('turns delimited parts into marks on the stripped segment', () => {
+    const {segment, marks} = marksFromDelimiters(
+      'the #{cat}# &amp; <x id="1"/>#{dog}#',
+      '#{',
+      '}#',
+    )
+    expect(segment).toBe('the cat &amp; <x id="1"/>dog')
+    const text = markableText(segment)
+    expect(marks.map(({start, end}) => text.slice(start, end))).toEqual([
+      'cat',
+      'dog',
+    ])
+  })
+
+  test('marks nothing for an unpaired delimiter', () => {
+    expect(marksFromDelimiters('a }# b #{ c', '#{', '}#').marks).toEqual([])
   })
 })

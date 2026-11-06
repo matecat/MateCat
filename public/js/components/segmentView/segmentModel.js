@@ -301,6 +301,120 @@ export const tokenize = (segment, {isRtl = false} = {}) => {
 export const visibleText = (segment, options) =>
   flattenText(tokenize(segment, options))
 
+/**
+ * Stands for a tag in `markableText`: never part of a word nor of a search
+ * term, so a match cannot run across a tag chip.
+ */
+export const OPAQUE_TAG = '￼'
+
+// Whitespace chips stand for the character they show, so a mark can run
+// across them as it runs across the character.
+const markableChar = (token) =>
+  token.name === 'space'
+    ? token.raw
+    : (tagSignatures[token.name]?.unicodeChar ?? OPAQUE_TAG)
+
+const tokensMarkableText = (tokens) =>
+  tokens
+    .map((token) => (token.type === 'text' ? token.text : markableChar(token)))
+    .join('')
+
+/**
+ * The text that `marks` offsets refer to: the decoded text of the segment,
+ * with each tag as one character. Whitespace chips (space, nbsp, tab, line
+ * breaks) are the character they stand for, every other tag is `OPAQUE_TAG`.
+ * Tag labels are not part of it, so a mark never lands inside a chip.
+ */
+export const markableText = (segment, options) =>
+  tokensMarkableText(tokenize(segment, options))
+
+/**
+ * Groups the tokens covered by `marks` ({start, end, className}, offsets in
+ * `markableText`). Text is split at mark edges; a tag inside a mark is
+ * wrapped whole. Empty and overlapped parts of marks are dropped.
+ * @returns {Array} tokens, and {type:'mark', className, tokens} groups
+ */
+export const applyMarks = (tokens, marks) => {
+  const ranges = marks
+    .filter(({start, end}) => end > start)
+    .sort((a, b) => a.start - b.start)
+  const out = []
+  let group = null
+  let groupRange = null
+  let r = 0
+  const rangeAt = (at) => {
+    while (ranges[r] && ranges[r].end <= at) r++
+    return ranges[r]
+  }
+  const emit = (token, range) => {
+    if (!range) {
+      group = null
+      out.push(token)
+      return
+    }
+    if (!group || groupRange !== range) {
+      group = {type: 'mark', className: range.className, tokens: []}
+      groupRange = range
+      out.push(group)
+    }
+    group.tokens.push(token)
+  }
+  let pos = 0
+  tokens.forEach((token) => {
+    if (token.type !== 'text') {
+      const range = rangeAt(pos)
+      emit(token, range && range.start <= pos ? range : null)
+      pos++
+      return
+    }
+    const {text} = token
+    let i = 0
+    while (i < text.length) {
+      const range = rangeAt(pos + i)
+      const inside = range && range.start <= pos + i
+      const end = inside
+        ? Math.min(text.length, range.end - pos)
+        : range
+          ? Math.min(text.length, range.start - pos)
+          : text.length
+      emit({type: 'text', text: text.slice(i, end)}, inside ? range : null)
+      i = end
+    }
+    pos += text.length
+  })
+  return out
+}
+
+const OPEN_DELIMITER = '﷐'
+const CLOSE_DELIMITER = '﷑'
+
+/**
+ * Turns the parts of `segment` wrapped in `open`…`close` (e.g. `#{`…`}#`)
+ * into marks. Returns the segment without the delimiters and the marks on
+ * it; a delimiter that has no pair, or sits inside a tag, marks nothing.
+ * @returns {{segment: string, marks: Array<{start:number, end:number}>}}
+ */
+export const marksFromDelimiters = (segment, open, close, options) => {
+  if (!segment) return {segment, marks: []}
+  const strip = (replacement) =>
+    segment.split(open).join(replacement[0]).split(close).join(replacement[1])
+  const text = markableText(strip([OPEN_DELIMITER, CLOSE_DELIMITER]), options)
+  const marks = []
+  let removed = 0
+  let start = null
+  for (let i = 0; i < text.length; i++) {
+    if (text[i] === OPEN_DELIMITER) {
+      start = i - removed
+      removed++
+    } else if (text[i] === CLOSE_DELIMITER) {
+      if (start !== null) marks.push({start, end: i - removed})
+      start = null
+      removed++
+    }
+  }
+  return {segment: strip(['', '']), marks}
+}
+
 const tagKey = (token) =>
   JSON.stringify([
     token.className,

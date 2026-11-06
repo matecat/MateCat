@@ -1,6 +1,12 @@
 import React, {memo, useMemo} from 'react'
 import PropTypes from 'prop-types'
-import {DIFF_DELETE, DIFF_INSERT, diffTokens, tokenize} from './segmentModel'
+import {
+  DIFF_DELETE,
+  DIFF_INSERT,
+  applyMarks,
+  diffTokens,
+  tokenize,
+} from './segmentModel'
 
 const DIFF_CLASS = {[DIFF_DELETE]: 'deleted', [DIFF_INSERT]: 'added'}
 
@@ -8,6 +14,13 @@ const renderTokens = (tokens) =>
   tokens.map((token, i) => {
     if (token.type === 'text') {
       return <React.Fragment key={i}>{token.text}</React.Fragment>
+    }
+    if (token.type === 'mark') {
+      return (
+        <mark key={i} className={token.className}>
+          {renderTokens(token.tokens)}
+        </mark>
+      )
     }
     const content = token.children ? renderTokens(token.children) : token.label
     if (token.index !== undefined && token.index !== null) {
@@ -29,13 +42,21 @@ const renderTokens = (tokens) =>
  * Read-only view of a segment string: text plus tag chips, with the markup
  * and classes of the cattool tags. With `compareTo`, shows the diff from
  * `compareTo` (old) to `segment` (new), removed parts in `span.deleted` and
- * added parts in `span.added`.
+ * added parts in `span.added`. Without it, `marks` wraps ranges of the text
+ * in `mark` elements. Other props go to the root element.
  */
-const SegmentView = ({segment, isRtl = false, compareTo, className}) => {
+const SegmentView = ({
+  segment,
+  isRtl = false,
+  compareTo,
+  marks,
+  as: Root = 'span',
+  ...rootProps
+}) => {
   const content = useMemo(() => {
     const tokens = tokenize(segment, {isRtl})
     if (compareTo === undefined || compareTo === null) {
-      return renderTokens(tokens)
+      return renderTokens(marks?.length ? applyMarks(tokens, marks) : tokens)
     }
     return diffTokens(tokenize(compareTo, {isRtl}), tokens).map(
       ({op, tokens: chunk}, i) => {
@@ -49,15 +70,23 @@ const SegmentView = ({segment, isRtl = false, compareTo, className}) => {
         )
       },
     )
-  }, [segment, isRtl, compareTo])
+  }, [segment, isRtl, compareTo, marks])
 
-  return <span className={className}>{content}</span>
+  return <Root {...rootProps}>{content}</Root>
 }
 
 SegmentView.propTypes = {
   segment: PropTypes.string,
   isRtl: PropTypes.bool,
   compareTo: PropTypes.string,
+  marks: PropTypes.arrayOf(
+    PropTypes.shape({
+      start: PropTypes.number.isRequired,
+      end: PropTypes.number.isRequired,
+      className: PropTypes.string,
+    }),
+  ),
+  as: PropTypes.elementType,
   className: PropTypes.string,
 }
 

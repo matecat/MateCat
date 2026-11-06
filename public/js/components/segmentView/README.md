@@ -11,6 +11,12 @@ import SegmentView from '../segmentView/SegmentView'
 
 // diff from an older version to this one
 <SegmentView segment={revision} compareTo={translation} />
+
+// highlight ranges of the text (search hits, a concordance term)
+<SegmentView segment={source} marks={[{start: 0, end: 5, className: 'searchMarker'}]} />
+
+// any other prop goes to the root element, `as` picks it
+<SegmentView as="div" className="targetarea" lang="it-IT" segment={translation} />
 ```
 
 ## Props
@@ -20,7 +26,9 @@ import SegmentView from '../segmentView/SegmentView'
 | `segment`   | string | —       | The segment to show                                                                           |
 | `isRtl`     | bool   | `false` | Right-to-left language: swaps the open/close tag styles, as the cattool does                  |
 | `compareTo` | string | —       | Older text to diff from. Removed parts are wrapped in `span.deleted`, added parts in `span.added` |
-| `className` | string | —       | Class of the root `span`                                                                      |
+| `marks`     | array  | —       | `{start, end, className}` ranges of `markableText(segment)`, each wrapped in a `mark`. Ignored with `compareTo` |
+| `as`        | elementType | `'span'` | Root element                                                                         |
+| …           |        |         | Any other prop (`className`, `id`, `lang`, `data-*`…) goes to the root element                |
 
 ## Input format
 
@@ -41,6 +49,19 @@ can never become HTML. The diff works on tokens, so a tag is never split.
 
 `segmentModel.js` exposes the pure functions behind it: `tokenize(segment,
 {isRtl})`, `visibleText(segment)` and `diffTokens(oldTokens, newTokens)`.
+
+## Marks
+
+Mark offsets refer to `markableText(segment, {isRtl})`: the decoded text,
+with every tag as one character. Whitespace chips (space, nbsp, tab, line
+breaks) stand for the character they show, every other tag for `OPAQUE_TAG`
+(U+FFFC). Run a search on that string and its match offsets are marks: a hit
+can never land inside a tag chip nor run across one, and one that runs across
+a whitespace chip wraps it. Text is split at mark edges; a tag inside a mark is
+wrapped whole.
+
+`marksFromDelimiters(segment, open, close, {isRtl})` turns delimited parts
+(the concordance service's `#{term}#`) into `{segment, marks}`.
 
 ## Rules
 
