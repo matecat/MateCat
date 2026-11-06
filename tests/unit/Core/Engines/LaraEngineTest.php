@@ -420,23 +420,18 @@ class LaraEngineTest extends AbstractTest
      * @throws Exception
      */
     #[Test]
-    public function getErrorFromLaraReturnsFallbackErrorResponse(): void
+    public function getErrorFromLaraFallsBackToGoogleTranslate(): void
     {
         $httpClient = new TestHttpClient();
         $client = $this->createStub(LaraClient::class);
         $client->method('getHttpClient')->willReturn($httpClient);
         $client->method('translate')->willThrowException(new LaraException('failure', 500));
         $this->engine->setMockClient($client);
-        $fallback = $this->createMock(MMT::class);
-        $fallbackResponse = new GetMemoryResponse([
+        $this->engine->googleFallbackResponse = new GetMemoryResponse([
             'responseStatus' => 500,
             'responseDetails' => 'fallback failed',
             'matches' => [],
         ]);
-        $fallback->expects(self::once())
-            ->method('get')
-            ->willReturn($fallbackResponse);
-        $this->engine->setMmtFallback($fallback);
         $response = $this->engine->get([
             'segment' => 'source segment',
             'source' => 'en-US',
@@ -447,6 +442,10 @@ class LaraEngineTest extends AbstractTest
             'context_list_after' => [],
         ]);
         self::assertSame(500, $response->responseStatus);
+        self::assertCount(1, $this->engine->googleFallbackConfigs);
+        self::assertSame('source segment', $this->engine->googleFallbackConfigs[0]['segment']);
+        self::assertSame('en-US', $this->engine->googleFallbackConfigs[0]['source']);
+        self::assertSame('it-IT', $this->engine->googleFallbackConfigs[0]['target']);
     }
     /**
      * @throws LaraException
@@ -460,9 +459,6 @@ class LaraEngineTest extends AbstractTest
         $client->method('getHttpClient')->willReturn($httpClient);
         $client->method('translate')->willThrowException(new LaraException("\xB1\x31", 429));
         $this->engine->setMockClient($client);
-        $fallback = $this->createMock(MMT::class);
-        $fallback->expects(self::never())->method('get');
-        $this->engine->setMmtFallback($fallback);
         $response = $this->engine->get([
             'segment' => 'source segment',
             'source' => 'en-US',
@@ -475,6 +471,7 @@ class LaraEngineTest extends AbstractTest
         self::assertInstanceOf(GetMemoryResponse::class, $response);
         self::assertSame(200, $response->responseStatus);
         self::assertSame([], $response->matches);
+        self::assertSame([], $this->engine->googleFallbackConfigs);
     }
     /**
      * @throws LaraException
@@ -526,16 +523,20 @@ class LaraEngineTest extends AbstractTest
         $client->method('getHttpClient')->willReturn($httpClient);
         $client->method('translate')->willThrowException(new LaraException('auth failed', 401));
         $this->engine->setMockClient($client);
-        $this->expectException(LaraException::class);
-        $this->expectExceptionMessage('Lara credentials not valid');
-        $this->engine->get([
-            'segment' => 'source segment',
-            'source' => 'en-US',
-            'target' => 'it-IT',
-            'keys' => ['k1'],
-            'context_list_before' => [],
-            'context_list_after' => [],
-        ]);
+        try {
+            $this->engine->get([
+                'segment' => 'source segment',
+                'source' => 'en-US',
+                'target' => 'it-IT',
+                'keys' => ['k1'],
+                'context_list_before' => [],
+                'context_list_after' => [],
+            ]);
+            self::fail('A 401 from Lara must be re-thrown');
+        } catch (LaraException $exception) {
+            self::assertStringContainsString('Lara credentials not valid', $exception->getMessage());
+        }
+        self::assertSame([], $this->engine->googleFallbackConfigs);
     }
     #[Test]
     public function reMapKeyListPrefixesKeysWithExtMy(): void
@@ -1199,11 +1200,18 @@ class TestLara extends Lara
     {
         $this->mockClient = $mockClient;
     }
-    public function setMmtFallback(MMT $fallback): void
+
+    /** @var list<array<string, mixed>> */
+    public array $googleFallbackConfigs = [];
+    public ?GetMemoryResponse $googleFallbackResponse = null;
+
+    protected function GoogleTranslateFallback(array $_config): GetMemoryResponse
     {
-        $prop = new ReflectionProperty(Lara::class, 'mmt_GET_Fallback');
-        $prop->setValue($this, $fallback);
+        $this->googleFallbackConfigs[] = $_config;
+
+        return $this->googleFallbackResponse ?? new GetMemoryResponse(null);
     }
+
     public function setMmtPrivateLicense(MMT $private): void
     {
         $prop = new ReflectionProperty(Lara::class, 'mmt_SET_PrivateLicense');

@@ -71,11 +71,6 @@ class Lara extends AbstractEngine
     private ?LaraClient $clientLoaded = null;
 
     /**
-     * @var MMTEngine
-     */
-    private MMTEngine $mmt_GET_Fallback;
-
-    /**
      * @var ?MMTEngine
      */
     private ?MMTEngine $mmt_SET_PrivateLicense = null;
@@ -140,17 +135,6 @@ class Lara extends AbstractEngine
 
         $extraParams = $this->getEngineRecord()->getExtraParamsAsArray();
         $credentials = new AccessKey($extraParams['Lara-AccessKeyId'], $extraParams['Lara-AccessKeySecret']);
-
-        $mmtStruct = MMTStruct::getStruct();
-        $mmtStruct->type = EngineConstants::MT;
-        $mmtStruct->extra_parameters = [
-            'MMT-License' => $extraParams['MMT-License'] ?: AppConfig::$DEFAULT_MMT_KEY,
-        ];
-        /**
-         * @var MMTEngine $engine
-         */
-        $engine = EnginesFactory::createTempInstance($mmtStruct, $this->database);
-        $this->mmt_GET_Fallback = $engine;
 
         if (!empty($extraParams['MMT-License'])) {
             $mmtStruct = MMTStruct::getStruct();
@@ -422,8 +406,7 @@ class Lara extends AbstractEngine
                     $this->logger->error(["Lara API Exception.", $t->getMessage(), $t->getCode(), $t->getTrace()]);
                 }
 
-                // mmt fallback
-                return $this->mmt_GET_Fallback->get($_config);
+                return $this->GoogleTranslateFallback($_config);
             }
         } else {
             $reasoning = !is_bool($_config['reasoning']) || $_config['reasoning'];

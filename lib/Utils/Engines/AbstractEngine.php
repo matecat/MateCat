@@ -430,21 +430,7 @@ abstract class AbstractEngine implements EngineInterface
     protected function GoogleTranslateFallback(array $_config): GetMemoryResponse
     {
         try {
-            /**
-             * Create a record of type GoogleTranslate
-             */
-            $newEngineStruct = GoogleTranslateStruct::getStruct();
-
-            $newEngineStruct->name = "Generic";
-             $newEngineStruct->uid = 0;
-             $newEngineStruct->type = EngineConstants::MT;
-             if (!is_array($newEngineStruct->extra_parameters)) {
-                 $newEngineStruct->extra_parameters = [];
-             }
-             $newEngineStruct->extra_parameters['client_secret'] = $_config['secret_key'] ?? null;
-             $newEngineStruct->others = [];
-
-            $gtEngine = EnginesFactory::createTempInstance($newEngineStruct, $this->database);
+            $gtEngine = EnginesFactory::createTempInstance($this->googleTranslateFallbackStruct($_config), $this->database);
 
             /** @var GoogleTranslate $gtEngine */
             return $gtEngine->get($_config);
@@ -452,6 +438,53 @@ abstract class AbstractEngine implements EngineInterface
             $this->logger->error($e);
             return new GetMemoryResponse(null);
         }
+    }
+
+    /**
+     * Builds the temporary Google Translate engine record the fallback translates with.
+     * The key is the one in the config, or the one in inc/mmt_fallback_key.ini when the config has none.
+     *
+     * Example: $this->googleTranslateFallbackStruct(['segment' => 'Hello'])->extra_parameters['client_secret']
+     * is the key read from the ini file.
+     *
+     * @param array<string, mixed> $_config
+     */
+    protected function googleTranslateFallbackStruct(array $_config): GoogleTranslateStruct
+    {
+        $newEngineStruct = GoogleTranslateStruct::getStruct();
+
+        $newEngineStruct->name = "Generic";
+        $newEngineStruct->uid = 0;
+        $newEngineStruct->type = EngineConstants::MT;
+        if (!is_array($newEngineStruct->extra_parameters)) {
+            $newEngineStruct->extra_parameters = [];
+        }
+        $newEngineStruct->extra_parameters['client_secret'] = !empty($_config['secret_key'])
+            ? $_config['secret_key']
+            : self::getG2FallbackSecretKey();
+        $newEngineStruct->others = [];
+
+        return $newEngineStruct;
+    }
+
+    /**
+     * Reads the Google Translate key of the fallback from inc/mmt_fallback_key.ini.
+     *
+     * Example: a file with `secret_key = "abc"` gives "abc"; no file gives null.
+     */
+    public static function getG2FallbackSecretKey(): ?string
+    {
+        $configFilePath = realpath(AppConfig::$ROOT . '/inc/mmt_fallback_key.ini');
+        if ($configFilePath === false || !file_exists($configFilePath)) {
+            return null;
+        }
+
+        $secret_key = parse_ini_file($configFilePath);
+        if ($secret_key === false) {
+            return null;
+        }
+
+        return $secret_key['secret_key'] ?? null;
     }
 
     /**
