@@ -13,6 +13,7 @@ use Utils\Engines\EngineInterface;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\Lara;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
+use Utils\Engines\Results\MyMemory\Matches;
 
 /**
  * Scores the first MT match with Lara quality estimation, paid by the engine owner's Lara engine.
@@ -45,6 +46,33 @@ class LaraQualityEstimator
      */
     public function scoreIfRequested(EngineInterface $mtEngine, GetMemoryResponse $response, array $engineConfig): void
     {
+        $match = $this->matchToScore($mtEngine, $response, $engineConfig);
+        if ($match === null) {
+            return;
+        }
+
+        $result = $this->estimate($mtEngine, $match, $engineConfig);
+        if ($result === null) {
+            return;
+        }
+
+        $match->score = $result->getScore();
+
+        $this->logger->debug('MT quality estimation score added', [
+            'score' => $match->score,
+            'mt_qe_engine_id' => $engineConfig['mt_qe_engine_id'] ?? null,
+        ]);
+    }
+
+    /**
+     * Returns the match to score, or null when no score is wanted or there is nothing to score.
+     *
+     * Example: a 500 response, or an engine with its own score such as ModernMT, gives null.
+     *
+     * @param array<string, mixed> $engineConfig
+     */
+    private function matchToScore(EngineInterface $mtEngine, GetMemoryResponse $response, array $engineConfig): ?Matches
+    {
         $match = $response->matches[0] ?? null;
 
         if (empty($engineConfig['include_score'])
@@ -53,9 +81,22 @@ class LaraQualityEstimator
             || $match === null
             || $match->raw_translation === ''
         ) {
-            return;
+            return null;
         }
 
+        return $match;
+    }
+
+    /**
+     * Asks Lara to score the match. Returns null when no Lara engine is found or the call fails (both
+     * logged as a warning), and when Lara answers without a single score.
+     *
+     * Example: for "Hello" translated as "Ciao", Lara can answer a QualityEstimationResult with score 0.83.
+     *
+     * @param array<string, mixed> $engineConfig
+     */
+    private function estimate(EngineInterface $mtEngine, Matches $match, array $engineConfig): ?QualityEstimationResult
+    {
         $engineRecord = $mtEngine->getEngineRecord();
 
         try {
@@ -69,7 +110,7 @@ class LaraQualityEstimator
                     ['uid' => $engineRecord->uid, 'engine_id' => $engineRecord->id]
                 );
 
-                return;
+                return null;
             }
 
             $result = $laraEngine->getLaraClient()->qualityEstimation(
@@ -78,6 +119,8 @@ class LaraQualityEstimator
                 $engineConfig['segment'] ?? '',
                 $match->raw_translation
             );
+
+            return $result instanceof QualityEstimationResult ? $result : null;
         } catch (Throwable $exception) {
             // The translation is already paid for: a failed score must never lose it.
             $this->logger->warning(
@@ -90,19 +133,8 @@ class LaraQualityEstimator
                 ]
             );
 
-            return;
+            return null;
         }
-
-        if (!$result instanceof QualityEstimationResult) {
-            return;
-        }
-
-        $match->score = $result->getScore();
-
-        $this->logger->debug('MT quality estimation score added', [
-            'score' => $match->score,
-            'mt_qe_engine_id' => $engineConfig['mt_qe_engine_id'] ?? null,
-        ]);
     }
 
     /**
