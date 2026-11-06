@@ -710,33 +710,6 @@ class MMT extends AbstractEngine
     }
 
     /**
-     * @param string $source
-     * @param string $target
-     * @param string $sentence
-     * @param string $translation
-     * @param string $mt_qe_engine_id
-     *
-     * @return float|null
-     * @throws MMTServiceApiException
-     * @throws RuntimeException
-     */
-    public function getQualityEstimation(
-        string $source,
-        string $target,
-        string $sentence,
-        string $translation,
-        string $mt_qe_engine_id = '2'
-    ): ?float {
-        $client = $this->_getClient();
-        $qualityEstimation = $client->qualityEstimation($source, $target, $sentence, $translation, $mt_qe_engine_id);
-        if ($qualityEstimation === null || !isset($qualityEstimation['score'])) {
-            return null;
-        }
-
-        return $qualityEstimation['score'];
-    }
-
-    /**
      * ModernMT computes the quality estimation score itself inside its translate call.
      */
     public function hasBuiltInQualityEstimation(): bool

@@ -41,6 +41,7 @@ use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\TmKeyManagement\TmKeyManager;
 use Throwable;
 use TypeError;
+use Utils\Engines\Lara\LaraQualityEstimator;
 
 class TMAnalysisWorker extends AbstractWorker
 {
@@ -90,7 +91,11 @@ class TMAnalysisWorker extends AbstractWorker
             ),
             $this->logger
         );
-        $this->engineService = $engineService ?? new EngineService(new DefaultEngineResolver($this->database), $this->database);
+        $this->engineService = $engineService ?? new EngineService(
+            new DefaultEngineResolver($this->database),
+            $this->database,
+            new LaraQualityEstimator($this->database, $this->logger)
+        );
         $this->matchProcessor = $matchProcessor ?? new MatchProcessorService(new MatchSorter(), $this->database);
     }
 

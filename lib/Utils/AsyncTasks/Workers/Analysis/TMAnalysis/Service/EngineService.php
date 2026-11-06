@@ -10,6 +10,7 @@ use Model\FeaturesBase\Hook\Event\Filter\AnalysisBeforeMTGetContributionEvent;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use TypeError;
+use Utils\Engines\Lara\LaraQualityEstimator;
 use Utils\Logger\LoggerFactory;
 use Utils\TaskRunner\Commons\QueueElement;
 use Utils\TaskRunner\Exceptions\NotSupportedMTException;
@@ -19,11 +20,13 @@ class EngineService
 {
     private DefaultEngineResolver $engineResolver;
     private IDatabase $database;
+    private LaraQualityEstimator $qualityEstimator;
 
-    public function __construct(DefaultEngineResolver $engineResolver, IDatabase $database)
+    public function __construct(DefaultEngineResolver $engineResolver, IDatabase $database, LaraQualityEstimator $qualityEstimator)
     {
         $this->engineResolver = $engineResolver;
         $this->database = $database;
+        $this->qualityEstimator = $qualityEstimator;
     }
 
     /**
@@ -123,6 +126,7 @@ class EngineService
             $engineConfig = $analysisEvent->getConfig();
 
             $engineResponse = $mtEngine->get($engineConfig);
+            $this->qualityEstimator->scoreIfRequested($mtEngine, $engineResponse, $engineConfig);
 
             if ($engineResponse->responseStatus >= 400) {
                 return [];

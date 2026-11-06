@@ -111,14 +111,6 @@ class AbstractEngineTest extends AbstractTest
     }
 
     #[Test]
-    public function getQualityEstimationReturnsNull(): void
-    {
-        self::assertNull(
-            $this->engine->getQualityEstimation('en', 'it', 'hello', 'ciao')
-        );
-    }
-
-    #[Test]
     public function importMemoryIsNoOp(): void
     {
         $user = new UserStruct();

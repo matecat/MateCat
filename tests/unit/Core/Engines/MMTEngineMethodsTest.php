@@ -541,24 +541,6 @@ class MMTEngineMethodsTest extends AbstractTest
     }
 
     #[Test]
-    public function getQualityEstimationHandlesSuccessAndNullCases(): void
-    {
-        $client = $this->createMock(MMTServiceApi::class);
-        $client->expects(self::exactly(3))
-            ->method('qualityEstimation')
-            ->willReturnOnConsecutiveCalls(
-                ['score' => 0.77],
-                null,
-                ['foo' => 'bar']
-            );
-
-        $engine = $this->createEngineWithClient($client);
-        self::assertSame(0.77, $engine->getQualityEstimation('en-US', 'it-IT', 's', 't'));
-        self::assertNull($engine->getQualityEstimation('en-US', 'it-IT', 's', 't'));
-        self::assertNull($engine->getQualityEstimation('en-US', 'it-IT', 's', 't'));
-    }
-
-    #[Test]
     public function getAvailableLanguagesDelegatesToClient(): void
     {
         $client = $this->createMock(MMTServiceApi::class);
