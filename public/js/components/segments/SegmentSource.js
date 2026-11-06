@@ -19,7 +19,7 @@ import * as DraftMatecatConstants from './utils/DraftMatecatUtils/editorConstant
 import SegmentConstants from '../../constants/SegmentConstants'
 import LexiqaUtils from '../../utils/lxq.main'
 import updateOffsetBasedOnEditorState from './utils/DraftMatecatUtils/updateOffsetBasedOnEditorState'
-import getFragmentFromSelection from './utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection'
+import {segmentClipboardHtml} from '../segmentView/segmentModel'
 import {tagSignatures} from './utils/DraftMatecatUtils/tagModel'
 import {SegmentContext} from './SegmentContext'
 import Assistant from '../../../img/icons/Assistant'
@@ -530,45 +530,24 @@ const SegmentSource = ({segment}) => {
     }
   }
 
-  const copyFragment = (e) => {
-    const internalClipboard = editorRef.current.getClipboard()
-    if (internalClipboard) {
-      e.preventDefault()
-      // Get plain text form internalClipboard fragment
-      const plainText = internalClipboard
-        .map((block) => block.getText())
-        .join('\n')
-        .replace(new RegExp(String.fromCharCode(parseInt('200B', 16)), 'g'), '')
-        .replace(/·/g, ' ')
+  // Copy and drag carry the raw segment slice, as a SegmentView copy does
+  // (segmentView/README.md, Copy), so a paste or drop in the target keeps
+  // the tags.
+  const writeSegmentSlice = (dataTransfer) => {
+    const slice = DraftMatecatUtils.getSegmentSlice(editorState)
+    if (!slice) return false
+    dataTransfer.clearData()
+    dataTransfer.setData('text/plain', slice.text)
+    dataTransfer.setData('text/html', segmentClipboardHtml(slice))
+    return true
+  }
 
-      const entitiesMap = DraftMatecatUtils.getEntitiesInFragment(
-        internalClipboard,
-        editorState,
-      )
-      const fragment = JSON.stringify({
-        orderedMap: internalClipboard,
-        entitiesMap: entitiesMap,
-      })
-      e.clipboardData.setData('text/plain', plainText)
-      SegmentActions.copyFragmentToClipboard(fragment, plainText)
-    }
+  const copyFragment = (e) => {
+    if (writeSegmentSlice(e.clipboardData)) e.preventDefault()
   }
 
   const dragFragment = (e) => {
-    let fragment = getFragmentFromSelection(editorState)
-    if (fragment) {
-      const entitiesMap = DraftMatecatUtils.getEntitiesInFragment(
-        fragment,
-        editorState,
-      )
-      fragment = JSON.stringify({
-        orderedMap: fragment,
-        entitiesMap: entitiesMap,
-      })
-      e.dataTransfer.clearData()
-      e.dataTransfer.setData('text/plain', fragment)
-      e.dataTransfer.setData('text/html', fragment)
-    }
+    writeSegmentSlice(e.dataTransfer)
   }
 
   const onChange = (editorState) => {

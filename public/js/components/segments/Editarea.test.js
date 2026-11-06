@@ -30,10 +30,6 @@ jest.mock('../../stores/SegmentStore', () => ({
   default: {
     addListener: jest.fn(),
     removeListener: jest.fn(),
-    getFragmentFromClipboard: jest.fn(() => ({
-      fragment: null,
-      plainText: '',
-    })),
   },
 }))
 
@@ -45,7 +41,6 @@ jest.mock('../../actions/SegmentActions', () => ({
     focusTags: jest.fn(),
     highlightTags: jest.fn(),
     editAreaChanged: jest.fn(),
-    copyFragmentToClipboard: jest.fn(),
     getSegmentsQa: jest.fn(),
   },
 }))
@@ -108,6 +103,8 @@ import ContextPreviewChannel from '../../utils/contextPreviewChannel'
 import SegmentUtils from '../../utils/segmentUtils'
 import {SegmentContext} from './SegmentContext'
 import {setTagSignatureMiddleware} from './utils/DraftMatecatUtils/tagModel'
+import DraftMatecatUtils from './utils/DraftMatecatUtils'
+import {readSegmentClipboard} from '../segmentView/segmentModel'
 import SegmentConstants from '../../constants/SegmentConstants'
 import EditAreaConstants from '../../constants/EditAreaConstants'
 
@@ -221,10 +218,6 @@ beforeEach(() => {
   })
   CatToolStore.getHaveKeysGlossary.mockReturnValue(false)
   SegmentUtils.checkCurrentSegmentTPEnabled.mockReturnValue(false)
-  SegmentStore.getFragmentFromClipboard.mockReturnValue({
-    fragment: null,
-    plainText: '',
-  })
   LexiqaUtils.getRanges.mockReturnValue([])
   jest.spyOn(console, 'log').mockImplementation(() => {})
 })
@@ -1046,6 +1039,48 @@ describe('the tag decorator sees the current segment', () => {
 // report the selection, so the format menu never appeared and the AI
 // alternatives button never activated. The whole suite passed regardless: the
 // old tests never fired a mouse-up at the editor.
+// jsdom gives Draft no real selection, so the slice of it is stubbed: what is
+// checked here is that copy, cut and drag all put it on the event the same way.
+describe('copy, cut and drag carry the raw segment slice', () => {
+  const slice = {raw: 'Ciao <x id="1"/>', text: 'Ciao 1x'}
+
+  const fakeDataTransfer = () => {
+    const data = {}
+    return {
+      data,
+      clearData: jest.fn(),
+      setData: jest.fn((type, value) => (data[type] = value)),
+    }
+  }
+
+  test.each([
+    ['copy', 'clipboardData'],
+    ['cut', 'clipboardData'],
+    ['dragStart', 'dataTransfer'],
+  ])('%s writes the slice and its plain text', (event, field) => {
+    jest.spyOn(DraftMatecatUtils, 'getSegmentSlice').mockReturnValue(slice)
+    const {container} = mountEditarea({translation: 'Ciao'})
+    const transfer = fakeDataTransfer()
+
+    fireEvent[event](editorNode(container), {[field]: transfer})
+
+    expect(transfer.data['text/plain']).toBe('Ciao 1x')
+    expect(readSegmentClipboard(transfer.data['text/html'])).toBe(
+      'Ciao <x id="1"/>',
+    )
+  })
+
+  test('a copy of nothing writes nothing', () => {
+    jest.spyOn(DraftMatecatUtils, 'getSegmentSlice').mockReturnValue(null)
+    const {container} = mountEditarea({translation: 'Ciao'})
+    const clipboardData = fakeDataTransfer()
+
+    fireEvent.copy(editorNode(container), {clipboardData})
+
+    expect(clipboardData.setData).not.toHaveBeenCalled()
+  })
+})
+
 describe('the format menu follows the selection', () => {
   test('mouse up reports whether anything is selected', () => {
     const {container, toggleFormatMenu} = mountEditarea({translation: 'ciao'})

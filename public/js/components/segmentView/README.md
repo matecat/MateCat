@@ -78,9 +78,11 @@ A copy (Ctrl/Cmd+C) of a selection that lies within one view writes:
 With `compareTo` only the new side (`segment`) is copied: removed parts are
 skipped. A selection that runs outside the view is left to the browser.
 
-This clipboard format is the contract between read-only views and editors:
-the Draft editor (`buildPastedEditorState`) reads it today, and any editor that
-replaces it must read the same format. `readSegmentClipboard(html)` decodes it
+This clipboard format is the one format of every copy, cut and drag in
+Matecat: the Draft editors write it too (`getSegmentSlice`, for the target and
+the source) and read it on paste (`buildPastedEditorState`) and drop
+(`resolveDrop`). Any editor that replaces them must write and read the same
+format. `readSegmentClipboard(html)` decodes it
 and validates it — the attribute can come from any page, so only markup that is
 exactly one of the segment's tags stays a tag, the rest becomes text.
 `sliceSegment(segment, start, end)` and `segmentClipboardHtml(slice)` write it.

@@ -1,166 +1,162 @@
-import {EditorState, Modifier} from 'draft-js'
+import {EditorState, SelectionState} from 'draft-js'
 import resolveDrop from './resolveDrop'
-import DraftMatecatUtils from './index'
+import getSegmentSlice from './getSegmentSlice'
+import encodeContent from './encodeContent'
+import decodeSegment from './decodeSegment'
+import {segmentClipboardHtml} from '../../../segmentView/segmentModel'
+import {initTagSignature, setTagSignatureMiddleware} from './tagModel'
 
-jest.mock('draft-js', () => ({
-  __esModule: true,
-  EditorState: {
-    forceSelection: jest.fn((state) => state),
-    push: jest.fn((state) => state),
-  },
-  Modifier: {
-    removeRange: jest.fn(() => 'content-without-drag'),
-    replaceWithFragment: jest.fn(() => 'content-with-fragment'),
-  },
-}))
+// Drops through the real Draft conversion. A drag carries the same raw
+// segment slice as a copy (see getSegmentSlice), from the source or from the
+// target itself.
 
-jest.mock('./index', () => ({
-  __esModule: true,
-  default: {
-    buildFragmentFromJson: jest.fn(() => 'fragment'),
-    duplicateFragment: jest.fn(() => 'duplicated'),
-    selectionIsEntity: jest.fn(() => ({entityKey: null})),
-  },
-}))
+beforeAll(() => initTagSignature({show_whitespace: 0}))
+afterAll(() => setTagSignatureMiddleware('space', () => undefined))
 
-jest.mock(
-  './DraftSource/src/component/handlers/edit/getFragmentFromSelection',
-  () => ({__esModule: true, default: jest.fn(() => 'raw-fragment')}),
-)
+const editorWith = (segment) =>
+  encodeContent(EditorState.createEmpty(), segment).editorState
 
-/** A selection that records what it was merged into. */
-const sel = (anchor, focus, blockKey = 'a') => ({
-  anchorOffset: anchor,
-  focusOffset: focus,
-  isBackward: false,
-  getAnchorKey: () => blockKey,
-  merge: jest.fn((patch) => ({...sel(patch.anchorOffset, patch.focusOffset, blockKey), merged: patch})),
-})
+const firstBlock = (editorState) =>
+  editorState.getCurrentContent().getFirstBlock()
 
-const editorWith = (dragSelection) => ({
-  getSelection: () => dragSelection,
-  getCurrentContent: () => 'content',
-})
-
-const run = (over = {}) =>
-  resolveDrop({
-    editorState: editorWith(over.drag || sel(0, 5)),
-    selection: over.drop || sel(20, 20),
-    text: 'text' in over ? over.text : null,
-    draggingFromEditArea: over.draggingFromEditArea !== false,
+const range = (editorState, start, end, {backward = false} = {}) =>
+  SelectionState.createEmpty(firstBlock(editorState).getKey()).merge({
+    anchorOffset: backward ? end : start,
+    focusOffset: backward ? start : end,
+    isBackward: backward,
   })
 
-beforeEach(() => {
-  jest.clearAllMocks()
-  DraftMatecatUtils.selectionIsEntity.mockReturnValue({entityKey: null})
-})
+const select = (editorState, start, end, options) =>
+  EditorState.forceSelection(
+    editorState,
+    range(editorState, start, end, options),
+  )
 
-test('nothing may be dropped on an entity', () => {
-  DraftMatecatUtils.selectionIsEntity.mockReturnValue({entityKey: 'tag-1'})
+const tagRange = (editorState) => {
+  let found
+  firstBlock(editorState).findEntityRanges(
+    (character) => character.getEntity() !== null,
+    (start, end) => (found ??= {start, end}),
+  )
+  return found
+}
 
-  const result = run()
+const offsetOf = (editorState, text) =>
+  firstBlock(editorState).getText().indexOf(text)
 
-  expect(result).toEqual({outcome: 'handled'})
-  expect(Modifier.replaceWithFragment).not.toHaveBeenCalled()
-})
+const sliceHtml = (editorState) =>
+  segmentClipboardHtml(getSegmentSlice(editorState))
 
-describe('a drag from outside the editor', () => {
-  test('is duplicated in with its entities', () => {
-    const payload = JSON.stringify({orderedMap: {b: 1}, entitiesMap: {0: 'e'}})
+const decoded = (editorState) => decodeSegment(editorState).decodedSegment
 
-    const result = run({text: payload, draggingFromEditArea: false})
+describe('a drag from the source', () => {
+  const source = () => {
+    const editorState = editorWith('ab<x id="1"/>cd')
+    return select(editorState, 0, tagRange(editorState).end)
+  }
 
-    expect(result.outcome).toBe('handled')
-    expect(result.editorState).toBe('duplicated')
-    expect(DraftMatecatUtils.duplicateFragment).toHaveBeenCalledWith(
-      'fragment',
-      expect.anything(),
-      {0: 'e'},
-    )
+  test('is inserted at the drop point with its tags', () => {
+    const target = editorWith('hello world')
+    const at = offsetOf(target, ' world')
+
+    const {outcome, editorState} = resolveDrop({
+      editorState: target,
+      selection: range(target, at, at),
+      html: sliceHtml(source()),
+      draggingFromEditArea: false,
+    })
+
+    expect(outcome).toBe('handled')
+    expect(decoded(editorState)).toBe('helloab<x id="1"/> world')
   })
 
-  test('is declined when the payload is not JSON', () => {
-    const result = run({text: '{not json', draggingFromEditArea: false})
+  test('is undone back to the target before the drop', () => {
+    const target = editorWith('hello')
+
+    const {editorState} = resolveDrop({
+      editorState: target,
+      selection: range(target, 5, 5),
+      html: sliceHtml(source()),
+      draggingFromEditArea: false,
+    })
+
+    expect(
+      EditorState.undo(editorState).getCurrentContent().getPlainText(),
+    ).toBe('hello')
+  })
+
+  test('is left to Draft when it carries no slice (text from another page)', () => {
+    const target = editorWith('hello')
+
+    const result = resolveDrop({
+      editorState: target,
+      selection: range(target, 5, 5),
+      html: '<b>bold</b>',
+      draggingFromEditArea: false,
+    })
 
     expect(result).toEqual({outcome: 'not-handled'})
   })
 })
 
-describe('a drag within the editor', () => {
-  test('cuts the dragged range out and puts the fragment at the drop point', () => {
-    const result = run({drag: sel(0, 5), drop: sel(20, 20)})
+test('nothing may be dropped onto a tag', () => {
+  const target = editorWith('ab<x id="1"/>cd')
+  const {start} = tagRange(target)
 
-    expect(Modifier.removeRange).toHaveBeenCalledWith(
-      'content',
-      expect.anything(),
-      'forward',
-    )
-    expect(Modifier.replaceWithFragment).toHaveBeenCalledWith(
-      'content-without-drag',
-      expect.anything(),
-      'fragment',
-    )
+  // Draft puts a drop on a chip at the offset of the tag entity
+  const result = resolveDrop({
+    editorState: target,
+    selection: range(target, start, start),
+    html: sliceHtml(select(editorWith('zz'), 0, 2)),
+    draggingFromEditArea: false,
+  })
+
+  expect(result).toEqual({outcome: 'handled'})
+})
+
+describe('a drag within the target', () => {
+  const move = (dragged, dropAt) =>
+    resolveDrop({
+      editorState: dragged,
+      selection: range(dragged, dropAt, dropAt),
+      html: sliceHtml(dragged),
+      draggingFromEditArea: true,
+    })
+
+  // Cutting the range out shifts later text left, so a drop further along the
+  // same block comes back by the length removed.
+  test('moves the range forward, tags included, at the right offset', () => {
+    const editorState = editorWith('ab<x id="1"/>cd efgh')
+    const dragged = select(editorState, 0, tagRange(editorState).end)
+
+    const result = move(dragged, firstBlock(dragged).getLength())
+
     expect(result.outcome).toBe('handled')
     expect(result.highlightTags).toBe(true)
+    expect(decoded(result.editorState)).toBe('cd efghab<x id="1"/>')
   })
 
-  test('removes backwards when the drag selection is backwards', () => {
-    const backwards = {...sel(5, 0), isBackward: true}
+  test('moves the range backward', () => {
+    const editorState = editorWith('abc<x id="1"/>xyz')
+    const from = offsetOf(editorState, 'xyz')
+    const dragged = select(editorState, from, from + 3)
 
-    run({drag: backwards, drop: sel(20, 20)})
-
-    expect(Modifier.removeRange).toHaveBeenCalledWith(
-      'content',
-      expect.anything(),
-      'backward',
-    )
+    expect(decoded(move(dragged, 1).editorState)).toBe('axyzbc<x id="1"/>')
   })
 
-  // The interesting case: cutting the range out shifts later text left, so a
-  // drop further along the same block must come back by the length removed.
-  test('pulls the drop offsets back when moving forward in the same block', () => {
-    const drop = sel(20, 20, 'same-block')
+  test('moves a backward selection the same way', () => {
+    const editorState = editorWith('abc def')
+    const dragged = select(editorState, 0, 3, {backward: true})
 
-    run({drag: sel(0, 5, 'same-block'), drop})
-
-    expect(drop.merge).toHaveBeenCalledWith({
-      anchorOffset: 15,
-      focusOffset: 15,
-    })
+    expect(decoded(move(dragged, 7).editorState)).toBe(' defabc')
   })
 
-  test('leaves the offsets alone when moving backward', () => {
-    const drop = sel(2, 2, 'same-block')
+  test('is undone in one step', () => {
+    const editorState = editorWith('ab<x id="1"/>cd efgh')
+    const dragged = select(editorState, 0, 2)
 
-    run({drag: sel(10, 15, 'same-block'), drop})
+    const {editorState: moved} = move(dragged, firstBlock(dragged).getLength())
 
-    expect(drop.merge).not.toHaveBeenCalled()
-  })
-
-  test('leaves the offsets alone when the drop is in another block', () => {
-    const drop = sel(20, 20, 'other-block')
-
-    run({drag: sel(0, 5, 'same-block'), drop})
-
-    expect(drop.merge).not.toHaveBeenCalled()
-  })
-
-  test('is declined when the content operations throw', () => {
-    Modifier.removeRange.mockImplementation(() => {
-      throw new Error('bad range')
-    })
-    jest.spyOn(console, 'log').mockImplementation(() => {})
-
-    expect(run()).toEqual({outcome: 'not-handled'})
-
-    console.log.mockRestore()
-    Modifier.removeRange.mockImplementation(() => 'content-without-drag')
-  })
-
-  test('selects the fragment it just dropped', () => {
-    run({drag: sel(0, 5), drop: sel(20, 20)})
-
-    // last forceSelection call places the caret at the adjusted drop point
-    expect(EditorState.forceSelection).toHaveBeenCalledTimes(2)
+    expect(decoded(EditorState.undo(moved))).toBe('ab<x id="1"/>cd efgh')
   })
 })

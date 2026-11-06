@@ -5,55 +5,23 @@ import {readSegmentClipboard} from '../../../segmentView/segmentModel'
 /**
  * Works out what a paste should put in the editor.
  *
- * A copy from a SegmentView (matches, concordance, closed segments...) carries
- * the raw segment slice in its html; its tags, once validated, are inserted
- * as tag entities, as when a segment is loaded. That html is only ever
- * written by such a copy, so it is checked first.
+ * A copy made in Matecat -- in the editors or in a SegmentView (matches,
+ * concordance, closed segments...) -- carries the raw segment slice in its
+ * html; its tags, once validated, are inserted as tag entities, as when a
+ * segment is loaded.
  *
- * Two other kinds of paste reach here. One is a copy made inside the editor, which
- * the store kept as a fragment so the tag entities survive the round trip; it
- * is recognised by its plain text still matching what the system clipboard
- * holds. The other is a copy from anywhere else, which arrives as text and has
- * to have its tags stripped and its special characters turned back into tag
- * placeholders.
+ * A copy from anywhere else arrives as text and has its tags stripped and its
+ * special characters turned back into tag placeholders.
  *
  * @returns the editor state to apply, or null to let Draft paste plain text
- *          itself -- which is also the answer when the saved fragment cannot be
- *          parsed
+ *          itself
  */
-export default function buildPastedEditorState({
-  text,
-  html,
-  clipboardFragment,
-  clipboardPlainText,
-  editorState,
-}) {
+export default function buildPastedEditorState({text, html, editorState}) {
   const segmentSlice = readSegmentClipboard(html)
   if (segmentSlice !== null) {
     const fragment = DraftMatecatUtils.buildFragmentFromText(segmentSlice)
     if (!fragment) return editorState
     return DraftMatecatUtils.duplicateFragment(fragment, editorState)
-  }
-
-  const sameAsStoredCopy =
-    clipboardFragment &&
-    text &&
-    clipboardPlainText.replace(/\n/g, '') === text.replace(/\n/g, '')
-
-  if (sameAsStoredCopy) {
-    try {
-      const fragmentContent = JSON.parse(clipboardFragment)
-      const fragment = DraftMatecatUtils.buildFragmentFromJson(
-        fragmentContent.orderedMap,
-      )
-      return DraftMatecatUtils.duplicateFragment(
-        fragment,
-        editorState,
-        fragmentContent.entitiesMap,
-      )
-    } catch (e) {
-      return null
-    }
   }
 
   if (!text) return null

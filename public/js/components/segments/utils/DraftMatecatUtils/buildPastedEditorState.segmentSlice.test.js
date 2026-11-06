@@ -33,8 +33,6 @@ const paste = (editorState, raw, text = 'visible') =>
   buildPastedEditorState({
     text,
     html: segmentClipboardHtml({raw, text}),
-    clipboardFragment: null,
-    clipboardPlainText: '',
     editorState,
   })
 
@@ -98,18 +96,6 @@ describe('pasting a SegmentView copy into the editor', () => {
       before.getCurrentContent().getPlainText(),
     )
   })
-
-  test('wins over a stale copy from the editor with the same plain text', () => {
-    const pasted = buildPastedEditorState({
-      text: 'same',
-      html: segmentClipboardHtml({raw: '<x id="9"/>', text: 'same'}),
-      clipboardFragment: '{not json',
-      clipboardPlainText: 'same',
-      editorState: caretAt(editorWith(''), 0),
-    })
-
-    expect(decoded(pasted)).toBe('<x id="9"/>')
-  })
 })
 
 describe('pastes that are not a SegmentView copy', () => {
@@ -117,8 +103,6 @@ describe('pastes that are not a SegmentView copy', () => {
     const pasted = buildPastedEditorState({
       text: 'a<x id="1"/>b',
       html: '<b>a</b>',
-      clipboardFragment: null,
-      clipboardPlainText: '',
       editorState: caretAt(editorWith(''), 0),
     })
 

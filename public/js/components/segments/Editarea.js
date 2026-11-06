@@ -55,6 +55,7 @@ import {
 import {removeZeroWidthSpace} from './utils/DraftMatecatUtils/tagUtils'
 import textUtils from '../../utils/textUtils'
 import ContextPreviewChannel from '../../utils/contextPreviewChannel'
+import {segmentClipboardHtml} from '../segmentView/segmentModel'
 
 // typing chars sequence
 const typingWordJoiner = matchTypingSequence(
@@ -1021,16 +1022,7 @@ const Editarea = forwardRef(
 
     const pasteFragment = (text, html) => {
       const {editorState} = stateRef.current
-      const {fragment: clipboardFragment, plainText: clipboardPlainText} =
-        SegmentStore.getFragmentFromClipboard()
-
-      const pasted = buildPastedEditorState({
-        text,
-        html,
-        clipboardFragment,
-        clipboardPlainText,
-        editorState,
-      })
+      const pasted = buildPastedEditorState({text, html, editorState})
       // null means let Draft paste the plain text itself
       if (!pasted) return false
 
@@ -1040,36 +1032,26 @@ const Editarea = forwardRef(
       return true
     }
 
-    const copyFragment = (e) => {
-      const internalClipboard = editorRef.current.getClipboard()
-      const {editorState} = stateRef.current
-      if (internalClipboard) {
-        e.preventDefault()
-        // Get plain text form internalClipboard fragment
-        const plainText = internalClipboard
-          .map((block) => block.getText())
-          .join('\n')
-          .replace(
-            new RegExp(String.fromCharCode(parseInt('200B', 16)), 'g'),
-            '',
-          )
-          .replace(/·/g, ' ')
-
-        const entitiesMap = DraftMatecatUtils.getEntitiesInFragment(
-          internalClipboard,
-          editorState,
-        )
-        const fragment = JSON.stringify({
-          orderedMap: internalClipboard,
-          entitiesMap: entitiesMap,
-        })
-        e.clipboardData.setData('text/plain', plainText)
-        SegmentActions.copyFragmentToClipboard(fragment, plainText)
-      }
+    // Copy, cut and drag carry the raw segment slice, as a SegmentView copy
+    // does (segmentView/README.md, Copy), so a paste or drop keeps the tags.
+    // On cut, Draft removes the selection itself once the event is over.
+    const writeSegmentSlice = (dataTransfer) => {
+      const slice = DraftMatecatUtils.getSegmentSlice(
+        stateRef.current.editorState,
+      )
+      if (!slice) return false
+      dataTransfer.setData('text/plain', slice.text)
+      dataTransfer.setData('text/html', segmentClipboardHtml(slice))
+      return true
     }
 
-    const onDragEvent = () => {
+    const copyFragment = (e) => {
+      if (writeSegmentSlice(e.clipboardData)) e.preventDefault()
+    }
+
+    const onDragEvent = (e) => {
       editorSyncRef.current.draggingFromEditArea = true
+      writeSegmentSlice(e.dataTransfer)
     }
 
     const onDragEnd = () => {
@@ -1085,7 +1067,7 @@ const Editarea = forwardRef(
       } = resolveDrop({
         editorState,
         selection,
-        text: dataTransfer.getText(),
+        html: dataTransfer.getHTML(),
         draggingFromEditArea: editorSyncRef.current.draggingFromEditArea,
       })
 
