@@ -41,6 +41,16 @@ test('shows the announcement for 30 seconds', () => {
   })
 })
 
+test('shows the TM settings one bottom right and the others bottom left', () => {
+  showReleaseAnnouncement('tmSettings', anonymous())
+  showReleaseAnnouncement('qualityReport', anonymous())
+
+  expect(addNotification.mock.calls.map(([n]) => [n.uid, n.position])).toEqual([
+    [RELEASE_ANNOUNCEMENTS.tmSettings.id, 'br'],
+    [qrId, 'bl'],
+  ])
+})
+
 test('does not show anything after the announcement period', () => {
   jest.setSystemTime(new Date(SHOW_UNTIL.getTime() + 1000))
 

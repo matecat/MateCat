@@ -17,9 +17,10 @@ export const RELEASE_ANNOUNCEMENTS = {
   tmSettings: {
     id: 'release_202611_tm_settings',
     title: 'New advanced settings',
+    position: 'br',
     text: (
       <>
-        Looking for pre-confirmation and variant-matching settings?
+        Looking for pre-confirmation and variant‑matching settings?
         <br />
         We moved them to the new Advanced subtab.
         <br />
@@ -32,6 +33,7 @@ export const RELEASE_ANNOUNCEMENTS = {
   fileImportSettings: {
     id: 'release_202611_file_import_settings',
     title: 'New XLIFF import settings',
+    position: 'br',
     text: (
       <>
         Working with XLIFF files just got more flexible.
@@ -78,7 +80,7 @@ const hideFromNowOn = (id, {isUserLogged, setUserMetadataKey}) => {
  * @param {{isUserLogged: boolean, userInfo: object, setUserMetadataKey: Function}} user
  */
 export const showReleaseAnnouncement = (key, user) => {
-  const {id, title, text} = RELEASE_ANNOUNCEMENTS[key]
+  const {id, title, text, position = 'bl'} = RELEASE_ANNOUNCEMENTS[key]
   if (new Date() > SHOW_UNTIL || isHidden(id, user.userInfo)) return
 
   addNotification({
@@ -86,7 +88,7 @@ export const showReleaseAnnouncement = (key, user) => {
     title,
     text,
     type: 'info',
-    position: 'bl',
+    position,
     autoDismiss: true,
     timer: AUTO_DISMISS_MS,
     closeCallback: (closedByUser) => {
