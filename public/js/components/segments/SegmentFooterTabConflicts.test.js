@@ -204,4 +204,55 @@ describe('SegmentFooterTabConflicts', () => {
     fireEvent.click(container.querySelector('.goto button'))
     expect(SegmentActions.openSegment).toHaveBeenCalledWith('99')
   })
+
+  test('double clicking a not editable alternative puts its translation in the editor', () => {
+    jest.useFakeTimers()
+    const SegmentActions = require('../../actions/SegmentActions')
+    renderComponent({
+      segment: {
+        ...baseSegment,
+        alternatives: {
+          editable: [],
+          not_editable: [{...ALTERNATIVE, translation: 'Buonasera mondo'}],
+        },
+      },
+    })
+
+    fireEvent.doubleClick(screen.getByRole('list'))
+    jest.runAllTimers()
+    jest.useRealTimers()
+
+    expect(SegmentActions.replaceEditAreaTextContent).toHaveBeenCalledWith(
+      '5',
+      'Buonasera mondo',
+    )
+  })
+
+  test('clicking "Go to" on a not editable alternative opens its involved segment', () => {
+    const SegmentActions = require('../../actions/SegmentActions')
+    renderComponent({
+      segment: {
+        ...baseSegment,
+        alternatives: {
+          editable: [],
+          not_editable: [{...ALTERNATIVE, involved_id: ['100']}],
+        },
+      },
+    })
+
+    fireEvent.click(screen.getByText('Go to'))
+    expect(SegmentActions.openSegment).toHaveBeenCalledWith('100')
+  })
+
+  test('renders not editable alternatives when the editable list is missing', () => {
+    renderComponent({
+      segment: {
+        ...baseSegment,
+        translation: 'Hi world',
+        alternatives: {not_editable: [{...ALTERNATIVE, id: '3'}]},
+      },
+    })
+    expect(screen.getAllByRole('list')).toHaveLength(1)
+    expect(screen.getByText('Yes')).toHaveClass('added')
+  })
 })

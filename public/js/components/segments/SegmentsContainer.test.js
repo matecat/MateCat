@@ -1,5 +1,5 @@
 import React from 'react'
-import {render, act, fireEvent} from '@testing-library/react'
+import {render, act, fireEvent, within} from '@testing-library/react'
 import {fromJS} from 'immutable'
 import SegmentStore from '../../stores/SegmentStore'
 import CatToolStore from '../../stores/CatToolStore'
@@ -592,5 +592,91 @@ describe('SegmentsContainer height calculation', () => {
     document.querySelector('header').remove()
 
     expect(() => render(<SegmentsContainer />)).not.toThrow()
+  })
+})
+
+describe('SegmentsContainer height measuring markup', () => {
+  const ReactDOMServer = require('react-dom/server')
+  const SegmentUtils = require('../../utils/segmentUtils')
+  const SegmentStringUtils = require('./utils/DraftMatecatUtils/segmentStringUtils')
+  const {Base64} = require('js-base64')
+  const {
+    setTagSignatureMiddleware,
+  } = require('./utils/DraftMatecatUtils/tagModel')
+
+  const ph = (html) =>
+    `<ph id="m1" ctype="x-html" equiv-text="base64:${Base64.encode(html)}"/>`
+
+  // Renders one segment and returns the markup measured for it, as a DOM node
+  const measuredMarkup = (segment) => {
+    const {renderToStaticMarkup: toStaticMarkup} =
+      jest.requireActual('react-dom/server')
+    const measured = []
+    ReactDOMServer.renderToStaticMarkup.mockImplementation((element) => {
+      measured.push(toStaticMarkup(element))
+      return measured.at(-1)
+    })
+    renderComponent()
+    act(() => {
+      mockSegmentStoreListeners[SegmentConstants.RENDER_SEGMENTS](
+        fromJS([segment.toJS()]),
+      )
+    })
+    const node = document.createElement('div')
+    node.innerHTML = measured[0]
+    return node
+  }
+
+  beforeAll(() => setTagSignatureMiddleware('space', () => false))
+  afterAll(() => setTagSignatureMiddleware('space', () => undefined))
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    SegmentStore.addListener.mockImplementation((event, cb) => {
+      mockSegmentStoreListeners[event] = cb
+    })
+    CatToolStore.addListener.mockImplementation((event, cb) => {
+      mockCatToolStoreListeners[event] = cb
+    })
+    CatToolStore.getJobFilesInfo.mockReturnValue([])
+  })
+
+  afterEach(() => {
+    ReactDOMServer.renderToStaticMarkup.mockImplementation(
+      () => '<section></section>',
+    )
+  })
+
+  test('measures the source and target text with tags as chips and entities decoded', () => {
+    const markup = measuredMarkup(
+      makeSegment('1', {
+        segment: `Tom &amp; ${ph('&lt;br/&gt;')}Jerry`,
+        translation: `Ciao &lt;mondo&gt; ${ph('&lt;hr/&gt;')}`,
+      }),
+    )
+    expect(within(markup).getByText(/Tom &/)).toHaveClass('source')
+    expect(within(markup).getByText('<br/>')).toHaveClass('tag')
+    expect(within(markup).getByText(/Ciao <mondo>/)).toHaveClass('targetarea')
+    expect(within(markup).getByText('<hr/>')).toHaveClass('tag')
+    expect(within(markup).queryByText(/equiv-text/)).not.toBeInTheDocument()
+  })
+
+  test('measures a segment with tag projection enabled without its tags', () => {
+    SegmentUtils.checkCurrentSegmentTPEnabled.mockReturnValue(true)
+    SegmentStringUtils.removeTagsFromText.mockImplementation((text) =>
+      text.replace(/<ph[^>]*\/>/g, ''),
+    )
+    const markup = measuredMarkup(
+      makeSegment('1', {
+        segment: `Source ${ph('&lt;br/&gt;')}text`,
+        translation: `Target ${ph('&lt;br/&gt;')}text`,
+      }),
+    )
+    SegmentUtils.checkCurrentSegmentTPEnabled.mockReturnValue(false)
+    SegmentStringUtils.removeTagsFromText.mockImplementation((t) => t)
+
+    expect(within(markup).getByText('Source text')).toHaveClass('source')
+    expect(within(markup).getByText('Target text')).toHaveClass('targetarea')
+    expect(within(markup).queryByText('<br/>')).not.toBeInTheDocument()
   })
 })

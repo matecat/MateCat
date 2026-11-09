@@ -104,7 +104,10 @@ import SegmentUtils from '../../utils/segmentUtils'
 import {SegmentContext} from './SegmentContext'
 import {setTagSignatureMiddleware} from './utils/DraftMatecatUtils/tagModel'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
-import {readSegmentClipboard} from '../segmentView/segmentModel'
+import {
+  readSegmentClipboard,
+  segmentClipboardHtml,
+} from '../segmentView/segmentModel'
 import SegmentConstants from '../../constants/SegmentConstants'
 import EditAreaConstants from '../../constants/EditAreaConstants'
 
@@ -1291,5 +1294,79 @@ describe('rendering does not update the parent', () => {
 
     // 'null' is the parent's initial state, before Editarea reports anything
     expect(screen.getByTestId('counter')).not.toHaveTextContent('null')
+  })
+})
+
+// A lexiqa suggestion replaces the word its warning covers. The warning's
+// offsets are relative to its own block, so the replacement must land in that
+// block even when the caret sits in another one.
+describe('replacing a word from a lexiqa suggestion', () => {
+  const mountWithLexiqaWarning = (translation) => {
+    LexiqaUtils.getRanges.mockReturnValue([{start: 0, end: 4}])
+    const activateLexiqa = jest.spyOn(DraftMatecatUtils, 'activateLexiqa')
+    const view = mountEditarea({
+      translation,
+      segment: makeSegment({translation, lexiqa: {target: [{}]}}),
+    })
+    const [editorState, , , , , replaceWordAt] = activateLexiqa.mock.calls[0]
+    const blockKeys = editorState
+      .getCurrentContent()
+      .getBlocksAsArray()
+      .map((block) => block.getKey())
+    return {...view, replaceWordAt, blockKeys}
+  }
+
+  const lastTranslationSent = () =>
+    SegmentActions.updateTranslation.mock.calls.at(-1)[1]
+
+  test('replaces the word in the block of the warning, not in the caret block', () => {
+    // The caret is at the end, in the second block
+    const {replaceWordAt, blockKeys} = mountWithLexiqaWarning('Ciao\nmondo')
+    expect(blockKeys).toHaveLength(2)
+
+    act(() =>
+      replaceWordAt({
+        newWord: 'Salve',
+        start: 0,
+        end: 4,
+        blockKey: blockKeys[0],
+      }),
+    )
+    flush()
+
+    expect(lastTranslationSent()).toMatch(/^Salve.*mondo$/s)
+  })
+
+  test('replaces the word in the caret block when no block is given', () => {
+    const {replaceWordAt} = mountWithLexiqaWarning('Ciao')
+
+    act(() => replaceWordAt({newWord: 'Salve', start: 0, end: 4}))
+    flush()
+
+    expect(lastTranslationSent()).toBe('Salve')
+  })
+})
+
+describe('pasting a segment copy', () => {
+  const clipboardWith = (data) => ({
+    types: Object.keys(data),
+    getData: (type) => data[type] ?? '',
+    items: [],
+  })
+
+  test('inserts the copied tags as tags, not as their text', () => {
+    const {container} = mountEditarea({translation: 'Ciao'})
+    const raw = 'mondo <x id="1"/>'
+    const clipboardData = clipboardWith({
+      'text/plain': 'mondo 1x',
+      'text/html': segmentClipboardHtml({raw, text: 'mondo 1x'}),
+    })
+
+    fireEvent.paste(editorNode(container), {clipboardData})
+    flush()
+
+    const translation = SegmentActions.updateTranslation.mock.calls.at(-1)[1]
+    expect(translation).toContain('<x id="1"/>')
+    expect(translation).not.toContain('1x')
   })
 })
