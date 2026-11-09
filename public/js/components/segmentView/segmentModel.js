@@ -49,9 +49,20 @@ const fromCodePoint = (code) =>
  * dropped, entities decoded, CR/CRLF normalised to LF. The result is plain
  * text, rendered by React as text: nothing in it can become markup.
  */
+// Strip until nothing is left to strip: one pass over `<<b>script>` would leave
+// `<script>` behind.
+const stripMarkup = (html) => {
+  let previous
+  let text = html
+  do {
+    previous = text
+    text = text.replace(MARKUP_RE, '')
+  } while (text !== previous)
+  return text
+}
+
 export const decodeHtmlText = (html) =>
-  html
-    .replace(MARKUP_RE, '')
+  stripMarkup(html)
     .replace(ENTITY_RE, (match, dec, hex, named, apos) => {
       if (dec) return fromCodePoint(parseInt(dec, 10))
       if (hex) return fromCodePoint(parseInt(hex, 16))

@@ -1,6 +1,7 @@
 import {Base64} from 'js-base64'
 import {
   OPAQUE_TAG,
+  decodeHtmlText,
   applyMarks,
   readSegmentClipboard,
   segmentClipboardHtml,
@@ -351,5 +352,19 @@ describe('segment clipboard', () => {
       '&lt;ph id="1" equiv-text="base64:PGI+"&gt;',
     )
     expect(roundTrip('a > b')).toBe('a &gt; b')
+  })
+})
+
+describe('decodeHtmlText', () => {
+  test('leaves no markup behind when stripping it rebuilds a tag', () => {
+    // CodeQL js/incomplete-multi-character-sanitization: a single pass over
+    // `<<b>script>` removed `<b>` and left `<script>`
+    expect(decodeHtmlText('a<<b>script>alert(1)<</b>/script>b')).toBe(
+      'aalert(1)b',
+    )
+  })
+
+  test('keeps encoded brackets as text', () => {
+    expect(decodeHtmlText('&lt;script&gt; &amp; x')).toBe('<script> & x')
   })
 })
