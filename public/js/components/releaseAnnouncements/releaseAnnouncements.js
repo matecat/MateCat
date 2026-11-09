@@ -22,7 +22,7 @@ export const RELEASE_ANNOUNCEMENTS = {
       <>
         Looking for pre‑confirmation and variant‑matching settings?
         <br />
-          We moved them to the new Advanced subtab.
+        We moved them to the new <b>Advanced</b> subtab.
           <br />
             We also gave you more control: you can now include 101% matches in your pre‑confirmation rules and choose the exact state they get in the editor.
       </>
