@@ -13,7 +13,7 @@ import {mountPage} from './mountPage'
 import SocketListener from '../sse/SocketListener'
 import {SegmentedControl} from '../components/common/SegmentedControl'
 import {SpinnerLoader} from '../components/common/SpinnerLoader'
-import {useReleaseAnnouncement} from '../components/releaseAnnouncements/useReleaseAnnouncement'
+import {showReleaseAnnouncement} from '../components/releaseAnnouncements/releaseAnnouncements'
 
 const getReviseUrlParameter = () => {
   const url = new URL(window.location.href)
@@ -127,12 +127,11 @@ export const QualityReport = () => {
     }
   }, [])
 
-  const showReleaseAnnouncement = useReleaseAnnouncement()
   const isReportLoaded = Boolean(jobInfo)
 
   useEffect(() => {
     if (isReportLoaded) showReleaseAnnouncement('qualityReport')
-  }, [isReportLoaded, showReleaseAnnouncement])
+  }, [isReportLoaded])
 
   const secondPassReviewEnabled = jobInfo?.get('quality_summary').size > 1
 

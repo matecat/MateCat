@@ -3,12 +3,12 @@
  * Delete this folder and its callers once SHOW_UNTIL has passed.
  *
  * An announcement stays hidden once the user closes it with the X. The choice is
- * kept in a cookie for this browser and, for a logged user, in the user
- * metadata, so it follows the account to other browsers.
+ * kept only in a cookie, so it applies to this browser.
  */
 import React from 'react'
 import Cookies from 'js-cookie'
 import {addNotification} from '../../actions/notificationActions'
+import {SETTINGS_PANEL_TABS} from '../settingsPanel/SettingsPanel'
 
 export const SHOW_UNTIL = new Date('2026-11-30T23:59:59Z')
 const AUTO_DISMISS_MS = 30000
@@ -23,8 +23,10 @@ export const RELEASE_ANNOUNCEMENTS = {
         Looking for pre‑confirmation and variant‑matching settings?
         <br />
         We moved them to the new <b>Advanced</b> subtab.
-          <br />
-            We also gave you more control: you can now include 101% matches in your pre‑confirmation rules and choose the exact state they get in the editor.
+        <br />
+        We also gave you more control: you can now include 101% matches in your
+        pre‑confirmation rules and choose the exact state they get in the
+        editor.
       </>
     ),
   },
@@ -36,7 +38,8 @@ export const RELEASE_ANNOUNCEMENTS = {
       <>
         Working with XLIFF files just got more flexible.
         <br />
-        You can now decide whether pre‑populated segments should be automatically locked in the editor or not.
+        You can now decide whether pre‑populated segments should be
+        automatically locked in the editor or not.
         <br />
         Scroll down to the dedicated section to try it out.
       </>
@@ -61,24 +64,11 @@ export const RELEASE_ANNOUNCEMENTS = {
 
 const cookieName = (id) => 'msg-' + id
 
-const isHidden = (id, userInfo) =>
-  typeof Cookies.get(cookieName(id)) !== 'undefined' ||
-  typeof userInfo?.metadata?.[id] !== 'undefined'
-
-const hideFromNowOn = (id, {isUserLogged, setUserMetadataKey}) => {
-  Cookies.set(cookieName(id), '', {expires: SHOW_UNTIL, secure: true})
-  // A failed save only loses the cross-browser part: the cookie still hides
-  // the announcement here, so there is nothing to tell the user.
-  if (isUserLogged) setUserMetadataKey(id, '1').catch(() => {})
-}
-
-/**
- * @param {keyof RELEASE_ANNOUNCEMENTS} key
- * @param {{isUserLogged: boolean, userInfo: object, setUserMetadataKey: Function}} user
- */
-export const showReleaseAnnouncement = (key, user) => {
+/** @param {keyof RELEASE_ANNOUNCEMENTS} key */
+export const showReleaseAnnouncement = (key) => {
   const {id, title, text, position = 'bl'} = RELEASE_ANNOUNCEMENTS[key]
-  if (new Date() > SHOW_UNTIL || isHidden(id, user.userInfo)) return
+  if (new Date() > SHOW_UNTIL) return
+  if (typeof Cookies.get(cookieName(id)) !== 'undefined') return
 
   addNotification({
     uid: id,
@@ -89,7 +79,19 @@ export const showReleaseAnnouncement = (key, user) => {
     autoDismiss: true,
     timer: AUTO_DISMISS_MS,
     closeCallback: (closedByUser) => {
-      if (closedByUser) hideFromNowOn(id, user)
+      if (closedByUser)
+        Cookies.set(cookieName(id), '', {expires: SHOW_UNTIL, secure: true})
     },
   })
+}
+
+const ANNOUNCEMENT_BY_SETTINGS_TAB = {
+  [SETTINGS_PANEL_TABS.translationMemoryGlossary]: 'tmSettings',
+  [SETTINGS_PANEL_TABS.fileImport]: 'fileImportSettings',
+}
+
+/** For the settings panel `onTabOpened`: shows the opened tab's announcement, if any. */
+export const announceSettingsTab = (tabId) => {
+  const key = ANNOUNCEMENT_BY_SETTINGS_TAB[tabId]
+  if (key) showReleaseAnnouncement(key)
 }

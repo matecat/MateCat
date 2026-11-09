@@ -46,7 +46,7 @@ import {getPretranslateParams} from '../utils/editorStatusLock'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
 import {mountPage} from './mountPage'
 import {HomePageSection} from '../components/createProject/HomePageSection'
-import {useSettingsTabAnnouncement} from '../components/releaseAnnouncements/useReleaseAnnouncement'
+import {announceSettingsTab} from '../components/releaseAnnouncements/releaseAnnouncements'
 import UserActions from '../actions/UserActions'
 import {getDeepLGlosssaries} from '../api/getDeepLGlosssaries'
 import SocketListener from '../sse/SocketListener'
@@ -372,8 +372,6 @@ const NewProject = () => {
   )
 
   const closeSettings = useCallback(() => setOpenSettings({isOpen: false}), [])
-
-  const announceSettingsTab = useSettingsTabAnnouncement()
 
   const selectedTeam = useMemo(() => {
     const team = userInfo?.teams?.find(
