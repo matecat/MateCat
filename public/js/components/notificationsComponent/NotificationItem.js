@@ -32,7 +32,7 @@ const NotificationItem = ({
   const styleNameContainer = 'notification-type-' + type
   let _notificationTimer = useRef()
 
-  const hideNotification = () => {
+  const hideNotification = (closedByUser = false) => {
     if (_notificationTimer.current) {
       clearTimeout(_notificationTimer.current)
     }
@@ -46,7 +46,7 @@ const NotificationItem = ({
     }, 1000)
 
     if (closeCallback) {
-      closeCallback.call()
+      closeCallback(closedByUser)
     }
   }
 
@@ -148,7 +148,7 @@ const NotificationItem = ({
           mode={BUTTON_MODE.GHOST}
           type={BUTTON_TYPE.ICON}
           size={BUTTON_SIZE.ICON_XSMALL}
-          onClick={hideNotification}
+          onClick={() => hideNotification(true)}
         >
           <IconClose size={16} />
         </Button>

@@ -78,6 +78,32 @@ describe('NotificationItem', () => {
     expect(closeCallback).toHaveBeenCalledTimes(1)
   })
 
+  test('tells closeCallback the user closed it with the X', async () => {
+    jest.useFakeTimers()
+    const user = userEvent.setup({advanceTimers: jest.advanceTimersByTime})
+    const closeCallback = jest.fn()
+    renderItem({closeCallback, autoDismiss: false})
+
+    await user.click(screen.getByRole('button'))
+
+    expect(closeCallback).toHaveBeenCalledWith(true)
+  })
+
+  test('tells closeCallback the notification timed out', () => {
+    jest.useFakeTimers()
+    const closeCallback = jest.fn()
+    renderItem({closeCallback, autoDismiss: true, timer: 700})
+
+    act(() => {
+      jest.advanceTimersByTime(50)
+    })
+    act(() => {
+      jest.advanceTimersByTime(700)
+    })
+
+    expect(closeCallback).toHaveBeenCalledWith(false)
+  })
+
   test('calls openCallback on mount', () => {
     const openCallback = jest.fn()
     renderItem({openCallback})
