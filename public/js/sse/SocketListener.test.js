@@ -1,5 +1,5 @@
 import React from 'react'
-import {render, screen} from '@testing-library/react'
+import {render} from '@testing-library/react'
 import SocketListener from './SocketListener'
 import useSocketLayer, {ConnectionStates} from '../hooks/useSocketLayer'
 import CatToolActions from '../actions/CatToolActions'
@@ -153,22 +153,15 @@ describe('SocketListener', () => {
 
     afterEach(() => jest.restoreAllMocks())
 
-    test('renders the HTML of a server message instead of showing its tags', () => {
+    test('passes the server title and text on as HTML to render', () => {
       eventHandlers.global_messages(message())
 
-      render(
-        <>
-          <h6>{shown().title}</h6>
-          <p>{shown().text}</p>
-        </>,
-      )
-
-      expect(screen.getByText('Matecat').tagName).toBe('B')
-      expect(
-        screen.getByRole('link', {name: 'info@matecat.com'}),
-      ).toHaveAttribute('href', 'mailto:info@matecat.com')
-      expect(screen.queryByText(/<a href/)).not.toBeInTheDocument()
-      expect(window.hacked).toBeUndefined()
+      expect(shown()).toMatchObject({
+        title: 'Welcome to the new <b>Matecat</b>!',
+        text: expect.stringContaining('<a href="mailto:info@matecat.com">'),
+        allowHtml: true,
+        autoDismiss: false,
+      })
     })
 
     test('only closing it with the X hides it for good', () => {

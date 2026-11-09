@@ -15,6 +15,7 @@
  * openCallback     (Function) A callback function that will be called when the notification is successfully added.
  * dismissable      (Boolean, Default true) If show or not the button to close the notification
  * timer            (Number, Default 700) The timer to auto dismiss the notification
+ * allowHtml        (Boolean, Default false) Render the HTML of a string title/text, keeping only safe tags (see htmlToReact)
  */
 import React, {useState, useRef, useEffect} from 'react'
 
@@ -136,6 +137,7 @@ const NotificationBox = () => {
                     closeCallback={notification.closeCallback}
                     openCallback={notification.openCallback}
                     dismissable={notification.dismissable}
+                    allowHtml={notification.allowHtml}
                     key={notification.uid}
                     uid={notification.uid}
                     remove={notification.remove}

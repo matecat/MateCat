@@ -34,6 +34,23 @@ describe('NotificationBox', () => {
     jest.useRealTimers()
   })
 
+  test('renders the HTML of a notification added with allowHtml', () => {
+    render(<NotificationBox />)
+
+    addNotification({
+      uid: 'server-message',
+      title: 'Notice',
+      text: 'Read the <a href="https://guides.matecat.com">guide</a>',
+      allowHtml: true,
+      autoDismiss: false,
+    })
+
+    expect(screen.getByRole('link', {name: 'guide'})).toHaveAttribute(
+      'href',
+      'https://guides.matecat.com',
+    )
+  })
+
   test('renders an empty wrapper when there are no notifications', () => {
     const {container} = render(<NotificationBox />)
     expect(

@@ -9,6 +9,7 @@ import {
 } from '../common/Button/Button'
 import InfoIcon from '../../../img/icons/InfoIcon'
 import CheckCircleBroken from '../../../img/icons/CheckCircleBroken'
+import {htmlToReact} from '../../utils/htmlToReact'
 
 const NotificationItem = ({
   uid,
@@ -21,6 +22,7 @@ const NotificationItem = ({
   openCallback,
   timer = 7000,
   dismissable = true,
+  allowHtml = false,
   onRemove,
   remove,
 }) => {
@@ -139,8 +141,8 @@ const NotificationItem = ({
       <div>
         <div className="notification-item-icon">{icon}</div>
         <div className="notification-item-content">
-          <h6>{title}</h6>
-          <p>{text}</p>
+          <h6>{allowHtml ? htmlToReact(title) : title}</h6>
+          <p>{allowHtml ? htmlToReact(text) : text}</p>
         </div>
       </div>
       {dismissable && (
@@ -167,6 +169,7 @@ NotificationItem.propTypes = {
   openCallback: PropTypes.func,
   timer: PropTypes.number,
   dismissable: PropTypes.bool,
+  allowHtml: PropTypes.bool,
 }
 
 export default NotificationItem

@@ -78,6 +78,28 @@ describe('NotificationItem', () => {
     expect(closeCallback).toHaveBeenCalledTimes(1)
   })
 
+  test('with allowHtml renders the HTML of the title and text, keeping only safe tags', () => {
+    renderItem({
+      allowHtml: true,
+      title: 'Welcome to the <b>new</b> Matecat',
+      text: 'Write to <a href="mailto:info@matecat.com">us</a><img src=x onerror="window.hacked = true">',
+    })
+
+    expect(screen.getByText('new').tagName).toBe('B')
+    expect(screen.getByRole('link', {name: 'us'})).toHaveAttribute(
+      'href',
+      'mailto:info@matecat.com',
+    )
+    expect(screen.queryByRole('img')).not.toBeInTheDocument()
+    expect(window.hacked).toBeUndefined()
+  })
+
+  test('without allowHtml shows markup as plain text', () => {
+    renderItem({text: 'Team <b>Alpha</b>'})
+
+    expect(screen.getByText('Team <b>Alpha</b>')).toBeInTheDocument()
+  })
+
   test('tells closeCallback the user closed it with the X', async () => {
     jest.useFakeTimers()
     const user = userEvent.setup({advanceTimers: jest.advanceTimersByTime})

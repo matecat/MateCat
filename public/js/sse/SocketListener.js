@@ -9,7 +9,6 @@ import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper
 import UserActions from '../actions/UserActions'
 import {v4 as uuidV4} from 'uuid'
 import Cookies from 'js-cookie'
-import {htmlToReact} from '../utils/htmlToReact'
 
 const SocketListener = ({isAuthenticated, userId}) => {
   const {forceLogout} = useContext(ApplicationWrapperContext)
@@ -225,11 +224,12 @@ const SocketListener = ({isAuthenticated, userId}) => {
       ) {
         const notification = {
           uid: message.token,
-          title: message.title ? htmlToReact(message.title) : 'Notice',
-          text: htmlToReact(message.message),
+          title: message.title ? message.title : 'Notice',
+          text: message.message,
           type: message.level ? message.level : 'warning',
           autoDismiss: false,
           position: 'bl',
+          allowHtml: true,
           // Only the X hides it for good: other notifications clearing the
           // whole list must not count as the user having read it.
           closeCallback: function (closedByUser) {
