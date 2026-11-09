@@ -29,7 +29,7 @@ import {TargetLanguagesSelect} from '../components/createProject/TargetLanguages
 import {TmGlossarySelect} from '../components/createProject/TmGlossarySelect'
 import {SourceLanguageSelect} from '../components/createProject/SourceLanguageSelect'
 import CommonUtils from '../utils/commonUtils'
-import {SETTINGS_PANEL_TABS, SettingsPanel} from '../components/settingsPanel'
+import {SettingsPanel} from '../components/settingsPanel'
 import {DEFAULT_ENGINE_MEMORY} from '../components/settingsPanel/SettingsPanelConstants'
 import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
 import {tmCreateRandUser} from '../api/tmCreateRandUser'
@@ -46,7 +46,7 @@ import {getPretranslateParams} from '../utils/editorStatusLock'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
 import {mountPage} from './mountPage'
 import {HomePageSection} from '../components/createProject/HomePageSection'
-import {useReleaseAnnouncement} from '../components/releaseAnnouncements/useReleaseAnnouncement'
+import {useSettingsTabAnnouncement} from '../components/releaseAnnouncements/useReleaseAnnouncement'
 import UserActions from '../actions/UserActions'
 import {getDeepLGlosssaries} from '../api/getDeepLGlosssaries'
 import SocketListener from '../sse/SocketListener'
@@ -373,16 +373,7 @@ const NewProject = () => {
 
   const closeSettings = useCallback(() => setOpenSettings({isOpen: false}), [])
 
-  const showReleaseAnnouncement = useReleaseAnnouncement()
-  const announceSettingsTab = useCallback(
-    (tabId) => {
-      if (tabId === SETTINGS_PANEL_TABS.translationMemoryGlossary)
-        showReleaseAnnouncement('tmSettings')
-      if (tabId === SETTINGS_PANEL_TABS.fileImport)
-        showReleaseAnnouncement('fileImportSettings')
-    },
-    [showReleaseAnnouncement],
-  )
+  const announceSettingsTab = useSettingsTabAnnouncement()
 
   const selectedTeam = useMemo(() => {
     const team = userInfo?.teams?.find(
