@@ -99,7 +99,9 @@ describe('rendering', () => {
   test('renders header, ProjectTemplate and the active tab content when opened with a template', () => {
     const {container} = render(<SettingsPanel {...baseProps()} />)
 
-    expect(container.querySelector('.settings-panel-header')).toBeInTheDocument()
+    expect(
+      container.querySelector('.settings-panel-header'),
+    ).toBeInTheDocument()
     expect(screen.getByText('Settings')).toBeInTheDocument()
     expect(screen.getByTestId('project-template')).toBeInTheDocument()
     expect(
@@ -197,6 +199,32 @@ describe('tabOpen', () => {
   })
 })
 
+describe('onTabOpened', () => {
+  test('reports the tab shown when the panel opens and each tab the user opens', async () => {
+    const user = userEvent.setup()
+    const onTabOpened = jest.fn()
+    render(<SettingsPanel {...baseProps()} onTabOpened={onTabOpened} />)
+
+    expect(onTabOpened).toHaveBeenLastCalledWith('tm')
+
+    await user.click(screen.getByText('File import'))
+
+    expect(onTabOpened).toHaveBeenLastCalledWith('fileImport')
+  })
+
+  test('reports nothing while the panel is closed, and the tab once it opens', () => {
+    const onTabOpened = jest.fn()
+    const props = {...baseProps(), onTabOpened}
+    const {rerender} = render(<SettingsPanel {...props} isOpened={false} />)
+
+    expect(onTabOpened).not.toHaveBeenCalled()
+
+    rerender(<SettingsPanel {...props} isOpened={true} />)
+
+    expect(onTabOpened).toHaveBeenCalledWith('tm')
+  })
+})
+
 describe('closing interactions', () => {
   test('clicking the overlay hides the panel and eventually calls onClose on transition end', () => {
     const props = baseProps()
@@ -231,9 +259,7 @@ describe('closing interactions', () => {
     const props = baseProps()
     const {container} = render(<SettingsPanel {...props} />)
 
-    const closeButton = container.querySelector(
-      '.settings-panel-header button',
-    )
+    const closeButton = container.querySelector('.settings-panel-header button')
     await userEvent.click(closeButton)
 
     const wrapper = container.querySelector('.settings-panel-wrapper')
@@ -364,9 +390,7 @@ describe('CreateProjectStore UPDATE_PROJECT_TEMPLATES listener', () => {
       id: 5,
       template: {name: 'old'},
     })
-    expect(props.setProjectTemplates).toHaveBeenCalledWith(
-      expect.any(Function),
-    )
+    expect(props.setProjectTemplates).toHaveBeenCalledWith(expect.any(Function))
 
     const updater = props.setProjectTemplates.mock.calls[0][0]
     const nextState = updater([

@@ -101,7 +101,6 @@ export const TMCreateResourceRow = ({row}) => {
       CatToolActions.addNotification({
         ...message,
         position: 'br',
-        allowHtml: true,
         timer: 5000,
       })
       return
@@ -304,7 +303,6 @@ export const TMCreateResourceRow = ({row}) => {
           title: 'Invalid key',
           type: 'error',
           text: message,
-          allowHtml: true,
           position: 'br',
           timer: 5000,
         })
