@@ -91,6 +91,7 @@ class MyMemory extends AbstractEngine
         'get_mt' => 1,
         'id_user' => null,
         'mt_key' => null,
+        'mt_threshold' => null,
         'num_result' => 3,
         'mt_only' => false,
         'isConcordance' => false,
@@ -294,6 +295,12 @@ class MyMemory extends AbstractEngine
         (!empty($_config['isConcordance']) ? $parameters['conc'] = 'true' : null);
         (!empty($_config['isConcordance']) ? $parameters['extended'] = '1' : null);
         (!empty($_config['mt_only']) ? $parameters['mtonly'] = '1' : null);
+
+        // The project's MT application threshold, so MyMemory can decide whether to call the MT and where to rank it.
+        // The editor allows up to 101; MyMemory accepts 0-100.
+        if (!empty($parameters['mt']) && isset($_config['mt_threshold']) && is_numeric($_config['mt_threshold'])) {
+            $parameters['mt_threshold'] = max(0, min(100, (int)$_config['mt_threshold']));
+        }
 
         if (isset($_config['context_after']) || isset($_config['context_before'])) {
             $parameters['context_after'] = $_config['context_after'] ?? '';
