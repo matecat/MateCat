@@ -19,7 +19,7 @@ export const RELEASE_ANNOUNCEMENTS = {
     title: 'New advanced settings',
     text: (
       <>
-        Looking for pre-confirmation and variant-strict matching?
+        Looking for pre-confirmation and variant-matching settings?
         <br />
         We moved them to the new Advanced subtab.
         <br />
@@ -52,9 +52,9 @@ export const RELEASE_ANNOUNCEMENTS = {
         <br />
         You can now track a segment&apos;s history directly from the QR page.
         <br />
-        Just click the Open history button in the bottom right corner of a
-        segment&apos;s section to see a list of every confirmation step and the
-        exact text confirmed at each stage.
+        Just click the <b>Open history</b> button in the bottom right corner of
+        a segment&apos;s details panel to see a list of every confirmation step
+        and the exact text confirmed at each stage.
       </>
     ),
   },
