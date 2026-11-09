@@ -20,13 +20,11 @@ export const RELEASE_ANNOUNCEMENTS = {
     position: 'br',
     text: (
       <>
-        Looking for pre-confirmation and variant‑matching settings?
+        Looking for pre‑confirmation and variant‑matching settings?
         <br />
-        We moved them to the new Advanced subtab.
-        <br />
-        We also gave you more control: you can now include 101% matches in your
-        pre-confirmation rules and choose the exact state they get in the
-        editor.
+          We moved them to the new Advanced subtab.
+          <br />
+            We also gave you more control: you can now include 101% matches in your pre‑confirmation rules and choose the exact state they get in the editor.
       </>
     ),
   },
@@ -38,8 +36,7 @@ export const RELEASE_ANNOUNCEMENTS = {
       <>
         Working with XLIFF files just got more flexible.
         <br />
-        You can now decide whether pre-populated segments should be
-        automatically locked in the editor or not.
+        You can now decide whether pre‑populated segments should be automatically locked in the editor or not.
         <br />
         Scroll down to the dedicated section to try it out.
       </>
