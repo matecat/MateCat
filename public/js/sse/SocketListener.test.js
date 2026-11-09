@@ -1,10 +1,11 @@
 import React from 'react'
-import {render} from '@testing-library/react'
+import {render, screen} from '@testing-library/react'
 import SocketListener from './SocketListener'
 import useSocketLayer, {ConnectionStates} from '../hooks/useSocketLayer'
 import CatToolActions from '../actions/CatToolActions'
 import SegmentActions from '../actions/SegmentActions'
 import UserActions from '../actions/UserActions'
+import Cookies from 'js-cookie'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
 
 jest.mock('../hooks/useSocketLayer', () => ({
@@ -133,6 +134,55 @@ describe('SocketListener', () => {
           text: 'The project owner has re-enabled editing for one or more segments. They are no longer read-only and can be edited again.',
           uid: 'translation_enabled',
         }),
+      )
+    })
+  })
+
+  describe('global_messages', () => {
+    const message = (fields = {}) => ({
+      message: {
+        token: 'release-1',
+        expire: '2999-01-01T00:00:00Z',
+        title: 'Welcome to the new <b>Matecat</b>!',
+        message:
+          'Write to <a href="mailto:info@matecat.com">info@matecat.com</a><script>window.hacked = true</script>',
+        ...fields,
+      },
+    })
+    const shown = () => CatToolActions.addNotification.mock.calls[0][0]
+
+    afterEach(() => jest.restoreAllMocks())
+
+    test('renders the HTML of a server message instead of showing its tags', () => {
+      eventHandlers.global_messages(message())
+
+      render(
+        <>
+          <h6>{shown().title}</h6>
+          <p>{shown().text}</p>
+        </>,
+      )
+
+      expect(screen.getByText('Matecat').tagName).toBe('B')
+      expect(
+        screen.getByRole('link', {name: 'info@matecat.com'}),
+      ).toHaveAttribute('href', 'mailto:info@matecat.com')
+      expect(screen.queryByText(/<a href/)).not.toBeInTheDocument()
+      expect(window.hacked).toBeUndefined()
+    })
+
+    test('only closing it with the X hides it for good', () => {
+      const setCookie = jest.spyOn(Cookies, 'set').mockImplementation(() => {})
+      eventHandlers.global_messages(message())
+
+      shown().closeCallback(false)
+      expect(setCookie).not.toHaveBeenCalled()
+
+      shown().closeCallback(true)
+      expect(setCookie).toHaveBeenCalledWith(
+        'msg-release-1',
+        '',
+        expect.objectContaining({secure: true}),
       )
     })
   })

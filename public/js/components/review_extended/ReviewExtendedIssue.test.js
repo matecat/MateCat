@@ -215,15 +215,49 @@ describe('ReviewExtendedIssue', () => {
     expect(setIssueEditing).toHaveBeenCalledWith(undefined)
   })
 
-  test('deleting an issue schedules an undo timer without throwing', () => {
-    global.config.ownerIsMe = true
-    jest.useFakeTimers()
-    renderIssue()
-    fireEvent.click(screen.getByTitle('Delete issue card'))
-    act(() => {
-      jest.advanceTimersByTime(500)
+  describe('undo after deleting', () => {
+    const deleteAndGetNotification = (props = {}) => {
+      global.config.ownerIsMe = true
+      const utils = renderIssue(props)
+      fireEvent.click(screen.getByTitle('Delete issue card'))
+      const notification = CatToolActions.addNotification.mock.calls[0][0]
+      render(<p>{notification.text}</p>)
+      return {...utils, notification}
+    }
+
+    afterEach(() => {
+      window.onbeforeunload = null
     })
-    jest.useRealTimers()
+
+    test('the deleted notification offers a working Undo link', () => {
+      const changeVisibility = jest.fn()
+      const issue = makeIssue()
+      const {notification} = deleteAndGetNotification({
+        issue,
+        changeVisibility,
+      })
+
+      fireEvent.click(screen.getByRole('link', {name: 'Undo'}))
+
+      expect(changeVisibility).toHaveBeenLastCalledWith(issue.id, true)
+      expect(window.onbeforeunload).toBeNull()
+      expect(CatToolActions.addNotification).toHaveBeenLastCalledWith(
+        expect.objectContaining({text: 'The issue has been restored.'}),
+      )
+
+      // Undo clears the notifications, which runs their close callback.
+      notification.closeCallback(false)
+      expect(SegmentActions.deleteIssue).not.toHaveBeenCalled()
+    })
+
+    test('without Undo the issue is deleted when the notification closes', () => {
+      const issue = makeIssue()
+      const {notification} = deleteAndGetNotification({issue, sid: '7'})
+
+      notification.closeCallback(false)
+
+      expect(SegmentActions.deleteIssue).toHaveBeenCalledWith(issue, '7')
+    })
   })
 
   test('clicking the comments button toggles the comment section open', () => {
@@ -373,7 +407,7 @@ describe('ReviewExtendedIssue', () => {
     act(() => {
       SegmentStore.emit(SegmentConstants.ISSUE_DELETED, 'seg-1', 1)
     })
-    expect(container.querySelector('.re-item')).toHaveStyle({opacity:'0'})
+    expect(container.querySelector('.re-item')).toHaveStyle({opacity: '0'})
   })
 
   test('ISSUE_DELETED store event ignores non-matching issues', () => {
@@ -383,7 +417,7 @@ describe('ReviewExtendedIssue', () => {
     act(() => {
       SegmentStore.emit(SegmentConstants.ISSUE_DELETED, 'other-seg', 1)
     })
-    expect(container.querySelector('.re-item')).not.toHaveStyle({opacity:'0'})
+    expect(container.querySelector('.re-item')).not.toHaveStyle({opacity: '0'})
   })
 
   test('OPEN_ISSUE_COMMENT store event opens the comment section when target_text is set', () => {
