@@ -1,0 +1,27 @@
+body {
+  font: 16px/1.6 sans-serif;
+  margin: 24px;
+  width: 520px;
+}
+.pane {
+  border: 1px solid #ccc;
+  margin-bottom: 16px;
+  padding: 8px;
+  min-height: 3em;
+}
+.tag {
+  display: inline-block;
+  margin: 0 1px;
+  padding: 0 4px;
+  border: 1px solid #8aa;
+  border-radius: 3px;
+  background: #eef4f4;
+  font-size: 12px;
+  line-height: 1.4;
+  cursor: pointer;
+  user-select: none;
+}
+.tag .index-counter {
+  font-weight: bold;
+  margin-right: 2px;
+}
