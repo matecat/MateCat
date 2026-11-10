@@ -148,3 +148,19 @@ describe('api', () => {
     expect(contentDOM).toHaveAttribute('spellcheck', 'true')
   })
 })
+
+describe('host extensions', () => {
+  test('extensions passed by the host stay active after a non-undoable setValue', () => {
+    const seen = []
+    const {EditorView} = require('@codemirror/view')
+    const editor = mount('one', {
+      extensions: EditorView.updateListener.of((u) => {
+        if (u.docChanged) seen.push(u.state.doc.toString())
+      }),
+    })
+    editor.setValue('two', {undoable: false})
+    editor.focus('end')
+    editor.insertText('!')
+    expect(seen).toEqual(['two!'])
+  })
+})

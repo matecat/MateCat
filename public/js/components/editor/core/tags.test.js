@@ -1,7 +1,7 @@
 import {Base64} from 'js-base64'
 import {createSegmentState} from './createSegmentEditor'
 import {serialize} from './docModel'
-import {chips} from './tags'
+import {chips, chipTokens, setTagState} from './tags'
 
 const ph = (id, ctype, text, extra = '') =>
   `<ph id="${id}" ctype="${ctype}" equiv-text="base64:${Base64.encode(text)}"${extra}/>`
@@ -181,5 +181,79 @@ describe('tag protection', () => {
     const state = createSegmentState(segment)
     const next = state.update({changes: {from: 5, insert: 'z'}}).state
     expect(next.doc.toString()).toContain('z')
+  })
+})
+
+describe('chip state classes (TagEntity tag-clicked / tag-focused)', () => {
+  const segment = 'a<x id="1"/>b<x id="2"/>'
+  // chipsOf drops the widget's extra class; read it straight off the decoration
+  const chipsWithState = (state) => {
+    const out = []
+    state.field(chips).between(0, state.doc.length, (from, to, deco) => {
+      out.push({from, to, stateClass: deco.spec.widget.stateClass})
+    })
+    return out
+  }
+
+  test('a class set on a chip range shows on that chip only', () => {
+    let state = createSegmentState(segment)
+    const [first] = chipTokens(state)
+    state = state.update({
+      effects: setTagState.of([
+        {from: first.from, to: first.to, className: 'tag-clicked'},
+      ]),
+    }).state
+    expect(chipsWithState(state).map((c) => c.stateClass)).toEqual([
+      'tag-clicked',
+      '',
+    ])
+  })
+
+  test('a new list replaces the previous one, and an empty list clears every chip', () => {
+    let state = createSegmentState(segment)
+    const [first, second] = chipTokens(state)
+    state = state.update({
+      effects: setTagState.of([{...first, className: 'tag-clicked'}]),
+    }).state
+    state = state.update({
+      effects: setTagState.of([{...second, className: 'tag-focused'}]),
+    }).state
+    expect(chipsWithState(state).map((c) => c.stateClass)).toEqual([
+      '',
+      'tag-focused',
+    ])
+    state = state.update({effects: setTagState.of([])}).state
+    expect(chipsWithState(state).map((c) => c.stateClass)).toEqual(['', ''])
+  })
+
+  test('a class follows its chip when text is inserted before it', () => {
+    let state = createSegmentState(segment)
+    const [, second] = chipTokens(state)
+    state = state.update({
+      effects: setTagState.of([{...second, className: 'tag-clicked'}]),
+    }).state
+    state = state.update({changes: {from: 0, insert: 'zz'}}).state
+    expect(chipsWithState(state)).toEqual([
+      {from: 3, to: 14, stateClass: ''},
+      {from: 15, to: 26, stateClass: 'tag-clicked'},
+    ])
+  })
+
+  test('a range that is not exactly a chip marks nothing', () => {
+    let state = createSegmentState(segment)
+    state = state.update({
+      effects: setTagState.of([{from: 0, to: 3, className: 'tag-clicked'}]),
+    }).state
+    expect(chipsWithState(state).map((c) => c.stateClass)).toEqual(['', ''])
+  })
+
+  test('chipTokens gives each tag its document range and token, unknown markup included', () => {
+    const state = createSegmentState('a<x id="1"/>b<bpt id="2">c')
+    expect(
+      chipTokens(state).map(({from, to, token}) => [from, to, token.name]),
+    ).toEqual([
+      [1, 12, 'x'],
+      [13, 25, 'unknown'],
+    ])
   })
 })
