@@ -59,6 +59,8 @@ const SegmentWrapper = ({isTarget}) => {
         segment={textToDisplay}
         isRtl={!!isRtl}
         marks={searchMarks}
+        // the user's switch, from the context: a closed segment follows it as soon as it changes
+        showWhitespace={userInfo?.metadata?.show_whitespace === 1}
         lang={isTarget ? config.target_code : config.source_code}
       />
     </div>

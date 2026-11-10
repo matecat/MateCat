@@ -23,6 +23,7 @@ import ContextPreviewChannel from '../../../utils/contextPreviewChannel'
 import TextUtils from '../../../utils/textUtils'
 import {classifyCompressibleTag} from '../../../utils/segmentText/compressibleTagUtils'
 import {SegmentContext} from '../../segments/SegmentContext'
+import {ApplicationWrapperContext} from '../../common/ApplicationWrapper/ApplicationWrapperContext'
 import TagBox from '../../segments/TagMenu/TagBox'
 import {createSegmentEditor} from '../core/createSegmentEditor'
 import {insertRaw} from '../core/docModel'
@@ -88,6 +89,10 @@ const TargetEditor = forwardRef(
     ref,
   ) => {
     const context = useContext(SegmentContext)
+    // The user's show whitespace option, from the application context: it changes live when the user toggles it.
+    const showWhitespace =
+      useContext(ApplicationWrapperContext).userInfo?.metadata
+        ?.show_whitespace === 1
 
     const parentRef = useRef(null)
     const wrapperRef = useRef(null)
@@ -288,6 +293,7 @@ const TargetEditor = forwardRef(
         lang: config.target_code,
         dir: config.isTargetRTL ? 'rtl' : 'ltr',
         readOnly,
+        showWhitespace,
         onChange: () => {
           if (!silentRef.current) updateTranslationDebounced()
         },
@@ -489,6 +495,11 @@ const TargetEditor = forwardRef(
     useEffect(() => {
       editorRef.current?.setReadOnly(readOnly)
     }, [readOnly])
+
+    // The show whitespace option applies live, without reopening the segment.
+    useEffect(() => {
+      editorRef.current?.setShowWhitespace(showWhitespace)
+    }, [showWhitespace])
 
     // Opening the segment focuses the target at the end.
     const prevOpenedRef = useRef(segment.opened)

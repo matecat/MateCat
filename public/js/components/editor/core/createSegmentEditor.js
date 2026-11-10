@@ -13,7 +13,7 @@ import {
   toDoc,
 } from './docModel'
 import {tagExtensions} from './tags'
-import {displayExtensions} from './display'
+import {displayExtensions, setShowWhitespaceEffect} from './display'
 import {keymapExtensions} from './keymap'
 import {clipboardExtensions} from './clipboard'
 import {historyExtensions} from './history'
@@ -159,6 +159,11 @@ export const createSegmentEditor = ({
           EditorState.readOnly.of(readOnly),
         ),
       })
+    },
+    /** Turns the space marks on or off (display only); kept across `setValue`. */
+    setShowWhitespace(showWhitespace) {
+      stateOptions.showWhitespace = showWhitespace
+      view.dispatch({effects: setShowWhitespaceEffect(showWhitespace)})
     },
     undo: () => undo(view),
     redo: () => redo(view),

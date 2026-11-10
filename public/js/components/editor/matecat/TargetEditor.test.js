@@ -6,6 +6,7 @@ import {EditorView} from '@codemirror/view'
 
 import TargetEditor, {tagMenuPosition, tagWarningClass} from './TargetEditor'
 import {SegmentContext} from '../../segments/SegmentContext'
+import {ApplicationWrapperContext} from '../../common/ApplicationWrapper/ApplicationWrapperContext'
 import SegmentActions from '../../../actions/SegmentActions'
 import SegmentStore from '../../../stores/SegmentStore'
 import SegmentConstants from '../../../constants/SegmentConstants'
@@ -601,5 +602,59 @@ describe('helpers', () => {
     expect(tagWarningClass(PC_OPEN, {tagMismatch: {target: [PC_OPEN]}})).toBe(
       '',
     )
+  })
+})
+
+describe('TargetEditor show whitespace option', () => {
+  const spaceMarks = (container) =>
+    container.querySelectorAll('.cm-content .special-char-space').length
+
+  test("follows the user's option, and applies a change live without remounting", async () => {
+    const segment = makeSegment({translation: 'a b c'})
+    const tree = (showWhitespace) => (
+      <ApplicationWrapperContext.Provider
+        value={{userInfo: {metadata: {show_whitespace: showWhitespace}}}}
+      >
+        <SegmentContext.Provider value={{segment}}>
+          <TargetEditor
+            segment={segment}
+            value={segment.translation}
+            translation={segment.translation}
+            bridge={targetEditorBridge}
+            updateCounter={jest.fn()}
+            toggleFormatMenu={jest.fn()}
+          />
+        </SegmentContext.Provider>
+      </ApplicationWrapperContext.Provider>
+    )
+    const {container, rerender} = render(tree(1))
+    await flush()
+    const view = viewOf(container)
+    expect(spaceMarks(container)).toBe(2)
+
+    rerender(tree(0))
+    expect(spaceMarks(container)).toBe(0)
+    rerender(tree(1))
+    expect(spaceMarks(container)).toBe(2)
+    // the same editor: the option is not a remount
+    expect(viewOf(container)).toBe(view)
+  })
+
+  test('marks no space without a logged user', async () => {
+    const segment = makeSegment({translation: 'a b c'})
+    const {container} = render(
+      <SegmentContext.Provider value={{segment}}>
+        <TargetEditor
+          segment={segment}
+          value={segment.translation}
+          translation={segment.translation}
+          bridge={targetEditorBridge}
+          updateCounter={jest.fn()}
+          toggleFormatMenu={jest.fn()}
+        />
+      </SegmentContext.Provider>,
+    )
+    await flush()
+    expect(spaceMarks(container)).toBe(0)
   })
 })
