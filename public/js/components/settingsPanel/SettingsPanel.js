@@ -138,6 +138,7 @@ export const SettingsPanel = ({
   fileImportFiltersParamsTemplates = {},
   fileImportXliffSettingsTemplates = {},
   subtemplatesNotSaved,
+  onTabOpened,
 }) => {
   const [isVisible, setIsVisible] = useState(false)
   const [tabs, setTabs] = useState(() => {
@@ -170,6 +171,12 @@ export const SettingsPanel = ({
       }
     },
   })
+
+  const openedTabId = tabs.find((tab) => tab.isOpened)?.id
+
+  useEffect(() => {
+    if (isOpened && openedTabId) onTabOpened?.(openedTabId)
+  }, [isOpened, openedTabId, onTabOpened])
 
   const wrapperRef = useRef()
 
@@ -370,6 +377,7 @@ export const SettingsPanel = ({
 SettingsPanel.propTypes = {
   onClose: PropTypes.func.isRequired,
   isOpened: PropTypes.bool,
+  onTabOpened: PropTypes.func,
   tabOpen: PropTypes.oneOf(Object.values(SETTINGS_PANEL_TABS)),
   user: PropTypes.object,
   tmKeys: PropTypes.array,

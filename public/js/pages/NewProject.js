@@ -46,6 +46,7 @@ import {getPretranslateParams} from '../utils/editorStatusLock'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
 import {mountPage} from './mountPage'
 import {HomePageSection} from '../components/createProject/HomePageSection'
+import {announceSettingsTab} from '../components/releaseAnnouncements/releaseAnnouncements'
 import UserActions from '../actions/UserActions'
 import {getDeepLGlosssaries} from '../api/getDeepLGlosssaries'
 import SocketListener from '../sse/SocketListener'
@@ -1170,6 +1171,7 @@ const NewProject = () => {
         <SettingsPanel
           {...{
             onClose: closeSettings,
+            onTabOpened: announceSettingsTab,
             isOpened: openSettings.isOpen,
             tabOpen: openSettings.tab,
             user: userInfo,

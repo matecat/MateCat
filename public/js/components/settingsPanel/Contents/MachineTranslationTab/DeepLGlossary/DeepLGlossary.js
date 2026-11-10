@@ -96,7 +96,6 @@ export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
           type: 'error',
           text: 'Error deleting glossary',
           position: 'br',
-          allowHtml: true,
           timer: 5000,
         })
       })
