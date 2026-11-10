@@ -6,6 +6,7 @@ use Controller\Abstracts\AbstractDownloadController;
 use Controller\Exceptions\RenderTerminatedException;
 use Controller\Traits\KleinResponseFileStream;
 use Exception;
+use ErrorException;
 use Klein\App;
 use Klein\Request;
 use Klein\Response;
@@ -42,6 +43,25 @@ class AbstractDownloadControllerTest extends AbstractTest
         parent::setUp();
         $this->cleanTestData();
         $this->controller = $this->createController();
+    }
+
+    /**
+     * Makes the deletion of $dir fail, also for root (the CI container), where a chmod would not:
+     * Utils::deleteDir() leaves a dot file in place, so its rmdir() of $dir warns, and the handler set
+     * here turns that one warning into an exception, as any failed deletion would. Other warnings,
+     * such as the silenced rmdir() of the job folder, stay silent. The caller restores the handler.
+     * Example: `<work dir>/.keep` keeps `<work dir>` on the disk.
+     */
+    private function makeUndeletable(string $dir): void
+    {
+        touch($dir . '/.keep');
+        set_error_handler(static function (int $severity, string $message) use ($dir): bool {
+            if (str_starts_with($message, 'rmdir(' . $dir . ')')) {
+                throw new ErrorException($message, 0, $severity);
+            }
+
+            return true;
+        }, E_WARNING);
     }
 
     protected function tearDown(): void
@@ -311,7 +331,8 @@ class AbstractDownloadControllerTest extends AbstractTest
     {
         $this->controller->id_job = 9030001;
         $dir = $this->controller->getWorkDir();
-        chmod($dir, 0500);
+        // A folder where the file should go blocks the write, also for root (CI).
+        mkdir($dir . '/output');
         set_error_handler(static fn (): bool => true, E_WARNING);
 
         try {
@@ -321,7 +342,6 @@ class AbstractDownloadControllerTest extends AbstractTest
             $this->controller->setOutputContent(new ZipContentObject(['output_filename' => 'test.txt', 'document_content' => 'body']));
         } finally {
             restore_error_handler();
-            chmod($dir, 0700);
             $this->invokeProtected('deleteWorkDir');
         }
     }
@@ -584,8 +604,7 @@ class AbstractDownloadControllerTest extends AbstractTest
     {
         $this->controller->id_job = 9030001;
         $dir = $this->controller->getWorkDir();
-        file_put_contents($dir . '/locked.docx', 'secret');
-        chmod($dir . '/locked.docx', 0000);
+        file_put_contents($dir . '/doc.docx', 'body');
 
         try {
             $this->expectException(Exception::class);
@@ -594,12 +613,12 @@ class AbstractDownloadControllerTest extends AbstractTest
             $method = new ReflectionMethod(AbstractDownloadController::class, 'composeZip');
             set_error_handler(static fn (): bool => true, E_WARNING);
             try {
-                $method->invoke(null, [new ZipContentObject(['output_filename' => 'locked.docx', 'input_filename' => $dir . '/locked.docx'])], $dir . '/out.zip');
+                // The zip is written at close; a missing folder fails it, also for root (CI).
+                $method->invoke(null, [new ZipContentObject(['output_filename' => 'doc.docx', 'input_filename' => $dir . '/doc.docx'])], $dir . '/missing/out.zip');
             } finally {
                 restore_error_handler();
             }
         } finally {
-            chmod($dir . '/locked.docx', 0600);
             $this->invokeProtected('deleteWorkDir');
         }
     }
@@ -647,7 +666,7 @@ class AbstractDownloadControllerTest extends AbstractTest
     {
         $this->controller->id_job = 9030001;
         $dir = $this->controller->getWorkDir();
-        chmod($dir, 0000);
+        $this->makeUndeletable($dir);
 
         try {
             $this->invokeProtected('deleteWorkDir');
@@ -655,7 +674,8 @@ class AbstractDownloadControllerTest extends AbstractTest
             $this->assertDirectoryExists($dir);
             $this->assertNotSame($dir, $this->controller->getWorkDir());
         } finally {
-            chmod($dir, 0700);
+            restore_error_handler();
+            unlink($dir . '/.keep');
             $this->invokeProtected('deleteWorkDir');
             @rmdir($dir);
             @rmdir(dirname($dir));
@@ -668,7 +688,7 @@ class AbstractDownloadControllerTest extends AbstractTest
         $this->controller->id_job = 9030001;
         $stale = AppConfig::$TMP_DOWNLOAD . '/9030002/stale';
         @mkdir($stale, 0700, true);
-        chmod($stale, 0000);
+        $this->makeUndeletable($stale);
         touch($stale, time() - AbstractDownloadController::WORK_DIR_MAX_AGE - 60);
 
         try {
@@ -677,7 +697,8 @@ class AbstractDownloadControllerTest extends AbstractTest
             $this->assertDirectoryExists($dir);
             $this->assertDirectoryExists($stale);
         } finally {
-            chmod($stale, 0700);
+            restore_error_handler();
+            unlink($stale . '/.keep');
             @rmdir($stale);
             @rmdir(dirname($stale));
             $this->invokeProtected('deleteWorkDir');

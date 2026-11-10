@@ -139,6 +139,8 @@ class DownloadControllerTest extends AbstractTest
     private Response&MockObject $responseMock;
     private string $storageMethod;
     private string $fixtureDir;
+    /** @var array{?string, ?string, ?string} */
+    private array $googleConfig;
 
     /**
      * @throws Throwable
@@ -150,6 +152,12 @@ class DownloadControllerTest extends AbstractTest
         // The test config stores files on S3: a download test opts in to S3 on its own.
         $this->storageMethod = AppConfig::$FILE_STORAGE_METHOD;
         AppConfig::$FILE_STORAGE_METHOD = 'fs';
+
+        // The GDrive downloads build a Google client, which needs these values; CI has no Google config.
+        $this->googleConfig = [AppConfig::$GOOGLE_OAUTH_CLIENT_APP_NAME, AppConfig::$GOOGLE_OAUTH_CLIENT_ID, AppConfig::$GOOGLE_OAUTH_CLIENT_SECRET];
+        AppConfig::$GOOGLE_OAUTH_CLIENT_APP_NAME = 'test-app';
+        AppConfig::$GOOGLE_OAUTH_CLIENT_ID = 'test-client-id';
+        AppConfig::$GOOGLE_OAUTH_CLIENT_SECRET = 'test-client-secret';
         $this->fixtureDir = sys_get_temp_dir() . '/download-test-' . uniqid();
         mkdir($this->fixtureDir);
 
@@ -181,6 +189,7 @@ class DownloadControllerTest extends AbstractTest
     protected function tearDown(): void
     {
         AppConfig::$FILE_STORAGE_METHOD = $this->storageMethod;
+        [AppConfig::$GOOGLE_OAUTH_CLIENT_APP_NAME, AppConfig::$GOOGLE_OAUTH_CLIENT_ID, AppConfig::$GOOGLE_OAUTH_CLIENT_SECRET] = $this->googleConfig;
         $this->deleteTree($this->fixtureDir);
         $this->cleanTestData();
         parent::tearDown();
@@ -659,7 +668,17 @@ class DownloadControllerTest extends AbstractTest
     {
         $path = $this->invokePrivate('storeConvertedDocument', ['ab', 'Localizable.strings', $this->fixtureDir . '/doc.xlf']);
 
-        $this->assertSame('00610062', bin2hex((string)file_get_contents($path)));
+        $this->assertSame(self::utf16WithoutBom('ab'), bin2hex((string)file_get_contents($path)));
+    }
+
+    /**
+     * The hex of a text written as UTF-16 by this platform's iconv, BOM removed, as the download writes it.
+     * The byte order follows iconv: little endian on Linux (production, CI), big endian on macOS.
+     * Example: "ab" gives "61006200" on Linux.
+     */
+    private static function utf16WithoutBom(string $text): string
+    {
+        return bin2hex(substr((string)iconv('UTF-8', 'UTF-16', $text), 2));
     }
 
     // ─── whole downloads, end to end ───
@@ -1162,7 +1181,7 @@ class DownloadControllerTest extends AbstractTest
 
         $this->runDownload([]);
 
-        $this->assertSame('00610062', bin2hex((string)$this->stream()->body));
+        $this->assertSame(self::utf16WithoutBom('ab'), bin2hex((string)$this->stream()->body));
     }
 
     /**
@@ -1690,21 +1709,25 @@ class DownloadControllerTest extends AbstractTest
     {
         $this->setSeededJob();
         $zipPath = $this->writeOriginalZip('pack.zip', ['doc.docx' => 'original-doc']);
-        $locked  = $this->fixtureDir . '/locked.docx';
-        file_put_contents($locked, 'secret');
-        chmod($locked, 0000);
+        // The file goes away once it is added, so close() cannot read it, also for root (CI).
+        $gone = $this->fixtureDir . '/gone.docx';
+        file_put_contents($gone, 'secret');
+        $vanishing = new class (['output_filename' => 'doc.docx', 'input_filename' => $gone]) extends ZipContentObject {
+            public function addToZip(ZipArchive $zip, string $entryName): void
+            {
+                parent::addToZip($zip, $entryName);
+                unlink((string)$this->input_filename);
+            }
+        };
         set_error_handler(static fn (): bool => true, E_WARNING);
 
         try {
             $this->expectException(Exception::class);
             $this->expectExceptionMessage('Unable to write the zip file pack.zip');
 
-            $this->controller->reBuildZipContent('pack.zip', [
-                new ZipContentObject(['output_filename' => 'doc.docx', 'input_filename' => $locked]),
-            ]);
+            $this->controller->reBuildZipContent('pack.zip', [$vanishing]);
         } finally {
             restore_error_handler();
-            chmod($locked, 0600);
             $this->deleteOriginalZip($zipPath);
             $this->invokePrivate('deleteWorkDir');
         }
