@@ -75,13 +75,16 @@ export const highlightedChips = (chips, {tagId, tagPlaceholder, key}) =>
     )
     .map(({from, to}) => ({from, to, className: 'tag-clicked'}))
 
-// Each chip with its Draft identity: the n-th chip with some markup is the n-th Draft tag with that markup.
-const chipsWithIdentity = (state, identities, sid) => {
+/**
+ * Each chip with its Draft identity (the n-th chip with some markup is the n-th Draft tag with that markup) and the
+ * key a highlight event names it by: `<keyPrefix>-<from>`.
+ */
+export const chipsWithIdentity = (state, identities, keyPrefix) => {
   const seen = {}
   return chipTokens(state).map(({from, to, token}) => {
     const n = (seen[token.raw] = (seen[token.raw] ?? -1) + 1)
     const identity = identities.filter(({raw}) => raw === token.raw)[n]
-    return {from, to, token, identity, key: `cm-source-${sid}-${from}`}
+    return {from, to, token, identity, key: `${keyPrefix}-${from}`}
   })
 }
 
@@ -146,7 +149,7 @@ const SourceEditor = ({segment, value, bridge}) => {
     return chipsWithIdentity(
       state,
       bridge?.tagIdentities?.(serialize(state)) ?? [],
-      segment.sid,
+      `cm-source-${segment.sid}`,
     )
   }
 
