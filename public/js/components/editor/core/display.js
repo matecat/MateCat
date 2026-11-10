@@ -261,7 +261,7 @@ const displayTheme = EditorView.baseTheme({
     content: '"\\21E5"',
     position: 'absolute',
     left: '0',
-    opacity: '0.6',
+    color: MARK_COLOR,
   },
 })
 

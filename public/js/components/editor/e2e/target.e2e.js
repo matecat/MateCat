@@ -386,3 +386,23 @@ test.describe('line breaks', () => {
     expect(box.y).toBeLessThan(text.bottom)
   })
 })
+
+test.describe('tab mark', () => {
+  test('the tab arrow is drawn in the same blue as the other marks', async ({
+    page,
+  }) => {
+    await open(page)
+    await call(page, 'setValue', 'a##$_09$##b##$_A0$##c')
+    const colors = await page.evaluate((target) => {
+      const root = document.querySelector(target)
+      const tab = getComputedStyle(root.querySelector('.cm-tab'), '::before')
+      const nbsp = getComputedStyle(
+        root.querySelector('.cm-nbsp .cm-mark-label'),
+        '::before',
+      )
+      return {tab: tab.color, nbsp: nbsp.color, opacity: tab.opacity}
+    }, TARGET)
+    expect(colors.tab).toBe(colors.nbsp)
+    expect(colors.opacity).toBe('1')
+  })
+})
