@@ -3,6 +3,7 @@
 
 namespace Matecat\Core\TestMyMemory;
 
+use Exception;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
@@ -182,7 +183,58 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest
         $engine_MyMemory = $this->getMockBuilder(MyMemory::class)->setConstructorArgs([$engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class)])->onlyMethods(['_call'])->getMock();
         $engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param, $curl_mock_param)->willReturn($rawValue_error);
 
-        $this->expectException('Exception');
+        $this->expectException(Exception::class);
+        $this->expectExceptionCode(-2);
+        $this->expectExceptionMessage('Error: The private TM key you entered (0123456789abcdef0123) appears to be invalid. Please check that the key is correct.');
+
+        $engine_MyMemory->checkCorrectKey($key_param);
+    }
+
+    /**
+     * @group  regression
+     * @covers MyMemory::checkCorrectKey
+     */
+    #[Test]
+    public function test_checkCorrectKey_with_http_500_from_mocked__call()
+    {
+        $key_param = "0123456789abcdef0123";
+        $url_mock_param = "https://api.mymemory.translated.net/authkey?key=0123456789abcdef0123";
+        $curl_mock_param = [
+            CURLOPT_HTTPGET => true,
+            CURLOPT_TIMEOUT => 10
+        ];
+
+        $rawValue_error = json_encode([
+            'error' => [
+                'code' => -22,
+                'message' => " The requested URL returned error: 500 - Server error (http status 500)",
+                'response' => "",
+            ],
+            'responseStatus' => 500
+        ]);
+
+
+        $engineDAO = new EngineDAO(obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
+        $engine_struct = EngineStruct::getStruct();
+        $engine_struct->id = 1;
+        $eng = $engineDAO->read($engine_struct);
+
+        /**
+         * @var $engineRecord EngineStruct
+         */
+        $engine_struct_param = $eng[0];
+
+        /**
+         * creation of the engine
+         * @var $engine_MyMemory MockObject|MyMemory
+         */
+        $engine_MyMemory = $this->getMockBuilder(MyMemory::class)->setConstructorArgs([$engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class)])->onlyMethods(['_call'])->getMock();
+        $engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param, $curl_mock_param)->willReturn($rawValue_error);
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionCode(-2);
+        $this->expectExceptionMessage('Error: The private TM key you entered (0123456789abcdef0123) appears to be invalid. Please check that the key is correct.');
+
         $engine_MyMemory->checkCorrectKey($key_param);
     }
 }
