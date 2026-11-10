@@ -31,7 +31,6 @@ export const ExportGlossary = ({row, onClose}) => {
         text: `You will receive the link at ${email}`,
         type: 'success',
         position: 'br',
-        allowHtml: true,
         timer: 5000,
       }
       CatToolActions.addNotification(notification)

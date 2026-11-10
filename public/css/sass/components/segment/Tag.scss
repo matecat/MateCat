@@ -11,7 +11,7 @@
               content: '\21B5'; //↵
               padding: 0 4px;
               font-size: variables.$font-size-xsmall;
-              color: colors.$blue200;
+              color: colors.$blue500;
             }
           }
         }
@@ -315,7 +315,7 @@
   &.tag-nbsp {
     font-size: variables.$font-size-base;
     margin: 0 2px;
-    color: colors.$blue200;
+    color: colors.$blue500;
     background: transparent;
     &:before {
       border: none;
@@ -333,7 +333,7 @@
   &.tag-word-joiner {
     font-size: variables.$font-size-small;
     margin: 0;
-    background: colors.$blue200;
+    background: colors.$blue500;
     &:before {
       border: none;
     }
@@ -351,7 +351,7 @@
     font-size: 17px;
     font-weight: 900;
     margin: 0;
-    color: colors.$blue200;
+    color: colors.$blue500;
     background-color: transparent;
     &:before {
       border: none;
@@ -380,7 +380,7 @@
       top: -7px;
       padding: 0 4px;
       font-size: variables.$font-size-xsmall;
-      color: colors.$blue200;
+      color: colors.$blue500;
       border: none;
     }
   }
@@ -394,7 +394,7 @@
       top: -7px;
       padding: 0 4px;
       font-size: variables.$font-size-xsmall;
-      color: colors.$blue200;
+      color: colors.$blue500;
       border: none;
     }
   }
@@ -402,7 +402,7 @@
   &.tag-tab {
     font-size: variables.$font-size-xsmall;
     margin: 0 2px;
-    color: colors.$blue200;
+    color: colors.$blue500;
     background: transparent;
     &:before {
       border: none;
@@ -419,7 +419,7 @@
 
   &.tag-split {
     position: relative;
-    color: colors.$blue200;
+    color: colors.$blue500;
     background-color: transparent;
 
     &:before {
@@ -722,8 +722,8 @@ body.tags-compressed {
       }
 
       .place-here-tips {
-        border: 1px solid colors.$blue200;
-        color: colors.$blue200;
+        border: 1px solid colors.$blue500;
+        color: colors.$blue500;
         border-radius: 2px;
         padding: 1px 2px;
         line-height: 1.1;
