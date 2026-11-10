@@ -16,6 +16,7 @@ import {
   specialCharMark,
   specialCharsPattern,
 } from '../../utils/segmentText/specialChars'
+import {segmentViewTagHandlers} from './tagTooltip'
 
 const DIFF_CLASS = {[DIFF_DELETE]: 'deleted', [DIFF_INSERT]: 'added'}
 
@@ -157,9 +158,17 @@ const renderToken = (token, i, options) => {
   const content = token.children
     ? renderTokens(token.children, {...options, inChip: true})
     : token.label
+  // The tag the chip shows, read by the tag tooltip (tagTooltip.js) when the chip is hovered.
+  const tagData = {'data-tag-name': token.name, 'data-tag-role': token.role}
   if (token.index !== undefined && token.index !== null) {
     return (
-      <span key={i} contentEditable={false} className={token.className}>
+      <span
+        key={i}
+        contentEditable={false}
+        className={token.className}
+        {...tagData}
+        data-tag-index={token.index}
+      >
         <span className="index-counter">{token.index + 1}</span>
         {token.role !== 'close' && <span data-text="true">{content}</span>}
       </span>
@@ -167,7 +176,12 @@ const renderToken = (token, i, options) => {
   }
   // The label in its own element, as the numbered chips have it: that is what Tag.scss trims with an ellipsis.
   return (
-    <span key={i} contentEditable={false} className={token.className}>
+    <span
+      key={i}
+      contentEditable={false}
+      className={token.className}
+      {...tagData}
+    >
       <span className="tag-text">{content}</span>
     </span>
   )
@@ -191,7 +205,7 @@ const SegmentView = ({
   as: Root = 'span',
   ...rootProps
 }) => {
-  const {onCopy} = rootProps
+  const {onCopy, onMouseOver, onMouseOut, onMouseDown} = rootProps
 
   // Copy the selected part as a segment slice, so that a paste in the editor
   // gets real tags. Only a selection that lies within this view.
@@ -268,8 +282,27 @@ const SegmentView = ({
     )
   }, [segment, isRtl, compareTo, marks, whitespace])
 
+  // One delegated handler pair per view shows the full text of a trimmed or compressed chip: no state per chip.
+  const tagHandlers = useMemo(
+    () => ({
+      onMouseOver: (event) => {
+        onMouseOver?.(event)
+        segmentViewTagHandlers.onMouseOver(event)
+      },
+      onMouseOut: (event) => {
+        onMouseOut?.(event)
+        segmentViewTagHandlers.onMouseOut(event)
+      },
+      onMouseDown: (event) => {
+        onMouseDown?.(event)
+        segmentViewTagHandlers.onMouseDown(event)
+      },
+    }),
+    [onMouseOver, onMouseOut, onMouseDown],
+  )
+
   return (
-    <Root {...rootProps} onCopy={handleCopy}>
+    <Root {...rootProps} {...tagHandlers} onCopy={handleCopy}>
       {content}
     </Root>
   )
