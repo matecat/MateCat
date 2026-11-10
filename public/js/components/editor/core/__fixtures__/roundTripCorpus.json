@@ -1,0 +1,390 @@
+[
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/buildPastedEditorState.segmentSlice.test.js",
+    "segment": "&lt;br/&gt;"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/buildPastedEditorState.segmentSlice.test.js",
+    "segment": "x##$_A0$##y##$_09$##"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/buildPastedEditorState.segmentSlice.test.js",
+    "segment": "ax##$_A0$##y##$_09$##b"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/buildPastedEditorState.segmentSlice.test.js",
+    "segment": "<img src=x onerror=alert(1)><x id=\"1\"/>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/buildPastedEditorState.segmentSlice.test.js",
+    "segment": "<x id=\"1\"/>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/buildPastedEditorState.segmentSlice.test.js",
+    "segment": "a<x id=\"1\"/>b"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/buildPastedEditorState.test.js",
+    "segment": "ciao <g id=\"1\">mondo</g>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/buildPastedEditorState.test.js",
+    "segment": "a°b\tc"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/buildPastedEditorState.test.js",
+    "segment": "<g id=\"1\"></g>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/compressibleTagUtils.test.js",
+    "segment": "<ph id=\"mtc_1\" ctype=\"x-original_pc_open\" equiv-text=\"base64:AAA\"/>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/compressibleTagUtils.test.js",
+    "segment": "<ph id=\"mtc_2\" ctype=\"x-original_pc_close\" equiv-text=\"base64:BBB\"/>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/compressibleTagUtils.test.js",
+    "segment": "<ph id=\"source1_1\" ctype=\"x-pc_open_data_ref\" equiv-text=\"base64:CCC\" x-orig=\"base64:DDD\"/>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/compressibleTagUtils.test.js",
+    "segment": "<ph id=\"source1_2\" ctype=\"x-pc_close_data_ref\" equiv-text=\"base64:EEE\" x-orig=\"base64:FFF\"/>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/compressibleTagUtils.test.js",
+    "segment": "<ph id=\"source2_1\" ctype=\"x-pc_open_data_ref\" equiv-text=\"base64:GGG\" x-orig=\"base64:HHH\"/>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/compressibleTagUtils.test.js",
+    "segment": "<ph id=\"source2_2\" ctype=\"x-pc_close_data_ref\" equiv-text=\"base64:III\" x-orig=\"base64:JJJ\"/>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/compressibleTagUtils.test.js",
+    "segment": "<ph id=\"mtc_3\" ctype=\"x-html\" equiv-text=\"base64:KKK\"/>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/compressibleTagUtils.test.js",
+    "segment": "<ph id=\"mtc_9\" equiv-text=\"base64:LLL\"/>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/compressibleTagUtils.test.js",
+    "segment": "<g id=\"1\" equiv-text=\"base64:WyMkZHA0XQ==\">"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/compressibleTagUtils.test.js",
+    "segment": "<g id=\"2\" equiv-text=\"base64:WyMkZHA0XQ==\">"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/compressibleTagUtils.test.js",
+    "segment": "<g id=\"3\">"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/compressibleTagUtils.test.js",
+    "segment": "<g id=\"4\" equiv-text=\"base64:WyMkZHA0XQ==\"/>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/compressibleTagUtils.test.js",
+    "segment": "</g>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/compressibleTagUtils.test.js",
+    "segment": "<ph id=\"mtc_1\" ctype=\"x-original_x\" x-orig=\"AAA\" equiv-text=\"base64:e3sjJmd0OyBlbWFpbC1zdWJqZWN0fX0=\"/>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/compressibleTagUtils.test.js",
+    "segment": "<ph id=\"mtc_2\" ctype=\"x-original_x\" x-orig=\"AAA\"/>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/compressibleTagUtils.test.js",
+    "segment": "plain g, self-closing g, </g> and x without equiv-text are not compressible"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/compressibleTagUtils.test.js",
+    "segment": "a g pair shares one number; its </g> is the close"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/compressibleTagUtils.test.js",
+    "segment": "a plain g nested in an equiv-text g does not steal its </g>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/compressibleTagUtils.test.js",
+    "segment": "an orphan </g> is not numbered"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/createNewEntitiesFromMap.gTags.test.js",
+    "segment": "<g id=\"7\">Reset</g>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/createNewEntitiesFromMap.test.js",
+    "segment": "<g id=\"1\">x</g>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/decodeSegment.test.js",
+    "segment": "<g id=\"1\">"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/decodeSegment.test.js",
+    "segment": "hello <g id=\"1\">"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/decodeTagInfo.test.js",
+    "segment": "<ph id=\"mtc_1\" ctype=\"x-original_pc_open\" equiv-text=\"base64:aGVsbG8=\"/>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/decodeTagInfo.test.js",
+    "segment": "<g id=\"2\">"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/decodeTagInfo.test.js",
+    "segment": "&lt;p&gt;\n"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/decodeTagInfo.test.js",
+    "segment": "##$_0A$##"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/findTagWithRegex.test.js",
+    "segment": "a <g id=\"1\">b</g> c <g id=\"2\">d</g> e"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/findTagWithRegex.test.js",
+    "segment": "<bx id=\"9\"/>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/getSegmentSlice.test.js",
+    "segment": "one##$_0A$##two"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/getSegmentSlice.test.js",
+    "segment": "ab<x id=\"1\"/>cd"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/getSegmentSlice.test.js",
+    "segment": "b<x id=\"1\"/>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/getSegmentSlice.test.js",
+    "segment": "a &lt;b&gt; c"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/htmlUtils.test.js",
+    "segment": "<g id=\"mtc_1\">"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/htmlUtils.test.js",
+    "segment": "<g id=\"-1\">"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/htmlUtils.test.js",
+    "segment": "&lt;p&gt;"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/htmlUtils.test.js",
+    "segment": "&amp;amp;"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/htmlUtils.test.js",
+    "segment": "&amp;"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/htmlUtils.test.js",
+    "segment": "&nbsp;"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/htmlUtils.test.js",
+    "segment": "&apos;"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/htmlUtils.test.js",
+    "segment": "&quot;"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/htmlUtils.test.js",
+    "segment": "&amp;lt;p&amp;gt;"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/matchTag.test.js",
+    "segment": "test <g id=\"1\">tag</g> end"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/matchTag.test.js",
+    "segment": "test </g> end"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/matchTag.test.js",
+    "segment": "value ##$_A0$## end"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/matchTag.test.js",
+    "segment": "<g id=\"1\">a</g> <g id=\"2\">b</g> <g id=\"3\">c</g>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/removeNewLineInContentState.test.js",
+    "segment": "foo##$_0A$##bar"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/removeNewLineInContentState.test.js",
+    "segment": "foo##$_0D$##bar"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/removeNewLineInContentState.test.js",
+    "segment": "foo##$_0D$####$_0A$##bar"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/removeNewLineInContentState.test.js",
+    "segment": "a##$_0A$##b##$_0A$##c"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/resolveDrop.test.js",
+    "segment": "helloab<x id=\"1\"/> world"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/resolveDrop.test.js",
+    "segment": "ab<x id=\"1\"/>cd efgh"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/resolveDrop.test.js",
+    "segment": "cd efghab<x id=\"1\"/>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/resolveDrop.test.js",
+    "segment": "abc<x id=\"1\"/>xyz"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/resolveDrop.test.js",
+    "segment": "axyzbc<x id=\"1\"/>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/splitOnTagPlaceHolder.test.js",
+    "segment": "foo##$_0A$##bar##$_0A$##baz"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/tagFromTagType.test.js",
+    "segment": "##$_A0$##"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/tagModel.test.js",
+    "segment": "<g id=\"1\">tag</g>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/tagUtils.tagIndex.test.js",
+    "segment": "<ph id=\"mtc_1\" ctype=\"x-original_pc_open\" equiv-text=\"base64:Jmx0O3AmZ3Q7\"/>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/tagUtils.tagIndex.test.js",
+    "segment": "<ph id=\"mtc_2\" ctype=\"x-original_pc_close\" equiv-text=\"base64:Jmx0Oy9wJmd0Ow==\"/>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/tagUtils.tagIndex.test.js",
+    "segment": "<ph id=\"source1_1\" ctype=\"x-pc_open_data_ref\" equiv-text=\"base64:Jmx0O3AmZ3Q7\" x-orig=\"base64:Jmx0O3AmZ3Q7\"/>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/tagUtils.tagIndex.test.js",
+    "segment": "<ph id=\"source1_2\" ctype=\"x-pc_close_data_ref\" equiv-text=\"base64:Jmx0Oy9wJmd0Ow==\" x-orig=\"base64:Jmx0Oy9wJmd0Ow==\"/>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/tagUtils.tagIndex.test.js",
+    "segment": "<ph id=\"mtc_3\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O3AmZ3Q7\"/>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/tagUtils.tagIndex.test.js",
+    "segment": "<span data-text=\"true\">&lt;p&gt;</span>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/tagUtils.tagIndex.test.js",
+    "segment": "&lt;p&gt;</span>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/tagUtils.tagIndex.test.js",
+    "segment": "<g id=\"1\">content</g>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/tagUtils.tagIndex.test.js",
+    "segment": "<g id=\"2\" equiv-text=\"base64:PGI+\">"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/tagUtils.tagIndex.test.js",
+    "segment": "<ph id=\"mtc_1\" ctype=\"x-original_x\" x-orig=\"AAA\" equiv-text=\"base64:WyMkZHA0XQ==\"/>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/tagUtils.tagIndex.test.js",
+    "segment": "a</g>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/tagUtils.tagIndex.test.js",
+    "segment": "a<g id=\"7\">b</g>c</g>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/tagUtils.test.js",
+    "segment": "test <g id=\"1\">tag</g> ph con &lt; &gt; &amp;lt; &amp;gt; <g id=\"2\"/> <ph id=\"mtc_1\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O3AmZ3Q7\"/> <ph id=\"mtc_2\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O3N0cm9uZyZndDs=\"/> <ph id=\"mtc_3\" ctype=\"x-html\" equiv-text=\"base64:Jmx0Oy9zdHJvbmcmZ3Q7\"/>pippoL&apos; placeholder &nbsp; elle-même"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/tagUtils.test.js",
+    "segment": "test <span contenteditable=\"false\" class=\"tag small tag-open\">​1​</span>tag<span contenteditable=\"false\" class=\"tag small tag-close\">​1​</span> ph con &lt; &gt; &amp;lt; &amp;gt; <span contenteditable=\"false\" class=\"tag small tag-selfclosed\">2</span> <span contenteditable=\"false\" class=\"tag small tag-selfclosed tag-ph\">&lt;p&gt;</span> <span contenteditable=\"false\" class=\"tag small tag-selfclosed tag-ph\">&lt;strong&gt;</span> <span contenteditable=\"false\" class=\"tag small tag-selfclosed tag-ph\">&lt;/strong&gt;</span>pippoL&apos; placeholder &nbsp; elle-même"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/tagUtils.test.js",
+    "segment": "test <g id=\"1\">tag</g> ph con &lt; &gt; &amp;lt; <g id=\"2\"></g> &amp;gt; <ph id=\"mtc_1\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O3AmZ3Q7\"/> <ph id=\"mtc_2\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O3N0cm9uZyZndDs=\"/> <ph id=\"mtc_3\" ctype=\"x-html\" equiv-text=\"base64:Jmx0Oy9zdHJvbmcmZ3Q7\"/>pippoL&apos; placeholder &nbsp; elle-même"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/tagUtils.test.js",
+    "segment": "test <g id=\"1\">tag</g> ph con &lt; &gt; &amp;lt; <g id=\"2\"></g> &amp;gt; <p> <strong> </strong>pippoL&apos; placeholder &nbsp; elle-même"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/tagUtils.test.js",
+    "segment": "test tag ph con ##$_SPLIT$## &lt; &gt; ##$_0A$## &amp;lt; ##$_09$## &amp;gt; ##$_A0$## ##$_0D$## <ph id=\"mtc_1\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O3AmZ3Q7\"/> <ph id=\"mtc_2\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O3N0cm9uZyZndDs=\"/> <ph id=\"mtc_3\" ctype=\"x-html\" equiv-text=\"base64:Jmx0Oy9zdHJvbmcmZ3Q7\"/>pippoL&apos; placeholder &nbsp; ##$_A0$##elle-même"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/tagUtils.test.js",
+    "segment": "test tag ph con  &lt; &gt; \n &amp;lt; ⇥ &amp;gt; ° \r <p> <strong> </strong>pippoL&apos; placeholder &nbsp; °elle-même"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/tagUtils.test.js",
+    "segment": "test tag ph con &lt; &gt; &amp;lt;  &amp;gt; <p> <strong> </strong>pippoL&apos; placeholder &nbsp; elle-même"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/tagUtils.test.js",
+    "segment": "a##$_A0$##b"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/tagUtils.test.js",
+    "segment": "a &lt;b&gt; c &amp; d"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/tagUtils.test.js",
+    "segment": "translated end<g id=\"1\"></g>"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/tagUtils.test.js",
+    "segment": "translated <g id=\"1\">tag</g> end"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/tagUtils.test.js",
+    "segment": "a##$_0A$##b##$_0D$##c##$_09$##d##$_A0$##e"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/tagUtils.test.js",
+    "segment": "a\nb\rc\td e"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/tagUtils.test.js",
+    "segment": "a\\u000Ab\\u000Dc\\u0009d e"
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/tagUtils.test.js",
+    "segment": "They started booking stays through Airbnb.&amp;nbsp;&amp;nbsp;<ph id=\"mtc_1\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O2JyIC8mZ3Q7\"/><ph id=\"mtc_2\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O2JyIC8mZ3Q7\"/>At first, Maria paid for these out of her own pocket, and it was putting a strain on her already limited finances—until Aladina Fundación connected her with Airbnb.org."
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/tagUtils.test.js",
+    "segment": "Airbnb.&nbsp;&nbsp;<<br />><<br />>At first, Maria paid for these out of her own pocket, and it was putting a strain on her already limited finances—until Aladina Fundación connected her with Airbnb.org."
+  },
+  {
+    "from": "public/js/components/segments/utils/DraftMatecatUtils/textUtils.test.js",
+    "segment": "foo##$_A0$##bar"
+  },
+  {
+    "from": "public/mocks/segmentsMock.js",
+    "segment": "Opt-in##$_SPLIT$## data"
+  }
+]
