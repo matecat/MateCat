@@ -1,6 +1,6 @@
 // The segment editor: a CodeMirror 6 view over one segment string. No app state: everything the host needs goes
 // through the options and the returned api.
-import {EditorSelection, EditorState} from '@codemirror/state'
+import {Compartment, EditorSelection, EditorState} from '@codemirror/state'
 import {EditorView} from '@codemirror/view'
 import {isolateHistory, redo, undo} from '@codemirror/commands'
 import {
@@ -18,6 +18,8 @@ import {keymapExtensions} from './keymap'
 import {clipboardExtensions} from './clipboard'
 import {historyExtensions} from './history'
 import {layerExtensions} from './layers'
+import {closeTagMenu, insertMenuTag, tagMenuExtensions} from './tagMenu'
+import {replaceOccurrenceSpec, transformSelectionSpec} from './commands'
 
 const theme = EditorView.theme({
   '&': {fontFamily: 'inherit', fontSize: 'inherit'},
@@ -26,6 +28,9 @@ const theme = EditorView.theme({
   '.cm-content': {padding: '0', caretColor: 'auto'},
   '.cm-line': {padding: '0'},
 })
+
+// Read-only can change while the editor lives (a target that gets locked): it sits in a compartment.
+const readOnlyCompartment = new Compartment()
 
 /**
  * The extensions of a segment editor state. Exported so the state can be built and tested without a view.
@@ -38,17 +43,20 @@ export const segmentEditorExtensions = ({
   readOnly = mode === 'source',
   showWhitespace = false,
   onEvent = () => {},
+  tagMenu,
   extensions = [],
 } = {}) => {
-  const editable = !readOnly
+  // The target keeps its editing extensions while read-only, so it can be made editable again.
+  const editable = mode === 'target' || !readOnly
   return [
     tagExtensions({dir, onEvent}),
     layerExtensions(),
     displayExtensions({showWhitespace}),
+    editable ? tagMenuExtensions(tagMenu) : [],
     keymapExtensions({editable}),
     clipboardExtensions({editable}),
     editable ? historyExtensions() : [],
-    EditorState.readOnly.of(readOnly),
+    readOnlyCompartment.of(EditorState.readOnly.of(readOnly)),
     EditorView.lineWrapping,
     EditorView.contentAttributes.of({
       spellcheck: 'true',
@@ -83,6 +91,7 @@ export const createSegmentState = (value, options) => {
  * @param {boolean} [options.showWhitespace] mark spaces (display only)
  * @param {(value: string) => void} [options.onChange] the segment string after every document change
  * @param {(name: string, payload: object) => void} [options.onEvent] `tagClick`
+ * @param {object} [options.tagMenu] `canOpen`, `onChange`, `onKey` of the tag menu (see tagMenu.js)
  * @param {import('@codemirror/state').Extension} [options.extensions] added to the editor, kept across `setValue`
  */
 export const createSegmentEditor = ({
@@ -111,6 +120,12 @@ export const createSegmentEditor = ({
     })
   }
 
+  const dispatchSpec = (spec, userEvent) => {
+    if (!spec || view.state.readOnly) return false
+    view.dispatch(spec, {userEvent})
+    return true
+  }
+
   return {
     view,
     /** The current segment string. */
@@ -130,6 +145,15 @@ export const createSegmentEditor = ({
         userEvent: 'set',
       })
     },
+    /** Makes the editor read-only or editable again; kept across `setValue`. */
+    setReadOnly(readOnly) {
+      stateOptions.readOnly = readOnly
+      view.dispatch({
+        effects: readOnlyCompartment.reconfigure(
+          EditorState.readOnly.of(readOnly),
+        ),
+      })
+    },
     undo: () => undo(view),
     redo: () => redo(view),
     /** Focuses the editor; `pos` `'start'` or `'end'` also moves the caret. */
@@ -146,6 +170,18 @@ export const createSegmentEditor = ({
     insertText: (text) => replaceSelection({text, tags: []}),
     /** Inserts a segment string at the selection: its tags become tags. */
     insertRaw: (raw) => replaceSelection(toDoc(raw)),
+    /** Replaces the selected text, between its tags, with `fn(text)`. False when nothing is selected. */
+    transformSelection: (fn) =>
+      dispatchSpec(transformSelectionSpec(view.state, fn), 'input'),
+    /** Replaces the `index`-th match of `regex` in the text between tags. False when there is none. */
+    replaceOccurrence: (regex, index, text) =>
+      dispatchSpec(
+        replaceOccurrenceSpec(view.state, regex, index, text),
+        'input.replace',
+      ),
+    /** Puts the tag `raw` in from the open tag menu (over the `<` that opened it) and closes the menu. */
+    insertMenuTag: (raw) => insertMenuTag(view, raw),
+    closeTagMenu: () => closeTagMenu(view),
     destroy: () => view.destroy(),
   }
 }
