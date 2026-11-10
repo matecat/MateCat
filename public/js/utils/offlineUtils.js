@@ -36,7 +36,6 @@ const OfflineUtils = {
             type: 'warning',
             position: 'bl',
             autoDismiss: false,
-            allowHtml: true,
             timer: 7000,
           }
           addNotification(notification)

@@ -41,7 +41,6 @@ export const ShareResource = ({row, onClose, onShare}) => {
         type: 'error',
         text: errorsObject.message,
         position: 'br',
-        allowHtml: true,
         timer: 5000,
       })
       setStatus({errors: errorsObject})

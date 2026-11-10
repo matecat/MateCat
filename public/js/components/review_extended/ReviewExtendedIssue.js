@@ -1,6 +1,5 @@
 import {isUndefined} from 'lodash'
 import React, {useContext, useEffect, useRef, useState} from 'react'
-import $ from 'jquery'
 import CatToolActions from '../../actions/CatToolActions'
 import SegmentActions from '../../actions/SegmentActions'
 import CommonUtils from '../../utils/commonUtils'
@@ -12,7 +11,12 @@ import IconEdit from '../../../img/icons/IconEdit'
 import ReviewExtendedIssuePanel from './ReviewExtendedIssuePanel'
 import Trash from '../../../img/icons/Trash'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
-import {Button, BUTTON_MODE, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../common/Button/Button'
 import CommentsSquareIconFilled from '../../../img/icons/CommentsSquareIconFilled'
 import CommentsSquareIcon from '../../../img/icons/CommentsSquareIcon'
 
@@ -78,42 +82,46 @@ export const ReviewExtendedIssue = ({
     if (issue.id === issueEditing?.id) setIssueEditing(undefined)
 
     CatToolActions.removeAllNotifications()
-    const notification = {
+
+    // The issue is deleted on the server only when this notification closes,
+    // so Undo has to stop that before clearing the notifications.
+    let isUndone = false
+    const undo = (event) => {
+      event.preventDefault()
+      isUndone = true
+      window.onbeforeunload = null
+      setVisible(true)
+      changeVisibility(issue.id, true)
+      CatToolActions.removeAllNotifications()
+      CatToolActions.addNotification({
+        title: 'Issue deleted',
+        text: 'The issue has been restored.',
+        type: 'warning',
+        position: 'bl',
+        timer: 5000,
+      })
+    }
+
+    CatToolActions.addNotification({
       title: 'Issue deleted',
-      text:
-        'The selected issue has been deleted. <a class="undo-issue-deleted undo-issue-deleted-' +
-        issue.id +
-        '">Undo</a>',
+      text: (
+        <>
+          The selected issue has been deleted.{' '}
+          <a href="#" onClick={undo}>
+            Undo
+          </a>
+        </>
+      ),
       type: 'warning',
       position: 'bl',
-      allowHtml: true,
       timer: 10000,
-      closeCallback: function () {
-        SegmentActions.deleteIssue(issue, sid)
+      closeCallback: () => {
+        if (!isUndone) SegmentActions.deleteIssue(issue, sid)
       },
-    }
-    CatToolActions.addNotification(notification)
+    })
     window.onbeforeunload = function () {
       SegmentActions.deleteIssue(issue, sid)
     }
-    setTimeout(function () {
-      const $button = $('.undo-issue-deleted-' + issue.id)
-      $button.off('click')
-      $button.on('click', function () {
-        setVisible(true)
-        changeVisibility(issue.id, true)
-        CatToolActions.removeAllNotifications()
-        const notification = {
-          title: 'Issue deleted',
-          text: 'The issue has been restored.',
-          type: 'warning',
-          position: 'bl',
-          timer: 5000,
-        }
-        CatToolActions.addNotification(notification)
-        window.onbeforeunload = null
-      })
-    }, 500)
   }
 
   const setCommentViewCallback = (event) => {
@@ -122,10 +130,7 @@ export const ReviewExtendedIssue = ({
 
     if (!commentView) {
       setTimeout(() => {
-        const input =
-          containerRef.current &&
-          $(containerRef.current).find('.re-comment-input')
-        input && input.length && input[0].focus()
+        containerRef.current?.querySelector('.re-comment-input')?.focus()
       }, 100)
     }
     setCommentView((prevState) => !prevState)
