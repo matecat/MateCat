@@ -99,6 +99,15 @@ export const SEGMENTS = {
     lang: {source: 'en-US', target: 'ko-KR'},
     dir: 'ltr',
   },
+  // Special characters the editor shows as display-only marks: em space, line separator, zero-width space.
+  special: {
+    source:
+      'An em\u2003space, a line\u2028separator and a zero\u200bwidth space',
+    target:
+      'Uno spazio\u2003em, un separatore\u2028di riga e uno spazio\u200bzero',
+    lang: {source: 'en-US', target: 'it-IT'},
+    dir: 'ltr',
+  },
   // Deliberate misspellings for the manual spellcheck check.
   spell: {
     source: 'The quick brown fox jumps over the lazy dog',

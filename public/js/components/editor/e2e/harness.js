@@ -29,12 +29,29 @@ const target = createSegmentEditor({
   onChange: (value) =>
     events.push({name: 'change', side: 'target', payload: value}),
   onEvent: record('target'),
+  // ?notags: a segment with no source tags to offer, the tag menu stays shut
+  tagMenu: {
+    canOpen: () => !params.has('notags'),
+    onChange: (menu) =>
+      events.push({name: 'tagMenu', side: 'target', payload: menu}),
+    onKey: (key) =>
+      events.push({name: 'tagMenuKey', side: 'target', payload: key}),
+  },
 })
 
-// A host shortcut such as Ctrl/Cmd+Enter must reach the page.
+// Host shortcuts (Ctrl/Cmd+Enter, add issue, Ctrl+K) must reach the page.
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-    events.push({name: 'hostKey', side: null, payload: 'Mod-Enter'})
+  const name =
+    (e.key === 'Enter' && e.ctrlKey && e.altKey && 'Ctrl-Alt-Enter') ||
+    (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && 'Mod-Enter') ||
+    (e.key === 'k' && e.ctrlKey && 'Ctrl-k')
+  if (name) {
+    events.push({
+      name: 'hostKey',
+      side: null,
+      payload: name,
+      defaultPrevented: e.defaultPrevented,
+    })
   }
 })
 

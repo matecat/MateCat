@@ -266,13 +266,13 @@ test.describe('keys', () => {
     )
   })
 
-  test('Ctrl/Cmd+Shift+Space inserts an nbsp, shown as a marked character', async ({
+  test('Ctrl+Shift+Space inserts an nbsp, shown as a marked character', async ({
     page,
   }) => {
     await open(page)
     const marks = await page.locator(`${TARGET} .cm-nbsp`).count()
     await caret(page, {before: 'Seconda'})
-    await page.keyboard.press('ControlOrMeta+Shift+Space')
+    await page.keyboard.press('Control+Shift+Space')
     expect(await value(page)).toBe(
       replaceOnce(target, 'Seconda', '##$_A0$##Seconda'),
     )
