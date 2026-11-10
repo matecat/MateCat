@@ -1,5 +1,8 @@
 import {createSegmentEditor} from './createSegmentEditor'
-import {LINE_BREAK, SPECIAL_CHARS} from './display'
+import {
+  LINE_BREAK,
+  SPECIAL_CHARS,
+} from '../../../utils/segmentText/specialChars'
 
 // jsdom has no layout: CodeMirror only needs these to exist. Nothing here asserts caret geometry.
 beforeAll(() => {
@@ -25,12 +28,12 @@ describe('invisible characters (display only)', () => {
   test('an nbsp shows as the cattool ° mark over the nbsp itself, and the document keeps the nbsp', () => {
     const editor = mount('a##$_A0$##b')
     const mark = editor.view.contentDOM.querySelector('.cm-specialChar')
-    expect(mark).toHaveClass('cm-nbsp')
+    expect(mark).toHaveClass('special-char-nbsp')
     // the mark keeps the nbsp width
     expect(mark.firstChild.nodeValue).toBe('\u00a0')
     // The ° is a child element, never a pseudo-element of the mark: the cattool tooltip owns ::before/::after of
     // every [aria-label] element and hid it (opacity 0 until hover).
-    const label = mark.querySelector(':scope > .cm-mark-label')
+    const label = mark.querySelector(':scope > .special-char-mark-label')
     expect(label.dataset.label).toBe('°')
     expect(label).toHaveAttribute('aria-hidden', 'true')
     expect(mark.dataset.label).toBeUndefined()
@@ -44,7 +47,7 @@ describe('invisible characters (display only)', () => {
     const editor = mount('25°C##$_A0$##x')
     const marks = editor.view.contentDOM.querySelectorAll('.cm-specialChar')
     expect(marks).toHaveLength(1)
-    expect(marks[0]).toHaveClass('cm-nbsp')
+    expect(marks[0]).toHaveClass('special-char-nbsp')
     expect(editor.view.contentDOM).toHaveTextContent('25°C')
     expect(editor.getValue()).toBe('25°C##$_A0$##x')
   })
@@ -58,7 +61,7 @@ describe('invisible characters (display only)', () => {
   test('a word joiner is marked, is no tag chip, and the document keeps the character', () => {
     const editor = mount('a\u2060b')
     const mark = editor.view.contentDOM.querySelector('.cm-specialChar')
-    expect(mark).toHaveClass('cm-word-joiner')
+    expect(mark).toHaveClass('special-char-word-joiner')
     expect(editor.view.contentDOM.querySelector('.tag')).toBeNull()
     expect(editor.getValue()).toBe('a\u2060b')
   })
@@ -73,13 +76,13 @@ describe('invisible characters (display only)', () => {
       expect(marks[0]).toHaveAttribute('aria-label', title)
       expect(marks[0]).not.toHaveAttribute('title')
       // a space keeps its width by holding itself; a zero-width character is replaced by its mark
-      expect(marks[0].firstChild?.nodeValue ?? '').toBe(keepsWidth ? ch : label)
-      // the drawing of a space is child elements that hold no text: the mark reads as the character alone
+      expect(marks[0].firstChild?.nodeValue ?? '').toBe(keepsWidth ? ch : '')
+      // the drawing is child elements that hold no text: the mark reads as the character alone, or as nothing
       const parts = [...marks[0].children].map((el) => el.className)
       expect(parts).toEqual(
         [
-          keepsWidth && label && 'cm-mark-label',
-          shape && `cm-mark-${shape}`,
+          label && 'special-char-mark-label',
+          shape && `special-char-mark-${shape}`,
         ].filter(Boolean),
       )
       for (const el of marks[0].children) expect(el).toBeEmptyDOMElement()
@@ -105,25 +108,27 @@ describe('invisible characters (display only)', () => {
 describe('line breaks (display only)', () => {
   const lineBreaks = (editor) =>
     [...editor.view.contentDOM.querySelectorAll('.cm-line')].map(
-      (line) => line.querySelectorAll('.cm-line-break').length,
+      (line) => line.querySelectorAll('.special-char-mark-line-break').length,
     )
 
   test('every line that ends with a line break shows the cattool line feed mark, the last line none', () => {
     const editor = mount('one##$_0A$##two##$_0A$####$_0A$##four')
     expect(lineBreaks(editor)).toEqual([1, 1, 1, 0])
-    const mark = editor.view.contentDOM.querySelector('.cm-line-break')
+    const mark = editor.view.contentDOM.querySelector(
+      '.special-char-mark-line-break',
+    )
     expect(mark).toHaveAttribute('aria-label', LINE_BREAK.title)
     expect(mark).not.toHaveAttribute('title')
-    expect(mark.querySelector(':scope > .cm-mark-label').dataset.label).toBe(
-      LINE_BREAK.label,
-    )
+    expect(
+      mark.querySelector(':scope > .special-char-mark-label').dataset.label,
+    ).toBe(LINE_BREAK.label)
     // the mark is after the text of its line and holds no text of its own
     const text = mark.parentElement.firstChild
     expect(text.nodeValue).toBe('one')
     expect(
       text.compareDocumentPosition(mark) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy()
-    expect(mark.querySelector('.cm-mark-label')).toBeEmptyDOMElement()
+    expect(mark.querySelector('.special-char-mark-label')).toBeEmptyDOMElement()
     expect(editor.getValue()).toBe('one##$_0A$##two##$_0A$####$_0A$##four')
   })
 
@@ -147,7 +152,47 @@ describe('line breaks (display only)', () => {
 
   test('a carriage return stays its tag chip and gets no line break mark', () => {
     const editor = mount('a##$_0D$##b')
-    expect(editor.view.contentDOM.querySelector('.cm-line-break')).toBeNull()
+    expect(
+      editor.view.contentDOM.querySelector('.special-char-mark-line-break'),
+    ).toBeNull()
     expect(editor.getValue()).toBe('a##$_0D$##b')
+  })
+})
+
+describe('spaces (the show whitespace option, display only)', () => {
+  const spaceMarks = (editor) => [
+    ...editor.view.contentDOM.querySelectorAll('.special-char-space'),
+  ]
+
+  test('are marked only with the option, one mark per space, and the document keeps them', () => {
+    expect(spaceMarks(mount('a  b'))).toHaveLength(0)
+
+    const editor = mount('a  b', {showWhitespace: true})
+    const marks = spaceMarks(editor)
+    // a run of spaces is one mark per space, not one element for the run
+    expect(marks).toHaveLength(2)
+    expect(marks[0].firstChild.nodeValue).toBe(' ')
+    expect(
+      marks[0].querySelector(':scope > .special-char-mark-label').dataset.label,
+    ).toBe('·')
+    // no tooltip on every space of the text
+    expect(marks[0]).not.toHaveAttribute('aria-label')
+    expect(editor.getValue()).toBe('a  b')
+  })
+
+  test('the option turns on and off in a live editor, and stays across a new value', () => {
+    const editor = mount('a b')
+    editor.setShowWhitespace(true)
+    expect(spaceMarks(editor)).toHaveLength(1)
+    editor.setValue('c d e', {undoable: false})
+    expect(spaceMarks(editor)).toHaveLength(2)
+    editor.setShowWhitespace(false)
+    expect(spaceMarks(editor)).toHaveLength(0)
+    // the other marks stay
+    editor.setValue('a##$_A0$##b', {undoable: false})
+    expect(
+      editor.view.contentDOM.querySelectorAll('.special-char-nbsp'),
+    ).toHaveLength(1)
+    expect(editor.getValue()).toBe('a##$_A0$##b')
   })
 })

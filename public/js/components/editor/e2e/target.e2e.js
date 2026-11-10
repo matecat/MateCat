@@ -103,15 +103,17 @@ test.describe('cattool keys', () => {
   }) => {
     await open(page)
     const chips = await page.locator(`${TARGET} .tag`).count()
-    const marks = await page.locator(`${TARGET} .cm-word-joiner`).count()
+    const marks = await page
+      .locator(`${TARGET} .special-char-word-joiner`)
+      .count()
     await caret(page, {before: 'Seconda'})
     await page.keyboard.press('Control+Alt+Space')
     expect(await value(page)).toBe(
       replaceOnce(target, 'Seconda', '\u2060Seconda'),
     )
-    await expect(page.locator(`${TARGET} .cm-word-joiner`)).toHaveCount(
-      marks + 1,
-    )
+    await expect(
+      page.locator(`${TARGET} .special-char-word-joiner`),
+    ).toHaveCount(marks + 1)
     await expect(page.locator(`${TARGET} .tag`)).toHaveCount(chips)
   })
 
@@ -151,20 +153,22 @@ test.describe('paste mapping', () => {
   }) => {
     await open(page)
     await caret(page, {before: 'Seconda'})
-    const nbspMarks = await page.locator(`${TARGET} .cm-nbsp`).count()
+    const nbspMarks = await page.locator(`${TARGET} .special-char-nbsp`).count()
     await clipboardEvent(page, 'paste', {'text/plain': 'a\tb 25°C'})
     expect(await value(page)).toBe(
       replaceOnce(target, 'Seconda', 'a##$_09$##b 25°CSeconda'),
     )
-    await expect(page.locator(`${TARGET} .cm-nbsp`)).toHaveCount(nbspMarks)
+    await expect(page.locator(`${TARGET} .special-char-nbsp`)).toHaveCount(
+      nbspMarks,
+    )
   })
 })
 
 test.describe('special characters', () => {
   const MARKS = [
-    ['.cm-typographic-space', 'Em space (U+2003)'],
-    ['.cm-separator-mark', 'Line separator (U+2028)'],
-    ['.cm-zwsp', 'Zero-width space (U+200B)'],
+    ['.special-char-typographic-space', 'Em space (U+2003)'],
+    ['.special-char-mark-separator', 'Line separator (U+2028)'],
+    ['.special-char-zwsp', 'Zero-width space (U+200B)'],
   ]
 
   test('em space, line separator and zero-width space each show their own visible mark', async ({
@@ -203,7 +207,7 @@ test.describe('special characters', () => {
   }) => {
     await open(page, 'special')
     const {mark, plain} = await page
-      .locator(`${TARGET} .cm-typographic-space`)
+      .locator(`${TARGET} .special-char-typographic-space`)
       .evaluate((el) => {
         const ctx = document.createElement('canvas').getContext('2d')
         ctx.font = getComputedStyle(el).font
@@ -237,8 +241,8 @@ test.describe('marks under the cattool tooltip', () => {
   }) => {
     await open(page)
     await page.mouse.move(0, 0)
-    const mark = page.locator(`${TARGET} .cm-nbsp`)
-    const label = mark.locator('.cm-mark-label')
+    const mark = page.locator(`${TARGET} .special-char-nbsp`)
+    const label = mark.locator('.special-char-mark-label')
     const shown = await label.evaluate((el) => {
       const before = getComputedStyle(el, '::before')
       return {content: before.content, opacity: before.opacity}
@@ -263,7 +267,7 @@ test.describe('marks under the cattool tooltip', () => {
   }) => {
     await open(page)
     const clipping = await page
-      .locator(`${TARGET} .cm-nbsp`)
+      .locator(`${TARGET} .special-char-nbsp`)
       .first()
       .evaluate((mark) => {
         const found = []
@@ -283,9 +287,9 @@ test.describe('marks under the cattool tooltip', () => {
   }) => {
     await open(page, 'special')
     for (const [selector, title] of [
-      ['.cm-typographic-space', 'Em space (U+2003)'],
-      ['.cm-separator-mark', 'Line separator (U+2028)'],
-      ['.cm-zwsp', 'Zero-width space (U+200B)'],
+      ['.special-char-typographic-space', 'Em space (U+2003)'],
+      ['.special-char-mark-separator', 'Line separator (U+2028)'],
+      ['.special-char-zwsp', 'Zero-width space (U+200B)'],
     ]) {
       const mark = page.locator(`${TARGET} ${selector}`)
       await hover(page, mark)
@@ -295,7 +299,9 @@ test.describe('marks under the cattool tooltip', () => {
     }
     // the bracket of a space is still drawn, by its own element
     const bracket = await page
-      .locator(`${TARGET} .cm-typographic-space .cm-mark-bracket`)
+      .locator(
+        `${TARGET} .special-char-typographic-space .special-char-mark-bracket`,
+      )
       .boundingBox()
     expect(bracket.width).toBeGreaterThan(1)
     expect(bracket.height).toBeGreaterThan(1)
@@ -303,7 +309,7 @@ test.describe('marks under the cattool tooltip', () => {
 })
 
 test.describe('line breaks', () => {
-  const LINE_BREAK = `${TARGET} .cm-line-break`
+  const LINE_BREAK = `${TARGET} .special-char-mark-line-break`
   const head = (page) =>
     page.evaluate(() => window.__editor.target.view.state.selection.main.head)
 
@@ -314,7 +320,7 @@ test.describe('line breaks', () => {
     const mark = page.locator(LINE_BREAK)
     await expect(mark).toHaveCount(1)
     const {glyph, color} = await mark
-      .locator('.cm-mark-label')
+      .locator('.special-char-mark-label')
       .evaluate((el) => {
         const before = getComputedStyle(el, '::before')
         return {glyph: before.content, color: before.color}
@@ -397,7 +403,7 @@ test.describe('tab mark', () => {
       const root = document.querySelector(target)
       const tab = getComputedStyle(root.querySelector('.cm-tab'), '::before')
       const nbsp = getComputedStyle(
-        root.querySelector('.cm-nbsp .cm-mark-label'),
+        root.querySelector('.special-char-nbsp .special-char-mark-label'),
         '::before',
       )
       return {tab: tab.color, nbsp: nbsp.color, opacity: tab.opacity}

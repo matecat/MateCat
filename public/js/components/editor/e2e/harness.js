@@ -5,6 +5,8 @@ import {tokenize} from '../../segmentView/segmentModel'
 import {SEGMENTS} from './fixtures'
 // The cattool's global tooltip: it owns ::before/::after of every [aria-label] element, the marks have to live with it.
 import '../../../../css/sass/commons/_aria-label-tooltip.scss'
+// The marks of the special characters: the styles the editor shares with SegmentView.
+import '../../../../css/sass/components/segment/SpecialCharMarks.scss'
 import {setLayer} from '../core/layers'
 import {chipTokens, setTagState} from '../core/tags'
 

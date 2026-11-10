@@ -16,6 +16,7 @@ import {
   OPAQUE_TAG,
   tokenize,
 } from '../../segmentView/segmentModel'
+import {CHARACTER_TAGS} from '../../../utils/segmentText/specialChars'
 
 export const LF = '##$_0A$##'
 export const NBSP = '##$_A0$##'
@@ -24,12 +25,7 @@ export const CR = '##$_0D$##'
 
 // Placeholders the document holds as the character they stand for. The word joiner is already that character in the
 // segment string, so it serialises as itself and needs no placeholder.
-const CHAR_FOR_TAG = {
-  lineFeed: '\n',
-  nbsp: '\u00a0',
-  tab: '\t',
-  wordJoiner: '\u2060',
-}
+const CHAR_FOR_TAG = CHARACTER_TAGS
 const PLACEHOLDER_FOR_CHAR = {'\n': LF, '\u00a0': NBSP, '\t': TAB}
 const PLACEHOLDER_CHARS = /[\n\u00a0\t]/g
 const WORD_JOINER = CHAR_FOR_TAG.wordJoiner

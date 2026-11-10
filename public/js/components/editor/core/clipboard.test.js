@@ -153,7 +153,7 @@ describe('paste (buildPastedEditorState)', () => {
       clipboardData: fakeTransfer({'text/plain': '25°C'}),
     })
     expect(editor.getValue()).toBe('a25°Cb')
-    expect(editor.view.contentDOM.querySelector('.cm-nbsp')).toBeNull()
+    expect(editor.view.contentDOM.querySelector('.special-char-nbsp')).toBeNull()
   })
 
   test('a paste into the read-only source changes nothing', () => {
