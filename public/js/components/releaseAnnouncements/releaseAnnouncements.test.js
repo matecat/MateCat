@@ -37,12 +37,13 @@ test('shows the announcement for 30 seconds', () => {
 })
 
 test('shows the TM settings one bottom right and the others bottom left', () => {
-  showReleaseAnnouncement('tmSettings')
   showReleaseAnnouncement('qualityReport')
+  showReleaseAnnouncement('tmSettings')
+  jest.advanceTimersByTime(1000)
 
   expect(addNotification.mock.calls.map(([n]) => [n.uid, n.position])).toEqual([
-    [RELEASE_ANNOUNCEMENTS.tmSettings.id, 'br'],
     [qrId, 'bl'],
+    [RELEASE_ANNOUNCEMENTS.tmSettings.id, 'br'],
   ])
 })
 
@@ -61,6 +62,7 @@ test('stays hidden in a browser where the user already closed it', () => {
 
   showReleaseAnnouncement('qualityReport')
   showReleaseAnnouncement('tmSettings')
+  jest.advanceTimersByTime(1000)
 
   expect(addNotification.mock.calls.map(([n]) => n.uid)).toEqual([
     RELEASE_ANNOUNCEMENTS.tmSettings.id,
@@ -88,11 +90,41 @@ test('it shows again after timing out without the user closing it', () => {
 
 test('the settings panel shows the announcement of the tab the user opens', () => {
   announceSettingsTab(SETTINGS_PANEL_TABS.translationMemoryGlossary)
+  jest.advanceTimersByTime(1000)
   announceSettingsTab(SETTINGS_PANEL_TABS.machineTranslation)
+  jest.advanceTimersByTime(1000)
   announceSettingsTab(SETTINGS_PANEL_TABS.fileImport)
+  jest.advanceTimersByTime(1000)
 
   expect(addNotification.mock.calls.map(([n]) => n.uid)).toEqual([
     RELEASE_ANNOUNCEMENTS.tmSettings.id,
     RELEASE_ANNOUNCEMENTS.fileImportSettings.id,
   ])
+})
+
+test('a settings tab announcement waits a second for the tab content to settle', () => {
+  announceSettingsTab(SETTINGS_PANEL_TABS.fileImport)
+
+  jest.advanceTimersByTime(999)
+  expect(addNotification).not.toHaveBeenCalled()
+
+  jest.advanceTimersByTime(1)
+  expect(addNotification).toHaveBeenCalledTimes(1)
+})
+
+test('switching tab while it waits drops the previous tab announcement', () => {
+  announceSettingsTab(SETTINGS_PANEL_TABS.translationMemoryGlossary)
+  jest.advanceTimersByTime(500)
+  announceSettingsTab(SETTINGS_PANEL_TABS.machineTranslation)
+  jest.advanceTimersByTime(2000)
+
+  expect(addNotification).not.toHaveBeenCalled()
+})
+
+test('a waiting announcement closed meanwhile in another browser tab is not shown', () => {
+  announceSettingsTab(SETTINGS_PANEL_TABS.fileImport)
+  Cookies.get.mockReturnValue('')
+  jest.advanceTimersByTime(1000)
+
+  expect(addNotification).not.toHaveBeenCalled()
 })

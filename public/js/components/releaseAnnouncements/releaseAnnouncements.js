@@ -16,6 +16,8 @@ const AUTO_DISMISS_MS = 30000
 export const RELEASE_ANNOUNCEMENTS = {
   tmSettings: {
     id: 'release_202611_tm_settings',
+    // Let the tab content settle first, so the user can read the notification.
+    delayMs: 1000,
     title: 'New advanced settings',
     position: 'br',
     text: (
@@ -32,6 +34,7 @@ export const RELEASE_ANNOUNCEMENTS = {
   },
   fileImportSettings: {
     id: 'release_202611_file_import_settings',
+    delayMs: 1000,
     title: 'New XLIFF import settings',
     position: 'br',
     text: (
@@ -64,11 +67,31 @@ export const RELEASE_ANNOUNCEMENTS = {
 
 const cookieName = (id) => 'msg-' + id
 
-/** @param {keyof RELEASE_ANNOUNCEMENTS} key */
+const isHidden = (id) =>
+  new Date() > SHOW_UNTIL || typeof Cookies.get(cookieName(id)) !== 'undefined'
+
+/**
+ * Shows the announcement after its `delayMs`, if any.
+ *
+ * @param {keyof RELEASE_ANNOUNCEMENTS} key
+ * @returns {Function} cancels the announcement while it is still waiting
+ */
 export const showReleaseAnnouncement = (key) => {
+  const {id, delayMs = 0} = RELEASE_ANNOUNCEMENTS[key]
+  if (isHidden(id)) return () => {}
+  if (!delayMs) {
+    addAnnouncement(key)
+    return () => {}
+  }
+
+  const timer = setTimeout(() => addAnnouncement(key), delayMs)
+  return () => clearTimeout(timer)
+}
+
+const addAnnouncement = (key) => {
   const {id, title, text, position = 'bl'} = RELEASE_ANNOUNCEMENTS[key]
-  if (new Date() > SHOW_UNTIL) return
-  if (typeof Cookies.get(cookieName(id)) !== 'undefined') return
+  // Closed in another tab while this one was waiting.
+  if (isHidden(id)) return
 
   addNotification({
     uid: id,
@@ -90,8 +113,14 @@ const ANNOUNCEMENT_BY_SETTINGS_TAB = {
   [SETTINGS_PANEL_TABS.fileImport]: 'fileImportSettings',
 }
 
-/** For the settings panel `onTabOpened`: shows the opened tab's announcement, if any. */
+let cancelPendingSettingsTab = () => {}
+
+/**
+ * For the settings panel `onTabOpened`: shows the opened tab's announcement, if
+ * any. Opening another tab cancels the previous one while it is still waiting.
+ */
 export const announceSettingsTab = (tabId) => {
+  cancelPendingSettingsTab()
   const key = ANNOUNCEMENT_BY_SETTINGS_TAB[tabId]
-  if (key) showReleaseAnnouncement(key)
+  cancelPendingSettingsTab = key ? showReleaseAnnouncement(key) : () => {}
 }
