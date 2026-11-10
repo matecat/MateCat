@@ -62,33 +62,51 @@ const boundaryOffset = (root, container, offset, side) => {
   return count
 }
 
+// A line break shows its chip and then breaks the line, as the editors do. A carriage return followed by a line
+// feed (CRLF) is one break: only the line feed breaks.
+const breaksLine = (tokens, i) =>
+  tokens[i].type === 'tag' &&
+  (tokens[i].name === 'lineFeed' ||
+    (tokens[i].name === 'carriageReturn' && tokens[i + 1]?.name !== 'lineFeed'))
+
 const renderTokens = (tokens) =>
-  tokens.map((token, i) => {
-    if (token.type === 'text') {
-      return <React.Fragment key={i}>{token.text}</React.Fragment>
-    }
-    if (token.type === 'mark') {
-      return (
-        <mark key={i} className={token.className}>
-          {renderTokens(token.tokens)}
-        </mark>
-      )
-    }
-    const content = token.children ? renderTokens(token.children) : token.label
-    if (token.index !== undefined && token.index !== null) {
-      return (
-        <span key={i} contentEditable={false} className={token.className}>
-          <span className="index-counter">{token.index + 1}</span>
-          {token.role !== 'close' && <span data-text="true">{content}</span>}
-        </span>
-      )
-    }
+  tokens.map((token, i) =>
+    breaksLine(tokens, i) ? (
+      <React.Fragment key={i}>
+        {renderToken(token, i)}
+        <br />
+      </React.Fragment>
+    ) : (
+      renderToken(token, i)
+    ),
+  )
+
+const renderToken = (token, i) => {
+  if (token.type === 'text') {
+    return <React.Fragment key={i}>{token.text}</React.Fragment>
+  }
+  if (token.type === 'mark') {
+    return (
+      <mark key={i} className={token.className}>
+        {renderTokens(token.tokens)}
+      </mark>
+    )
+  }
+  const content = token.children ? renderTokens(token.children) : token.label
+  if (token.index !== undefined && token.index !== null) {
     return (
       <span key={i} contentEditable={false} className={token.className}>
-        {content}
+        <span className="index-counter">{token.index + 1}</span>
+        {token.role !== 'close' && <span data-text="true">{content}</span>}
       </span>
     )
-  })
+  }
+  return (
+    <span key={i} contentEditable={false} className={token.className}>
+      {content}
+    </span>
+  )
+}
 
 /**
  * Read-only view of a segment string: text plus tag chips, with the markup
