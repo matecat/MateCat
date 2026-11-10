@@ -92,3 +92,6 @@ certs
 .code-review-graph/
 plugins/headroom_memory.db
 evidence/
+
+# Playwright output of the editor acceptance suite
+/test-results/
