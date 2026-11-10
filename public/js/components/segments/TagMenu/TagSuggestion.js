@@ -1,5 +1,5 @@
 import React from 'react'
-import {getStyleForName} from '../tagModel'
+import {getStyleForName} from '../../../utils/segmentText/tagModel'
 
 const TagSuggestion = React.forwardRef((props, ref) => {
   const {index, tagRole} = props.suggestion.data

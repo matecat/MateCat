@@ -1,3 +1,5 @@
+/* eslint-disable testing-library/no-node-access, testing-library/no-container --
+   The tag menu entries are plain divs with no roles or labels: they are found by class. */
 import React from 'react'
 import {render, screen, fireEvent} from '@testing-library/react'
 import TagSuggestion from './TagSuggestion'

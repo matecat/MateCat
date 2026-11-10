@@ -31,7 +31,7 @@ import selectionAroundEntity from './utils/DraftMatecatUtils/selectionAroundEnti
 import TagEntity from './TagEntity/TagEntity.component'
 import SegmentUtils from '../../utils/segmentUtils'
 import CommonUtils from '../../utils/commonUtils'
-import TagBox from './utils/DraftMatecatUtils/TagMenu/TagBox'
+import TagBox from './TagMenu/TagBox'
 import insertTag from './utils/DraftMatecatUtils/TagMenu/insertTag'
 import checkForMissingTags from './utils/DraftMatecatUtils/TagMenu/checkForMissingTag'
 import LexiqaUtils from '../../utils/lxq.main'
