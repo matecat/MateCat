@@ -146,7 +146,6 @@ export const ChunksJobContainer = ({
         text: `The selected jobs has been successfully archived.`,
         type: 'warning',
         position: 'bl',
-        allowHtml: true,
         timer: 10000,
       })
     }
@@ -160,7 +159,6 @@ export const ChunksJobContainer = ({
         text: `The selected jobs has been successfully unarchived.`,
         type: 'warning',
         position: 'bl',
-        allowHtml: true,
         timer: 10000,
       })
     }
@@ -174,7 +172,6 @@ export const ChunksJobContainer = ({
         text: `The selected jobs has been successfully canceled.`,
         type: 'warning',
         position: 'bl',
-        allowHtml: true,
         timer: 10000,
       })
     }
@@ -194,7 +191,6 @@ export const ChunksJobContainer = ({
             text: `The selected jobs has been successfully deleted permanently.`,
             type: 'warning',
             position: 'bl',
-            allowHtml: true,
             timer: 10000,
           })
         }

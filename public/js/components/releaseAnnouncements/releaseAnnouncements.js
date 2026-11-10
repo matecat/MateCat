@@ -1,0 +1,126 @@
+/**
+ * Temporary notifications announcing the main changes of the 2026-11 release.
+ * Delete this folder and its callers once SHOW_UNTIL has passed.
+ *
+ * An announcement stays hidden once the user closes it with the X. The choice is
+ * kept only in a cookie, so it applies to this browser.
+ */
+import React from 'react'
+import Cookies from 'js-cookie'
+import {addNotification} from '../../actions/notificationActions'
+import {SETTINGS_PANEL_TABS} from '../settingsPanel/SettingsPanel'
+
+export const SHOW_UNTIL = new Date('2026-11-30T23:59:59Z')
+const AUTO_DISMISS_MS = 30000
+
+export const RELEASE_ANNOUNCEMENTS = {
+  tmSettings: {
+    id: 'release_202611_tm_settings',
+    // Let the tab content settle first, so the user can read the notification.
+    delayMs: 1000,
+    title: 'New advanced settings',
+    position: 'br',
+    text: (
+      <>
+        Looking for pre‑confirmation and variant‑matching settings?
+        <br />
+        We moved them to the new <b>Advanced</b> subtab.
+        <br />
+        We also gave you more control: you can now include 101% matches in your
+        pre‑confirmation rules and choose the exact state they get in the
+        editor.
+      </>
+    ),
+  },
+  fileImportSettings: {
+    id: 'release_202611_file_import_settings',
+    delayMs: 1000,
+    title: 'New XLIFF import settings',
+    position: 'br',
+    text: (
+      <>
+        Working with XLIFF files just got more flexible.
+        <br />
+        You can now decide whether pre‑populated segments should be
+        automatically locked in the editor or not.
+        <br />
+        Scroll down to the dedicated section to try it out.
+      </>
+    ),
+  },
+  qualityReport: {
+    id: 'release_202611_quality_report',
+    title: 'Dive into segment history',
+    text: (
+      <>
+        Wondering how a translation evolved?
+        <br />
+        You can now track a segment&apos;s history directly from the QR page.
+        <br />
+        Just click the <b>Open history</b> button in the bottom right corner of
+        a segment&apos;s details panel to see a list of every confirmation step
+        and the exact text confirmed at each stage.
+      </>
+    ),
+  },
+}
+
+const cookieName = (id) => 'msg-' + id
+
+const isHidden = (id) =>
+  new Date() > SHOW_UNTIL || typeof Cookies.get(cookieName(id)) !== 'undefined'
+
+/**
+ * Shows the announcement after its `delayMs`, if any.
+ *
+ * @param {keyof RELEASE_ANNOUNCEMENTS} key
+ * @returns {Function} cancels the announcement while it is still waiting
+ */
+export const showReleaseAnnouncement = (key) => {
+  const {id, delayMs = 0} = RELEASE_ANNOUNCEMENTS[key]
+  if (isHidden(id)) return () => {}
+  if (!delayMs) {
+    addAnnouncement(key)
+    return () => {}
+  }
+
+  const timer = setTimeout(() => addAnnouncement(key), delayMs)
+  return () => clearTimeout(timer)
+}
+
+const addAnnouncement = (key) => {
+  const {id, title, text, position = 'bl'} = RELEASE_ANNOUNCEMENTS[key]
+  // Closed in another tab while this one was waiting.
+  if (isHidden(id)) return
+
+  addNotification({
+    uid: id,
+    title,
+    text,
+    type: 'info',
+    position,
+    autoDismiss: true,
+    timer: AUTO_DISMISS_MS,
+    closeCallback: (closedByUser) => {
+      if (closedByUser)
+        Cookies.set(cookieName(id), '', {expires: SHOW_UNTIL, secure: true})
+    },
+  })
+}
+
+const ANNOUNCEMENT_BY_SETTINGS_TAB = {
+  [SETTINGS_PANEL_TABS.translationMemoryGlossary]: 'tmSettings',
+  [SETTINGS_PANEL_TABS.fileImport]: 'fileImportSettings',
+}
+
+let cancelPendingSettingsTab = () => {}
+
+/**
+ * For the settings panel `onTabOpened`: shows the opened tab's announcement, if
+ * any. Opening another tab cancels the previous one while it is still waiting.
+ */
+export const announceSettingsTab = (tabId) => {
+  cancelPendingSettingsTab()
+  const key = ANNOUNCEMENT_BY_SETTINGS_TAB[tabId]
+  cancelPendingSettingsTab = key ? showReleaseAnnouncement(key) : () => {}
+}
