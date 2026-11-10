@@ -10,6 +10,7 @@ use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\Filters\DTO\Dita;
 use Model\Filters\DTO\IDto;
 use Model\Filters\DTO\Json;
+use Model\Filters\DTO\Markdown;
 use Model\Filters\DTO\MSExcel;
 use Model\Filters\DTO\MSPowerpoint;
 use Model\Filters\DTO\MSWord;
@@ -35,6 +36,7 @@ class FiltersConfigTemplateStruct extends AbstractDaoSilentStruct implements Jso
     public ?MSExcel $ms_excel = null;
     public ?MSPowerpoint $ms_powerpoint = null;
     public ?Dita $dita = null;
+    public ?Markdown $markdown = null;
 
     /**
      * Get YAML filter configuration DTO.
@@ -104,6 +106,16 @@ class FiltersConfigTemplateStruct extends AbstractDaoSilentStruct implements Jso
     public function getDita(): ?Dita
     {
         return $this->dita;
+    }
+
+    /**
+     * Get Markdown filter configuration DTO.
+     *
+     * @return Markdown|null Markdown configuration or null if not set.
+     */
+    public function getMarkdown(): ?Markdown
+    {
+        return $this->markdown;
     }
 
     /**
@@ -191,6 +203,18 @@ class FiltersConfigTemplateStruct extends AbstractDaoSilentStruct implements Jso
     }
 
     /**
+     * Set Markdown filter configuration DTO.
+     *
+     * @param Markdown|null $markdown Markdown configuration.
+     *
+     * @return void
+     */
+    public function setMarkdown(?Markdown $markdown): void
+    {
+        $this->markdown = $markdown;
+    }
+
+    /**
      * @param class-string<IDto> $dtoClass
      * @param array<string, mixed> $data
      */
@@ -207,6 +231,7 @@ class FiltersConfigTemplateStruct extends AbstractDaoSilentStruct implements Jso
             MSWord::class => $this->setMsWord($dto instanceof MSWord ? $dto : null),
             MSPowerpoint::class => $this->setMsPowerpoint($dto instanceof MSPowerpoint ? $dto : null),
             Dita::class => $this->setDita($dto instanceof Dita ? $dto : null),
+            Markdown::class => $this->setMarkdown($dto instanceof Markdown ? $dto : null),
             default => null,
         };
     }
@@ -256,6 +281,14 @@ class FiltersConfigTemplateStruct extends AbstractDaoSilentStruct implements Jso
         // dita
         if (isset($json['dita'])) {
             is_array($json['dita']) ? $this->hydrateDtoFromArray(Dita::class, $json['dita']) : $this->hydrateDtoFromArray(Dita::class, json_decode($json['dita'], true));
+        }
+
+        // markdown
+        if (isset($json['markdown'])) {
+            is_array($json['markdown']) ? $this->hydrateDtoFromArray(Markdown::class, $json['markdown']) : $this->hydrateDtoFromArray(
+                Markdown::class,
+                json_decode($json['markdown'], true)
+            );
         }
     }
 
@@ -320,6 +353,7 @@ class FiltersConfigTemplateStruct extends AbstractDaoSilentStruct implements Jso
         $this->setMsWord(new MSWord());
         $this->setMsPowerpoint(new MSPowerpoint());
         $this->setDita(new Dita());
+        $this->setMarkdown(new Markdown());
 
         $this->hydrateAllDto($json);
 
@@ -345,6 +379,7 @@ class FiltersConfigTemplateStruct extends AbstractDaoSilentStruct implements Jso
             'ms_excel' => $this->ms_excel,
             'ms_powerpoint' => $this->ms_powerpoint,
             'dita' => $this->dita,
+            'markdown' => $this->markdown,
             'created_at' => DateTimeUtil::formatIsoDate($this->created_at),
             'modified_at' => DateTimeUtil::formatIsoDate($this->modified_at)
         ];

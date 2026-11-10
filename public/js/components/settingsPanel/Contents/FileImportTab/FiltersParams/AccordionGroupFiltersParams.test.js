@@ -51,6 +51,7 @@ const baseTemplate = {
   },
   msPowerpoint: {extract_doc_properties: false, extract_notes: true, translate_slides: []},
   dita: {do_not_translate_elements: []},
+  markdown: {extract_frontmatter: false, translate_frontmatter_keys: []},
 }
 
 const setup = ({currentTemplateOverrides = {}, templates} = {}) => {
@@ -80,6 +81,28 @@ describe('AccordionGroupFiltersParams', () => {
     expect(screen.getByText('MS Excel')).toBeInTheDocument()
     expect(screen.getByText('MS PowerPoint')).toBeInTheDocument()
     expect(screen.getByText('DITA/DITAMAP')).toBeInTheDocument()
+    expect(screen.getByText('Markdown')).toBeInTheDocument()
+  })
+
+  test('lists the markdown section last', () => {
+    setup()
+
+    const titles = screen.getAllByText(
+      /^(JSON|XML|YAML|MS Word|MS Excel|MS PowerPoint|DITA\/DITAMAP|Markdown)$/,
+    )
+    expect(titles).toHaveLength(8)
+    expect(titles.at(-1)).toHaveTextContent('Markdown')
+  })
+
+  test('expands the markdown section content on click', () => {
+    setup()
+
+    fireEvent.click(screen.getByText('Markdown'))
+
+    expect(screen.getByText('Translate frontmatter')).toBeInTheDocument()
+    expect(
+      screen.getByText('Translatable frontmatter keys'),
+    ).toBeInTheDocument()
   })
 
   test('expands the json section content on click', () => {
@@ -116,5 +139,24 @@ describe('AccordionGroupFiltersParams', () => {
     })
 
     expect(screen.getByText('●')).toBeInTheDocument()
+  })
+
+  test('marks the markdown section as unsaved when it differs from the original template', () => {
+    const modifiedTemplate = {
+      ...baseTemplate,
+      markdown: {...baseTemplate.markdown, extract_frontmatter: true},
+    }
+
+    setup({
+      currentTemplateOverrides: modifiedTemplate,
+      templates: [baseTemplate, modifiedTemplate],
+    })
+
+    expect(screen.getAllByText('●')).toHaveLength(1)
+    expect(
+      screen.getAllByText(
+        (_, element) => element?.textContent === '●Markdown',
+      ).length,
+    ).toBeGreaterThan(0)
   })
 })

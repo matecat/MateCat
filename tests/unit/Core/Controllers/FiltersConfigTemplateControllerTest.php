@@ -248,6 +248,44 @@ class FiltersConfigTemplateControllerTest extends AbstractTest
     }
 
     #[Test]
+    public function create_accepts_markdown_extraction_parameters(): void
+    {
+        $body = json_encode([
+            'name'     => 'Markdown template',
+            'markdown' => ['extract_frontmatter' => true, 'translate_frontmatter_keys' => ['title']],
+        ]);
+        $this->setRequest([], $body, 'application/json');
+        $struct = new FiltersConfigTemplateStruct();
+        $this->daoStub->method('createFromJSON')->willReturn($struct);
+
+        $response = $this->responseMock();
+        $response->expects(self::once())->method('json')->with($struct);
+
+        $this->controller->create();
+    }
+
+    #[Test]
+    public function create_rejects_both_markdown_key_lists(): void
+    {
+        $body = json_encode([
+            'name'     => 'Markdown template',
+            'markdown' => [
+                'extract_frontmatter'               => true,
+                'translate_frontmatter_keys'        => ['title'],
+                'do_not_translate_frontmatter_keys' => ['slug'],
+            ],
+        ]);
+        $this->setRequest([], $body, 'application/json');
+
+        $response = $this->responseMock();
+        $response->expects(self::once())
+            ->method('json')
+            ->with(self::callback(static fn(array $data): bool => isset($data['error'])));
+
+        $this->controller->create();
+    }
+
+    #[Test]
     public function create_returns_400_on_duplicate_name_pdo_exception(): void
     {
         $this->setRequest([], self::VALID_JSON, 'application/json');
@@ -295,6 +333,24 @@ class FiltersConfigTemplateControllerTest extends AbstractTest
 
         $response = $this->responseMock();
         $response->expects(self::once())->method('json')->with($edited);
+
+        $this->controller->update();
+    }
+
+    #[Test]
+    public function update_rejects_an_unknown_markdown_property(): void
+    {
+        $body = json_encode([
+            'name'     => 'Markdown template',
+            'markdown' => ['translate_keys' => ['title']],
+        ]);
+        $this->setRequest(['id' => '42'], $body, 'application/json');
+        $this->daoStub->method('getByIdAndUser')->willReturn(new FiltersConfigTemplateStruct());
+
+        $response = $this->responseMock();
+        $response->expects(self::once())
+            ->method('json')
+            ->with(self::callback(static fn(array $data): bool => isset($data['error'])));
 
         $this->controller->update();
     }

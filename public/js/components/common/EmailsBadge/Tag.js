@@ -13,6 +13,7 @@ export const Tag = ({
   children,
   onRemove = () => {},
   status = TAG_STATUS.DEFAULT,
+  removable = true,
 }) => {
   const handleCLick = (e) => {
     e.stopPropagation()
@@ -23,9 +24,15 @@ export const Tag = ({
   return (
     <div className={[styles['email-badge-tag'], styles[status]].filter(Boolean).join(' ')}>
       {children}
-      <div className={styles['email-badge-tag-button-close']} onClick={handleCLick}>
-        <IconClose size={8} />
-      </div>
+      {removable && (
+        <div
+          className={styles['email-badge-tag-button-close']}
+          onClick={handleCLick}
+          data-testid="email-badge-tag-remove"
+        >
+          <IconClose size={8} />
+        </div>
+      )}
     </div>
   )
 }
@@ -34,4 +41,5 @@ Tag.propTypes = {
   children: PropTypes.node,
   onRemove: PropTypes.func.isRequired,
   status: PropTypes.oneOf([...Object.values(TAG_STATUS)]),
+  removable: PropTypes.bool,
 }
