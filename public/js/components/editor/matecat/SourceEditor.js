@@ -35,6 +35,7 @@ import {glossaryRanges, qaCheckGlossaryRanges} from './layers/glossary'
 import {lexiqaRanges} from './layers/lexiqa'
 import {icuRanges} from './layers/icu'
 import {layerTooltipExtensions} from './layerTooltip'
+import {createTagTooltip} from './tagTooltip'
 
 export const SPLIT_PLACEHOLDER = '##$_SPLIT$##'
 
@@ -253,6 +254,7 @@ const SourceEditor = ({segment, value, bridge}) => {
   eventsRef.current = {onTagClick, focusSelectedChips, applyTagState}
 
   useEffect(() => {
+    const tagTooltip = createTagTooltip()
     const editor = createSegmentEditor({
       parent: parentRef.current,
       showWhitespace,
@@ -261,9 +263,11 @@ const SourceEditor = ({segment, value, bridge}) => {
       lang: config.source_code,
       dir: config.isSourceRTL ? 'rtl' : 'ltr',
       onEvent: (name, payload) => {
+        tagTooltip.onEvent(name, payload)
         if (name === 'tagClick') eventsRef.current.onTagClick(payload)
       },
       extensions: [
+        tagTooltip.extension,
         layerTooltipExtensions(),
         Prec.highest(
           EditorView.domEventHandlers({
@@ -307,6 +311,7 @@ const SourceEditor = ({segment, value, bridge}) => {
       clearTimeout(delayAiAssistantRef.current)
       editorRef.current = null
       editor.destroy()
+      tagTooltip.destroy()
     }
     // Mounted once per segment, as SegmentSource builds its editor state once.
     // eslint-disable-next-line react-hooks/exhaustive-deps

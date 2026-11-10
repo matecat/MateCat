@@ -7,6 +7,8 @@ import {SEGMENTS} from './fixtures'
 import '../../../../css/sass/commons/_aria-label-tooltip.scss'
 // The marks of the special characters: the styles the editor shares with SegmentView.
 import '../../../../css/sass/components/segment/SpecialCharMarks.scss'
+// The cattool chip styles: trimming (ellipsis) and tag compaction are measured against them.
+import '../../../../css/sass/components/segment/Tag.scss'
 import {setLayer} from '../core/layers'
 import {chipTokens, setTagState} from '../core/tags'
 

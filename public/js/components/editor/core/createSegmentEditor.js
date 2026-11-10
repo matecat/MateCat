@@ -96,7 +96,8 @@ export const createSegmentState = (value, options) => {
  * @param {boolean} [options.readOnly]
  * @param {boolean} [options.showWhitespace] mark spaces (display only)
  * @param {(value: string) => void} [options.onChange] the segment string after every document change
- * @param {(name: string, payload: object) => void} [options.onEvent] `tagClick`
+ * @param {(name: string, payload: object) => void} [options.onEvent] `tagClick`, `tagHover` (with `truncated`, the
+ *   full `label` and the chip `rect`) and `tagLeave`
  * @param {object} [options.tagMenu] `canOpen`, `onChange`, `onKey` of the tag menu (see tagMenu.js)
  * @param {import('@codemirror/state').Extension} [options.extensions] added to the editor, kept across `setValue`
  */

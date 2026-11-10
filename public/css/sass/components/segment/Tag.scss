@@ -174,7 +174,8 @@
   span {
     all: revert;
   }
-  span[data-text='true'] {
+  span[data-text='true'],
+  .tag-text {
     display: flow-root;
     white-space: nowrap;
     overflow: hidden;
@@ -475,7 +476,8 @@
     box-shadow: inset 0px 0px 0px 1px colors.$grey500;
   }
   &.tag-compressed {
-    span[data-text='true'] {
+    span[data-text='true'],
+    .tag-text {
       display: none;
     }
   }
@@ -492,7 +494,8 @@ body.tags-compressed {
       margin-right: 0;
       background-color: #788190;
     }
-    span[data-text='true'] {
+    span[data-text='true'],
+    .tag-text {
       display: none;
     }
   }
@@ -504,7 +507,8 @@ body.tags-compressed {
 .tag-container-lite .tag.tag-ph,
 .tag-container-lite .tag.tag-numbered {
   .index-counter,
-  span[data-text='true'] {
+  span[data-text='true'],
+  .tag-text {
     display: inline;
   }
 }

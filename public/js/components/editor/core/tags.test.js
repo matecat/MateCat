@@ -1,4 +1,5 @@
 import {Base64} from 'js-base64'
+import {EditorView} from '@codemirror/view'
 import {createSegmentState} from './createSegmentEditor'
 import {serialize} from './docModel'
 import {chips, chipTokens, setTagState} from './tags'
@@ -254,6 +255,42 @@ describe('chip state classes (TagEntity tag-clicked / tag-focused)', () => {
     ).toEqual([
       [1, 12, 'x'],
       [13, 25, 'unknown'],
+    ])
+  })
+})
+
+describe('chip DOM (TagEntity markup that Tag.scss trims and compacts)', () => {
+  // The chip children as [className, text]: the pair number, then the label span.
+  const chipChildren = (value) => {
+    const parent = document.body.appendChild(document.createElement('div'))
+    const view = new EditorView({parent, state: createSegmentState(value)})
+    const out = [...view.dom.querySelectorAll('.tag')].map((chip) =>
+      [...chip.childNodes].map((n) => [n.className ?? '#text', n.textContent]),
+    )
+    view.destroy()
+    parent.remove()
+    return out
+  }
+
+  test('a plain tag keeps its label in a span, not as bare chip text', () => {
+    expect(chipChildren('a' + ph('1', 'x-html', '<br/>'))).toEqual([
+      [['tag-text', '<br/>']],
+    ])
+  })
+
+  test('a numbered opening tag shows its number then its label; the closing one only its number', () => {
+    expect(
+      chipChildren(
+        ph('1', 'x-original_pc_open', '<b>') +
+          'a' +
+          ph('2', 'x-original_pc_close', '</b>'),
+      ),
+    ).toEqual([
+      [
+        ['index-counter', '1'],
+        ['tag-text', '<b>'],
+      ],
+      [['index-counter', '1']],
     ])
   })
 })
