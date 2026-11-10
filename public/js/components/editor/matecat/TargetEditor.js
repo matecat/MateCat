@@ -27,6 +27,7 @@ import TagBox from '../../segments/TagMenu/TagBox'
 import {createSegmentEditor} from '../core/createSegmentEditor'
 import {insertRaw} from '../core/docModel'
 import {chipTokens, setTagState} from '../core/tags'
+import {createTagTooltip} from './tagTooltip'
 import {chipsWithIdentity, highlightedChips} from './SourceEditor'
 
 const MENU_MIN_WIDTH = 300
@@ -281,6 +282,7 @@ const TargetEditor = forwardRef(
     )
 
     useEffect(() => {
+      const tagTooltip = createTagTooltip()
       const editor = createSegmentEditor({
         parent: parentRef.current,
         value,
@@ -292,6 +294,7 @@ const TargetEditor = forwardRef(
           if (!silentRef.current) updateTranslationDebounced()
         },
         onEvent: (name, payload) => {
+          tagTooltip.onEvent(name, payload)
           if (name === 'tagClick') eventsRef.current.onTagClick(payload)
         },
         tagMenu: {
@@ -300,6 +303,7 @@ const TargetEditor = forwardRef(
           onKey: (key) => eventsRef.current.onMenuKey(key),
         },
         extensions: [
+          tagTooltip.extension,
           Prec.highest(
             EditorView.domEventHandlers({
               // A triple click selects the whole target, not only the clicked line
@@ -343,6 +347,7 @@ const TargetEditor = forwardRef(
         refreshWarningsDebounced.cancel()
         editorRef.current = null
         editor.destroy()
+        tagTooltip.destroy()
       }
       // Mounted once per segment, as Editarea builds its editor state once.
       // eslint-disable-next-line react-hooks/exhaustive-deps

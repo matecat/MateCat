@@ -108,6 +108,29 @@ export const SEGMENTS = {
     lang: {source: 'en-US', target: 'it-IT'},
     dir: 'ltr',
   },
+  // A ph whose text is longer than a chip shows (Tag.scss trims it at 320px), next to a short one.
+  longTag: {
+    source:
+      'Open ' +
+      phc(
+        'mtc_1',
+        'x-html',
+        '<a href="https://www.matecat.com/a/very/long/path/that/never/fits/in/a/chip" class="link">',
+      ) +
+      'the link' +
+      phc('mtc_2', 'x-html', '<br/>'),
+    target:
+      'Apri ' +
+      phc(
+        'mtc_1',
+        'x-html',
+        '<a href="https://www.matecat.com/a/very/long/path/that/never/fits/in/a/chip" class="link">',
+      ) +
+      'il link' +
+      phc('mtc_2', 'x-html', '<br/>'),
+    lang: {source: 'en-US', target: 'it-IT'},
+    dir: 'ltr',
+  },
   // Deliberate misspellings for the manual spellcheck check.
   spell: {
     source: 'The quick brown fox jumps over the lazy dog',
