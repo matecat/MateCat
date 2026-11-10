@@ -198,7 +198,7 @@ export const DownloadMenu = ({password, jid, isGDriveProject}) => {
             </>
           ),
           onClick: () => {
-            window.open(`/api/v2/xliff/${jid}/${password}/${jid}.zip`, '_blank')
+            window.open(`/api/v3/jobs/${jid}/${password}/xliff`, '_blank')
           },
         },
         {
@@ -209,7 +209,7 @@ export const DownloadMenu = ({password, jid, isGDriveProject}) => {
             </>
           ),
           onClick: () => {
-            window.open(`/api/v2/tmx/${jid}/${password}`, '_blank')
+            window.open(`/api/v3/jobs/${jid}/${password}/tmx`, '_blank')
           },
         },
       ]}

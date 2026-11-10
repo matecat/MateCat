@@ -93,7 +93,7 @@ test('opens the xliff export in a new tab', () => {
   render(<DownloadMenu password="secret" jid="10" isGDriveProject={false} />)
   fireEvent.click(screen.getByText('Export XLIFF'))
   expect(window.open).toHaveBeenCalledWith(
-    '/api/v2/xliff/10/secret/10.zip',
+    '/api/v3/jobs/10/secret/xliff',
     '_blank',
   )
 })
@@ -101,7 +101,10 @@ test('opens the xliff export in a new tab', () => {
 test('opens the job tmx export in a new tab', () => {
   render(<DownloadMenu password="secret" jid="10" isGDriveProject={false} />)
   fireEvent.click(screen.getByText('Export job TMX'))
-  expect(window.open).toHaveBeenCalledWith('/api/v2/tmx/10/secret', '_blank')
+  expect(window.open).toHaveBeenCalledWith(
+    '/api/v3/jobs/10/secret/tmx',
+    '_blank',
+  )
 })
 
 test('downloads the original file to google drive', () => {

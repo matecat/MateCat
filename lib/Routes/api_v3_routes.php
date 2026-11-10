@@ -28,6 +28,11 @@ $klein->with('/api/v3/jobs/[i:id_job]/[:password]', function () {
     route('/file/[i:id_file]/instructions', 'POST', ['\Controller\API\V3\FileInfoController', 'setInstructions']);
     route('/metadata', 'GET', ['\Controller\API\V3\MetaDataController', 'index']);
 
+    // Download files
+    route('/translation', 'GET', ['Controller\API\V2\DownloadController', 'index']);
+    route('/xliff', 'GET', ['Controller\API\V2\DownloadController', 'forceXliff']);
+    route('/tmx', 'GET', ['Controller\API\V2\DownloadJobTMXController', 'index']);
+
     route('/warnings', 'GET', ['Controller\API\App\GetWarningController', 'global']);
 
     route('/delete', 'POST', ['Controller\API\V2\JobsController', 'delete']);
@@ -222,9 +227,15 @@ route('/api/v3/engines/list', 'GET', ['\Controller\API\V2\EnginesController', 'l
 
 // Download files
 route('/api/v3/original/[:id_job]/[:password]', 'GET', ['Controller\API\V2\DownloadOriginalController', 'index']);
+
+// Deprecated aliases of /api/v3/jobs/[:id_job]/[:password]/{translation,xliff,tmx}, kept for existing integrations.
+// Each path must be registered only once: Klein runs every matching route, and a GDrive download does not exit.
+// The [:filename] segment is ignored by the controller.
 route('/api/v3/translation/[:id_job]/[:password]', 'GET', ['Controller\API\V2\DownloadController', 'index']);
 route('/api/v3/xliff/[:id_job]/[:password]/[:filename]', 'GET', ['Controller\API\V2\DownloadController', 'forceXliff']);
+route('/api/v3/SDLXLIFF/[:id_job]/[:password]/[:filename]', 'GET', ['Controller\API\V2\DownloadController', 'forceXliff']);
 route('/api/v3/tmx/[:id_job]/[:password]', 'GET', ['Controller\API\V2\DownloadJobTMXController', 'index']);
+route('/api/v3/TMX/[:id_job]/[:password]', 'GET', ['Controller\API\V2\DownloadJobTMXController', 'index']);
 
 $klein->with('/api/v3/teams', function () {
     route('', 'GET', ['\Controller\API\V2\TeamsController', 'getTeamList']);
@@ -250,12 +261,6 @@ $klein->with('/api/v3/files', function () {
 
 // change password
 route('/api/v3/change-password', 'POST', ['Controller\API\V2\ChangePasswordController', 'changePassword']);
-
-// Download files
-route('/api/v3/original/[:id_job]/[:password]', 'GET', ['Controller\API\V2\DownloadOriginalController', 'index']);
-route('/api/v3/translation/[:id_job]/[:password]', 'GET', ['Controller\API\V2\DownloadController', 'index']);
-route('/api/v3/SDLXLIFF/[:id_job]/[:password]/[:filename]', 'GET', ['Controller\API\V2\DownloadController', 'forceXliff']);
-route('/api/v3/TMX/[:id_job]/[:password]', 'GET', ['Controller\API\V2\DownloadJobTMXController', 'index']);
 
 // User
 route('/api/v3/user', 'PUT', ['Controller\API\V2\UserController', 'edit']);
