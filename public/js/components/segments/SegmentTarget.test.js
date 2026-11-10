@@ -7,6 +7,8 @@ import {SegmentContext} from './SegmentContext'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentActions from '../../actions/SegmentActions'
 import OfflineUtils from '../../utils/offlineUtils'
+import SegmentUtils from '../../utils/segmentUtils'
+import CursorUtils from '../../utils/cursorUtils'
 import {Base64} from 'js-base64'
 import {setTagSignatureMiddleware} from './utils/DraftMatecatUtils/tagModel'
 
@@ -17,6 +19,29 @@ jest.mock('./Editarea', () => (props) => (
     data-sid={props.segment?.sid}
   />
 ))
+
+let mockNewEditor = false
+jest.mock('../editor/matecat/editorEngine', () => ({
+  isNewEditorActive: () => mockNewEditor,
+}))
+jest.mock('../editor/matecat/TargetEditor', () => {
+  const React = require('react')
+  return React.forwardRef((props, ref) => {
+    React.useImperativeHandle(ref, () => mockTargetHandle)
+    return (
+      <div
+        data-testid="target-editor"
+        data-value={props.value}
+        data-translation={props.translation}
+        data-bridge={props.bridge?.name}
+      />
+    )
+  })
+})
+const mockTargetHandle = {addMissingSourceTagsToTarget: jest.fn()}
+jest.mock('./targetEditorBridge', () => ({
+  targetEditorBridge: {name: 'target-bridge'},
+}))
 
 jest.mock('./SegmentButtons', () => (props) => (
   <div data-testid="segment-buttons" data-disabled={String(props.disabled)} />
@@ -75,6 +100,7 @@ jest.mock('../../utils/cursorUtils', () => ({
 }))
 
 jest.mock('../../utils/segmentUtils', () => ({
+  checkCurrentSegmentTPEnabled: jest.fn(() => false),
   getRelativeTransUnitCharactersCounter: jest.fn(({charactersCounter}) => ({
     segmentCharacters: charactersCounter?.segmentCharacters ?? 0,
     unitCharacters: charactersCounter?.counter ?? 0,
@@ -361,5 +387,123 @@ describe('SegmentTarget', () => {
       jest.advanceTimersByTime(100)
       expect(SegmentActions.replaceEditAreaTextContent).not.toHaveBeenCalled()
     })
+  })
+})
+
+describe('SegmentTarget editor engine', () => {
+  beforeEach(() => {
+    window.config = {target_code: 'en', isTargetRTL: false, isReview: false}
+  })
+  afterEach(() => {
+    mockNewEditor = false
+    SegmentUtils.checkCurrentSegmentTPEnabled.mockReturnValue(false)
+  })
+
+  test('with the new editor active the target opens in the CodeMirror editor, wired to the Draft bridge', () => {
+    mockNewEditor = true
+    renderTarget()
+    const editor = screen.getByTestId('target-editor')
+    expect(editor).toHaveAttribute('data-value', 'some translation')
+    expect(editor).toHaveAttribute('data-bridge', 'target-bridge')
+    expect(screen.queryByTestId('edit-area')).not.toBeInTheDocument()
+  })
+
+  test('with tag projection on, the CodeMirror target starts from the translation without tags', () => {
+    mockNewEditor = true
+    SegmentUtils.checkCurrentSegmentTPEnabled.mockReturnValue(true)
+    renderTarget()
+    const editor = screen.getByTestId('target-editor')
+    expect(editor).toHaveAttribute('data-value', 'clean-some translation')
+    expect(editor).toHaveAttribute('data-translation', 'some translation')
+  })
+
+  test('the toolbar reaches the CodeMirror target through the same handle as the Draft one', () => {
+    mockNewEditor = true
+    const {rerender, segment} = renderTarget()
+    rerender(
+      <SegmentContext.Provider
+        value={{
+          segment,
+          removeSelection: jest.fn(),
+          speech2textEnabledFn: jest.fn(() => false),
+        }}
+      >
+        <SegmentTarget segment={segment} />
+      </SegmentContext.Provider>,
+    )
+    const props = mockSegmentTargetToolbar.mock.calls.at(-1)[0]
+    expect(props.editArea).toBe(mockTargetHandle)
+    expect(props.addMissingSourceTagsToTarget).toBe(
+      mockTargetHandle.addMissingSourceTagsToTarget,
+    )
+  })
+
+  test('with the new editor off the target stays the Draft editor', () => {
+    renderTarget()
+    expect(screen.getByTestId('edit-area')).toBeInTheDocument()
+    expect(screen.queryByTestId('target-editor')).not.toBeInTheDocument()
+  })
+})
+
+describe('SegmentTarget issue selection', () => {
+  beforeEach(() => {
+    window.config = {target_code: 'en', isTargetRTL: false, isReview: true}
+    jest.clearAllMocks()
+  })
+
+  const selectIn = (node, from, to) => {
+    const range = document.createRange()
+    range.setStart(node, from)
+    range.setEnd(node, to)
+    const selection = document.getSelection()
+    selection.removeAllRanges()
+    selection.addRange(range)
+  }
+
+  test('selecting text of the locked translation opens the issues panel with that selection', () => {
+    jest.useFakeTimers()
+    const removeSelection = jest.fn()
+    renderTarget(
+      {segment: buildSegment({edit_area_locked: true, translation: 'locked'})},
+      {removeSelection},
+    )
+    const area = screen.getByText('locked')
+    // eslint-disable-next-line testing-library/no-node-access
+    selectIn(area.firstChild, 1, 4)
+    act(() => {
+      area.dispatchEvent(new MouseEvent('mouseup', {bubbles: true}))
+      jest.runAllTimers()
+    })
+    expect(CursorUtils.getSelectionData).toHaveBeenCalledWith(
+      expect.anything(),
+      area,
+    )
+    expect(SegmentActions.openIssuesPanel).toHaveBeenCalledWith(
+      {sid: '1-1', selection: {selectionData: true}},
+      true,
+    )
+    expect(SegmentActions.showIssuesMessage).toHaveBeenCalledWith('1-1', 2)
+    expect(removeSelection).not.toHaveBeenCalled()
+    jest.useRealTimers()
+  })
+
+  test('a mouse up without a selection in the locked translation clears the selection instead', () => {
+    jest.useFakeTimers()
+    const removeSelection = jest.fn()
+    renderTarget(
+      {segment: buildSegment({edit_area_locked: true, translation: 'locked'})},
+      {removeSelection},
+    )
+    const area = screen.getByText('locked')
+    // eslint-disable-next-line testing-library/no-node-access
+    selectIn(area.firstChild, 2, 2)
+    act(() => {
+      area.dispatchEvent(new MouseEvent('mouseup', {bubbles: true}))
+      jest.runAllTimers()
+    })
+    expect(SegmentActions.openIssuesPanel).not.toHaveBeenCalled()
+    expect(removeSelection).toHaveBeenCalled()
+    expect(SegmentActions.showIssuesMessage).toHaveBeenCalledWith('1-1', 0)
+    jest.useRealTimers()
   })
 })

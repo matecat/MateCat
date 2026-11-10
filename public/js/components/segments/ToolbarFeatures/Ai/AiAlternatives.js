@@ -10,7 +10,7 @@ import PropTypes from 'prop-types'
 export const AiAlternatives = ({sid, editArea, isIconsBundled}) => {
   const {userInfo} = useContext(ApplicationWrapperContext)
 
-  const selectedText = useMemo(() => {
+  const draftSelectedText = useMemo(() => {
     return editArea?.state?.editorState
       ? getSelectedTextWithTags(editArea.state.editorState).reduce(
           (acc, {value}) => `${acc}${value}`,
@@ -18,6 +18,10 @@ export const AiAlternatives = ({sid, editArea, isIconsBundled}) => {
         )
       : ''
   }, [editArea?.state?.editorState])
+  // The CodeMirror target hands its selection out directly
+  const selectedText = editArea?.getSelection
+    ? editArea.getSelection().textWithTags
+    : draftSelectedText
 
   const openTab = () => {
     SegmentActions.aiAlternativeTab({
