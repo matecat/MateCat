@@ -1,20 +1,16 @@
-import $ from 'jquery'
 const CursorUtils = {
   savedSel: null,
   savedSelActiveElement: null,
 
   getSelectionData(selection, container) {
     var data = {}
-    data.start_node = $.inArray(selection.anchorNode, container.contents())
+    var nodes = Array.from(container.childNodes) //array of nodes
+    data.start_node = nodes.indexOf(selection.anchorNode)
     if (data.start_node < 0) {
       //this means that the selection is probably ending inside a lexiqa tag,
       //or matecat tag/marking
-      data.start_node = $.inArray(
-        $(selection.anchorNode).parent()[0],
-        container.contents(),
-      )
+      data.start_node = nodes.indexOf(selection.anchorNode.parentNode)
     }
-    var nodes = container.contents() //array of nodes
     if (data.start_node === 0) {
       data.start_offset = selection.anchorOffset
     } else {
@@ -26,14 +22,11 @@ const CursorUtils = {
       data.start_node = 0
     }
 
-    data.end_node = $.inArray(selection.focusNode, container.contents())
+    data.end_node = nodes.indexOf(selection.focusNode)
     if (data.end_node < 0) {
       //this means that the selection is probably ending inside a lexiqa tag,
       //or matecat tag/marking
-      data.end_node = $.inArray(
-        $(selection.focusNode).parent()[0],
-        container.contents(),
-      )
+      data.end_node = nodes.indexOf(selection.focusNode.parentNode)
     }
     if (data.end_node === 0) data.end_offset = selection.focusOffset
     else {

@@ -1,10 +1,9 @@
-import $ from 'jquery'
 import CursorUtils from './cursorUtils'
 
 const buildContainer = (children) => {
   const div = document.createElement('div')
   children.forEach((child) => div.appendChild(child))
-  return $(div)
+  return div
 }
 
 test('getSelectionData computes offsets when selection nodes are direct children', () => {
