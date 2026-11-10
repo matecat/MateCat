@@ -73,6 +73,47 @@ const describeTag = (el) => ({
   ]),
 })
 
+// The first intentional difference: the tags that stand for a character (line feed, tab, nbsp, word joiner) and the
+// space placeholder are chips in transformTagsToHtml, and in SegmentView the display-only marks of the CodeMirror
+// editor (utils/segmentText/specialChars.js), so a segment looks the same open and closed. Both sides are reduced to
+// the character itself; everything else must still match.
+const CHAR_OF_CHIP = {
+  'tag-lf': '\n',
+  'tag-tab': '\t',
+  'tag-nbsp': '\u00a0',
+  'tag-word-joiner': '\u2060',
+  'tag-space-placeholder': ' ',
+}
+const CHIP_SELECTOR = Object.keys(CHAR_OF_CHIP)
+  .map((name) => `.tag.${name}`)
+  .join(', ')
+
+/* eslint-disable testing-library/no-node-access -- reducing two DOM trees to what they must have in common */
+// Only the chips of the text: inside the label of a chip nothing becomes a mark.
+const chipsToCharacters = (root) => {
+  for (const el of root.querySelectorAll(CHIP_SELECTOR)) {
+    if (el.parentElement.closest('.tag')) continue
+    const name = Object.keys(CHAR_OF_CHIP).find((n) => el.classList.contains(n))
+    el.replaceWith(CHAR_OF_CHIP[name])
+  }
+}
+
+// The text of a mark is the character it stands for: its drawing holds none.
+const marksToCharacters = (root) => {
+  for (const el of root.querySelectorAll('.special-char-mark')) {
+    el.replaceWith(el.textContent)
+  }
+}
+
+// The second intentional difference: the label of a chip that has no number sits in a `span.tag-text` (the element
+// Tag.scss trims with an ellipsis), where transformTagsToHtml puts it right in the chip.
+const unwrapTagText = (root) => {
+  for (const el of root.querySelectorAll('.tag > .tag-text')) {
+    el.replaceWith(...el.childNodes)
+  }
+}
+/* eslint-enable testing-library/no-node-access */
+
 const snapshotOf = (root) => ({
   text: root.textContent,
   // eslint-disable-next-line testing-library/no-node-access
@@ -82,6 +123,7 @@ const snapshotOf = (root) => ({
 const legacySnapshot = (segment, isRtl) => {
   const div = document.createElement('div')
   div.innerHTML = transformTagsToHtml(segment, isRtl)
+  chipsToCharacters(div)
   return snapshotOf(div)
 }
 
@@ -89,6 +131,8 @@ const viewSnapshot = (segment, isRtl) => {
   const {container, unmount} = render(
     <SegmentView segment={segment} isRtl={isRtl} />,
   )
+  marksToCharacters(container)
+  unwrapTagText(container)
   const snapshot = snapshotOf(container)
   unmount()
   return snapshot

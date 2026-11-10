@@ -3,6 +3,7 @@ import {fireEvent, render, screen} from '@testing-library/react'
 import {Base64} from 'js-base64'
 import SegmentView from './SegmentView'
 import {readSegmentClipboard} from './segmentModel'
+import {SPECIAL_CHARS} from '../../utils/segmentText/specialChars'
 import {
   initTagSignature,
   setTagSignatureMiddleware,
@@ -26,7 +27,7 @@ describe('SegmentView line breaks', () => {
     return container.querySelectorAll('br').length
   }
 
-  test('a line feed breaks the line after its chip', () => {
+  test('a line feed breaks the line after its mark', () => {
     expect(lineBreaks('one##$_0A$##two##$_0A$##three')).toBe(2)
   })
 
@@ -47,9 +48,11 @@ describe('SegmentView', () => {
     expect(screen.queryByRole('img')).not.toBeInTheDocument()
   })
 
-  test('shows a ph tag as its equiv-text', () => {
+  test('shows a ph tag as its equiv-text, the label in its own element (what Tag.scss trims)', () => {
     render(<SegmentView segment={`Hi ${ph('&lt;br/&gt;')}there`} />)
-    expect(screen.getByText('<br/>')).toHaveClass('tag', 'tag-ph')
+    expect(
+      screen.getByText('<br/>', {selector: '.tag.tag-ph > .tag-text'}),
+    ).toBeInTheDocument()
   })
 
   test('shows the number of a compressible tag before its content', () => {
@@ -121,7 +124,9 @@ describe('SegmentView', () => {
           marks={[{start: 3, end: 5, className: 'm'}]}
         />,
       )
-      expect(screen.getByText('cd')).toHaveClass('tag')
+      expect(
+        screen.getByText('cd', {selector: '.tag > .tag-text'}),
+      ).toBeInTheDocument()
       expect(screen.getByText('ef', {selector: 'mark'})).toBeInTheDocument()
     })
 
@@ -143,6 +148,97 @@ describe('SegmentView', () => {
     render(<SegmentView as="p" lang="it" data-testid="root" segment="x" />)
     expect(screen.getByTestId('root')).toHaveAttribute('lang', 'it')
     expect(screen.getByText('x', {selector: 'p'})).toBeInTheDocument()
+  })
+})
+
+describe('SegmentView special characters (the marks of the editor)', () => {
+  const rootText = () => screen.getByTestId('view').textContent
+  const spaceMarks = () =>
+    screen.queryAllByText((_, el) =>
+      el.classList.contains('special-char-space'),
+    )
+
+  test.each(Object.entries(SPECIAL_CHARS))(
+    '%j shows its mark and tooltip, and the text keeps the character',
+    (ch, {title}) => {
+      render(<SegmentView data-testid="view" segment={`a${ch}b`} />)
+      const mark = screen.getByLabelText(title)
+      expect(mark).toHaveClass('special-char-mark')
+      expect(mark).not.toHaveAttribute('title')
+      expect(mark).not.toHaveClass('tag')
+      // the drawing holds no text: the view reads as the segment's text
+      expect(rootText()).toBe(`a${ch}b`)
+    },
+  )
+
+  test('the nbsp, tab, word joiner and line feed tags are marks, not chips; the carriage return stays a chip', () => {
+    render(
+      <SegmentView
+        data-testid="view"
+        segment={'a##$_A0$##b##$_09$##c\u2060d##$_0A$##e##$_0D$##f'}
+      />,
+    )
+    for (const title of [
+      'Non-breaking space (U+00A0)',
+      'Tab (U+0009)',
+      'Word joiner (U+2060)',
+      'Line break',
+    ]) {
+      expect(screen.getByLabelText(title)).not.toHaveClass('tag')
+    }
+    expect(screen.getByText(byClassAndText('tag-cr', '\n'))).toBeInTheDocument()
+    expect(rootText()).toBe('a\u00a0b\tc\u2060d\ne\nf')
+  })
+
+  test('inside the label of a tag chip nothing becomes a mark', () => {
+    render(<SegmentView segment={`x ${ph('a##$_A0$##b')}y`} />)
+    expect(
+      screen.queryByLabelText('Non-breaking space (U+00A0)'),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.getByText(byClassAndText('tag-ph', 'a°b')),
+    ).toBeInTheDocument()
+  })
+
+  test('a mark is wrapped in a search mark like the character it stands for', () => {
+    render(
+      <SegmentView
+        segment={'a\u2003b'}
+        marks={[{start: 1, end: 3, className: 'searchMarker'}]}
+      />,
+    )
+    expect(
+      screen.getByLabelText('Em space (U+2003)', {
+        selector: 'mark.searchMarker > span',
+      }),
+    ).toBeInTheDocument()
+  })
+
+  describe('spaces', () => {
+    afterEach(() => initTagSignature({show_whitespace: 0}))
+
+    test('are marked with showWhitespace, one mark per space, and stay spaces', () => {
+      render(<SegmentView data-testid="view" segment="a  b" showWhitespace />)
+      expect(spaceMarks()).toHaveLength(2)
+      expect(spaceMarks()[0]).not.toHaveClass('tag')
+      expect(rootText()).toBe('a  b')
+    })
+
+    test("without the prop follow the user's switch, and the prop wins over it", () => {
+      initTagSignature({show_whitespace: 1})
+      const {rerender} = render(<SegmentView segment="a b" />)
+      expect(spaceMarks()).toHaveLength(1)
+      rerender(<SegmentView segment="a b" showWhitespace={false} />)
+      expect(spaceMarks()).toHaveLength(0)
+    })
+
+    test('a special character matched as a space keeps its own mark', () => {
+      initTagSignature({show_whitespace: 1})
+      render(<SegmentView data-testid="view" segment={'a\u2003b c'} />)
+      expect(screen.getByLabelText('Em space (U+2003)')).toBeInTheDocument()
+      expect(spaceMarks()).toHaveLength(1)
+      expect(rootText()).toBe('a\u2003b c')
+    })
   })
 })
 
@@ -227,6 +323,32 @@ describe('copying from a SegmentView', () => {
     // a selection starting inside a removed part starts where it was
     select(textNode(root, 'blue'), 2, textNode(root, 'car'), 1)
     expect(copy(root).slice).toBe('red <x id="1"/>c')
+  })
+
+  test('counts every mark as the one character it stands for', () => {
+    render(
+      <SegmentView
+        data-testid="view"
+        segment={'a\u2003b##$_A0$##c##$_0A$##d'}
+        showWhitespace
+      />,
+    )
+    const root = screen.getByTestId('view')
+    select(textNode(root, 'a'), 1, textNode(root, 'd'), 0)
+
+    const {data, slice} = copy(root)
+
+    expect(slice).toBe('\u2003b##$_A0$##c##$_0A$##')
+    expect(data['text/plain']).toBe('\u2003b\u00a0c\n')
+  })
+
+  test('a selection that ends inside a mark counts it whole', () => {
+    render(<SegmentView data-testid="view" segment={'ab\u2003cd'} />)
+    const root = screen.getByTestId('view')
+    // from inside "ab" to the em space itself
+    select(textNode(root, 'ab'), 1, textNode(root, '\u2003'), 1)
+
+    expect(copy(root).slice).toBe('b\u2003')
   })
 
   test('leaves a selection that runs outside the view to the browser', () => {

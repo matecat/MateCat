@@ -1,3 +1,10 @@
+// The index of the direct child of `container` that holds `node` (-1 when none does): a selection can end inside a
+// tag chip, a mark or a lexiqa marking, any number of levels down (the label of a chip is in its own element).
+const childIndexOf = (nodes, node, container) => {
+  while (node && node.parentNode !== container) node = node.parentNode
+  return nodes.indexOf(node)
+}
+
 const CursorUtils = {
   savedSel: null,
   savedSelActiveElement: null,
@@ -5,12 +12,7 @@ const CursorUtils = {
   getSelectionData(selection, container) {
     var data = {}
     var nodes = Array.from(container.childNodes) //array of nodes
-    data.start_node = nodes.indexOf(selection.anchorNode)
-    if (data.start_node < 0) {
-      //this means that the selection is probably ending inside a lexiqa tag,
-      //or matecat tag/marking
-      data.start_node = nodes.indexOf(selection.anchorNode.parentNode)
-    }
+    data.start_node = childIndexOf(nodes, selection.anchorNode, container)
     if (data.start_node === 0) {
       data.start_offset = selection.anchorOffset
     } else {
@@ -22,12 +24,7 @@ const CursorUtils = {
       data.start_node = 0
     }
 
-    data.end_node = nodes.indexOf(selection.focusNode)
-    if (data.end_node < 0) {
-      //this means that the selection is probably ending inside a lexiqa tag,
-      //or matecat tag/marking
-      data.end_node = nodes.indexOf(selection.focusNode.parentNode)
-    }
+    data.end_node = childIndexOf(nodes, selection.focusNode, container)
     if (data.end_node === 0) data.end_offset = selection.focusOffset
     else {
       data.end_offset = 0

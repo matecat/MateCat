@@ -79,3 +79,28 @@ test('getSelectionData accumulates offset when the anchor is a later direct chil
   expect(data.end_offset).toBe(1)
   expect(data.selected_string).toBe('partial')
 })
+
+test('getSelectionData counts from the direct child that holds a selection nested two levels down', () => {
+  // a tag chip whose label sits in its own element, as SegmentView renders it
+  const before = document.createTextNode('Tom ')
+  const chip = document.createElement('span')
+  const label = document.createElement('span')
+  const labelText = document.createTextNode('<br/>')
+  label.appendChild(labelText)
+  chip.appendChild(label)
+  const after = document.createTextNode('Jerry')
+  const container = buildContainer([before, chip, after])
+
+  const selection = {
+    anchorNode: labelText,
+    anchorOffset: 1,
+    focusNode: after,
+    focusOffset: 2,
+    toString: () => 'br/>Je',
+  }
+
+  const data = CursorUtils.getSelectionData(selection, container)
+
+  expect(data.start_offset).toBe('Tom '.length + 1)
+  expect(data.end_offset).toBe('Tom <br/>'.length + 2)
+})

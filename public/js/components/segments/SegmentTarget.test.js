@@ -324,7 +324,9 @@ describe('SegmentTarget', () => {
 
     test('shows the translation text and its tags as chips, with entities decoded', () => {
       lockedWith(`Tom &amp; ${ph('&lt;br/&gt;')}Jerry`)
-      expect(screen.getByText('<br/>')).toHaveClass('tag', 'tag-ph')
+      expect(
+        screen.getByText('<br/>', {selector: '.tag.tag-ph > .tag-text'}),
+      ).toBeInTheDocument()
       expect(screen.getByText(/Tom &/)).toHaveClass('errorTaggingArea')
       expect(screen.queryByText(/equiv-text/)).not.toBeInTheDocument()
     })
@@ -336,7 +338,7 @@ describe('SegmentTarget', () => {
       const area = screen.getByText(/Tom/)
       expect(area).toHaveClass('errorTaggingArea')
       // eslint-disable-next-line testing-library/no-node-access
-      expect(screen.getByText('<br/>').parentElement).toBe(area)
+      expect(screen.getByText('<br/>').parentElement.parentElement).toBe(area)
       // eslint-disable-next-line testing-library/no-node-access
       expect(Array.from(area.childNodes).map((n) => n.textContent)).toEqual([
         'Tom ',

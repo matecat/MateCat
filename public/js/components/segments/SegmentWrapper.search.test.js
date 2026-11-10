@@ -3,6 +3,7 @@ import {render, screen} from '@testing-library/react'
 
 import SegmentWrapper from './SegmentWrapper'
 import {SegmentContext} from './SegmentContext'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import SearchUtils from '../header/cattol/search/searchUtils'
 import {setTagSignatureMiddleware} from './utils/DraftMatecatUtils/tagModel'
 
@@ -31,21 +32,23 @@ const search = ({params, featured = 0, hits = 1, mode = 'normal'}) => {
   }
 }
 
-const renderClosed = (segment, {isTarget = false} = {}) =>
+const renderClosed = (segment, {isTarget = false, metadata = {}} = {}) =>
   render(
-    <SegmentContext.Provider
-      value={{
-        segment: {
-          sid: SID,
-          segment,
-          translation: segment,
-          opened: false,
-          inSearch: true,
-        },
-      }}
-    >
-      <SegmentWrapper isTarget={isTarget} />
-    </SegmentContext.Provider>,
+    <ApplicationWrapperContext.Provider value={{userInfo: {metadata}}}>
+      <SegmentContext.Provider
+        value={{
+          segment: {
+            sid: SID,
+            segment,
+            translation: segment,
+            opened: false,
+            inSearch: true,
+          },
+        }}
+      >
+        <SegmentWrapper isTarget={isTarget} />
+      </SegmentContext.Provider>
+    </ApplicationWrapperContext.Provider>,
   )
 
 const marks = () => screen.queryAllByText(/.*/, {selector: 'mark'})
@@ -82,7 +85,9 @@ describe('search highlights on a closed segment', () => {
     renderClosed('Hello <x id="1"/> <ph id="2" equiv-text="base64:aWQ="/>')
 
     expect(marks()).toHaveLength(0)
-    expect(screen.getByText('id')).toHaveClass('tag')
+    expect(
+      screen.getByText('id', {selector: '.tag > .tag-text'}),
+    ).toBeInTheDocument()
   })
 
   test('matches the text as shown, entities decoded', () => {
@@ -101,12 +106,15 @@ describe('search highlights on a closed segment', () => {
     expect(marks()[0]).toHaveTextContent('mondo')
   })
 
-  test('wraps a whitespace chip the hit runs across', () => {
-    setTagSignatureMiddleware('space', () => undefined)
+  test('wraps the mark of a space the hit runs across (show whitespace on)', () => {
+    setTagSignatureMiddleware('space', () => true)
     search({params: {source: 'foo bar'}})
-    renderClosed('foo bar')
+    renderClosed('foo bar', {metadata: {show_whitespace: 1}})
 
     expect(marks()).toHaveLength(1)
-    expect(marks()[0]).toHaveTextContent('foo·bar')
+    expect(marks()[0]).toHaveTextContent('foo bar')
+    expect(marks()[0]).toContainElement(
+      screen.getByText((_, el) => el.classList.contains('special-char-space')),
+    )
   })
 })

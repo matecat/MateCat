@@ -236,7 +236,9 @@ describe('SegmentFooterMultiMatches', () => {
 
   test('renders the match translation with its tags as chips', () => {
     renderMatch({match: '100'})
-    expect(screen.getByText('1')).toHaveClass('tag')
+    expect(
+      screen.getByText('1', {selector: '.tag > .tag-text'}),
+    ).toBeInTheDocument()
     expect(screen.getByText('Ciao &', {exact: false})).toHaveClass(
       'translation',
     )

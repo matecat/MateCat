@@ -9,6 +9,12 @@ import {
   sliceSegment,
   tokenize,
 } from './segmentModel'
+import {tagSignatures} from '../../utils/segmentText/tagModel'
+import {
+  CHARACTER_TAGS,
+  specialCharMark,
+  specialCharsPattern,
+} from '../../utils/segmentText/specialChars'
 
 const DIFF_CLASS = {[DIFF_DELETE]: 'deleted', [DIFF_INSERT]: 'added'}
 
@@ -62,37 +68,94 @@ const boundaryOffset = (root, container, offset, side) => {
   return count
 }
 
-// A line break shows its chip and then breaks the line, as the editors do. A carriage return followed by a line
-// feed (CRLF) is one break: only the line feed breaks.
+// A line feed shows its mark and then breaks the line, as the editors do. A carriage return (a chip, as in the editor)
+// breaks the line too, unless a line feed follows it (CRLF): that is one break.
 const breaksLine = (tokens, i) =>
   tokens[i].type === 'tag' &&
   (tokens[i].name === 'lineFeed' ||
     (tokens[i].name === 'carriageReturn' && tokens[i + 1]?.name !== 'lineFeed'))
 
-const renderTokens = (tokens) =>
+// The mark of a special character (utils/segmentText/specialChars.js), as the editor draws it: the character stays in
+// the text, so offsets and copies count it as the character it is, and the drawing is child elements with no text.
+const renderMark = (ch, mark, key) => (
+  <span
+    key={key}
+    className={mark.className}
+    aria-label={mark.title ?? undefined}
+  >
+    {mark.keepsWidth ? (
+      ch
+    ) : (
+      <span className="special-char-mark-char">{ch}</span>
+    )}
+    {mark.label && (
+      <span
+        className="special-char-mark-label"
+        aria-hidden="true"
+        data-label={mark.label}
+      />
+    )}
+    {mark.shape && (
+      <span className={`special-char-mark-${mark.shape}`} aria-hidden="true" />
+    )}
+  </span>
+)
+
+// Text with its special characters as marks.
+const renderText = (text, key, options) => {
+  const parts = options.inChip ? [text] : text.split(options.specialChars)
+  if (parts.length === 1)
+    return <React.Fragment key={key}>{text}</React.Fragment>
+  return (
+    <React.Fragment key={key}>
+      {parts.map((part, i) => {
+        if (i % 2 === 0) return part
+        const mark = specialCharMark(part, options)
+        return part === '\n' ? (
+          <React.Fragment key={i}>
+            {renderMark(part, mark)}
+            <br />
+          </React.Fragment>
+        ) : (
+          renderMark(part, mark, i)
+        )
+      })}
+    </React.Fragment>
+  )
+}
+
+const renderTokens = (tokens, options) =>
   tokens.map((token, i) =>
     breaksLine(tokens, i) ? (
       <React.Fragment key={i}>
-        {renderToken(token, i)}
+        {renderToken(token, i, options)}
         <br />
       </React.Fragment>
     ) : (
-      renderToken(token, i)
+      renderToken(token, i, options)
     ),
   )
 
-const renderToken = (token, i) => {
-  if (token.type === 'text') {
-    return <React.Fragment key={i}>{token.text}</React.Fragment>
-  }
+const renderToken = (token, i, options) => {
+  if (token.type === 'text') return renderText(token.text, i, options)
   if (token.type === 'mark') {
     return (
       <mark key={i} className={token.className}>
-        {renderTokens(token.tokens)}
+        {renderTokens(token.tokens, options)}
       </mark>
     )
   }
-  const content = token.children ? renderTokens(token.children) : token.label
+  // Inside the label of a chip nothing is a mark (Tag.scss reverts every span of a chip): the label stays as it was.
+  if (!options.inChip) {
+    // A space is text, shown as a mark only with the show whitespace option, as in the editor.
+    if (token.name === 'space') return renderText(token.raw, i, options)
+    // Tags that stand for one character are that character's mark, never a chip, as in the editor.
+    const ch = CHARACTER_TAGS[token.name]
+    if (ch) return renderMark(ch, specialCharMark(ch), i)
+  }
+  const content = token.children
+    ? renderTokens(token.children, {...options, inChip: true})
+    : token.label
   if (token.index !== undefined && token.index !== null) {
     return (
       <span key={i} contentEditable={false} className={token.className}>
@@ -101,18 +164,21 @@ const renderToken = (token, i) => {
       </span>
     )
   }
+  // The label in its own element, as the numbered chips have it: that is what Tag.scss trims with an ellipsis.
   return (
     <span key={i} contentEditable={false} className={token.className}>
-      {content}
+      <span className="tag-text">{content}</span>
     </span>
   )
 }
 
 /**
  * Read-only view of a segment string: text plus tag chips, with the markup
- * and classes of the cattool tags. With `compareTo`, shows the diff from
- * `compareTo` (old) to `segment` (new), removed parts in `span.deleted` and
- * added parts in `span.added`. Without it, `marks` wraps ranges of the text
+ * and classes of the cattool tags, and special characters drawn with the
+ * marks of the editor. `showWhitespace` marks spaces too; without it the
+ * view follows the user's switch held by the tag signatures. With
+ * `compareTo`, shows the diff from `compareTo` (old) to `segment` (new),
+ * removed parts in `span.deleted` and added parts in `span.added`. Without it, `marks` wraps ranges of the text
  * in `mark` elements. Other props go to the root element.
  */
 const SegmentView = ({
@@ -120,6 +186,7 @@ const SegmentView = ({
   isRtl = false,
   compareTo,
   marks,
+  showWhitespace,
   as: Root = 'span',
   ...rootProps
 }) => {
@@ -162,24 +229,38 @@ const SegmentView = ({
     [segment, isRtl, onCopy],
   )
 
+  // Without the prop, the user's switch as the cattool holds it (the space tag signature, see initTagSignature).
+  const whitespace = showWhitespace ?? !!tagSignatures.space
+
   const content = useMemo(() => {
+    const options = {
+      showWhitespace: whitespace,
+      specialChars: new RegExp(
+        `(${specialCharsPattern({showWhitespace: whitespace})})`,
+      ),
+    }
     const tokens = tokenize(segment, {isRtl})
     if (compareTo === undefined || compareTo === null) {
-      return renderTokens(marks?.length ? applyMarks(tokens, marks) : tokens)
+      return renderTokens(
+        marks?.length ? applyMarks(tokens, marks) : tokens,
+        options,
+      )
     }
     return diffTokens(tokenize(compareTo, {isRtl}), tokens).map(
       ({op, tokens: chunk}, i) => {
         const diffClass = DIFF_CLASS[op]
         return diffClass ? (
           <span key={i} className={diffClass}>
-            {renderTokens(chunk)}
+            {renderTokens(chunk, options)}
           </span>
         ) : (
-          <React.Fragment key={i}>{renderTokens(chunk)}</React.Fragment>
+          <React.Fragment key={i}>
+            {renderTokens(chunk, options)}
+          </React.Fragment>
         )
       },
     )
-  }, [segment, isRtl, compareTo, marks])
+  }, [segment, isRtl, compareTo, marks, whitespace])
 
   return (
     <Root {...rootProps} onCopy={handleCopy}>
@@ -199,6 +280,7 @@ SegmentView.propTypes = {
       className: PropTypes.string,
     }),
   ),
+  showWhitespace: PropTypes.bool,
   as: PropTypes.elementType,
   className: PropTypes.string,
 }

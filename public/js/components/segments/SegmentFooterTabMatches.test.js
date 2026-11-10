@@ -205,7 +205,9 @@ describe('SegmentFooterTabMatches', () => {
         },
       },
     })
-    expect(screen.getByText('3')).toHaveClass('tag')
+    expect(
+      screen.getByText('3', {selector: '.tag > .tag-text'}),
+    ).toBeInTheDocument()
     expect(screen.getByText('a <b>', {exact: false})).toHaveClass('translation')
   })
 
