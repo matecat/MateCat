@@ -1,5 +1,5 @@
 import {createSegmentEditor} from './createSegmentEditor'
-import {SPECIAL_CHARS} from './display'
+import {LINE_BREAK, SPECIAL_CHARS} from './display'
 
 // jsdom has no layout: CodeMirror only needs these to exist. Nothing here asserts caret geometry.
 beforeAll(() => {
@@ -26,10 +26,17 @@ describe('invisible characters (display only)', () => {
     const editor = mount('a##$_A0$##b')
     const mark = editor.view.contentDOM.querySelector('.cm-specialChar')
     expect(mark).toHaveClass('cm-nbsp')
-    expect(mark.dataset.label).toBe('°')
     // the mark keeps the nbsp width
     expect(mark.firstChild.nodeValue).toBe('\u00a0')
-    expect(mark).toHaveAttribute('title', 'Non-breaking space (U+00A0)')
+    // The ° is a child element, never a pseudo-element of the mark: the cattool tooltip owns ::before/::after of
+    // every [aria-label] element and hid it (opacity 0 until hover).
+    const label = mark.querySelector(':scope > .cm-mark-label')
+    expect(label.dataset.label).toBe('°')
+    expect(label).toHaveAttribute('aria-hidden', 'true')
+    expect(mark.dataset.label).toBeUndefined()
+    // only the cattool tooltip: a native title would show a second one
+    expect(mark).toHaveAttribute('aria-label', 'Non-breaking space (U+00A0)')
+    expect(mark).not.toHaveAttribute('title')
     expect(editor.getValue()).toBe('a##$_A0$##b')
   })
 
@@ -58,15 +65,24 @@ describe('invisible characters (display only)', () => {
 
   test.each(Object.entries(SPECIAL_CHARS))(
     '%j gets its own mark and tooltip, and the document keeps the character',
-    (ch, {className, title, label, keepsWidth}) => {
+    (ch, {className, title, label, shape, keepsWidth}) => {
       const editor = mount(`a${ch}b`)
       const marks = editor.view.contentDOM.querySelectorAll('.cm-specialChar')
       expect(marks).toHaveLength(1)
       expect(marks[0].className).toBe(`cm-specialChar ${className}`)
-      expect(marks[0]).toHaveAttribute('title', title)
       expect(marks[0]).toHaveAttribute('aria-label', title)
+      expect(marks[0]).not.toHaveAttribute('title')
       // a space keeps its width by holding itself; a zero-width character is replaced by its mark
       expect(marks[0].firstChild?.nodeValue ?? '').toBe(keepsWidth ? ch : label)
+      // the drawing of a space is child elements that hold no text: the mark reads as the character alone
+      const parts = [...marks[0].children].map((el) => el.className)
+      expect(parts).toEqual(
+        [
+          keepsWidth && label && 'cm-mark-label',
+          shape && `cm-mark-${shape}`,
+        ].filter(Boolean),
+      )
+      for (const el of marks[0].children) expect(el).toBeEmptyDOMElement()
       expect(editor.view.state.doc.toString()).toBe(`a${ch}b`)
     },
   )
@@ -76,11 +92,62 @@ describe('invisible characters (display only)', () => {
     const bidi = editor.view.contentDOM.querySelector('.cm-specialChar')
     expect(bidi.className).toBe('cm-specialChar')
     expect(bidi).toHaveAttribute(
-      'title',
+      'aria-label',
       expect.stringMatching(/left-to-right mark/),
     )
+    expect(bidi).not.toHaveAttribute('title')
     expect(bidi).toHaveTextContent('\u2022')
     expect(editor.view.contentDOM.querySelectorAll('.cm-tab')).toHaveLength(1)
     expect(editor.getValue()).toBe('a\u200eb##$_09$##c')
+  })
+})
+
+describe('line breaks (display only)', () => {
+  const lineBreaks = (editor) =>
+    [...editor.view.contentDOM.querySelectorAll('.cm-line')].map(
+      (line) => line.querySelectorAll('.cm-line-break').length,
+    )
+
+  test('every line that ends with a line break shows the cattool line feed mark, the last line none', () => {
+    const editor = mount('one##$_0A$##two##$_0A$####$_0A$##four')
+    expect(lineBreaks(editor)).toEqual([1, 1, 1, 0])
+    const mark = editor.view.contentDOM.querySelector('.cm-line-break')
+    expect(mark).toHaveAttribute('aria-label', LINE_BREAK.title)
+    expect(mark).not.toHaveAttribute('title')
+    expect(mark.querySelector(':scope > .cm-mark-label').dataset.label).toBe(
+      LINE_BREAK.label,
+    )
+    // the mark is after the text of its line and holds no text of its own
+    const text = mark.parentElement.firstChild
+    expect(text.nodeValue).toBe('one')
+    expect(
+      text.compareDocumentPosition(mark) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+    expect(mark.querySelector('.cm-mark-label')).toBeEmptyDOMElement()
+    expect(editor.getValue()).toBe('one##$_0A$##two##$_0A$####$_0A$##four')
+  })
+
+  test('a segment with no line break shows none, a typed line break gets one and loses it on undo', () => {
+    const editor = mount('one two')
+    expect(lineBreaks(editor)).toEqual([0])
+    editor.view.dispatch({changes: {from: 3, to: 4, insert: '\n'}})
+    expect(lineBreaks(editor)).toEqual([1, 0])
+    expect(editor.getValue()).toBe('one##$_0A$##two')
+    editor.view.dispatch({changes: {from: 3, to: 4, insert: ' '}})
+    expect(lineBreaks(editor)).toEqual([0])
+  })
+
+  test('the mark adds no document position: the end of a line is right before its line break', () => {
+    const editor = mount('ab##$_0A$##cd')
+    const {view} = editor
+    expect(view.state.doc.length).toBe(5)
+    expect(view.state.doc.line(1).to).toBe(2)
+    expect(view.state.doc.line(2).from).toBe(3)
+  })
+
+  test('a carriage return stays its tag chip and gets no line break mark', () => {
+    const editor = mount('a##$_0D$##b')
+    expect(editor.view.contentDOM.querySelector('.cm-line-break')).toBeNull()
+    expect(editor.getValue()).toBe('a##$_0D$##b')
   })
 })

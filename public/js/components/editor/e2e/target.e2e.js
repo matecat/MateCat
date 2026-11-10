@@ -11,6 +11,7 @@ import {
   expect,
   open,
   replaceOnce,
+  select,
   textRect,
   value,
 } from './helpers'
@@ -174,7 +175,8 @@ test.describe('special characters', () => {
     for (const [selector, title] of MARKS) {
       const mark = page.locator(`${TARGET} ${selector}`)
       await expect(mark).toHaveCount(1)
-      await expect(mark).toHaveAttribute('title', title)
+      await expect(mark).toHaveAttribute('aria-label', title)
+      await expect(mark).not.toHaveAttribute('title')
       // drawn by the editor, not by a font glyph that may be missing (LSEP in Chrome on macOS)
       const box = await mark.boundingBox()
       expect(box.width).toBeGreaterThan(1)
@@ -211,5 +213,176 @@ test.describe('special characters', () => {
         }
       })
     expect(Math.abs(mark - plain)).toBeLessThan(0.5)
+  })
+})
+
+/** The cattool tooltip of an element (its `::after`, see commons/_aria-label-tooltip.scss): text and opacity. */
+const tooltip = (locator) =>
+  locator.evaluate((el) => {
+    const after = getComputedStyle(el, '::after')
+    return {text: after.content, opacity: after.opacity}
+  })
+
+/** Moves the mouse over the middle of an element (a space mark is a few pixels wide: no actionability wait). */
+const hover = async (page, locator) => {
+  const box = await locator.boundingBox()
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+}
+
+// The harness loads the cattool tooltip stylesheet: it owns ::before/::after of every [aria-label] element, so a mark
+// that drew itself with them was hidden (opacity 0 until hover) or lost its tooltip.
+test.describe('marks under the cattool tooltip', () => {
+  test('the nbsp ° shows without hover, and hovering the mark shows its name', async ({
+    page,
+  }) => {
+    await open(page)
+    await page.mouse.move(0, 0)
+    const mark = page.locator(`${TARGET} .cm-nbsp`)
+    const label = mark.locator('.cm-mark-label')
+    const shown = await label.evaluate((el) => {
+      const before = getComputedStyle(el, '::before')
+      return {content: before.content, opacity: before.opacity}
+    })
+    expect(shown).toEqual({content: '"°"', opacity: '1'})
+    const box = await label.boundingBox()
+    expect(box.width).toBeGreaterThan(0)
+    expect(box.height).toBeGreaterThan(0)
+    expect(await tooltip(mark)).toEqual({
+      text: '"Non-breaking space (U+00A0)"',
+      opacity: '0',
+    })
+
+    await hover(page, mark)
+    await expect
+      .poll(() => tooltip(mark))
+      .toEqual({text: '"Non-breaking space (U+00A0)"', opacity: '1'})
+  })
+
+  test('nothing inside the editor clips the tooltip of a mark on the first line', async ({
+    page,
+  }) => {
+    await open(page)
+    const clipping = await page
+      .locator(`${TARGET} .cm-nbsp`)
+      .first()
+      .evaluate((mark) => {
+        const found = []
+        for (let el = mark.parentElement; el; el = el.parentElement) {
+          const {overflowX, overflowY} = getComputedStyle(el)
+          if ([overflowX, overflowY].some((o) => o !== 'visible'))
+            found.push(el.className)
+          if (el.classList.contains('cm-editor')) break
+        }
+        return found
+      })
+    expect(clipping).toEqual([])
+  })
+
+  test('every special character mark shows its own name on hover', async ({
+    page,
+  }) => {
+    await open(page, 'special')
+    for (const [selector, title] of [
+      ['.cm-typographic-space', 'Em space (U+2003)'],
+      ['.cm-separator-mark', 'Line separator (U+2028)'],
+      ['.cm-zwsp', 'Zero-width space (U+200B)'],
+    ]) {
+      const mark = page.locator(`${TARGET} ${selector}`)
+      await hover(page, mark)
+      await expect
+        .poll(() => tooltip(mark))
+        .toEqual({text: `"${title}"`, opacity: '1'})
+    }
+    // the bracket of a space is still drawn, by its own element
+    const bracket = await page
+      .locator(`${TARGET} .cm-typographic-space .cm-mark-bracket`)
+      .boundingBox()
+    expect(bracket.width).toBeGreaterThan(1)
+    expect(bracket.height).toBeGreaterThan(1)
+  })
+})
+
+test.describe('line breaks', () => {
+  const LINE_BREAK = `${TARGET} .cm-line-break`
+  const head = (page) =>
+    page.evaluate(() => window.__editor.target.view.state.selection.main.head)
+
+  test('the line that ends with a line break shows the cattool line feed glyph after its text, with a tooltip', async ({
+    page,
+  }) => {
+    await open(page)
+    const mark = page.locator(LINE_BREAK)
+    await expect(mark).toHaveCount(1)
+    const {glyph, color} = await mark
+      .locator('.cm-mark-label')
+      .evaluate((el) => {
+        const before = getComputedStyle(el, '::before')
+        return {glyph: before.content, color: before.color}
+      })
+    expect(glyph).toBe('"↵"')
+    expect(color).toBe('rgb(0, 153, 204)')
+    // at the end of the first line, after its last character
+    const box = await mark.boundingBox()
+    const text = await textRect(page, 'modifiche.')
+    expect(box.width).toBeGreaterThan(1)
+    expect(box.x).toBeGreaterThan(text.right)
+    expect(box.y).toBeLessThan(text.bottom)
+    expect((await textRect(page, 'Seconda')).top).toBeGreaterThanOrEqual(
+      text.bottom - 1,
+    )
+
+    await hover(page, mark)
+    await expect
+      .poll(() => tooltip(mark))
+      .toEqual({text: '"Line break"', opacity: '1'})
+  })
+
+  test('the caret steps over a line break in one key press, and a copy leaves the glyph out', async ({
+    page,
+  }) => {
+    await open(page)
+    const lineEnd = await page.evaluate(
+      () => window.__editor.target.view.state.doc.line(1).to,
+    )
+    await page.evaluate((at) => window.__editor.caret('target', at), lineEnd)
+    await page.keyboard.press('ArrowRight')
+    expect(await head(page)).toBe(lineEnd + 1)
+    await page.keyboard.press('ArrowLeft')
+    expect(await head(page)).toBe(lineEnd)
+
+    await select(page, 'modifiche.', 'Seconda', 'target')
+    const {plain} = await clipboardEvent(page, 'copy')
+    expect(plain).not.toContain('↵')
+    expect(plain).toContain('\n')
+    expect(await value(page)).toBe(target)
+  })
+
+  test('a line break inserted in the document gets its mark, and loses it when deleted', async ({
+    page,
+  }) => {
+    await open(page)
+    const at = await page.evaluate(() =>
+      window.__editor.doc('target').indexOf('qui.'),
+    )
+    await page.evaluate((pos) => {
+      const {view} = window.__editor.target
+      view.dispatch({changes: {from: pos, insert: '\n'}})
+    }, at)
+    await expect(page.locator(LINE_BREAK)).toHaveCount(2)
+    await page.evaluate((pos) => window.__editor.caret('target', pos + 1), at)
+    await page.keyboard.press('Backspace')
+    await expect(page.locator(LINE_BREAK)).toHaveCount(1)
+    expect(await value(page)).toBe(target)
+  })
+
+  test('in an rtl target the mark sits at the left end of its line', async ({
+    page,
+  }) => {
+    await open(page, 'rtl')
+    await call(page, 'setValue', 'اضغط##$_0A$##على')
+    const box = await page.locator(LINE_BREAK).boundingBox()
+    const text = await textRect(page, 'اضغط')
+    expect(box.x + box.width).toBeLessThanOrEqual(text.left + 0.5)
+    expect(box.y).toBeLessThan(text.bottom)
   })
 })
