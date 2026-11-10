@@ -336,6 +336,14 @@
   padding: 8px 4px 8px 0;
   border-radius: variables.$border-radius-default;
 
+  &:hover {
+    border: 1px solid colors.$grey400;
+  }
+
+  &:focus-within {
+    border: 1px solid colors.$grey400;
+  }
+
   input {
     position: absolute;
     width: 94%;
@@ -346,6 +354,7 @@
     line-height: 24px;
     font-weight: 400;
     text-align: center;
+    border: none !important;
   }
 
   button {

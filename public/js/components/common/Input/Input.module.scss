@@ -1,4 +1,5 @@
 @use 'tokens/colors';
+@use 'commons/variables';
 
 .input-component {
   display: flex;
@@ -36,8 +37,9 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    border-radius: 8px;
+    border-radius: variables.$border-radius-default;
     padding: 8px 12px;
+    outline: none;
 
     &:autofill,
     &:-webkit-autofill {
@@ -53,8 +55,6 @@
     &:focus,
     &:active {
       border-color: colors.$grey400;
-      box-shadow: 0 0 0 1px colors.$grey400;
-      outline: none;
     }
     &.isCompressed {
       padding: 10px;
@@ -70,11 +70,10 @@
     &.hasError,
     &.hasError:hover,
     &.hasError:focus {
-      box-shadow: inset 0 0 0 1px colors.$red500 !important;
+      border-color: colors.$red500 !important;
     }
     &:disabled {
       background-color: colors.$grey75;
-      box-shadow: none;
       color: colors.$grey400;
       cursor: not-allowed;
 

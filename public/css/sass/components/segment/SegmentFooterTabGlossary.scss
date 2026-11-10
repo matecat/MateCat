@@ -55,13 +55,17 @@
 .tab.glossary textarea {
   resize: none;
   height: 100px;
-  border-color: colors.$grey200;
+  outline: none;
+  border: 1px solid colors.$grey200;
+  border-radius: variables.$border-radius-default;
+  padding: 8px 12px;
 
+  &:hover {
+    border: 1px solid colors.$grey400;
+  }
   &:focus,
   &:active {
-    border-color: colors.$grey400;
-    box-shadow: 0 0 0 1px colors.$grey400;
-    outline: none;
+    border: 1px solid colors.$grey400;
   }
 }
 
@@ -81,12 +85,15 @@
   border: 1px solid colors.$grey200;
   border-radius: variables.$border-radius-default;
   padding: 4px;
+  outline: none;
+
+  &:hover {
+    border-color: colors.$grey400;
+  }
 
   &:focus-within,
   &:active {
     border-color: colors.$grey400;
-    box-shadow: 0 0 0 1px colors.$grey400;
-    outline: none;
   }
 }
 

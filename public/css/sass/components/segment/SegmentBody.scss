@@ -178,14 +178,15 @@ section.readonly .status-container a.status:hover {
   color: colors.$black;
   border: 1px solid colors.$grey200;
   border-radius: variables.$border-radius-default;
-  /*font-variant-ligatures: none;*/
   cursor: text;
+
+  &:hover {
+    border-color: colors.$grey400;
+  }
 }
 
-.editarea:focus {
-  border: 1px solid colors.$grey300;
-  box-shadow: inset 0px 0px 2px 2px colors.$grey300;
-  outline-color: colors.$grey300;
+.editarea:focus-within {
+  border-color: colors.$grey400;
 }
 
 .source {
