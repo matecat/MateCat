@@ -11,6 +11,24 @@ jest.mock('./SegmentSource', () => ({
   default: ({segment}) => <div data-testid="segment-source">{segment.sid}</div>,
 }))
 
+const mockIsNewEditorEnabled = jest.fn(() => false)
+jest.mock('../editor/matecat/editorEngine', () => ({
+  isNewEditorEnabled: () => mockIsNewEditorEnabled(),
+}))
+
+jest.mock('../editor/matecat/SourceEditor', () => ({
+  __esModule: true,
+  default: ({segment, value, bridge}) => (
+    <div
+      data-testid="source-editor"
+      data-value={value}
+      data-bridge={Object.keys(bridge).sort().join(',')}
+    >
+      {segment.sid}
+    </div>
+  ),
+}))
+
 jest.mock('./SegmentTarget', () => ({
   __esModule: true,
   default: ({segment}) => <div data-testid="segment-target">{segment.sid}</div>,
@@ -70,6 +88,7 @@ beforeEach(() => {
   }
   mockCheckCurrentSegmentTPEnabled.mockReset()
   mockCheckCurrentSegmentTPEnabled.mockReturnValue(false)
+  mockIsNewEditorEnabled.mockReturnValue(false)
   mockGetSearchMarks.mockClear()
   mockRemoveTagsFromText.mockClear()
 })
@@ -155,5 +174,38 @@ describe('SegmentWrapper on a closed segment', () => {
 
     expect(mockGetSearchMarks).not.toHaveBeenCalled()
     expect(screen.queryByText(/.*/, {selector: 'mark'})).not.toBeInTheDocument()
+  })
+})
+
+describe('SegmentWrapper editor switch (ENABLE_NEW_EDITOR)', () => {
+  test('with the flag off the opened source is the Draft editor', () => {
+    renderWrapper(makeSegment({opened: true}))
+    expect(screen.getByTestId('segment-source')).toBeInTheDocument()
+    expect(screen.queryByTestId('source-editor')).not.toBeInTheDocument()
+  })
+
+  test('with the flag on the opened source is the CodeMirror editor, given the Draft bridge', () => {
+    mockIsNewEditorEnabled.mockReturnValue(true)
+    renderWrapper(makeSegment({opened: true}))
+    const editor = screen.getByTestId('source-editor')
+    expect(editor).toHaveAttribute('data-value', 'source text')
+    expect(editor).toHaveAttribute('data-bridge', 'publishSource,tagIdentities')
+    expect(screen.queryByTestId('segment-source')).not.toBeInTheDocument()
+  })
+
+  test('with tag projection on, the CodeMirror source shows the source without tags', () => {
+    mockIsNewEditorEnabled.mockReturnValue(true)
+    mockCheckCurrentSegmentTPEnabled.mockReturnValue(true)
+    renderWrapper(makeSegment({opened: true}))
+    expect(screen.getByTestId('source-editor')).toHaveAttribute(
+      'data-value',
+      'stripped:source text',
+    )
+  })
+
+  test('the target stays the Draft editor whatever the flag', () => {
+    mockIsNewEditorEnabled.mockReturnValue(true)
+    renderWrapper(makeSegment({opened: true}), {isTarget: true})
+    expect(screen.getByTestId('segment-target')).toBeInTheDocument()
   })
 })
