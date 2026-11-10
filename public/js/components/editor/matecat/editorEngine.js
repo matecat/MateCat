@@ -7,3 +7,14 @@ export const isNewEditorEnabled = () => {
   const flag = process.env.ENABLE_NEW_EDITOR
   return flag !== false && flag !== 'false'
 }
+
+/** The user metadata key holding the editor the user picked in the Editor settings tab: 'cm6' or 'draft'. */
+export const EDITOR_ENGINE_KEY = 'editor_engine'
+
+/**
+ * True when a segment opens in the CodeMirror editor: the build allows it and the user has not switched back to the
+ * previous editor. A user who never picked one gets the new editor. The single place that decides it, for the source
+ * now and for the target once it moves too.
+ */
+export const isNewEditorActive = (metadata) =>
+  isNewEditorEnabled() && metadata?.[EDITOR_ENGINE_KEY] !== 'draft'

@@ -9,15 +9,18 @@ import SearchUtils from '../header/cattol/search/searchUtils'
 import SegmentStringUtils from './utils/DraftMatecatUtils/segmentStringUtils'
 import {markableText} from '../segmentView/segmentModel'
 import SourceEditor from '../editor/matecat/SourceEditor'
-import {isNewEditorEnabled} from '../editor/matecat/editorEngine'
+import {isNewEditorActive} from '../editor/matecat/editorEngine'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import {sourceEditorBridge} from './sourceEditorBridge'
 
 const SegmentWrapper = ({isTarget}) => {
   const {segment} = useContext(SegmentContext)
+  const {userInfo} = useContext(ApplicationWrapperContext)
 
   if (segment.opened) {
     if (isTarget) return <SegmentTarget segment={segment} />
-    if (!isNewEditorEnabled()) return <SegmentSource segment={segment} />
+    if (!isNewEditorActive(userInfo?.metadata))
+      return <SegmentSource segment={segment} />
     return (
       <SourceEditor
         segment={segment}
