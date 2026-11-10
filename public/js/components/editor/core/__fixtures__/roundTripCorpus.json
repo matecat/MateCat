@@ -386,5 +386,13 @@
   {
     "from": "public/mocks/segmentsMock.js",
     "segment": "Opt-in##$_SPLIT$## data"
+  },
+  {
+    "from": "public/js/components/editor/core/display.js",
+    "segment": "Em\u2003space, line\u2028separator, \u5168\u89d2\u3000\u7a7a\u767d, soft\u00adhyphen, para\u2029graph"
+  },
+  {
+    "from": "public/js/components/editor/core/display.js",
+    "segment": "zero\u200bwidth em\u2003space <x id=\"1\"/>ideo\u3000graphic LS\u2028 shy\u00ad wj\u2060 bom\ufeff nnbsp\u202f thin\u2009 hair\u200a zwnj\u200c zwj\u200d en\u2002 fig\u2007 math\u205f"
   }
 ]
