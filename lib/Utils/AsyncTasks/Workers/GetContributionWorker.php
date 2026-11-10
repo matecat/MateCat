@@ -105,17 +105,21 @@ class GetContributionWorker extends AbstractWorker
         if (!empty($contributionStruct->crossLangTargets)) {
             $crossLangMatches = [];
 
-            foreach ($contributionStruct->crossLangTargets as $lang) {
-                // double-check for not black lang
-                if ($lang !== '') {
-                    [, $matches] = $this->_getMatches($contributionStruct, $jobStruct, $lang, $featureSet, true);
+            // Skip blank languages, and query a language picked in both slots only once:
+            // two identical queries would publish every match twice.
+            $crossLangTargets = array_unique(array_filter(
+                $contributionStruct->crossLangTargets,
+                fn(string $lang): bool => $lang !== ''
+            ));
 
-                    $matches = array_slice($matches, 0, $contributionStruct->resultNum);
-                    $this->normalizeMTMatches($matches, $contributionStruct, $featureSet);
+            foreach ($crossLangTargets as $lang) {
+                [, $matches] = $this->_getMatches($contributionStruct, $jobStruct, $lang, $featureSet, true);
 
-                    foreach ($matches as $match) {
-                        $crossLangMatches[] = $match;
-                    }
+                $matches = array_slice($matches, 0, $contributionStruct->resultNum);
+                $this->normalizeMTMatches($matches, $contributionStruct, $featureSet);
+
+                foreach ($matches as $match) {
+                    $crossLangMatches[] = $match;
                 }
             }
 
@@ -437,6 +441,9 @@ class GetContributionWorker extends AbstractWorker
 
         if ($isCrossLang) {
             $_config['get_mt'] = false;
+            // The job's dialect_strict belongs to the job's own target language. A reference
+            // language is always variant strict, otherwise sibling variants come back penalized.
+            $_config['dialect_strict'] = true;
         }
 
         /**
