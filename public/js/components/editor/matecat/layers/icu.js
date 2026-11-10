@@ -1,4 +1,4 @@
-// ICU message syntax in the source (createICUDecorator): every token that is not plain text is marked. The tokens are
+// ICU message syntax in the source and the target (createICUDecorator): every token that is not plain text is marked. The tokens are
 // the ones format-message-parse gives for the document text, so their offsets are document positions.
 import parse from 'format-message-parse'
 
@@ -103,8 +103,13 @@ export const icuTokens = (text, locale) => {
   return tokens
 }
 
-/** The ICU layer of the source: no error styling, as the source shows none. */
-export const icuRanges = (state, locale) => {
+export const ICU_ERROR_CLASS = 'icuItem-error'
+
+/**
+ * The ICU layer of a document. The source shows no error styling; the target (`showErrors`) marks the errors and keeps
+ * their messages for the tooltip, as IcuHighlight does with `isTarget`.
+ */
+export const icuRanges = (state, locale, {showErrors = false} = {}) => {
   const text = state.doc.toString()
   return icuTokens(text, locale)
     .filter(
@@ -113,5 +118,14 @@ export const icuRanges = (state, locale) => {
         t.end <= text.length &&
         text.slice(t.start, t.end) === t.text,
     )
-    .map(({start, end}) => ({from: start, to: end, className: ICU_CLASS}))
+    .map(({start, end, type, message}) =>
+      showErrors && type === 'error'
+        ? {
+            from: start,
+            to: end,
+            className: `${ICU_CLASS} ${ICU_ERROR_CLASS}`,
+            data: {type: 'icu', messages: message ?? []},
+          }
+        : {from: start, to: end, className: ICU_CLASS},
+    )
 }

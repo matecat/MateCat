@@ -5,9 +5,13 @@ import {EditorView} from '@codemirror/view'
 import {createSegmentState} from '../core/createSegmentEditor'
 import {setLayer} from '../core/layers'
 import {act} from 'react'
+import {fireEvent} from '@testing-library/react'
+import {createSegmentEditor} from '../core/createSegmentEditor'
+import {serialize} from '../core/docModel'
+import {HOVER_TIME} from '../core/layerHover'
 import {
-  layerTooltipAt,
   layerTooltipExtensions,
+  createLayerTooltip,
   tooltipContent,
 } from './layerTooltip'
 
@@ -52,6 +56,41 @@ describe('tooltipContent (GlossaryHighlight / QaCheckGlossaryHighlight / LexiqaH
     ])
     render(content.element)
     expect(() => screen.getByText('two').click()).not.toThrow()
+  })
+
+  test('a blacklisted term says what it is a forbidden translation of', () => {
+    render(
+      tooltipContent([
+        range('blacklist', {
+          term: {source: {term: 'inexpensive'}, target: {term: 'cheap'}},
+        }),
+      ]).element,
+    )
+    expect(
+      screen.getByText(
+        'cheap is flagged as a forbidden translation for inexpensive',
+      ),
+    ).toBeInTheDocument()
+  })
+
+  test('an ICU error lists its messages under its title', () => {
+    render(
+      tooltipContent([
+        range('icu', {messages: ['Missing few', 'Missing many']}),
+      ]).element,
+    )
+    expect(screen.getByText('ICU syntax error')).toBeInTheDocument()
+    expect(screen.getByText('Missing many')).toBeInTheDocument()
+  })
+
+  test('a Lexiqa suggestion is handed to onReplace with the warning it belongs to', () => {
+    const onReplace = jest.fn()
+    const warning = range('lexiqa', {
+      messages: [{type: 'suggestion', msg: 'two', start: 0, end: 3}],
+    })
+    render(tooltipContent([warning], {onReplace}).element)
+    screen.getByText('two').click()
+    expect(onReplace).toHaveBeenCalledWith(warning, 'two')
   })
 
   test('nothing to show for a warning without messages, an ICU token or no range', () => {
@@ -112,35 +151,112 @@ describe('glossary click', () => {
   })
 })
 
-describe('hover tooltip', () => {
-  test('hovering a term shows its tooltip over the whole term, and closing it unmounts the content', async () => {
-    jest.useFakeTimers()
-    const parent = document.createElement('div')
-    document.body.appendChild(parent)
-    const view = new EditorView({
-      parent,
-      state: createSegmentState('guest room', {mode: 'source'}),
+describe('the Lexiqa tooltip of the target (Editarea.replaceWordAt, C4)', () => {
+  const suggestion = [{type: 'suggestion', msg: 'two', start: 0, end: 3}]
+  let editor
+
+  const mountTarget = (value, warnings, options) => {
+    editor = createSegmentEditor({
+      parent: document.body.appendChild(document.createElement('div')),
+      value,
+      mode: 'target',
+      ...options,
     })
-    view.dispatch({
+    editor.view.dispatch({
       effects: setLayer.of({
-        name: 'glossary',
-        ranges: [
-          {from: 0, to: 5, className: 'glossaryItem', data: {type: 'glossary'}},
-        ],
+        name: 'lexiqa',
+        volatile: true,
+        ranges: warnings.map(({from, to}) => ({
+          from,
+          to,
+          className: 'lexiqahighlight',
+          data: {type: 'lexiqa', messages: suggestion},
+        })),
       }),
     })
-    const tooltip = layerTooltipAt(view, 2)
-    expect([tooltip.pos, tooltip.end]).toEqual([0, 5])
+  }
+
+  beforeEach(() => jest.useFakeTimers())
+  afterEach(() => {
+    act(() => {
+      editor.destroy()
+      jest.runOnlyPendingTimers()
+    })
+    jest.useRealTimers()
+    document.body.innerHTML = ''
+  })
+
+  test('hovering a warning of the second line and picking the suggestion replaces that word, not one on the caret line', () => {
+    const value = 'tow one##$_0A$##line tow'
+    const second = 'tow one\nline '.length
+    mountTarget(value, [{from: second, to: second + 3}], {
+      extensions: layerTooltipExtensions({editable: true}),
+    })
+    editor.view.dispatch({selection: {anchor: 0}})
+    const mark = editor.view.contentDOM.querySelector('.lexiqahighlight')
+    fireEvent.mouseOver(mark)
+    act(() => jest.advanceTimersByTime(HOVER_TIME))
+    act(() => screen.getByText('two').click())
+    expect(serialize(editor.view.state)).toBe('tow one##$_0A$##line two')
+  })
+
+  test('the tooltip is the cattool tooltip, interactive, above the warning', () => {
+    mountTarget('a tow', [{from: 2, to: 5}])
     let shown
     act(() => {
-      shown = tooltip.create(view)
+      shown = createLayerTooltip({editable: true})(editor.view, {
+        ranges: [
+          {
+            name: 'lexiqa',
+            from: 2,
+            to: 5,
+            data: {type: 'lexiqa', messages: suggestion},
+          },
+        ],
+        rect: {top: 100, left: 40, width: 20, height: 16},
+        close: () => {},
+      })
     })
-    expect(shown.dom).toHaveTextContent('Termbase entry')
+    const tooltip = shown.dom.firstChild
+    expect(tooltip).toHaveStyle({top: `${100 - 7}px`, left: '50px'})
+    expect(shown.dom).toHaveTextContent('two')
     shown.destroy()
     act(() => jest.runAllTimers())
     expect(shown.dom).toBeEmptyDOMElement()
-    expect(layerTooltipAt(view, 8)).toBeNull()
-    view.destroy()
-    jest.useRealTimers()
+  })
+
+  test('in the source a suggestion changes nothing', () => {
+    mountTarget('a tow', [{from: 2, to: 5}], {mode: 'source'})
+    const close = jest.fn()
+    let shown
+    act(() => {
+      shown = createLayerTooltip({editable: false})(editor.view, {
+        ranges: [
+          {
+            name: 'lexiqa',
+            from: 2,
+            to: 5,
+            data: {type: 'lexiqa', messages: suggestion},
+          },
+        ],
+        rect: {top: 0, left: 0, width: 0, height: 0},
+        close,
+      })
+    })
+    document.body.appendChild(shown.dom)
+    act(() => screen.getByText('two').click())
+    expect(serialize(editor.view.state)).toBe('a tow')
+    expect(close).not.toHaveBeenCalled()
+  })
+
+  test('ranges with nothing to explain get no tooltip', () => {
+    mountTarget('a tow', [])
+    expect(
+      createLayerTooltip({editable: true})(editor.view, {
+        ranges: [{name: 'icu', from: 0, to: 1}],
+        rect: {},
+        close: () => {},
+      }),
+    ).toBeNull()
   })
 })

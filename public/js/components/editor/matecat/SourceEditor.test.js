@@ -286,6 +286,27 @@ describe('SourceEditor layers', () => {
     expect(marks(container, '.glossaryItem')).toEqual(['Hello'])
   })
 
+  test('a search hit inside a tag label marks the chip, until the search ends (markSearch)', () => {
+    Object.assign(SearchUtils, {
+      searchMode: 'normal',
+      searchParams: {source: 'count'},
+      occurrencesList: ['10'],
+      featuredSearchResult: 5,
+      searchResultsDictionary: {10: {occurrences: []}},
+    })
+    const ph = `<ph id="mtc_1" ctype="x-html" equiv-text="base64:${btoa('{{count}}')}"/>`
+    const segment = makeSegment({segment: `Total ${ph} <g id="1">a</g>`})
+    const {container, update} = renderSource(segment)
+    const marked = () =>
+      [...container.querySelectorAll('.cm-content .tag.tag-search-match')].map(
+        (el) => el.textContent,
+      )
+    update({...segment, inSearch: true, searchParams: {source: 'count'}})
+    expect(marked()).toEqual(['{{count}}'])
+    update({...segment, inSearch: false, searchParams: {}})
+    expect(marked()).toEqual([])
+  })
+
   test('Lexiqa warnings on the source are highlighted', () => {
     mockGetRanges.mockReturnValue([
       {start: 6, end: 11, myClass: 'spelling s0', errorid: 'e', color: 'red'},

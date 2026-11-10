@@ -77,3 +77,29 @@ test('a composed word, then a tag from the tag menu right after it', async ({
     replaceOnce(target, 'Seconda', '\ud55c<x id="9"/>Seconda'),
   )
 })
+
+test('a layer update during a composition waits for it to end, and then marks the right text', async ({
+  page,
+}) => {
+  await open(page)
+  await caret(page, {before: 'Salva'})
+  const cdp = await page.context().newCDPSession(page)
+  for (const text of ['ㅎ', '하']) {
+    await cdp.send('Input.imeSetComposition', {
+      text,
+      selectionStart: text.length,
+      selectionEnd: text.length,
+    })
+  }
+  const now = await page.evaluate(() =>
+    window.__editor.layerOnWord('lexiqa', 'Salva', 'lexiqahighlight'),
+  )
+  expect(now).toBe(false)
+  await expect(page.locator(`${TARGET} [data-layer=lexiqa]`)).toHaveCount(0)
+
+  await cdp.send('Input.insertText', {text: '한'})
+  await expect(page.locator(`${TARGET} [data-layer=lexiqa]`)).toHaveText(
+    'Salva',
+  )
+  expect(await value(page)).toBe(replaceOnce(target, 'Salva', '한Salva'))
+})

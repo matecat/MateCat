@@ -30,7 +30,7 @@ import {createSegmentEditor} from '../core/createSegmentEditor'
 import {serialize} from '../core/docModel'
 import {SEARCH_LAYER, setLayer} from '../core/layers'
 import {chipTokens, setTagState} from '../core/tags'
-import {searchRanges} from './layers/search'
+import {searchChipRanges, searchRanges} from './layers/search'
 import {glossaryRanges, qaCheckGlossaryRanges} from './layers/glossary'
 import {lexiqaRanges} from './layers/lexiqa'
 import {icuRanges} from './layers/icu'
@@ -120,6 +120,7 @@ const SourceEditor = ({segment, value, bridge}) => {
   const layerKeyRef = useRef(null)
   const highlightRef = useRef([])
   const focusRef = useRef([])
+  const searchChipRef = useRef([])
 
   // Fixed for the life of the segment, as in SegmentSource: what split mode goes back to, and data-original.
   const [initialValue] = useState(() => value)
@@ -138,7 +139,11 @@ const SourceEditor = ({segment, value, bridge}) => {
     const editor = editorRef.current
     if (!editor) return
     const byRange = new Map()
-    ;[...highlightRef.current, ...focusRef.current].forEach((r) => {
+    ;[
+      ...highlightRef.current,
+      ...focusRef.current,
+      ...searchChipRef.current,
+    ].forEach((r) => {
       const k = `${r.from}-${r.to}`
       const prev = byRange.get(k)
       byRange.set(
@@ -191,6 +196,10 @@ const SourceEditor = ({segment, value, bridge}) => {
         setLayer.of({name, ranges}),
       ),
     })
+    // A hit inside a tag label marks its chip, as TagEntity's markSearch does.
+    searchChipRef.current = inSearch ? searchChipRanges(state, segment) : []
+    applyTagState()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const publish = useCallback(() => {

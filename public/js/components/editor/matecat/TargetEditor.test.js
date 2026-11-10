@@ -3,8 +3,15 @@
 import React, {createRef} from 'react'
 import {act, fireEvent, render, screen} from '@testing-library/react'
 import {EditorView} from '@codemirror/view'
+import {createSegmentState} from '../core/createSegmentEditor'
 
-import TargetEditor, {tagMenuPosition, tagWarningClass} from './TargetEditor'
+import TargetEditor, {
+  tagMenuPosition,
+  tagWarningClass,
+  targetLayers,
+} from './TargetEditor'
+import SearchUtils from '../../header/cattol/search/searchUtils'
+import {HOVER_TIME} from '../core/layerHover'
 import {SegmentContext} from '../../segments/SegmentContext'
 import {ApplicationWrapperContext} from '../../common/ApplicationWrapper/ApplicationWrapperContext'
 import SegmentActions from '../../../actions/SegmentActions'
@@ -50,12 +57,26 @@ jest.mock('../../../actions/SegmentActions', () => ({
   },
 }))
 
+const mockHaveKeysGlossary = jest.fn(() => false)
 jest.mock('../../../stores/CatToolStore', () => ({
   __esModule: true,
   default: {
     getCurrentProjectTemplate: () => ({
       characterCounterCountTags: false,
     }),
+    getHaveKeysGlossary: () => mockHaveKeysGlossary(),
+    isTagsCompressed: () => false,
+  },
+}))
+
+const mockGetRanges = jest.fn(() => [])
+const mockIgnoreError = jest.fn()
+jest.mock('../../../utils/lxq.main', () => ({
+  __esModule: true,
+  default: {
+    getRanges: (...args) => mockGetRanges(...args),
+    buildTooltipMessages: (warning) => warning.messages,
+    ignoreError: (...args) => mockIgnoreError(...args),
   },
 }))
 
@@ -120,6 +141,7 @@ const chipEls = (container) => [
   ...container.querySelectorAll('.cm-content .tag'),
 ]
 const docOf = (container) => viewOf(container).state.doc.toString()
+const viewOfState = (value) => createSegmentState(value, {mode: 'target'})
 
 const flush = async (ms = 0) => {
   await act(async () => {
@@ -656,5 +678,219 @@ describe('TargetEditor show whitespace option', () => {
     )
     await flush()
     expect(spaceMarks(container)).toBe(0)
+  })
+})
+
+describe('TargetEditor layers (Editarea checkDecorators)', () => {
+  const TARGET = 'Una casa economica##$_0A$##una casa tow'
+  const blacklisted = {
+    term_id: 1,
+    matching_words: ['economica'],
+    source: {term: 'cheap'},
+    target: {term: 'economica'},
+  }
+  // What the store holds for the target (Editarea's prepareTextForLexiqa of the decoded segment)
+  window.config = {...window.config, lfPlaceholder: '##$_0A$##'}
+  const lexiqaText = translationUpdate(
+    TARGET,
+    sourceTagMap,
+  ).lxqDecodedTranslation
+  const towWarning = (extra = {}) => {
+    const start = lexiqaText.lastIndexOf('tow')
+    return {
+      start,
+      end: start + 3,
+      myClass: 'spelling',
+      errorid: 'e_10_t',
+      color: 'rgb(1, 2, 3)',
+      messages: [
+        {msg: 'Spelling', error: 'e_10_t'},
+        {msg: 'two', type: 'suggestion', start, end: start + 3},
+      ],
+      ...extra,
+    }
+  }
+  const segmentWith = (overrides) =>
+    makeSegment({
+      translation: TARGET,
+      lxqDecodedTranslation: lexiqaText,
+      ...overrides,
+    })
+  const marks = (container, selector) =>
+    [...container.querySelectorAll(`.cm-content ${selector}`)].map(
+      (el) => el.textContent,
+    )
+
+  beforeEach(() => {
+    mockGetRanges.mockImplementation(() => [])
+    window.config = {
+      ...window.config,
+      isCJK: false,
+      lfPlaceholder: '##$_0A$##',
+    }
+  })
+  afterEach(() => jest.useRealTimers())
+
+  test('blacklisted terms of the QA check are marked, and unmarked when the check clears them', async () => {
+    const {container, update} = renderTarget(
+      segmentWith({qaBlacklistGlossary: [blacklisted]}),
+    )
+    await flush()
+    expect(marks(container, '.blacklistItem')).toEqual(['economica'])
+    update(segmentWith({qaBlacklistGlossary: []}))
+    await flush()
+    expect(marks(container, '.blacklistItem')).toEqual([])
+  })
+
+  test('Lexiqa warnings on the target are marked with their colour once the blacklist check is in', async () => {
+    mockHaveKeysGlossary.mockReturnValue(true)
+    mockGetRanges.mockImplementation(() => [towWarning()])
+    const lexiqa = {target: {spelling: [{}]}}
+    const {container, update} = renderTarget(segmentWith({lexiqa}))
+    await flush()
+    // The job has glossary keys: Lexiqa waits for the blacklist, which takes precedence
+    expect(marks(container, '.lexiqahighlight')).toEqual([])
+    update(segmentWith({lexiqa, qaBlacklistGlossary: []}))
+    await flush()
+    const [mark] = container.querySelectorAll('.cm-content .lexiqahighlight')
+    expect(mark).toHaveTextContent('tow')
+    expect(mark).toHaveStyle({backgroundColor: 'rgb(1, 2, 3)'})
+    mockHaveKeysGlossary.mockReturnValue(false)
+  })
+
+  test('an edit on a warning drops it until Lexiqa sends new results; warnings elsewhere follow the text', async () => {
+    const other = lexiqaText.indexOf('casa')
+    mockGetRanges.mockImplementation(() => [
+      towWarning(),
+      {start: other, end: other + 4, myClass: 'x', errorid: 'e2'},
+    ])
+    const lexiqa = {target: {spelling: [{}]}}
+    const {container, update} = renderTarget(segmentWith({lexiqa}))
+    await flush()
+    expect(marks(container, '.lexiqahighlight')).toEqual(['casa', 'tow'])
+
+    const view = viewOf(container)
+    select(view, view.state.doc.length)
+    type(view, 'n')
+    select(view, 0)
+    type(view, '> ')
+    // The store update after the edit, same results: the touched warning stays dropped
+    update(segmentWith({lexiqa: {target: {spelling: [{}]}}}))
+    await flush()
+    expect(marks(container, '.lexiqahighlight')).toEqual(['casa'])
+
+    mockGetRanges.mockImplementation(() => [])
+    update(segmentWith({lexiqa: {target: {spelling: []}}}))
+    await flush()
+    expect(marks(container, '.lexiqahighlight')).toEqual([])
+  })
+
+  test('hovering a Lexiqa warning offers its suggestion, which replaces the word, and Ignore, which LXQ handles', async () => {
+    jest.useFakeTimers()
+    mockGetRanges.mockImplementation(() => [towWarning()])
+    const {container} = renderTarget(
+      segmentWith({lexiqa: {target: {spelling: [{}]}}}),
+    )
+    act(() => jest.advanceTimersByTime(0))
+    const mark = () => container.querySelector('.cm-content .lexiqahighlight')
+    fireEvent.mouseOver(mark())
+    act(() => jest.advanceTimersByTime(HOVER_TIME))
+    act(() => screen.getByText('Ignore').click())
+    expect(mockIgnoreError).toHaveBeenCalledWith('e_10_t')
+
+    act(() => screen.getByText('two').click())
+    expect(docOf(container)).toBe('Una casa economica\nuna casa two')
+    act(() => jest.advanceTimersByTime(200))
+    expect(SegmentActions.updateTranslation).toHaveBeenLastCalledWith(
+      '10',
+      'Una casa economica##$_0A$##una casa two',
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+    )
+    act(() => jest.runOnlyPendingTimers())
+  })
+
+  test('searching the target hides the other layers and marks the current item; ending it brings them back', async () => {
+    Object.assign(SearchUtils, {
+      searchMode: 'normal',
+      searchParams: {target: 'casa'},
+      occurrencesList: ['10', '10'],
+      featuredSearchResult: 1,
+      searchResultsDictionary: {
+        10: {
+          occurrences: [
+            {searchProgressiveIndex: 0},
+            {searchProgressiveIndex: 1},
+          ],
+        },
+      },
+    })
+    const base = {qaBlacklistGlossary: [blacklisted]}
+    const {container, update} = renderTarget(segmentWith(base))
+    await flush()
+    update(
+      segmentWith({
+        ...base,
+        inSearch: true,
+        currentInSearch: true,
+        currentInSearchIndex: 1,
+        searchParams: {target: 'casa'},
+      }),
+    )
+    await flush()
+    expect(marks(container, 'mark.searchMarker')).toEqual(['casa', 'casa'])
+    expect(marks(container, 'mark.currSearchItem')).toEqual(['casa'])
+    expect(marks(container, '.blacklistItem')).toEqual([])
+
+    update(segmentWith(base))
+    await flush()
+    expect(marks(container, 'mark.searchMarker')).toEqual([])
+    expect(marks(container, '.blacklistItem')).toEqual(['economica'])
+  })
+
+  test('a search of the source only leaves the target layers alone', () => {
+    const state = viewOfState('casa economica')
+    const layers = targetLayers(
+      state,
+      segmentWith({
+        inSearch: true,
+        searchParams: {source: 'house'},
+        qaBlacklistGlossary: [blacklisted],
+      }),
+      false,
+    )
+    const byName = Object.fromEntries(layers.map((l) => [l.name, l]))
+    expect(byName.search.ranges()).toEqual([])
+    expect(byName.blacklist.ranges()).toHaveLength(1)
+  })
+
+  test('ICU errors of the target are marked as errors', async () => {
+    const {container} = renderTarget(
+      makeSegment({
+        icu: true,
+        translation: '{count, plural, one {# casa}}',
+      }),
+    )
+    await flush()
+    expect(container.querySelector('.cm-content .icuItem-error')).not.toBeNull()
+  })
+
+  test('a layer update that arrives during an IME composition waits for it to end', async () => {
+    const composing = jest
+      .spyOn(EditorView.prototype, 'composing', 'get')
+      .mockReturnValue(false)
+    const {container, update} = renderTarget(segmentWith({}))
+    await flush()
+    composing.mockReturnValue(true)
+    update(segmentWith({qaBlacklistGlossary: [blacklisted]}))
+    await flush()
+    expect(marks(container, '.blacklistItem')).toEqual([])
+    composing.mockReturnValue(false)
+    viewOf(container).contentDOM.dispatchEvent(new Event('compositionend'))
+    await flush(10)
+    expect(marks(container, '.blacklistItem')).toEqual(['economica'])
+    composing.mockRestore()
   })
 })

@@ -169,3 +169,49 @@ describe('lexiqaRanges (activateLexiqa on the source)', () => {
     expect(lexiqaRanges(createSegmentState('one tow'), segment)).toEqual([])
   })
 })
+
+describe('lexiqaRanges (activateLexiqa on the target)', () => {
+  const target = 'line one##$_0A$##line tow'
+  const segment = {
+    sid: '5',
+    lexiqa: {source: {spelling: [{}]}, target: {spelling: [{}]}},
+    lxqDecodedSource: prepareTextForLexiqa('nothing here'),
+    lxqDecodedTranslation: prepareTextForLexiqa(target),
+  }
+
+  beforeEach(() => {
+    mockGetRanges.mockReset()
+    mockBuildTooltipMessages.mockReset()
+  })
+
+  test('the target results are placed over the Lexiqa text of the translation, on the right line', () => {
+    const start = segment.lxqDecodedTranslation.indexOf('tow')
+    mockGetRanges.mockReturnValue([
+      {start, end: start + 3, myClass: 'spelling', errorid: 'e2'},
+    ])
+    mockBuildTooltipMessages.mockReturnValue([{msg: 'two', type: 'suggestion'}])
+    const state = createSegmentState(target)
+    const [range] = lexiqaRanges(state, segment, false)
+    expect(state.sliceDoc(range.from, range.to)).toBe('tow')
+    expect(state.doc.lineAt(range.from).number).toBe(2)
+    expect(range.data.messages).toEqual([{msg: 'two', type: 'suggestion'}])
+    expect(mockGetRanges).toHaveBeenCalledWith(
+      segment.lexiqa.target,
+      segment.lxqDecodedTranslation,
+      false,
+    )
+    expect(mockBuildTooltipMessages).toHaveBeenCalledWith(
+      expect.objectContaining({errorid: 'e2'}),
+      '5',
+      false,
+    )
+  })
+
+  test('source results are never shown on the target', () => {
+    const state = createSegmentState(target)
+    expect(
+      lexiqaRanges(state, {...segment, lexiqa: {source: {a: [{}]}}}, false),
+    ).toEqual([])
+    expect(mockGetRanges).not.toHaveBeenCalled()
+  })
+})

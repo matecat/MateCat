@@ -9,13 +9,70 @@ import '../../../../css/sass/commons/_aria-label-tooltip.scss'
 import '../../../../css/sass/components/segment/SpecialCharMarks.scss'
 // The cattool chip styles: trimming (ellipsis) and tag compaction are measured against them.
 import '../../../../css/sass/components/segment/Tag.scss'
-import {setLayer} from '../core/layers'
+import {
+  applyLayers,
+  layerRangesAt,
+  layers as layersField,
+  replaceLayerRange,
+  setLayer,
+} from '../core/layers'
+import {layerHover} from '../core/layerHover'
 import {chipTokens, setTagState} from '../core/tags'
 
 const params = new URLSearchParams(location.search)
 const segment = SEGMENTS[params.get('seg') || 'basic']
 const events = []
 const record = (side) => (name, payload) => events.push({name, side, payload})
+
+// The hover tooltip of the layer marks, as the Matecat editors use it: a Lexiqa-like range (`data.suggestions`) gets
+// one button per suggestion, which replaces the range, and an Ignore button, which drops that range only.
+const GAP = 6
+const renderTooltip = (view, {ranges, rect, close}) => {
+  const range = ranges.find((r) => r.data?.suggestions)
+  if (!range) return null
+  const dom = document.createElement('div')
+  dom.className = 'harness-tooltip'
+  Object.assign(dom.style, {
+    position: 'absolute',
+    top: `${rect.top + window.scrollY - GAP}px`,
+    left: `${rect.left + window.scrollX}px`,
+    transform: 'translateY(-100%)',
+  })
+  const button = (className, text, onClick) => {
+    const el = dom.appendChild(document.createElement('button'))
+    el.className = className
+    el.textContent = text
+    el.addEventListener('click', onClick)
+  }
+  range.data.suggestions.forEach((text) =>
+    button('harness-suggestion', text, () => {
+      events.push({name: 'tooltipAction', payload: {id: range.data.id, text}})
+      close()
+      replaceLayerRange(view, range, text)
+    }),
+  )
+  button('harness-ignore', 'Ignore', () => {
+    events.push({
+      name: 'tooltipAction',
+      payload: {id: range.data.id, action: 'ignore'},
+    })
+    const kept = []
+    view.state
+      .field(layersField)
+      .get(range.name)
+      .set.between(0, view.state.doc.length, (from, to, mark) => {
+        if (mark.spec.data?.id !== range.data.id)
+          kept.push({
+            from,
+            to,
+            className: mark.spec.class,
+            data: mark.spec.data,
+          })
+      })
+    view.dispatch({effects: setLayer.of({name: range.name, ranges: kept})})
+  })
+  return {dom}
+}
 
 const source = createSegmentEditor({
   parent: document.querySelector('[data-testid=source]'),
@@ -35,6 +92,7 @@ const target = createSegmentEditor({
   onChange: (value) =>
     events.push({name: 'change', side: 'target', payload: value}),
   onEvent: record('target'),
+  extensions: [layerHover({render: renderTooltip})],
   // ?notags: a segment with no source tags to offer, the tag menu stays shut
   tagMenu: {
     canOpen: () => !params.has('notags'),
@@ -84,6 +142,28 @@ window.__editor = {
     const editor = pane === 'source' ? source : target
     editor.view.dispatch({effects: setLayer.of({name, ranges})})
   },
+  /**
+   * Marks `word` of the target in layer `name` through applyLayers, as the Matecat editors update their layers: the
+   * position is read when the update is dispatched, which waits for an IME composition to end.
+   */
+  layerOnWord(name, word, className) {
+    return applyLayers(target.view, (state) => {
+      const from = state.doc.toString().indexOf(word)
+      return [
+        setLayer.of({
+          name,
+          ranges: from < 0 ? [] : [{from, to: from + word.length, className}],
+        }),
+      ]
+    })
+  },
+  /** The layer ranges of the target at a document position, as `{name, from, to}`. */
+  rangesAt: (pos) =>
+    layerRangesAt(target.view.state, pos).map(({name, from, to}) => ({
+      name,
+      from,
+      to,
+    })),
   /** Gives the n-th chips of a pane an extra class: `[[n, className]]`. */
   tagState(pane, list) {
     const editor = pane === 'source' ? source : target

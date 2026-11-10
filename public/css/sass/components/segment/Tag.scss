@@ -749,3 +749,9 @@ body.tags-compressed {
     vertical-align: middle;
   }
 }
+
+// A search hit inside a tag label in the CodeMirror editors: the label is marked, with the colour of TagEntity's
+// markSearch (which marks only the matching part).
+.tag.tag-search-match .tag-text {
+  background-color: rgb(255 255 0);
+}
