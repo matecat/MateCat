@@ -1,4 +1,4 @@
-import React, {memo, useCallback, useMemo} from 'react'
+import React, {memo, useCallback, useContext, useMemo} from 'react'
 import PropTypes from 'prop-types'
 import {
   DIFF_DELETE,
@@ -10,6 +10,7 @@ import {
   tokenize,
 } from './segmentModel'
 import {tagSignatures} from '../../utils/segmentText/tagModel'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import {
   CHARACTER_TAGS,
   specialCharMark,
@@ -176,7 +177,7 @@ const renderToken = (token, i, options) => {
  * Read-only view of a segment string: text plus tag chips, with the markup
  * and classes of the cattool tags, and special characters drawn with the
  * marks of the editor. `showWhitespace` marks spaces too; without it the
- * view follows the user's switch held by the tag signatures. With
+ * view follows the user's switch from the application context, or the one held by the tag signatures when there is none. With
  * `compareTo`, shows the diff from `compareTo` (old) to `segment` (new),
  * removed parts in `span.deleted` and added parts in `span.added`. Without it, `marks` wraps ranges of the text
  * in `mark` elements. Other props go to the root element.
@@ -229,8 +230,13 @@ const SegmentView = ({
     [segment, isRtl, onCopy],
   )
 
-  // Without the prop, the user's switch as the cattool holds it (the space tag signature, see initTagSignature).
-  const whitespace = showWhitespace ?? !!tagSignatures.space
+  // Without the prop, the user's switch from the application context (a change re-renders the view at once);
+  // with no user there, the switch as the tag signatures hold it (see initTagSignature).
+  const {userInfo} = useContext(ApplicationWrapperContext)
+  const userSwitch = userInfo
+    ? userInfo.metadata?.show_whitespace === 1
+    : undefined
+  const whitespace = showWhitespace ?? userSwitch ?? !!tagSignatures.space
 
   const content = useMemo(() => {
     const options = {

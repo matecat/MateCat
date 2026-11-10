@@ -27,7 +27,7 @@ import SegmentView from '../segmentView/SegmentView'
 | `isRtl`     | bool   | `false` | Right-to-left language: swaps the open/close tag styles, as the cattool does                  |
 | `compareTo` | string | —       | Older text to diff from. Removed parts are wrapped in `span.deleted`, added parts in `span.added` |
 | `marks`     | array  | —       | `{start, end, className}` ranges of `markableText(segment)`, each wrapped in a `mark`. Ignored with `compareTo` |
-| `showWhitespace` | bool | the user's switch | Marks every space. Without it, the view follows the switch held by the tag signatures (`initTagSignature`) |
+| `showWhitespace` | bool | the user's switch | Marks every space. Without it, the view follows `userInfo.metadata.show_whitespace` of `ApplicationWrapperContext` and re-renders when it changes; with no user in the context, the switch held by the tag signatures (`initTagSignature`) |
 | `as`        | elementType | `'span'` | Root element                                                                         |
 | …           |        |         | Any other prop (`className`, `id`, `lang`, `data-*`…) goes to the root element                |
 

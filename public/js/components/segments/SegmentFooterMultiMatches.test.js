@@ -3,6 +3,7 @@ import {render, screen, fireEvent} from '@testing-library/react'
 import SegmentFooterMultiMatches from './SegmentFooterMultiMatches'
 import {setTagSignatureMiddleware} from './utils/DraftMatecatUtils/tagModel'
 import {SegmentContext} from './SegmentContext'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 
 jest.mock('../../actions/SegmentActions', () => ({
   setFocusOnEditArea: jest.fn(),
@@ -242,5 +243,46 @@ describe('SegmentFooterMultiMatches', () => {
     expect(screen.getByText('Ciao &', {exact: false})).toHaveClass(
       'translation',
     )
+  })
+
+  test('shows the spaces of a match as soon as the user turns the switch on', () => {
+    const segment = {
+      ...baseSegment,
+      cl_contributions: {
+        matches: [
+          {
+            id: '1',
+            segment: 'source text',
+            translation: 'target text',
+            created_by: 'MyMemory',
+            match: '95',
+            source: 'en-US',
+            target: 'it-IT',
+          },
+        ],
+      },
+    }
+    const tree = (show_whitespace) => (
+      <ApplicationWrapperContext.Provider
+        value={{userInfo: {metadata: {show_whitespace}}}}
+      >
+        <SegmentContext.Provider value={{clientConnected: true}}>
+          <SegmentFooterMultiMatches
+            code="cl"
+            active_class="active"
+            tab_class="cross-matches"
+            segment={segment}
+          />
+        </SegmentContext.Provider>
+      </ApplicationWrapperContext.Provider>
+    )
+    const spaceMarks = () =>
+      screen.queryAllByText((_, el) =>
+        el.classList.contains('special-char-space'),
+      )
+    const {rerender} = render(tree(0))
+    expect(spaceMarks()).toHaveLength(0)
+    rerender(tree(1))
+    expect(spaceMarks().length).toBeGreaterThan(0)
   })
 })

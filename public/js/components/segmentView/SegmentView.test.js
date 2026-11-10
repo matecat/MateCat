@@ -2,6 +2,7 @@ import React from 'react'
 import {fireEvent, render, screen} from '@testing-library/react'
 import {Base64} from 'js-base64'
 import SegmentView from './SegmentView'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import {readSegmentClipboard} from './segmentModel'
 import {SPECIAL_CHARS} from '../../utils/segmentText/specialChars'
 import {
@@ -365,5 +366,42 @@ describe('copying from a SegmentView', () => {
 
     expect(prevented).toBe(false)
     expect(data).toEqual({})
+  })
+})
+
+describe('SegmentView show whitespace from the application context', () => {
+  const spaceMarks = () =>
+    screen.queryAllByText((_, el) =>
+      el.classList.contains('special-char-space'),
+    )
+  const inContext = (userInfo, view) => (
+    <ApplicationWrapperContext.Provider value={{userInfo}}>
+      {view}
+    </ApplicationWrapperContext.Provider>
+  )
+  const user = (show_whitespace) => ({metadata: {show_whitespace}})
+
+  test('follows the user switch as it changes, without a prop', () => {
+    const view = <SegmentView segment="a b" />
+    const {rerender} = render(inContext(user(0), view))
+    expect(spaceMarks()).toHaveLength(0)
+    rerender(inContext(user(1), view))
+    expect(spaceMarks()).toHaveLength(1)
+    rerender(inContext(user(0), view))
+    expect(spaceMarks()).toHaveLength(0)
+  })
+
+  test('the prop overrides the context', () => {
+    render(inContext(user(0), <SegmentView segment="a b" showWhitespace />))
+    expect(spaceMarks()).toHaveLength(1)
+  })
+
+  test('without a user in the context, follows the tag signature switch', () => {
+    const {rerender} = render(<SegmentView segment="a b" />)
+    expect(spaceMarks()).toHaveLength(0)
+    setTagSignatureMiddleware('space', () => true)
+    rerender(inContext(undefined, <SegmentView segment="a b" />))
+    expect(spaceMarks()).toHaveLength(1)
+    setTagSignatureMiddleware('space', () => undefined)
   })
 })
