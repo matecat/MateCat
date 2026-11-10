@@ -19,6 +19,27 @@ const ph = (html, id = 'm1') =>
 const byClassAndText = (className, text) => (_, element) =>
   element.classList.contains(className) && element.textContent === text
 
+describe('SegmentView line breaks', () => {
+  const lineBreaks = (segment) => {
+    const {container} = render(<SegmentView segment={segment} />)
+    // eslint-disable-next-line testing-library/no-node-access, testing-library/no-container -- a <br> has no role or text to query by
+    return container.querySelectorAll('br').length
+  }
+
+  test('a line feed breaks the line after its chip', () => {
+    expect(lineBreaks('one##$_0A$##two##$_0A$##three')).toBe(2)
+  })
+
+  test('a CRLF is one line break, and so is a lone carriage return', () => {
+    expect(lineBreaks('one##$_0D$####$_0A$##two')).toBe(1)
+    expect(lineBreaks('one##$_0D$##two')).toBe(1)
+  })
+
+  test('a segment without line feeds stays on one line', () => {
+    expect(lineBreaks('one <x id="1"/> two')).toBe(0)
+  })
+})
+
 describe('SegmentView', () => {
   test('shows markup carried by the segment as text, never as HTML', () => {
     render(<SegmentView segment={'&lt;img src=x onerror=alert(1)&gt;'} />)
