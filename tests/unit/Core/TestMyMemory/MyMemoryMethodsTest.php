@@ -358,7 +358,7 @@ class MyMemoryMethodsTest extends AbstractTest
 
         $result = $mock->importMemory(
             $this->tempFilePath,
-            'a6043e606ac9b5d7ff24',
+            '00000000000000000001',
             $user
         );
 

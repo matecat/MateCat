@@ -8,23 +8,11 @@
 
 .search-form .find-wrapper .find-element input:not(.input--invisible) {
   border-radius: variables.$border-radius-default;
-  border: 1px solid rgba(34, 36, 38, 0.15) !important;
   font-size: 16px;
   padding: 8px 16px 7px !important;
 
   &::-webkit-input-placeholder {
     color: colors.$grey400;
-  }
-
-  &:hover {
-    border-color: rgba(34, 36, 38, 0.35) !important;
-  }
-
-  &:focus {
-    border-color: colors.$blue300 !important;
-    background: colors.$white !important;
-    color: rgba(0, 0, 0, 0.8) !important;
-    /*outline: none;*/
   }
 }
 
