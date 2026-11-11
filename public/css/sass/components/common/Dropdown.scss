@@ -72,10 +72,9 @@ $padding-top-and-bottom: 8px;
   width: 100%;
   padding: 8px 8px 8px 40px !important;
   background-color: colors.$grey75;
-  outline: none;
   border: 1px solid colors.$grey200;
   border-radius: variables.$border-radius-default;
-  outline: none;
+  outline-color: colors.$grey400;
 
   &:hover {
     border-color: colors.$grey400;

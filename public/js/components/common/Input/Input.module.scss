@@ -39,7 +39,7 @@
     text-overflow: ellipsis;
     border-radius: variables.$border-radius-default;
     padding: 8px 12px;
-    outline: none;
+    outline-offset: 0;
 
     &:autofill,
     &:-webkit-autofill {
@@ -55,6 +55,7 @@
     &:focus,
     &:active {
       border-color: colors.$grey400;
+      outline: 1px solid colors.$grey400;
     }
     &.isCompressed {
       padding: 10px;

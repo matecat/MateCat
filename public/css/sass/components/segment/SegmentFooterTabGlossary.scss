@@ -55,7 +55,7 @@
 .tab.glossary textarea {
   resize: none;
   height: 100px;
-  outline: none;
+  outline-color: colors.$grey400;
   border: 1px solid colors.$grey200;
   border-radius: variables.$border-radius-default;
   padding: 8px 12px;
@@ -85,7 +85,6 @@
   border: 1px solid colors.$grey200;
   border-radius: variables.$border-radius-default;
   padding: 4px;
-  outline: none;
 
   &:hover {
     border-color: colors.$grey400;
@@ -94,6 +93,7 @@
   &:focus-within,
   &:active {
     border-color: colors.$grey400;
+    box-shadow: inset 0 0 0 1px colors.$grey400;
   }
 }
 

@@ -174,11 +174,11 @@ section.readonly .status-container a.status:hover {
   margin: 2px 0 0px;
   word-break: normal;
   line-height: 25px;
-  outline: none;
   color: colors.$black;
   border: 1px solid colors.$grey200;
   border-radius: variables.$border-radius-default;
   cursor: text;
+  outline: 1px solid transparent;
 
   &:hover {
     border-color: colors.$grey400;
@@ -187,6 +187,7 @@ section.readonly .status-container a.status:hover {
 
 .editarea:focus-within {
   border-color: colors.$grey400;
+  outline-color: colors.$grey400;
 }
 
 .source {
