@@ -121,7 +121,7 @@ const executeMswServer = () => {
       const response = {
         errors: [],
         data: {
-          key: '6f03df0307c7a161afa9',
+          key: '00000000000000000009',
           id: 'MyMemory_5007d86025f58b50f29c',
           pass: 'f22815f87d',
           mtLangSupported: true,
@@ -141,7 +141,7 @@ const executeMswServer = () => {
       const response = {
         errors: [],
         data: {
-          key: '6f03df0307c7a161afa9',
+          key: '00000000000000000009',
           id: 'MyMemory_5007d86025f58b50f29c',
           pass: 'f22815f87d',
           mtLangSupported: true,
@@ -161,7 +161,7 @@ const executeMswServer = () => {
       const response = {
         errors: [],
         data: {
-          key: '6f03df0307c7a161afa9',
+          key: '00000000000000000009',
           id: 'MyMemory_5007d86025f58b50f29c',
           pass: 'f22815f87d',
           mtLangSupported: true,
@@ -187,7 +187,7 @@ const executeMswServer = () => {
       const response = {
         errors: [],
         data: {
-          key: '6f03df0307c7a161afa9',
+          key: '00000000000000000009',
           id: 'MyMemory_5007d86025f58b50f29c',
           pass: 'f22815f87d',
           mtLangSupported: true,
@@ -240,14 +240,14 @@ test('Enabled/disable key', async () => {
 
   let rowLookup = getRowElementById({
     column: ROW_COLUMNS_TESTID.LOOKUP,
-    id: 'e32699c0a360e08948fe',
+    id: '00000000000000000008',
   })
   expect(rowLookup).toBeEnabled()
   expect(rowLookup).not.toBeChecked()
 
   let rowUpdate = getRowElementById({
     column: ROW_COLUMNS_TESTID.UPDATE,
-    id: 'e32699c0a360e08948fe',
+    id: '00000000000000000008',
   })
   expect(rowUpdate).not.toBeInTheDocument()
 
@@ -258,11 +258,11 @@ test('Enabled/disable key', async () => {
 
   rowLookup = getRowElementById({
     column: ROW_COLUMNS_TESTID.LOOKUP,
-    id: 'e32699c0a360e08948fe',
+    id: '00000000000000000008',
   })
   rowUpdate = getRowElementById({
     column: ROW_COLUMNS_TESTID.UPDATE,
-    id: 'e32699c0a360e08948fe',
+    id: '00000000000000000008',
   })
   expect(rowLookup).toBeChecked()
   expect(rowUpdate).toBeChecked()
@@ -274,11 +274,11 @@ test('Enabled/disable key', async () => {
 
   rowLookup = getRowElementById({
     column: ROW_COLUMNS_TESTID.LOOKUP,
-    id: 'e32699c0a360e08948fe',
+    id: '00000000000000000008',
   })
   rowUpdate = getRowElementById({
     column: ROW_COLUMNS_TESTID.UPDATE,
-    id: 'e32699c0a360e08948fe',
+    id: '00000000000000000008',
   })
 
   expect(rowLookup).not.toBeChecked()
@@ -290,13 +290,13 @@ test('Enabled/disable key', async () => {
 
   rowUpdate = getRowElementById({
     column: ROW_COLUMNS_TESTID.UPDATE,
-    id: 'e32699c0a360e08948fe',
+    id: '00000000000000000008',
   })
 
   expect(
     (rowUpdate = getRowElementById({
       column: ROW_COLUMNS_TESTID.UPDATE,
-      id: 'e32699c0a360e08948fe',
+      id: '00000000000000000008',
     })),
   ).not.toBeInTheDocument()
 })
@@ -310,7 +310,7 @@ test('Create and delete new resource', async () => {
         const response = {
           errors: [],
           data: {
-            key: '6f03df0307c7a161afa9',
+            key: '00000000000000000009',
             id: 'MyMemory_5007d86025f58b50f29c',
             pass: 'f22815f87d',
             mtLangSupported: true,
@@ -358,11 +358,11 @@ test('Create and delete new resource', async () => {
   const rowNewEntry = {
     lookup: getRowElementById({
       column: ROW_COLUMNS_TESTID.LOOKUP,
-      id: '6f03df0307c7a161afa9',
+      id: '00000000000000000009',
     }),
     update: getRowElementById({
       column: ROW_COLUMNS_TESTID.UPDATE,
-      id: '6f03df0307c7a161afa9',
+      id: '00000000000000000009',
     }),
   }
 
@@ -386,7 +386,7 @@ test('Create and delete new resource', async () => {
 
   const rowDeleted = getRowElementById({
     column: ROW_COLUMNS_TESTID.LOOKUP,
-    id: '6f03df0307c7a161afa9',
+    id: '00000000000000000009',
   })
 
   expect(rowDeleted).not.toBeInTheDocument()
@@ -421,7 +421,7 @@ test('Create shared resource', async () => {
   const rowSharedKey = screen.getByTestId(
     `input-${SPECIAL_ROWS_ID.addSharedResource}`,
   )
-  await act(async () => user.type(rowSharedKey, '6a820ef8f06d922ca0a0'))
+  await act(async () => user.type(rowSharedKey, '00000000000000000011'))
 
   expect(buttonConfirm).toBeEnabled()
   await waitFor(async () => user.click(buttonConfirm))
@@ -431,11 +431,11 @@ test('Create shared resource', async () => {
   const rowNewEntry = {
     lookup: getRowElementById({
       column: ROW_COLUMNS_TESTID.LOOKUP,
-      id: '6a820ef8f06d922ca0a0',
+      id: '00000000000000000011',
     }),
     update: getRowElementById({
       column: ROW_COLUMNS_TESTID.UPDATE,
-      id: '6a820ef8f06d922ca0a0',
+      id: '00000000000000000011',
     }),
   }
 
@@ -527,15 +527,15 @@ test('Search resources inactive keys', async () => {
 
   const row1 = getRowElementById({
     column: ROW_COLUMNS_TESTID.LOOKUP,
-    id: 'e32699c0a360e08948fe',
+    id: '00000000000000000008',
   })
   const row2 = getRowElementById({
     column: ROW_COLUMNS_TESTID.LOOKUP,
-    id: '74b6c82408a028b6f020',
+    id: '00000000000000000010',
   })
   const row3 = getRowElementById({
     column: ROW_COLUMNS_TESTID.LOOKUP,
-    id: '21df10c8cce1b31f2d0d',
+    id: '00000000000000000012',
   })
   expect(row1).not.toBeInTheDocument()
   expect(row2).not.toBeInTheDocument()
@@ -556,7 +556,7 @@ test('Modal delete tmkeys used in other templates', async () => {
   const user = userEvent.setup()
   const {projectTemplates, ...rest} = contextMockValues({
     tmKeysMockArray: tmKeysMock.tm_keys.filter(
-      ({key}) => key === '74b6c82408a028b6f020',
+      ({key}) => key === '00000000000000000010',
     ),
   })
   const template = {

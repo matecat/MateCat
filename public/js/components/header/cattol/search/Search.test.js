@@ -1,5 +1,5 @@
 import React from 'react'
-import {render, screen, act, fireEvent} from '@testing-library/react'
+import {render, screen, act, fireEvent, waitFor} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import Search from './Search'
@@ -190,7 +190,9 @@ test('clicking clear resets the search fields after the deferred timeout', async
   await user.type(screen.getByPlaceholderText('Find in source'), 'hello')
   await user.click(screen.getByText('Clear'))
 
-  expect(screen.getByPlaceholderText('Find in source')).toHaveValue('')
+  await waitFor(() =>
+    expect(screen.getByPlaceholderText('Find in source')).toHaveValue(''),
+  )
 })
 
 test('inserts a non-breaking space placeholder on Ctrl+Shift+Space', () => {
