@@ -98,8 +98,16 @@ jobs:
         id: image_cache
         run: echo "scope=test-images-$(date -u +%G-W%V)" >> "$GITHUB_OUTPUT"
 
+      # The RUN steps of the build resolve names through fixed public DNS
+      # servers. On 2026-11-11 the runner's own resolver could not find
+      # eu-central-1.ec2.archive.ubuntu.com for two minutes, and apt-get
+      # update stopped both builds.
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
+        with:
+          buildkitd-config-inline: |
+            [dns]
+              nameservers = ["1.1.1.1", "8.8.8.8"]
 
       # test-node starts FROM matecat-base-node-24. The buildx builder cannot
       # see the images of the local docker daemon, so the contexts line points
@@ -180,8 +188,16 @@ jobs:
         id: image_cache
         run: echo "scope=test-images-$(date -u +%G-W%V)" >> "$GITHUB_OUTPUT"
 
+      # The RUN steps of the build resolve names through fixed public DNS
+      # servers. On 2026-11-11 the runner's own resolver could not find
+      # eu-central-1.ec2.archive.ubuntu.com for two minutes, and apt-get
+      # update stopped both builds.
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
+        with:
+          buildkitd-config-inline: |
+            [dns]
+              nameservers = ["1.1.1.1", "8.8.8.8"]
 
       # Same build as the PHP job; this one only reads the cache.
       - name: Build images
