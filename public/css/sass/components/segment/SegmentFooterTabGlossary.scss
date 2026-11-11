@@ -98,7 +98,7 @@
 }
 
 .tab.glossary .glossary_search-container svg {
-  color: colors.$grey300;
+  color: colors.$grey600;
 }
 
 .tab.glossary .glossary__button-add-container {
@@ -112,6 +112,10 @@
   border: none;
   outline: none;
   margin-left: 8px;
+
+  &::placeholder {
+    color: colors.$grey400;
+  }
 }
 
 .tab.glossary input.glossary_search-input:disabled {

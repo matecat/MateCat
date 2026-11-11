@@ -3,6 +3,7 @@ import {Select} from '../../../common/Select'
 import {SubTemplatesContext} from './SubTemplateContext'
 import HelpCircle from '../../../../../img/icons/HelpCircle'
 import Tooltip from '../../../common/Tooltip'
+import {SELECT_HEIGHT} from '../../../../constants/Constants'
 
 export const SubTemplateSelect = () => {
   const {templates, setTemplates, currentTemplate} =
@@ -56,7 +57,7 @@ export const SubTemplateSelect = () => {
             options={options}
             activeOption={activeOption}
             onSelect={onSelect}
-            maxHeightDroplist={300}
+            maxHeightDroplist={SELECT_HEIGHT}
           />
         </div>
       )}

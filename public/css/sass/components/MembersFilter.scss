@@ -155,8 +155,24 @@
       width: 100%;
 
       input {
-        border: unset;
-        box-shadow: none;
+        height: 30px;
+        margin: 10px 0;
+        border-color: transparent;
+
+        &::placeholder {
+          color: colors.$grey400;
+        }
+
+        &:hover,
+        &:focus,
+        &:active {
+          border-color: colors.$grey400;
+        }
+      }
+
+      svg {
+        top: 16px;
+        color: colors.$grey600;
       }
     }
   }

@@ -4,6 +4,7 @@ import {Select} from '../../common/Select'
 import {Button, BUTTON_MODE, BUTTON_TYPE} from '../../common/Button/Button'
 import ModalsActions from '../../../actions/ModalsActions'
 import CommonUtils from '../../../utils/commonUtils'
+import {SELECT_HEIGHT} from '../../../constants/Constants'
 
 const getImgUser = (userData) => {
   const {user_metadata: metadata, user} = userData
@@ -55,7 +56,7 @@ export const BulkAssignToMember = ({teams, projects, successCallback}) => {
         activeOption={memberSelected}
         checkSpaceToReverse={false}
         onSelect={onSelect}
-        maxHeightDroplist={300}
+        maxHeightDroplist={SELECT_HEIGHT}
       />
       <div className="content-bulk-modal-control">
         <Button
