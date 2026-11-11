@@ -4,7 +4,6 @@ import {SettingsPanelContext} from '../../SettingsPanelContext'
 import SegmentActions from '../../../../actions/SegmentActions'
 import CatToolActions from '../../../../actions/CatToolActions'
 import SegmentStore from '../../../../stores/SegmentStore'
-import {SELECT_HEIGHT} from '../../../../constants/Constants'
 
 export const taggingTypes = [
   {id: 'markup', name: 'Markup', code: '<text>', default: true},
