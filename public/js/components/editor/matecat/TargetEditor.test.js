@@ -877,6 +877,72 @@ describe('TargetEditor layers (Editarea checkDecorators)', () => {
     expect(container.querySelector('.cm-content .icuItem-error')).not.toBeNull()
   })
 
+  describe('ICU syntax wins over Lexiqa and the blacklist (Draft decorates a character once)', () => {
+    const ICU =
+      '{itemCount, plural, =0 {nessun libro} one {un libro} other {# libri}}'
+    const icuLexiqaText = translationUpdate(
+      ICU,
+      sourceTagMap,
+    ).lxqDecodedTranslation
+    const warningOn = (word) => {
+      const start = icuLexiqaText.indexOf(word)
+      return {start, end: start + word.length, myClass: 'x', errorid: word}
+    }
+    const icuSegment = (overrides) =>
+      makeSegment({
+        translation: ICU,
+        lxqDecodedTranslation: icuLexiqaText,
+        lexiqa: {target: {spelling: [{}]}},
+        qaBlacklistGlossary: [
+          {
+            ...blacklisted,
+            matching_words: ['plural'],
+            target: {term: 'plural'},
+          },
+          {...blacklisted, matching_words: ['libri'], target: {term: 'libri'}},
+        ],
+        ...overrides,
+      })
+
+    beforeEach(() => {
+      mockGetRanges.mockImplementation(() =>
+        ['{itemCount,', 'plural,', '=0', 'nessun', 'libro}', '{un'].map(
+          warningOn,
+        ),
+      )
+    })
+
+    test('a mark touching the ICU syntax is dropped whole; one inside the text of a case stays', async () => {
+      const {container} = renderTarget(icuSegment({icu: true}))
+      await flush()
+      expect(marks(container, '.lexiqahighlight')).toEqual(['nessun'])
+      expect(marks(container, '.blacklistItem')).toEqual(['libri'])
+      expect(marks(container, '.icuItem')).toContain('plural')
+    })
+
+    test('a segment that is not ICU keeps every mark', async () => {
+      const {container} = renderTarget(icuSegment({icu: false}))
+      await flush()
+      expect(marks(container, '.lexiqahighlight')).toEqual([
+        '{itemCount,',
+        'plural,',
+        '=0',
+        'nessun',
+        'libro}',
+        '{un',
+      ])
+      expect(marks(container, '.blacklistItem')).toEqual(['plural', 'libri'])
+    })
+
+    test('the Lexiqa marks are filtered again when the segment turns ICU', async () => {
+      const {container, update} = renderTarget(icuSegment({icu: false}))
+      await flush()
+      update(icuSegment({icu: true}))
+      await flush()
+      expect(marks(container, '.lexiqahighlight')).toEqual(['nessun'])
+    })
+  })
+
   test('a layer update that arrives during an IME composition waits for it to end', async () => {
     const composing = jest
       .spyOn(EditorView.prototype, 'composing', 'get')

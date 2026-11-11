@@ -28,7 +28,7 @@ import Assistant from '../../../../img/icons/Assistant'
 import Education from '../../../../img/icons/Education'
 import {createSegmentEditor} from '../core/createSegmentEditor'
 import {serialize} from '../core/docModel'
-import {SEARCH_LAYER, setLayer} from '../core/layers'
+import {SEARCH_LAYER, setLayer, withoutRangesOverlapping} from '../core/layers'
 import {chipTokens, setTagState} from '../core/tags'
 import {searchChipRanges, searchRanges} from './layers/search'
 import {glossaryRanges, qaCheckGlossaryRanges} from './layers/glossary'
@@ -184,12 +184,18 @@ const SourceEditor = ({segment, value, bridge}) => {
     if (!force && key === layerKeyRef.current) return
     layerKeyRef.current = key
     const inSearch = segment.inSearch && segment.searchParams?.source
+    const icu =
+      segment.icu && !inSearch ? icuRanges(state, config.source_code) : []
+    // ICU syntax wins over the glossary and Lexiqa, as SegmentSource's ICU decorator does: a mark touching it is not shown.
+    const outsideIcu = (ranges) => withoutRangesOverlapping(ranges, icu)
     const layers = {
       [SEARCH_LAYER]: inSearch ? searchRanges(state, segment) : [],
-      glossary: inSearch ? [] : glossaryRanges(state, segment),
-      qaCheckGlossary: inSearch ? [] : qaCheckGlossaryRanges(state, segment),
-      lexiqa: inSearch ? [] : lexiqaRanges(state, segment),
-      icu: segment.icu && !inSearch ? icuRanges(state, config.source_code) : [],
+      glossary: inSearch ? [] : outsideIcu(glossaryRanges(state, segment)),
+      qaCheckGlossary: inSearch
+        ? []
+        : outsideIcu(qaCheckGlossaryRanges(state, segment)),
+      lexiqa: inSearch ? [] : outsideIcu(lexiqaRanges(state, segment)),
+      icu,
     }
     editor.view.dispatch({
       effects: Object.entries(layers).map(([name, ranges]) =>

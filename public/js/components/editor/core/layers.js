@@ -100,6 +100,17 @@ export const layerRangesAt = (state, pos) => {
 }
 
 /**
+ * The `ranges` that share no character with any of `blockers` (all `{from, to}`): a range overlapping one is dropped
+ * whole, as Draft's CompositeDecorator skips a decorator range when a decorator before it took one of its characters.
+ */
+export const withoutRangesOverlapping = (ranges, blockers) =>
+  blockers.length
+    ? ranges.filter(
+        (r) => !blockers.some((b) => b.from < r.to && b.to > r.from),
+      )
+    : ranges
+
+/**
  * Turns ranges over `visibleDoc().text` ({start, end, …}) into document ranges ({from, to, …}): the offsets the
  * segment view and its marks use mark the same text in the editor.
  */

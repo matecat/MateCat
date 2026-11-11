@@ -27,7 +27,12 @@ import {ApplicationWrapperContext} from '../../common/ApplicationWrapper/Applica
 import TagBox from '../../segments/TagMenu/TagBox'
 import {createSegmentEditor} from '../core/createSegmentEditor'
 import {insertRaw} from '../core/docModel'
-import {SEARCH_LAYER, applyLayers, setLayer} from '../core/layers'
+import {
+  SEARCH_LAYER,
+  applyLayers,
+  setLayer,
+  withoutRangesOverlapping,
+} from '../core/layers'
 import {chipTokens, setTagState} from '../core/tags'
 import {createTagTooltip} from './tagTooltip'
 import {layerTooltipExtensions} from './layerTooltip'
@@ -88,6 +93,11 @@ export const targetLayers = (state, segment, haveKeysGlossary) => {
   const showLexiqa =
     !inSearch &&
     (haveKeysGlossary === false || Array.isArray(segment.qaBlacklistGlossary))
+  // ICU syntax wins over the blacklist and Lexiqa, as Editarea's ICU decorator does: a mark touching it is not shown.
+  const outsideIcu = (ranges) =>
+    segment.icu
+      ? withoutRangesOverlapping(ranges, icuRanges(state, config.target_code))
+      : ranges
   return [
     {
       name: SEARCH_LAYER,
@@ -103,16 +113,21 @@ export const targetLayers = (state, segment, haveKeysGlossary) => {
     {
       name: 'blacklist',
       key: !inSearch && [doc, segment.qaBlacklistGlossary],
-      ranges: () => (inSearch ? [] : blacklistRanges(state, segment)),
+      ranges: () =>
+        inSearch ? [] : outsideIcu(blacklistRanges(state, segment)),
     },
     {
       // Lexiqa describes the text it checked: recomputed when its results change (once the store has the Lexiqa
-      // text of the target), an edit drops what it touches.
+      // text of the target), an edit drops what it touches. The ICU syntax is the one of the checked text.
       name: 'lexiqa',
       key: showLexiqa &&
-        segment.lxqDecodedTranslation !== undefined && [segment.lexiqa?.target],
+        segment.lxqDecodedTranslation !== undefined && [
+          segment.lexiqa?.target,
+          Boolean(segment.icu),
+        ],
       volatile: true,
-      ranges: () => (showLexiqa ? lexiqaRanges(state, segment, false) : []),
+      ranges: () =>
+        showLexiqa ? outsideIcu(lexiqaRanges(state, segment, false)) : [],
     },
     {
       name: 'icu',

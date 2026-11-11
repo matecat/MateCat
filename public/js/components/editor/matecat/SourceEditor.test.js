@@ -331,6 +331,47 @@ describe('SourceEditor layers', () => {
     )
     expect(marks(plainSegment, '.icuItem')).toEqual([])
   })
+
+  test('in an ICU segment, a glossary, missing term or Lexiqa mark touching the ICU syntax is dropped whole', () => {
+    const text = '{gender, select, male {Lui ha} other {Lei ha}}'
+    const at = (word) => text.indexOf(word)
+    mockGetRanges.mockReturnValue(
+      ['{gender,', 'select,', 'male', 'Lui', '{Lei'].map((word) => ({
+        start: at(word),
+        end: at(word) + word.length,
+      })),
+    )
+    const segmentWith = (icu) =>
+      makeSegment({
+        segment: text,
+        icu,
+        glossary: [
+          {term_id: 1, matching_words: ['male']},
+          {term_id: 2, matching_words: ['ha']},
+          {term_id: 3, matching_words: ['other'], missingTerm: true},
+          {term_id: 4, matching_words: ['Lei'], missingTerm: true},
+        ],
+        lexiqa: {source: {spelling: [{}]}},
+        lxqDecodedSource: text,
+      })
+    const {container: icuSegment} = renderSource(segmentWith(true))
+    expect(marks(icuSegment, '.lexiqahighlight')).toEqual(['Lui'])
+    expect(marks(icuSegment, '.glossaryItem')).toEqual(['ha', 'ha'])
+    expect(marks(icuSegment, '.qaCheckGlossaryItem')).toEqual(['Lei'])
+
+    const {container: plainSegment} = renderSource({
+      ...segmentWith(false),
+      sid: '11',
+    })
+    expect(marks(plainSegment, '.lexiqahighlight')).toEqual([
+      '{gender,',
+      'select,',
+      'male',
+      'Lui',
+      '{Lei',
+    ])
+    expect(marks(plainSegment, '.glossaryItem')).toEqual(['male', 'ha', 'ha'])
+  })
 })
 
 describe('SourceEditor tags', () => {
