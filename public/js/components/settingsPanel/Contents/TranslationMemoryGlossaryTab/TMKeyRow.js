@@ -539,6 +539,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
       </div>
       <div>
         <input
+          type="text"
           className={`tm-key-row-name${
             isMMSharedKey ? ' tm-key-row-name-disabled' : ''
           }`}

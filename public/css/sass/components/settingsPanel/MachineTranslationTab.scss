@@ -666,9 +666,14 @@
   }
 
   input {
-    height: 32px;
     padding: 4px 8px;
     border-radius: variables.$border-radius-default;
+
+    &:disabled {
+      background-color: colors.$white !important;
+      color: inherit !important;
+      cursor: not-allowed;
+    }
   }
 }
 
