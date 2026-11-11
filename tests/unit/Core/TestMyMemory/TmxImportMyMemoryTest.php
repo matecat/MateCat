@@ -120,7 +120,7 @@ class TmxImportMyMemoryTest extends AbstractTest
         $path_of_the_original_file = AppConfig::$ROOT . '/tests/resources/files/tmx/exampleForTestOriginal.tmx';
 
         $file_param = $path_of_the_original_file;
-        $key_param = "a6043e606ac9b5d7ff24";
+        $key_param = "00000000000000000001";
 
 
         /**

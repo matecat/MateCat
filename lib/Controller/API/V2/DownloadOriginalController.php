@@ -7,26 +7,28 @@ use Exception;
 use Model\ActivityLog\Activity;
 use Model\ActivityLog\ActivityLogStruct;
 use Model\Conversion\ZipArchiveHandler;
+use Model\Exceptions\NotFoundException;
 use Model\FilesStorage\AbstractFilesStorage;
-use Model\FilesStorage\FilesStorageFactory;
 use Model\Jobs\JobDao;
 use Model\LQA\ChunkReviewDao;
 use Model\Projects\ProjectDao;
+use ReflectionException;
 use TypeError;
 use Utils\Tools\Utils;
 use View\API\Commons\ZipContentObject;
-
-set_time_limit(180);
 
 class DownloadOriginalController extends AbstractDownloadController
 {
 
     /**
      * @throws Exception
+     * @throws NotFoundException
      * @throws TypeError
      */
     public function index(): void
     {
+        set_time_limit(180);
+
         $filterArgs = [
             'filename' => [
                 'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
@@ -57,15 +59,13 @@ class DownloadOriginalController extends AbstractDownloadController
         if (empty($jobData)) {
             $chunkReviewStruct = (new ChunkReviewDao($this->getDatabase()))->findByReviewPasswordAndJobId($this->password, (int)$this->id_job);
             if (empty($chunkReviewStruct)) {
-                $msg = "Error : wrong password provided for download \n\n " . var_export($this->request->paramsPost()->all(), true) . "\n";
-                $this->logger->debug($msg);
-                return;
+                throw new NotFoundException("Not found.");
             }
             $jobData = $chunkReviewStruct->getChunk(new JobDao($this->getDatabase()));
         }
 
         //get storage object
-        $fs = FilesStorageFactory::create();
+        $fs = $this->getFilesStorage();
         $files_job = $fs->getFilesForJob($this->getDatabase(), $this->id_job, false);
 
         if (empty($files_job)) {
@@ -107,36 +107,71 @@ class DownloadOriginalController extends AbstractDownloadController
             $output_content[$key] = new ZipContentObject($iFile);
         }
 
-        if (count($output_content) > 1) {
-            $this->setFilename($this->getDefaultFileName($this->project));
-            $pathInfo = AbstractFilesStorage::pathinfo_fix($this->_filename);
-
-            if (!is_array($pathInfo)) {
-                throw new Exception("pathinfo_fix returned non-array value");
+        try {
+            if (AbstractFilesStorage::isOnS3()) {
+                $this->copyOriginalsFromS3($output_content);
             }
 
-            if (($pathInfo['extension'] ?? '') !== 'zip') {
-                $this->setFilename(($pathInfo['basename'] ?? $this->_filename) . ".zip");
+            if (count($output_content) > 1) {
+                $this->setFilename($this->getDefaultFileName($this->project));
+                $pathInfo = AbstractFilesStorage::pathinfo_fix($this->_filename);
+
+                if (!is_array($pathInfo)) {
+                    throw new Exception("pathinfo_fix returned non-array value");
+                }
+
+                if (($pathInfo['extension'] ?? '') !== 'zip') {
+                    $this->setFilename(($pathInfo['basename'] ?? $this->_filename) . ".zip");
+                }
+
+                $this->setOutputContent(new ZipContentObject([
+                    'output_filename' => $this->_filename,
+                    'input_filename' => self::composeZip($output_content, $this->getWorkDir() . DIRECTORY_SEPARATOR . 'original.zip', true),
+                ]));
+                $this->setMimeType();
+            } elseif (count($output_content) == 1) {
+                $oContent = array_pop($output_content);
+                $this->setFilename($oContent->output_filename);
+                $this->setOutputContent($oContent);
+                $this->setMimeType();
             }
 
-            $this->outputContent = self::composeZip($output_content, null, true); //add zip archive content here;
-            $this->setMimeType();
-        } elseif (count($output_content) == 1) {
-            $oContent = array_pop($output_content);
-            $this->setFilename($oContent->output_filename);
-            $this->setOutputContent($oContent);
-            $this->setMimeType();
+            $activity = new ActivityLogStruct();
+            $activity->id_job = $this->id_job;
+            $activity->id_project = $id_project;
+            $activity->action = ActivityLogStruct::DOWNLOAD_ORIGINAL;
+            $activity->ip = Utils::getRealIpAddr();
+            $activity->uid = $this->user->uid;
+            $activity->event_date = date('Y-m-d H:i:s');
+            Activity::save($activity);
+
+            $this->finalize();
+        } finally {
+            $this->deleteWorkDir();
         }
+    }
 
-        $activity = new ActivityLogStruct();
-        $activity->id_job = $this->id_job;
-        $activity->id_project = $id_project;
-        $activity->action = ActivityLogStruct::DOWNLOAD_ORIGINAL;
-        $activity->ip = Utils::getRealIpAddr();
-        $activity->uid = $this->user->uid;
-        $activity->event_date = date('Y-m-d H:i:s');
-        Activity::save($activity);
+    /**
+     * Copies the originals kept on S3 to the work folder, so they are zipped or streamed from the
+     * disk like local files instead of being read into memory.
+     *
+     * @param ZipContentObject[] $files
+     *
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    private function copyOriginalsFromS3(array $files): void
+    {
+        foreach ($files as $key => $f) {
+            if (empty($f->input_filename) || file_exists($f->input_filename)) {
+                continue;
+            }
 
-        $this->finalize();
+            // Named after the file id: the zip entry takes its name from output_filename, and the
+            // original name could exceed the 255 bytes a file name can have.
+            $saveAs = $this->getWorkDir() . DIRECTORY_SEPARATOR . $key;
+            $this->downloadFromS3($f->input_filename, $saveAs);
+            $f->input_filename = $saveAs;
+        }
     }
 }
