@@ -440,4 +440,10 @@ jobs:
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_CHANNEL: travis-ci
+          # Without SLACK_COLOR the action paints every message green. job.status
+          # would not help either: it is the status of this job, which succeeds.
+          SLACK_COLOR: >-
+            ${{ contains(needs.*.result, 'failure') && 'failure'
+            || contains(needs.*.result, 'cancelled') && 'cancelled'
+            || 'success' }}
           SLACK_TITLE: GitHub CI/CD Pipeline Complete for ${{ github.head_ref || github.ref_name }}
