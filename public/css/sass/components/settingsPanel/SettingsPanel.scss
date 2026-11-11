@@ -186,18 +186,14 @@
   }
 
   .template-name {
-    width: 236px;
-    height: 38px;
+    width: 240px;
+    height: 40px;
     font-size: variables.$font-size-small;
     padding: 9px 0 9px 12px;
     border-radius: variables.$border-radius-default;
-    border: none;
     position: absolute;
-    margin-top: 41px;
-    margin-left: 1px;
-    outline: none;
+    margin-top: 40px;
     line-height: 4;
-    border: none !important;
   }
 }
 
@@ -366,7 +362,7 @@
 
   .settings-panel-templates-container-select {
     .template-name {
-      margin-top: 29px;
+      margin-top: 28px;
     }
   }
 }

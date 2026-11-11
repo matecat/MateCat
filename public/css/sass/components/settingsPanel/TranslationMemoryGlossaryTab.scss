@@ -369,9 +369,10 @@
 
 .tm-key-create-resource-row-input {
   width: 100%;
-  padding: 4px 8px;
+  padding: 4px 8px !important;
   border-radius: variables.$border-radius-default;
   border: solid 1px colors.$grey150;
+  background-color: colors.$white !important;
 
   &.error {
     border: solid 1px colors.$red500;
