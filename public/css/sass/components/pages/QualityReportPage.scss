@@ -621,7 +621,7 @@ header
   display: flex;
   align-items: center;
   background-color: colors.$white;
-  height: 40px;
+  min-height: 40px;
   border-bottom: 1px solid colors.$grey100;
 }
 
@@ -646,7 +646,7 @@ header
   .qr-body-list
   .qr-element {
   position: relative;
-  padding-left: 24px;
+  padding: 8px 8px 8px 24px;
 }
 
 .qr-wrapper
