@@ -100,7 +100,7 @@ class UpdateJobKeysController extends KleinController
          *                           [tm] => 1
          *                           [glos] => 1
          *                           [owner] => 0
-         *                           [key] => 952681baffb9c147b346
+         *                           [key] => 00000000000000000006
          *                           [name] => cgjhkmfgdcjkfh
          *                           [r] => 1
          *                           [w] => 1

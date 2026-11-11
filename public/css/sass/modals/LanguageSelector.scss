@@ -95,12 +95,21 @@
         align-items: center;
         width: 100%;
         text-align: left;
+        border: 1px solid colors.$grey200;
         border-radius: variables.$border-radius-default;
-        border: 1px solid $medium-gray;
         padding: 6px 16px;
+
+        input::placeholder {
+          color: colors.$grey400 !important;
+        }
+
         &:hover {
-          border: 1px solid $dark-gray;
+          border: 1px solid colors.$grey400;
           cursor: text;
+        }
+        &:focus-within {
+          border: 1px solid colors.$grey400;
+          outline: 1px solid colors.$grey400;
         }
       }
     }
