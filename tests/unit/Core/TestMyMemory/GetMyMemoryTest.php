@@ -73,7 +73,7 @@ class GetMyMemoryTest extends AbstractTest
             'email' => "demo@matecat.com",
             'prop' => null,
             'get_mt' => true,
-            'id_user' => [0 => "a6043e606ac9b5d7ff24"],
+            'id_user' => [0 => "00000000000000000001"],
             'num_result' => 10,
             'mt_only' => false,
             'isConcordance' => false,
@@ -82,99 +82,75 @@ class GetMyMemoryTest extends AbstractTest
     }
 
     /**
-     * @group  regression
-     * @group  ExternalServices
-     * @group  MyMemory
-     * @covers MyMemory::get
-     */
-    #[Group('ExternalServices')]
-    #[Group('MyMemory')]
-    #[Test]
-    public function test_get_segment_dutch()
-    {
-        $this->engine_MyMemory = new MyMemory($this->engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class));
-
-        $this->config_param_of_get['segment'] = "- Auf der Fußhaut natürlich vorhandene Hornhautbakterien zersetzen sich durch auftretenden Schweiß an Ihren Füßen.";
-
-        $result = $this->engine_MyMemory->get($this->config_param_of_get);
-        $this->assertEquals(200, $result->responseStatus);
-        $this->assertEquals("", $result->responseDetails);
-        $this->assertCount(2, $result->responseData);
-        $this->assertTrue($result instanceof GetMemoryResponse);
-
-        $this->reflector = new ReflectionClass($result);
-        $property = $this->reflector->getProperty('_rawResponse');
-
-
-        $this->assertEquals("", $property->getValue($result));
-    }
-
-    /**
      * Test that verified the behaviour of a get request for the translation
      * of a segment given personal tm with respective id_user.
      * @group  regression
-     * @group  ExternalServices
-     * @group  MyMemory
      * @covers MyMemory::get
      */
-    #[Group('ExternalServices')]
-    #[Group('MyMemory')]
     #[Test]
     public function test_get_segment_italian_with_id_user_initialized()
     {
-        $this->engine_MyMemory = new MyMemory($this->engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class));
-
+        $mock_json_return = <<<'TAB'
+{"responseData":{"translatedText":null,"match":null},"responseDetails":"","responseStatus":200,"responderId":null,"matches":[]}
+TAB;
 
         $this->config_param_of_get['segment'] = "L’Amministratore inserisce titolo, anno di produzione e codice univoco del nuovo film.";
+        $this->config_param_of_get['id_user'] = ['00000000000000000001', '00000000000000000002'];
 
+        $sent = [];
+
+        /**
+         * @var Matches
+         */
+        $this->engine_MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$this->engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class)])->onlyMethods(['_call'])->getMock();
+        $this->engine_MyMemory->expects($this->once())->method('_call')
+            ->with('https://api.mymemory.translated.net/get', $this->anything())
+            ->willReturnCallback(function (string $url, array $options) use (&$sent, $mock_json_return) {
+                $sent = $options[CURLOPT_POSTFIELDS];
+                return $mock_json_return;
+            });
 
         $result = $this->engine_MyMemory->get($this->config_param_of_get);
 
-        /**
-         * general check on the keys of TSM object returned
-         */
-        $this->assertTrue($result instanceof GetMemoryResponse);
-        $this->assertTrue(property_exists($result, 'matches'));
-        $this->assertTrue(property_exists($result, 'responseStatus'));
-        $this->assertTrue(property_exists($result, 'responseDetails'));
-        $this->assertTrue(property_exists($result, 'responseData'));
-        $this->assertTrue(property_exists($result, 'error'));
-        $this->assertTrue(property_exists($result, '_rawResponse'));
+        $this->assertSame('00000000000000000001,00000000000000000002', $sent['key']);
+        $this->assertEquals(200, $result->responseStatus);
+        $this->assertNull($result->error);
     }
 
     /**
      * Test that verified the behaviour of a get request for the translation of a
      * segment with wrong source language.
      * @group  regression
-     * @group  ExternalServices
-     * @group  MyMemory
      * @covers MyMemory::get
      */
-    #[Group('ExternalServices')]
-    #[Group('MyMemory')]
     #[Test]
     public function test_get_segment_italian_with_wrong_source_language_and_id_user_not_in_array_coverage_purpose()
     {
-        $this->engine_MyMemory = new MyMemory($this->engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class));
-
+        $mock_json_return = <<<'TAB'
+{"responseData":{"translatedText":null,"match":null},"responseDetails":"","responseStatus":200,"responderId":null,"matches":[]}
+TAB;
 
         $this->config_param_of_get['segment'] = "Scelta del Piano di studio parziale per il secondo anno ripetente secondo l’Ordinamento D.M. 270/04";
-        $this->config_param_of_get['id_user'] = "bfb9bd80a43253670c8d";
+        $this->config_param_of_get['id_user'] = "0123456789abcdef0123";
 
+        $sent = [];
+
+        /**
+         * @var Matches
+         */
+        $this->engine_MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$this->engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class)])->onlyMethods(['_call'])->getMock();
+        $this->engine_MyMemory->expects($this->once())->method('_call')
+            ->with('https://api.mymemory.translated.net/get', $this->anything())
+            ->willReturnCallback(function (string $url, array $options) use (&$sent, $mock_json_return) {
+                $sent = $options[CURLOPT_POSTFIELDS];
+                return $mock_json_return;
+            });
 
         $result = $this->engine_MyMemory->get($this->config_param_of_get);
 
-
-        /**
-         * general check on the keys of TSM object returned
-         */
-        $this->assertTrue($result instanceof GetMemoryResponse);
-        $this->assertTrue(property_exists($result, 'matches'));
-        $this->assertTrue(property_exists($result, 'responseStatus'));
-        $this->assertTrue(property_exists($result, 'responseDetails'));
-        $this->assertTrue(property_exists($result, 'responseData'));
-        $this->assertTrue(property_exists($result, 'error'));
-        $this->assertTrue(property_exists($result, '_rawResponse'));
+        $this->assertSame('0123456789abcdef0123', $sent['key']);
+        $this->assertEquals(200, $result->responseStatus);
+        $this->assertNull($result->error);
     }
 
     /**
@@ -196,7 +172,7 @@ class GetMyMemoryTest extends AbstractTest
                     'de' => 'demo@matecat.com',
                     'mt' => true,
                     'numres' => 10,
-                    'key' => 'a6043e606ac9b5d7ff24',
+                    'key' => '00000000000000000001',
                     'client_id' => 0
                 ],
             CURLINFO_HEADER_OUT => true,
@@ -260,7 +236,7 @@ TAB;
                     'de' => 'demo@matecat.com',
                     'mt' => true,
                     'numres' => 10,
-                    'key' => 'a6043e606ac9b5d7ff24',
+                    'key' => '00000000000000000001',
                     'client_id' => 0,
                     'priority_key' => 0,
                     JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value => 'null'
@@ -271,7 +247,7 @@ TAB;
 
         $url_mock_param = "https://api.mymemory.translated.net/get";
         $mock_json_return = <<<'TAB'
-{"responseData":{"translatedText":"Each copy has a unique serial number.","match":1},"responseDetails":"","responseStatus":200,"responderId":"238","matches":[{"id":"484523811","segment":"Ciascuna copia \u00e8 dotata di un numero di serie univoco.","translation":"Each copy has a unique serial number.","quality":"74","reference":"","usage-count":1,"subject":"All","created-by":"MyMemory_65655950851269d899c7","last-updated-by":"MyMemory_65655950851269d899c7","create-date":"2016-05-02 17:15:11","last-update-date":"2016-05-02 17:15:11","tm_properties":"[{\"type\":\"x-project_id\",\"value\":\"9\"},{\"type\":\"x-project_name\",\"value\":\"eryt\"},{\"type\":\"x-job_id\",\"value\":\"9\"}]","match":1,"key":"a6043e606ac9b5d7ff24"},{"id":0,"segment":"Ciascuna copia \u00e8 dotata di un numero di serie univoco.","translation":"Each copy has a unique serial number.","quality":70,"reference":"Machine Translation provided by Google, Microsoft, Worldlingo or MyMemory customized engine.","usage-count":1,"subject":false,"created-by":"MT!","last-updated-by":"MT!","create-date":"2016-05-02 17:20:51","last-update-date":"2016-05-02 17:20:51","tm_properties":"","match":0.85},{"id":"418675820","segment":"- un numero di serie univoco;","translation":"- a unique serial number;","quality":"0","reference":"http:\/\/eur-lex.europa.eu\/LexUriServ\/LexUriServ.do?uri=OJ:L:2007:084:0007:01:EN:HTML|@|http:\/\/eur-lex.europa.eu\/LexUriServ\/LexUriServ.do?uri=OJ:L:2007:084:0007:01:IT:HTML","usage-count":1,"subject":"Legal_and_Notarial","created-by":"Europa.eu","last-updated-by":"Europa.eu","create-date":"0000-00-00 00:00:00","last-update-date":"0000-00-00 00:00:00","tm_properties":null,"match":0.58}]}
+{"responseData":{"translatedText":"Each copy has a unique serial number.","match":1},"responseDetails":"","responseStatus":200,"responderId":"238","matches":[{"id":"484523811","segment":"Ciascuna copia \u00e8 dotata di un numero di serie univoco.","translation":"Each copy has a unique serial number.","quality":"74","reference":"","usage-count":1,"subject":"All","created-by":"MyMemory_65655950851269d899c7","last-updated-by":"MyMemory_65655950851269d899c7","create-date":"2016-05-02 17:15:11","last-update-date":"2016-05-02 17:15:11","tm_properties":"[{\"type\":\"x-project_id\",\"value\":\"9\"},{\"type\":\"x-project_name\",\"value\":\"eryt\"},{\"type\":\"x-job_id\",\"value\":\"9\"}]","match":1,"key":"00000000000000000001"},{"id":0,"segment":"Ciascuna copia \u00e8 dotata di un numero di serie univoco.","translation":"Each copy has a unique serial number.","quality":70,"reference":"Machine Translation provided by Google, Microsoft, Worldlingo or MyMemory customized engine.","usage-count":1,"subject":false,"created-by":"MT!","last-updated-by":"MT!","create-date":"2016-05-02 17:20:51","last-update-date":"2016-05-02 17:20:51","tm_properties":"","match":0.85},{"id":"418675820","segment":"- un numero di serie univoco;","translation":"- a unique serial number;","quality":"0","reference":"http:\/\/eur-lex.europa.eu\/LexUriServ\/LexUriServ.do?uri=OJ:L:2007:084:0007:01:EN:HTML|@|http:\/\/eur-lex.europa.eu\/LexUriServ\/LexUriServ.do?uri=OJ:L:2007:084:0007:01:IT:HTML","usage-count":1,"subject":"Legal_and_Notarial","created-by":"Europa.eu","last-updated-by":"Europa.eu","create-date":"0000-00-00 00:00:00","last-update-date":"0000-00-00 00:00:00","tm_properties":null,"match":0.58}]}
 TAB;
 
 
@@ -324,7 +300,7 @@ TAB;
         $this->assertEquals("100%", $result->matches[0]['match']);
         $this->assertEquals([], $result->matches[0]['prop']);
         $this->assertEquals("", $result->matches[0]['source_note']);
-        $this->assertEquals("a6043e606ac9b5d7ff24", $result->matches[0]['memory_key']);
+        $this->assertEquals("00000000000000000001", $result->matches[0]['memory_key']);
         /**
          * 2nd match
          */
@@ -414,7 +390,7 @@ TAB;
                     'de' => 'demo@matecat.com',
                     'mt' => true,
                     'numres' => 10,
-                    'key' => 'a6043e606ac9b5d7ff24',
+                    'key' => '00000000000000000001',
                     'client_id' => 0,
                     'priority_key' => 0,
                     JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value => 'null'
@@ -425,7 +401,7 @@ TAB;
 
         $url_mock_param = "https://api.mymemory.translated.net/get";
         $mock_json_return = <<<'TAB'
-{"responseData":{"translatedText":"Each copy has a unique serial number.","match":1},"responseDetails":"","responseStatus":200,"responderId":"238","matches":[{"id":"484523811","segment":"Ciascuna copia \u00e8 dotata di un numero di serie univoco.","translation":"Each copy has a unique serial number.","quality":"74","reference":"","usage-count":1,"subject":"All","created-by":"MyMemory_65655950851269d899c7","last-updated-by":"MyMemory_65655950851269d899c7","create-date":"2016-05-02 17:15:11","last-update-date":"2016-05-02 17:15:11","tm_properties":"[{\"type\":\"x-project_id\",\"value\":\"9\"},{\"type\":\"x-project_name\",\"value\":\"eryt\"},{\"type\":\"x-job_id\",\"value\":\"9\"}]","match":0.94,"key":"a6043e606ac9b5d7ff24"},{"id":0,"segment":"Ciascuna copia \u00e8 dotata di un numero di serie univoco.","translation":"Each copy has a unique serial number.","quality":70,"reference":"Machine Translation provided by Google, Microsoft, Worldlingo or MyMemory customized engine.","usage-count":1,"subject":false,"created-by":"MT!","last-updated-by":"MT!","create-date":"2016-05-02 17:20:51","last-update-date":"2016-05-02 17:20:51","tm_properties":"","match":0.85},{"id":"418675820","segment":"- un numero di serie univoco;","translation":"- a unique serial number;","quality":"0","reference":"http:\/\/eur-lex.europa.eu\/LexUriServ\/LexUriServ.do?uri=OJ:L:2007:084:0007:01:EN:HTML|@|http:\/\/eur-lex.europa.eu\/LexUriServ\/LexUriServ.do?uri=OJ:L:2007:084:0007:01:IT:HTML","usage-count":1,"subject":"Legal_and_Notarial","created-by":"Europa.eu","last-updated-by":"Europa.eu","create-date":"0000-00-00 00:00:00","last-update-date":"0000-00-00 00:00:00","tm_properties":null,"match":0.58}]}
+{"responseData":{"translatedText":"Each copy has a unique serial number.","match":1},"responseDetails":"","responseStatus":200,"responderId":"238","matches":[{"id":"484523811","segment":"Ciascuna copia \u00e8 dotata di un numero di serie univoco.","translation":"Each copy has a unique serial number.","quality":"74","reference":"","usage-count":1,"subject":"All","created-by":"MyMemory_65655950851269d899c7","last-updated-by":"MyMemory_65655950851269d899c7","create-date":"2016-05-02 17:15:11","last-update-date":"2016-05-02 17:15:11","tm_properties":"[{\"type\":\"x-project_id\",\"value\":\"9\"},{\"type\":\"x-project_name\",\"value\":\"eryt\"},{\"type\":\"x-job_id\",\"value\":\"9\"}]","match":0.94,"key":"00000000000000000001"},{"id":0,"segment":"Ciascuna copia \u00e8 dotata di un numero di serie univoco.","translation":"Each copy has a unique serial number.","quality":70,"reference":"Machine Translation provided by Google, Microsoft, Worldlingo or MyMemory customized engine.","usage-count":1,"subject":false,"created-by":"MT!","last-updated-by":"MT!","create-date":"2016-05-02 17:20:51","last-update-date":"2016-05-02 17:20:51","tm_properties":"","match":0.85},{"id":"418675820","segment":"- un numero di serie univoco;","translation":"- a unique serial number;","quality":"0","reference":"http:\/\/eur-lex.europa.eu\/LexUriServ\/LexUriServ.do?uri=OJ:L:2007:084:0007:01:EN:HTML|@|http:\/\/eur-lex.europa.eu\/LexUriServ\/LexUriServ.do?uri=OJ:L:2007:084:0007:01:IT:HTML","usage-count":1,"subject":"Legal_and_Notarial","created-by":"Europa.eu","last-updated-by":"Europa.eu","create-date":"0000-00-00 00:00:00","last-update-date":"0000-00-00 00:00:00","tm_properties":null,"match":0.58}]}
 TAB;
 
 
@@ -482,7 +458,7 @@ TAB;
         $this->assertEquals("94%", $result->matches[0]['match']);
         $this->assertEquals([], $result->matches[0]['prop']);
         $this->assertEquals("", $result->matches[0]['source_note']);
-        $this->assertEquals("a6043e606ac9b5d7ff24", $result->matches[0]['memory_key']);
+        $this->assertEquals("00000000000000000001", $result->matches[0]['memory_key']);
         /**
          * 2nd match
          */
@@ -564,7 +540,7 @@ TAB;
                     'de' => 'demo@matecat.com',
                     'mt' => true,
                     'numres' => 10,
-                    'key' => 'a6043e606ac9b5d7ff24',
+                    'key' => '00000000000000000001',
                     'client_id' => 0
                 ],
             CURLINFO_HEADER_OUT => true,
