@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Utils\Email;
 
 use ArrayAccess;
+use Countable;
 use IteratorAggregate;
 use Stringable;
 use Traversable;
+use TypeError;
 
 /**
  * A template value that escapes itself when written into an email.
@@ -27,6 +29,11 @@ use Traversable;
  * — to measure it, compare it, or pass it on — gets the real one from {@see value()}, and only the
  * text written into the message is transformed.
  *
+ * Only text, non-empty arrays and objects are wrapped. `null`, booleans, numbers, numeric strings, `''`
+ * and `[]` reach the template as they are: they cannot carry markup, and a wrapper object would make
+ * them truthy in an `if` and in `empty()`, and break `==` against a number. A wrapped array can be
+ * counted, so `count($issues)` works.
+ *
  * `raw()` is the way out, for values that are already markup. There is one today: the rendered
  * message body the layout embeds. Every use is asserted against an allowlist by
  * `EmailTemplateEscapingTest`, so adding another is a deliberate act rather than a quiet one.
@@ -34,7 +41,7 @@ use Traversable;
  * @implements ArrayAccess<array-key, mixed>
  * @implements IteratorAggregate<array-key, mixed>
  */
-final class EmailValue implements Stringable, ArrayAccess, IteratorAggregate
+final class EmailValue implements Stringable, ArrayAccess, IteratorAggregate, Countable
 {
     /**
      * ENT_QUOTES covers both quote characters, since a value can land inside an attribute as easily
@@ -83,14 +90,12 @@ final class EmailValue implements Stringable, ArrayAccess, IteratorAggregate
         $wrapped = [];
 
         foreach ($variables as $key => $value) {
-            $wrapped[$key] = $value instanceof self
-                ? $value
-                : new self(
-                    $value,
-                    escapes: true,
-                    defangs: !in_array((string)$key, $verbatimKeys, true),
-                    verbatimKeys: $verbatimKeys
-                );
+            $wrapped[$key] = self::wrap(
+                $value,
+                escapes: true,
+                defangs: !in_array((string)$key, $verbatimKeys, true),
+                verbatimKeys: $verbatimKeys
+            );
         }
 
         return $wrapped;
@@ -169,18 +174,21 @@ final class EmailValue implements Stringable, ArrayAccess, IteratorAggregate
      */
     public function offsetGet(mixed $offset): mixed
     {
-        $value = is_array($this->value) ? ($this->value[$offset] ?? null) : null;
+        return $this->child($offset, is_array($this->value) ? ($this->value[$offset] ?? null) : null);
+    }
 
-        if ($value instanceof self) {
-            return $value;
+    /**
+     * The number of items of a wrapped array, so a template can write `count($issues)`.
+     *
+     * @throws TypeError when the value cannot be counted, as `count()` does for a string
+     */
+    public function count(): int
+    {
+        if (!is_countable($this->value)) {
+            throw new TypeError('count(): Argument #1 ($value) must be of type Countable|array, ' . get_debug_type($this->value) . ' given');
         }
 
-        // The key list applies at any depth: `user['email']` and `commenter['email']` reach the page
-        // through a `toArray()` nobody restructured for this, and a reader must see their own
-        // address whole.
-        $defangs = $this->defangs && !in_array((string)$offset, $this->verbatimKeys, true);
-
-        return new self($value, $this->escapes, $defangs, $this->verbatimKeys);
+        return count($this->value);
     }
 
     public function offsetExists(mixed $offset): bool
@@ -209,7 +217,42 @@ final class EmailValue implements Stringable, ArrayAccess, IteratorAggregate
     public function getIterator(): Traversable
     {
         foreach (is_array($this->value) ? $this->value : [] as $key => $value) {
-            yield $key => ($value instanceof self ? $value : $this->offsetGet($key));
+            yield $key => $this->child($key, $value);
         }
+    }
+
+    /**
+     * Wraps a member of this array with this value's treatments.
+     */
+    private function child(mixed $key, mixed $value): mixed
+    {
+        // The key list applies at any depth: `user['email']` and `commenter['email']` reach the page
+        // through a `toArray()` nobody restructured for this, and a reader must see their own
+        // address whole.
+        $defangs = $this->defangs && !in_array((string)$key, $this->verbatimKeys, true);
+
+        return self::wrap($value, $this->escapes, $defangs, $this->verbatimKeys);
+    }
+
+    /**
+     * Wraps a value, or returns it as it is when it cannot carry markup.
+     *
+     * Example: `false` stays `false`, so `<?php if ($showTitle) { ?>` skips the title; `'2'` stays
+     * `'2'`, so `$comment['source_page'] == 2` holds; `'<b>'` becomes a wrapper that writes
+     * `&lt;b&gt;`.
+     *
+     * @param list<string> $verbatimKeys
+     */
+    private static function wrap(mixed $value, bool $escapes, bool $defangs, array $verbatimKeys): mixed
+    {
+        $carriesMarkup = (is_string($value) && $value !== '' && !is_numeric($value))
+            || (is_array($value) && $value !== [])
+            || is_object($value);
+
+        if ($value instanceof self || !$carriesMarkup) {
+            return $value;
+        }
+
+        return new self($value, $escapes, $defangs, $verbatimKeys);
     }
 }
