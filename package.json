@@ -103,5 +103,5 @@
     "draft-js/immutable": "^3.8.4",
     "wrap-ansi": "^7.0.0"
   },
-  "version": "5.0.3"
+  "version": "5.0.4"
 }
