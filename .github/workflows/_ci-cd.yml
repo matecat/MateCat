@@ -30,6 +30,12 @@ on:
 env:
   AWS_REGION: 'eu-central-1'
   APP_NAME: matecat
+  # Ubuntu archive host for apt in the base-node build (docker/base-node/Dockerfile).
+  # The runners live on Azure, and the Dockerfile default, the mirror inside AWS
+  # eu-central-1, is far from them: on 2026-11-11 it served 120 kB/s and then
+  # refused connections. Set the repository variable UBUNTU_MIRROR to another host
+  # to switch mirror without a commit; the next run picks it up.
+  UBUNTU_MIRROR: ${{ vars.UBUNTU_MIRROR || 'azure.archive.ubuntu.com' }}
   # Opt into Node.js 24 for all JavaScript-based actions (checkout@v4, etc.)
   # Remove once actions/checkout@v5 is released with native Node 24 support.
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
