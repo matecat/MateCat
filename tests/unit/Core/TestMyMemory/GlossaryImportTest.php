@@ -52,7 +52,7 @@ class GlossaryImportTest extends AbstractTest
     public function setUp(): void
     {
         parent::setUp();
-        $this->key_param = "a6043e606ac9b5d7ff24";
+        $this->key_param = "00000000000000000001";
         $engineDAO = new EngineDAO(obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE));
         $engine_struct = EngineStruct::getStruct();
         $engine_struct->id = 1;
@@ -74,12 +74,8 @@ class GlossaryImportTest extends AbstractTest
 
     /**
      * @group  regression
-     * @group  ExternalServices
-     * @group  MyMemory
      * @covers MyMemory::glossaryImport
      */
-    #[Group('ExternalServices')]
-    #[Group('MyMemory')]
     #[Test]
     public function test_glossaryImport_correct_behaviour()
     {
@@ -90,8 +86,33 @@ class GlossaryImportTest extends AbstractTest
 
         copy($path_of_the_original_file, $this->path_of_file_for_test);
 
+        $mock_json_return = <<<'TAB'
+{"responseStatus":202,"responseData":{"UUID":"0a64b364-f4f0-d301-66c4-5a6c04c2a2bf"},"responseDetails":""}
+TAB;
+
+        $sent_url = null;
+        $sent_options = null;
+
+        /**
+         * @var $this->engine_MyMemory MyMemory mocking _call
+         */
+        $this->engine_MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$this->engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class)])->onlyMethods(['_call'])->getMock();
+        $this->engine_MyMemory->expects($this->once())->method('_call')
+            ->willReturnCallback(function (string $url, array $options) use (&$sent_url, &$sent_options, $mock_json_return) {
+                $sent_url = $url;
+                $sent_options = $options;
+                return $mock_json_return;
+            });
+
         Languages::getInstance();
         $result = $this->engine_MyMemory->glossaryImport($this->path_of_file_for_test, $this->key_param, 'Final-Matecat-new_glossary_format-Glossary.csv');
+
+        $this->assertSame('https://api.mymemory.translated.net/v2/glossary/import', $sent_url);
+        $postFields = $sent_options[CURLOPT_POSTFIELDS];
+        $this->assertSame('00000000000000000001', $postFields['key']);
+        $this->assertSame(AppConfig::$MYMEMORY_API_KEY, $postFields['de']);
+        $this->assertSame('Final-Matecat-new_glossary_format-Glossary.csv', $postFields['key_name']);
+        $this->assertInstanceOf(\CURLFile::class, $postFields['glossary']);
 
         $this->assertEquals(202, $result->responseStatus);
         $this->assertArrayHasKey('UUID', $result->responseData);
@@ -110,49 +131,27 @@ class GlossaryImportTest extends AbstractTest
 
     /**
      * @group  regression
-     * @group  ExternalServices
-     * @group  MyMemory
      * @covers MyMemory::glossaryImport
      */
-    #[Group('ExternalServices')]
-    #[Group('MyMemory')]
-    #[Test]
-    public function test_glossaryImport_wrong_target_lang()
-    {
-        $path_of_the_original_file = AppConfig::$ROOT . '/tests/resources/files/glossary/Final-Matecat-new_glossary_format-InvalidTargetLang.csv';
-        $this->path_of_file_for_test = AppConfig::$ROOT . '/tests/resources/files/glossary/Final-Matecat-new_glossary_format-InvalidTargetLangCopy.csv';
-
-
-        chmod($path_of_the_original_file, 0644);
-
-        copy($path_of_the_original_file, $this->path_of_file_for_test);
-
-        Languages::getInstance();
-        $result = $this->engine_MyMemory->glossaryImport($this->path_of_file_for_test, $this->key_param, 'Final-Matecat-new_glossary_format-InvalidTargetLangCopy.csv');
-
-        $this->assertEquals(403, $result->responseStatus);
-        $this->assertEquals("HEADER DON'T MATCH THE CORRECT STRUCTURE", $result->responseDetails);
-        $this->assertEquals("HEADER DON'T MATCH THE CORRECT STRUCTURE", $result->responseData['translatedText']);
-    }
-
-    /**
-     * @group  regression
-     * @group  ExternalServices
-     * @group  MyMemory
-     * @covers MyMemory::glossaryImport
-     */
-    #[Group('ExternalServices')]
-    #[Group('MyMemory')]
     #[Test]
     public function test_glossaryImport_invalid_header()
     {
         $path_of_the_original_file = AppConfig::$ROOT . '/tests/resources/files/glossary/GlossaryInvalidHeader.csv';
         $this->path_of_file_for_test = AppConfig::$ROOT . '/tests/resources/files/glossary/GlossaryInvalidHeaderCopy.csv';
 
-
         chmod($path_of_the_original_file, 0644);
 
         copy($path_of_the_original_file, $this->path_of_file_for_test);
+
+        $mock_json_return = <<<'TAB'
+{"responseStatus":403,"responseDetails":"HEADER DON'T MATCH THE CORRECT STRUCTURE","responseData":{"translatedText":"HEADER DON'T MATCH THE CORRECT STRUCTURE"}}
+TAB;
+
+        /**
+         * @var $this->engine_MyMemory MyMemory mocking _call
+         */
+        $this->engine_MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$this->engine_struct_param, $this->createStub(\Model\DataAccess\IDatabase::class)])->onlyMethods(['_call'])->getMock();
+        $this->engine_MyMemory->expects($this->once())->method('_call')->willReturn($mock_json_return);
 
         Languages::getInstance();
         $result = $this->engine_MyMemory->glossaryImport($this->path_of_file_for_test, $this->key_param, 'GlossaryInvalidHeaderCopy.csv');

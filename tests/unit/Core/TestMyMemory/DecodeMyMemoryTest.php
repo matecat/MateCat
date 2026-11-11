@@ -108,7 +108,7 @@ LAB;
             'de' => "demo@matecat.com",
             'mt' => true,
             'numres' => "3",
-            'key' => "a6043e606ac9b5d7ff24"
+            'key' => "00000000000000000001"
         ];
         $input_function_purpose = "translate_relative_url";
 
@@ -150,7 +150,7 @@ LABEL;
             'langpair' => "it-IT|en-US",
             'de' => "demo@matecat.com",
             'prop' => $prop,
-            'key' => "a6043e606ac9b5d7ff24"
+            'key' => "00000000000000000001"
         ];
 
         $input_function_purpose = "contribute_relative_url";
@@ -213,7 +213,7 @@ LABEL;
             'langpair' => "it-IT|en-US",
             'de' => "demo@matecat.com",
             'prop' => $prop,
-            'key' => "a6043e606ac9b5d7ff24"
+            'key' => "00000000000000000001"
         ];
 
         $input_function_purpose = "contribute_relative_url";
