@@ -598,10 +598,11 @@ class AppConfig
 
     /*
      * The maximum file name length accepted on upload, in bytes.
-     * The upload directory keeps the original name, and a file name can be at most 255 bytes on most filesystems.
-     * The storage layer saves every file under a fixed-length name, so it reserves nothing.
+     * A file name can be at most 255 bytes on most filesystems. The upload directory keeps the original name, and
+     * the conversion service saves its working copy as "<name>.xlf", 4 bytes longer: 251 leaves room for it.
+     * The storage layer saves every file under a fixed-length name, so it needs no room of its own.
      */
-    public static int $MAX_FILENAME_LENGTH = 255;
+    public static int $MAX_FILENAME_LENGTH = 251;
 
     /** @var list<string> */
     public static array $AUTOLOAD_PLUGINS = ["second_pass_review"];

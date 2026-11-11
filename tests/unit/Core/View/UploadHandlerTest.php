@@ -766,19 +766,20 @@ class UploadHandlerTest extends AbstractTest
     }
 
     /**
-     * The limit is 255 bytes, the longest name the upload directory can hold: a multibyte name reaches it in fewer
-     * characters.
+     * The limit is 251 bytes: the conversion service saves its copy as "<name>.xlf", which must still fit in the
+     * 255 bytes of a file name. A multibyte name reaches it in fewer characters.
      *
      * @return array<string, array{string, bool}>
      */
     public static function fileNameLengthProvider(): array
     {
         return [
-            '255 bytes, ASCII'                       => [str_repeat('a', 249) . '.xliff', true],
+            '251 bytes, ASCII'                       => [str_repeat('a', 245) . '.xliff', true],
             '211 bytes, ASCII, over the old limit'   => [str_repeat('a', 205) . '.xliff', true],
             '100 Cyrillic characters, 206 bytes'     => [str_repeat('я', 100) . '.xliff', true],
-            '255 bytes, Arabic'                      => [str_repeat('ب', 124) . 'a.xliff', true],
-            '256 bytes, ASCII'                       => [str_repeat('a', 250) . '.xliff', false],
+            '251 bytes, Arabic'                      => [str_repeat('ب', 122) . 'a.xliff', true],
+            '252 bytes, ASCII'                       => [str_repeat('a', 246) . '.xliff', false],
+            '252 bytes, Arabic'                      => [str_repeat('ب', 122) . 'ab.xliff', false],
             '130 Cyrillic characters, 266 bytes'     => [str_repeat('я', 130) . '.xliff', false],
             '1000 bytes'                             => [str_repeat('a', 994) . '.xliff', false],
         ];
@@ -786,7 +787,7 @@ class UploadHandlerTest extends AbstractTest
 
     #[Test]
     #[DataProvider('fileNameLengthProvider')]
-    public function validate_accepts_a_file_name_of_up_to_255_bytes(string $name, bool $accepted): void
+    public function validate_accepts_a_file_name_of_up_to_251_bytes(string $name, bool $accepted): void
     {
         $file = new \stdClass();
         $file->name = $name;
