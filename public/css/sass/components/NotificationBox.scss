@@ -70,10 +70,12 @@
   margin: 0 auto;
   left: 50%;
 }
+// Below the 60px header, on the side of the toolbar the user acted on
 .notifications-position-tr {
-  top: 60px;
+  top: 72px;
   bottom: auto;
   left: auto;
+  right: 20px;
 }
 
 .notification-item-icon {

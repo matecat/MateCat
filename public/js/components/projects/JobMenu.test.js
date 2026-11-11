@@ -2,12 +2,17 @@ import {render, screen} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import React from 'react'
 import JobMenu from './JobMenu'
+import DownloadFileUtils from '../../utils/downloadFileUtils'
 import {fromJS} from 'immutable'
 import {http, HttpResponse} from 'msw'
 import {mswServer} from '../../../mocks/mswServer'
 import ProjectsStore from '../../stores/ProjectsStore'
 import ManageActions from '../../actions/ManageActions'
 import ManageConstants from '../../constants/ManageConstants'
+
+jest.mock('../../utils/downloadFileUtils', () => ({
+  downloadUrl: jest.fn(),
+}))
 
 global.config = {
   splitFeatureAvailable: 1,
@@ -117,11 +122,7 @@ const getFakeProperties = (fakeProperties) => {
       job,
       project,
       getDownloadLabel: {
-        label: (
-          <>
-            Draft
-          </>
-        ),
+        label: <>Draft</>,
         action: () => {},
       },
       openSplitModalFn: () => {},
@@ -224,24 +225,23 @@ test('Check items href link', async () => {
   await userEvent.click(qaReportHref)
   expect(window.open).toHaveBeenCalledTimes(2)
   expect(window.open).toHaveBeenCalledWith(props.qAReportUrl, '_blank')
+})
 
-  await userEvent.click(screen.getByTestId('job-menu-button'))
-  const downloadOriginaletHref = screen.getByText('Original')
-  await userEvent.click(downloadOriginaletHref)
-  expect(window.open).toHaveBeenCalledTimes(3)
-  expect(window.open).toHaveBeenCalledWith(props.originalUrl, '_blank')
+test('downloads the original and the exports without opening a tab', async () => {
+  const {props} = getFakeProperties(fakeProjectsData.jobWithoutActivity)
+  render(<JobMenu {...props} />)
 
-  await userEvent.click(screen.getByTestId('job-menu-button'))
-  const exportXLIFFtHref = screen.getByText('Export XLIFF')
-  await userEvent.click(exportXLIFFtHref)
-  expect(window.open).toHaveBeenCalledTimes(4)
-  expect(window.open).toHaveBeenCalledWith(props.exportXliffUrl, '_blank')
+  for (const label of ['Original', 'Export XLIFF', 'Export job TMX']) {
+    await userEvent.click(screen.getByTestId('job-menu-button'))
+    await userEvent.click(screen.getByText(label))
+  }
 
-  await userEvent.click(screen.getByTestId('job-menu-button'))
-  const exportTMXtHref = screen.getByText('Export job TMX')
-  await userEvent.click(exportTMXtHref)
-  expect(window.open).toHaveBeenCalledTimes(5)
-  expect(window.open).toHaveBeenCalledWith(props.jobTMXUrl, '_blank')
+  expect(DownloadFileUtils.downloadUrl.mock.calls).toEqual([
+    [props.originalUrl],
+    [props.exportXliffUrl],
+    [props.jobTMXUrl],
+  ])
+  expect(window.open).not.toHaveBeenCalled()
 })
 
 test('Splitted job: check Merge item', async () => {

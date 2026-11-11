@@ -17,6 +17,7 @@ import Revise from '../../../img/icons/Revise'
 import {BUTTON_SIZE} from '../common/Button/Button'
 import FlipBackward from '../../../img/icons/FlipBackward'
 import PropTypes from 'prop-types'
+import DownloadFileUtils from '../../utils/downloadFileUtils'
 
 const JOB_MENU_ITEM_ID = {
   CHANGE_PASSWORD: 'change_password',
@@ -257,7 +258,13 @@ const JobMenu = ({
       ? [
           {
             id: JOB_MENU_ITEM_ID.DOWNLOAD,
-            label: downloadLabel.label,
+            label: disableDownload ? (
+              <>
+                <Download size={18} /> Download in progress
+              </>
+            ) : (
+              downloadLabel.label
+            ),
             onClick: () => {
               downloadLabel.action()
             },
@@ -273,7 +280,7 @@ const JobMenu = ({
         </>
       ),
       onClick: () => {
-        window.open(originalUrl, '_blank')
+        DownloadFileUtils.downloadUrl(originalUrl)
       },
     },
     {
@@ -284,7 +291,7 @@ const JobMenu = ({
         </>
       ),
       onClick: () => {
-        window.open(exportXliffUrl, '_blank')
+        DownloadFileUtils.downloadUrl(exportXliffUrl)
       },
     },
     {
@@ -295,7 +302,7 @@ const JobMenu = ({
         </>
       ),
       onClick: () => {
-        window.open(jobTMXUrl, '_blank')
+        DownloadFileUtils.downloadUrl(jobTMXUrl)
       },
     },
     'separator',

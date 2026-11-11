@@ -143,12 +143,15 @@ export const DownloadMenu = ({password, jid, isGDriveProject}) => {
                   <>
                     {' '}
                     <Download />
-                    {isGDriveProject
-                      ? 'Open in Google Drive'
-                      : 'Download translation'}
+                    {downloadDisabled
+                      ? 'Download in progress'
+                      : isGDriveProject
+                        ? 'Open in Google Drive'
+                        : 'Download translation'}
                   </>
                 ),
                 onClick: () => runDownload(),
+                disabled: downloadDisabled,
               },
             ]
           : [
@@ -156,12 +159,15 @@ export const DownloadMenu = ({password, jid, isGDriveProject}) => {
                 label: (
                   <>
                     <Download />
-                    {isGDriveProject
-                      ? 'Open preview in Google Drive'
-                      : 'Download draft'}
+                    {downloadDisabled
+                      ? 'Download in progress'
+                      : isGDriveProject
+                        ? 'Open preview in Google Drive'
+                        : 'Download draft'}
                   </>
                 ),
                 onClick: () => runDownload(),
+                disabled: downloadDisabled,
               },
             ]),
         ...(!isGDriveProject
@@ -174,7 +180,9 @@ export const DownloadMenu = ({password, jid, isGDriveProject}) => {
                   </>
                 ),
                 onClick: () => {
-                  window.open(`/api/v2/original/${jid}/${password}`, '_blank')
+                  DownloadFileUtils.downloadUrl(
+                    `/api/v2/original/${jid}/${password}`,
+                  )
                 },
               },
             ]
@@ -198,7 +206,9 @@ export const DownloadMenu = ({password, jid, isGDriveProject}) => {
             </>
           ),
           onClick: () => {
-            window.open(`/api/v2/xliff/${jid}/${password}/${jid}.zip`, '_blank')
+            DownloadFileUtils.downloadUrl(
+              `/api/v2/xliff/${jid}/${password}/${jid}.zip`,
+            )
           },
         },
         {
@@ -209,7 +219,7 @@ export const DownloadMenu = ({password, jid, isGDriveProject}) => {
             </>
           ),
           onClick: () => {
-            window.open(`/api/v2/tmx/${jid}/${password}`, '_blank')
+            DownloadFileUtils.downloadUrl(`/api/v2/tmx/${jid}/${password}`)
           },
         },
       ]}

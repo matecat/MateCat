@@ -1,31 +1,24 @@
-import {saveAs} from 'file-saver'
-// import {Base64} from 'js-base64'
+import {downloadFromUrl} from '../downloadFromUrl'
 
 /**
- * Export TMX
+ * Download the translated files of a job
  *
  * @param {string} [idJob=config.id_job]
  * @param {string} [password=config.password]
- * @param checkErrors
- * @returns {Promise<object>}
+ * @param {boolean} [checkErrors=true]
+ * @param {function({loaded: number, total: number})} [onProgress] called as the file arrives
+ * @param {AbortSignal} [signal] aborts the download
+ * @returns {Promise<void>}
  */
-export const downloadFile = async ({
+export const downloadFile = ({
   idJob = config.id_job,
   password = config.password,
   checkErrors = true,
-}) => {
-  const response = await fetch(
-    `${config.basepath}api/v2/translation/${idJob}/${password}?download_type=all&encoding=base64&disableErrorCheck=${checkErrors ? 0 : 1}`,
-    {
-      credentials: 'include',
-    },
-  )
-  if (!response.ok) return Promise.reject(response)
-  const header = response.headers.get('Content-Disposition')
-  const parts = header.split(';')
-  let filename = parts[1].split('=')[1]
-  filename = filename.replace(/"/g, '')
-  const blob = await response.blob()
-  saveAs(blob, filename)
-  return Promise.resolve()
-}
+  onProgress,
+  signal,
+}) =>
+  downloadFromUrl({
+    url: `${config.basepath}api/v2/translation/${idJob}/${password}?download_type=all&disableErrorCheck=${checkErrors ? 0 : 1}`,
+    onProgress,
+    signal,
+  })
