@@ -20,6 +20,11 @@ class UploadHandler
     const string DIRSEP = "//";
 
     /**
+     * Shown as it is next to the file in the upload list.
+     */
+    const string FILE_NAME_TOO_LONG = "The file name is too long. Shorten it and try again.";
+
+    /**
      * @var array<string, mixed>
      */
     protected array $options;
@@ -174,6 +179,13 @@ class UploadHandler
             return false;
         }
 
+        // checked first: a name over the limit is otherwise refused as an invalid file name
+        if (strlen($file->name) > AppConfig::$MAX_FILENAME_LENGTH) {
+            $file->error = self::FILE_NAME_TOO_LONG;
+
+            return false;
+        }
+
         try {
             self::_validateFileName($file->name);
             self::_validateToken($this->options['upload_token']);
@@ -237,10 +249,6 @@ class UploadHandler
 
         if (!$file->name) {
             $file->error = 'missingFileName';
-
-            return false;
-        } elseif (mb_strlen($file->name) > AppConfig::$MAX_FILENAME_LENGTH) {
-            $file->error = "filenameTooLong";
 
             return false;
         }

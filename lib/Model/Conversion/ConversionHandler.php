@@ -234,7 +234,7 @@ class ConversionHandler
                 $this->logger->error("S3 Exception: Message: " . $e->getMessage());
 
                 $this->result->setErrorCode(ConversionHandlerStatus::S3_ERROR);
-                $this->result->setErrorMessage('Sorry, file name too long. Try shortening it and try again.');
+                $this->result->setErrorMessage('Error while saving the file. Try again.');
 
                 return;
             }

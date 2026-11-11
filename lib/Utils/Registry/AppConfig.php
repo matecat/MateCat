@@ -597,12 +597,11 @@ class AppConfig
     public static array $MIME_TYPES = [];
 
     /*
-     * The maximum filename length accepted.
-     * Usually OSes accept names of 255 characters at most.
-     * During the execution, a hash string can be prepended to the filename.
-     * So we reserve 45 chars for internal purposes.
+     * The maximum file name length accepted on upload, in bytes.
+     * The upload directory keeps the original name, and a file name can be at most 255 bytes on most filesystems.
+     * The storage layer saves every file under a fixed-length name, so it reserves nothing.
      */
-    public static int $MAX_FILENAME_LENGTH = 210;
+    public static int $MAX_FILENAME_LENGTH = 255;
 
     /** @var list<string> */
     public static array $AUTOLOAD_PLUGINS = ["second_pass_review"];

@@ -401,7 +401,8 @@ class GDriveControllerTest extends AbstractTest
     {
         $result = $this->invokePrivate('formatErrorMessage', ['Something The specified key does not exist. here']);
 
-        $this->assertStringContainsString('name of the file you are trying to upload is too long', $result);
+        // a storage error, not a name too long
+        $this->assertSame('Error while saving the file. Try again.', $result);
     }
 
     #[Test]

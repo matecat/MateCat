@@ -662,23 +662,6 @@ class UploadHandlerTest extends AbstractTest
         $this->addToAssertionCount(1); // no exception thrown is the assertion
     }
 
-    #[Test]
-    public function validate_returns_false_for_filename_too_long(): void
-    {
-        $file = new \stdClass();
-        $file->name = str_repeat('a', 215) . '.xliff';
-        $file->size = 100;
-        $file->type = null;
-
-        $_SERVER['CONTENT_LENGTH'] = 100;
-
-        $result = $this->invokePrivate('validate', ['', $file, '']);
-
-        $this->assertFalse($result);
-
-        unset($_SERVER['CONTENT_LENGTH']);
-    }
-
     // ─── validate() — remaining branches ───
 
     #[Test]
@@ -783,21 +766,56 @@ class UploadHandlerTest extends AbstractTest
     }
 
     /**
-     * Every earlier guard passes — the extension and MIME type are fine — so the length check is
-     * the one that rejects it.
+     * The limit is 255 bytes, the longest name the upload directory can hold: a multibyte name reaches it in fewer
+     * characters.
+     *
+     * @return array<string, array{string, bool}>
      */
+    public static function fileNameLengthProvider(): array
+    {
+        return [
+            '255 bytes, ASCII'                       => [str_repeat('a', 249) . '.xliff', true],
+            '211 bytes, ASCII, over the old limit'   => [str_repeat('a', 205) . '.xliff', true],
+            '100 Cyrillic characters, 206 bytes'     => [str_repeat('я', 100) . '.xliff', true],
+            '255 bytes, Arabic'                      => [str_repeat('ب', 124) . 'a.xliff', true],
+            '256 bytes, ASCII'                       => [str_repeat('a', 250) . '.xliff', false],
+            '130 Cyrillic characters, 266 bytes'     => [str_repeat('я', 130) . '.xliff', false],
+            '1000 bytes'                             => [str_repeat('a', 994) . '.xliff', false],
+        ];
+    }
+
     #[Test]
-    public function validate_returns_false_for_a_filename_longer_than_the_limit(): void
+    #[DataProvider('fileNameLengthProvider')]
+    public function validate_accepts_a_file_name_of_up_to_255_bytes(string $name, bool $accepted): void
     {
         $file = new \stdClass();
-        $file->name = str_repeat('a', AppConfig::$MAX_FILENAME_LENGTH + 1) . '.xliff';
+        $file->name = $name;
         $file->size = 100;
         $file->type = 'application/xml';
 
         $_SERVER['CONTENT_LENGTH'] = 100;
 
+        try {
+            $this->assertSame($accepted, $this->invokePrivate('validate', ['', $file, '']));
+            $this->assertSame($accepted ? null : 'The file name is too long. Shorten it and try again.', $file->error ?? null);
+        } finally {
+            unset($_SERVER['CONTENT_LENGTH']);
+        }
+    }
+
+    /**
+     * Checked before the other name rules: a long name is not reported as an invalid one.
+     */
+    #[Test]
+    public function validate_reports_a_long_name_before_an_invalid_one(): void
+    {
+        $file = new \stdClass();
+        $file->name = str_repeat('a', 300) . ':.xliff';
+        $file->size = 100;
+        $file->type = 'application/xml';
+
         $this->assertFalse($this->invokePrivate('validate', ['', $file, '']));
-        $this->assertSame('filenameTooLong', $file->error);
+        $this->assertSame(UploadHandler::FILE_NAME_TOO_LONG, $file->error);
     }
 
     // ─── trim_file_name — collision loop ───

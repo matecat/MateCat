@@ -4,6 +4,7 @@ namespace Model\FilesStorage;
 
 use Exception;
 use InvalidArgumentException;
+use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Model\DataAccess\IDatabase;
 use PDO;
 use PDOException;
@@ -170,6 +171,25 @@ abstract class AbstractFilesStorage implements IFilesStorage
     public static function getCacheFileName(string $cacheHash, string $originalName): string
     {
         return $cacheHash . self::storageExtension(static::basename_fix($originalName));
+    }
+
+    /**
+     * Name a native xliff is stored under in the work folder of the cache package: its cache name, plus `.sdlxliff`
+     * when it is a plain xliff not already named so, because the readers take the converted file type from it.
+     *
+     * The detection reads the local file at $xliffPath, still under its original name.
+     *
+     * @param string $cacheHash
+     * @param string $xliffPath
+     *
+     * @return string
+     */
+    protected static function getNativeXliffCacheFileName(string $cacheHash, string $xliffPath): string
+    {
+        $fileType = (new XliffProprietaryDetect())->getInfo($xliffPath);
+        $forcedExtension = (!$fileType['proprietary'] && $fileType['info']['extension'] != 'sdlxliff') ? '.sdlxliff' : '';
+
+        return static::getCacheFileName($cacheHash, $xliffPath) . $forcedExtension;
     }
 
     /**

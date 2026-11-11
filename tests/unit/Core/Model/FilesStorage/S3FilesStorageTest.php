@@ -60,8 +60,8 @@ class S3FilesStorageTest extends AbstractTest
         $prefix .= $hashTree['firstLevel'] . DIRECTORY_SEPARATOR . $hashTree['secondLevel'] . DIRECTORY_SEPARATOR . $hashTree['thirdLevel'] . S3FilesStorage::OBJECTS_SAFE_DELIMITER . $lang;
 
         $this->assertTrue($this->fs->makeCachePackage($sha1, $lang, $filePath, $xliffPathTarget));
-        $this->assertEquals($prefix . '/orig/hello.txt', $this->fs->getOriginalFromCache($sha1, $lang));
-        $this->assertEquals($prefix . '/work/hello.txt.sdlxliff', $this->fs->getXliffFromCache($sha1, $lang));
+        $this->assertEquals($prefix . '/orig/' . $sha1 . '.txt', $this->fs->getOriginalFromCache($sha1, $lang));
+        $this->assertEquals($prefix . '/work/' . $sha1 . '.txt.sdlxliff', $this->fs->getXliffFromCache($sha1, $lang));
     }
 
     /**
@@ -79,8 +79,8 @@ class S3FilesStorageTest extends AbstractTest
         $idFile = 13;
 
         $this->assertTrue($this->fs->moveFromCacheToFileDir($dateHashPath, $lang, $idFile, $filePath));
-        $this->assertEquals(S3FilesStorage::FILES_FOLDER . '/20191212/13/orig/hello.txt', $this->fs->getOriginalFromFileDir($idFile, $dateHashPath));
-        $this->assertEquals(S3FilesStorage::FILES_FOLDER . '/20191212/13/xliff/hello.txt.sdlxliff', $this->fs->getXliffFromFileDir($idFile, $dateHashPath));
+        $this->assertEquals(S3FilesStorage::FILES_FOLDER . '/20191212/13/orig/' . $sha1 . '.txt', $this->fs->getOriginalFromFileDir($idFile, $dateHashPath));
+        $this->assertEquals(S3FilesStorage::FILES_FOLDER . '/20191212/13/xliff/' . $sha1 . '.txt.sdlxliff', $this->fs->getXliffFromFileDir($idFile, $dateHashPath));
     }
 
     /**
