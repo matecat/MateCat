@@ -1371,6 +1371,7 @@ describe('stripSegmentTags — visible placeholders', () => {
     ['x-percent-variable', '%name%'],
     ['x-smart-count', '||||'],
     ['x-double-square-brackets', '[[name]]'],
+    ['x-single-square-brackets', '[name]'],
     ['x-dollar-curly-brackets', '${name}'],
   ])('keeps a %s placeholder as its original text', (ctype, original) => {
     expect(

@@ -169,10 +169,8 @@ input {
   .comments-view
   .re-add-comment
   .re-comment-input {
-  border-radius: 20px !important;
   height: 40px;
   width: 100%;
-  border: 1px solid colors.$grey200;
   padding: 8px 12px 8px 12px;
   border-radius: variables.$border-radius-default;
   font-size: variables.$font-size-small;

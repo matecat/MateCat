@@ -96,6 +96,7 @@ export const ModifyCategory = ({target, category, setIsEditingName}) => {
       onKeyUp={confirmWithKeyboard}
     >
       <input
+        type="text"
         className={`quality-framework-input input${error ? ' quality-framework-input-error' : ''}`}
         placeholder="Name"
         value={label}
@@ -106,6 +107,7 @@ export const ModifyCategory = ({target, category, setIsEditingName}) => {
         <span className="quality-framework-error-message">{error}</span>
       )}
       <input
+        type="text"
         className="quality-framework-input input"
         placeholder="Description"
         value={description}

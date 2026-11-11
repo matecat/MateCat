@@ -70,7 +70,7 @@ export const NumericStepper = ({
     <div className={styles['numeric-stepper-component']}>
       <input
         ref={ref}
-        type="string"
+        type="text"
         name={name}
         value={valueInput}
         disabled={disabled}
