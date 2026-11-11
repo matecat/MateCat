@@ -157,3 +157,14 @@ input[type='password'] {
     cursor: not-allowed;
   }
 }
+
+.download-alert-modal {
+  .modal-buttons {
+    justify-content: space-between;
+
+    > div {
+      display: flex;
+      gap: 16px;
+    }
+  }
+}
