@@ -40,11 +40,19 @@ jobs:
   # ───────────────────────────────────────────────────────────────────────────
   # JOBS 1a and 1b – php-tests and js-tests, run in parallel
   #
-  # Both build the same test-node image with plain docker compose, then run
-  # one script from .github/ci/ inside it, in place of the image's default
-  # command (docker/test-node/build_assets.sh, which runs both suites one
-  # after the other). Running them side by side cuts the wall time to the
-  # slower of the two, the JS one.
+  # Both build the same test-node image, then run one script from
+  # .github/ci/ inside it, in place of the image's default command
+  # (docker/test-node/build_assets.sh, which runs both suites one after the
+  # other). Running them side by side cuts the wall time to the slower of the
+  # two, the JS one.
+  #
+  # The image layers of base-node and test-node come from the GitHub Actions
+  # cache when their Dockerfiles did not change. The cache holds no secret:
+  # the AWS keys of the tests reach the container when it starts, through
+  # docker-compose-ci.yml, and never enter the image. The cache scope changes
+  # every week (for example "test-images-2026-W46"), so the test image picks
+  # up the Ubuntu updates of base-node at least once a week. The deploy job
+  # builds its images without any cache.
   #
   # Each job mounts two host folders into the container:
   #   /ci-out    the coverage reports, uploaded for test-guard
@@ -79,23 +87,43 @@ jobs:
           key: php-deps-${{ hashFiles('composer.lock') }}
           restore-keys: php-deps-
 
-      # The AWS credentials are needed by the PHP tests only, so only this
-      # job passes them to the test-node build.
+      - name: Name the weekly image cache
+        id: image_cache
+        run: echo "scope=test-images-$(date -u +%G-W%V)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      # test-node starts FROM matecat-base-node-24. The buildx builder cannot
+      # see the images of the local docker daemon, so the contexts line points
+      # that name at the base-node build of the same bake run. This job also
+      # writes the cache that the JS job reads.
       - name: Build images
+        uses: docker/bake-action@v7
+        env:
+          REPOSITORY_BRANCH: ${{ github.base_ref || github.ref_name }}
+          REPOSITORY_TAG: ${{ github.base_ref || github.ref_name }}
+        with:
+          # Local files (the checkout, private submodule included), not the remote git context.
+          source: .
+          files: docker/docker-compose-ci.yml
+          targets: base-node,test-node
+          load: true
+          # The compose file sets context ".." for every image, meant for docker compose,
+          # which reads it from docker/. bake reads it from the working directory, the
+          # repository root, so "*.context=." points it back at the same folder.
+          set: |
+            *.context=.
+            *.cache-from=type=gha,scope=${{ steps.image_cache.outputs.scope }}
+            *.cache-to=type=gha,scope=${{ steps.image_cache.outputs.scope }},mode=max
+            test-node.contexts.matecat-base-node-24=target:base-node
+
+      # The AWS keys are needed by the PHP tests only, so only this job sets
+      # them; docker-compose-ci.yml hands them to the container.
+      - name: Run PHPUnit
         env:
           TEST_AWS_ACCESS_KEY_ID: ${{ vars.AWS_ACCESS_KEY_ID }}
           TEST_AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          REPOSITORY_BRANCH: ${{ github.base_ref || github.ref_name }}
-          REPOSITORY_TAG: ${{ github.base_ref || github.ref_name }}
-        run: |
-          docker compose -f docker/docker-compose-ci.yml build mysql redis > /dev/null 2>&1
-          docker compose -f docker/docker-compose-ci.yml create mysql redis > /dev/null 2>&1
-          # Build base-node (keep logs; useful for debugging)
-          docker compose -f docker/docker-compose-ci.yml build base-node
-          echo "Build test node"
-          docker compose -f docker/docker-compose-ci.yml build test-node > /dev/null 2>&1
-
-      - name: Run PHPUnit
         run: |
           mkdir -p ci-out "$RUNNER_TEMP/ci-cache"
           docker compose -f docker/docker-compose-ci.yml run --rm -T \
@@ -132,16 +160,32 @@ jobs:
           key: js-deps-${{ hashFiles('yarn.lock', 'nodejs/package-lock.json') }}
           restore-keys: js-deps-
 
+      - name: Name the weekly image cache
+        id: image_cache
+        run: echo "scope=test-images-$(date -u +%G-W%V)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      # Same build as the PHP job; this one only reads the cache.
       - name: Build images
+        uses: docker/bake-action@v7
         env:
           REPOSITORY_BRANCH: ${{ github.base_ref || github.ref_name }}
           REPOSITORY_TAG: ${{ github.base_ref || github.ref_name }}
-        run: |
-          docker compose -f docker/docker-compose-ci.yml build mysql redis > /dev/null 2>&1
-          docker compose -f docker/docker-compose-ci.yml create mysql redis > /dev/null 2>&1
-          docker compose -f docker/docker-compose-ci.yml build base-node
-          echo "Build test node"
-          docker compose -f docker/docker-compose-ci.yml build test-node > /dev/null 2>&1
+        with:
+          # Local files (the checkout, private submodule included), not the remote git context.
+          source: .
+          files: docker/docker-compose-ci.yml
+          targets: base-node,test-node
+          load: true
+          # The compose file sets context ".." for every image, meant for docker compose,
+          # which reads it from docker/. bake reads it from the working directory, the
+          # repository root, so "*.context=." points it back at the same folder.
+          set: |
+            *.context=.
+            *.cache-from=type=gha,scope=${{ steps.image_cache.outputs.scope }}
+            test-node.contexts.matecat-base-node-24=target:base-node
 
       - name: Run Jest and the nodejs tests
         run: |
