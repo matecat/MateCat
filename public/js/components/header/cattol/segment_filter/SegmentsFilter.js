@@ -357,7 +357,6 @@ const SegmentsFilter = ({active}) => {
                 checkSpaceToReverse={false}
                 showResetButton={true}
                 resetFunction={() => handleFilterSelectChanged()}
-                maxHeightDroplist={200}
               />
             </div>
             <div className="filter-dropdown">
@@ -375,7 +374,6 @@ const SegmentsFilter = ({active}) => {
                 checkSpaceToReverse={false}
                 showResetButton={true}
                 resetFunction={() => handleMoreFilterSelectChanged()}
-                maxHeightDroplist={400}
                 enabled={!dataSampleEnabled}
               />
             </div>

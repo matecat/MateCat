@@ -8,6 +8,22 @@ import Tooltip from './Tooltip'
 import usePortal from '../../hooks/usePortal'
 import IconClose from '../../../img/icons/IconClose'
 import classnames from 'classnames'
+
+// Flip-decision threshold for call sites that don't pass their own
+// maxHeightDroplist — kept identical to the old hardcoded default so flip
+// timing for those call sites doesn't change, only the height applied once
+// opened (see clampToAvailableSpace below).
+const DEFAULT_FLIP_THRESHOLD = 420
+
+// The value actually applied as the dropdown's max-height is always the real
+// available space in the chosen direction, never the list's own natural
+// height — callers that explicitly pass maxHeightDroplist keep that as a
+// hard ceiling; callers that don't get the full available space.
+const clampToAvailableSpace = (availableSpace, maxHeightDroplist) =>
+  maxHeightDroplist !== undefined
+    ? Math.min(availableSpace, maxHeightDroplist)
+    : availableSpace
+
 export const Select = ({
   className,
   label,
@@ -31,7 +47,7 @@ export const Select = ({
   optionsSelectedCopySingular = () => {},
   optionsSelectedCopyPlural = () => {},
   checkSpaceToReverse = true,
-  maxHeightDroplist = 420,
+  maxHeightDroplist,
   isPortalDropdown,
   isActiveOptionOnTop,
   dropdownClassName,
@@ -101,18 +117,63 @@ export const Select = ({
   }
 
   useEffect(() => {
-    if (
+    if (!(
       isDropdownVisible &&
       multipleSelect !== 'modal' &&
       wrapperRef.current &&
       dropDownRef.current
-    ) {
-      const {setListMaxHeight} = dropDownRef.current
-      const wrapperNode = wrapperRef.current
+    )) {
+      return
+    }
 
-      const SEARCH_BAR_HEIGHT = 56
-      const MARGIN_DROPDOWN = 4
+    const {setListMaxHeight} = dropDownRef.current
+    const wrapperNode = wrapperRef.current
 
+    const SEARCH_BAR_HEIGHT = 56
+    const MARGIN_DROPDOWN = 4
+
+    const hasExplicitCap = maxHeightDroplist !== undefined
+    const flipThreshold = maxHeightDroplist ?? DEFAULT_FLIP_THRESHOLD
+
+    // Decide which side's available space the dropdown actually gets sized
+    // against, then apply it (optionally clamped to an explicit cap).
+    const applyMaxHeight = (availableHeightBelow, availableHeightAbove) => {
+      const notEnoughRoomBelow = availableHeightBelow <= flipThreshold
+      const willReverse = checkSpaceToReverse && notEnoughRoomBelow
+
+      if (willReverse) {
+        setDropdownReversed(true)
+      }
+
+      // A caller with an explicit cap keeps today's behavior of measuring
+      // against the space above whenever space below is tight, even when
+      // checkSpaceToReverse keeps it anchored below (existing, tested
+      // behavior for those ~25 call sites). A caller relying on the default
+      // always measures against whichever side the dropdown actually
+      // renders on, so it's never sized against space it doesn't occupy.
+      const usesSpaceAbove =
+        willReverse || (hasExplicitCap && notEnoughRoomBelow)
+
+      setListMaxHeight(
+        Math.max(
+          0,
+          clampToAvailableSpace(
+            usesSpaceAbove ? availableHeightAbove : availableHeightBelow,
+            maxHeightDroplist,
+          ),
+        ),
+      )
+    }
+
+    const getLabelHeight = () =>
+      wrapperNode.getElementsByTagName('label')?.[0]?.getBoundingClientRect()
+        .height ?? 0
+
+    // Available space is measured against the viewport (or offsetParent), so
+    // a window resize can make a previously-computed max-height stale —
+    // recompute whenever the window is resized while the dropdown stays open,
+    // not just once when it first opens.
+    const recalculateMaxHeight = () => {
       const wrapperRect = wrapperNode.getBoundingClientRect()
 
       if (isPortalDropdown) {
@@ -127,29 +188,14 @@ export const Select = ({
             (showSearchBar ? SEARCH_BAR_HEIGHT : 0) -
             referenceRect.bottom,
         )
+        const availableHeightAbove =
+          wrapperRect.y -
+          (MARGIN_DROPDOWN + 20) -
+          (showSearchBar ? SEARCH_BAR_HEIGHT : 0) -
+          getLabelHeight() -
+          referenceRect.top
 
-        if (availableHeightBelow > maxHeightDroplist) {
-          setListMaxHeight(maxHeightDroplist)
-        } else {
-          if (checkSpaceToReverse) {
-            setDropdownReversed(true)
-          }
-
-          const labelHeight =
-            wrapperNode
-              .getElementsByTagName('label')?.[0]
-              ?.getBoundingClientRect().height ?? 0
-
-          const availableHeightAbove =
-            wrapperRect.y -
-            (MARGIN_DROPDOWN + 20) -
-            labelHeight -
-            referenceRect.top
-
-          setListMaxHeight(
-            Math.max(0, Math.min(availableHeightAbove, maxHeightDroplist)),
-          )
-        }
+        applyMaxHeight(availableHeightBelow, availableHeightAbove)
         return
       }
 
@@ -171,26 +217,28 @@ export const Select = ({
           (showSearchBar ? SEARCH_BAR_HEIGHT : 0) -
           (parentHeight + parentScrollTop),
       )
+      const availableHeightAbove =
+        wrapperRect.y -
+        (MARGIN_DROPDOWN + 20) -
+        getLabelHeight() -
+        parentScrollTop
 
-      if (availableHeightBelow > maxHeightDroplist) {
-        setListMaxHeight(maxHeightDroplist)
-      } else {
-        if (checkSpaceToReverse) {
-          setDropdownReversed(true)
-        }
+      applyMaxHeight(availableHeightBelow, availableHeightAbove)
+    }
 
-        const labelHeight =
-          wrapperNode
-            .getElementsByTagName('label')?.[0]
-            ?.getBoundingClientRect().height ?? 0
+    recalculateMaxHeight()
 
-        const availableHeightAbove =
-          wrapperRect.y - (MARGIN_DROPDOWN + 20) - labelHeight - parentScrollTop
+    let rafId
+    const handleResize = () => {
+      cancelAnimationFrame(rafId)
+      rafId = requestAnimationFrame(recalculateMaxHeight)
+    }
 
-        setListMaxHeight(
-          Math.max(0, Math.min(availableHeightAbove, maxHeightDroplist)),
-        )
-      }
+    window.addEventListener('resize', handleResize)
+
+    return () => {
+      cancelAnimationFrame(rafId)
+      window.removeEventListener('resize', handleResize)
     }
   }, [
     isDropdownVisible,
