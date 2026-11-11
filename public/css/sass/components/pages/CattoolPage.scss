@@ -91,16 +91,9 @@ body.cattool {
   overflow-y: hidden !important;
   padding: unset;
   background-color: colors.$grey50;
-  // The editor lays out below 1024px (the global body minimum in _reset.scss); with that
-  // minimum the page scrolled sideways under the footer and its scrollbar sat below it
-  min-width: 0;
-
-  // Phones and tablets keep the 1024px minimum: the editor is not laid out for their widths,
-  // and with it the browser zooms out to show the whole page instead of clipping the target
-  // column and the header
-  @media (hover: none) and (pointer: coarse) {
-    min-width: 1024px;
-  }
+  // No min-width override: the editor is not laid out below 1024px, so it keeps the global body
+  // minimum from _reset.scss on every device. Narrower windows scroll sideways and phones zoom out,
+  // instead of clipping the target column and the header
 }
 
 body.cattool .page-content {
