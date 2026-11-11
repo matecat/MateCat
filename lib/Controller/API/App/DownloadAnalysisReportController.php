@@ -5,6 +5,7 @@ namespace Controller\API\App;
 use Controller\Abstracts\AbstractDownloadController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
+use DivisionByZeroError;
 use Exception;
 use InvalidArgumentException;
 use Model\ActivityLog\Activity;
@@ -34,7 +35,7 @@ class DownloadAnalysisReportController extends AbstractDownloadController
     }
 
     /**
-     * @throws \DivisionByZeroError
+     * @throws DivisionByZeroError
      * @throws ReflectionException
      * @throws Exception
      * @throws TypeError
@@ -61,19 +62,26 @@ class DownloadAnalysisReportController extends AbstractDownloadController
             ]);
         }
 
-        $this->outputContent = $this->composeZip($outputContent);
-        $this->_filename = $_project_data[0]['pname'] . ".zip";
+        try {
+            $this->_filename = $_project_data[0]['pname'] . ".zip";
+            $this->setOutputContent(new ZipContentObject([
+                'output_filename' => $this->_filename,
+                'input_filename' => self::composeZip($outputContent, $this->getWorkDir() . DIRECTORY_SEPARATOR . 'report.zip'),
+            ]));
 
-        $activity = new ActivityLogStruct();
-        $activity->id_job = (int)$_project_data[0]['jid'];
-        $activity->id_project = $projectId; //assume that all rows have the same project id
-        $activity->action = ActivityLogStruct::DOWNLOAD_ANALYSIS_REPORT;
-        $activity->ip = Utils::getRealIpAddr();
-        $activity->uid = $this->user->uid;
-        $activity->event_date = date('Y-m-d H:i:s');
-        Activity::save($activity);
+            $activity = new ActivityLogStruct();
+            $activity->id_job = (int)$_project_data[0]['jid'];
+            $activity->id_project = $projectId; //assume that all rows have the same project id
+            $activity->action = ActivityLogStruct::DOWNLOAD_ANALYSIS_REPORT;
+            $activity->ip = Utils::getRealIpAddr();
+            $activity->uid = $this->user->uid;
+            $activity->event_date = date('Y-m-d H:i:s');
+            Activity::save($activity);
 
-        $this->finalize();
+            $this->finalize();
+        } finally {
+            $this->deleteWorkDir();
+        }
     }
 
     /**
