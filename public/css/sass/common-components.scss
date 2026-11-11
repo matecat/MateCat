@@ -130,3 +130,30 @@ body svg {
 .pull-right {
   float: right !important;
 }
+
+input[type='text'],
+input[type='number'],
+input[type='email'],
+input[type='password'] {
+  outline-offset: 0;
+  border: 1px solid colors.$grey200;
+  border-radius: variables.$border-radius-default;
+  padding: 8px 12px;
+
+  &::placeholder {
+    color: colors.$grey400;
+  }
+  &:hover {
+    border: 1px solid colors.$grey400;
+  }
+  &:focus,
+  &:active {
+    border: 1px solid colors.$grey400;
+    outline: 1px solid colors.$grey400;
+  }
+  &:disabled {
+    background-color: colors.$grey75;
+    color: colors.$grey400;
+    cursor: not-allowed;
+  }
+}
