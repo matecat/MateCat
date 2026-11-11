@@ -38,13 +38,26 @@ env:
 # The calling workflow (aws_dev.yml / aws_prod.yml) sets the ceiling.
 jobs:
   # ───────────────────────────────────────────────────────────────────────────
-  # JOB 1 – tests
-  # Builds all Docker images using plain docker compose (same as Travis),
-  # then runs the PHPUnit test suite inside a test-node container with
-  # MySQL + Redis.
+  # JOBS 1a and 1b – php-tests and js-tests, run in parallel
+  #
+  # Both build the same test-node image with plain docker compose, then run
+  # one script from .github/ci/ inside it, in place of the image's default
+  # command (docker/test-node/build_assets.sh, which runs both suites one
+  # after the other). Running them side by side cuts the wall time to the
+  # slower of the two, the JS one.
+  #
+  # Each job mounts two host folders into the container:
+  #   /ci-out    the coverage reports, uploaded for test-guard
+  #   /ci-cache  the composer, yarn and npm download caches, kept between
+  #              runs by actions/cache and keyed on the lock files
+  #
+  # On pull_request events, github.ref_name is "<pr_number>/merge" which
+  # Upgrade.php does not recognise. We use github.base_ref (the target
+  # branch, e.g. "develop" or "master") for PRs, and github.ref_name for
+  # pushes/tags.
   # ───────────────────────────────────────────────────────────────────────────
-  tests:
-    name: Run tests
+  php-tests:
+    name: PHP tests
     runs-on: ubuntu-24.04
     environment: ci_test
     permissions:
@@ -58,11 +71,17 @@ jobs:
         with:
           token: '${{ secrets.CI_USER_TOKEN_MATECATBOT || github.token }}'
           submodules: recursive
-      # On pull_request events, github.ref_name is "<pr_number>/merge" which
-      # Upgrade.php does not recognise. We use github.base_ref (the target
-      # branch, e.g. "develop" or "master") for PRs, and github.ref_name
-      # for pushes/tags.
-      - name: Build and test
+
+      - name: Restore the composer cache
+        uses: actions/cache@v6
+        with:
+          path: ${{ runner.temp }}/ci-cache
+          key: php-deps-${{ hashFiles('composer.lock') }}
+          restore-keys: php-deps-
+
+      # The AWS credentials are needed by the PHP tests only, so only this
+      # job passes them to the test-node build.
+      - name: Build images
         env:
           TEST_AWS_ACCESS_KEY_ID: ${{ vars.AWS_ACCESS_KEY_ID }}
           TEST_AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -71,29 +90,77 @@ jobs:
         run: |
           docker compose -f docker/docker-compose-ci.yml build mysql redis > /dev/null 2>&1
           docker compose -f docker/docker-compose-ci.yml create mysql redis > /dev/null 2>&1
-          # Build base-node (keep logs — useful for debugging)
+          # Build base-node (keep logs; useful for debugging)
           docker compose -f docker/docker-compose-ci.yml build base-node
           echo "Build test node"
           docker compose -f docker/docker-compose-ci.yml build test-node > /dev/null 2>&1
-          # Run tests — exit code propagated to the workflow step
-          docker compose -f docker/docker-compose-ci.yml up test-node --exit-code-from test-node || exit 1
 
-      # ── Coverage artifacts (consumed by test-guard job) ─────────────────
-      - name: Extract coverage reports from test container
+      - name: Run PHPUnit
         run: |
-          CONTAINER_ID=$(docker compose -f docker/docker-compose-ci.yml ps -aq test-node | head -1)
-          docker cp "$CONTAINER_ID":/var/www/matecat/coverage.xml ./php-coverage.xml
-          docker cp "$CONTAINER_ID":/var/www/matecat/js-coverage/clover.xml ./js-coverage.xml
-          docker cp "$CONTAINER_ID":/var/www/matecat/nodejs/.coverage/clover.xml ./node-coverage.xml
+          mkdir -p ci-out "$RUNNER_TEMP/ci-cache"
+          docker compose -f docker/docker-compose-ci.yml run --rm -T \
+            -v "$PWD/ci-out:/ci-out" \
+            -v "$RUNNER_TEMP/ci-cache:/ci-cache" \
+            -e COMPOSER_CACHE_DIR=/ci-cache/composer \
+            test-node /var/www/matecat/.github/ci/php-tests.sh
 
-      - name: Upload coverage artifacts
+      # ── Coverage artifact (consumed by test-guard job) ──────────────────
+      - name: Upload coverage artifact
         uses: actions/upload-artifact@v7
         with:
-          name: coverage-report
+          name: coverage-php
+          path: ci-out/php-coverage.xml
+          retention-days: 7
+
+  js-tests:
+    name: JS tests
+    runs-on: ubuntu-24.04
+    environment: ci_test
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          token: '${{ secrets.CI_USER_TOKEN_MATECATBOT || github.token }}'
+          submodules: recursive
+
+      - name: Restore the yarn and npm caches
+        uses: actions/cache@v6
+        with:
+          path: ${{ runner.temp }}/ci-cache
+          key: js-deps-${{ hashFiles('yarn.lock', 'nodejs/package-lock.json') }}
+          restore-keys: js-deps-
+
+      - name: Build images
+        env:
+          REPOSITORY_BRANCH: ${{ github.base_ref || github.ref_name }}
+          REPOSITORY_TAG: ${{ github.base_ref || github.ref_name }}
+        run: |
+          docker compose -f docker/docker-compose-ci.yml build mysql redis > /dev/null 2>&1
+          docker compose -f docker/docker-compose-ci.yml create mysql redis > /dev/null 2>&1
+          docker compose -f docker/docker-compose-ci.yml build base-node
+          echo "Build test node"
+          docker compose -f docker/docker-compose-ci.yml build test-node > /dev/null 2>&1
+
+      - name: Run Jest and the nodejs tests
+        run: |
+          mkdir -p ci-out "$RUNNER_TEMP/ci-cache"
+          docker compose -f docker/docker-compose-ci.yml run --rm -T \
+            -v "$PWD/ci-out:/ci-out" \
+            -v "$RUNNER_TEMP/ci-cache:/ci-cache" \
+            -e YARN_CACHE_FOLDER=/ci-cache/yarn \
+            -e npm_config_cache=/ci-cache/npm \
+            test-node /var/www/matecat/.github/ci/js-tests.sh
+
+      # ── Coverage artifact (consumed by test-guard job) ──────────────────
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-js
           path: |
-            php-coverage.xml
-            js-coverage.xml
-            node-coverage.xml
+            ci-out/js-coverage.xml
+            ci-out/node-coverage.xml
           retention-days: 7
   # ───────────────────────────────────────────────────────────────────────────
   # JOB 2 – deploy (only when should_deploy is true)
@@ -114,7 +181,8 @@ jobs:
       contents: read
     if: ${{ inputs.should_deploy }}
     needs:
-      - tests
+      - php-tests
+      - js-tests
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -190,13 +258,16 @@ jobs:
   # ───────────────────────────────────────────────────────────────────────────
   # JOB – test-guard (PR only)
   #
-  # Downloads the "coverage-report" artifact produced by the tests job and
-  # runs ostico/test-guard to evaluate test adequacy on changed files.
+  # Downloads the "coverage-php" and "coverage-js" artifacts produced by the
+  # test jobs and runs ostico/test-guard to evaluate test adequacy on changed
+  # files.
   # ───────────────────────────────────────────────────────────────────────────
   test-guard:
     name: Test adequacy gate
     runs-on: ubuntu-24.04
-    needs: tests
+    needs:
+      - php-tests
+      - js-tests
     if: >-
       github.event_name == 'pull_request' &&
       !contains(github.event.pull_request.labels.*.name, 'test-guard-exception')
@@ -214,10 +285,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Download coverage artifact
+      - name: Download coverage artifacts
         uses: actions/download-artifact@v8
         with:
-          name: coverage-report
+          pattern: coverage-*
+          merge-multiple: true
 
       - name: Test Guard
         uses: ostico/test-guard@v2
@@ -264,7 +336,8 @@ jobs:
     name: Slack Notification
     runs-on: ubuntu-24.04
     needs:
-      - tests
+      - php-tests
+      - js-tests
       - deploy
       - test-guard
     if: >-
