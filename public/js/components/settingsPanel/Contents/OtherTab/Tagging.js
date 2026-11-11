@@ -149,7 +149,6 @@ export const Tagging = () => {
           name={'project-tagging'}
           isPortalDropdown={true}
           dropdownClassName="select-dropdown__wrapper-portal"
-          maxHeightDroplist={SELECT_HEIGHT}
           showSearchBar={true}
           options={taggingTypes}
           activeOptions={activeOptions}
