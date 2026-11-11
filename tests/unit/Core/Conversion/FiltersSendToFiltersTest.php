@@ -2,6 +2,7 @@
 
 namespace Matecat\Core\Conversion;
 
+use CURLFile;
 use Exception;
 use Matecat\TestHelpers\AbstractTest;
 use Model\Conversion\Filters;
@@ -188,7 +189,7 @@ class FiltersSendToFiltersTest extends AbstractTest
         try {
             $result = $this->filters->sourceToXliff($tmpFile, 'en-US', 'it-IT');
 
-            self::assertFalse($result['isSuccess']);
+            self::assertFalse($result['successful']);
             self::assertSame('Bad format', $result['errorMessage']);
         } finally {
             @unlink($tmpFile);
@@ -209,7 +210,7 @@ class FiltersSendToFiltersTest extends AbstractTest
         try {
             $result = $this->filters->sourceToXliff($tmpFile, 'en-US', 'it-IT');
 
-            self::assertFalse($result['isSuccess']);
+            self::assertFalse($result['successful']);
             self::assertStringContainsString('FILTERS_RAPIDAPI_KEY', $result['errorMessage']);
         } finally {
             @unlink($tmpFile);
@@ -238,7 +239,7 @@ class FiltersSendToFiltersTest extends AbstractTest
         try {
             $result = $this->filters->sourceToXliff($tmpFile, 'en-US', 'it-IT');
 
-            self::assertFalse($result['isSuccess']);
+            self::assertFalse($result['successful']);
             self::assertStringContainsString('Curl error 28', $result['errorMessage']);
         } finally {
             @unlink($tmpFile);
@@ -259,7 +260,7 @@ class FiltersSendToFiltersTest extends AbstractTest
         try {
             $result = $this->filters->sourceToXliff($tmpFile, 'en-US', 'it-IT');
 
-            self::assertFalse($result['isSuccess']);
+            self::assertFalse($result['successful']);
             self::assertStringContainsString('503', $result['errorMessage']);
         } finally {
             @unlink($tmpFile);
@@ -312,6 +313,84 @@ class FiltersSendToFiltersTest extends AbstractTest
             self::assertIsArray($result);
         } finally {
             @unlink($tmpFile);
+        }
+    }
+
+    // ── memory discipline ──────────────────────────────────────────────
+
+    #[Test]
+    public function sendToFiltersClearsTheCurlHandlerAfterReadingTheResponses(): void
+    {
+        $curl = $this->createMock(MultiCurlHandler::class);
+        $curl->method('createResource')->willReturn('0');
+        $curl->method('getAllContents')->willReturn(['0' => json_encode(['document' => base64_encode('abc')])]);
+        $curl->method('getAllInfo')->willReturn(['0' => [
+            'http_code' => 200,
+            'errno' => 0,
+            'error' => '',
+            'curlinfo_total_time' => 0.123,
+        ]]);
+        $curl->method('getAllHeaders')->willReturn(['0' => []]);
+        $curl->expects($this->once())->method('clear');
+
+        $this->filters->mockCurl = $curl;
+
+        $result = $this->filters->xliffToTarget([1 => ['document_content' => '<xliff/>']]);
+
+        self::assertSame('abc', $result['0']['document_content']);
+    }
+
+    #[Test]
+    public function sendToFiltersDecodesASuccessfulResponseOnce(): void
+    {
+        $body = json_encode(['document' => base64_encode(str_repeat('a', 8 * 1024 * 1024))]);
+
+        $this->filters->mockCurl = $this->createMockedCurl($body);
+
+        $before = memory_get_usage();
+        memory_reset_peak_usage();
+        $result = $this->filters->xliffToTarget([1 => ['document_content' => '<xliff/>']]);
+        $peak = memory_get_peak_usage() - $before;
+
+        self::assertSame(8388608, strlen($result['0']['document_content']));
+        self::assertLessThan(2.5 * strlen($body), $peak);
+    }
+
+    #[Test]
+    public function xliffToTargetSendsAnXliffAlreadyOnDiskWithoutCopyingIt(): void
+    {
+        $path = tempnam(sys_get_temp_dir(), 'test-xliff-');
+        file_put_contents($path, '<xliff version="1.2"/>');
+
+        try {
+            $curl = $this->createMock(MultiCurlHandler::class);
+            $curl->method('getAllContents')->willReturn(['0' => json_encode(['document' => base64_encode('abc')])]);
+            $curl->method('getAllInfo')->willReturn(['0' => [
+                'http_code' => 200,
+                'errno' => 0,
+                'error' => '',
+                'curlinfo_total_time' => 0.123,
+            ]]);
+            $curl->method('getAllHeaders')->willReturn(['0' => []]);
+            $curl->expects($this->once())->method('createResource')
+                ->with(
+                    self::anything(),
+                    self::callback(static fn (array $options): bool => $options[CURLOPT_POSTFIELDS]['xliff'] instanceof CURLFile
+                        && $options[CURLOPT_POSTFIELDS]['xliff']->getFilename() === $path
+                        && $options[CURLOPT_POSTFIELDS]['xliff']->getPostFilename() === 'matecat-xliff-to-target'
+                        && $options[CURLOPT_POSTFIELDS]['xliff']->getMimeType() === ''),
+                    self::anything()
+                )
+                ->willReturn('0');
+
+            $this->filters->mockCurl = $curl;
+
+            $this->filters->xliffToTarget([1 => ['input_filename' => $path]]);
+
+            self::assertFileExists($path);
+            self::assertSame('<xliff version="1.2"/>', file_get_contents($path));
+        } finally {
+            @unlink($path);
         }
     }
 }
