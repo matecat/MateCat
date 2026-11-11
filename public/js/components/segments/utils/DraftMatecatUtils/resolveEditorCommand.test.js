@@ -17,6 +17,20 @@ jest.mock('../../../../utils/Utils', () => ({
   isMacOS: jest.fn(() => false),
 }))
 
+// Draft reads the platform from the user agent once, at import, so under jsdom
+// isOptionKeyCommand is always false. Tie it to the isMacOS mock instead.
+jest.mock('draft-js', () => {
+  const actual = jest.requireActual('draft-js')
+  return {
+    ...actual,
+    KeyBindingUtil: {
+      ...actual.KeyBindingUtil,
+      isOptionKeyCommand: (e) =>
+        require('../../../../utils/Utils').isMacOS() && !!e.altKey,
+    },
+  }
+})
+
 // The caret arms are why this function exists as its own module. They used to
 // live inside the component's keyBindingFn, where the only way to reach them
 // was to place a caret jsdom cannot place, so they went uncovered. Here the
@@ -125,6 +139,30 @@ describe('tag insertion', () => {
     expect(
       resolveEditorCommand(ev, ctx({hasSpaceTag: false})).command,
     ).not.toBe('insert-space-tag')
+  })
+
+  // macOS reports option + space as the character it types, U+00A0, not ' '.
+  test.each([' ', ' '])(
+    'option + space (key %j) inserts an nbsp tag on a mac',
+    (character) => {
+      isMacOS.mockReturnValue(true)
+
+      const r = resolveEditorCommand(
+        key({key: character, code: 'Space', altKey: true}),
+        ctx(),
+      )
+
+      expect(r.command).toBe('insert-nbsp-tag')
+    },
+  )
+
+  test('alt + space (key U+00A0) inserts an nbsp tag on a chromebook', () => {
+    const r = resolveEditorCommand(
+      key({key: ' ', code: 'Space', altKey: true}),
+      ctx({isChromeBook: true}),
+    )
+
+    expect(r.command).toBe('insert-nbsp-tag')
   })
 })
 

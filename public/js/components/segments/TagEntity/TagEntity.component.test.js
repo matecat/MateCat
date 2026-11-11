@@ -16,7 +16,7 @@ jest.mock('../../../stores/SegmentStore', () => ({
 }))
 
 jest.mock('../../../stores/CatToolStore', () => ({
-  isPhTagsCompressed: jest.fn(() => false),
+  isTagsCompressed: jest.fn(() => false),
   addListener: jest.fn(),
   removeListener: jest.fn(),
 }))
@@ -100,7 +100,7 @@ const flushDebounce = () => {
 }
 
 beforeEach(() => {
-  CatToolStore.isPhTagsCompressed.mockReturnValue(false)
+  CatToolStore.isTagsCompressed.mockReturnValue(false)
 })
 
 afterEach(() => {
@@ -144,7 +144,7 @@ describe('TagEntity children content', () => {
   })
 
   test('hides children content when ph tags are compressed', () => {
-    CatToolStore.isPhTagsCompressed.mockReturnValue(true)
+    CatToolStore.isTagsCompressed.mockReturnValue(true)
     renderTag()
     expect(document.querySelector('.index-counter')).toBeTruthy()
     expect(tagEl()).toHaveTextContent('1')
@@ -157,7 +157,7 @@ describe('TagEntity children content', () => {
         placeholder: 'PH',
         index: 0,
         name: 'ph',
-        pcRole: 'close',
+        tagRole: 'close',
       }),
     })
     expect(tagEl()).toHaveTextContent('1')
@@ -178,10 +178,10 @@ describe('TagEntity children content', () => {
         placeholder: 'PH',
         index: 0,
         name: 'ph',
-        pcRole: 'open',
+        tagRole: 'open',
       }),
     })
-    expect(tagClass()).toContain('tag-pc-open')
+    expect(tagClass()).toContain('tag-paired-open')
   })
 })
 
@@ -337,9 +337,9 @@ describe('TagEntity ph compression toggle', () => {
     renderTag()
     expect(tagEl()).toHaveTextContent(/hello/)
 
-    CatToolStore.isPhTagsCompressed.mockReturnValue(true)
+    CatToolStore.isTagsCompressed.mockReturnValue(true)
     act(() => {
-      listenerFor(CatToolStore, CatToolConstants.TOGGLE_PH_TAGS_COMPRESSED)()
+      listenerFor(CatToolStore, CatToolConstants.TOGGLE_TAGS_COMPRESSED)()
     })
 
     expect(tagClass()).toContain('tag-compressed')
@@ -706,20 +706,20 @@ describe('TagEntity tooltip', () => {
   })
 
   test('shows the tooltip for a compressed ph tag without needing overflow', () => {
-    CatToolStore.isPhTagsCompressed.mockReturnValue(true)
+    CatToolStore.isTagsCompressed.mockReturnValue(true)
     renderTag()
     expect(screen.getByTestId('tooltip-content')).toHaveTextContent('PH')
   })
 
   test('never shows a tooltip for a closing pc tag', () => {
-    CatToolStore.isPhTagsCompressed.mockReturnValue(true)
+    CatToolStore.isTagsCompressed.mockReturnValue(true)
     renderTag({
       contentState: makeContentState({
         id: 'e1',
         placeholder: 'PH',
         index: 0,
         name: 'ph',
-        pcRole: 'close',
+        tagRole: 'close',
       }),
     })
     expect(screen.getByTestId('tooltip-content')).toHaveTextContent('')
@@ -806,7 +806,7 @@ describe('TagEntity store subscriptions', () => {
       ]),
     )
     expect(CatToolStore.addListener).toHaveBeenCalledWith(
-      CatToolConstants.TOGGLE_PH_TAGS_COMPRESSED,
+      CatToolConstants.TOGGLE_TAGS_COMPRESSED,
       expect.any(Function),
     )
   })

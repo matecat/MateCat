@@ -79,18 +79,18 @@ class TmKeyManagementTest extends AbstractTest
         self::$dummyTmKey_edit = true;
         self::$uid_translator = 123;
 
-        self::$validJsonStringTmKeyList = '[{"tm":true,"glos":false,"owner":true,"uid_transl":null,"uid_rev":null,"name":"My personal Key","key":"993dddb1c603b4e57f69","r":"1","w":"0","r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]';
+        self::$validJsonStringTmKeyList = '[{"tm":true,"glos":false,"owner":true,"uid_transl":null,"uid_rev":null,"name":"My personal Key","key":"00000000000000000003","r":"1","w":"0","r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]';
 
         /**
          * Invalid Json because of "glos":true"owner":true,
          */
-        self::$invalidJsonStringTmKeyList = '[{tm":true,"glos":true"owner":true,"uid_transl":null,"uid_rev":null,"name":"My personal Key","key":"993dddb1c603b4e57f69","r":"1","w":"0","r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]';
-        self::$validJsonStringTmKeyListWithUidTranslator = '[{"tm":true,"glos":false,"owner":false,"uid_transl":123,"uid_rev":null,"name":"My personal Key","key":"993dddb1c603b4e57f69","r":"1","w":"0","r_transl":"1","w_transl":"1","r_rev":null,"w_rev":null,"source":null,"target":null}]';
-        self::$invalidClientJson = '[{name""My personal Key","key":"993dddb1c603b4e57f69","r":"1","w":"0"}]';
-        self::$validClientJson = '[{"name":"My personal Key","key":"993dddb1c603b4e57f69","r":"1","w":"0"},{"name":"My second Key","key":"testclientKey","r":"1","w":"1"}]';
+        self::$invalidJsonStringTmKeyList = '[{tm":true,"glos":true"owner":true,"uid_transl":null,"uid_rev":null,"name":"My personal Key","key":"00000000000000000003","r":"1","w":"0","r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]';
+        self::$validJsonStringTmKeyListWithUidTranslator = '[{"tm":true,"glos":false,"owner":false,"uid_transl":123,"uid_rev":null,"name":"My personal Key","key":"00000000000000000003","r":"1","w":"0","r_transl":"1","w_transl":"1","r_rev":null,"w_rev":null,"source":null,"target":null}]';
+        self::$invalidClientJson = '[{name""My personal Key","key":"00000000000000000003","r":"1","w":"0"}]';
+        self::$validClientJson = '[{"name":"My personal Key","key":"00000000000000000003","r":"1","w":"0"},{"name":"My second Key","key":"testclientKey","r":"1","w":"1"}]';
 
-        self::$invalidServerJson = '[{tm":true,"glos":true"owner":true,"uid_transl":null,"uid_rev":null,"name":"My personal Key","key":"993dddb1c603b4e57f69","r":"1","w":"0","r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]';
-        self::$validServerJson = '[{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"My personal Key","key":"993dddb1c603b4e57f69","r":"1","w":"0","r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]';
+        self::$invalidServerJson = '[{tm":true,"glos":true"owner":true,"uid_transl":null,"uid_rev":null,"name":"My personal Key","key":"00000000000000000003","r":"1","w":"0","r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]';
+        self::$validServerJson = '[{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"My personal Key","key":"00000000000000000003","r":"1","w":"0","r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]';
 
         self::$invalidGrantString = "invalidGrantString";
         self::$invalidTypeString = "invalidTypeString";
@@ -1846,12 +1846,12 @@ class TmKeyManagementTest extends AbstractTest
     {
         $tmKeyStruct       = new TmKeyStruct();
         $tmKeyStruct->name = "èèèééééççòòòòò";
-        $tmKeyStruct->key  = "keyèéç993dddb1c603b4e57f69";
+        $tmKeyStruct->key  = "keyèéç00000000000000000003";
 
         $result = TmKeyManager::sanitize($tmKeyStruct);
 
         $this->assertSame("èèèééééççòòòòò", $result->name);
-        $this->assertSame("keyèéç993dddb1c603b4e57f69", $result->key);
+        $this->assertSame("keyèéç00000000000000000003", $result->key);
     }
 
     /**

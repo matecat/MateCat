@@ -1,11 +1,11 @@
 import React, {useEffect, useRef} from 'react'
-import Close from '../../../img/icons/Close'
 import {
   Button,
   BUTTON_MODE,
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../common/Button/Button'
+import IconClose from '../../../img/icons/IconClose'
 
 export const ModalContainer = ({
   title,
@@ -86,7 +86,7 @@ export const ModalContainer = ({
                 onClick={handleClose}
                 data-testid="close-button"
               >
-                <Close size={20} />
+                <IconClose size={20} />
               </Button>
             )}
           </div>

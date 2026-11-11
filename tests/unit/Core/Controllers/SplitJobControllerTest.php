@@ -5,6 +5,8 @@ namespace Matecat\Core\Controllers;
 use ArrayObject;
 use Controller\API\App\SplitJobController as AppSplitJobController;
 use Controller\API\Commons\Exceptions\AuthorizationError;
+use Controller\API\Commons\Exceptions\ConflictError;
+use Controller\API\Commons\JobRestructureLock;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\V2\SplitJobController;
 use InvalidArgumentException;
@@ -12,6 +14,7 @@ use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
+use Matecat\TestHelpers\FakeLockRedisClient;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Filter\IsAnInternalUserEvent;
@@ -32,8 +35,16 @@ class TestableSplitJobController extends SplitJobController
     /** @var JobStruct[]|null */
     public ?array $fakeJobs = null;
 
+    public FakeLockRedisClient $redis;
+
     public function __construct()
     {
+        $this->redis = new FakeLockRedisClient();
+    }
+
+    protected function restructureLock(): JobRestructureLock
+    {
+        return new JobRestructureLock($this->redis);
     }
 
     protected function getProjectData(int $project_id, string $project_pass, bool $split_raw_words = false): array
@@ -52,6 +63,22 @@ class TestableSplitJobController extends SplitJobController
         }
 
         return $this->fakeJobs;
+    }
+
+    /** @var list<int> the job ids checked against the project, in order */
+    public array $jobInProjectLookups = [];
+
+    /** @var JobStruct[]|null what the check before the lock sees; null falls back to fakeJobs */
+    public ?array $fakeJobInProject = null;
+
+    protected function findJobInProject(int $jid, ProjectStruct $project): array
+    {
+        $this->jobInProjectLookups[] = $jid;
+
+        return array_values(array_filter(
+            $this->fakeJobInProject ?? $this->getProjectJobs($project),
+            fn(JobStruct $job): bool => $job->id == $jid
+        ));
     }
 }
 
@@ -948,6 +975,312 @@ class SplitJobControllerTest extends AbstractTest
             self::assertSame('', $askedAbout, 'the dispatch must happen even with no address to offer');
             $this->cleanFragments($base);
         }
+    }
+
+    // ─── the per-job restructure lock ───
+
+    /**
+     * Wire the controller with $jobs as the project's chunks and $pManager as the manager, and a request
+     * naming job 99 with password 'jp'.
+     *
+     * @param JobStruct[] $jobs
+     */
+    private function prepareRestructure(array $jobs, JobSplitMergeManager $pManager, ?SplitMergeProjectData $data = null): SplitMergeProjectData
+    {
+        $data ??= new SplitMergeProjectData(1);
+        $data->splitResult ??= new ArrayObject(['chunks' => [1, 2]]);
+
+        $this->controller->fakeJobs = $jobs;
+        $this->controller->fakeProjectData = [
+            'data'       => $data,
+            'pManager'   => $pManager,
+            'count_type' => 'eq_word_count',
+            'project'    => $this->makeOwnedProject(),
+        ];
+
+        $this->stubRequestParams([
+            'project_id'   => '1',
+            'project_pass' => 'pp',
+            'job_id'       => '99',
+            'job_pass'     => 'jp',
+            'num_split'    => '2',
+        ]);
+
+        return $data;
+    }
+
+    #[Test]
+    public function apply_holds_the_job_while_it_splits_and_releases_it_after(): void
+    {
+        $lockLogAtSplit = null;
+        $pManager = $this->createMock(JobSplitMergeManager::class);
+        $pManager->expects(self::once())
+            ->method('applySplit')
+            ->willReturnCallback(function () use (&$lockLogAtSplit): void {
+                $lockLogAtSplit = $this->controller->redis->log;
+            });
+
+        $this->prepareRestructure([$this->makeJobStub(99, 'jp', false)], $pManager);
+
+        $this->controller->apply();
+
+        self::assertSame(['set job_restructure:99'], $lockLogAtSplit, 'the split must run holding the job');
+        self::assertSame(['set job_restructure:99', 'del job_restructure:99'], $this->controller->redis->log);
+        [$key, , $ex, $ttl, $nx] = $this->controller->redis->setCalls[0];
+        self::assertSame(['job_restructure:99', 'EX', JobRestructureLock::TTL_SECONDS, 'NX'], [$key, $ex, $ttl, $nx]);
+    }
+
+    #[Test]
+    public function apply_releases_the_job_when_the_split_fails(): void
+    {
+        $pManager = $this->createStub(JobSplitMergeManager::class);
+        $pManager->method('applySplit')->willThrowException(new \RuntimeException('split failed'));
+
+        $this->prepareRestructure([$this->makeJobStub(99, 'jp', false)], $pManager);
+
+        try {
+            $this->controller->apply();
+            self::fail('the split failure must reach the caller');
+        } catch (\RuntimeException $e) {
+            self::assertSame('split failed', $e->getMessage());
+        }
+
+        self::assertSame([], $this->controller->redis->keys, 'a failed split must not leave the job locked');
+    }
+
+    /**
+     * The second of two concurrent applies: refused before it reads a chunk, so it cannot validate the
+     * job as it was before the first one commits.
+     */
+    #[Test]
+    public function apply_answers_conflict_and_reads_nothing_while_another_request_holds_the_job(): void
+    {
+        $pManager = $this->createMock(JobSplitMergeManager::class);
+        $pManager->expects(self::never())->method('getSplitData');
+        $pManager->expects(self::never())->method('applySplit');
+
+        $this->prepareRestructure([$this->makeJobStub(99, 'jp', false)], $pManager);
+        $this->controller->fakeJobInProject = $this->controller->fakeJobs;
+        $this->controller->fakeJobs = null; // getProjectJobs() throws if it is reached
+        $this->controller->redis->keys['job_restructure:99'] = 1;
+
+        try {
+            $this->controller->apply();
+            self::fail('a held job must be refused');
+        } catch (ConflictError) {
+        }
+
+        self::assertSame(['job_restructure:99' => 1], $this->controller->redis->keys, 'the holder keeps its lock');
+    }
+
+    /**
+     * The retry that comes after the first apply committed: the job holds two chunks by then.
+     */
+    #[Test]
+    public function apply_refuses_a_job_already_split_and_releases_it(): void
+    {
+        $pManager = $this->createMock(JobSplitMergeManager::class);
+        $pManager->expects(self::never())->method('applySplit');
+
+        $this->prepareRestructure([$this->makeJobStub(99, 'jp', false), $this->makeJobStub(99, 'jp2', false)], $pManager);
+
+        try {
+            $this->controller->apply();
+            self::fail('a job already split must be refused');
+        } catch (InvalidArgumentException $e) {
+            self::assertSame(-11, $e->getCode());
+        }
+
+        self::assertSame([], $this->controller->redis->keys);
+    }
+
+    #[Test]
+    public function check_refuses_a_job_already_split_without_taking_the_job(): void
+    {
+        $this->prepareRestructure(
+            [$this->makeJobStub(99, 'jp', false), $this->makeJobStub(99, 'jp2', false)],
+            $this->createStub(JobSplitMergeManager::class)
+        );
+
+        try {
+            $this->controller->check();
+            self::fail('a job already split must be refused');
+        } catch (InvalidArgumentException $e) {
+            self::assertSame(-11, $e->getCode());
+        }
+
+        self::assertSame([], $this->controller->redis->log, 'check writes nothing, so it takes no lock');
+    }
+
+    /**
+     * The password is checked first, so a caller who does not hold the job learns nothing about its chunks.
+     */
+    #[Test]
+    public function apply_answers_access_denied_before_telling_a_job_is_split(): void
+    {
+        $this->prepareRestructure(
+            [$this->makeJobStub(99, 'other_pw', false), $this->makeJobStub(99, 'jp2', false)],
+            $this->createStub(JobSplitMergeManager::class)
+        );
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionCode(-10);
+        $this->controller->apply();
+    }
+
+    /**
+     * A caller with no standing over the project never holds its jobs, so cannot keep them from their
+     * owners.
+     *
+     * @return list<array{string, int}>
+     */
+    public static function restructuringRoutes(): array
+    {
+        return [['apply', 1400], ['merge', 1500]];
+    }
+
+    #[Test]
+    #[\PHPUnit\Framework\Attributes\DataProvider('restructuringRoutes')]
+    public function a_caller_without_standing_never_takes_the_job(string $route, int $offset): void
+    {
+        $base = self::REAL_DB_BASE + $offset;
+
+        try {
+            $this->seedRestructureScope($base, member: false);
+            $this->stubRestructureRequest($base);
+
+            try {
+                $this->controller->$route();
+                self::fail('a caller without standing must be refused');
+            } catch (AuthorizationError) {
+            }
+
+            self::assertSame([], $this->controller->redis->log);
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    #[Test]
+    public function merge_holds_the_job_while_it_merges_and_releases_it_after(): void
+    {
+        $lockLogAtMerge = null;
+        $pManager = $this->createMock(JobSplitMergeManager::class);
+        $pManager->expects(self::once())
+            ->method('mergeALL')
+            ->willReturnCallback(function () use (&$lockLogAtMerge): void {
+                $lockLogAtMerge = $this->controller->redis->log;
+            });
+
+        $this->prepareRestructure([$this->makeJobStub(99, 'jp', false), $this->makeJobStub(99, 'jp2', false)], $pManager);
+
+        $this->controller->merge();
+
+        self::assertSame(['set job_restructure:99'], $lockLogAtMerge);
+        self::assertSame(['set job_restructure:99', 'del job_restructure:99'], $this->controller->redis->log);
+    }
+
+    #[Test]
+    public function merge_answers_conflict_and_reads_nothing_while_another_request_holds_the_job(): void
+    {
+        $pManager = $this->createMock(JobSplitMergeManager::class);
+        $pManager->expects(self::never())->method('mergeALL');
+
+        $this->prepareRestructure([$this->makeJobStub(99, 'jp', false)], $pManager);
+        $this->controller->fakeJobInProject = $this->controller->fakeJobs;
+        $this->controller->fakeJobs = null; // getProjectJobs() throws if it is reached
+        $this->controller->redis->keys['job_restructure:99'] = 1;
+
+        $this->expectException(ConflictError::class);
+        $this->controller->merge();
+    }
+
+    /**
+     * The lock is keyed by the job id alone: a caller with standing over one project must not be able
+     * to take a job of another, or the owner's own split, merge and password change answer 409.
+     */
+    #[Test]
+    public function merge_refuses_a_job_outside_the_project_before_taking_it(): void
+    {
+        $pManager = $this->createMock(JobSplitMergeManager::class);
+        $pManager->expects(self::never())->method('mergeALL');
+
+        $this->prepareRestructure([$this->makeJobStub(99, 'jp', false)], $pManager);
+        $this->controller->fakeJobInProject = [];
+        $this->controller->fakeJobs = null; // getProjectJobs() throws if it is reached
+
+        try {
+            $this->controller->merge();
+            self::fail('a job outside the project must be refused');
+        } catch (NotFoundException $e) {
+            self::assertSame(-10, $e->getCode());
+        }
+
+        self::assertSame([99], $this->controller->jobInProjectLookups);
+        self::assertSame([], $this->controller->redis->log, 'no lock is taken on a job the caller cannot see');
+    }
+
+    #[Test]
+    public function apply_refuses_a_job_outside_the_project_before_taking_it(): void
+    {
+        $pManager = $this->createMock(JobSplitMergeManager::class);
+        $pManager->expects(self::never())->method('getSplitData');
+        $pManager->expects(self::never())->method('applySplit');
+
+        $this->prepareRestructure([$this->makeJobStub(99, 'jp', false)], $pManager);
+        $this->controller->fakeJobInProject = [];
+        $this->controller->fakeJobs = null; // getProjectJobs() throws if it is reached
+
+        try {
+            $this->controller->apply();
+            self::fail('a job outside the project must be refused');
+        } catch (NotFoundException $e) {
+            self::assertSame(-10, $e->getCode());
+        }
+
+        self::assertSame([99], $this->controller->jobInProjectLookups);
+        self::assertSame([], $this->controller->redis->log, 'no lock is taken on a job the caller cannot see');
+    }
+
+    /**
+     * A deleted chunk counts as outside the project: the lock is not taken on it either.
+     */
+    #[Test]
+    public function merge_refuses_a_deleted_job_before_taking_it(): void
+    {
+        $pManager = $this->createMock(JobSplitMergeManager::class);
+        $pManager->expects(self::never())->method('mergeALL');
+
+        $this->prepareRestructure([$this->makeJobStub(99, 'jp', false)], $pManager);
+        $this->controller->fakeJobInProject = [$this->makeJobStub(99, 'jp', true)];
+        $this->controller->fakeJobs = null;
+
+        try {
+            $this->controller->merge();
+            self::fail('a deleted job must be refused');
+        } catch (NotFoundException $e) {
+            self::assertSame(-10, $e->getCode());
+        }
+
+        self::assertSame([], $this->controller->redis->log);
+    }
+
+    #[Test]
+    public function merge_releases_the_job_when_the_merge_fails(): void
+    {
+        $pManager = $this->createStub(JobSplitMergeManager::class);
+        $pManager->method('mergeALL')->willThrowException(new \RuntimeException('merge failed'));
+
+        $this->prepareRestructure([$this->makeJobStub(99, 'jp', false), $this->makeJobStub(99, 'jp2', false)], $pManager);
+
+        try {
+            $this->controller->merge();
+            self::fail('the merge failure must reach the caller');
+        } catch (\RuntimeException $e) {
+            self::assertSame('merge failed', $e->getMessage());
+        }
+
+        self::assertSame([], $this->controller->redis->keys);
     }
 
     /**

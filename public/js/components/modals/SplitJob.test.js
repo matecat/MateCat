@@ -67,7 +67,7 @@ test('confirming the split calls confirmSplitRequest and closes the modal on suc
 
 test('shows an error and disables further checks when confirmSplitRequest fails', async () => {
   checkSplitRequest.mockResolvedValue({data: successData})
-  confirmSplitRequest.mockRejectedValue([{message: 'confirm failed'}])
+  confirmSplitRequest.mockRejectedValue({errors: [{message: 'confirm failed'}]})
   render(
     <SplitJobModal job={baseJob} project={baseProject} callback={jest.fn()} />,
   )
@@ -86,8 +86,10 @@ test('shows the "too few segments" message and disables split when the API retur
   )
 
   expect(
-      await screen.findByText('Split unsuccessful: the job has too few segments.'),
-    ).toBeInTheDocument()
+    await screen.findByText(
+      'Split unsuccessful: the job has too few segments.',
+    ),
+  ).toBeInTheDocument()
   expect(screen.getByText('Check split')).toBeDisabled()
 })
 
@@ -308,7 +310,7 @@ describe('SplitJobModal confirm', () => {
   })
 
   test('an error list shows the message and goes back to the split check', async () => {
-    confirmSplitRequest.mockRejectedValue([{message: 'Split failed'}])
+    confirmSplitRequest.mockRejectedValue({errors: [{message: 'Split failed'}]})
 
     const confirm = await renderUntilConfirm()
 
@@ -322,8 +324,8 @@ describe('SplitJobModal confirm', () => {
     expect(confirmSplitRequest).toHaveBeenCalledTimes(1)
   })
   test('the button is enabled again when the request fails without an error list', async () => {
-    // confirmSplitRequest rejects with the fetch Response itself on a non-ok status.
-    confirmSplitRequest.mockRejectedValue({ok: false, status: 500})
+    // confirmSplitRequest rejects with the response alone when a non-ok status has no body.
+    confirmSplitRequest.mockRejectedValue({response: {ok: false, status: 500}})
 
     const confirm = await renderUntilConfirm()
 

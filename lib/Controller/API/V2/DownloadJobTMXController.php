@@ -3,7 +3,10 @@
 namespace Controller\API\V2;
 
 use Controller\Abstracts\AbstractDownloadController;
+use Controller\Exceptions\RenderTerminatedException;
+use DomainException;
 use Exception;
+use InvalidArgumentException;
 use Model\ActivityLog\Activity;
 use Model\ActivityLog\ActivityLogStruct;
 use Model\FeaturesBase\FeatureSet;
@@ -113,8 +116,8 @@ class DownloadJobTMXController extends AbstractDownloadController
 
     /**
      * @throws TypeError
-     * @throws \DomainException
-     * @throws \InvalidArgumentException
+     * @throws DomainException
+     * @throws InvalidArgumentException
      */
     protected function _saveActivity(): void
     {
@@ -129,8 +132,10 @@ class DownloadJobTMXController extends AbstractDownloadController
     }
 
     /**
+     * Sends the exported file and ends the request.
+     *
+     * @throws RenderTerminatedException
      * @Override
-     * @codeCoverageIgnore
      */
     public function finalize(bool $forceXliff = false): never
     {
@@ -160,6 +165,6 @@ class DownloadJobTMXController extends AbstractDownloadController
             }
         }
 
-        exit;
+        $this->endRequest();
     }
 }

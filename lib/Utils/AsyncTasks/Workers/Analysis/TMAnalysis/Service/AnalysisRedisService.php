@@ -4,13 +4,15 @@ namespace Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service;
 
 use Exception;
 use Predis\Client;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
+use Random\RandomException;
 use ReflectionException;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\Analysis\RedisKeys;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\AnalysisRedisServiceInterface;
-use Utils\Logger\LoggerFactory;
+use Utils\Redis\RedisLock;
 
-class AnalysisRedisService implements AnalysisRedisServiceInterface
+class AnalysisRedisService
 {
     /**
      * TTL of the per-project init semaphore. Must exceed the worst-case duration of
@@ -34,38 +36,60 @@ class AnalysisRedisService implements AnalysisRedisServiceInterface
 
     private Client $redis;
 
+    /** Takes and releases the init and completion locks, on the same client as $redis. */
+    private RedisLock $lock;
+
     /**
+     * Where the service logs. The worker passes its queue logger, so these lines land in the
+     * analysis-queue log. The default NullLogger drops them (unit tests).
+     */
+    private LoggerInterface $logger;
+
+    /**
+     * @param AMQHandler $queueHandler
+     * @param LoggerInterface $logger
+     *
      * @throws ReflectionException
      * @throws Exception
      */
-    public function __construct(AMQHandler $queueHandler)
+    public function __construct(AMQHandler $queueHandler, LoggerInterface $logger = new NullLogger())
     {
         $this->redis = $queueHandler->getRedisClient();
+        $this->lock = new RedisLock($this->redis);
+        $this->logger = $logger;
     }
 
+    /**
+     * Force-close the underlying Redis connection so the next command
+     * opens a fresh TCP socket. Used between retries after connection
+     * failures to avoid reusing a corrupt/dead socket.
+     */
     public function reconnect(): void
     {
         $this->redis->disconnect();
     }
 
-    public function acquireInitLock(int $pid): bool
+    /**
+     * Take the project's init lock, so only one worker initializes its counters.
+     *
+     * @return string|null the token to pass to releaseInitLock(), or null while another worker holds the lock
+     * @throws RandomException when no random source is available for the token
+     * @phpstan-impure
+     */
+    public function acquireInitLock(int $pid): ?string
     {
-        return (bool)$this->redis->set(
-            RedisKeys::PROJECT_INIT_SEMAPHORE . $pid,
-            1,
-            'EX', self::INIT_LOCK_TTL_SECONDS,
-            'NX'
-        );
+        return $this->lock->acquire(RedisKeys::PROJECT_INIT_SEMAPHORE . $pid, self::INIT_LOCK_TTL_SECONDS);
     }
 
     /**
      * Release the init semaphore eagerly. Called when doInit() fails or finds the
      * segment count not yet available, so the next worker for this PID can re-attempt
      * initialization immediately instead of waiting out the TTL.
+     * Does nothing when the lock expired and another worker took it: that lock is not ours.
      */
-    public function releaseInitLock(int $pid): void
+    public function releaseInitLock(int $pid, string $token): void
     {
-        $this->redis->del(RedisKeys::PROJECT_INIT_SEMAPHORE . $pid);
+        $this->lock->release(RedisKeys::PROJECT_INIT_SEMAPHORE . $pid, $token);
     }
 
     /**
@@ -131,6 +155,10 @@ class AnalysisRedisService implements AnalysisRedisServiceInterface
         return $val !== null ? (int)$val : null;
     }
 
+    /**
+     * Polls for both PROJECT_TOT_SEGMENTS and PROJECT_NUM_SEGMENTS_DONE.
+     * Returns true if init is complete, false on timeout (winner likely crashed).
+     */
     public function waitForInitialization(int $pid, int $maxWaitMs = 5000): bool
     {
         $waited  = 0;
@@ -156,7 +184,7 @@ class AnalysisRedisService implements AnalysisRedisServiceInterface
             $sleepMs  = min($sleepMs * 2, 500);
         }
 
-        LoggerFactory::doJsonLog("WARNING — timed out waiting for init completion for PID $pid");
+        $this->logger->warning("Timed out waiting for init completion for PID $pid");
 
         return false;
     }
@@ -227,19 +255,25 @@ class AnalysisRedisService implements AnalysisRedisServiceInterface
         $this->redis->lrem($queueKey, 0, (string)$pid);
     }
 
-    public function acquireCompletionLock(int $pid): bool
+    /**
+     * Take the project's completion lock, so only one worker finalizes it.
+     *
+     * @return string|null the token to pass to releaseCompletionLock(), or null while another worker holds the lock
+     * @throws RandomException when no random source is available for the token
+     * @phpstan-impure
+     */
+    public function acquireCompletionLock(int $pid): ?string
     {
-        return (bool)$this->redis->set(
-            RedisKeys::PROJECT_ENDING_SEMAPHORE . $pid,
-            1,
-            'EX', self::COMPLETION_LOCK_TTL_SECONDS,
-            'NX'
-        );
+        return $this->lock->acquire(RedisKeys::PROJECT_ENDING_SEMAPHORE . $pid, self::COMPLETION_LOCK_TTL_SECONDS);
     }
 
-    public function releaseCompletionLock(int $pid): void
+    /**
+     * Release the completion lock so the next worker can retry finalizing without waiting out the TTL.
+     * Does nothing when the lock expired and another worker took it: that lock is not ours.
+     */
+    public function releaseCompletionLock(int $pid, string $token): void
     {
-        $this->redis->del(RedisKeys::PROJECT_ENDING_SEMAPHORE . $pid);
+        $this->lock->release(RedisKeys::PROJECT_ENDING_SEMAPHORE . $pid, $token);
     }
 
     /**

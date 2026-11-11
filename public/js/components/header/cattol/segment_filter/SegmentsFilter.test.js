@@ -334,13 +334,13 @@ test('selecting a status submits the filter and the reset button clears it', () 
   jest.useRealTimers()
 })
 
-test('selecting APPROVED-2 submits the filter with revision number 2', () => {
+test('selecting APPROVED2 submits the filter with revision number 2', () => {
   jest.useFakeTimers()
   config.secondRevisionsCount = true
   renderFilter()
 
   fireEvent.click(document.querySelector('.filter-status .select'))
-  fireEvent.click(screen.getByTestId('option-APPROVED-2'))
+  fireEvent.click(screen.getByTestId('option-APPROVED2'))
   act(() => {
     jest.advanceTimersByTime(100)
   })

@@ -1,4 +1,6 @@
+import React from 'react'
 import {mergeJobChunks} from '../api/mergeJobChunks'
+import {getApiErrorMessage} from '../utils/getApiErrorMessage'
 import AppDispatcher from '../stores/AppDispatcher'
 import ModalsConstants from '../constants/ModalsConstants'
 import {MODAL_KEY} from '../constants/ModalKeys'
@@ -115,11 +117,28 @@ let ModalsActions = {
         'This operation cannot be canceled.',
       successText: 'Continue',
       successCallback: () => {
-        mergeJobChunks(project, job).then(function () {
-          if (successCallback) {
-            successCallback.call()
-          }
-        })
+        // Two-argument then: an error thrown by successCallback must not be reported as a failed merge.
+        mergeJobChunks(project, job).then(
+          () => {
+            if (successCallback) {
+              successCallback.call()
+            }
+          },
+          // The confirm modal is already closed, so the failure opens an alert, for example a 409 when
+          // another request is changing this job. An alert, not a notification: the analyze page has no
+          // notification box. The text is a node, so the server message is not rendered as HTML.
+          // Closing the alert runs the caller's refresh, so the user sees what another request changed.
+          (rejection) => {
+            this.showModalComponent(
+              MODAL_KEY.ALERT,
+              {
+                text: <span>{getApiErrorMessage(rejection)}</span>,
+                onCloseCallback: successCallback,
+              },
+              'Merge failed',
+            )
+          },
+        )
         this.onCloseModal()
       },
       cancelText: 'Cancel',

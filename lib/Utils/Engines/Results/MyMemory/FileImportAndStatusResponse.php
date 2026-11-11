@@ -47,7 +47,7 @@ class FileImportAndStatusResponse extends TMSAbstractResponse
         if ($this->responseStatus == 200 || $this->responseStatus == 202) {
             $this->id = empty($this->responseData['uuid']) ? $this->responseData['UUID'] : $this->responseData['uuid'];
         } else {
-            LoggerFactory::doJsonLog($response);
+            LoggerFactory::getLogger('engines')->error($response);
         }
     }
 

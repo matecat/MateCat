@@ -5,14 +5,18 @@ namespace Matecat\Core\TaskRunner\Commons;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
+use Monolog\Handler\TestHandler;
+use Monolog\Level;
+use Monolog\Logger;
 use PDO;
 use PDOException;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use ReflectionClass;
-use SplObserver;
-use SplSubject;
 use Utils\ActiveMQ\AMQHandler;
+use Utils\Logger\MatecatLogger;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\Context;
@@ -24,10 +28,14 @@ class AbstractWorkerTest extends AbstractTest
 {
     private AMQHandler $stubAmqHandler;
 
+    /** Collects every record the worker writes through the logger injected by makeWorker(). */
+    private TestHandler $logHandler;
+
     protected function setUp(): void
     {
         parent::setUp();
         $this->stubAmqHandler = $this->createStub(AMQHandler::class);
+        $this->logHandler = new TestHandler();
     }
 
     // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -35,14 +43,11 @@ class AbstractWorkerTest extends AbstractTest
     private function makeWorker(?IDatabase $database = null): AbstractWorker
     {
         $handler = $this->stubAmqHandler;
+        $monolog = new Logger('test');
+        $monolog->pushHandler($this->logHandler);
 
-        $worker = new class($handler, $database ?? obtainTestDatabase()) extends AbstractWorker {
+        return new class($handler, $database ?? obtainTestDatabase(), new MatecatLogger($monolog)) extends AbstractWorker {
             public function process(AbstractElement $queueElement): void {}
-
-            public function getLogMsg(): array|string
-            {
-                return $this->_logMsg ?? '';
-            }
 
             /** Expose _doLog for testing */
             public function doLog(array|string $msg): void
@@ -76,12 +81,21 @@ class AbstractWorkerTest extends AbstractTest
                 return $this->amqHandlerStub ?? parent::_getAmqHandlerForPublish();
             }
         };
+    }
 
-        // Initialize $_observer so notify() works without prior attach()
-        $ref = new ReflectionClass($worker);
-        $ref->getProperty('_observer')->setValue($worker, []);
+    /**
+     * @return string[] the messages of the debug records written so far
+     */
+    private function debugMessages(): array
+    {
+        $messages = [];
+        foreach ($this->logHandler->getRecords() as $record) {
+            if ($record->level === Level::Debug) {
+                $messages[] = $record->message;
+            }
+        }
 
-        return $worker;
+        return $messages;
     }
 
     // ─── Constructor ─────────────────────────────────────────────────────────────
@@ -138,142 +152,46 @@ class AbstractWorkerTest extends AbstractTest
         $this->assertSame($context, $worker->getContext());
     }
 
-    // ─── getLoggerName() ─────────────────────────────────────────────────────────
+    // ─── _doLog() ───────────────────────────────────────────────────────────────
 
     #[Test]
-    public function getLoggerName_returns_context_logger_name(): void
-    {
-        $worker = $this->makeWorker();
-        $context = Context::buildFromArray(['queue_name' => 'test_q', 'max_executors' => 1]);
-        $worker->setContext($context);
-
-        $this->assertSame($context->loggerName, $worker->getLoggerName());
-    }
-
-    // ─── _doLog() / getLogMsg() ──────────────────────────────────────────────────
-
-    #[Test]
-    public function doLog_sets_log_message_string(): void
+    public function doLog_writes_string_at_debug_to_injected_logger(): void
     {
         $worker = $this->makeWorker();
         $worker->doLog('hello world');
 
-        $this->assertSame('hello world', $worker->getLogMsg());
+        $this->assertTrue($this->logHandler->hasDebug('hello world'));
+        $this->assertCount(1, $this->logHandler->getRecords());
     }
 
     #[Test]
-    public function doLog_sets_log_message_array(): void
+    public function doLog_writes_array_as_debug_context(): void
     {
         $worker = $this->makeWorker();
         $worker->doLog(['key' => 'value', 'num' => 42]);
 
-        $this->assertSame(['key' => 'value', 'num' => 42], $worker->getLogMsg());
-    }
-
-    // ─── attach() / detach() / notify() ─────────────────────────────────────────
-
-    #[Test]
-    public function attach_adds_observer_and_notify_calls_it(): void
-    {
-        $worker = $this->makeWorker();
-
-        $observer = new class implements SplObserver {
-            public bool $updated = false;
-            public function update(SplSubject $subject): void { $this->updated = true; }
-        };
-
-        $worker->attach($observer);
-        $worker->notify();
-
-        $this->assertTrue($observer->updated);
+        $records = $this->logHandler->getRecords();
+        $this->assertCount(1, $records);
+        $this->assertSame(Level::Debug, $records[0]->level);
+        $this->assertSame(['key' => 'value', 'num' => 42], $records[0]->context);
     }
 
     #[Test]
-    public function doLog_triggers_observer_update(): void
+    public function worker_built_without_logger_falls_back_to_default_logger(): void
     {
-        $worker = $this->makeWorker();
+        $worker = new class($this->stubAmqHandler, obtainTestDatabase()) extends AbstractWorker {
+            public function process(AbstractElement $queueElement): void {}
 
-        $observer = new class implements SplObserver {
-            public bool $updated = false;
-            public function update(SplSubject $subject): void { $this->updated = true; }
+            public function doLog(array|string $msg): void
+            {
+                $this->_doLog($msg);
+            }
         };
 
-        $worker->attach($observer);
-        $worker->doLog('logged');
+        $worker->doLog('logged without an injected logger');
 
-        $this->assertTrue($observer->updated);
-    }
-
-    #[Test]
-    public function detach_removes_observer(): void
-    {
-        $worker = $this->makeWorker();
-
-        $observer = new class implements SplObserver {
-            public int $callCount = 0;
-            public function update(SplSubject $subject): void { $this->callCount++; }
-        };
-
-        $worker->attach($observer);
-        $worker->detach($observer);
-        $worker->notify();
-
-        $this->assertSame(0, $observer->callCount);
-    }
-
-    #[Test]
-    public function notify_calls_all_attached_observers(): void
-    {
-        $worker = $this->makeWorker();
-
-        $observer1 = new class implements SplObserver {
-            public bool $updated = false;
-            public function update(SplSubject $subject): void { $this->updated = true; }
-        };
-        $observer2 = new class implements SplObserver {
-            public bool $updated = false;
-            public function update(SplSubject $subject): void { $this->updated = true; }
-        };
-
-        $worker->attach($observer1);
-        $worker->attach($observer2);
-        $worker->notify();
-
-        $this->assertTrue($observer1->updated);
-        $this->assertTrue($observer2->updated);
-    }
-
-    #[Test]
-    public function notify_passes_worker_as_subject(): void
-    {
-        $worker = $this->makeWorker();
-
-        $observer = new class implements SplObserver {
-            public ?SplSubject $received = null;
-            public function update(SplSubject $subject): void { $this->received = $subject; }
-        };
-
-        $worker->attach($observer);
-        $worker->notify();
-
-        $this->assertSame($worker, $observer->received);
-    }
-
-    #[Test]
-    public function attach_same_observer_twice_is_idempotent(): void
-    {
-        $worker = $this->makeWorker();
-
-        $observer = new class implements SplObserver {
-            public int $callCount = 0;
-            public function update(SplSubject $subject): void { $this->callCount++; }
-        };
-
-        $worker->attach($observer);
-        $worker->attach($observer); // same hash → same slot
-        $worker->notify();
-
-        $this->assertSame(1, $observer->callCount);
+        $ref = new ReflectionClass(AbstractWorker::class);
+        $this->assertInstanceOf(MatecatLogger::class, $ref->getProperty('logger')->getValue($worker));
     }
 
     // ─── _checkForReQueueEnd() ────────────────────────────────────────────────────
@@ -359,26 +277,14 @@ class AbstractWorkerTest extends AbstractTest
 
         $worker = $this->makeWorker($dbStub);
 
-        $log = new class implements SplObserver {
-            /** @var string[] */
-            public array $messages = [];
-
-            public function update(SplSubject $subject): void
-            {
-                /** @var AbstractWorker $subject */
-                $msg = $subject->getLogMsg();
-                $this->messages[] = is_array($msg) ? implode(' ', $msg) : (string)$msg;
-            }
-        };
-        $worker->attach($log);
-
         $this->setDatabaseInstance($dbStub);
 
         $worker->checkDatabaseConnection();
 
-        $this->assertCount(2, $log->messages);
-        $this->assertStringContainsString('MySQL server has gone away', $log->messages[0]);
-        $this->assertStringContainsString('Database connection reloaded', $log->messages[1]);
+        $messages = $this->debugMessages();
+        $this->assertCount(2, $messages);
+        $this->assertStringContainsString('MySQL server has gone away', $messages[0]);
+        $this->assertStringContainsString('Database connection reloaded', $messages[1]);
     }
 
     // ─── publishToNodeJsClients() ─────────────────────────────────────────────────
@@ -394,7 +300,7 @@ class AbstractWorkerTest extends AbstractTest
 
         $worker->callPublishToNodeJsClients(['foo' => 'bar']);
 
-        $this->assertSame('{"foo":"bar"}', $worker->getLogMsg());
+        $this->assertSame(['{"foo":"bar"}'], $this->debugMessages());
     }
 
     #[Test]
@@ -413,6 +319,52 @@ class AbstractWorkerTest extends AbstractTest
             fclose($resource);
         }
 
-        $this->assertSame('', $worker->getLogMsg());
+        $this->assertSame([''], $this->debugMessages());
+    }
+
+    /**
+     * The Executor builds every worker with the named argument `logger:`. A worker whose own
+     * constructor has no `$logger` parameter would only fail at runtime, with
+     * "Unknown named parameter $logger", so this test checks every concrete worker class.
+     */
+    #[Test]
+    public function every_worker_constructor_accepts_the_logger_named_argument(): void
+    {
+        $roots = array_merge(
+            [AbstractTest::projectRoot() . '/lib/Utils/AsyncTasks/Workers'],
+            glob(AbstractTest::projectRoot() . '/plugins/*/lib', GLOB_ONLYDIR) ?: []
+        );
+
+        $workers = [];
+        foreach ($roots as $root) {
+            $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root, RecursiveDirectoryIterator::SKIP_DOTS));
+            foreach ($files as $file) {
+                if ($file->getExtension() !== 'php') {
+                    continue;
+                }
+                $source = (string)file_get_contents($file->getPathname());
+                if (!preg_match('/^namespace\s+([^;]+);/m', $source, $ns)
+                    || !preg_match('/^(?:final\s+|abstract\s+)*class\s+(\w+)/m', $source, $cls)) {
+                    continue;
+                }
+                $className = $ns[1] . '\\' . $cls[1];
+                if (!class_exists($className)) {
+                    continue;
+                }
+                $reflection = new ReflectionClass($className);
+                if ($reflection->isAbstract() || !$reflection->isSubclassOf(AbstractWorker::class)) {
+                    continue;
+                }
+                $workers[] = $className;
+
+                $parameters = array_map(
+                    fn($parameter) => $parameter->getName(),
+                    $reflection->getConstructor()?->getParameters() ?? []
+                );
+                $this->assertContains('logger', $parameters, "$className::__construct() must accept ?MatecatLogger \$logger.");
+            }
+        }
+
+        $this->assertContains('Utils\\AsyncTasks\\Workers\\Analysis\\TMAnalysisWorker', $workers);
     }
 }

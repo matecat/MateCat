@@ -9,7 +9,6 @@ use Model\FilesStorage\AbstractFilesStorage;
 use Model\Filters\DTO\IDto;
 use Model\Jobs\JobStruct;
 use PDO;
-use Psr\Log\InvalidArgumentException;
 use RuntimeException;
 use Utils\Logger\LoggerFactory;
 use Utils\Network\MultiCurlHandler;
@@ -29,7 +28,6 @@ class Filters
      *
      * @return array<int|string, array<string, mixed>>
      *
-     * @throws InvalidArgumentException
      * @throws RuntimeException
      */
     protected function sendToFilters(array $dataGroups, string $endpoint): array
@@ -76,14 +74,18 @@ class Filters
         $infos = $multiCurl->getAllInfo();
         $headers = $multiCurl->getAllHeaders();
 
+        // The handles keep a reference to each body: drop them so a body is freed once it is decoded.
+        $multiCurl->clear();
+
         // Compute results
         foreach ($responses as $id => &$response) {
             $info = $infos[$id];
-            $originalResponse = json_decode($response);
 
             // Compute response
             if ($info['http_code'] != 200 || $response === false) {
-                $errResponse = ["isSuccess" => false, "curlInfo" => $info];
+                // Decoded only here: on success the body is decoded once, below.
+                $originalResponse = is_string($response) ? json_decode($response) : null;
+                $errResponse = ["successful" => false, "curlInfo" => $info];
                 if ($response === '{"message":"Invalid RapidAPI Key"}') {
                     $errResponse['errorMessage'] = "Failed RapidAPI authentication. Check FILTERS_RAPIDAPI_KEY in config.ini";
                 } elseif (isset($originalResponse->errorMessage)) {
@@ -167,7 +169,6 @@ class Filters
      *
      * @return mixed
      *
-     * @throws InvalidArgumentException
      * @throws RuntimeException
      */
     public function sourceToXliff(
@@ -216,11 +217,14 @@ class Filters
     }
 
     /**
-     * @param array<int|string, array{document_content: string}> $xliffsData
+     * Each entry holds the XLIFF either as a string (`document_content`) or as the path of a file
+     * already on disk (`input_filename`), which is sent as it is and never deleted.
+     * Example: `[12 => ['input_filename' => '/tmp/download/12/file.xlf']]`.
+     *
+     * @param array<int|string, array{document_content?: string|null, input_filename?: string|null}> $xliffsData
      *
      * @return array<int|string, array<string, mixed>>
      *
-     * @throws InvalidArgumentException
      * @throws RuntimeException
      */
     public function xliffToTarget(array $xliffsData): array
@@ -229,13 +233,20 @@ class Filters
         $tmpFiles = [];
 
         foreach ($xliffsData as $id => $xliffData) {
+            // An XLIFF already on disk is uploaded as it is: reading it back into memory
+            // only to write it again would double the memory a large download needs.
+            // It is uploaded under a fixed name, like the temp file below, not under the user's.
+            if (!empty($xliffData['input_filename'])) {
+                $dataGroups[$id] = ['xliff' => new CURLFile($xliffData['input_filename'], null, 'matecat-xliff-to-target')];
+                continue;
+            }
+
             // Filters are expecting an upload of a xliff file, so put the xliff
             // data in a temp file and configure POST param to upload it
             $tmpXliffFile = tempnam(sys_get_temp_dir(), "matecat-xliff-to-target-");
 
-
             $tmpFiles[$id] = $tmpXliffFile;
-            file_put_contents($tmpXliffFile, $xliffData['document_content']);
+            file_put_contents($tmpXliffFile, $xliffData['document_content'] ?? '');
 
             $dataGroups[$id] = ['xliff' => new CURLFile($tmpXliffFile)];
         }
@@ -311,7 +322,7 @@ class Filters
             'filters_version' => $response['instanceVersion'] ?? null,
             'client_ip' => Utils::getRealIpAddr(),
             'to_xliff' => $toXliff,
-            'success' => ($response['successful'] === true),
+            'success' => (($response['successful'] ?? false) === true),
             'error_message' => $response['errorMessage'] ?? null,
             'conversion_time' => $response['time'],
             'sent_file_size' => filesize($sentFile),
@@ -383,8 +394,6 @@ class Filters
      *   $STORAGE_DIR/conversion_errors/YYYYMMDD/HHmmSS-filename.ext
      *
      * @param string $sentFile
-     *
-     * @throws InvalidArgumentException
      */
     protected function backupFailedConversion(string &$sentFile): void
     {

@@ -11,15 +11,19 @@ namespace Controller\API\V2;
 
 
 use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\ConflictError;
+use Controller\API\Commons\JobRestructureLock;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\JobPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
+use Model\Exceptions\NotFoundException as ModelNotFoundException;
 use Model\Jobs\JobStruct;
 use Model\Users\UserDao;
 use Model\Outsource\ConfirmationDao;
 use Model\Translators\JobsTranslatorsDao;
+use Model\Translators\JobsTranslatorsStruct;
 use Model\Translators\TranslatorsModel;
 use ReflectionException;
 use TypeError;
@@ -36,8 +40,9 @@ class JobsTranslatorsController extends KleinController
 
     /**
      * @throws NotFoundException
+     * @throws ConflictError when a split, a merge or a password change holds the job
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function add(): void
     {
@@ -67,7 +72,12 @@ class JobsTranslatorsController extends KleinController
             ->setJobOwnerTimezone((float)$this->params['timezone'])
             ->setEmail($this->params['email']);
 
-        $tStruct = $TranslatorsModel->update();
+        // update() rotates the chunk password when the translator changes, so it runs serialized
+        // with the split, merge and password change of the same job.
+        $tStruct = $this->restructureLock()->run(
+            (int)$this->jStruct->id,
+            fn(): JobsTranslatorsStruct => $TranslatorsModel->update()
+        );
         $this->response->json(
             [
                 'job' => [
@@ -92,8 +102,18 @@ class JobsTranslatorsController extends KleinController
     }
 
     /**
+     * Seam: the per-job lock add() takes. Overridable in tests to keep them off Redis.
+     *
+     * @throws Exception when the Redis connection cannot be configured
+     */
+    protected function restructureLock(): JobRestructureLock
+    {
+        return JobRestructureLock::forDefaultConnection();
+    }
+
+    /**
      * @throws ReflectionException
-     * @throws \Model\Exceptions\NotFoundException
+     * @throws ModelNotFoundException
      * @throws NotFoundException
      * @throws Exception
      * @throws TypeError

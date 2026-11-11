@@ -2,10 +2,14 @@
 
 namespace Matecat\Core\Controllers;
 
+use Aws\CommandInterface;
+use Aws\Result;
 use Controller\API\App\DownloadAnalysisReportController;
 use Controller\API\V2\DownloadController;
 use Controller\API\V2\DownloadJobTMXController;
 use Controller\API\V2\DownloadOriginalController;
+use Controller\Exceptions\RenderTerminatedException;
+use Controller\Traits\KleinResponseFileStream;
 use InvalidArgumentException;
 use Klein\App;
 use Klein\Request;
@@ -16,6 +20,10 @@ use Matecat\TestHelpers\ControllerSeedFragments;
 use Model\ActivityLog\ActivityLogStruct;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\FeatureSet;
+use Model\FilesStorage\AbstractFilesStorage;
+use Model\FilesStorage\FsFilesStorage;
+use Model\FilesStorage\S3FilesStorage;
+use Matecat\SimpleS3\Client as S3Client;
 use Model\Jobs\JobStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
@@ -27,10 +35,11 @@ use ReflectionProperty;
 use RuntimeException;
 use SplTempFileObject;
 use Stomp\Transport\Message;
+use Utils\Registry\AppConfig;
 use TypeError;
+use ZipArchive;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\ActiveMQ\WorkerClient;
-use Utils\Logger\MatecatLogger;
 use Utils\TMS\TMSService;
 
 /**
@@ -234,10 +243,9 @@ class DownloadControllersTest extends AbstractTest
         // download() resolves the project+job data from the seeded rows, sets the
         // controller's id_job from that data, loads the feature set, then assembles
         // the analysis output via XTRFStatus + composeZip. With no analysis word-count
-        // rows seeded the assembled zip is empty, so composeZip raises the documented
-        // "Failed to read zip file" Exception — after the real data-resolution path
-        // (controller lines 44-64) has executed. We assert the concrete resolved
-        // id_job, proving the project/job lookup returned the seeded job.
+        // rows seeded the zip has no entries, so composeZip fails, and the work folder
+        // is deleted anyway. We assert the concrete resolved id_job, proving the
+        // project/job lookup returned the seeded job.
         $projectId = $this->projectId(self::ANALYSIS_BASE);
         $jobId     = $this->jobId(self::ANALYSIS_BASE);
 
@@ -256,12 +264,72 @@ class DownloadControllersTest extends AbstractTest
             $controller->download();
             $this->fail('Expected the composeZip boundary Exception was not thrown');
         } catch (\Exception $e) {
-            $this->assertStringContainsString('Failed to read zip file', $e->getMessage());
+            $this->assertStringContainsString('every file is empty', $e->getMessage());
         }
+        $this->assertDirectoryDoesNotExist(\Utils\Registry\AppConfig::$TMP_DOWNLOAD . '/' . $jobId);
 
         // concrete payload value: id_job was set from the resolved getProjectAndJobData row
         $idJobProp = new ReflectionProperty(\Controller\Abstracts\AbstractDownloadController::class, 'id_job');
         $this->assertSame($jobId, $idJobProp->getValue($controller));
+    }
+
+    /**
+     * An analysed project: the report counts the words of each chunk, zips one report per chunk
+     * and sends it.
+     *
+     * @throws \Throwable
+     */
+    #[Test]
+    public function downloadActionSendsTheAnalysisReportOfEachChunkAsAZip(): void
+    {
+        $projectId = $this->projectId(self::ANALYSIS_BASE);
+        $jobId     = $this->jobId(self::ANALYSIS_BASE);
+        $this->seedSegment(self::ANALYSIS_BASE);
+        $this->seedSegmentTranslation(self::ANALYSIS_BASE);
+        $controller = $this->createAnalysisReportController(['id_project' => (string)$projectId, 'password' => 'projpw']);
+        $user        = new UserStruct();
+        $user->uid   = 1;
+        $user->email = $this->ownerEmail(self::ANALYSIS_BASE);
+        $this->setControllerProp($controller, 'user', $user);
+
+        $handler = $this->createStub(AMQHandler::class);
+        $activity = null;
+        $handler->method('publishToQueues')->willReturnCallback(static function (string $queue, Message $message) use (&$activity): bool {
+            $activity = (string)$message->getBody();
+
+            return true;
+        });
+        $savedHandler = WorkerClient::$_HANDLER;
+        $savedQueues  = WorkerClient::$_QUEUES;
+        $previousEnv  = AppConfig::$ENV;
+        $obLevel      = ob_get_level();
+        $output       = '';
+        WorkerClient::init($handler);
+        AppConfig::$ENV = 'testing';
+        // finalize() drops the top output buffer: the one below it catches the streamed file.
+        ob_start();
+        ob_start();
+        set_error_handler(static fn (int $errno, string $errstr): bool => str_contains($errstr, 'Cannot modify header information'), E_WARNING);
+
+        try {
+            $controller->download();
+            $this->fail('download() must end the request with RenderTerminatedException under the testing env');
+        } catch (RenderTerminatedException) {
+        } finally {
+            restore_error_handler();
+            while (ob_get_level() > $obLevel) {
+                $output = (string)ob_get_clean() . $output;
+            }
+            AppConfig::$ENV = $previousEnv;
+            WorkerClient::$_HANDLER = $savedHandler;
+            WorkerClient::$_QUEUES  = $savedQueues;
+        }
+
+        $entries = $this->zipEntries($output);
+        $this->assertSame([$jobId . '-jobpw'], array_keys($entries));
+        $this->assertStringContainsString('Total:', $entries[$jobId . '-jobpw']);
+        $this->assertSame('CtrlTestProject_' . self::ANALYSIS_BASE . '.zip', $controller->getFilename());
+        $this->assertMatchesRegularExpression('/"action":' . ActivityLogStruct::DOWNLOAD_ANALYSIS_REPORT . '(?!\d)/', (string)$activity);
     }
 
     /** @throws \Throwable */
@@ -311,30 +379,23 @@ class DownloadControllersTest extends AbstractTest
 
     /** @throws \Throwable */
     #[Test]
-    public function downloadOriginalIndexReturnsEarlyOnWrongPassword(): void
+    public function downloadOriginalIndexAnswersNotFoundOnWrongPassword(): void
     {
-        // Wrong password + no review row -> the controller logs and returns
-        // before touching the filesystem. Asserts the debug message payload.
+        // Wrong password and no review row: 404, the same answer the translation and TMX
+        // downloads give, never a 200 with an empty file.
         $jobId = $this->jobId(self::ORIGINAL_BASE);
         $controller = $this->createOriginalController([
             'id_job'   => (string)$jobId,
             'password' => 'definitely_wrong_pw',
         ]);
 
-        $logger = $this->createMock(MatecatLogger::class);
-        $captured = null;
-        $logger->expects($this->once())
-            ->method('debug')
-            ->with($this->callback(function (string $msg) use (&$captured): bool {
-                $captured = $msg;
-                return true;
-            }));
-        $this->setControllerProp($controller, 'logger', $logger);
-
-        $controller->index();
-
-        $this->assertIsString($captured);
-        $this->assertStringContainsString('wrong password provided for download', $captured);
+        try {
+            $controller->index();
+            $this->fail('Expected NotFoundException');
+        } catch (NotFoundException $e) {
+            // router.php maps this exception class to a 404 response
+            $this->assertSame('Not found.', $e->getMessage());
+        }
     }
 
     /** @throws \Throwable */
@@ -358,6 +419,251 @@ class DownloadControllersTest extends AbstractTest
         $this->expectExceptionMessage('No files found for job');
 
         $controller->index();
+    }
+
+    /**
+     * The originals of a job can be hundreds of MB: with more than one file the zip is written in
+     * the work folder and streamed from there, never loaded in memory, and the folder is deleted.
+     *
+     * @throws \Throwable
+     */
+    #[Test]
+    public function downloadOriginalIndexStreamsTheZipOfManyFilesFromDisk(): void
+    {
+        $sourceDir = sys_get_temp_dir() . '/original-test-' . uniqid();
+        mkdir($sourceDir);
+        file_put_contents($sourceDir . '/a.docx', 'aaa');
+        file_put_contents($sourceDir . '/b.docx', 'bbb');
+
+        try {
+            $stream = $this->runOriginalDownload([
+                ['filename' => 'a.docx', 'originalFilePath' => $sourceDir . '/a.docx'],
+                ['filename' => 'b.docx', 'originalFilePath' => $sourceDir . '/b.docx'],
+            ]);
+        } finally {
+            @unlink($sourceDir . '/a.docx');
+            @unlink($sourceDir . '/b.docx');
+            @rmdir($sourceDir);
+        }
+
+        $this->assertStringStartsWith(AppConfig::$TMP_DOWNLOAD . '/' . $this->jobId(self::ORIGINAL_BASE) . '/', (string)$stream->path);
+        $this->assertDirectoryDoesNotExist(AppConfig::$TMP_DOWNLOAD . '/' . $this->jobId(self::ORIGINAL_BASE));
+        $this->assertSame(['a.docx' => 'aaa', 'b.docx' => 'bbb'], $this->zipEntries((string)$stream->body));
+    }
+
+    /**
+     * On S3 the originals are copied to the work folder first, so they are zipped and streamed
+     * from the disk like local files instead of being read into memory.
+     *
+     * @throws \Throwable
+     */
+    #[Test]
+    public function downloadOriginalIndexCopiesTheOriginalsFromS3ToDiskBeforeZippingThem(): void
+    {
+        $storageMethod = AppConfig::$FILE_STORAGE_METHOD;
+        AppConfig::$FILE_STORAGE_METHOD = 's3';
+
+        try {
+            $stream = $this->runOriginalDownload(
+                [
+                    ['filename' => 'a.docx', 'originalFilePath' => 'files/20261110/a.docx'],
+                    ['filename' => 'b.docx', 'originalFilePath' => 'files/20261110/b.docx'],
+                ],
+                ['files/20261110/a.docx' => 'aaa', 'files/20261110/b.docx' => 'bbb']
+            );
+        } finally {
+            AppConfig::$FILE_STORAGE_METHOD = $storageMethod;
+        }
+
+        $this->assertSame(['files/20261110/a.docx', 'files/20261110/b.docx'], $stream->s3Keys);
+        $this->assertDirectoryDoesNotExist(AppConfig::$TMP_DOWNLOAD . '/' . $this->jobId(self::ORIGINAL_BASE));
+        $this->assertSame(['a.docx' => 'aaa', 'b.docx' => 'bbb'], $this->zipEntries((string)$stream->body));
+    }
+
+    /**
+     * A single original on S3 is copied to the work folder and streamed from there.
+     *
+     * @throws \Throwable
+     */
+    #[Test]
+    public function downloadOriginalIndexStreamsASingleOriginalFromS3FromDisk(): void
+    {
+        $storageMethod = AppConfig::$FILE_STORAGE_METHOD;
+        AppConfig::$FILE_STORAGE_METHOD = 's3';
+
+        try {
+            $stream = $this->runOriginalDownload(
+                [['filename' => 'a.docx', 'originalFilePath' => 'files/20261110/a.docx']],
+                ['files/20261110/a.docx' => 'aaa']
+            );
+        } finally {
+            AppConfig::$FILE_STORAGE_METHOD = $storageMethod;
+        }
+
+        $this->assertSame(['files/20261110/a.docx'], $stream->s3Keys);
+        $this->assertSame('aaa', $stream->body);
+        $this->assertSame('a.docx', $stream->filename);
+        $this->assertDirectoryDoesNotExist(AppConfig::$TMP_DOWNLOAD . '/' . $this->jobId(self::ORIGINAL_BASE));
+    }
+
+    /**
+     * The copy of an original is named after its file id: a long name (254 bytes here) with any
+     * prefix would pass the 255 bytes a file name can have. The download keeps the original name.
+     *
+     * @throws \Throwable
+     */
+    #[Test]
+    public function downloadOriginalIndexCopiesAnOriginalWithALongNameFromS3(): void
+    {
+        $storageMethod = AppConfig::$FILE_STORAGE_METHOD;
+        AppConfig::$FILE_STORAGE_METHOD = 's3';
+        $name = str_repeat('文', 83) . '.docx';
+
+        try {
+            $stream = $this->runOriginalDownload(
+                [['filename' => $name, 'originalFilePath' => 'files/20261110/' . $name]],
+                ['files/20261110/' . $name => 'aaa']
+            );
+        } finally {
+            AppConfig::$FILE_STORAGE_METHOD = $storageMethod;
+        }
+
+        $this->assertSame('1', basename((string)$stream->path));
+        $this->assertSame('aaa', $stream->body);
+        $this->assertSame($name, $stream->filename);
+    }
+
+    /**
+     * Runs DownloadOriginalController::index() on the seeded job with the given files and returns
+     * what it streamed. $s3Objects maps an S3 key to its content.
+     *
+     * @param list<array{filename: string, originalFilePath: string}> $files
+     * @param array<string, string> $s3Objects
+     *
+     * @throws \Throwable
+     */
+    private function runOriginalDownload(array $files, array $s3Objects = []): KleinResponseFileStream
+    {
+        $jobId = $this->jobId(self::ORIGINAL_BASE);
+        // finalize() names the download after the project files, whose row needs every field
+        $this->seedConnection()->exec("UPDATE files SET sha1_original_file = 'ctrltest', is_converted = 0 WHERE id = " . $this->fileId(self::ORIGINAL_BASE));
+
+        $rows = [];
+        foreach ($files as $i => $file) {
+            $rows[] = ['id_file' => $i + 1, 'id_project' => $this->projectId(self::ORIGINAL_BASE)] + $file;
+        }
+        $storage = $this->createStub(FsFilesStorage::class);
+        $storage->method('getFilesForJob')->willReturn($rows);
+
+        $stream = new class (new Response(), $s3Objects) extends KleinResponseFileStream {
+            public ?string $path = null;
+            public ?string $body = null;
+            public ?string $filename = null;
+            /** @var list<string> */
+            public array $s3Keys = [];
+
+            /** @param array<string, string> $s3Objects */
+            public function __construct(Response $response, public readonly array $s3Objects)
+            {
+                parent::__construct($response);
+            }
+
+            public function streamFileFromPointer($filePointer, string $mimeType, string $disposition, string $filename): void
+            {
+                $this->path = stream_get_meta_data($filePointer)['uri'];
+                $this->body = (string)stream_get_contents($filePointer);
+                $this->filename = $filename;
+                fclose($filePointer);
+            }
+        };
+
+        $_GET['id_job']   = (string)$jobId;
+        $_GET['password'] = 'jobpw';
+        $controller = new class (Request::createFromGlobals(), new Response(), null, $this->dbApp(), $storage, $stream) extends DownloadOriginalController {
+            protected bool $useSession = false;
+
+            public function __construct($request, $response, $service, $app, private readonly AbstractFilesStorage $storage, private readonly KleinResponseFileStream $stream)
+            {
+                parent::__construct($request, $response, $service, $app);
+            }
+
+            protected function identifyUser(?bool $useSession = true): void
+            {
+                $this->userIsLogged = false;
+            }
+
+            protected function getFilesStorage(): AbstractFilesStorage
+            {
+                return $this->storage;
+            }
+
+            protected function createFileStream(): KleinResponseFileStream
+            {
+                return $this->stream;
+            }
+
+            protected function downloadFromS3(string $key, string $saveAs): void
+            {
+                $this->stream->s3Keys[] = $key;
+                file_put_contents($saveAs, $this->stream->s3Objects[$key]);
+            }
+        };
+        unset($_GET['id_job'], $_GET['password']);
+
+        $user = new UserStruct();
+        $user->uid = 1;
+        $user->email = 'test@example.org';
+        $this->setControllerProp($controller, 'user', $user);
+        $this->setControllerProp($controller, 'featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
+
+        $savedHandler = WorkerClient::$_HANDLER;
+        $savedQueues  = WorkerClient::$_QUEUES;
+        $previousEnv  = AppConfig::$ENV;
+        $obLevel      = ob_get_level();
+
+        try {
+            WorkerClient::init($this->createStub(AMQHandler::class));
+            AppConfig::$ENV = 'testing';
+            ob_start();
+            $controller->index();
+            $this->fail('index() must end the request with RenderTerminatedException under the testing env');
+        } catch (RenderTerminatedException) {
+        } finally {
+            while (ob_get_level() > $obLevel) {
+                ob_end_clean();
+            }
+            AppConfig::$ENV = $previousEnv;
+            WorkerClient::$_HANDLER = $savedHandler;
+            WorkerClient::$_QUEUES  = $savedQueues;
+        }
+
+        return $stream;
+    }
+
+    /**
+     * @return array<string, string> entry name => content
+     */
+    private function zipEntries(string $zipBytes): array
+    {
+        $zipPath = tempnam(sys_get_temp_dir(), 'original-zip-');
+        file_put_contents($zipPath, $zipBytes);
+        $zip = new ZipArchive();
+        $entries = [];
+
+        try {
+            $this->assertTrue($zip->open($zipPath));
+            for ($i = 0; $i < $zip->numFiles; $i++) {
+                $name = (string)$zip->getNameIndex($i);
+                $entries[$name] = (string)$zip->getFromIndex($i);
+            }
+            $zip->close();
+        } finally {
+            @unlink($zipPath);
+        }
+
+        ksort($entries);
+
+        return $entries;
     }
 
     // --- DownloadJobTMXController ---
@@ -553,6 +859,83 @@ class DownloadControllersTest extends AbstractTest
         $service = $method->invoke($controller);
 
         $this->assertInstanceOf(TMSService::class, $service);
+    }
+
+    /**
+     * The S3 copy of an original goes through the shared simple-s3 client, here on a mocked AWS
+     * transport.
+     *
+     * @throws \Throwable
+     */
+    #[Test]
+    public function downloadFromS3SavesTheObjectOfTheKeyToTheGivenPath(): void
+    {
+        $controller = $this->createOriginalController();
+        $saveAs     = tempnam(sys_get_temp_dir(), 'original-s3-');
+        $requests   = [];
+
+        $configured = S3FilesStorage::getStaticS3Client();
+        $client     = new ReflectionProperty(S3FilesStorage::class, 'CLIENT');
+        $client->setValue(null, new S3Client([
+            'version'     => 'latest',
+            'region'      => 'eu-central-1',
+            'credentials' => ['key' => 'test', 'secret' => 'test'],
+            'handler'     => static function (CommandInterface $command) use (&$requests) {
+                $requests[] = [$command->getName(), $command['Bucket'], $command['Key']];
+                file_put_contents((string)($command['SaveAs'] ?? $command['@http']['sink']), 'original-bytes');
+
+                return \GuzzleHttp\Promise\Create::promiseFor(new Result(['@metadata' => ['statusCode' => 200]]));
+            },
+        ]));
+
+        try {
+            (new ReflectionMethod($controller, 'downloadFromS3'))->invoke($controller, 'files/20261110/a.docx', $saveAs);
+            $saved = file_get_contents($saveAs);
+        } finally {
+            $client->setValue(null, $configured);
+            @unlink($saveAs);
+        }
+
+        $this->assertSame([['GetObject', S3FilesStorage::getFilesStorageBucket(), 'files/20261110/a.docx']], $requests);
+        $this->assertSame('original-bytes', $saved);
+    }
+
+    /**
+     * finalize() sends the export line by line and, under the testing env, ends with
+     * RenderTerminatedException instead of exit.
+     *
+     * @throws \Throwable
+     */
+    #[Test]
+    public function downloadJobTMXFinalizeSendsTheExportAndEndsTheRequest(): void
+    {
+        $controller = $this->createTMXController();
+        $file       = new SplTempFileObject();
+        $file->fwrite("<tmx version=\"1.4\">\n<body/>\n</tmx>\n");
+        $file->rewind();
+        (new ReflectionProperty(DownloadJobTMXController::class, 'tmx'))->setValue($controller, $file);
+        (new ReflectionProperty(DownloadJobTMXController::class, 'fileName'))->setValue($controller, 'Project "A"-42.tmx');
+
+        $previousEnv = AppConfig::$ENV;
+        $obLevel     = ob_get_level();
+        $output      = '';
+        ob_start();
+        AppConfig::$ENV = 'testing';
+        set_error_handler(static fn (int $errno, string $errstr): bool => str_contains($errstr, 'Cannot modify header information'), E_WARNING);
+
+        try {
+            $controller->finalize();
+        } catch (RenderTerminatedException) {
+            $output = (string)ob_get_contents();
+        } finally {
+            restore_error_handler();
+            AppConfig::$ENV = $previousEnv;
+            while (ob_get_level() > $obLevel) {
+                ob_end_clean();
+            }
+        }
+
+        $this->assertSame("<tmx version=\"1.4\">\n<body/>\n</tmx>\n", $output);
     }
 
     // --- Helper factories ---

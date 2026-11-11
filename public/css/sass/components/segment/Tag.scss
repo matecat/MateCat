@@ -11,7 +11,7 @@
               content: '\21B5'; //↵
               padding: 0 4px;
               font-size: variables.$font-size-xsmall;
-              color: colors.$blue200;
+              color: colors.$blue500;
             }
           }
         }
@@ -162,11 +162,11 @@
   // Open/close affordance for pc-carrying ph tags: a paired open tag flattens its
   // trailing edge (content follows to the right), a close tag flattens its leading
   // edge (content precedes on the left), echoing the g open/close pair.
-  &.tag-ph.tag-pc-open {
+  &.tag-ph.tag-paired-open {
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
   }
-  &.tag-ph.tag-pc-close {
+  &.tag-ph.tag-paired-close {
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
   }
@@ -315,7 +315,7 @@
   &.tag-nbsp {
     font-size: variables.$font-size-base;
     margin: 0 2px;
-    color: colors.$blue200;
+    color: colors.$blue500;
     background: transparent;
     &:before {
       border: none;
@@ -333,7 +333,7 @@
   &.tag-word-joiner {
     font-size: variables.$font-size-small;
     margin: 0;
-    background: colors.$blue200;
+    background: colors.$blue500;
     &:before {
       border: none;
     }
@@ -351,7 +351,7 @@
     font-size: 17px;
     font-weight: 900;
     margin: 0;
-    color: colors.$blue200;
+    color: colors.$blue500;
     background-color: transparent;
     &:before {
       border: none;
@@ -380,7 +380,7 @@
       top: -7px;
       padding: 0 4px;
       font-size: variables.$font-size-xsmall;
-      color: colors.$blue200;
+      color: colors.$blue500;
       border: none;
     }
   }
@@ -394,7 +394,7 @@
       top: -7px;
       padding: 0 4px;
       font-size: variables.$font-size-xsmall;
-      color: colors.$blue200;
+      color: colors.$blue500;
       border: none;
     }
   }
@@ -402,7 +402,7 @@
   &.tag-tab {
     font-size: variables.$font-size-xsmall;
     margin: 0 2px;
-    color: colors.$blue200;
+    color: colors.$blue500;
     background: transparent;
     &:before {
       border: none;
@@ -419,7 +419,7 @@
 
   &.tag-split {
     position: relative;
-    color: colors.$blue200;
+    color: colors.$blue500;
     background-color: transparent;
 
     &:before {
@@ -448,12 +448,20 @@
     }
     &:hover {
       &:after {
-        content: '\00d7';
-        color: red;
+        content: '×';
+        color: #788190;
+        font-weight: bold;
         position: absolute;
-        font-size: variables.$font-size-base;
-        margin-left: 5px;
-        margin-top: -18px;
+        font-size: 18px;
+        margin-top: -14px;
+        background-color: white;
+        width: 18px;
+        height: 18px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #d7d8db;
       }
     }
   }
@@ -474,12 +482,11 @@
 }
 
 // Body-level toggle for HTML-rendered (closed) segments
-// Scoped to pc-carrying ph tags ONLY. Targeting every .tag-ph would also hide
-// the Draft.js-rendered text (span[data-text='true']) of normal/semantic ph tags
-// in the open editor, making them vanish when compaction is on.
-body.ph-tags-compressed {
-  .tag.tag-ph.tag-pc-open,
-  .tag.tag-ph.tag-pc-close {
+// Scoped to compressible (numbered) tags ONLY. Targeting every .tag-ph would also
+// hide the Draft.js-rendered text (span[data-text='true']) of normal/semantic ph
+// tags in the open editor, making them vanish when compaction is on.
+body.tags-compressed {
+  .tag.tag-numbered {
     .index-counter {
       margin-left: 0;
       margin-right: 0;
@@ -491,10 +498,11 @@ body.ph-tags-compressed {
   }
 }
 
-// Ensure inline layout for index + text inside HTML-rendered ph tags only.
+// Ensure inline layout for index + text inside HTML-rendered ph and numbered tags.
 // Scoped to tag-container-lite so it does not override display:flow-root
 // in the Draft.js editor (where flex handles inline layout automatically).
-.tag-container-lite .tag.tag-ph {
+.tag-container-lite .tag.tag-ph,
+.tag-container-lite .tag.tag-numbered {
   .index-counter,
   span[data-text='true'] {
     display: inline;
@@ -609,23 +617,6 @@ body.ph-tags-compressed {
         text-transform: capitalize;
       }
     }
-    .tooltip-error-ignore {
-      color: colors.$grey600;
-      text-decoration: none;
-      cursor: pointer;
-      border-radius: 0 4px 4px 0;
-      padding-left: 10px;
-      height: 40px;
-      &:hover {
-        color: colors.$grey700;
-      }
-      .tooltip-error-ignore-text {
-        margin-left: 5px;
-        margin-right: 10px;
-        float: left;
-        line-height: 40px;
-      }
-    }
     &:not(:first-child) {
       border-top: 1px solid rgba(255, 255, 255, 0.36);
     }
@@ -731,8 +722,8 @@ body.ph-tags-compressed {
       }
 
       .place-here-tips {
-        border: 1px solid colors.$blue200;
-        color: colors.$blue200;
+        border: 1px solid colors.$blue500;
+        color: colors.$blue500;
         border-radius: 2px;
         padding: 1px 2px;
         line-height: 1.1;

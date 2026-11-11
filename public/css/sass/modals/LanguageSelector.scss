@@ -1,5 +1,5 @@
 /* Language Selector Modal */
-@use "../tokens/colors";
+@use '../tokens/colors';
 @use 'commons/variables';
 
 #matecat-modal-languages {
@@ -95,12 +95,21 @@
         align-items: center;
         width: 100%;
         text-align: left;
-        border-radius: 2px;
-        border: 1px solid $medium-gray;
+        border: 1px solid colors.$grey200;
+        border-radius: variables.$border-radius-default;
         padding: 6px 16px;
+
+        input::placeholder {
+          color: colors.$grey400 !important;
+        }
+
         &:hover {
-          border: 1px solid $dark-gray;
+          border: 1px solid colors.$grey400;
           cursor: text;
+        }
+        &:focus-within {
+          border: 1px solid colors.$grey400;
+          outline: 1px solid colors.$grey400;
         }
       }
     }
@@ -121,18 +130,15 @@
       width: 100%;
       & > span {
         display: inline-block;
-        & > * {
-          margin-top: 2px;
-          margin-bottom: 2px;
-        }
       }
     }
     .language-to .language-search .tag {
       position: relative;
       display: inline-block;
-      padding: 4px 8px;
+      padding: 4px 12px;
       text-transform: capitalize;
-      border-radius: 2px;
+      // Pill, like the design system's badges
+      border-radius: 999px;
       margin: 0 2px;
       background: colors.$white;
       color: colors.$black;
@@ -244,7 +250,7 @@
         position: relative;
         padding: 8px 12px;
         margin: 4px;
-        border-radius: 2px;
+        border-radius: variables.$border-radius-default;
 
         &.selected {
           background: $dark-blue;
@@ -280,7 +286,6 @@
             border-color: transparent transparent transparent $medium-blue;
           }
         }
-
       }
       li.lang-item .language-dropdown-item-container .code-badge-selected {
         background-color: colors.$white;

@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace Matecat\Core\Features\Hook;
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\ValidationError as ControllerValidationError;
 use Matecat\TestHelpers\AbstractTest;
+use Exception;
 use Model\DataAccess\IDatabase;
+use Model\DataAccess\TransactionAbortedException;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\BasicFeatureStruct;
@@ -234,6 +237,107 @@ class FeatureSetDispatchTest extends AbstractTest
         ]);
 
         $this->expectException(AuthenticationError::class);
+        $featureSet->dispatch(new DispatchRunEvent());
+    }
+
+    #[Test]
+    public function dispatchRunInsideATransactionAbortsItOnAGenericException(): void
+    {
+        \Plugins\Features\TestDispatchRunThrowsGeneric::$invoked = false;
+        \Plugins\Features\TestDispatchRunAfterGeneric::$invoked = false;
+
+        $db = $this->createMock(IDatabase::class);
+        $db->method('isInTransactionScope')->willReturn(true);
+        $db->expects($this->once())->method('markRollbackOnly');
+
+        $featureSet = new FeatureSet($db, [
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_run_throws_generic']),
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_run_after_generic']),
+        ]);
+
+        try {
+            $featureSet->dispatch(new DispatchRunEvent());
+            self::fail('a hook failure inside a transaction must abort it');
+        } catch (TransactionAbortedException $e) {
+            self::assertInstanceOf(Exception::class, $e->getPrevious());
+            self::assertStringContainsString('dispatchRunHook', $e->getMessage());
+            self::assertStringNotContainsString('generic run failure', $e->getMessage());
+        }
+
+        self::assertFalse(
+            \Plugins\Features\TestDispatchRunAfterGeneric::$invoked,
+            'no hook may run on a transaction already condemned'
+        );
+    }
+
+    #[Test]
+    public function dispatchRunInsideATransactionRethrowsADomainExceptionAndCondemnsIt(): void
+    {
+        \Plugins\Features\TestDispatchRunThrowsHandled::$throwable = new ValidationError('invalid');
+
+        $db = $this->createMock(IDatabase::class);
+        $db->method('isInTransactionScope')->willReturn(true);
+        $db->expects($this->once())->method('markRollbackOnly');
+
+        $featureSet = new FeatureSet($db, [
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_run_throws_handled']),
+        ]);
+
+        $this->expectException(ValidationError::class);
+        $featureSet->dispatch(new DispatchRunEvent());
+    }
+
+    #[Test]
+    public function dispatchRunOutsideATransactionStillSwallowsAGenericException(): void
+    {
+        \Plugins\Features\TestDispatchRunAfterGeneric::$invoked = false;
+
+        $db = $this->createMock(IDatabase::class);
+        $db->method('isInTransactionScope')->willReturn(false);
+        $db->expects($this->never())->method('markRollbackOnly');
+
+        $featureSet = new FeatureSet($db, [
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_run_throws_generic']),
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_run_after_generic']),
+        ]);
+
+        $featureSet->dispatch(new DispatchRunEvent());
+
+        self::assertTrue(\Plugins\Features\TestDispatchRunAfterGeneric::$invoked);
+    }
+
+    #[Test]
+    public function dispatchFilterInsideATransactionAbortsItOnAGenericException(): void
+    {
+        $db = $this->createMock(IDatabase::class);
+        $db->method('isInTransactionScope')->willReturn(true);
+        $db->expects($this->once())->method('markRollbackOnly');
+
+        $featureSet = new FeatureSet($db, [
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_filter_throws_generic']),
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_filter_after_generic']),
+        ]);
+
+        try {
+            $featureSet->dispatch(new DispatchFilterEvent());
+            self::fail('a filter hook failure inside a transaction must abort it');
+        } catch (TransactionAbortedException) {
+            // expected
+        }
+
+        self::assertFalse(\Plugins\Features\TestDispatchFilterAfterGeneric::$invoked);
+    }
+
+    #[Test]
+    public function dispatchRunRethrowsTheControllerValidationError(): void
+    {
+        \Plugins\Features\TestDispatchRunThrowsHandled::$throwable = new ControllerValidationError('undo data is not available');
+
+        $featureSet = new FeatureSet($this->dbStub, [
+            new BasicFeatureStruct(['feature_code' => 'test_dispatch_run_throws_handled']),
+        ]);
+
+        $this->expectException(ControllerValidationError::class);
         $featureSet->dispatch(new DispatchRunEvent());
     }
 

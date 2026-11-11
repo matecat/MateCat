@@ -301,6 +301,7 @@ const CommonUtils = {
       case 'mif':
       case 'idml':
       case 'icml':
+      case 'epub':
       case 'tex':
         return <FileTypePub size={size} /> //TODO add specific icons for these file types
       case 'zip':

@@ -9,6 +9,7 @@
 @use '../header/ActionMenu';
 @use '../../tokens/colors';
 @use '../../commons/variables';
+@use '../../commons/aria-label-tooltip';
 
 $color-red: #fb2a0d;
 $color-orange: #fbaa0d;
@@ -226,9 +227,14 @@ header
   .layout__container
   .qr-label {
   font-weight: 100;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 12px;
-  padding-right: 9px;
+
+  // Summary labels ("Reviewed words", "TTE revise 2") stay on one line where they fit;
+  // below 1280px all five no longer do, so they wrap there
+  @media (min-width: 1280px) {
+    white-space: nowrap;
+  }
 }
 
 .qr-wrapper
@@ -237,7 +243,7 @@ header
   .qr-job-summary-container
   .layout__container
   .qr-info {
-  font-size: variables.$font-size-xsmall;
+  font-size: variables.$font-size-small;
 }
 
 .qr-info {
@@ -272,7 +278,14 @@ header
   height: 64px;
   gap: 30px;
   border-radius: variables.$border-radius-default;
-  flex: 1 0 0;
+  // Shrinks beside the EPT box instead of pushing it out of the row on narrow windows
+  flex: 1 1 0;
+  min-width: 0;
+
+  // With two revisions there are six stats; below 1280px they only fit with tighter gaps
+  @media (max-width: 1279px) {
+    gap: 16px;
+  }
 }
 
 .qr-wrapper
@@ -340,6 +353,14 @@ header
   display: flex;
   align-items: center;
   gap: 8px;
+  // The progress bar is what gives way when the row is tight (JobProgressBar keeps a
+  // 196px minimum elsewhere)
+  flex: 1 1 96px;
+  min-width: 96px;
+
+  div {
+    min-width: 0;
+  }
 }
 
 .qr-wrapper
@@ -365,16 +386,6 @@ header
   .qr-production-quality
   .qr-effort {
   padding: 15px 0;
-}
-
-.qr-wrapper
-  .qr-container
-  .qr-container-inside
-  .qr-job-summary-container
-  .layout__container
-  .qr-production-quality
-  .qr-effort:last-child {
-  padding-right: 15px !important;
 }
 
 .qr-wrapper
@@ -455,7 +466,7 @@ header
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 12px;
   font-weight: 700;
 }
@@ -506,7 +517,7 @@ header
   .qr-production-quality
   .qr-effort.qr-score
   .qr-threshold {
-  font-size: 12px;
+  font-size: 14px;
   line-height: 12px;
 }
 
@@ -596,6 +607,7 @@ header
   .qr-head
   .qr-title {
   padding-left: 24px;
+  font-size: 16px;
 }
 
 .qr-wrapper
@@ -609,7 +621,7 @@ header
   display: flex;
   align-items: center;
   background-color: colors.$white;
-  height: 40px;
+  min-height: 40px;
   border-bottom: 1px solid colors.$grey100;
 }
 
@@ -634,7 +646,7 @@ header
   .qr-body-list
   .qr-element {
   position: relative;
-  padding-left: 24px;
+  padding: 8px 8px 8px 24px;
 }
 
 .qr-wrapper
@@ -687,6 +699,7 @@ header
   .qr-body-list.qr-total-line {
   background-color: colors.$grey150;
   height: 40px;
+  font-size: variables.$font-size-small;
 }
 
 .qr-wrapper
@@ -771,7 +784,21 @@ header
   .qr-quality
   .severity {
   width: 21%;
-  text-align: left;
+  text-align: center;
+}
+
+.qr-wrapper
+  .qr-container
+  .qr-container-inside
+  .qr-job-summary-container
+  .layout__container
+  .qr-production-quality
+  .qr-quality
+  .qr-head
+  .qr-severities-heading {
+  width: calc(21% * var(--qr-severity-count, 1));
+  padding-left: 0;
+  text-align: center;
 }
 
 .qr-wrapper
@@ -791,6 +818,39 @@ header
   .qr-quality
   .total-severity {
   width: 20%;
+}
+
+// Severity counts and error points are centred under their column, without the
+// category column's left indent
+.qr-wrapper
+  .qr-container
+  .qr-container-inside
+  .qr-job-summary-container
+  .layout__container
+  .qr-production-quality
+  .qr-quality
+  .qr-body-list
+  .qr-element.severity,
+.qr-wrapper
+  .qr-container
+  .qr-container-inside
+  .qr-job-summary-container
+  .layout__container
+  .qr-production-quality
+  .qr-quality
+  .qr-body-list
+  .qr-element.total-severity,
+.qr-wrapper
+  .qr-container
+  .qr-container-inside
+  .qr-job-summary-container
+  .layout__container
+  .qr-production-quality
+  .qr-quality
+  .qr-head
+  .qr-total-severity {
+  padding-left: 0;
+  text-align: center;
 }
 
 .qr-wrapper
@@ -851,6 +911,7 @@ header
   .qr-header
   h3 {
   font-weight: bold;
+  font-size: variables.$font-size-page-title;
 }
 
 .qr-wrapper
@@ -1010,9 +1071,9 @@ header
   .document-name {
   display: flex;
   align-items: center;
-  font-size: variables.$font-size-xsmall;
+  font-size: variables.$font-size-small;
   margin-top: 8px;
-  line-height: 16px;
+  line-height: 20px;
   gap: 8px;
 }
 
@@ -1095,7 +1156,8 @@ header
   align-items: center;
   height: 48px;
   padding: 0 24px;
-  font-size: variables.$font-size-xsmall;
+  // Card text is 16px; segment status keeps its own 14px rule
+  font-size: variables.$font-size-small;
 }
 
 .qr-wrapper
@@ -1180,6 +1242,7 @@ header
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  gap: 8px;
 }
 
 .qr-wrapper
@@ -1214,8 +1277,13 @@ header
   background: colors.$white;
   border-bottom: 1px solid colors.$grey100;
   min-height: 40px;
-  font-size: variables.$font-size-xsmall;
+  font-size: variables.$font-size-small;
   align-items: center;
+
+  // Issue counts, phase and the issue chips stay smaller than the card text
+  .qa-buttons button {
+    font-size: variables.$font-size-xsmall;
+  }
 }
 
 .qr-wrapper
@@ -1406,7 +1474,6 @@ header
   border-radius: 0;
   position: relative;
   z-index: 1;
-  font-size: 12px;
   padding: 4px 8px;
   font-weight: normal;
 }
@@ -1827,7 +1894,9 @@ header
   background: colors.$white;
   border: 1px solid colors.$grey100;
   border-radius: variables.$border-radius-default;
-  gap: 6px;
+  // Category, then severity, 4px apart
+  gap: 4px;
+  font-size: variables.$font-size-xsmall;
 }
 
 .qr-wrapper
@@ -2465,39 +2534,6 @@ header
   .qr-single-segment
   .qr-segment-body
   .qr-history
-  .qr-history-issue {
-  font-weight: 700;
-}
-
-.qr-wrapper
-  .qr-container
-  .qr-container-inside
-  .qr-job-summary-container
-  .layout__container
-  .qr-segment-details-container
-  .qr-segments-summary
-  .qr-segments
-  .qr-segments-list
-  .qr-single-segment
-  .qr-segment-body
-  .qr-history
-  .qr-history-issue
-  span {
-  font-weight: 400;
-}
-
-.qr-wrapper
-  .qr-container
-  .qr-container-inside
-  .qr-job-summary-container
-  .layout__container
-  .qr-segment-details-container
-  .qr-segments-summary
-  .qr-segments
-  .qr-segments-list
-  .qr-single-segment
-  .qr-segment-body
-  .qr-history
   span[class*='badge-container'] {
   cursor: pointer;
 }
@@ -2542,69 +2578,6 @@ header
   .layout__container
   .qr-segment-details-container
   .qr-segments-summary
-  .select {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 5px;
-  padding-left: 9px;
-  border-radius: 40px;
-  height: 38px;
-  line-height: 20px;
-}
-
-.qr-segments-summary .filter-status .select span {
-  display: flex;
-  align-content: center;
-  align-items: center;
-  gap: 4px;
-}
-
-.qr-wrapper
-  .qr-container
-  .qr-container-inside
-  .qr-job-summary-container
-  .layout__container
-  .qr-segment-details-container
-  .qr-segments-summary
-  li.dropdown__option {
-  padding: 8px;
-}
-
-.qr-wrapper
-  .qr-container
-  .qr-container-inside
-  .qr-job-summary-container
-  .layout__container
-  .qr-segment-details-container
-  .qr-segments-summary
-  .dropdown__option
-  span {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: variables.$font-size-small;
-}
-
-.qr-wrapper
-  .qr-container
-  .qr-container-inside
-  .qr-job-summary-container
-  .layout__container
-  .qr-segment-details-container
-  .qr-segments-summary
-  .custom-dropdown.select__dropdown {
-  background-color: colors.$white;
-  min-width: 120px;
-}
-
-.qr-wrapper
-  .qr-container
-  .qr-container-inside
-  .qr-job-summary-container
-  .layout__container
-  .qr-segment-details-container
-  .qr-segments-summary
   .filter-category {
   max-width: 200px;
 }
@@ -2617,8 +2590,10 @@ header
   .qr-segment-details-container
   .qr-segments-summary
   .filter-category
-  .select__dropdown-wrapper {
-  width: unset;
+  .select__dropdown-wrapper
+  .custom-dropdown {
+  width: max-content;
+  max-width: 280px;
 }
 
 .qr-reviewType-control {
@@ -2869,10 +2844,4 @@ header
 .tooltip--wide {
   max-width: 360px;
   width: max-content;
-}
-
-.filter-idSegment {
-  input[type='text'] {
-    padding: 8px 20px !important;
-  }
 }

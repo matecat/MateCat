@@ -70,8 +70,15 @@ class LoggerFactory
      * Logs content in JSON format to a specified file.
      *
      * @param mixed $content The content to log.
-     * @param string $filename The name of the log file. Defaults to 'log.txt'.
+     * @param string $filename The name of the log file. Defaults to 'general_log.txt'.
      * @param string|null $logName The name of the logger. Defaults to the filename.
+     *
+     * @deprecated Use a named logger, at the level the entry deserves:
+     *             LoggerFactory::getLogger('feature_set')->error('message', ['key' => $value]).
+     *             This method writes everything at debug level, and to the logger named after the
+     *             file, which no alias points at: inside a worker, the Executor aliases the named
+     *             loggers ('feature_set', 'engines', ...) to the queue's own log, but an entry written
+     *             here still lands in general_log.txt, away from the rest of that job's lines.
      */
     public static function doJsonLog(mixed $content, string $filename = self::LOG_FILENAME, ?string $logName = null): void
     {
@@ -83,7 +90,7 @@ class LoggerFactory
      * Retrieves a logger instance by name and file.
      *
      * @param string|null $name The name of the logger. Defaults to the filename.
-     * @param string $fileName The name of the log file. Defaults to 'log.txt'.
+     * @param string $fileName The name of the log file. Defaults to 'general_log.txt'.
      *
      * @return MatecatLogger The logger instance.
      */

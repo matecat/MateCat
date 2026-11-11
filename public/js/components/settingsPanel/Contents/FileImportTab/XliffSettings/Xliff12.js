@@ -133,7 +133,7 @@ export const Xliff12 = () => {
               <Button
                 ref={createRef()}
                 mode={BUTTON_MODE.GHOST}
-                size={BUTTON_SIZE.ICON_SMALL}
+                size={BUTTON_SIZE.ICON_XSMALL}
               >
                 <InfoIcon size={16} />
               </Button>

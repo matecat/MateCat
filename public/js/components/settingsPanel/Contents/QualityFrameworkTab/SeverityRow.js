@@ -125,7 +125,7 @@ export const SeveritiyRow = ({severity}) => {
             size={BUTTON_SIZE.ICON_XSMALL}
             onClick={removeSeverity}
           >
-            <IconClose size={9} />
+            <IconClose size={14} />
           </Button>
         </Tooltip>
       </div>

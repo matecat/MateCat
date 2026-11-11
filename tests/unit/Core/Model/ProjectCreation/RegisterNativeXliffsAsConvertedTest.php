@@ -20,8 +20,10 @@ use Utils\Logger\MatecatLogger;
  * - Correct calls to makeCachePackage + linkSessionToCacheForAlreadyConvertedFiles
  * - Hash keys are correctly appended to $linkFiles['conversionHashes']
  * - Duplicate hashes are deduplicated
- * - Project error added when sha1_file fails
- * - Project error added when makeCachePackage throws
+ * - Throws FILE_HASH_FAILED when sha1_file fails, before touching the cache
+ * - Throws FILE_HASH_FAILED when makeCachePackage throws, keeping the storage error as previous
+ *   and stopping before the session link and the hash append
+ * - No error is recorded on the project structure: createProject() records the one error
  */
 class RegisterNativeXliffsAsConvertedTest extends AbstractTest
 {
@@ -248,12 +250,8 @@ class RegisterNativeXliffsAsConvertedTest extends AbstractTest
 
     // ── Error when sha1_file fails ───────────────────────────────────
 
-    /**
-     * @return void
-     * @throws Exception
-     */
     #[Test]
-    public function addsProjectErrorWhenSha1FileFails(): void
+    public function throwsWhenSha1FileFails(): void
     {
         // Create a file name but DON'T create the actual file → sha1_file returns false
         $fileName = 'nonexistent.xliff';
@@ -264,128 +262,70 @@ class RegisterNativeXliffsAsConvertedTest extends AbstractTest
         ];
 
         $linkFiles = ['conversionHashes' => ['sha' => [], 'fileName' => []]];
-        $fs = $this->createStub(AbstractFilesStorage::class);
-
-        // Suppress expected PHP warning from sha1_file on non-existent file
-        @$this->service->registerNativeXliffsAsConverted(
-            $fs,
-            $this->projectStructure,
-            $this->uploadDir,
-            $linkFiles
-        );
-
-        $errors = $this->projectStructure->result['errors'];
-        $this->assertCount(1, $errors);
-        $this->assertSame(ProjectCreationError::FILE_HASH_FAILED->value, $errors[0]['code']);
-        $this->assertStringContainsString($fileName, $errors[0]['message']);
-    }
-
-    // ── Error when makeCachePackage throws ────────────────────────────
-
-    /**
-     * @return void
-     * @throws Exception
-     */
-    #[Test]
-    public function addsProjectErrorWhenMakeCachePackageThrows(): void
-    {
-        $fileName = 'test.xliff';
-        file_put_contents($this->uploadDir . '/' . $fileName, 'content');
-
-        $this->projectStructure->array_files = [$fileName];
-        $this->projectStructure->array_files_meta = [
-            ['mustBeConverted' => false],
-        ];
-
-        $linkFiles = ['conversionHashes' => ['sha' => [], 'fileName' => []]];
-
-        $fs = $this->createMock(AbstractFilesStorage::class);
-        $fs->expects($this->once())
-            ->method('makeCachePackage')
-            ->willThrowException(new Exception('Cache write failed'));
-
-        $this->service->registerNativeXliffsAsConverted(
-            $fs,
-            $this->projectStructure,
-            $this->uploadDir,
-            $linkFiles
-        );
-
-        $errors = $this->projectStructure->result['errors'];
-        $this->assertCount(1, $errors);
-        $this->assertSame(ProjectCreationError::FILE_HASH_FAILED->value, $errors[0]['code']);
-        $this->assertSame('Cache write failed', $errors[0]['message']);
-    }
-
-    // ── makeCachePackage error does NOT prevent linkSession + hash append ──
-
-    /**
-     * @return void
-     * @throws Exception
-     */
-    #[Test]
-    public function continuesWithLinkAndHashAppendAfterMakeCachePackageError(): void
-    {
-        $fileName = 'test.xliff';
-        file_put_contents($this->uploadDir . '/' . $fileName, 'content');
-
-        $this->projectStructure->array_files = [$fileName];
-        $this->projectStructure->array_files_meta = [
-            ['mustBeConverted' => false],
-        ];
-
-        $linkFiles = ['conversionHashes' => ['sha' => [], 'fileName' => []]];
-
-        $fs = $this->createMock(AbstractFilesStorage::class);
-        $fs->expects($this->once())
-            ->method('makeCachePackage')
-            ->willThrowException(new Exception('Cache write failed'));
-
-        // linkSession should STILL be called after makeCachePackage fails
-        $fs->expects($this->once())
-            ->method('linkSessionToCacheForAlreadyConvertedFiles');
-
-        $this->service->registerNativeXliffsAsConverted(
-            $fs,
-            $this->projectStructure,
-            $this->uploadDir,
-            $linkFiles
-        );
-
-        // Hash should still be appended
-        $this->assertCount(1, $linkFiles['conversionHashes']['sha']);
-    }
-
-    // ── sha1_file failure prevents further processing for that file ──
-
-    /**
-     * @return void
-     * @throws Exception
-     */
-    #[Test]
-    public function sha1FailureSkipsCacheAndLinkForThatFile(): void
-    {
-        // File doesn't exist → sha1_file returns false
-        $this->projectStructure->array_files = ['missing.xliff'];
-        $this->projectStructure->array_files_meta = [
-            ['mustBeConverted' => false],
-        ];
-
-        $linkFiles = ['conversionHashes' => ['sha' => [], 'fileName' => []]];
 
         $fs = $this->createMock(AbstractFilesStorage::class);
         $fs->expects($this->never())->method('makeCachePackage');
         $fs->expects($this->never())->method('linkSessionToCacheForAlreadyConvertedFiles');
 
-        // Suppress expected PHP warning from sha1_file on non-existent file
-        @$this->service->registerNativeXliffsAsConverted(
-            $fs,
-            $this->projectStructure,
-            $this->uploadDir,
-            $linkFiles
-        );
+        try {
+            // Suppress expected PHP warning from sha1_file on non-existent file
+            @$this->service->registerNativeXliffsAsConverted(
+                $fs,
+                $this->projectStructure,
+                $this->uploadDir,
+                $linkFiles
+            );
+            $this->fail('Expected Exception');
+        } catch (Exception $e) {
+            $this->assertSame(ProjectCreationError::FILE_HASH_FAILED->value, $e->getCode());
+            $this->assertSame("Failed to compute hash for file $fileName", $e->getMessage());
+        }
 
         $this->assertEmpty($linkFiles['conversionHashes']['sha']);
+        $this->assertEmpty($this->projectStructure->result['errors']);
+    }
+
+    // ── Error when makeCachePackage throws ────────────────────────────
+
+    #[Test]
+    public function throwsWhenMakeCachePackageThrows(): void
+    {
+        $fileName = 'test.xliff';
+        file_put_contents($this->uploadDir . '/' . $fileName, 'content');
+
+        $this->projectStructure->array_files = [$fileName];
+        $this->projectStructure->array_files_meta = [
+            ['mustBeConverted' => false],
+        ];
+
+        $linkFiles = ['conversionHashes' => ['sha' => [], 'fileName' => []]];
+
+        $storageError = new Exception('Cache write failed at /internal/path');
+
+        $fs = $this->createMock(AbstractFilesStorage::class);
+        $fs->expects($this->once())
+            ->method('makeCachePackage')
+            ->willThrowException($storageError);
+        $fs->expects($this->never())
+            ->method('linkSessionToCacheForAlreadyConvertedFiles');
+
+        try {
+            $this->service->registerNativeXliffsAsConverted(
+                $fs,
+                $this->projectStructure,
+                $this->uploadDir,
+                $linkFiles
+            );
+            $this->fail('Expected Exception');
+        } catch (Exception $e) {
+            $this->assertSame(ProjectCreationError::FILE_HASH_FAILED->value, $e->getCode());
+            // The storage message can name internal paths: it stays in the previous only
+            $this->assertSame("Failed to cache file $fileName", $e->getMessage());
+            $this->assertSame($storageError, $e->getPrevious());
+        }
+
+        $this->assertEmpty($linkFiles['conversionHashes']['sha']);
+        $this->assertEmpty($this->projectStructure->result['errors']);
     }
 
     // ── Empty file list ──────────────────────────────────────────────

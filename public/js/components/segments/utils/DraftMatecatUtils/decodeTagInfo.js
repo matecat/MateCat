@@ -1,6 +1,7 @@
 import {tagSignatures} from './tagModel'
 import {getIdAttributeRegEx, unescapeHTMLRecursive} from './htmlUtils'
 import {Base64} from 'js-base64'
+import {getGEquivText} from './compressibleTagUtils'
 
 /**
  *
@@ -41,6 +42,15 @@ const decodeTagInfo = (tag) => {
       }
     } else {
       decodedTagData.content = tagPlaceholder
+    }
+    // A <g> with equiv-text shows that text instead of its id
+    const gEquivText = tagName === 'g' && getGEquivText(tagEncodedText)
+    if (gEquivText) {
+      // A line break would split the Draft block in the middle of the tag
+      decodedTagData.content = unescapeHTMLRecursive(gEquivText).replace(
+        /\r\n?|\n/g,
+        ' ',
+      )
     }
   } else {
     decodedTagData.content = '?'

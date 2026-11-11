@@ -86,10 +86,12 @@ export const CreateTeam = () => {
       </div>
       <div>
         <div className="member-item">
-          {metadata ? (
+          {metadata?.gplus_picture ? (
             <img className="member-avatar" src={metadata.gplus_picture} />
           ) : (
-            <span>{CommonUtils.getUserShortName(user)}</span>
+            <span className="ui-user-top-image user-avatar">
+              {CommonUtils.getUserShortName(user)}
+            </span>
           )}
           <div className="member-info">
             {(user.first_name || user.last_name) && (

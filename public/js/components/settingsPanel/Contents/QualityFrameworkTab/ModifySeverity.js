@@ -93,6 +93,7 @@ export const ModifySeverity = ({
       onKeyUp={confirmWithKeyboard}
     >
       <input
+        type="text"
         className={`quality-framework-input input${error ? ' quality-framework-input-error' : ''}`}
         placeholder="Name"
         value={labelState}
@@ -141,7 +142,7 @@ export const ModifySeverity = ({
             onClick={updateLabel}
             disabled={!labelState || typeof error === 'string'}
           >
-            <Checkmark size={14} />
+            <Checkmark size={18} />
             Confirm
           </Button>
         </div>

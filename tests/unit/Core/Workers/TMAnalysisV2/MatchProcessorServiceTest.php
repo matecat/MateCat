@@ -4,7 +4,6 @@ namespace Matecat\Core\Workers\TMAnalysisV2;
 
 use Matecat\TestHelpers\AbstractTest;
 use Model\Analysis\Constants\InternalMatchesConstants;
-use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -361,7 +360,7 @@ class MatchProcessorServiceTest extends AbstractTest
             'locked'           => false,
         ];
 
-        $params                         = new \stdClass();
+        $params                         = new Params();
         $params->target                 = 'en-US';
         $params->pretranslate_100       = false;
         $params->mt_qe_workflow_enabled = false;
@@ -384,7 +383,7 @@ class MatchProcessorServiceTest extends AbstractTest
             'locked'           => false,
         ];
 
-        $params                         = new \stdClass();
+        $params                         = new Params();
         $params->target                 = 'zh-CN';
         $params->pretranslate_100       = false;
         $params->mt_qe_workflow_enabled = false;
@@ -409,7 +408,7 @@ class MatchProcessorServiceTest extends AbstractTest
             'locked'           => false,
         ];
 
-        $params                         = new \stdClass();
+        $params                         = new Params();
         $params->target                 = 'en-US';
         $params->pretranslate_100       = true;
         $params->mt_qe_workflow_enabled = false;
@@ -430,7 +429,7 @@ class MatchProcessorServiceTest extends AbstractTest
             'locked'           => false,
         ];
 
-        $params                         = new \stdClass();
+        $params                         = new Params();
         $params->target                 = 'en-US';
         $params->pretranslate_100       = false;
         $params->mt_qe_workflow_enabled = false;
@@ -451,7 +450,7 @@ class MatchProcessorServiceTest extends AbstractTest
             'locked'           => false,
         ];
 
-        $params                         = new \stdClass();
+        $params                         = new Params();
         $params->target                 = 'en-US';
         $params->pretranslate_100       = true;
         $params->mt_qe_workflow_enabled = false;
@@ -474,7 +473,7 @@ class MatchProcessorServiceTest extends AbstractTest
             'locked'           => true,
         ];
 
-        $params                         = new \stdClass();
+        $params                         = new Params();
         $params->target                 = 'en-US';
         $params->pretranslate_100       = false;
         $params->mt_qe_workflow_enabled = true;
@@ -495,7 +494,7 @@ class MatchProcessorServiceTest extends AbstractTest
             'locked'           => false,
         ];
 
-        $params                         = new \stdClass();
+        $params                         = new Params();
         $params->target                 = 'en-US';
         $params->pretranslate_100       = false;
         $params->mt_qe_workflow_enabled = false;
@@ -516,7 +515,7 @@ class MatchProcessorServiceTest extends AbstractTest
             'locked'           => false,
         ];
 
-        $params                         = new \stdClass();
+        $params                         = new Params();
         $params->target                 = 'en-US';
         $params->pretranslate_100       = true;
         $params->mt_qe_workflow_enabled = true;
@@ -540,7 +539,7 @@ class MatchProcessorServiceTest extends AbstractTest
             'extra_field'      => 'preserved',
         ];
 
-        $params                         = new \stdClass();
+        $params                         = new Params();
         $params->target                 = 'en-US';
         $params->pretranslate_100       = false;
         $params->mt_qe_workflow_enabled = false;
@@ -686,7 +685,7 @@ class MatchProcessorServiceTest extends AbstractTest
         $isIce = $matchType === InternalMatchesConstants::TM_ICE;
         $otherStatus = $status === TranslationStatus::STATUS_APPROVED2 ? TranslationStatus::STATUS_TRANSLATED : TranslationStatus::STATUS_APPROVED2;
 
-        $params = (object)[
+        $params = new Params([
             'target'                  => 'it-IT',
             'mt_qe_workflow_enabled'  => false,
             'pretranslate_101'        => $isIce ? $preConfirm : !$preConfirm,
@@ -695,7 +694,7 @@ class MatchProcessorServiceTest extends AbstractTest
             'pretranslate_100'        => $isIce ? !$preConfirm : $preConfirm,
             'pretranslate_100_status' => $isIce ? $otherStatus : $status,
             'pretranslate_100_lock'   => $isIce ? !$lock : $lock,
-        ];
+        ]);
 
         $result = $this->service->determinePreTranslateStatus($this->preConfirmTmData($matchType), $params);
 
@@ -791,14 +790,14 @@ class MatchProcessorServiceTest extends AbstractTest
     #[DataProvider('pretranslate101OffProvider')]
     public function determinePreTranslateStatus_leaves_ice_untouched_when_pretranslate_101_is_off(bool|string $pretranslate101): void
     {
-        $params = (object)[
+        $params = new Params([
             'target'                  => 'it-IT',
             'pretranslate_100'        => true,
             'mt_qe_workflow_enabled'  => false,
             'pretranslate_101'        => $pretranslate101,
             'pretranslate_101_status' => TranslationStatus::STATUS_APPROVED,
             'pretranslate_101_lock'   => true,
-        ];
+        ]);
 
         $result = $this->service->determinePreTranslateStatus($this->preConfirmTmData(InternalMatchesConstants::TM_ICE), $params);
 
@@ -809,12 +808,12 @@ class MatchProcessorServiceTest extends AbstractTest
     #[Test]
     public function determinePreTranslateStatus_applies_the_lock_and_status_defaults_when_only_the_101_status_is_set(): void
     {
-        $params = (object)[
+        $params = new Params([
             'target'                  => 'it-IT',
             'pretranslate_100'        => true,
             'mt_qe_workflow_enabled'  => false,
             'pretranslate_101_status' => TranslationStatus::STATUS_TRANSLATED,
-        ];
+        ]);
 
         $ice = $this->service->determinePreTranslateStatus($this->preConfirmTmData(InternalMatchesConstants::TM_ICE), $params);
         $this->assertSame(TranslationStatus::STATUS_TRANSLATED, $ice['status']);
@@ -830,7 +829,7 @@ class MatchProcessorServiceTest extends AbstractTest
     {
         Ices::$iceLockDisabledForTargetLangs = ['zh'];
 
-        $params = (object)[
+        $params = new Params([
             'target'                  => 'zh-CN',
             'pretranslate_100'        => true,
             'mt_qe_workflow_enabled'  => false,
@@ -839,7 +838,7 @@ class MatchProcessorServiceTest extends AbstractTest
             'pretranslate_101_lock'   => true,
             'pretranslate_100_status' => TranslationStatus::STATUS_APPROVED,
             'pretranslate_100_lock'   => true,
-        ];
+        ]);
 
         $ice = $this->service->determinePreTranslateStatus($this->preConfirmTmData(InternalMatchesConstants::TM_ICE), $params);
         $this->assertArrayNotHasKey('status', $ice);

@@ -128,7 +128,7 @@ class BatchReviewProcessor
             (new ChunkReviewModel($chunkReview, $this->chunkReviewDao->getDatabaseHandler()))->recountAndUpdatePassFailResult($project, $this->actingUser);
             $chunkReviews[] = $chunkReview;
 
-            LoggerFactory::doJsonLog('Batch review processor created a new chunkReview (id ' . $chunkReview->id . ') for chunk with id ' . $this->chunk->id);
+            LoggerFactory::getLogger('feature_set')->info('Batch review processor created a new chunkReview (id ' . $chunkReview->id . ') for chunk with id ' . $this->chunk->id);
 
             // After the commit. send() enqueues to ActiveMQ rather than talking SMTP, so this is not
             // a slow call — but enqueuing inside the transaction means a rollback still delivers the

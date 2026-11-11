@@ -10,7 +10,7 @@ import {
   BUTTON_TYPE,
 } from '../common/Button/Button'
 import FlipBackwardIcon from '../../../img/icons/FlipBackwardIcon'
-import Close from '../../../img/icons/Close'
+import IconClose from '../../../img/icons/IconClose'
 
 const RECENTLY_USED_LOCAL_STORAGE_KEY = `target_languages_recently_used-${config.userMail}`
 const MAX_RECENTLY_USED_STORED = 3
@@ -188,7 +188,7 @@ const LanguageSelector = (props) => {
             mode={BUTTON_MODE.GHOST}
             onClick={onClose}
           >
-            <Close size={20} />
+            <IconClose size={20} />
           </Button>
         </div>
 

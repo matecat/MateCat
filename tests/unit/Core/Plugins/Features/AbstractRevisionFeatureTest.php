@@ -24,7 +24,6 @@ use Model\QualityReport\QualityReportModel;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
 use Plugins\Features\AbstractRevisionFeature;
-use Plugins\Features\ReviewExtended;
 use Plugins\Features\SecondPassReview;
 
 /**
@@ -70,11 +69,6 @@ class ConcreteTestRevisionFeature extends AbstractRevisionFeature
     {
         return $this->qualityReportModel ?? parent::createQualityReportModel($chunk);
     }
-}
-
-class ReviewExtendedProbe extends ReviewExtended
-{
-    public const string FEATURE_CODE = 'review_extended_probe';
 }
 
 class TestChunkReviewStruct extends ChunkReviewStruct
@@ -235,17 +229,6 @@ class AbstractRevisionFeatureTest extends AbstractTest
         $this->assertNotEmpty($projectStructure->result['errors']);
         $this->assertSame('-900', $projectStructure->result['errors'][0]['code']);
         $this->assertNull($projectStructure->features['quality_framework']);
-    }
-
-    #[Test]
-    public function loadAndValidateQualityFrameworkReturnsEarlyForReviewExtendedClass(): void
-    {
-        $projectStructure = new ProjectStructure();
-
-        ReviewExtendedProbe::loadAndValidateQualityFramework($projectStructure, '/not/existing/qa_model.json');
-
-        $this->assertArrayNotHasKey('quality_framework', $projectStructure->features);
-        $this->assertSame([], $projectStructure->result['errors']);
     }
 
     #[Test]
@@ -444,25 +427,6 @@ class AbstractRevisionFeatureTest extends AbstractTest
         $this->feature->alterChunkReviewStruct($this->makeAlterEvent());
     }
 
-    /**
-     * Projects carry both review_extended and second_pass_review in their features metadata, and
-     * FeatureSet::dispatch() calls each hook on both. These hooks must run once, so ReviewExtended returns before it
-     * reaches the database. A second split run multiplied the recounts held inside the split
-     * transaction; a second resetScore snapshotted zeros over the undo data.
-     */
-    private function makeReviewExtendedThatMustNotTouchTheDatabase(): ReviewExtended
-    {
-        $feature = new ReviewExtended(new BasicFeatureStruct([
-            'feature_code' => ReviewExtended::FEATURE_CODE,
-        ]));
-
-        $database = $this->createMock(IDatabase::class);
-        $database->expects($this->never())->method($this->anything());
-        $feature->setDatabase($database);
-
-        return $feature;
-    }
-
     private function makeSecondPassReviewOutsideATransaction(): SecondPassReview
     {
         $feature = new SecondPassReview(new BasicFeatureStruct([
@@ -492,15 +456,9 @@ class AbstractRevisionFeatureTest extends AbstractTest
     }
 
     #[Test]
-    public function postJobSplittedIsSkippedByReviewExtended(): void
+    public function postJobSplittedReachesTheChunkReviewLockForSecondPassReview(): void
     {
-        $this->makeReviewExtendedThatMustNotTouchTheDatabase()->postJobSplitted($this->makeSplitEvent());
-    }
-
-    #[Test]
-    public function postJobSplittedStillRunsForSecondPassReview(): void
-    {
-        // Reaching the qa_chunk_reviews lock proves the hook got past the guard.
+        // Reaching the qa_chunk_reviews lock proves SecondPassReview runs the hook against the database.
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('requires an open transaction');
 
@@ -508,13 +466,7 @@ class AbstractRevisionFeatureTest extends AbstractTest
     }
 
     #[Test]
-    public function postJobMergedIsSkippedByReviewExtended(): void
-    {
-        $this->makeReviewExtendedThatMustNotTouchTheDatabase()->postJobMerged($this->makeMergeEvent());
-    }
-
-    #[Test]
-    public function postJobMergedStillRunsForSecondPassReview(): void
+    public function postJobMergedReachesTheChunkReviewLockForSecondPassReview(): void
     {
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('requires an open transaction');
@@ -523,14 +475,7 @@ class AbstractRevisionFeatureTest extends AbstractTest
     }
 
     #[Test]
-    public function projectCompletionEventSavedIsSkippedByReviewExtended(): void
-    {
-        $this->makeReviewExtendedThatMustNotTouchTheDatabase()
-            ->projectCompletionEventSaved($this->makeCompletionEventSavedEvent());
-    }
-
-    #[Test]
-    public function projectCompletionEventSavedStillRunsForSecondPassReview(): void
+    public function projectCompletionEventSavedReachesTheChunkReviewLockForSecondPassReview(): void
     {
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('requires an open transaction');
@@ -540,18 +485,11 @@ class AbstractRevisionFeatureTest extends AbstractTest
     }
 
     #[Test]
-    public function alterChunkReviewStructIsSkippedByReviewExtended(): void
-    {
-        $this->makeReviewExtendedThatMustNotTouchTheDatabase()->alterChunkReviewStruct($this->makeAlterEvent());
-    }
-
-    #[Test]
-    public function alterChunkReviewStructStillRunsForSecondPassReview(): void
+    public function alterChunkReviewStructReachesTheChunkReviewLockForSecondPassReview(): void
     {
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('requires an open transaction');
 
         $this->makeSecondPassReviewOutsideATransaction()->alterChunkReviewStruct($this->makeAlterEvent());
     }
-
 }

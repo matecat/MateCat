@@ -446,7 +446,7 @@
           {
             "name": "subfiltering_handlers",
             "in": "formData",
-            "description": "An array string to choose which syntaxes to detect and lock in tags during translation. Allowed values are: \"markup\", \"percent_double_curly\", \"twig\", \"ruby_on_rails\", \"double_snail\", \"double_square\", \"dollar_curly\", \"single_curly\", \"objective_c_ns\", \"double_percent\", \"square_sprintf\", \"sprintf\"",
+            "description": "An array string to choose which syntaxes to detect and lock in tags during translation. Allowed values are: \"markup\", \"percent_double_curly\", \"twig\", \"ruby_on_rails\", \"double_snail\", \"double_square\", \"dollar_curly\", \"single_curly\", \"objective_c_ns\", \"double_percent\", \"square_sprintf\", \"single_square\", \"sprintf\"",
             "required": false,
             "type": "string",
             "default": "[]",
@@ -678,6 +678,26 @@
             "description": "urls",
             "schema": {
               "$ref": "#/definitions/ProjectCreationStatus"
+            }
+          },
+          "202": {
+            "description": "The project is still in the creation queue. Poll again later.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "integer"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No project matches the supplied id and password, or its creation status has expired.",
+            "schema": {
+              "$ref": "#/definitions/Error"
             }
           },
           "default": {

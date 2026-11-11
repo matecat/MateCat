@@ -1,12 +1,7 @@
 import React, {useState} from 'react'
 import PropTypes from 'prop-types'
 import {Select} from '../../common/Select'
-import {
-  Button,
-  BUTTON_MODE,
-  BUTTON_SIZE,
-  BUTTON_TYPE,
-} from '../../common/Button/Button'
+import {Button, BUTTON_MODE, BUTTON_TYPE} from '../../common/Button/Button'
 import ModalsActions from '../../../actions/ModalsActions'
 
 export const BulkChangePassword = ({jobs, successCallback}) => {
@@ -40,14 +35,12 @@ export const BulkChangePassword = ({jobs, successCallback}) => {
       <div className="content-bulk-modal-control">
         <Button
           mode={BUTTON_MODE.OUTLINE}
-          size={BUTTON_SIZE.MEDIUM}
           onClick={() => ModalsActions.onCloseModal()}
         >
           Cancel
         </Button>
         <Button
           type={BUTTON_TYPE.PRIMARY}
-          size={BUTTON_SIZE.MEDIUM}
           disabled={typeof typeSelected === 'undefined'}
           onClick={() =>
             successCallback({

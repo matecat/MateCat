@@ -15,7 +15,7 @@
   align-items: center;
   margin: 0;
   padding: 6px 16px;
-  font-size: variables.$font-size-small;
+  font-size: variables.$font-size-base;
   line-height: 24px;
   background-color: colors.$grey100;
 }
@@ -40,7 +40,7 @@
   align-items: center;
   gap: 6px;
   padding: 2px;
-  font-size: variables.$font-size-xsmall;
+  font-size: variables.$font-size-small;
 
   > svg {
     flex-shrink: 0;

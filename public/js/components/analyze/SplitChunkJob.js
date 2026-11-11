@@ -52,8 +52,8 @@ const SplitChunkJob = ({
     return (
       <>
         <div key={index} className="project-card__content">
-          <div className="project-card__header-info">
-            <div className="project-card__chunkName">{`Chunk ${index}`}</div>
+          <div className="project-card__header-info project-card__header-info--chunk">
+            <div className="project-card__chunkName">{`${index} -`}</div>
             <div className="project-card__header-link">
               <input
                 ref={(el) => (jobLinkRef.current[jidChunk] = el)}

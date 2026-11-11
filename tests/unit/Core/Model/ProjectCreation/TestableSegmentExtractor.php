@@ -4,7 +4,6 @@ namespace Matecat\Core\Model\ProjectCreation;
 
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
-use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\Files\MetadataDao;
 use Model\ProjectCreation\ProjectStructure;

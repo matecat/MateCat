@@ -4,7 +4,6 @@
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 16/05/14
  * Time: 17.01
- *
  */
 
 namespace Utils\TaskRunner;
@@ -12,7 +11,6 @@ namespace Utils\TaskRunner;
 use Exception;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
-use Psr\Log\InvalidArgumentException as LogInvalidArgumentException;
 use ReflectionException;
 use RuntimeException;
 use TypeError;
@@ -28,7 +26,6 @@ use Utils\TaskRunner\Commons\ProcessControlInterface;
  * Class Analysis_Manager
  *
  * Generic Asynchronous Task Runner
- *
  */
 class TaskManager extends AbstractDaemon
 {
@@ -37,7 +34,6 @@ class TaskManager extends AbstractDaemon
      * Key Set that holds the main process of Task Manager
      *
      * Every Task Manager must have its pid registered to distribute the across multiple servers
-     *
      */
     const string TASK_RUNNER_PID = 'task_manager_pid_set';
 
@@ -101,9 +97,7 @@ class TaskManager extends AbstractDaemon
      *
      * @return void
      * @throws Exception
-     * @throws LogInvalidArgumentException
      * @throws TypeError
-     *
      */
     public function main(array $args = null): void
     {
@@ -182,7 +176,6 @@ class TaskManager extends AbstractDaemon
      *
      * @throws ReflectionException
      * @throws Exception
-     * @throws LogInvalidArgumentException
      */
     protected function _waitPid(): void
     {
@@ -258,7 +251,6 @@ class TaskManager extends AbstractDaemon
      *
      * @throws ReflectionException
      * @throws Exception
-     * @throws LogInvalidArgumentException
      */
     public function cleanShutDown(): void
     {
@@ -291,7 +283,6 @@ class TaskManager extends AbstractDaemon
      *
      * @throws ReflectionException
      * @throws Exception
-     * @throws LogInvalidArgumentException
      */
     protected function _killPids(Context $queueInfo = null, int $pid = 0, int $num = 0): void
     {
@@ -424,8 +415,7 @@ class TaskManager extends AbstractDaemon
      * Reload Configuration every cycle
      *
      * @throws Exception
-     * @throws LogInvalidArgumentException
-     * @throws \TypeError
+     * @throws TypeError
      */
     protected function _updateConfiguration(): void
     {
@@ -452,7 +442,6 @@ class TaskManager extends AbstractDaemon
          *     Compares array1 against one or more other arrays
          *     and returns the values in array1 that are not present in any of the other arrays.
          *</pre>
-         *
          */
         if ($diff = array_diff_key($this->_queueContextList->list, $configuration->getContextList()->list)) {
             //remove no more present contexts
@@ -479,7 +468,6 @@ class TaskManager extends AbstractDaemon
      *
      * @throws ReflectionException
      * @throws Exception
-     * @throws LogInvalidArgumentException
      */
     protected function _cleanContexts(): void
     {

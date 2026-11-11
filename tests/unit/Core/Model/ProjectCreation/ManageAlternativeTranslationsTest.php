@@ -196,6 +196,9 @@ class ManageAlternativeTranslationsTest extends AbstractTest
                 $this->assertSame('A system for automated oven configuration.', $contribution['segment']);
                 $this->assertSame('Ein System zur automatisierten Ofenkonfiguration.', $contribution['translation']);
                 $this->assertSame('{"match-quality":"75"}', $contribution['prop']);
+                // every key passed at project creation is the owner's
+                $this->assertSame(['test-private-key'], $contribution['id_user']);
+                $this->assertSame(['test-private-key'], $contribution['mt_key']);
 
                 return true;
             }));

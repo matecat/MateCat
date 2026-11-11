@@ -62,8 +62,9 @@ const matchTag = (plainContent) => {
         closingTag.data.openTagId = uniqueId
         // Closing tag has no ID, so take the one available inside open tag
         closingTag.data.id = openTags[i].data.id
-        // Placeholder for closing (cases: <g>, <ex>)
-        closingTag.data.placeholder = openTags[i].data.id
+        // Placeholder for closing (<g>): the opener's, so a click
+        // highlights both halves (the id, unless the <g> carries equiv-text)
+        closingTag.data.placeholder = openTags[i].data.placeholder
       }
       i++
     }

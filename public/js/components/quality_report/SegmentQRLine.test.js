@@ -95,3 +95,32 @@ test('renders the spacer for a locked non-ICE match when showIceMatchInfo', () =
   )
   expect(screen.getByTestId('qr-spacer')).toBeInTheDocument()
 })
+
+test('renders the suggestion-match percentage when showSuggestionSource and suggestion_match is a number', () => {
+  render(
+    <SegmentQRLine
+      classes="qr-line"
+      label="Target"
+      text="hi"
+      segment={fromJS({match_type: 'MT', suggestion_match: 87})}
+      showSuggestionSource
+    />,
+  )
+  expect(screen.getByText('87%')).toBeInTheDocument()
+})
+
+// Regression: suggestion_match is parsed with parseInt, so a missing/non-numeric value
+// produces NaN — the suggestion-match badge used to render regardless, showing a bare
+// "NaN%" instead of nothing.
+test('omits the suggestion-match badge when suggestion_match is not a number', () => {
+  render(
+    <SegmentQRLine
+      classes="qr-line"
+      label="Target"
+      text="hi"
+      segment={fromJS({match_type: 'MT'})}
+      showSuggestionSource
+    />,
+  )
+  expect(screen.queryByText(/NaN/)).not.toBeInTheDocument()
+})

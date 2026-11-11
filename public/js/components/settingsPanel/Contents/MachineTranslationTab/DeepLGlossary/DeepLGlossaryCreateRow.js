@@ -2,7 +2,6 @@ import React, {useContext, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import Upload from '../../../../../../img/icons/Upload'
 import Checkmark from '../../../../../../img/icons/Checkmark'
-import Close from '../../../../../../img/icons/Close'
 import {DEEPL_GLOSSARY_CREATE_ROW_ID} from './DeepLGlossaryConstants'
 import {createAndImportDeepLGlossary} from '../../../../../api/createAndImportDeepLGlossary'
 import LabelWithTooltip from '../../../../common/LabelWithTooltip'
@@ -14,6 +13,7 @@ import {
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../../../../common/Button/Button'
+import IconClose from '../../../../../../img/icons/IconClose'
 
 export const DeepLGlossaryCreateRow = ({engineId, row, setRows}) => {
   const {portalTarget} = useContext(SettingsPanelContext)
@@ -74,7 +74,6 @@ export const DeepLGlossaryCreateRow = ({engineId, row, setRows}) => {
         type: 'error',
         text: !name ? 'Name mandatory' : 'File mandatory',
         position: 'br',
-        allowHtml: true,
         timer: 5000,
       })
       return false
@@ -95,7 +94,6 @@ export const DeepLGlossaryCreateRow = ({engineId, row, setRows}) => {
       type: 'success',
       text: 'Glossary created successfully',
       position: 'br',
-      allowHtml: true,
       timer: 5000,
     })
     setIsWaitingResult(false)
@@ -106,7 +104,6 @@ export const DeepLGlossaryCreateRow = ({engineId, row, setRows}) => {
       type: 'error',
       text: 'Error creating glossary',
       position: 'br',
-      allowHtml: true,
       timer: 5000,
     })
     setIsWaitingResult(false)
@@ -143,6 +140,7 @@ export const DeepLGlossaryCreateRow = ({engineId, row, setRows}) => {
         }`}
       >
         <input
+          type="text"
           className={inputNameClasses}
           placeholder="Please insert a name for the glossary"
           value={name}
@@ -185,7 +183,7 @@ export const DeepLGlossaryCreateRow = ({engineId, row, setRows}) => {
           htmlType={BUTTON_HTML_TYPE.SUBMIT}
           testId="deeplglossary-create-confirm"
         >
-          <Checkmark size={12} />
+          <Checkmark size={16} />
           Confirm
         </Button>
       </div>
@@ -197,7 +195,7 @@ export const DeepLGlossaryCreateRow = ({engineId, row, setRows}) => {
           onClick={onReset}
           disabled={isWaitingResult}
         >
-          <Close size={18} />
+          <IconClose size={16} />
         </Button>
       </div>
       {isWaitingResult && <div className="spinner"></div>}

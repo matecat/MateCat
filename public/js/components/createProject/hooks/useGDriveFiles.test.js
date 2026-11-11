@@ -274,12 +274,7 @@ describe('useGDriveFiles', () => {
     expect(result.current.files).toEqual([])
   })
 
-  // Documents real production behavior: `files.length >= maxNumberFiles` is
-  // checked before `files.length > maxNumberFiles`, and the first is always
-  // true whenever the second is, so the "Maximum X files allowed" message on
-  // the second branch is unreachable dead code. Only the "No more files can
-  // be loaded" message is ever actually shown.
-  test('shows the "no more files can be loaded" message once the file count reaches the limit', async () => {
+  test('shows no error banner once the file count reaches the limit', async () => {
     global.config = {...global.config, maxNumberFiles: 1}
     getGoogleDriveUploadedFiles.mockResolvedValue({
       files: [
@@ -293,12 +288,7 @@ describe('useGDriveFiles', () => {
     await act(async () => {
       result.current.pickerCallback({action: 'picked', docs: [{id: 'doc-1'}]})
     })
-    expect(CreateProjectActions.showError).toHaveBeenCalledWith(
-      'No more files can be loaded (the limit of 1 has been exceeded).',
-    )
-    expect(CreateProjectActions.showError).not.toHaveBeenCalledWith(
-      expect.stringMatching(/Maximum 1 files allowed/),
-    )
+    expect(CreateProjectActions.showError).not.toHaveBeenCalled()
     global.config = {...global.config, maxNumberFiles: 10}
   })
 

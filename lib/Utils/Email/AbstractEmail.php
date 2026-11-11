@@ -69,7 +69,7 @@ abstract class AbstractEmail
             ['persistent' => WorkerClient::$_HANDLER->persistent]
         );
 
-        LoggerFactory::doJsonLog('Message has been sent');
+        LoggerFactory::getLogger('mail', 'mail.log')->info('Message has been sent');
     }
 
     /**
@@ -122,7 +122,16 @@ abstract class AbstractEmail
      */
     protected function verbatimKeys(): array
     {
-        return ['signup_url', 'url', 'password_reset_url', 'activation_url', 'email'];
+        return [
+            'signup_url',
+            'url',
+            'password_reset_url',
+            'activation_url',
+            'manageUrl',
+            'project_url',
+            'segmentUrl',
+            'email',
+        ];
     }
 
     /**

@@ -68,11 +68,14 @@ describe('TmGlossarySelect', () => {
     ).toBeInTheDocument()
   })
 
-  test('clicking CREATE RESOURCE opens settings and closes the dropdown', () => {
+  test('clicking CREATE RESOURCE opens settings on the TM/glossary tab and closes the dropdown', () => {
     const {container, contextValue} = renderWithContext()
     fireEvent.click(container.querySelector('.select'))
     fireEvent.click(screen.getByText('CREATE RESOURCE'))
-    expect(contextValue.setOpenSettings).toHaveBeenCalledWith({isOpen: true})
+    expect(contextValue.setOpenSettings).toHaveBeenCalledWith({
+      isOpen: true,
+      tab: 'tm',
+    })
   })
 
   test('toggling an inactive option activates it and calls modifyingCurrentTemplate', () => {
@@ -89,11 +92,13 @@ describe('TmGlossarySelect', () => {
     // 'Another TM' (tmKeys[1], isActive: true) renders twice: once as the
     // closed select's selected-value label and once as a dropdown row, so
     // it can't be targeted with screen.getByText. Click the active row
-    // (.dropdown__option--is-active-option) directly instead.
+    // (.dropdown__option--is-active-option) directly instead. The dropdown
+    // now renders through a portal (isPortalDropdown), so it must be queried
+    // via `document` rather than the local `container`.
     const {container, contextValue} = renderWithContext()
     fireEvent.click(container.querySelector('.select'))
     fireEvent.click(
-      container.querySelector('.dropdown__option--is-active-option'),
+      document.querySelector('.dropdown__option--is-active-option'),
     )
     const updater = contextValue.modifyingCurrentTemplate.mock.calls[0][0]
     const result = updater({tm: [{key: 'key-2'}]})

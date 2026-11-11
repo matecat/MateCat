@@ -24,7 +24,7 @@ import {AiAlternatives} from './ToolbarFeatures/Ai/AiAlternatives'
 import {AiFeedback} from './ToolbarFeatures/Ai/AiFeedback'
 import Star from '../../../img/icons/Star'
 import useResizeObserver from '../../hooks/useResizeObserver'
-import {hasCompressiblePhTags} from './utils/DraftMatecatUtils/pcTagUtils'
+import {hasCompressibleTags} from './utils/DraftMatecatUtils/compressibleTagUtils'
 import CatToolStore from '../../stores/CatToolStore'
 import CatToolActions from '../../actions/CatToolActions'
 import CatToolConstants from '../../constants/CatToolConstants'
@@ -43,17 +43,17 @@ export const SegmentTargetToolbar = ({
   addMissingSourceTagsToTarget,
 }) => {
   const [compressed, setCompressed] = useState(
-    CatToolStore.isPhTagsCompressed(),
+    CatToolStore.isTagsCompressed(),
   )
   useEffect(() => {
-    const handler = () => setCompressed(CatToolStore.isPhTagsCompressed())
+    const handler = () => setCompressed(CatToolStore.isTagsCompressed())
     CatToolStore.addListener(
-      CatToolConstants.TOGGLE_PH_TAGS_COMPRESSED,
+      CatToolConstants.TOGGLE_TAGS_COMPRESSED,
       handler,
     )
     return () =>
       CatToolStore.removeListener(
-        CatToolConstants.TOGGLE_PH_TAGS_COMPRESSED,
+        CatToolConstants.TOGGLE_TAGS_COMPRESSED,
         handler,
       )
   }, [])
@@ -94,8 +94,8 @@ export const SegmentTargetToolbar = ({
     missingTagsInTarget && missingTagsInTarget.length > 0 && editArea,
   )
   const canToggleTagsCompression = Boolean(
-    hasCompressiblePhTags(segment?.segment) ||
-    hasCompressiblePhTags(segment?.translation),
+    hasCompressibleTags(segment?.segment) ||
+    hasCompressibleTags(segment?.translation),
   )
   const tagMenuVisible =
     canRemoveTags || canCopyMissingTags || canToggleTagsCompression
@@ -206,7 +206,7 @@ export const SegmentTargetToolbar = ({
                         </Tooltip>
                       </div>
                     ),
-                    onClick: () => CatToolActions.togglePhTagsCompressed(),
+                    onClick: () => CatToolActions.toggleTagsCompressed(),
                     disabled: !canToggleTagsCompression,
                     selected: !compressed,
                     keepOpen: true,

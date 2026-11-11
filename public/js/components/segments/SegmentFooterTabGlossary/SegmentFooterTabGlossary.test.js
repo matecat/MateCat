@@ -121,7 +121,7 @@ describe('SegmentFooterTabGlossary', () => {
     expect(CatToolActions.retrieveJobKeys).toHaveBeenCalled()
   })
 
-  test('shows the no-glossary state and opens the form to create one', () => {
+  test('shows the no-glossary state and opens the settings panel to add one', () => {
     renderComponent()
 
     act(() => {
@@ -131,15 +131,11 @@ describe('SegmentFooterTabGlossary', () => {
       })
     })
 
-    expect(screen.getByText('No glossary available.')).toBeInTheDocument()
+    expect(screen.getByText('No termbase available.')).toBeInTheDocument()
 
-    fireEvent.click(
-      screen.getByText('+ Click here to create one'),
-    )
+    fireEvent.click(screen.getByText('Click here to add one'))
 
-    expect(
-      document.querySelector('input[name="glossary-term-original"]'),
-    ).toBeInTheDocument()
+    expect(CatToolActions.openSettingsPanel).toHaveBeenCalledWith('tm')
   })
 
   test('fetches the glossary for the segment when keys exist and were not already verified', () => {

@@ -14,7 +14,6 @@ import {importMemoryGlossary} from '../../../../../api/importMemoryGlossary/impo
 import {updateMemoryGlossary} from '../../../../../api/updateMemoryGlossary/updateMemoryGlossary'
 import IconEdit from '../../../../../../img/icons/IconEdit'
 import Checkmark from '../../../../../../img/icons/Checkmark'
-import Close from '../../../../../../img/icons/Close'
 import LabelWithTooltip from '../../../../common/LabelWithTooltip'
 import CatToolActions from '../../../../../actions/CatToolActions'
 import {SettingsPanelContext} from '../../../SettingsPanelContext'
@@ -23,6 +22,7 @@ import {
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../../../../common/Button/Button'
+import IconClose from '../../../../../../img/icons/IconClose'
 
 export const MTGlossaryRow = ({
   engineId,
@@ -56,7 +56,6 @@ export const MTGlossaryRow = ({
         type: 'success',
         text: `Glossary file ${file.name} imported successfully`,
         position: 'br',
-        allowHtml: true,
         timer: 5000,
       })
       setIsWaitingResult(false)
@@ -67,7 +66,6 @@ export const MTGlossaryRow = ({
         type: 'error',
         text: `Glossary file ${file.name} import error`,
         position: 'br',
-        allowHtml: true,
         timer: 5000,
       })
       setIsWaitingResult(false)
@@ -159,7 +157,7 @@ export const MTGlossaryRow = ({
         disabled={!name}
         onClick={updateKeyName}
       >
-        <Checkmark size={12} />
+        <Checkmark size={16} />
         Confirm
       </Button>
 
@@ -171,7 +169,7 @@ export const MTGlossaryRow = ({
           setName(row.name)
         }}
       >
-        <Close size={18} />
+        <IconClose size={16} />
       </Button>
     </div>
   )
@@ -203,6 +201,7 @@ export const MTGlossaryRow = ({
         {setInputNameContainer(
           <input
             ref={inputNameRef}
+            type="text"
             className={`glossary-row-name-input${
               isEditingName ? ' active' : ''
             }`}

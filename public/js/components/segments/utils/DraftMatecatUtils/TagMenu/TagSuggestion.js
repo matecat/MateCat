@@ -2,12 +2,15 @@ import React from 'react'
 import {getStyleForName} from '../tagModel'
 
 const TagSuggestion = React.forwardRef((props, ref) => {
+  const {index, tagRole} = props.suggestion.data
+  // Every compressible (numbered) tag looks like a pc tag, so a numbered g
+  // takes the ph style too.
   const tagStyle = getStyleForName(
-    props.suggestion.data.name,
+    index >= 0 ? 'ph' : props.suggestion.data.name,
     config.isTargetRTL,
   ).join(' ')
-  const {index, pcRole} = props.suggestion.data
-  const pcRoleClass = pcRole ? ` tag-pc-${pcRole}` : ''
+  const tagRoleClass =
+    tagRole === 'open' || tagRole === 'close' ? ` tag-paired-${tagRole}` : ''
   return (
     <div
       className={`tag-menu-suggestion ${props.isFocused ? `active` : ''}`}
@@ -22,7 +25,7 @@ const TagSuggestion = React.forwardRef((props, ref) => {
       <div className={'tag-menu-suggestion-item'}>
         {props.suggestion ? (
           <div className={'tag-container'}>
-            <div className={`tag ${tagStyle} tag-placeholder${pcRoleClass}`}>
+            <div className={`tag ${tagStyle} tag-placeholder${tagRoleClass}`}>
               <span>{props.suggestion.data.placeholder}</span>
               {index >= 0 && <span className="index-counter">{index + 1}</span>}
             </div>

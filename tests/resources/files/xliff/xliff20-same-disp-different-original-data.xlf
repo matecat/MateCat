@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:2.0" version="2.0" srcLang="en-US" trgLang="it-IT">
+	<file id="f1">
+		<unit id="u1">
+			<originalData>
+				<data id="d1">&lt;a href="https://a.example"&gt;</data>
+			</originalData>
+			<segment id="s1">
+				<source>Click <ph id="1" dataRef="d1" disp="[link]"/> to continue.</source>
+			</segment>
+		</unit>
+		<unit id="u2">
+			<originalData>
+				<data id="d1">&lt;a href="https://b.example"&gt;</data>
+			</originalData>
+			<segment id="s2">
+				<source>Click <ph id="1" dataRef="d1" disp="[link]"/> to continue.</source>
+			</segment>
+		</unit>
+	</file>
+</xliff>

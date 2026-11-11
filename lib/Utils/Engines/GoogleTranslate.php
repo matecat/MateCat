@@ -4,6 +4,7 @@ namespace Utils\Engines;
 
 use Exception;
 use Model\DataAccess\IDatabase;
+use RuntimeException;
 use TypeError;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
@@ -67,8 +68,7 @@ class GoogleTranslate extends AbstractEngine
     /**
      * @param array<string, mixed> $_config
      * @throws TypeError
-     * @throws \Psr\Log\InvalidArgumentException
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
     public function get(array $_config): GetMemoryResponse
     {

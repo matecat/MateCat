@@ -1,9 +1,5 @@
-php_value magic_quotes_gpc off
 <IfModule mod_rewrite.c>
 RewriteEngine On
-
-RewriteCond "%{HTTP_HOST}"   "!^www\.matecat\.com" [NC]
-RewriteRule ^robots\.txt$ robots-whitelabel.txt [L]
 
 SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
 
@@ -71,4 +67,3 @@ SetEnvIfNoCase Request_URI \.(?:css|js|map)$ !no-gzip
 php_value display_errors 0
 php_value log_errors 1
 php_value error_log storage/log_archive/php_errors.txt
-php_value short_open_tag on

@@ -28,8 +28,15 @@
   outline: none;
   cursor: text;
   overflow-y: auto;
-  border: 1px solid rgba(34, 36, 38, 0.15);
+  border: 1px solid colors.$grey200;
   background-color: white;
+
+  &:hover {
+    border-color: colors.$grey400;
+  }
+  &:focus-within {
+    border-color: colors.$grey400;
+  }
 }
 
 .email-badge-wrapper {

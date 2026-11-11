@@ -115,10 +115,7 @@ const Tooltip = ({
     .join(' ')
 
   return mode === TOOLTIP_MODE.STATIC || !children ? (
-    <div
-      className={tooltipClassName}
-      style={style}
-    >
+    <div className={tooltipClassName} style={style}>
       {content}
     </div>
   ) : children ? (

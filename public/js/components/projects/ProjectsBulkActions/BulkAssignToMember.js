@@ -1,12 +1,7 @@
 import React, {useState} from 'react'
 import PropTypes from 'prop-types'
 import {Select} from '../../common/Select'
-import {
-  Button,
-  BUTTON_MODE,
-  BUTTON_SIZE,
-  BUTTON_TYPE,
-} from '../../common/Button/Button'
+import {Button, BUTTON_MODE, BUTTON_TYPE} from '../../common/Button/Button'
 import ModalsActions from '../../../actions/ModalsActions'
 import CommonUtils from '../../../utils/commonUtils'
 
@@ -14,10 +9,7 @@ const getImgUser = (userData) => {
   const {user_metadata: metadata, user} = userData
 
   return metadata ? (
-    <img
-      className="ui-user-dropdown-image"
-      src={metadata.gplus_picture}
-    />
+    <img className="ui-user-dropdown-image" src={metadata.gplus_picture} />
   ) : (
     <a className="user-initials">{CommonUtils.getUserShortName(user)}</a>
   )
@@ -33,20 +25,20 @@ export const BulkAssignToMember = ({teams, projects, successCallback}) => {
   const [memberSelected, setMemberSelected] = useState({
     id: memberActuallySelected.id.toString(),
     name: (
-      <>
+      <span className="option-assign-member">
         {getImgUser(memberActuallySelected)}{' '}
         {`${memberActuallySelected.user.first_name} ${memberActuallySelected.user.last_name}`}
-      </>
+      </span>
     ),
   })
 
   const options = projectTeam.members.map((member) => ({
     id: member.id.toString(),
     name: (
-      <>
+      <span className="option-assign-member">
         {getImgUser(member)}{' '}
         {`${member.user.first_name} ${member.user.last_name}`}
-      </>
+      </span>
     ),
   }))
 
@@ -68,14 +60,12 @@ export const BulkAssignToMember = ({teams, projects, successCallback}) => {
       <div className="content-bulk-modal-control">
         <Button
           mode={BUTTON_MODE.OUTLINE}
-          size={BUTTON_SIZE.MEDIUM}
           onClick={() => ModalsActions.onCloseModal()}
         >
           Cancel
         </Button>
         <Button
           type={BUTTON_TYPE.PRIMARY}
-          size={BUTTON_SIZE.MEDIUM}
           disabled={typeof memberSelected === 'undefined'}
           onClick={() =>
             successCallback({id_assignee: parseInt(memberSelected?.id)})

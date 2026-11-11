@@ -332,15 +332,12 @@
   justify-content: end;
   width: 100%;
   height: 40px;
-  border: 1px solid colors.$grey200;
   padding: 8px 4px 8px 0;
-  border-radius: variables.$border-radius-default;
 
   input {
     position: absolute;
-    width: 94%;
-    left: 3px;
-    border: none;
+    width: 100%;
+    left: 0;
     background-color: unset;
     font-size: variables.$font-size-small;
     line-height: 24px;
@@ -349,8 +346,6 @@
   }
 
   button {
-    width: 20px !important;
-    height: 20px !important;
     color: colors.$grey300 !important;
 
     &:hover {

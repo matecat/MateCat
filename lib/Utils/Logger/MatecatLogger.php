@@ -17,7 +17,6 @@ use Exception;
 use Monolog\Handler\HandlerInterface;
 use Monolog\Level;
 use Monolog\Logger;
-use Psr\Log\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Utils\Registry\AppConfig;
 
@@ -55,8 +54,6 @@ class MatecatLogger implements LoggerInterface
      *
      * @param mixed                $message The debug message to log. Can be a string, array, or object.
      * @param array<string, mixed> $context Additional context to include with the log. Defaults to an empty array.
-     *
-     * @throws InvalidArgumentException
      */
     public function debug(mixed $message, array $context = []): void
     {
@@ -103,8 +100,6 @@ class MatecatLogger implements LoggerInterface
     /**
      * @param mixed                $message
      * @param array<string, mixed> $context
-     *
-     * @throws InvalidArgumentException
      */
     public function emergency(mixed $message, array $context = []): void
     {
@@ -114,8 +109,6 @@ class MatecatLogger implements LoggerInterface
     /**
      * @param mixed                $message
      * @param array<string, mixed> $context
-     *
-     * @throws InvalidArgumentException
      */
     public function alert(mixed $message, array $context = []): void
     {
@@ -125,8 +118,6 @@ class MatecatLogger implements LoggerInterface
     /**
      * @param mixed                $message
      * @param array<string, mixed> $context
-     *
-     * @throws InvalidArgumentException
      */
     public function critical(mixed $message, array $context = []): void
     {
@@ -136,8 +127,6 @@ class MatecatLogger implements LoggerInterface
     /**
      * @param mixed                $message
      * @param array<string, mixed> $context
-     *
-     * @throws InvalidArgumentException
      */
     public function error(mixed $message, array $context = []): void
     {
@@ -147,8 +136,6 @@ class MatecatLogger implements LoggerInterface
     /**
      * @param mixed                $message
      * @param array<string, mixed> $context
-     *
-     * @throws InvalidArgumentException
      */
     public function warning(mixed $message, array $context = []): void
     {
@@ -158,8 +145,6 @@ class MatecatLogger implements LoggerInterface
     /**
      * @param mixed                $message
      * @param array<string, mixed> $context
-     *
-     * @throws InvalidArgumentException
      */
     public function notice(mixed $message, array $context = []): void
     {
@@ -169,8 +154,6 @@ class MatecatLogger implements LoggerInterface
     /**
      * @param mixed                $message
      * @param array<string, mixed> $context
-     *
-     * @throws InvalidArgumentException
      */
     public function info(mixed $message, array $context = []): void
     {
@@ -188,6 +171,9 @@ class MatecatLogger implements LoggerInterface
      * @param mixed                $level   The log level (e.g., DEBUG, INFO, ERROR).
      * @param mixed                $message The message to log. Can be a string, array, or object.
      * @param array<string, mixed> $context Additional context to include with the log. Defaults to an empty array.
+     *
+     * @throws void LoggerInterface::log() declares InvalidArgumentException for an unknown level, but
+     *              every exception from Monolog is caught below and written to the fallback file.
      */
     public function log(mixed $level, mixed $message, array $context = []): void
     {

@@ -51,7 +51,7 @@ const SegmentQRIssue = ({issue, index}) => {
   return (
     <div className="qr-issue human critical" key={'qr-issue' + index}>
       <div className="qr-error" key={'error-qr' + index}>
-        {issue.get('issue_category')}:{' '}
+        {issue.get('issue_category')}
       </div>
       <div className="qr-severity" key={'severity-qr' + index}>
         <b key={'sev' + index}>[{issue.get('issue_severity')}]</b>

@@ -5,72 +5,105 @@
   width: 100%;
 }
 .footer-body {
-  display: flex;
-  height: 64px;
-  padding: 0 10px;
+  // Job ID on the left; the progress bar and the counts together in the middle.
+  // The two outer 1fr tracks share what is left, so the middle pair stays centred;
+  // the bar grows to 520px before they get anything.
+  display: grid;
+  // The bar column never gets narrower than its content (codes, the bar's own minimum,
+  // the percentage), so the percentage cannot run into the counts
+  grid-template-columns:
+    minmax(max-content, 1fr) minmax(min-content, 520px) max-content
+    minmax(0, 1fr);
+  column-gap: 32px;
+  height: 50px;
+  padding: 0 32px;
   background-color: colors.$white;
+  // One line at any width: rather cut the end than wrap above the bar's 50px
+  white-space: nowrap;
+  overflow: hidden;
 
   .container-left,
   .container-center,
   .container-right {
     display: flex;
     align-items: center;
+    min-width: 0;
   }
 
-  .container-center {
-    flex-grow: 1;
-    justify-content: center;
-    gap: 20px;
+  .container-right {
+    gap: 24px;
   }
 
   .container-progress-bar {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    gap: 16px;
     flex-grow: 1;
-    max-width: 400px;
-    margin-right: 20px;
-    font-weight: bold;
-  }
+    min-width: 0;
 
-  .grey-box {
-    display: flex;
-    flex-direction: column;
-    background-color: colors.$grey50;
-    border-radius: 4px;
-    padding: 5px 10px;
-    line-height: 1.2;
+    // Only the language codes are bold, not the arrow or the percentage
+    .language {
+      white-space: nowrap;
 
-    > :first-child {
-      font-weight: bold;
-    }
-
-    > :last-child {
-      color: colors.$grey700;
-    }
-
-    .grey-box-row {
-      display: grid;
-      gap: 15px;
-      grid-template-columns: 80px 1fr auto;
-      text-align: left;
-
-      > :last-child:is(span) {
-        font-weight: normal;
+      span:not(.to-arrow) {
+        font-weight: bold;
       }
     }
 
-    .button-icon {
-      padding-top: 0px;
-      margin-top: -2px;
+    .footer-progress {
+      flex-grow: 1;
+      min-width: 0;
+      // On narrow windows the bar gives way, so the percentage never runs into the counts
+      --job-progress-bar-min-width: 60px;
     }
   }
 
-  .grey-box-speed-etc {
-    font-weight: bold;
-    > * {
-      color: colors.$black !important;
+  .footer-stat-label {
+    color: colors.$grey700;
+  }
+
+  .footer-stat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+
+  .footer-count-raw {
+    color: colors.$grey700;
+  }
+
+  .footer-speed-etc {
+    gap: 32px;
+
+    // Tooltip wraps its trigger in a block container; keep each pair on the line
+    > span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
   }
+
+  .footer-divider {
+    align-self: stretch;
+    flex-shrink: 0;
+    width: 1px;
+    margin: 15px 0;
+    background-color: colors.$grey200;
+  }
+
+  // Narrow windows: tighter spacing keeps everything on the line down to ~900px.
+  // Last in the block so it wins over the gaps above.
+  @media (max-width: 1023px) {
+    column-gap: 16px;
+    padding: 0 16px;
+
+    .container-right,
+    .footer-speed-etc {
+      gap: 16px;
+    }
+  }
+
   .stats-foo {
     //height: 44px;
     background-color: colors.$white;
@@ -81,5 +114,23 @@
     z-index: 2;
     display: grid;
     min-width: 1024px;
+  }
+}
+
+// Footer tooltips render in a portal on body. A top tooltip is centred on its trigger;
+// near the right edge it has no room and collapses into a narrow column, so give it its
+// natural width and anchor the ones at the end of the footer to the trigger's right side.
+body.cattool .footer-tooltip {
+  width: max-content;
+  max-width: 260px;
+}
+
+body.cattool .footer-tooltip-end {
+  transform: translate(calc(-100% + 16px), -100%);
+
+  &::before {
+    left: auto;
+    right: 12px;
+    margin-left: 0;
   }
 }

@@ -2,8 +2,10 @@ import React, {useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import Upload from '../../../../../../img/icons/Upload'
 import Checkmark from '../../../../../../img/icons/Checkmark'
-import Close from '../../../../../../img/icons/Close'
-import {MTGlossaryStatus, MT_GLOSSARY_CREATE_ROW_ID} from './MTGlossaryConstants'
+import {
+  MTGlossaryStatus,
+  MT_GLOSSARY_CREATE_ROW_ID,
+} from './MTGlossaryConstants'
 import {createMemoryAndImportGlossary} from '../../../../../api/createMemoryAndImportGlossary/createMemoryAndImportGlossary'
 import LabelWithTooltip from '../../../../common/LabelWithTooltip'
 import CatToolActions from '../../../../../actions/CatToolActions'
@@ -14,6 +16,7 @@ import {
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../../../../common/Button/Button'
+import IconClose from '../../../../../../img/icons/IconClose'
 
 export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
   const {portalTarget} = useContext(SettingsPanelContext)
@@ -93,7 +96,6 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
         type: 'error',
         text: !name ? 'Name mandatory' : 'File mandatory',
         position: 'br',
-        allowHtml: true,
         timer: 5000,
       })
       return false
@@ -114,7 +116,6 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
       type: 'success',
       text: 'Glossary created successfully',
       position: 'br',
-      allowHtml: true,
       timer: 5000,
     })
     setIsWaitingResult(false)
@@ -125,7 +126,6 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
       type: 'error',
       text: 'Error creating glossary',
       position: 'br',
-      allowHtml: true,
       timer: 5000,
     })
     setIsWaitingResult(false)
@@ -162,6 +162,7 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
         }`}
       >
         <input
+          type="text"
           className={inputNameClasses}
           placeholder="Please insert a name for the glossary"
           value={name}
@@ -204,7 +205,7 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
           htmlType={BUTTON_HTML_TYPE.SUBMIT}
           testId="mtglossary-create-confirm"
         >
-          <Checkmark size={12} />
+          <Checkmark size={16} />
           Confirm
         </Button>
       </div>
@@ -216,7 +217,7 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
           onClick={onReset}
           disabled={isWaitingResult}
         >
-          <Close size={18} />
+          <IconClose size={16} />
         </Button>
       </div>
       {isWaitingResult && <div className="spinner"></div>}

@@ -1,9 +1,10 @@
 @use 'tokens/colors';
+@use 'commons/variables';
 
 .tooltip-container {
   position: absolute;
   z-index: 12;
-  border-radius: 8px;
+  border-radius: variables.$border-radius-default;
   padding: 5px 10px;
   background-color: colors.$white;
   box-shadow: 0 0 16px rgba(colors.$black, 0.25);

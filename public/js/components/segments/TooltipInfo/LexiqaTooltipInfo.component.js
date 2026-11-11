@@ -2,6 +2,7 @@ import React from 'react'
 
 import LXQ from '../../../utils/lxq.main'
 import IconCloseCircle from '../../../../img/icons/IconCloseCircle'
+import {Button, BUTTON_MODE, BUTTON_SIZE} from '../../common/Button/Button'
 
 const LexiqaTooltipInfo = ({onReplaceWord, messages}) => {
   const ignoreError = (message) => {
@@ -22,13 +23,14 @@ const LexiqaTooltipInfo = ({onReplaceWord, messages}) => {
     const errorsHtml = errors.map((error, i) => (
       <div className="tooltip-error-container" key={i}>
         <span className="tooltip-error-category">{error.msg}</span>
-        <div
-          className="tooltip-error-ignore"
+        <Button
+          mode={BUTTON_MODE.GHOST}
+          size={BUTTON_SIZE.XSMALL}
           onClick={() => ignoreError(error)}
         >
-          <IconCloseCircle />
-          <span className="tooltip-error-ignore-text">Ignore</span>
-        </div>
+          <IconCloseCircle size={18} />
+          <span>Ignore</span>
+        </Button>
       </div>
     ))
 

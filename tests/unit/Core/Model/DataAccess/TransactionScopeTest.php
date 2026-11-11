@@ -231,6 +231,123 @@ class TransactionScopeTest extends AbstractTest
         $this->assertFalse($ran);
     }
 
+    #[Test]
+    public function aScopeEnteredAfterTheServerRolledBackIsRefused(): void
+    {
+        $ran = false;
+
+        try {
+            $this->db->transaction(function () use (&$ran): void {
+                $this->write(1);
+                $this->serverRollsBack();
+
+                $this->db->transaction(function () use (&$ran): void {
+                    $ran = true;
+                });
+            });
+            $this->fail('a scope entered after the server ended the transaction must be refused');
+        } catch (TransactionAbortedException) {
+            // expected
+        }
+
+        $this->assertFalse($ran, 'the refused scope must not open a transaction of its own and run');
+        $this->assertSame(0, $this->countRows());
+        $this->assertFalse($this->db->isInTransactionScope());
+    }
+
+    #[Test]
+    public function theCommitIsRefusedAfterTheServerRolledBack(): void
+    {
+        $drained = false;
+
+        try {
+            $this->db->transaction(function () use (&$drained): void {
+                $this->db->onCommit(function () use (&$drained): void {
+                    $drained = true;
+                });
+                $this->write(1);
+                $this->serverRollsBack();
+                // Lands in autocommit: the damage the refusal reports, and cannot undo.
+                $this->write(2);
+            });
+            $this->fail('the commit of a transaction the server ended must be refused');
+        } catch (TransactionAbortedException) {
+            // expected
+        }
+
+        $this->assertFalse($drained, 'work deferred against rolled-back writes must not run');
+        $this->assertSame(1, $this->countRows());
+    }
+
+    #[Test]
+    public function aScopeStaysOpenAfterTheServerRolledBack(): void
+    {
+        $this->db->begin();
+        $this->serverRollsBack();
+
+        $this->assertFalse($this->db->getConnection()->inTransaction());
+        $this->assertTrue($this->db->isInTransactionScope());
+
+        $this->db->rollback();
+
+        $this->assertFalse($this->db->isInTransactionScope());
+    }
+
+    #[Test]
+    public function aFixtureScopeOpenedWithBeginMakesTransactionAGuest(): void
+    {
+        $this->db->begin();
+
+        $this->db->transaction(function (): void {
+            $this->write(1);
+        });
+
+        $this->assertTrue($this->db->getConnection()->inTransaction(), 'the guest must not commit the fixture scope');
+
+        $this->db->rollback();
+
+        $this->assertSame(0, $this->countRows());
+    }
+
+    #[Test]
+    public function joiningWithBeginKeepsTheVerdict(): void
+    {
+        $this->db->begin();
+        $this->db->markRollbackOnly();
+        $this->db->begin();
+
+        $this->expectException(TransactionAbortedException::class);
+
+        $this->db->commit();
+    }
+
+    #[Test]
+    public function theScopeEndsWithCommitRollbackAndClose(): void
+    {
+        $this->db->transaction(function (): void {
+            $this->assertTrue($this->db->isInTransactionScope());
+        });
+        $this->assertFalse($this->db->isInTransactionScope(), 'after commit');
+
+        $this->db->begin();
+        $this->db->rollback();
+        $this->assertFalse($this->db->isInTransactionScope(), 'after rollback');
+
+        $this->db->begin();
+        $this->db->close();
+        $this->assertFalse($this->db->isInTransactionScope(), 'after close');
+    }
+
+    /**
+     * Stands in for the server ending the transaction on its own, as it does on a deadlock (1213) or
+     * on a lock wait timeout (1205) under innodb_rollback_on_timeout. The OK packet clears the PDO
+     * flag the same way the first statement after that error does.
+     */
+    private function serverRollsBack(): void
+    {
+        $this->db->getConnection()->exec('ROLLBACK');
+    }
+
     private function write(int $id): void
     {
         $this->db->getConnection()->exec("INSERT INTO tx_scope_probe VALUES ($id)");

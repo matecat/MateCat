@@ -67,7 +67,8 @@
   );
   background-color: var(--accordion-content-bg, #{colors.$grey100});
   overflow: var(--accordion-content-overflow, hidden);
-}
-.insideContent {
-  padding: 12px 0;
+
+  > div {
+    padding: 10px 0;
+  }
 }

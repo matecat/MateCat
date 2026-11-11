@@ -46,8 +46,6 @@ class TestableJobSplitMergeService extends JobSplitMergeService
 
     /** @var array{job: JobStruct, newPassword: string|false}[] */
     private array $updateForMergeCalls = [];
-    /** @var JobStruct[] */
-    private array $deleteOnMergeCalls = [];
     /** @var array{chunk: JobStruct, oldPassword: string, newPassword: string}[] */
     private array $sweepCredentialCachesCalls = [];
 
@@ -232,7 +230,7 @@ class TestableJobSplitMergeService extends JobSplitMergeService
         return $this->enqueuedWorkers;
     }
 
-    // ── updateForMerge / deleteOnMerge ──
+    // ── updateForMerge ──
 
     protected function updateForMerge(JobStruct $job, string $newPassword): void
     {
@@ -247,18 +245,6 @@ class TestableJobSplitMergeService extends JobSplitMergeService
         return $this->updateForMergeCalls;
     }
 
-    protected function deleteOnMerge(JobStruct $job): void
-    {
-        $this->deleteOnMergeCalls[] = $job;
-    }
-
-    /**
-     * @return JobStruct[]
-     */
-    public function getDeleteOnMergeCalls(): array
-    {
-        return $this->deleteOnMergeCalls;
-    }
 
     protected function sweepCredentialCaches(JobStruct $chunk, string $oldPassword, string $newPassword): void
     {

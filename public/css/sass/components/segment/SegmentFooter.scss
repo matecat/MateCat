@@ -25,9 +25,7 @@
         input {
           display: inline-block;
           width: 100%;
-          border: 1px solid colors.$grey200;
-          padding: 2px 0.4%;
-          border-radius: variables.$border-radius-default;
+          padding: 2px 8px;
           text-align: left;
           min-height: 20px;
         }
@@ -235,7 +233,9 @@ section.loaded .submenu {
 .loading-tab .loader.loader_on {
   left: unset;
   right: 12px;
-  top: 6px;
+  // Centred on the tab label: the 20px spinner sits on the text's centre line,
+  // 1px below the middle of the tab
+  top: calc(50% - 9px);
 }
 
 .submenu li a {
@@ -323,4 +323,19 @@ section.loaded .submenu {
 
 .sub-editor .cc-search .search-target {
   width: 44.2%;
+}
+
+.alternatives .deleted,
+.suggestion_source .deleted,
+.suggestion_source del {
+  background: rgba(255, 46, 0, 0.3);
+  color: colors.$red600;
+  text-decoration: line-through;
+}
+
+.alternatives .added,
+.suggestion_source .added,
+.suggestion_source ins {
+  background: rgba(18, 230, 130, 0.12);
+  color: colors.$green1000;
 }

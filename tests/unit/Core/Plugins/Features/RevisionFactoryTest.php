@@ -17,7 +17,6 @@ use PDOStatement;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\Stub;
 use Plugins\Features\AbstractRevisionFeature;
-use Plugins\Features\ReviewExtended;
 use Plugins\Features\ReviewExtended\ChunkReviewModel;
 use Plugins\Features\RevisionFactory;
 use Plugins\Features\SecondPassReview;
@@ -132,7 +131,7 @@ class RevisionFactoryTest extends AbstractTest
     {
         $metadataRow = new MetadataStruct();
         $metadataRow->key = 'features';
-        $metadataRow->value = 'review_extended';
+        $metadataRow->value = 'second_pass_review';
         $metadataRow->id_project = 1;
 
         $this->stmtStub->method('fetchAll')->willReturn([$metadataRow]);

@@ -2,6 +2,7 @@
 
 namespace Matecat\Core\Model\ProjectCreation;
 
+use DomainException;
 use Exception;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\IDatabase;
@@ -11,6 +12,8 @@ use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\PayableRates\CustomPayableRateDao;
 use Model\PayableRates\CustomPayableRateStruct;
 use Model\ProjectCreation\JobCreationService;
+use Model\ProjectCreation\ProjectCreationError;
+use Model\ProjectCreation\ProjectCreationException;
 use Model\ProjectCreation\ProjectStructure;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
@@ -467,6 +470,67 @@ class JobCreationServiceTest extends AbstractTest
         $ref = new ReflectionClass(JobCreationService::class);
         $method = $ref->getMethod('resolvePayableRates');
         $method->invoke($service, $ps, 'it-IT');
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function testResolvePayableRatesFromModelObjectTurnsAnInvalidLanguageIntoAProjectCreationException(): void
+    {
+        $ps = $this->makeProjectStructure([
+            'mt_qe_workflow_payable_rate' => null,
+            'payable_rate_model' => [
+                'version' => 1,
+                'payable_rate_template_name' => 'test_model',
+                'breakdowns' => [
+                    'default' => ['NO_MATCH' => 100, 'ICE' => 0, 'ICE_MT' => 0],
+                    'xx-XX' => ['it-IT' => ['NO_MATCH' => 100]],
+                ],
+            ],
+        ]);
+
+        try {
+            $this->invokeMethod('resolvePayableRates', [$ps, 'it-IT']);
+            $this->fail('Expected ProjectCreationException');
+        } catch (ProjectCreationException $e) {
+            $this->assertSame(ProjectCreationError::INVALID_PAYABLE_RATES->value, $e->getCode());
+            $this->assertSame('xx-XX is not a supported language', $e->getMessage());
+            $this->assertInstanceOf(DomainException::class, $e->getPrevious());
+            $this->assertSame(403, $e->getPrevious()->getCode());
+        }
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function testResolvePayableRatesFromDbLookupTurnsADomainExceptionIntoAProjectCreationException(): void
+    {
+        $refused = new DomainException('xx-XX is not a supported language', 403);
+
+        $template = $this->createStub(CustomPayableRateStruct::class);
+        $template->method('getPayableRates')->willThrowException($refused);
+
+        $dao = $this->createStub(CustomPayableRateDao::class);
+        $dao->method('findById')->willReturn($template);
+
+        $service = new JobCreationService($this->featureSet, $this->logger, $this->db, $dao);
+
+        $ps = $this->makeProjectStructure([
+            'mt_qe_workflow_payable_rate' => null,
+            'payable_rate_model' => null,
+            'payable_rate_model_id' => 42,
+        ]);
+
+        try {
+            (new ReflectionClass(JobCreationService::class))->getMethod('resolvePayableRates')->invoke($service, $ps, 'it-IT');
+            $this->fail('Expected ProjectCreationException');
+        } catch (ProjectCreationException $e) {
+            $this->assertSame(ProjectCreationError::INVALID_PAYABLE_RATES->value, $e->getCode());
+            $this->assertSame('xx-XX is not a supported language', $e->getMessage());
+            $this->assertSame($refused, $e->getPrevious());
+        }
     }
 
     // =========================================================================

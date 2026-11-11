@@ -1,4 +1,5 @@
 @use 'tokens/colors';
+@use 'commons/variables';
 
 .input-component {
   display: flex;
@@ -6,6 +7,7 @@
   gap: 4px;
 
   label {
+    color: colors.$grey700;
     cursor: pointer;
     // body carries a legacy `text-align: center`, so the label has to opt out
     text-align: left;
@@ -27,17 +29,17 @@
     box-sizing: border-box;
     width: 100%;
     height: 40px;
-    color: colors.$grey700;
-    border: 1px solid colors.$grey100;
-    box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.0784313725) inset;
+    color: colors.$black;
+    border: 1px solid colors.$grey200;
     font-size: 16px;
     line-height: 24px;
     font-weight: 400;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    border-radius: 8px;
+    border-radius: variables.$border-radius-default;
     padding: 8px 12px;
+    outline-offset: 0;
 
     &:autofill,
     &:-webkit-autofill {
@@ -48,12 +50,12 @@
       opacity: 1;
     }
     &:hover {
-      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.0784313725) inset;
+      border-color: colors.$grey400;
     }
     &:focus,
     &:active {
-      outline: none;
-      box-shadow: inset 0 0 0 2px colors.$black;
+      border-color: colors.$grey400;
+      outline: 1px solid colors.$grey400;
     }
     &.isCompressed {
       padding: 10px;
@@ -69,16 +71,15 @@
     &.hasError,
     &.hasError:hover,
     &.hasError:focus {
-      box-shadow: inset 0 0 0 2px colors.$red500 !important;
+      border-color: colors.$red500 !important;
     }
     &:disabled {
       background-color: colors.$grey75;
-      box-shadow: none;
-      color: colors.$grey200;
+      color: colors.$grey400;
       cursor: not-allowed;
 
       &::placeholder {
-        color: colors.$grey200;
+        color: colors.$grey400;
       }
     }
   }

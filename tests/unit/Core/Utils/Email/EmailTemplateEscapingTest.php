@@ -102,6 +102,37 @@ class EmailTemplateEscapingTest extends AbstractTest
     }
 
     /**
+     * Every value a template writes into an `href` is a link the email exists to offer, so it has to
+     * be listed in {@see \Utils\Email\AbstractEmail::verbatimKeys()}. An unlisted one is defanged and
+     * the reader gets `https[:]//…` instead of a working link: `manageUrl`, `project_url` and
+     * `segmentUrl` shipped that way and were only found by manual testing.
+     */
+    #[Test]
+    #[DataProvider('emailTemplates')]
+    public function everyLinkTargetIsExemptFromDefanging(string $template): void
+    {
+        $contents = file_get_contents($template);
+        $this->assertIsString($contents, "cannot read $template");
+
+        $verbatimKeys = (new ReflectionMethod(InvitedToTeamEmail::class, 'verbatimKeys'))
+            ->invoke($this->invitationFor('Team'));
+
+        // `$sender['email']` is judged by the key read, since that is what EmailValue matches on.
+        preg_match_all('~href="<\?=\s*\$(\w+)(?:\[\s*[\'"](\w+)[\'"]\s*])?~', $contents, $matches, PREG_SET_ORDER);
+
+        foreach ($matches as $match) {
+            $key = ($match[2] ?? '') !== '' ? $match[2] : $match[1];
+
+            $this->assertContains(
+                $key,
+                $verbatimKeys,
+                basename($template) . " links to \$$key, which is not in AbstractEmail::verbatimKeys()."
+                . ' It will be defanged and the link will not work'
+            );
+        }
+    }
+
+    /**
      * A payload written through the wrapper comes out as text, once.
      */
     #[Test]

@@ -15,6 +15,12 @@ jest.mock('../../actions/ModalsActions')
 jest.mock('../../actions/CatToolActions')
 jest.mock('../../utils/commonUtils')
 
+global.ResizeObserver = class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
 jest.mock('./JobMenu', () => ({
   __esModule: true,
   default: (props) => (
@@ -22,10 +28,10 @@ jest.mock('./JobMenu', () => ({
       <span data-testid="disable-download">
         {props.disableDownload ? 'disabled' : 'enabled'}
       </span>
-      <div data-testid="download-label">{props.getDownloadLabel.label}</div>
+      <div data-testid="download-label">{props.downloadLabel.label}</div>
       <button
         data-testid="download-action"
-        onClick={() => props.getDownloadLabel.action()}
+        onClick={() => props.downloadLabel.action()}
       >
         download
       </button>
@@ -415,6 +421,99 @@ test('toggles disableDownload state on DISABLE/ENABLE_DOWNLOAD_BUTTON store even
     ProjectsStore.emit(ManageConstants.DISABLE_DOWNLOAD_BUTTON, 999)
   })
   expect(screen.getByTestId('disable-download')).toHaveTextContent('enabled')
+})
+
+test('shows only the first 5 chunks when there are more than 5 and not expanded', () => {
+  const chunks = new Array(7)
+    .fill(null)
+    .map((_, index) => makeJob({id: 90 + index}))
+
+  render(
+    <ChunksJobContainer
+      chunks={chunks}
+      project={makeProject(7)}
+      isChecked={false}
+      isChunk={true}
+      isChunkOutsourced={false}
+      onCheckedJob={jest.fn()}
+      downloadTranslationFn={jest.fn()}
+    />,
+  )
+
+  for (let index = 1; index <= 5; index++) {
+    expect(
+      screen.getByTestId(`job-container-${89 + index}-${index}`),
+    ).toBeInTheDocument()
+  }
+  expect(screen.queryByTestId('job-container-95-6')).not.toBeInTheDocument()
+  expect(screen.queryByTestId('job-container-96-7')).not.toBeInTheDocument()
+})
+
+test('reveals the extra chunks when the shared expanded prop is true', () => {
+  const chunks = new Array(7)
+    .fill(null)
+    .map((_, index) => makeJob({id: 90 + index}))
+
+  render(
+    <ChunksJobContainer
+      chunks={chunks}
+      project={makeProject(7)}
+      isChecked={false}
+      isChunk={true}
+      isChunkOutsourced={false}
+      onCheckedJob={jest.fn()}
+      downloadTranslationFn={jest.fn()}
+      expanded={true}
+    />,
+  )
+
+  expect(screen.getByTestId('job-container-95-6')).toBeInTheDocument()
+  expect(screen.getByTestId('job-container-96-7')).toBeInTheDocument()
+})
+
+test('collapsing the shared expanded prop defers unmounting the extra chunks until the transition ends', () => {
+  const chunks = new Array(7)
+    .fill(null)
+    .map((_, index) => makeJob({id: 90 + index}))
+
+  const {rerender} = render(
+    <ChunksJobContainer
+      chunks={chunks}
+      project={makeProject(7)}
+      isChecked={false}
+      isChunk={true}
+      isChunkOutsourced={false}
+      onCheckedJob={jest.fn()}
+      downloadTranslationFn={jest.fn()}
+      expanded={true}
+    />,
+  )
+
+  // eslint-disable-next-line testing-library/no-node-access
+  const collapseWrapper = screen.getByTestId('job-container-95-6').parentElement.parentElement
+
+  rerender(
+    <ChunksJobContainer
+      chunks={chunks}
+      project={makeProject(7)}
+      isChecked={false}
+      isChunk={true}
+      isChunkOutsourced={false}
+      onCheckedJob={jest.fn()}
+      downloadTranslationFn={jest.fn()}
+      expanded={false}
+    />,
+  )
+
+  expect(screen.getByTestId('job-container-95-6')).toBeInTheDocument()
+
+  act(() => {
+    const event = new Event('transitionend', {bubbles: true})
+    event.propertyName = 'height'
+    collapseWrapper.dispatchEvent(event)
+  })
+
+  expect(screen.queryByTestId('job-container-95-6')).not.toBeInTheDocument()
 })
 
 test('removes the store listeners on unmount', () => {

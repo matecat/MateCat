@@ -12,12 +12,19 @@ import TEXT_UTILS from '../../utils/textUtils'
  * A direct call to a sibling would capture the core implementation and silently
  * bypass whatever a plugin assigned.
  */
+// Metadata the Messages tab never shows: sizeRestriction drives the character
+// counter, and resname/restype only feed the context preview. Rendering them
+// would also open the tab on every segment of an Excel upload.
+const HIDDEN_METADATA_KEYS = ['sizeRestriction', 'resname', 'restype']
+
 const segmentNotes = {
   // Assigned by plugins that hide notes matching a pattern. Undefined in core.
   excludeMatchingNotesRegExp: undefined,
 
   getFilteredMetadataKeys({metadata}) {
-    return metadata.filter(({meta_key}) => meta_key !== 'sizeRestriction')
+    return metadata.filter(
+      ({meta_key}) => !HIDDEN_METADATA_KEYS.includes(meta_key),
+    )
   },
 
   getNoteContent(note) {
@@ -160,7 +167,9 @@ const segmentNotes = {
     const filtered =
       typeof segmentNotes.getFilteredMetadataKeys === 'function'
         ? segmentNotes.getFilteredMetadataKeys({metadata})
-        : metadata.filter((item) => item.meta_key !== 'sizeRestriction')
+        : metadata.filter(
+            ({meta_key}) => !HIDDEN_METADATA_KEYS.includes(meta_key),
+          )
     if (filtered?.length > 0) {
       notesHtml.push(segmentNotes.getMetadataNotes({metadata, segment}))
     }

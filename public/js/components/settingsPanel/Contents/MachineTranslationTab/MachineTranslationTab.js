@@ -26,7 +26,7 @@ import {OptionsContainer} from './OptionsContainer'
 import {ApplicationThreshold} from './ApplicationThreshold'
 import defaultMTOptions from '../../Contents/defaultTemplates/mtOptions.json'
 import {normalizeTemplatesWithNullProps} from '../../../../hooks/useTemplates'
-import {Button, BUTTON_TYPE} from '../../../common/Button/Button'
+import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../../../common/Button/Button'
 import IconClose from '../../../../../img/icons/IconClose'
 import IconAdd from '../../../../../img/icons/IconAdd'
 
@@ -123,7 +123,7 @@ export const MachineTranslationTab = () => {
         {name: 'Active'},
         {name: 'Engine name'},
         {name: 'Description'},
-        {name: 'Action'},
+        {name: ''},
       ]
 
   const addMTEngineRequest = (data) => {
@@ -315,7 +315,7 @@ export const MachineTranslationTab = () => {
             <Select
               placeholder="Choose provider"
               id="mt-engine"
-              maxHeightDroplist={100}
+              maxHeightDroplist={400}
               options={enginesList}
               activeOption={activeAddEngine}
               onSelect={(option) => {
@@ -325,9 +325,10 @@ export const MachineTranslationTab = () => {
             />
             <Button
               type={BUTTON_TYPE.WARNING}
+              size={BUTTON_SIZE.ICON_STANDARD}
               onClick={() => setAddMTVisible(false)}
             >
-              <IconClose size={11} />
+              <IconClose size={18} />
             </Button>
           </div>
           {activeAddEngine ? (
@@ -351,7 +352,7 @@ export const MachineTranslationTab = () => {
               onClick={() => setAddMTVisible(true)}
               title="Add MT engine"
             >
-              <IconAdd size={16} /> Add MT engine
+              <IconAdd size={22} /> Add MT engine
             </Button>
           )}
         </div>

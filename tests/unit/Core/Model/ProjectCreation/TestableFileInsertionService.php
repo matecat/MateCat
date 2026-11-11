@@ -2,10 +2,10 @@
 
 namespace Matecat\Core\Model\ProjectCreation;
 
+use Exception;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\ProjectCreation\FileInsertionService;
 use Model\ProjectCreation\ProjectStructure;
-use Throwable;
 
 /**
  * Testable subclass of {@see FileInsertionService} that exposes protected
@@ -60,22 +60,11 @@ class TestableFileInsertionService extends FileInsertionService
 
     /**
      * Public wrapper to invoke validateCachedXliff() (now protected).
-     * @throws \Exception
+     * @throws Exception
      */
     public function callValidateCachedXliff(?string $cachedXliffFilePathName, array $_originalFileNames, array $linkFiles): void
     {
         $this->validateCachedXliff($cachedXliffFilePathName, $_originalFileNames, $linkFiles);
-    }
-
-    /**
-     * Public wrapper to invoke mapFileInsertionError() (still private — use reflection).
-     * @throws \ReflectionException
-     */
-    public function callMapFileInsertionError(ProjectStructure $projectStructure, Throwable $e): void
-    {
-        $ref = new \ReflectionClass(FileInsertionService::class);
-        $method = $ref->getMethod('mapFileInsertionError');
-        $method->invoke($this, $projectStructure, $e);
     }
 
     protected function validateCachedXliff(?string $cachedXliffFilePathName, array $_originalFileNames, array $linkFiles): void

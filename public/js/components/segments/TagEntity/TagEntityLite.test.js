@@ -1,12 +1,13 @@
 import React from 'react'
 import {render, act} from '@testing-library/react'
+import {renderToStaticMarkup as toStaticMarkup} from 'react-dom/server'
 import {TagEntityLite} from './TagEntityLite'
 
 let mockCompressed = false
 let mockStoreListeners = {}
 
 jest.mock('../../../stores/CatToolStore', () => ({
-  isPhTagsCompressed: () => mockCompressed,
+  isTagsCompressed: () => mockCompressed,
   addListener: jest.fn((event, handler) => {
     mockStoreListeners[event] = handler
   }),
@@ -16,7 +17,7 @@ jest.mock('../../../stores/CatToolStore', () => ({
 }))
 
 jest.mock('../../../constants/CatToolConstants', () => ({
-  TOGGLE_PH_TAGS_COMPRESSED: 'TOGGLE_PH_TAGS_COMPRESSED',
+  TOGGLE_TAGS_COMPRESSED: 'TOGGLE_TAGS_COMPRESSED',
 }))
 
 jest.mock('../utils/DraftMatecatUtils/tagModel', () => ({
@@ -36,9 +37,9 @@ jest.mock('../../common/Tooltip', () => ({
   ),
 }))
 
-const mockContentState = (entityName, index, placeholder = 'test', pcRole) => ({
+const mockContentState = (entityName, index, placeholder = 'test', tagRole) => ({
   getEntity: () => ({
-    data: {name: entityName, index, placeholder, pcRole},
+    data: {name: entityName, index, placeholder, tagRole},
   }),
 })
 
@@ -176,7 +177,7 @@ describe('TagEntityLite', () => {
 
     mockCompressed = true
     act(() => {
-      mockStoreListeners['TOGGLE_PH_TAGS_COMPRESSED']?.()
+      mockStoreListeners['TOGGLE_TAGS_COMPRESSED']?.()
     })
 
     expect(
@@ -279,7 +280,7 @@ describe('TagEntityLite', () => {
     expect(container.querySelector('.tag-text-lite')).toBeTruthy()
     expect(
       container.querySelector('.tag'),
-    ).toHaveClass('tag-pc-open')
+    ).toHaveClass('tag-paired-open')
     expect(
       container.querySelector('[data-testid="tooltip-wrapper"]'),
     ).toBeTruthy()
@@ -300,7 +301,37 @@ describe('TagEntityLite', () => {
     expect(container.querySelector('.tag-text-lite')).toBeNull()
     expect(
       container.querySelector('.tag'),
-    ).toHaveClass('tag-pc-close')
+    ).toHaveClass('tag-paired-close')
     expect(container.querySelector('[data-testid="tooltip-wrapper"]')).toBeNull()
+  })
+})
+
+describe('TagEntityLite - numbered g tags', () => {
+  const classesOf = (contentState) => {
+    const html = toStaticMarkup(
+      <TagEntityLite
+        entityKey="1"
+        contentState={contentState}
+        offsetkey="1-0-0"
+        isRTL={false}
+      >
+        <span>text</span>
+      </TagEntityLite>,
+    )
+    return html.match(/class="tag ([^"]*)"/)[1].split(/\s+/)
+  }
+
+  test('a numbered g tag takes the pc (ph) style, not the g style', () => {
+    const classes = classesOf(mockContentState('g', 0, '[#$dp4]', 'open'))
+    expect(classes).toEqual(
+      expect.arrayContaining(['tag-selfclosed', 'tag-ph', 'tag-paired-open']),
+    )
+    expect(classes).not.toContain('tag-open')
+  })
+
+  test('a plain g tag keeps the g style', () => {
+    const classes = classesOf(mockContentState('g', undefined, '1'))
+    expect(classes).toContain('tag-open')
+    expect(classes).not.toContain('tag-ph')
   })
 })

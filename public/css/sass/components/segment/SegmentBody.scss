@@ -1,6 +1,8 @@
 @use '../../tokens/colors';
 @use 'commons/variables';
 
+$footerTabHeight: 36px;
+
 .wrap .outersource {
   display: flex;
 }
@@ -100,7 +102,9 @@ body #file section:not(.editor) {
 }
 
 .editor .source {
-  padding-top: 4px !important;
+  // Puts the first source line on the same line as the first target line: the target
+  // editor adds a 1px border, 5px of padding and a taller line height.
+  padding-top: 12px !important;
   font-size: variables.$font-size-base;
 }
 
@@ -170,18 +174,20 @@ section.readonly .status-container a.status:hover {
   margin: 2px 0 0px;
   word-break: normal;
   line-height: 25px;
-  outline: none;
   color: colors.$black;
   border: 1px solid colors.$grey200;
   border-radius: variables.$border-radius-default;
-  /*font-variant-ligatures: none;*/
   cursor: text;
+  outline: 1px solid transparent;
+
+  &:hover {
+    border-color: colors.$grey400;
+  }
 }
 
-.editarea:focus {
-  border: 1px solid colors.$grey300;
-  box-shadow: inset 0px 0px 2px 2px colors.$grey300;
-  outline-color: colors.$grey300;
+.editarea:focus-within {
+  border-color: colors.$grey400;
+  outline-color: colors.$grey400;
 }
 
 .source {
@@ -193,7 +199,7 @@ section.readonly .status-container a.status:hover {
   float: left;
   width: 99%;
   height: 100%;
-  padding-bottom: 5px;
+  padding-bottom: 10px;
   padding-top: 5px;
   font-size: variables.$font-size-small;
 }
@@ -227,7 +233,7 @@ section.readonly .status-container a.status:hover {
   z-index: 1;
   position: absolute;
   width: 8px;
-  height: 100%;
+  height: calc(100% + $footerTabHeight);
   right: 0;
   top: 0;
   overflow: hidden;

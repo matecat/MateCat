@@ -1,5 +1,5 @@
 import React from 'react'
-import {render, screen, act, fireEvent} from '@testing-library/react'
+import {render, screen, act, fireEvent, waitFor} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import Search from './Search'
@@ -128,11 +128,22 @@ test('renders the search form with source and target inputs when active', () => 
   expect(screen.getByText('REPLACE ALL')).toBeInTheDocument()
 })
 
-test('adds the APPROVED-2 status option when secondRevisionsCount is set', () => {
+test('adds the APPROVED2 status option when secondRevisionsCount is set', () => {
   global.config.secondRevisionsCount = true
   render(<Search {...baseProps()} />)
 
-  expect(screen.getByRole('option', {name: 'APPROVED-2'})).toBeInTheDocument()
+  expect(screen.getByRole('option', {name: 'APPROVED2'})).toBeInTheDocument()
+})
+
+test('selecting the APPROVED2 status option keeps it selected', () => {
+  global.config.secondRevisionsCount = true
+  render(<Search {...baseProps()} />)
+
+  fireEvent.change(screen.getByTestId('status-select'), {
+    target: {value: 'APPROVED2'},
+  })
+
+  expect(screen.getByTestId('status-select').value).toBe('APPROVED2')
 })
 
 test('typing in the source input enables the find button and shows the clear button', async () => {
@@ -179,7 +190,9 @@ test('clicking clear resets the search fields after the deferred timeout', async
   await user.type(screen.getByPlaceholderText('Find in source'), 'hello')
   await user.click(screen.getByText('Clear'))
 
-  expect(screen.getByPlaceholderText('Find in source')).toHaveValue('')
+  await waitFor(() =>
+    expect(screen.getByPlaceholderText('Find in source')).toHaveValue(''),
+  )
 })
 
 test('inserts a non-breaking space placeholder on Ctrl+Shift+Space', () => {

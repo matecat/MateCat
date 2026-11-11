@@ -18,6 +18,12 @@ export const taggingTypes = [
     default: true,
   },
   {
+    id: 'single_square',
+    name: 'Single square brackets',
+    code: '[text]',
+    default: false,
+  },
+  {
     id: 'dollar_curly',
     name: 'Dollar curly brackets',
     code: '${text}',
@@ -150,6 +156,7 @@ export const Tagging = () => {
           checkSpaceToReverse={true}
           onToggleOption={toggleOption}
           multipleSelect={'dropdown'}
+          isActiveOptionCheckmarkVisible={false}
           onCloseSelect={() => onClose()}
         >
           {({name, code, html}) => ({
@@ -163,7 +170,7 @@ export const Tagging = () => {
                   />
                 ) : (
                   <div className="codes-container">
-                    {code.split(',').map((code) => (
+                    {code?.split(',').map((code) => (
                       <div key={code} className="code-badge">
                         {code}
                       </div>

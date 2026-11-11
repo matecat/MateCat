@@ -3,9 +3,11 @@
 .instructions-modal {
   min-height: 230px;
   max-width: 900px;
+  // The shared .matecat-modal-middle pads only the sides
+  padding-bottom: 25px;
   .title {
     display: flex;
-    gap: 8px
+    gap: 8px;
   }
   h4 {
     margin: 20px 0;
@@ -14,7 +16,6 @@
     background-color: colors.$white;
     padding: 20px;
     margin-top: 20px;
-    margin-bottom: 20px;
     max-height: 400px;
     overflow: auto;
     p {
@@ -25,6 +26,31 @@
       border-left: 5px solid colors.$grey200;
       margin: 1.5em 10px;
       padding: 0.5em 10px;
+    }
+  }
+
+  // Instructions arrive as markdown rendered to paragraphs and lists; the global reset strips
+  // their spacing and bullets, which runs every line together
+  .instructions-text {
+    line-height: 26px;
+    overflow-wrap: anywhere;
+    p,
+    ul,
+    ol {
+      margin: 0 0 12px;
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+    ul,
+    ol {
+      padding-left: 24px;
+    }
+    ul {
+      list-style: disc;
+    }
+    ol {
+      list-style: decimal;
     }
   }
 
@@ -44,15 +70,19 @@
   }
 
   &:first-child {
-    --accordion-title-br: #{variables.$border-radius-default} #{variables.$border-radius-default} 0 0;
-    --accordion-title-expanded-br: #{variables.$border-radius-default} #{variables.$border-radius-default} 0 0;
+    --accordion-title-br: #{variables.$border-radius-default}
+      #{variables.$border-radius-default} 0 0;
+    --accordion-title-expanded-br: #{variables.$border-radius-default}
+      #{variables.$border-radius-default} 0 0;
   }
 
   &:last-child {
-    --accordion-content-br: 0 0 #{variables.$border-radius-default} #{variables.$border-radius-default};
+    --accordion-content-br: 0 0 #{variables.$border-radius-default}
+      #{variables.$border-radius-default};
 
     &:not(:has([data-expanded])) {
-      --accordion-title-br: 0 0 #{variables.$border-radius-default} #{variables.$border-radius-default};
+      --accordion-title-br: 0 0 #{variables.$border-radius-default}
+        #{variables.$border-radius-default};
     }
   }
 
@@ -65,4 +95,9 @@
   [data-expanded] > :first-child {
     color: #{colors.$black};
   }
+}
+
+.file-instructions-accordion {
+  max-height: min(70dvh, 800px);
+  overflow-y: auto;
 }

@@ -3,10 +3,7 @@ import {fireEvent, render, screen} from '@testing-library/react'
 import {Select} from './Select'
 
 // Controlled by individual tests to drive the portal dropdown's max-height
-// and positioning effects in Select.js.
-let mockListRect = {top: 0, height: 0, bottom: 0}
-let mockShowCustomDropdownWrapper = false
-let mockCustomDropdownMarginBottom = '0px'
+// effect in Select.js.
 const mockSetListMaxHeight = jest.fn()
 
 jest.mock('./Dropdown', () => {
@@ -14,10 +11,10 @@ jest.mock('./Dropdown', () => {
   return {
     Dropdown: forwardRef(({options, onSelect}, ref) => {
       useImperativeHandle(ref, () => ({
-        getListRef: () => ({getBoundingClientRect: () => mockListRect}),
+        getListRef: () => null,
         setListMaxHeight: mockSetListMaxHeight,
       }))
-      const content = (
+      return (
         <div data-testid="dropdown">
           {options?.map((opt) => (
             <button
@@ -29,18 +26,6 @@ jest.mock('./Dropdown', () => {
             </button>
           ))}
         </div>
-      )
-      // Mirrors Dropdown's real `.custom-dropdown` wrapper, which Select.js
-      // queries for to account for its margin-bottom when reversed.
-      return mockShowCustomDropdownWrapper ? (
-        <div
-          className="custom-dropdown"
-          style={{marginBottom: mockCustomDropdownMarginBottom}}
-        >
-          {content}
-        </div>
-      ) : (
-        content
       )
     }),
   }
@@ -329,30 +314,13 @@ describe('Select', () => {
 
   describe('portal dropdown (isPortalDropdown)', () => {
     let elementRects
-    let resizeObserverInstances
 
     beforeEach(() => {
       elementRects = {}
-      resizeObserverInstances = []
-      mockListRect = {top: 0, height: 0, bottom: 0}
-      mockShowCustomDropdownWrapper = false
-      mockCustomDropdownMarginBottom = '0px'
       mockSetListMaxHeight.mockClear()
 
-      global.ResizeObserver = jest.fn().mockImplementation(() => {
-        const instance = {
-          observe: jest.fn(),
-          unobserve: jest.fn(),
-          disconnect: jest.fn(),
-        }
-        resizeObserverInstances.push(instance)
-        return instance
-      })
-
-      // wrapperRef, and optionally the real `.custom-dropdown` node rendered
-      // by the mocked Dropdown, are real DOM nodes in jsdom (unlike the
-      // fully-mocked list node) — keyed by class so each test controls just
-      // the rects it cares about.
+      // wrapperRef is a real DOM node in jsdom — keyed by class so each test
+      // controls just the rect it cares about.
       jest
         .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
         .mockImplementation(function () {
@@ -374,6 +342,8 @@ describe('Select', () => {
         elementRects['select-with-label__wrapper'] = {
           top: 50,
           bottom: 100,
+          y: 50,
+          height: 50,
         }
         const {container} = renderSelect({
           isPortalDropdown: true,
@@ -389,6 +359,8 @@ describe('Select', () => {
         elementRects['select-with-label__wrapper'] = {
           top: 700,
           bottom: 760,
+          y: 700,
+          height: 60,
         }
         const {container} = renderSelect({
           isPortalDropdown: true,
@@ -404,6 +376,8 @@ describe('Select', () => {
         elementRects['select-with-label__wrapper'] = {
           top: 700,
           bottom: 760,
+          y: 700,
+          height: 60,
         }
         const {container} = renderSelect({
           isPortalDropdown: true,
@@ -420,6 +394,8 @@ describe('Select', () => {
         elementRects['select-with-label__wrapper'] = {
           top: 380,
           bottom: 390,
+          y: 380,
+          height: 10,
         }
         const offsetParent = {
           getBoundingClientRect: () => ({top: 200, bottom: 400}),
@@ -439,6 +415,8 @@ describe('Select', () => {
         elementRects['select-with-label__wrapper'] = {
           top: 700,
           bottom: 760,
+          y: 700,
+          height: 60,
         }
         const {container} = renderSelect({
           isPortalDropdown: true,
@@ -448,8 +426,9 @@ describe('Select', () => {
         })
         clickTrigger(container)
 
-        // availableHeightAbove = 700 - 0 + 32 (label) - 32 - 48 (searchBar) = 652
-        expect(mockSetListMaxHeight).toHaveBeenCalledWith(652)
+        // availableHeightAbove = wrapperRect.y(700) - (MARGIN_DROPDOWN(4) + 20) -
+        // labelHeight(0, unmocked) - referenceRect.top(0) = 676
+        expect(mockSetListMaxHeight).toHaveBeenCalledWith(676)
       })
     })
 
@@ -458,94 +437,69 @@ describe('Select', () => {
         elementRects['select-with-label__wrapper'] = {
           x: 10,
           y: 20,
+          left: 10,
+          top: 20,
           width: 200,
           height: 50,
-          top: 20,
           bottom: 70,
         }
-        mockListRect = {height: 150, bottom: 300, top: 150}
 
         const {container} = renderSelect({isPortalDropdown: true})
         clickTrigger(container)
 
         expect(getDropdownWrapper(container)).toHaveStyle({
           transform: 'translate(10px,70px)',
+          bottom: 'auto',
           width: '200px',
         })
       })
 
-      test('translates the portal wrapper above the trigger, offset by content height, when reversed', () => {
+      test('anchors the portal wrapper to the trigger via a document-relative bottom when reversed', () => {
+        // Not enough space below the wrapper (availableHeightBelow =
+        // innerHeight(900) - wrapper.bottom(500) - margins(16) = 384,
+        // under maxHeightDroplist's 400 default) forces reversed mode.
         elementRects['select-with-label__wrapper'] = {
           x: 10,
-          y: 700,
+          y: 440,
+          left: 10,
+          top: 440,
           width: 200,
           height: 60,
-          top: 700,
-          bottom: 760,
+          bottom: 500,
         }
-        mockListRect = {height: 150, bottom: 850, top: 700}
-
-        const {container} = renderSelect({isPortalDropdown: true})
-        clickTrigger(container)
-
-        // reversed (insufficient space below); dropdownHeight = 150 (no
-        // custom-dropdown wrapper, so no extra gap) -> y = 700 - 150
-        expect(getDropdownWrapper(container)).toHaveStyle({
-          transform: 'translate(10px,550px)',
-        })
-      })
-
-      test("adds the custom-dropdown wrapper's margin-bottom to the offset when reversed", () => {
-        mockShowCustomDropdownWrapper = true
-        mockCustomDropdownMarginBottom = '10px'
-        elementRects['select-with-label__wrapper'] = {
+        // The anchor point is wrapperRef's last DOM child, read via
+        // getBoundingClientRect() — in jsdom that resolves to the dropdown
+        // wrapper itself (portals don't detach the same way jsdom renders
+        // them as in a real browser), so this is keyed by its own class.
+        elementRects['select__dropdown-wrapper'] = {
           x: 10,
-          y: 700,
+          y: 448,
+          left: 10,
+          top: 448,
           width: 200,
-          height: 60,
-          top: 700,
-          bottom: 760,
+          height: 32,
+          bottom: 480,
         }
-        elementRects['custom-dropdown'] = {top: 500, bottom: 500}
-        mockListRect = {height: 0, bottom: 620, top: 0}
-
-        const {container} = renderSelect({isPortalDropdown: true})
-        clickTrigger(container)
-
-        // contentHeight = listNode.bottom(620) - customDropdownNode.top(500) = 120
-        // reversedGap = marginBottom = 10 (reversed) -> dropdownHeight = 130
-        // y = 700 - 130 = 570
-        expect(getDropdownWrapper(container)).toHaveStyle({
-          transform: 'translate(10px,570px)',
+        const originalInnerHeight = window.innerHeight
+        Object.defineProperty(window, 'innerHeight', {
+          configurable: true,
+          value: 900,
         })
-      })
-
-      test('observes the dropdown list node with a ResizeObserver and disconnects when the dropdown closes', () => {
-        elementRects['select-with-label__wrapper'] = {
-          x: 10,
-          y: 20,
-          width: 200,
-          height: 50,
-          top: 20,
-          bottom: 70,
-        }
-        mockListRect = {height: 150, bottom: 300, top: 150}
 
         const {container} = renderSelect({isPortalDropdown: true})
         clickTrigger(container)
 
-        expect(resizeObserverInstances).toHaveLength(1)
-        expect(resizeObserverInstances[0].observe).toHaveBeenCalled()
+        // bottom = innerHeight(900) - anchor.y(448) + gap(4) = 456
+        expect(getDropdownWrapper(container)).toHaveStyle({
+          transform: 'translateX(10px)',
+          top: 'auto',
+          bottom: '456px',
+        })
 
-        clickTrigger(container)
-        expect(resizeObserverInstances[0].disconnect).toHaveBeenCalled()
-      })
-
-      test('does not construct a ResizeObserver when isPortalDropdown is false', () => {
-        const {container} = renderSelect()
-        clickTrigger(container)
-
-        expect(resizeObserverInstances).toHaveLength(0)
+        Object.defineProperty(window, 'innerHeight', {
+          configurable: true,
+          value: originalInnerHeight,
+        })
       })
     })
   })

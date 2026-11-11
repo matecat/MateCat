@@ -147,11 +147,12 @@ export const Yaml = () => {
             <br />
             Key names are case sensitive.
             <br />
-            If the toggle is set to &quot;Translatable&quot;, only the keys entered will
-            be extracted as translatable.
+            If the toggle is set to &quot;Translatable&quot;, only the keys
+            entered will be extracted as translatable.
             <br />
-            If the toggle is set to &quot;Non-translatable&quot;, all the keys in the file{' '}
-            <b>except</b> those entered will be extracted as translatable.
+            If the toggle is set to &quot;Non-translatable&quot;, all the keys
+            in the file <b>except</b> those entered will be extracted as
+            translatable.
           </p>
         </div>
         <div className="container-segmented-control">
@@ -243,6 +244,7 @@ export const Yaml = () => {
             <Select
               name={name}
               placeholder="Select inner content type"
+              isPortalDropdown={true}
               options={INNER_CONTENT_TYPE_OPTIONS}
               activeOption={INNER_CONTENT_TYPE_OPTIONS?.find(
                 ({id}) => id === value,

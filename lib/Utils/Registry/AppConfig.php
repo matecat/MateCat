@@ -199,6 +199,18 @@ class AppConfig
     public static bool $ENABLE_OUTSOURCE = true;
 
     /**
+     * Lets search engines index the pages meant to be found (home, sign-in, file converter) on this
+     * installation. Off by default: a staging copy or a self-hosted install answers
+     * `X-Robots-Tag: noindex, nofollow` on every page. Example: `ALLOW_SEARCH_INDEXING = true` in
+     * the environment section of `inc/config.ini` on the public site only.
+     *
+     * It applies only to requests whose host is the host of HTTPHOST, so an alias host stays noindex.
+     *
+     * @see \Controller\Abstracts\BaseKleinViewController::$isIndexable
+     */
+    public static bool $ALLOW_SEARCH_INDEXING = false;
+
+    /**
      * MateCat Filters configuration
      */
     public static string $FILTERS_USER_AGENT = "MateCat Community Instance";
@@ -559,6 +571,7 @@ class AppConfig
             'mif' => ['class' => 'extmif'],
             'idml' => ['class' => 'extidd'],
             'icml' => ['class' => 'exticml'],
+            'epub' => ['class' => 'extepub'],
         ],
         'Subtitling' => [
             'sbv' => ['class' => 'extsbv'],

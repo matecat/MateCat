@@ -9,10 +9,7 @@
 namespace Controller\Traits;
 
 
-use Klein\Exceptions\LockedResponseException;
-use Klein\Exceptions\ResponseAlreadySentException;
 use Klein\Response;
-use Model\FilesStorage\AbstractFilesStorage;
 use Utils\Tools\ContentDisposition;
 
 class KleinResponseFileStream
@@ -34,35 +31,62 @@ class KleinResponseFileStream
     }
 
     /**
-     * @param resource $filePointer
+     * Sends the file with the headers of every download: the cache headers of noCache(), then the
+     * type, name and size of the file. Each one replaces a header of the same name already set,
+     * such as those session_start() adds, so a header is never sent twice.
      *
-     * @throws LockedResponseException
-     * @throws ResponseAlreadySentException
+     * @param resource $filePointer
      */
     public function streamFileFromPointer($filePointer, string $mimeType, string $disposition, string $filename): void
     {
-        $this->response->body('');
-        $this->response->noCache();
+        try {
+            $this->noCache();
 
-        $this->response->header('Content-type', $mimeType);
-        $this->response->header('Content-Disposition', ContentDisposition::build(AbstractFilesStorage::basename_fix($filename), $disposition));
-        $this->response->header('Expires', "0");
-        $this->response->header('Connection', "close");
+            $this->header('Content-Type: ' . $mimeType);
+            $this->header('Content-Disposition: ' . ContentDisposition::build($filename, $disposition));
+            $this->header('Expires: 0');
+            $this->header('Connection: close');
 
-        $this->response->send();
+            $stat = fstat($filePointer);
+            if ($stat !== false) {
+                $this->header('Content-Length: ' . $stat['size']);
+            }
 
-        while (!feof($filePointer)) {
-            echo fgets($filePointer, 2048);
+            // Copies the stream to the output in chunks, so a large file is never held in memory.
+            // Not Response::send(): under PHP-FPM it ends the request with fastcgi_finish_request(),
+            // and the bytes written after it never reach the client.
+            fpassthru($filePointer);
+
+            $this->response->lock();
+        } finally {
+            fclose($filePointer);
         }
+    }
 
-        fclose($filePointer);
+    /**
+     * Tells the browser and every proxy not to keep a copy of the response.
+     */
+    public function noCache(): void
+    {
+        $this->header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
+        $this->header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+        $this->header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+        $this->header("Cache-Control: post-check=0, pre-check=0", false);
+        $this->header("Pragma: no-cache");
+    }
+
+    /**
+     * Sends one header with PHP's header(). A method so a test can see what is sent.
+     * Example: `header('Expires: 0')` replaces an `Expires` sent before; with `$replace` false
+     * both are sent.
+     */
+    protected function header(string $header, bool $replace = true): void
+    {
+        header($header, $replace);
     }
 
     /**
      * @param resource $filePointer
-     *
-     * @throws ResponseAlreadySentException
-     * @throws LockedResponseException
      */
     public function streamFileDownloadFromPointer($filePointer, string $filename): void
     {
@@ -71,9 +95,6 @@ class KleinResponseFileStream
 
     /**
      * @param resource $filePointer
-     *
-     * @throws ResponseAlreadySentException
-     * @throws LockedResponseException
      */
     public function streamFileInlineFromPointer($filePointer, string $filename, string $mimeType): void
     {

@@ -149,7 +149,11 @@ class CattoolController extends BaseKleinViewController
         $jobOwnership = $this->findOwnerEmailAndTeam($chunkStruct->getProject(new ProjectDao($this->getDatabase())));
 
         if ($chunkStruct->isCanceled()) {
-            $this->cancelled($jobOwnership);
+            $this->cancelled(
+                $chunkId,
+                $isRevision ? ($chunkReviewStruct->review_password ?? $chunkPassword) : $chunkPassword,
+                $jobOwnership
+            );
         }
 
         if ($chunkStruct->isArchived()) {
@@ -338,11 +342,14 @@ class CattoolController extends BaseKleinViewController
      *
      * @throws Exception
      */
-    private function cancelled(array $jobOwnership): void
+    private function cancelled(int $job_id, string $password, array $jobOwnership): void
     {
         $this->setView('job_cancelled.html', [
             "support_mail" => AppConfig::$SUPPORT_MAIL,
             "owner_email" => $jobOwnership['owner_email'],
+            "jid" => $job_id,
+            "password" => $password,
+            "jobOwnerIsMe" => $jobOwnership['jobOwnerIsMe']
         ]);
         $this->render();
     }

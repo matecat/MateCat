@@ -4,11 +4,13 @@ namespace Model\FeaturesBase;
 
 use Controller\Abstracts\IController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\ValidationError as ControllerValidationError;
 use Controller\Views\TemplateDecorator\AbstractDecorator;
 use Controller\Views\TemplateDecorator\Arguments\ArgumentInterface;
 use Exception;
 use LogicException;
 use Model\DataAccess\IDatabase;
+use Model\DataAccess\TransactionAbortedException;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\Hook\FilterEvent;
@@ -280,6 +282,7 @@ class FeatureSet implements EventDispatcherInterface
      *
      * Routes to the appropriate internal dispatcher based on event type:
      * - FilterEvent/RunEvent: uses hookName() (no reflection), re-throws domain exceptions
+     * - FilterEvent/RunEvent inside a transaction scope: any failure aborts the transaction and is re-thrown
      * - External events (subfiltering PSR-14): derives hook name from class name, swallows all exceptions
      *
      * @template T of object
@@ -290,6 +293,7 @@ class FeatureSet implements EventDispatcherInterface
      * @throws AuthenticationError
      * @throws ReQueueException
      * @throws ValidationError
+     * @throws ControllerValidationError
      * @throws NotFoundException
      */
     public function dispatch(object $event): object
@@ -303,19 +307,44 @@ class FeatureSet implements EventDispatcherInterface
 
         $rethrowDomainExceptions = ($event instanceof FilterEvent || $event instanceof RunEvent);
 
+        // A hook dispatched inside a transaction is part of it: a Run hook writes, and a Filter hook
+        // computes a value the caller is about to write. An exception that reaches here is one the
+        // hook did not handle, so its part of the work is missing or half done, and committing the
+        // rest would make that permanent: the hook's failure aborts the transaction. A failure the
+        // operation can live with is the hook's to catch. Outside a scope the caller's work is
+        // already committed, and a failed side effect must not turn it into an error.
+        $abortsTransaction = $rethrowDomainExceptions && $this->database->isInTransactionScope();
+
         foreach ($this->features as $feature) {
             try {
                 $obj = $feature->toNewObject($this->database);
                 if (method_exists($obj, $hookName)) {
                     $obj->$hookName($event);
                 }
-            } catch (ValidationError|NotFoundException|AuthenticationError|ReQueueException|EndQueueException $e) {
+            } catch (ValidationError|ControllerValidationError|NotFoundException|AuthenticationError|ReQueueException|EndQueueException $e) {
+                if ($abortsTransaction) {
+                    // The caller may catch it to answer with an error and carry on: the verdict
+                    // stops that from reaching a commit.
+                    $this->database->markRollbackOnly();
+                }
                 if ($rethrowDomainExceptions) {
                     throw $e;
                 }
                 $this->logger->error("Exception running hook " . $hookName . ": " . $e->getMessage());
             } catch (Throwable $e) {
                 $this->logger->error("Exception running hook " . $hookName . ": " . $e->getMessage());
+
+                if ($abortsTransaction) {
+                    $this->database->markRollbackOnly();
+
+                    // Unchecked, like every abort: the message names the hook only, because the
+                    // cause can carry raw database text.
+                    throw new TransactionAbortedException(
+                        'Hook ' . $hookName . ' failed inside a transaction, so the transaction was aborted',
+                        0,
+                        $e
+                    );
+                }
             }
         }
 

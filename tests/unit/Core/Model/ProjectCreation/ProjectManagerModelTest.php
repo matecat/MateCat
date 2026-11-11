@@ -6,10 +6,14 @@ use Exception;
 use InvalidArgumentException;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\IDatabase;
+use Model\ProjectCreation\ProjectCreationError;
+use Model\ProjectCreation\ProjectCreationException;
 use Model\ProjectCreation\ProjectManagerModel;
 use PDO;
 use PDOException;
 use PDOStatement;
+use PHPUnit\Framework\Attributes\DataProvider;
+use ReflectionProperty;
 use Utils\Logger\MatecatLogger;
 
 class ProjectManagerModelTest extends AbstractTest
@@ -882,21 +886,147 @@ class ProjectManagerModelTest extends AbstractTest
         self::assertCount(9, $this->executedValues[0]);
     }
 
-    // ── insertFile exception path ──────────────────────────────────
+    // ── insertFile ─────────────────────────────────────────────────
 
-    public function testInsertFileThrowsOnPdoException(): void
+    public function testInsertFileStoresTheFileRowAndReturnsItsId(): void
     {
-        $this->expectException(Exception::class);
-        $this->expectExceptionMessage('Database insert file error');
+        $mockDb = $this->createMock(IDatabase::class);
+        $mockDb->expects($this->once())->method('insert')->with('files', [
+            'id_project' => 1,
+            'filename' => 'test.xliff',
+            'source_language' => 'en-US',
+            'mime_type' => 'xliff',
+            'sha1_original_file' => 'abc123',
+            'is_converted' => 0,
+        ])->willReturn('42');
+
+        $model = new ProjectManagerModel($mockDb, $this->createStub(MatecatLogger::class));
+
+        self::assertSame('42', $model->insertFile(1, 'en-US', 'test.xliff', 'xliff', 'abc123'));
+    }
+
+    // ── executeBulkInsert exception path ───────────────────────────
+
+    private function createModelFailingOnPrepare(PDOException $pdoException): ProjectManagerModel
+    {
+        $mockPdo = $this->createStub(PDO::class);
+        $mockPdo->method('prepare')->willThrowException($pdoException);
 
         $mockDb = $this->createStub(IDatabase::class);
-        $mockDb->method('insert')->willThrowException(
-            new PDOException('Duplicate entry', 1062)
-        );
+        $mockDb->method('getConnection')->willReturn($mockPdo);
 
-        $mockLogger = $this->createStub(MatecatLogger::class);
-        $model = new ProjectManagerModel($mockDb, $mockLogger);
+        return new ProjectManagerModel($mockDb, $this->createStub(MatecatLogger::class));
+    }
 
-        $model->insertFile(1, 'en-US', 'test.xliff', 'application/xliff+xml', 'abc123');
+    private function sqlStatePdoException(): PDOException
+    {
+        $pdoException = new PDOException("SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '1-1' for key 'PRIMARY'");
+        (new ReflectionProperty(Exception::class, 'code'))->setValue($pdoException, '23000');
+
+        return $pdoException;
+    }
+
+    private function assertBulkInsertFailure(
+        ProjectCreationException $thrown,
+        PDOException $original,
+        ProjectCreationError $expectedCode,
+        string $expectedMessage
+    ): void {
+        self::assertSame($expectedCode->value, $thrown->getCode());
+        self::assertSame($expectedMessage, $thrown->getMessage());
+        self::assertStringNotContainsString('SQLSTATE', $thrown->getMessage());
+        self::assertStringNotContainsString('Duplicate entry', $thrown->getMessage());
+        self::assertSame($original, $thrown->getPrevious());
+    }
+
+    public function testBulkInsertContextsGroupsFailureCarriesTheBulkInsertCodeAndNoSqlText(): void
+    {
+        $original = $this->sqlStatePdoException();
+        $model = $this->createModelFailingOnPrepare($original);
+
+        try {
+            $model->bulkInsertContextsGroups(1, [
+                ['context_json' => ['a' => 'b'], 'context_json_segment_ids' => [10]],
+            ]);
+            self::fail('Expected ProjectCreationException');
+        } catch (ProjectCreationException $e) {
+            $this->assertBulkInsertFailure($e, $original, ProjectCreationError::BULK_INSERT_CONTEXT_GROUPS, 'Failed to save context groups.');
+        }
+    }
+
+    public function testInsertPreTranslationsFailureCarriesTheBulkInsertCodeAndNoSqlText(): void
+    {
+        $original = $this->sqlStatePdoException();
+        $model = $this->createModelFailingOnPrepare($original);
+
+        try {
+            $model->insertPreTranslations([[1, 1, 'hash', 'TRANSLATED', 't', 's', 0, 'ICE', 1, '', '', 'ICE', 1, 0]]);
+            self::fail('Expected ProjectCreationException');
+        } catch (ProjectCreationException $e) {
+            $this->assertBulkInsertFailure($e, $original, ProjectCreationError::BULK_INSERT_PRE_TRANSLATIONS, 'Failed to save pre-translations.');
+        }
+    }
+
+    public function testBulkInsertNotesFailureCarriesTheBulkInsertCodeAndNoSqlText(): void
+    {
+        $original = $this->sqlStatePdoException();
+        $model = $this->createModelFailingOnPrepare($original);
+
+        try {
+            $model->bulkInsertSegmentNotesAndMetadata([
+                42 => $this->makeNote([0 => 'comment'], [0 => 'a plain note'], [100]),
+            ]);
+            self::fail('Expected ProjectCreationException');
+        } catch (ProjectCreationException $e) {
+            $this->assertBulkInsertFailure($e, $original, ProjectCreationError::BULK_INSERT_NOTES, 'Failed to save notes.');
+        }
+    }
+
+    public function testBulkInsertSegmentMetadataFailureCarriesTheBulkInsertCodeAndNoSqlText(): void
+    {
+        $original = $this->sqlStatePdoException();
+        $model = $this->createModelFailingOnPrepare($original);
+
+        try {
+            $model->bulkInsertSegmentNotesAndMetadata([
+                42 => $this->makeNote([0 => 'id_request'], [0 => 'REQ-123'], [100]),
+            ]);
+            self::fail('Expected ProjectCreationException');
+        } catch (ProjectCreationException $e) {
+            $this->assertBulkInsertFailure($e, $original, ProjectCreationError::BULK_INSERT_SEGMENT_METADATA, 'Failed to save segment metadata.');
+        }
+    }
+
+    // ── projectExists: a redelivered creation must not delete a project another run inserted ──
+
+    /**
+     * @return array<string, array{int|false, bool}>
+     */
+    public static function projectRows(): array
+    {
+        return [
+            'no row' => [false, false],
+            'a row'  => [1, true],
+        ];
+    }
+
+    #[DataProvider('projectRows')]
+    public function testProjectExistsReadsTheProjectsTable(int|false $column, bool $expected): void
+    {
+        $stmt = $this->createMock(PDOStatement::class);
+        $stmt->expects($this->once())->method('execute')->with(['id_project' => 7])->willReturn(true);
+        $stmt->method('fetchColumn')->willReturn($column);
+
+        $pdo = $this->createMock(PDO::class);
+        $pdo->expects($this->once())->method('prepare')
+            ->with('SELECT 1 FROM projects WHERE id = :id_project')
+            ->willReturn($stmt);
+
+        $db = $this->createStub(IDatabase::class);
+        $db->method('getConnection')->willReturn($pdo);
+
+        $model = new ProjectManagerModel($db, $this->createStub(MatecatLogger::class));
+
+        $this->assertSame($expected, $model->projectExists(7));
     }
 }

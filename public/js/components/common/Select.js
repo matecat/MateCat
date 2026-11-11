@@ -30,15 +30,15 @@ export const Select = ({
   onCloseSelect = () => {},
   optionsSelectedCopySingular = () => {},
   optionsSelectedCopyPlural = () => {},
-  resetSelectedOptions = () => {},
   checkSpaceToReverse = true,
-  maxHeightDroplist = 128,
+  maxHeightDroplist = 420,
   isPortalDropdown,
   isActiveOptionOnTop,
   dropdownClassName,
   showResetButton = false,
   resetFunction = () => {},
   tooltipContent,
+  isActiveOptionCheckmarkVisible,
   children,
 }) => {
   const dropDownRef = useRef()
@@ -110,26 +110,42 @@ export const Select = ({
       const {setListMaxHeight} = dropDownRef.current
       const wrapperNode = wrapperRef.current
 
+      const SEARCH_BAR_HEIGHT = 56
+      const MARGIN_DROPDOWN = 4
+
+      const wrapperRect = wrapperNode.getBoundingClientRect()
+
       if (isPortalDropdown) {
-        const wrapperRect = wrapperNode.getBoundingClientRect()
         const referenceRect = offsetParent
           ? offsetParent.getBoundingClientRect()
           : {top: 0, bottom: window.innerHeight}
 
-        const availableHeightBelow =
-          referenceRect.bottom - wrapperRect.bottom - 16 // 16 = margins
+        const availableHeightBelow = Math.abs(
+          wrapperRect.y +
+            wrapperRect.height +
+            (MARGIN_DROPDOWN + 20) +
+            (showSearchBar ? SEARCH_BAR_HEIGHT : 0) -
+            referenceRect.bottom,
+        )
+
         if (availableHeightBelow > maxHeightDroplist) {
           setListMaxHeight(maxHeightDroplist)
         } else {
           if (checkSpaceToReverse) {
             setDropdownReversed(true)
           }
+
+          const labelHeight =
+            wrapperNode
+              .getElementsByTagName('label')?.[0]
+              ?.getBoundingClientRect().height ?? 0
+
           const availableHeightAbove =
-            wrapperRect.top -
-            referenceRect.top +
-            (label ? 32 : 0) -
-            32 -
-            (showSearchBar ? 48 : 0) // 32 = margins; 32 = label height; 48 = searchBar height
+            wrapperRect.y -
+            (MARGIN_DROPDOWN + 20) -
+            labelHeight -
+            referenceRect.top
+
           setListMaxHeight(
             Math.max(0, Math.min(availableHeightAbove, maxHeightDroplist)),
           )
@@ -137,39 +153,42 @@ export const Select = ({
         return
       }
 
-      const listTopPosition = wrapperNode.getBoundingClientRect().height
-
-      const wrapperTopPosition = wrapperNode.offsetTop
       const offsetParentElement = offsetParent
         ? offsetParent
         : (wrapperNode.offsetParent ?? document.body)
+
       const parentHeight = offsetParentElement.getBoundingClientRect().height
+
       const parentScrollTop =
         offsetParentElement === document.body
           ? document.documentElement.scrollTop
-          : offsetParentElement.scrollTop
-      let availableHeight =
-        parentHeight +
-        parentScrollTop -
-        wrapperTopPosition -
-        listTopPosition -
-        16 // 16 = margins
-      if (availableHeight > maxHeightDroplist) {
-        setListMaxHeight(availableHeight)
+          : offsetParentElement.offsetTop
+
+      const availableHeightBelow = Math.abs(
+        wrapperRect.y +
+          wrapperRect.height +
+          (MARGIN_DROPDOWN + 20) +
+          (showSearchBar ? SEARCH_BAR_HEIGHT : 0) -
+          (parentHeight + parentScrollTop),
+      )
+
+      if (availableHeightBelow > maxHeightDroplist) {
+        setListMaxHeight(maxHeightDroplist)
       } else {
         if (checkSpaceToReverse) {
           setDropdownReversed(true)
         }
-        availableHeight =
-          wrapperTopPosition -
-          parentScrollTop +
-          (label ? 32 : 0) -
-          32 -
-          (showSearchBar ? 48 : 0) // 32 = margins; 32 = label height; 48 = searchBar height
+
+        const labelHeight =
+          wrapperNode
+            .getElementsByTagName('label')?.[0]
+            ?.getBoundingClientRect().height ?? 0
+
+        const availableHeightAbove =
+          wrapperRect.y - (MARGIN_DROPDOWN + 20) - labelHeight - parentScrollTop
+
         setListMaxHeight(
-          availableHeight > maxHeightDroplist
-            ? availableHeight
-            : maxHeightDroplist,
+          Math.max(0, Math.min(availableHeightAbove, maxHeightDroplist)),
         )
       }
     }
@@ -189,30 +208,42 @@ export const Select = ({
 
     let rafId
 
+    // Matches Dropdown.scss's $dropdown-to-bottom-margin — the same gap the
+    // non-reversed (opens-below) case gets between the trigger and the
+    // dropdown.
+    const DROPDOWN_TO_TRIGGER_GAP = 4
+
     const updatePosition = () => {
       const rect = wrapperRef.current?.getBoundingClientRect()
-      const listNode = dropDownRef.current?.getListRef()
 
-      if (rect && wrapperDropDownRef.current && listNode) {
+      if (rect && wrapperDropDownRef.current) {
         const x = rect.x + window.scrollX
-        const y = rect.y + window.scrollY
+        let y = rect.y + window.scrollY
+        const style = wrapperDropDownRef.current.style
 
-        const customDropdownNode =
-          wrapperDropDownRef.current.querySelector('.custom-dropdown')
-        const reversedGap = customDropdownNode
-          ? parseFloat(getComputedStyle(customDropdownNode).marginBottom) || 0
-          : 0
-        const contentHeight = customDropdownNode
-          ? listNode.getBoundingClientRect().bottom -
-            customDropdownNode.getBoundingClientRect().top
-          : listNode.getBoundingClientRect().height
-        const dropdownHeight =
-          contentHeight + (isDropdownReversed ? reversedGap : 0)
+        if (isDropdownReversed) {
+          // `position: absolute` has no positioned ancestor here (the portal
+          // root is a plain, unpositioned div), so its containing block is
+          // the initial containing block — sized to the *viewport*, not the
+          // document, and anchored at the document's own top-left corner
+          // (not at the current scroll position). `bottom` has to be
+          // expressed in that same document-relative space: how far the
+          // trigger's document-relative top (y) sits above the containing
+          // block's document-relative bottom edge (window.innerHeight).
 
-        wrapperDropDownRef.current.style.transform = `translate(${x}px,${
-          !isDropdownReversed ? y + rect.height : y - dropdownHeight
-        }px)`
-        wrapperDropDownRef.current.style.width = `${rect.width}px`
+          y = wrapperRef.current.lastChild?.getBoundingClientRect?.()
+            ? wrapperRef.current.lastChild.getBoundingClientRect().y
+            : rect.y
+
+          style.transform = `translateX(${x}px)`
+          style.top = 'auto'
+          style.bottom = `${window.innerHeight - y + DROPDOWN_TO_TRIGGER_GAP}px`
+        } else {
+          style.transform = `translate(${x}px,${y + rect.height}px)`
+          style.top = ''
+          style.bottom = 'auto'
+        }
+        style.width = `${rect.width}px`
       }
     }
 
@@ -229,16 +260,9 @@ export const Select = ({
     window.addEventListener('scroll', handleScroll, true)
     window.addEventListener('resize', handleScroll)
 
-    const resizeObserver = new ResizeObserver(updatePosition)
-    const listNode = dropDownRef.current?.getListRef()
-    if (listNode) {
-      resizeObserver.observe(listNode)
-    }
-
     return () => {
       window.removeEventListener('scroll', handleScroll, true)
       window.removeEventListener('resize', handleScroll)
-      resizeObserver.disconnect()
     }
   }, [isDropdownVisible, isPortalDropdown, isDropdownReversed])
 
@@ -342,8 +366,8 @@ export const Select = ({
           isActiveOptionOnTop,
           optionsSelectedCopySingular,
           optionsSelectedCopyPlural,
-          resetSelectedOptions,
           onClose: hideDropdown.current,
+          isActiveOptionCheckmarkVisible,
         }}
       >
         {children}
@@ -386,7 +410,7 @@ export const Select = ({
                   resetFunction()
                 }}
               >
-                <IconClose size={7} />
+                <IconClose size={12} />
               </div>
             )}
             <span>{renderSelection()}</span>
@@ -443,7 +467,6 @@ Select.propTypes = {
   onToggleOption: PropTypes.func,
   optionsSelectedCopySingular: PropTypes.func,
   optionsSelectedCopyPlural: PropTypes.func,
-  resetSelectedOptions: PropTypes.func,
   checkSpaceToReverse: PropTypes.bool,
   maxHeightDroplist: PropTypes.number,
   isPortalDropdown: PropTypes.bool,
@@ -452,5 +475,6 @@ Select.propTypes = {
   showResetButton: PropTypes.bool,
   resetFunction: PropTypes.func,
   tooltipContent: PropTypes.string,
+  isActiveOptionCheckmarkVisible: PropTypes.bool,
   children: PropTypes.func,
 }

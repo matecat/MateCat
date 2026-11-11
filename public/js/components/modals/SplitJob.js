@@ -2,13 +2,9 @@ import React, {useState, useEffect, useRef} from 'react'
 import {checkSplitRequest} from '../../api/checkSplitRequest'
 import {confirmSplitRequest} from '../../api/confirmSplitRequest'
 import CommonUtils from '../../utils/commonUtils'
+import {getApiErrorMessage} from '../../utils/getApiErrorMessage'
 import ModalsActions from '../../actions/ModalsActions'
-import {
-  Button,
-  BUTTON_MODE,
-  
-  BUTTON_TYPE,
-} from '../common/Button/Button'
+import {Button, BUTTON_MODE, BUTTON_TYPE} from '../common/Button/Button'
 import Tooltip from '../common/Tooltip'
 import {SpinnerLoader} from '../common/SpinnerLoader'
 
@@ -214,9 +210,10 @@ const SplitJobModal = ({job, project, callback}) => {
             releaseConfirm()
           }
         },
-        (errors) => {
-          if (typeof errors !== 'undefined' && errors.length) {
-            setErrorMsg(errors[0].message)
+        // Show the server's message, for example a 409 when another request is changing this job.
+        (rejection) => {
+          if (rejection?.errors) {
+            setErrorMsg(getApiErrorMessage(rejection))
             setShowError(true)
             setShowLoader(false)
             setSplitChecked(false)

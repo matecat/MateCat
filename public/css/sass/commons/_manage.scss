@@ -15,7 +15,6 @@ body.manage {
   overflow-y: hidden;
   overflow-x: auto;
   font-size: variables.$font-size-xsmall;
-  line-height: 1.4285em;
 }
 
 div#manage-container {
@@ -543,13 +542,6 @@ div#manage-container {
   }
 }
 
-.project-activity-icon button.project-team-dropdown {
-  font-size: variables.$font-size-xsmall;
-  color: colors.$black;
-  padding: 5px 15px;
-  background-color: colors.$white;
-}
-
 .project-title-editing-name-mode {
   > .label {
     padding-top: 1px !important;
@@ -574,6 +566,10 @@ ul {
     display: flex;
     justify-content: space-between;
     margin: 40px 0 16px;
+
+    h3 {
+      font-size: variables.$font-size-page-title;
+    }
 
     > :last-child {
       display: flex;

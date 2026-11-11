@@ -6,7 +6,7 @@ import {MachineTranslationTab} from './Contents/MachineTranslationTab'
 import {OtherTab} from './Contents/OtherTab'
 import {TranslationMemoryGlossaryTab} from './Contents/TranslationMemoryGlossaryTab'
 import {ProjectTemplate} from './ProjectTemplate/ProjectTemplate'
-import {SCHEMA_KEYS, isStandardTemplate} from '../../hooks/useProjectTemplates'
+import {isStandardTemplate} from '../../hooks/useProjectTemplates'
 import {AnalysisTab} from './Contents/AnalysisTab'
 import {QualityFrameworkTab} from './Contents/QualityFrameworkTab'
 import {updateProjectTemplate} from '../../api/updateProjectTemplate'
@@ -27,7 +27,7 @@ import {
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../common/Button/Button'
-import Close from '../../../img/icons/Close'
+import IconClose from '../../../img/icons/IconClose'
 
 let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
   'openTab',
@@ -42,33 +42,6 @@ export const SETTINGS_PANEL_TABS = {
   fileImport: 'fileImport',
   editorSettings: 'editorSettings',
   editorOther: 'editorOther',
-}
-
-export const TEMPLATE_PROPS_BY_TAB = {
-  [SETTINGS_PANEL_TABS.translationMemoryGlossary]: [
-    SCHEMA_KEYS.tm,
-    SCHEMA_KEYS.getPublicMatches,
-    SCHEMA_KEYS.publicTmPenalty,
-    SCHEMA_KEYS.pretranslate,
-    SCHEMA_KEYS.tmPrioritization,
-  ],
-  [SETTINGS_PANEL_TABS.machineTranslation]: [SCHEMA_KEYS.mt],
-  [SETTINGS_PANEL_TABS.qualityFramework]: [SCHEMA_KEYS.qaModelTemplateId],
-  [SETTINGS_PANEL_TABS.fileImport]: [
-    SCHEMA_KEYS.segmentationRule,
-    SCHEMA_KEYS.filtersTemplateId,
-    SCHEMA_KEYS.XliffConfigTemplateId,
-  ],
-  [SETTINGS_PANEL_TABS.analysis]: [SCHEMA_KEYS.payableRateTemplateId],
-  [SETTINGS_PANEL_TABS.other]: [
-    SCHEMA_KEYS.speech2text,
-    SCHEMA_KEYS.tagProjection,
-    SCHEMA_KEYS.lexica,
-    SCHEMA_KEYS.crossLanguageMatches,
-    SCHEMA_KEYS.idTeam,
-  ],
-  [SETTINGS_PANEL_TABS.editorSettings]: [],
-  [SETTINGS_PANEL_TABS.editorOther]: [],
 }
 
 const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
@@ -147,7 +120,7 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
 export const SettingsPanel = ({
   onClose,
   isOpened,
-  tabOpen = SETTINGS_PANEL_TABS.translationMemoryGlossary,
+  tabOpen,
   user,
   tmKeys,
   setTmKeys,
@@ -165,6 +138,7 @@ export const SettingsPanel = ({
   fileImportFiltersParamsTemplates = {},
   fileImportXliffSettingsTemplates = {},
   subtemplatesNotSaved,
+  onTabOpened,
 }) => {
   const [isVisible, setIsVisible] = useState(false)
   const [tabs, setTabs] = useState(() => {
@@ -174,7 +148,8 @@ export const SettingsPanel = ({
         (value) => value === tabOpenFromQueryString,
       )
         ? tabOpenFromQueryString === tab.id
-        : tabOpen === tab.id,
+        : (tabOpen ?? SETTINGS_PANEL_TABS.translationMemoryGlossary) ===
+          tab.id,
     }))
 
     tabOpenFromQueryString = false
@@ -197,7 +172,27 @@ export const SettingsPanel = ({
     },
   })
 
+  const openedTabId = tabs.find((tab) => tab.isOpened)?.id
+
+  useEffect(() => {
+    if (isOpened && openedTabId) onTabOpened?.(openedTabId)
+  }, [isOpened, openedTabId, onTabOpened])
+
   const wrapperRef = useRef()
+
+  useEffect(() => {
+    if (!tabOpen) return
+
+    setTabs(() => {
+      const updatedState = DEFAULT_CONTENTS().map((tab) => ({
+        ...tab,
+        isOpened: tabOpen === tab.id,
+      }))
+
+      tabOpenFromQueryString = false
+      return updatedState
+    })
+  }, [tabOpen])
 
   useEffect(() => {
     setIsVisible(typeof isOpened !== 'undefined' ? isOpened : true)
@@ -366,7 +361,7 @@ export const SettingsPanel = ({
                   mode={BUTTON_MODE.GHOST}
                   onClick={close}
                 >
-                  <Close size={20} />
+                  <IconClose size={20} />
                 </Button>
               </div>
               {isEnabledProjectTemplateComponent && <ProjectTemplate />}
@@ -382,6 +377,7 @@ export const SettingsPanel = ({
 SettingsPanel.propTypes = {
   onClose: PropTypes.func.isRequired,
   isOpened: PropTypes.bool,
+  onTabOpened: PropTypes.func,
   tabOpen: PropTypes.oneOf(Object.values(SETTINGS_PANEL_TABS)),
   user: PropTypes.object,
   tmKeys: PropTypes.array,

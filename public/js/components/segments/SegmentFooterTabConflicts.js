@@ -6,6 +6,7 @@ import $ from 'jquery'
 import TextUtils from '../../utils/textUtils'
 import SegmentActions from '../../actions/SegmentActions'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
+import {Button, BUTTON_MODE, BUTTON_SIZE} from '../common/Button/Button'
 
 const allowHTML = (string) => ({__html: string})
 
@@ -65,12 +66,13 @@ const renderAlternatives = (segment, alternatives) => {
           />
         </li>
         <li className="goto">
-          <a
-            data-goto={this.involved_id[0]}
+          <Button
+            mode={BUTTON_MODE.LINK}
+            size={BUTTON_SIZE.LINK_SMALL}
             onClick={() => SegmentActions.openSegment(this.involved_id[0])}
           >
             Go to
-          </a>
+          </Button>
         </li>
       </ul>,
     )

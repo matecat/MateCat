@@ -50,7 +50,6 @@ use Model\Xliff\DTO\XliffRulesModel;
 use Model\Xliff\XliffConfigTemplateDao;
 use Plugins\Features\ProjectCompletion;
 use ReflectionException;
-use RuntimeException;
 use TypeError;
 use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
 use Utils\Constants\Constants;
@@ -181,12 +180,6 @@ class NewController extends KleinController
         $projectStructure->from_api = true;
 
         ProjectQueue::sendProject($projectStructure);
-
-        $errors = $projectStructure->result['errors'];
-
-        if (!empty($errors)) {
-            throw new RuntimeException('Project creation failure');
-        }
 
         $this->response->json([
             'status' => 'OK',
@@ -844,7 +837,7 @@ class NewController extends KleinController
      *
      * @return array<int, mixed>
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     protected function validateTmAndKeys(string $private_tm_key = "", string $private_tm_key_json = ""): array
     {
@@ -989,8 +982,8 @@ class NewController extends KleinController
      * @param array<string, mixed> $elem
      *
      * @return array<string, mixed>
-     * @throws \DomainException
-     * @throws \TypeError
+     * @throws DomainException
+     * @throws TypeError
      */
     private static function sanitizeTmKeyArr(array $elem): array
     {

@@ -10,76 +10,15 @@
   border-radius: variables.$border-radius-default;
 }
 
-.tab.glossary .glossary-select,
 .tab.glossary .input-with-label__wrapper {
   position: relative;
   display: flex;
   flex-direction: column;
   text-align: left;
-}
 
-.tab.glossary .glossary-select label,
-.tab.glossary .input-with-label__wrapper label {
-  display: block;
-  margin-bottom: 4px;
-  font-size: variables.$font-size-xsmall;
-  line-height: 16px;
-  color: colors.$grey700;
-}
-
-.tab.glossary .glossary-select .select-with-icon__wrapper {
-  z-index: 2;
-}
-
-.tab.glossary .glossary-select .select-with-icon__wrapper svg {
-  color: colors.$grey300;
-}
-
-.tab.glossary .glossary-select .select {
-  line-height: 16px;
-}
-
-.tab.glossary .glossary-select .select__dropdown-wrapper .custom-dropdown {
-  margin-top: 0;
-}
-
-.tab.glossary
-  .glossary-select
-  .select__dropdown-wrapper
-  .custom-dropdown
-  .dropdown__search-bar {
-  box-shadow: none;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-.tab.glossary
-  .glossary-select
-  .select__dropdown-wrapper
-  .custom-dropdown
-  .dropdown__search-bar
-  svg {
-  display: none;
-}
-
-.tab.glossary
-  .glossary-select
-  .select__dropdown-wrapper
-  .custom-dropdown
-  .dropdown__search-bar
-  input {
-  width: 100%;
-}
-
-.tab.glossary
-  .glossary-select
-  .select__dropdown-wrapper
-  .custom-dropdown
-  .dropdown__list
-  .glossary-option {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
+  > span:first-of-type {
+    color: colors.$grey700;
+  }
 }
 
 .tab.glossary
@@ -90,64 +29,6 @@
   .glossary-option
   input[type='checkbox'] {
   accent-color: colors.$blue500;
-}
-
-.tab.glossary
-  .glossary-select
-  .select__dropdown-wrapper
-  .custom-dropdown
-  .dropdown__list
-  .glossary-option
-  label {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin: 0 0 0 8px;
-}
-
-.tab.glossary
-  .glossary-select
-  .select__dropdown-wrapper
-  .custom-dropdown
-  .dropdown__list
-  .dropdown__option
-  span {
-  width: 90%;
-}
-
-.tab.glossary
-  .glossary-select
-  .select__dropdown-wrapper
-  .custom-dropdown
-  .dropdown__list
-  .dropdown__option--is-active-option {
-  background-color: unset;
-  color: unset;
-}
-
-.tab.glossary
-  .glossary-select
-  .select__dropdown-wrapper
-  .custom-dropdown
-  .dropdown__list
-  .dropdown__option--is-no-results-found {
-  background-color: unset;
-  color: colors.$grey400;
-}
-
-.tab.glossary
-  .glossary-select
-  .select__dropdown-wrapper
-  .custom-dropdown
-  .dropdown__list
-  .dropdown__option--is-highlighted-option,
-.tab.glossary
-  .glossary-select
-  .select__dropdown-wrapper
-  .custom-dropdown
-  .dropdown__list
-  .dropdown__option:hover {
-  background-color: colors.$grey200;
 }
 
 .tab.glossary
@@ -171,104 +52,21 @@
   }
 }
 
-.tab.glossary
-  .glossary-select
-  .select__dropdown-wrapper
-  .custom-dropdown::before {
-  content: none;
-}
-
-.tab.glossary
-  .domain-select
-  .select__dropdown-wrapper
-  .custom-dropdown
-  .dropdown__list
-  .dropdown__option--is-active-option {
-  background-color: colors.$grey100;
-  color: colors.$grey700;
-}
-
-.tab.glossary
-  .domain-select
-  .select__dropdown-wrapper
-  .custom-dropdown
-  .dropdown__list
-  .dropdown__option--is-no-results-found {
-  display: none;
-}
-
-.tab.glossary
-  .domain-select
-  .select__dropdown-wrapper
-  .custom-dropdown
-  .dropdown__list
-  .dropdown__option--is-highlighted-option,
-.tab.glossary
-  .domain-select
-  .select__dropdown-wrapper
-  .custom-dropdown
-  .dropdown__list
-  .dropdown__option:hover {
-  background-color: colors.$grey200;
-}
-
-.tab.glossary
-  .domain-select
-  .select__dropdown-wrapper
-  .custom-dropdown
-  .dropdown__list
-  .domain-option {
-  border: 1px solid colors.$grey400;
-  border-radius: 12px;
-  padding: 0 6px 0 6px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 18px;
-  text-align: center;
-}
-
-.tab.glossary
-  .domain-select
-  .select__dropdown-wrapper
-  .custom-dropdown
-  .dropdown__list
-  .button-create-option {
-  color: colors.$grey400;
-  font-style: italic;
-  font-size: 12px;
-  border: none;
-  background: none;
-  cursor: pointer;
-
-  &:hover {
-    color: colors.$grey700;
-  }
-}
-
-.tab.glossary input:not([type='radio']),
-.tab.glossary textarea {
-  border: 1px solid colors.$grey200;
-  padding: 4px 8px;
-  outline: none;
-  font-size: variables.$font-size-xsmall;
-  line-height: 16px;
-}
-
-.tab.glossary input:not([type='radio']):focus,
-.tab.glossary input:not([type='radio']):focus-visible,
-.tab.glossary textarea:focus,
-.tab.glossary textarea:focus-visible {
-  border-color: colors.$blue300;
-}
-
-.tab.glossary input:not([type='radio']).input-large,
-.tab.glossary textarea.input-large {
-  height: 64px;
-}
-
 .tab.glossary textarea {
   resize: none;
+  height: 100px;
+  outline-color: colors.$grey400;
+  border: 1px solid colors.$grey200;
+  border-radius: variables.$border-radius-default;
+  padding: 8px 12px;
+
+  &:hover {
+    border: 1px solid colors.$grey400;
+  }
+  &:focus,
+  &:active {
+    border: 1px solid colors.$grey400;
+  }
 }
 
 .tab.glossary .glossary_search {
@@ -287,6 +85,16 @@
   border: 1px solid colors.$grey200;
   border-radius: variables.$border-radius-default;
   padding: 4px;
+
+  &:hover {
+    border-color: colors.$grey400;
+  }
+
+  &:focus-within,
+  &:active {
+    border-color: colors.$grey400;
+    box-shadow: inset 0 0 0 1px colors.$grey400;
+  }
 }
 
 .tab.glossary .glossary_search-container svg {
@@ -302,6 +110,8 @@
   width: 300px;
   font-size: variables.$font-size-small;
   border: none;
+  outline: none;
+  margin-left: 8px;
 }
 
 .tab.glossary input.glossary_search-input:disabled {
@@ -786,14 +596,11 @@ span {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 4px;
 }
 
 .tab.glossary .no_keys_glossary > p {
   font-size: variables.$font-size-small;
-}
-
-.tab.glossary .select--is-disabled {
-  background-color: colors.$grey100;
 }
 
 .tab.glossary .search-type {
@@ -851,4 +658,43 @@ span {
 .tab.glossary .loading_label {
   display: block;
   margin-top: 10px;
+}
+
+.glossary-domain-subdomain-dropdown {
+  .dropdown__option--is-no-results-found {
+    display: none;
+  }
+
+  .button-create-option {
+    > div {
+      width: 100%;
+    }
+
+    .button-create-option-content {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      svg {
+        flex-shrink: 0;
+        opacity: 1;
+      }
+    }
+
+    &:has(+ .dropdown__option--is-no-results-found) {
+      margin-bottom: 0;
+    }
+
+    &:hover {
+      background-color: colors.$grey50 !important;
+    }
+  }
+}
+
+.glossary-domain-subdomain-no-records {
+  display: block;
+  text-align: left;
+  color: colors.$grey600;
+  padding: 0 8px;
+  line-height: 1.2;
 }

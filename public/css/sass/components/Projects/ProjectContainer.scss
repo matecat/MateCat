@@ -7,7 +7,13 @@
   background-color: colors.$white;
   border: 1px solid colors.$grey150;
   border-radius: 18px;
-  overflow: hidden;
+  // `clip` (unlike `hidden`) never establishes a scroll container, so it still rounds the
+  // card's corners and clips the job grid's horizontal overflow without trapping the
+  // header's `position: sticky` below.
+  overflow: clip;
+  // Let the clip reach over the 1px border, so the stuck header's page-coloured shadow
+  // can cover the card's side borders in the gap above it (Safari ignores this)
+  overflow-clip-margin: 1px;
 }
 
 .project-container-header {
@@ -17,7 +23,20 @@
   height: 64px;
   align-items: center;
   align-self: stretch;
-  background-color: colors.$grey50;
+  background-color: colors.$grey75;
+  position: sticky;
+  // Stuck, it keeps a gap below the top bar and the card's rounded corners
+  top: 8px;
+  z-index: 2;
+  border-radius: 17px 17px 0 0;
+  // The page-coloured shadow fills that gap and the corners, so the job rows scrolling
+  // underneath stay hidden. The three 1px shadows redraw the card border on the top and
+  // sides only: a ring on all four sides would leave a line under the stuck header.
+  box-shadow:
+    0 -1px 0 0 colors.$grey150,
+    -1px 0 0 0 colors.$grey150,
+    1px 0 0 0 colors.$grey150,
+    0 -8px 0 8px colors.$grey100;
 }
 
 .project-container-header-sx,
@@ -38,6 +57,7 @@
   display: flex;
   align-items: center;
   gap: 2px;
+  height: 28px;
 
   h6 {
     font-weight: bold;
@@ -49,6 +69,8 @@
 
 .project-container-form-edit-name {
   display: inline-block;
+  margin-left: -5px;
+  margin-top: -1px;
 
   fieldset {
     border: unset;
@@ -61,10 +83,39 @@
     min-width: 250px;
     max-width: 400px;
     border-radius: variables.$border-radius-default;
-    &:active,
-    &:focus {
-      box-shadow: unset;
-      border: 1px solid colors.$grey500;
+    outline: none;
+    border: none;
+    box-shadow: none;
+    font-weight: bold;
+    font-size: variables.$font-size-base;
+    padding: 5px;
+    color: colors.$black;
+  }
+}
+
+.project-container-show-more {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding: 0 12px 24px;
+  background-color: colors.$white;
+  z-index: 1;
+
+  // continue the .job-container-background zebra stripe (see JobContainer.scss)
+  // into the show-more bar instead of always showing white under it —
+  // ProjectContainer.js computes which row is striped (position-based CSS
+  // selectors can't, once AnimatedCollapse re-scopes the "extra" rows)
+  &.project-container-show-more--striped {
+    background-color: colors.$grey25;
+  }
+
+  .project-container-show-more-icon {
+    display: flex;
+    svg {
+      transition: transform 0.2s ease;
+    }
+    &.is-expanded svg {
+      transform: rotate(180deg);
     }
   }
 }
@@ -74,6 +125,10 @@
   align-items: center;
   padding: 0px 24px;
   height: 40px;
+  background-color: colors.$white;
+  border-top: 1px solid colors.$grey100;
+  z-index: 1;
+
   > * {
     color: colors.$grey700 !important;
     font-size: variables.$font-size-xsmall !important;
@@ -94,6 +149,7 @@
 .user-project-dropdown {
   border-radius: 999px !important;
   font-weight: normal !important;
+  font-size: 14px !important;
 }
 
 .project-menu-dropdown {
@@ -104,4 +160,9 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+}
+
+// The name row's 2px gap keeps the name and its edit pencil together; the badge sits apart
+.project-language-pairs {
+  margin-left: 6px;
 }

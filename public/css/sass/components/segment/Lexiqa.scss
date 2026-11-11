@@ -30,23 +30,6 @@
         text-transform: capitalize;
       }
     }
-    .tooltip-error-ignore {
-      color: colors.$grey600;
-      text-decoration: none;
-      cursor: pointer;
-      border-radius: 0 4px 4px 0;
-      padding-left: 10px;
-      height: 40px;
-      &:hover {
-        color: colors.$grey700;
-      }
-      .tooltip-error-ignore-text {
-        margin-left: 5px;
-        margin-right: 10px;
-        float: left;
-        line-height: 40px;
-      }
-    }
     &:not(:first-child) {
       border-top: 1px solid rgba(255, 255, 255, 0.36);
     }

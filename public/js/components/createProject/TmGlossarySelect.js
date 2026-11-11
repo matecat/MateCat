@@ -1,12 +1,17 @@
 import React, {useContext} from 'react'
-import Check from '../../../img/icons/Check'
 import {Select} from '../common/Select'
 import {CreateProjectContext} from './CreateProjectContext'
-import {orderTmKeys} from '../settingsPanel/Contents/TranslationMemoryGlossaryTab'
+import {
+  getSavedTemplateTm,
+  orderTmKeys,
+  toTemplateTmEntry,
+} from '../settingsPanel/Contents/TranslationMemoryGlossaryTab'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import HelpCircle from '../../../img/icons/HelpCircle'
 import IconAdd from '../../../img/icons/IconAdd'
 import {SELECT_HEIGHT} from '../../constants/Constants'
+import {Button, BUTTON_MODE, BUTTON_TYPE} from '../common/Button/Button'
+import {SETTINGS_PANEL_TABS} from '../settingsPanel'
 
 export const TmGlossarySelect = () => {
   const {tmKeys, setOpenSettings, modifyingCurrentTemplate, projectTemplates} =
@@ -37,6 +42,8 @@ export const TmGlossarySelect = () => {
       id="tmx-select"
       name={'tmx-select'}
       className={`${hasNoPrivateKeys ? 'select-without-private-keys' : ''}`}
+      dropdownClassName="new-project-form-select-portal"
+      isPortalDropdown={true}
       maxHeightDroplist={SELECT_HEIGHT}
       showSearchBar={true}
       isDisabled={!tmKeys || !isUserLogged || !projectTemplates?.length}
@@ -64,11 +71,13 @@ export const TmGlossarySelect = () => {
           tm: orderTmKeys(
             updatedKeys.filter(({isActive}) => isActive),
             prevTemplate.tm.map(({key}) => key),
-          ).map(({id, isActive, ...rest}) => rest), //eslint-disable-line
+          ).map((tmKey) =>
+            toTemplateTmEntry(tmKey, getSavedTemplateTm(projectTemplates)),
+          ),
         }))
       }}
     >
-      {({index, onClose, name, key, showActiveOptionIcon}) => ({
+      {({index, onClose, name, key}) => ({
         ...(index === 0 && {
           beforeRow: (
             <>
@@ -77,16 +86,22 @@ export const TmGlossarySelect = () => {
                   You have no private resources
                 </span>
               )}
-              <button
-                className="button-top-of-list"
-                onClick={() => {
-                  setOpenSettings({isOpen: true})
-                  onClose()
-                }}
-              >
-                CREATE RESOURCE
-                <IconAdd />
-              </button>
+              <div className="tm-tb-select-button-create-resource">
+                <Button
+                  type={BUTTON_TYPE.PRIMARY}
+                  mode={BUTTON_MODE.GHOST}
+                  onClick={() => {
+                    setOpenSettings({
+                      isOpen: true,
+                      tab: SETTINGS_PANEL_TABS.translationMemoryGlossary,
+                    })
+                    onClose()
+                  }}
+                >
+                  <IconAdd size={22} />
+                  CREATE RESOURCE
+                </Button>
+              </div>
             </>
           ),
         }),
@@ -96,7 +111,6 @@ export const TmGlossarySelect = () => {
               <span>{name}</span>
               <span>{key}</span>
             </div>
-            {showActiveOptionIcon && <Check size={16} />}
           </div>
         ),
       })}

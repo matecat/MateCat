@@ -1056,12 +1056,14 @@ const SegmentSource = ({segment}) => {
         <div className="buttons">
           <Button
             mode={BUTTON_MODE.OUTLINE}
+            size={BUTTON_SIZE.SMALL}
             onClick={() => SegmentActions.closeSplitSegment()}
           >
             Cancel
           </Button>
           <Button
             type={BUTTON_TYPE.PRIMARY}
+            size={BUTTON_SIZE.SMALL}
             disabled={!splitPointRef.current}
             onClick={() => splitSegmentNew()}
           >

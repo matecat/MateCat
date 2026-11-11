@@ -29,72 +29,146 @@
   }
 }
 
-.translation-memory-glossary-checkbox-container {
+.translation-memory-glossary-subtabs {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  border-radius: variables.$border-radius-default;
-  border: 1px dashed colors.$grey200;
-  padding: 10px;
-  margin-bottom: 20px;
-  background: colors.$white;
+  gap: 28px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid colors.$grey150;
 }
 
-.translation-memory-glossary-checkbox-item {
-  display: flex;
+.translation-memory-glossary-subtab {
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  padding: 4px 2px 10px;
+  margin-bottom: -1px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: none;
+  font-family: inherit;
+  font-size: variables.$font-size-small;
+  font-weight: normal;
+  color: colors.$grey700;
+  cursor: pointer;
+
+  &:hover {
+    color: colors.$blue900;
+  }
 }
 
-.translation-memory-glossary-pretranslate {
+.translation-memory-glossary-subtab-active {
+  color: colors.$blue900;
+  border-bottom-color: colors.$blue500;
+}
+
+.translation-memory-glossary-advanced {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  text-align: left;
+}
+
+.translation-memory-glossary-advanced-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.translation-memory-glossary-advanced
+  .translation-memory-glossary-advanced-heading {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-bottom: 20px;
 
-  .translation-memory-glossary-tab-table-title {
-    margin-bottom: 0;
-
-    h2 {
-      margin: 0;
-      padding: 0 10px;
-    }
+  h2 {
+    margin: 0;
+    padding: 0;
+    font-size: variables.$font-size-big;
+    line-height: 24px;
   }
 
   p {
     margin: 0;
-    padding: 0 10px;
-    color: colors.$grey600;
-    text-align: left;
+    font-size: variables.$font-size-small;
+    line-height: 24px;
+    color: colors.$grey700;
   }
 }
 
 .translation-memory-glossary-pretranslate-cards {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 
 .translation-memory-glossary-pretranslate-card {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   border-radius: variables.$border-radius-default;
-  border: 1px solid colors.$grey200;
-  padding: 12px;
+  border: 1px solid colors.$grey150;
+  padding: 16px;
   background: colors.$white;
 }
 
 .translation-memory-glossary-pretranslate-toggle {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+  font-size: variables.$font-size-small;
   font-weight: bold;
 }
 
-.translation-memory-glossary-pretranslate-status-label {
-  color: colors.$grey600;
-  text-align: left;
+.translation-memory-glossary-pretranslate-status {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.translation-memory-glossary-variant-matching {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: variables.$font-size-small;
+    line-height: 24px;
+    color: #2d2d30;
+    cursor: pointer;
+  }
+
+  input {
+    appearance: none;
+    flex: none;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    border: 1px solid rgba(1, 1, 24, 0.26);
+    border-radius: 50%;
+    background: rgba(56, 56, 56, 0.04);
+    cursor: pointer;
+
+    &:checked {
+      border-color: #2985ec;
+      background: radial-gradient(circle, colors.$white 0 5px, #2985ec 5px);
+    }
+
+    &:focus-visible {
+      outline: 2px solid #2985ec;
+      outline-offset: 2px;
+    }
+  }
+}
+
+.translation-memory-glossary-subtab-panel {
+  display: flex;
+  flex-direction: column;
+
+  &[hidden] {
+    display: none;
+  }
 }
 
 .translation-memory-glossary-tab-table-title {
@@ -111,10 +185,9 @@
 }
 
 .translation-memory-glossary-tab-input-text {
-  border-radius: variables.$border-radius-default;
-  border: 1px solid colors.$grey200;
-  padding: 6px;
+  padding: 6px !important;
   width: 350px;
+  font-size: variables.$font-size-xsmall;
 }
 
 .translation-memory-glossary-tab {
@@ -128,16 +201,18 @@
     padding: 0 20px;
   }
 
-  .settings-panel-table-rowHeading,
+  .settings-panel-table-rowHeading {
+    grid-template-columns: 8% 5% minmax(0, 1fr) 20% 5% 14% 146px;
+  }
   .settings-panel-row-content {
-    grid-template-columns: 8% 5% minmax(0, 1fr) 20% 5% 14% 18%;
+    grid-template-columns: 8% 5% minmax(0, 1fr) 20% 5% 14% auto;
   }
 
   .settings-panel-row {
     border: unset;
 
     .row-content-default-memory {
-      grid-template-columns: 8% 5% minmax(0, 1fr) 5% 14% 18%;
+      grid-template-columns: 8% 5% minmax(0, 1fr) 5% 14% 144px;
       padding: 0 10px !important;
       background-color: transparent;
 
@@ -220,10 +295,8 @@
 
 .tm-key-row-name {
   width: 100%;
-  padding: 4px 8px;
   background-color: unset;
-  border: 1px solid colors.$grey200;
-  border-radius: variables.$border-radius-default;
+  padding: 4px 8px !important;
 
   &:focus,
   &:hover {
@@ -236,10 +309,13 @@
 }
 
 .tm-key-row-name-disabled {
-  border: unset;
+  border: none !important;
+  background-color: unset !important;
+  color: colors.$black !important;
+
   &:focus,
   &:hover {
-    background-color: unset;
+    background-color: unset !important;
   }
 }
 
@@ -255,37 +331,6 @@
 
 .tm-key-row-menu-button {
   justify-content: unset;
-
-  .menu-button-wrapper {
-    button {
-      color: colors.$black !important;
-      background: colors.$grey100 !important;
-      text-align: center;
-      border: 1px solid colors.$grey300 !important;
-      height: 32px !important;
-      font-size: variables.$font-size-xsmall !important;
-
-      &:hover {
-        background-color: colors.$grey50 !important;
-      }
-    }
-
-    > :last-child {
-      padding: 4px 8px;
-    }
-
-    /* > :first-child {
-      min-width: 140px;
-      border-radius: 2px;
-      height: 28px;
-    }
-
-    > :last-child {
-      border: none;
-      background-color: unset;
-      color: colors.$grey700;
-    } */
-  }
 
   .just-button-import-tmx {
     min-width: 140px;
@@ -324,9 +369,10 @@
 
 .tm-key-create-resource-row-input {
   width: 100%;
-  padding: 4px;
-  border-radius: 3px;
+  padding: 4px 8px !important;
+  border-radius: variables.$border-radius-default;
   border: solid 1px colors.$grey150;
+  background-color: colors.$white !important;
 
   &.error {
     border: solid 1px colors.$red500;
@@ -339,7 +385,7 @@
 .translation-memory-glossary-tab-delete {
   display: flex;
   flex-direction: column;
-  padding: 10px 36px;
+  padding: 10px 10px 10px 40px;
   min-height: 50px;
 
   .message-share-tmx-email {
@@ -359,6 +405,20 @@
       gap: 10px;
       align-items: center;
       margin-right: 20px;
+    }
+
+    input[type='file']::file-selector-button {
+      color: #000;
+      background: colors.$grey100;
+      padding: 4px 8px;
+      text-align: center;
+      border: 1px solid colors.$grey300;
+      border-radius: variables.$border-radius-default;
+      margin-right: 10px;
+
+      &:hover {
+        background-color: colors.$grey50;
+      }
     }
   }
 
@@ -454,8 +514,6 @@
 }
 
 .translation-memory-glossary-tab-share {
-  padding: 10px 36px 10px 10px;
-
   .translation-memory-glossary-tab-input-text {
     width: 260px;
   }
@@ -528,9 +586,23 @@
 
 .tm-key-row-menu-button,
 .tm-row-penalty {
+  // Same width and position as the "Add penalty" button it replaces, so the field
+  // starts at the button's left edge and the × ends at its right edge
   .tm-row-penalty-numeric-stepper {
     display: flex;
-    gap: 5px;
+    gap: 2px;
+    width: 104px;
+    margin: 0 auto;
+
+    > :first-child {
+      flex: 1;
+      min-width: 0;
+
+      input {
+        flex: 1;
+        min-width: 0;
+      }
+    }
   }
 
   .penalty-numeric-stepper-close-button {

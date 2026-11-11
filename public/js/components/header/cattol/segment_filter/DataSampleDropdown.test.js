@@ -48,11 +48,11 @@ test('shows the placeholder label when disabled even with a sampling type set', 
 // Filters-panel height to include the closed dropdown's size.
 test('does not render the dropdown list in the DOM while closed', () => {
   renderDropdown()
-  expect(screen.queryByPlaceholderText('n°')).not.toBeInTheDocument()
+  expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
   expect(screen.queryByText('Regular interval')).not.toBeInTheDocument()
 
   fireEvent.click(screen.getByRole('button', {name: /Data sample/}))
-  expect(screen.getByPlaceholderText('n°')).toBeInTheDocument()
+  expect(screen.getByRole('textbox')).toBeInTheDocument()
 })
 
 test('toggles the dropdown open state and registers a click listener', () => {
@@ -97,27 +97,50 @@ test('marks the currently selected sampling type as active', () => {
   ).not.toHaveClass('active')
 })
 
-test('updates the sample size when a valid value is entered', () => {
+test('updates the displayed sample size while typing, without committing it yet', () => {
   const {onChangeSampleSize} = renderDropdown()
   fireEvent.click(screen.getByRole('button', {name: /Data sample/}))
-  const input = screen.getByPlaceholderText('n°')
+  const input = screen.getByRole('textbox')
+  fireEvent.focus(input)
 
   fireEvent.change(input, {target: {value: '42'}})
 
-  expect(onChangeSampleSize).toHaveBeenCalledWith(42)
-  expect(input.value).toBe('42')
+  expect(input).toHaveValue('42')
+  expect(onChangeSampleSize).not.toHaveBeenCalled()
 })
 
-test('ignores out of range or invalid sample size values', () => {
+test('commits the typed sample size on blur', () => {
   const {onChangeSampleSize} = renderDropdown()
   fireEvent.click(screen.getByRole('button', {name: /Data sample/}))
-  const input = screen.getByPlaceholderText('n°')
+  const input = screen.getByRole('textbox')
 
-  fireEvent.change(input, {target: {value: '0'}})
-  fireEvent.change(input, {target: {value: '101'}})
+  fireEvent.change(input, {target: {value: '42'}})
+  fireEvent.blur(input)
+
+  expect(onChangeSampleSize).toHaveBeenCalledWith(42)
+})
+
+test('ignores non-numeric characters while typing', () => {
+  const {onChangeSampleSize} = renderDropdown()
+  fireEvent.click(screen.getByRole('button', {name: /Data sample/}))
+  const input = screen.getByRole('textbox')
+  fireEvent.focus(input)
+
   fireEvent.change(input, {target: {value: 'abc'}})
 
+  expect(input).toHaveValue('5')
   expect(onChangeSampleSize).not.toHaveBeenCalled()
+})
+
+test('clamps an out of range sample size to the min/max bound on blur', () => {
+  const {onChangeSampleSize} = renderDropdown()
+  fireEvent.click(screen.getByRole('button', {name: /Data sample/}))
+  const input = screen.getByRole('textbox')
+
+  fireEvent.change(input, {target: {value: '101'}})
+  fireEvent.blur(input)
+
+  expect(onChangeSampleSize).toHaveBeenCalledWith(100)
 })
 
 test('clicking the close icon resets the filter without toggling the dropdown', () => {

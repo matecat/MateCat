@@ -9,7 +9,6 @@ import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {getInfoTmKey} from '../../../../api/getInfoTmKey'
 
 import Checkmark from '../../../../../img/icons/Checkmark'
-import Close from '../../../../../img/icons/Close'
 import CatToolActions from '../../../../actions/CatToolActions'
 import {
   Button,
@@ -17,6 +16,7 @@ import {
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../../../common/Button/Button'
+import IconClose from '../../../../../img/icons/IconClose'
 
 export const TMCreateResourceRow = ({row}) => {
   const {tmKeys, setTmKeys, modifyingCurrentTemplate} =
@@ -101,7 +101,6 @@ export const TMCreateResourceRow = ({row}) => {
       CatToolActions.addNotification({
         ...message,
         position: 'br',
-        allowHtml: true,
         timer: 5000,
       })
       return
@@ -304,7 +303,6 @@ export const TMCreateResourceRow = ({row}) => {
           title: 'Invalid key',
           type: 'error',
           text: message,
-          allowHtml: true,
           position: 'br',
           timer: 5000,
         })
@@ -336,6 +334,7 @@ export const TMCreateResourceRow = ({row}) => {
       <div>
         <input
           ref={nameRef}
+          type="text"
           placeholder="Please insert a name for the resource"
           className={inputNameClasses}
           value={name}
@@ -346,6 +345,7 @@ export const TMCreateResourceRow = ({row}) => {
       <div className="tm-key-add-shared-resource align-center">
         {row.id === SPECIAL_ROWS_ID.addSharedResource && (
           <input
+            type="text"
             placeholder="Add the shared key here"
             className={inputKeyCodeClasses}
             value={keyCode}
@@ -363,7 +363,7 @@ export const TMCreateResourceRow = ({row}) => {
           htmlType={BUTTON_HTML_TYPE.SUBMIT}
           testId="create-tmkey-confirm"
         >
-          <Checkmark size={12} />
+          <Checkmark size={16} />
           Confirm
         </Button>
 
@@ -373,7 +373,7 @@ export const TMCreateResourceRow = ({row}) => {
           htmlType={BUTTON_HTML_TYPE.RESET}
           onClick={onReset}
         >
-          <Close size={18} />
+          <IconClose size={16} />
         </Button>
       </div>
     </form>

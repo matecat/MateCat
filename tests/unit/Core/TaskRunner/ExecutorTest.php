@@ -9,7 +9,6 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use ReflectionMethod;
-use SplSubject;
 use Stomp\Client;
 use Stomp\Transport\Frame;
 use Utils\ActiveMQ\AMQHandler;
@@ -528,31 +527,6 @@ class ExecutorTest extends AbstractTest
         $this->assertSame($initial + 1, $frameIdProp->getValue($executor));
     }
 
-    // ─── update() tests ─────────────────────────────────────────────────────────
-
-    #[Test]
-    public function test_update_logs_message_from_abstract_worker(): void
-    {
-        $executor = $this->createTestableExecutor();
-
-        $mockWorker = $this->createMock(AbstractWorker::class);
-        $mockWorker->expects($this->once())->method('getLogMsg')->willReturn('Worker completed task');
-
-        $executor->update($mockWorker);
-    }
-
-    #[Test]
-    public function test_update_ignores_non_abstract_worker_subjects(): void
-    {
-        $executor = $this->createTestableExecutor();
-
-        $mockSubject = $this->createMock(SplSubject::class);
-
-        // Should not throw — just does nothing
-        $executor->update($mockSubject);
-        $this->assertTrue(true);
-    }
-
     // ─── isAllowedWorkerClass() tests ───────────────────────────────────────────
 
     #[Test]
@@ -828,7 +802,29 @@ class ExecutorTest extends AbstractTest
     }
 
     #[Test]
-    public function test_main_worker_attach_sets_pid_and_context(): void
+    public function test_main_builds_worker_with_executor_logger(): void
+    {
+        $executor = $this->createTestableExecutor();
+        $mockRedis = $this->createCountdownRedis(1);
+        $this->mockAmqHandler->method('getRedisClient')->willReturn($mockRedis);
+
+        $payload = json_encode(['classLoad' => TestFixtureWorker::class, 'params' => []]);
+        $frame = new Frame('MESSAGE', ['MESSAGE' => ''], $payload);
+        $this->mockAmqHandler->method('read')->willReturn($frame);
+
+        $executor->main(0);
+
+        $ref = new ReflectionClass($executor);
+        $worker = $ref->getProperty('_worker')->getValue($executor);
+        $this->assertInstanceOf(TestFixtureWorker::class, $worker);
+
+        // The worker logs through the executor's queue logger, not a default one of its own
+        $workerLogger = (new ReflectionClass(AbstractWorker::class))->getProperty('logger')->getValue($worker);
+        $this->assertSame($ref->getProperty('logger')->getValue($executor), $workerLogger);
+    }
+
+    #[Test]
+    public function test_main_worker_build_sets_pid_and_context(): void
     {
         $executor = $this->createTestableExecutor();
         $mockRedis = $this->createCountdownRedis(1);
@@ -867,11 +863,6 @@ class TestDummyWorker extends AbstractWorker
     public function process(AbstractElement $queueElement): void
     {
     }
-
-    public function getLogMsg(): array|string
-    {
-        return 'dummy log';
-    }
 }
 
 class TestReQueueWorker extends AbstractWorker
@@ -884,11 +875,6 @@ class TestReQueueWorker extends AbstractWorker
     public function process(AbstractElement $queueElement): void
     {
         throw new \Utils\TaskRunner\Exceptions\ReQueueException('test requeue');
-    }
-
-    public function getLogMsg(): array|string
-    {
-        return 'requeue log';
     }
 }
 
@@ -903,11 +889,6 @@ class TestPDOExceptionWorker extends AbstractWorker
     {
         throw new \PDOException('test pdo error');
     }
-
-    public function getLogMsg(): array|string
-    {
-        return 'pdo log';
-    }
 }
 
 class TestThrowableWorker extends AbstractWorker
@@ -920,10 +901,5 @@ class TestThrowableWorker extends AbstractWorker
     public function process(AbstractElement $queueElement): void
     {
         throw new \Error('test throwable');
-    }
-
-    public function getLogMsg(): array|string
-    {
-        return 'throwable log';
     }
 }

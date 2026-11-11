@@ -9,6 +9,7 @@ import {
 } from '../common/Button/Button'
 import InfoIcon from '../../../img/icons/InfoIcon'
 import CheckCircleBroken from '../../../img/icons/CheckCircleBroken'
+import {htmlToReact} from '../../utils/htmlToReact'
 
 const NotificationItem = ({
   uid,
@@ -21,6 +22,7 @@ const NotificationItem = ({
   openCallback,
   timer = 7000,
   dismissable = true,
+  allowHtml = false,
   onRemove,
   remove,
 }) => {
@@ -32,7 +34,7 @@ const NotificationItem = ({
   const styleNameContainer = 'notification-type-' + type
   let _notificationTimer = useRef()
 
-  const hideNotification = () => {
+  const hideNotification = (closedByUser = false) => {
     if (_notificationTimer.current) {
       clearTimeout(_notificationTimer.current)
     }
@@ -46,7 +48,7 @@ const NotificationItem = ({
     }, 1000)
 
     if (closeCallback) {
-      closeCallback.call()
+      closeCallback(closedByUser)
     }
   }
 
@@ -139,8 +141,8 @@ const NotificationItem = ({
       <div>
         <div className="notification-item-icon">{icon}</div>
         <div className="notification-item-content">
-          <h6>{title}</h6>
-          <p>{text}</p>
+          <h6>{allowHtml ? htmlToReact(title) : title}</h6>
+          <p>{allowHtml ? htmlToReact(text) : text}</p>
         </div>
       </div>
       {dismissable && (
@@ -148,9 +150,9 @@ const NotificationItem = ({
           mode={BUTTON_MODE.GHOST}
           type={BUTTON_TYPE.ICON}
           size={BUTTON_SIZE.ICON_XSMALL}
-          onClick={hideNotification}
+          onClick={() => hideNotification(true)}
         >
-          <IconClose size={10} />
+          <IconClose size={16} />
         </Button>
       )}
     </div>
@@ -167,6 +169,7 @@ NotificationItem.propTypes = {
   openCallback: PropTypes.func,
   timer: PropTypes.number,
   dismissable: PropTypes.bool,
+  allowHtml: PropTypes.bool,
 }
 
 export default NotificationItem

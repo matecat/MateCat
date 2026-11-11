@@ -24,6 +24,9 @@ import AppDispatcher from '../../../stores/AppDispatcher'
 import {removeZeroWidthSpace} from '../utils/DraftMatecatUtils/tagUtils'
 
 import {TERM_FORM_FIELDS} from './GlossaryConstants'
+import {Button, BUTTON_TYPE} from '../../common/Button/Button'
+import IconAdd from '../../../../img/icons/IconAdd'
+import {SETTINGS_PANEL_TABS} from '../../settingsPanel/SettingsPanelConstants'
 
 const initialState = {
   keys: [],
@@ -566,10 +569,17 @@ export const SegmentFooterTabGlossary = ({
           <TermForm />
         ) : haveKeysGlossary === false ? (
           <div className="no_keys_glossary">
-            <p>No glossary available.</p>
-            <button className="glossary__button-add" onClick={openForm}>
-              + Click here to create one
-            </button>
+            <p>No termbase available.</p>
+            <Button
+              type={BUTTON_TYPE.PRIMARY}
+              onClick={() =>
+                CatToolActions.openSettingsPanel(
+                  SETTINGS_PANEL_TABS.translationMemoryGlossary,
+                )
+              }
+            >
+              <IconAdd size={22} /> Click here to add one
+            </Button>
           </div>
         ) : (
           <span className="loading_label">Loading</span>

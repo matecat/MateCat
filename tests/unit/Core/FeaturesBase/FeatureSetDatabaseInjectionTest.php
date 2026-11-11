@@ -22,7 +22,7 @@ class FeatureSetDatabaseInjectionTest extends AbstractTest
         $db = $this->createStub(IDatabase::class);
 
         $struct = new BasicFeatureStruct();
-        $struct->feature_code = 'review_extended';
+        $struct->feature_code = 'second_pass_review';
         $struct->options = null;
 
         $feature = $struct->toNewObject($db);
@@ -46,7 +46,7 @@ class FeatureSetDatabaseInjectionTest extends AbstractTest
         $db = $this->createStub(IDatabase::class);
 
         $featureSet = new FeatureSet($db);
-        $featureSet->loadFromString('review_extended');
+        $featureSet->loadFromString('second_pass_review');
 
         $structs = $featureSet->getFeaturesStructs();
         self::assertNotEmpty($structs);

@@ -1,4 +1,11 @@
-import React, {createRef, Fragment, useContext, useEffect, useRef, useState} from 'react'
+import React, {
+  createRef,
+  Fragment,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {TranslationMemoryGlossaryTabContext} from './TranslationMemoryGlossaryTabContext'
@@ -7,7 +14,11 @@ import {
   getTmDataStructureToSendServer,
   isOwnerOfKey,
   orderTmKeys,
-} from './TranslationMemoryGlossaryTab'
+} from './ResourceManagement'
+import {
+  getSavedTemplateTm,
+  toTemplateTmEntry,
+} from './TranslationMemoryGlossaryTabUtils'
 import {ImportTMX} from './ImportTMX'
 import {ImportGlossary} from './ImportGlossary'
 import {ExportTMX} from './ExportTMX'
@@ -90,7 +101,6 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         type: 'error',
         text: 'You can activate up to 10 resources per project.',
         position: 'br',
-        allowHtml: true,
         timer: 5000,
       })
       setIsLookup(false)
@@ -137,7 +147,9 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         tm: orderTmKeys(
           updatedKeys.filter(({isActive}) => isActive),
           prevTemplate.tm.map(({key}) => key),
-        ).map(({id, isActive, ...rest}) => rest), //eslint-disable-line
+        ).map((tmKey) =>
+          toTemplateTmEntry(tmKey, getSavedTemplateTm(projectTemplates)),
+        ),
       }))
     } else {
       setSpecialRows((prevState) =>
@@ -182,7 +194,6 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         type: 'error',
         text: 'This name is already in use, please choose a different one',
         position: 'br',
-        allowHtml: true,
         timer: 5000,
       })
 
@@ -241,7 +252,6 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           type: 'error',
           text: 'Resource name cannot be empty. Please provide a valid name.',
           position: 'br',
-          allowHtml: true,
           timer: 5000,
         })
         setTmKeys((prevState) =>
@@ -344,7 +354,6 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           type: 'error',
           text: 'There was an error saving your data. Please retry!',
           position: 'br',
-          allowHtml: true,
           timer: 5000,
         })
         onExpandRow({row, shouldExpand: false})
@@ -485,7 +494,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           size={BUTTON_SIZE.ICON_SMALL}
           onClick={() => onChangePenalty(0)}
         >
-          <IconClose />
+          <IconClose size={18} />
         </Button>
       </div>
     ) : (
@@ -530,6 +539,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
       </div>
       <div>
         <input
+          type="text"
           className={`tm-key-row-name${
             isMMSharedKey ? ' tm-key-row-name-disabled' : ''
           }`}

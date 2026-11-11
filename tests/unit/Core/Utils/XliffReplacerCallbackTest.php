@@ -8,6 +8,7 @@ use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Utils\XliffReplacer\XliffReplacerCallback;
 
@@ -130,5 +131,70 @@ class XliffReplacerCallbackTest extends AbstractTest
         $xliffReplacerCallback = new XliffReplacerCallback(new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)), 'en-US', 'es-ES', $jobStructMock, obtainTestDatabase());
 
         $this->assertFalse($xliffReplacerCallback->thereAreErrors(1, $source, $target, $dataRefMap), "Should not have errors");
+    }
+
+    /**
+     * XLIFF 2.0 inline codes are compared by their original data, not by their disp/equiv display values:
+     * a target tag whose disp is missing or localized is still the same tag. Before this, the export wrote the
+     * source in place of these translations.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    #[DataProvider('xliff20DisplayValuesProvider')]
+    public function testXliff20DisplayValuesDoNotCauseATagMismatch(string $source, string $target): void
+    {
+        $jobStructMock = $this->getStubBuilder(JobStruct::class)
+            ->setConstructorArgs([
+                [
+                    'id' => '1',
+                    'password' => 'password',
+                    'source' => 'en-US',
+                    'target' => 'it-IT'
+                ]
+            ])->getStub();
+
+        $projectStructMock = $this->getStubBuilder(ProjectStruct::class)->getStub();
+        $jobStructMock->method('getProject')->willReturn($projectStructMock);
+
+        $dataRefMap = [
+            'd1' => '{name}',
+            'd2' => '&lt;b&gt;',
+            'd3' => '&lt;/b&gt;',
+        ];
+
+        /** @noinspection PhpParamsInspection */
+        $xliffReplacerCallback = new XliffReplacerCallback(new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)), 'en-US', 'it-IT', $jobStructMock, obtainTestDatabase());
+
+        $this->assertFalse($xliffReplacerCallback->thereAreErrors(1, $source, $target, $dataRefMap));
+    }
+
+    /**
+     * @return array<string, array{string, string}>
+     */
+    public static function xliff20DisplayValuesProvider(): array
+    {
+        return [
+            'ph with the same disp' => [
+                'Hello <ph id="1" dataRef="d1" disp="[Name]"/>!',
+                'Ciao <ph id="1" dataRef="d1" disp="[Name]"/>!',
+            ],
+            'ph whose disp is missing in the target' => [
+                'Hello <ph id="1" dataRef="d1" disp="[Name]"/>!',
+                'Ciao <ph id="1" dataRef="d1"/>!',
+            ],
+            'ph whose disp is localized in the target' => [
+                'Hello <ph id="1" dataRef="d1" disp="[Name]"/>!',
+                'Ciao <ph id="1" dataRef="d1" disp="[Nome]"/>!',
+            ],
+            'identical pc with a slash in an attribute' => [
+                'A <pc id="2" dataRefStart="d2" dataRefEnd="d3" dispStart="[b]" dispEnd="[/b]">bold</pc> word',
+                'Una parola <pc id="2" dataRefStart="d2" dataRefEnd="d3" dispStart="[b]" dispEnd="[/b]">grassetto</pc>',
+            ],
+            'pc whose disp is missing in the target' => [
+                'A <pc id="2" dataRefStart="d2" dataRefEnd="d3" dispStart="[b]" dispEnd="[/b]">bold</pc> word',
+                'Una parola <pc id="2" dataRefStart="d2" dataRefEnd="d3">grassetto</pc>',
+            ],
+        ];
     }
 }

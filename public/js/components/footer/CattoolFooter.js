@@ -8,7 +8,7 @@ import {BUTTON_MODE, BUTTON_SIZE, Button} from '../common/Button/Button'
 import {REVISE_STEP_NUMBER} from '../../constants/Constants'
 import {CookieConsent} from '../common/CookieConsent'
 import IconRedirect from '../../../img/icons/IconRedirect'
-import Tooltip, {TOOLTIP_POSITION} from '../common/Tooltip'
+import Tooltip from '../common/Tooltip'
 import IconArrowRight from '../../../img/icons/IconArrowRight'
 
 export const CattoolFooter = ({
@@ -30,6 +30,8 @@ export const CattoolFooter = ({
   const etcLabelRef = useRef()
   const etcNARef = useRef()
   const speedNaRef = useRef()
+  const wordsCountRef = useRef()
+  const toDoCountRef = useRef()
 
   const sourceLang =
     languagesArray.find((item) => item.code == source)?.name ?? source
@@ -86,39 +88,52 @@ export const CattoolFooter = ({
     )
   const removeTooltip = () => setIsShowingTooltip(false)
 
-  const renderWordsStats = () => {
-    const label = isCJK ? 'Characters' : 'Weighted'
+  // A dash only while the count is unknown; zero words is a real count
+  const formatCount = (value) =>
+    value === undefined || value === null || value === ''
+      ? '-'
+      : Math.round(value)
 
-    return (
-      <>
-        <div className="grey-box-row">
-          <span>Total words</span>
-          {stats ? Math.round(stats.raw.total) : '-'}{' '}
-          {config.allow_link_to_analysis && (
-            <Tooltip content="Go to analysis page">
-              <Button
-                ref={goToAnalysisRef}
-                className="button-icon"
-                size={BUTTON_SIZE.ICON_XSMALL}
-                mode={BUTTON_MODE.GHOST}
-                onClick={onClickOpenJobAnalysis}
-              >
-                <IconRedirect size={14}/>
-              </Button>
-            </Tooltip>
-          )}
-        </div>
-        <div className="grey-box-row">
-          <span>{label}</span>
-          {stats ? Math.round(stats.equivalent.total) : '-'}{' '}
-        </div>
-      </>
-    )
-  }
+  // Weighted count in black, raw count in grey brackets, the two spelled out on hover
+  // (same pattern as the words button in My projects).
+  const renderCount = ({label, weighted, raw, countRef}) => (
+    <Tooltip
+      content={`Weighted: ${formatCount(weighted)} / Total: ${formatCount(raw)}`}
+    >
+      <span ref={countRef} className="footer-count">
+        {label}:{' '}
+        <span className="footer-count-weighted">{formatCount(weighted)}</span>{' '}
+        <span className="footer-count-raw">({formatCount(raw)})</span>
+      </span>
+    </Tooltip>
+  )
+
+  const renderWordsStats = () => (
+    <div className="footer-stat">
+      {renderCount({
+        label: isCJK ? 'Characters' : 'Words',
+        weighted: stats?.equivalent?.total,
+        raw: stats?.raw?.total,
+        countRef: wordsCountRef,
+      })}
+      {config.allow_link_to_analysis && (
+        <Tooltip content="Go to analysis page">
+          <Button
+            ref={goToAnalysisRef}
+            className="button-icon"
+            size={BUTTON_SIZE.ICON_XSMALL}
+            mode={BUTTON_MODE.GHOST}
+            onClick={onClickOpenJobAnalysis}
+            aria-label="Go to analysis page"
+          >
+            <IconRedirect size={14} />
+          </Button>
+        </Tooltip>
+      )}
+    </div>
+  )
 
   const renderToDoStats = () => {
-    const label = isCJK ? 'Characters' : 'Weighted'
-
     const valueTotal = config.isReview
       ? config.revisionNumber === REVISE_STEP_NUMBER.REVISE1
         ? stats?.revise_todo_total
@@ -136,58 +151,66 @@ export const CattoolFooter = ({
       : stats?.translate_todo
 
     return (
-      <>
-        <div className="grey-box-row">
-          <span>To do</span>
-          {valueTotal ? Math.round(valueTotal) : '-'}{' '}
-          <Tooltip content="Go to next unconfirmed segment">
-            <Button
-              ref={openToDoRef}
-              className="button-icon"
-              size={BUTTON_SIZE.ICON_XSMALL}
-              mode={BUTTON_MODE.GHOST}
-              onClick={onClickTodo}
-            >
-              <IconArrowRight />
-            </Button>
-          </Tooltip>
-        </div>
-        <div className="grey-box-row">
-          <span>{label}</span>
-          {valueWeighted ? Math.round(valueWeighted) : '-'}{' '}
-        </div>
-      </>
+      <div className="footer-stat">
+        {renderCount({
+          label: 'To do',
+          weighted: valueWeighted,
+          raw: valueTotal,
+          countRef: toDoCountRef,
+        })}
+        <Tooltip content="Go to next unconfirmed segment">
+          <Button
+            ref={openToDoRef}
+            className="button-icon"
+            size={BUTTON_SIZE.ICON_XSMALL}
+            mode={BUTTON_MODE.GHOST}
+            onClick={onClickTodo}
+            aria-label="Go to next unconfirmed segment"
+          >
+            <IconArrowRight />
+          </Button>
+        </Tooltip>
+      </div>
     )
   }
 
   const renderSpeedETC = () => (
-    <>
-      <div className="grey-box-row">
-        <span>Speed</span>
-        {stats?.words_per_hour ?? (
-          <Tooltip
-            content="This information becomes available after you confirm at least ten segments since opening the job"
-            position={TOOLTIP_POSITION.LEFT}
-          >
-            <span ref={speedNaRef}>N/A</span>
-          </Tooltip>
-        )}{' '}
-        <span>Words/h</span>
-      </div>
-      <div className="grey-box-row">
-        <Tooltip content="Estimated time to complete">
-          <span ref={etcLabelRef}>ETC</span>
-        </Tooltip>
-        {stats?.estimated_completion ?? (
-          <Tooltip
-            content="This information becomes available after you confirm at least ten segments since opening the job"
-            position={TOOLTIP_POSITION.LEFT}
-          >
-            <span ref={etcNARef}>N/A</span>
-          </Tooltip>
-        )}
-      </div>
-    </>
+    <div className="footer-stat footer-speed-etc">
+      <span>
+        <span className="footer-stat-label">Speed</span>{' '}
+        <strong>
+          {stats?.words_per_hour ?? (
+            <Tooltip
+              className="footer-tooltip"
+              content="This information becomes available after you confirm at least ten segments since opening the job"
+            >
+              <span ref={speedNaRef}>N/A</span>
+            </Tooltip>
+          )}
+        </strong>{' '}
+        words/h
+      </span>
+      <span>
+        <Tooltip
+          className="footer-tooltip footer-tooltip-end"
+          content="Estimated time to complete"
+        >
+          <span ref={etcLabelRef} className="footer-stat-label">
+            ETC
+          </span>
+        </Tooltip>{' '}
+        <strong>
+          {stats?.estimated_completion ?? (
+            <Tooltip
+              className="footer-tooltip footer-tooltip-end"
+              content="This information becomes available after you confirm at least ten segments since opening the job"
+            >
+              <span ref={etcNARef}>N/A</span>
+            </Tooltip>
+          )}
+        </strong>
+      </span>
+    </div>
   )
 
   return (
@@ -195,19 +218,22 @@ export const CattoolFooter = ({
       <div className="footer-body">
         <div className="container-left">
           <p id="job_id">
-            Job ID: <span>{idJob}</span>
+            <span className="footer-stat-label">Job ID</span>{' '}
+            <span className="footer-stat-label">{idJob}</span>
           </p>
         </div>
         <div className="container-center">
           <div className="container-progress-bar">
-            <div className="language" data-testid="language-pair">
-              <p>
-                <span>{sourceLang}</span>
-                <span className="to-arrow"> &#8594; </span>
-                <span id="footer-target-lang">{targetLang}</span>
-              </p>
+            <div
+              className="language"
+              data-testid="language-pair"
+              title={`${sourceLang} → ${targetLang}`}
+            >
+              <span>{source}</span>
+              <span className="to-arrow"> &#8594; </span>
+              <span id="footer-target-lang">{target}</span>
             </div>
-            <div onMouseLeave={removeTooltip}>
+            <div className="footer-progress" onMouseLeave={removeTooltip}>
               <JobProgressBar
                 stats={stats}
                 showPercent={true}
@@ -216,10 +242,13 @@ export const CattoolFooter = ({
               {getTooltip('progressBar')}
             </div>
           </div>
-
-          <div className="grey-box">{renderWordsStats()}</div>
-          <div className="grey-box">{renderToDoStats()}</div>
-          <div className="grey-box grey-box-speed-etc">{renderSpeedETC()}</div>
+        </div>
+        <div className="container-right">
+          {renderWordsStats()}
+          <span className="footer-divider" />
+          {renderToDoStats()}
+          <span className="footer-divider" />
+          {renderSpeedETC()}
         </div>
       </div>
       <CookieConsent />

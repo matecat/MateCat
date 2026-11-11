@@ -17,18 +17,15 @@
 }
 
 .user-initials {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
+  border: 2px solid colors.$blue500;
+  color: colors.$blue500;
   width: 24px;
   height: 24px;
+  font-size: 10px;
   border-radius: 50%;
-  background-color: #e8e8e8;
-  color: rgba(0, 0, 0, 0.6);
-  font-size: 0.75rem;
-  font-weight: 700;
-  vertical-align: middle;
-  cursor: default;
 }
 
 .cancel-label {
@@ -132,4 +129,31 @@ body svg {
 
 .pull-right {
   float: right !important;
+}
+
+input[type='text'],
+input[type='number'],
+input[type='email'],
+input[type='password'] {
+  outline-offset: 0;
+  border: 1px solid colors.$grey200;
+  border-radius: variables.$border-radius-default;
+  padding: 8px 12px;
+
+  &::placeholder {
+    color: colors.$grey400;
+  }
+  &:hover {
+    border: 1px solid colors.$grey400;
+  }
+  &:focus,
+  &:active {
+    border: 1px solid colors.$grey400;
+    outline: 1px solid colors.$grey400;
+  }
+  &:disabled {
+    background-color: colors.$grey75;
+    color: colors.$grey400;
+    cursor: not-allowed;
+  }
 }

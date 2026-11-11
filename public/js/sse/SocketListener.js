@@ -230,7 +230,10 @@ const SocketListener = ({isAuthenticated, userId}) => {
           autoDismiss: false,
           position: 'bl',
           allowHtml: true,
-          closeCallback: function () {
+          // Only the X hides it for good: other notifications clearing the
+          // whole list must not count as the user having read it.
+          closeCallback: function (closedByUser) {
+            if (!closedByUser) return
             const expireDate = new Date(message.expire)
             Cookies.set('msg-' + message.token, '', {
               expires: expireDate,

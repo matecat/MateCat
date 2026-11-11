@@ -28,6 +28,7 @@ class TranslatorsModelTest extends AbstractTest
         parent::setUp();
         [$this->dbStub, , $this->stmtStub] = $this->createDatabaseMock();
         $this->stmtStub->method('fetchAll')->willReturn([]);
+        $this->stmtStub->method('rowCount')->willReturn(1); // the rotation found its chunk
     }
 
     private function makeJobStructWithProject(

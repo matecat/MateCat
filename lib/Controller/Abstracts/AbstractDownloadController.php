@@ -4,26 +4,46 @@ namespace Controller\Abstracts;
 
 use Controller\Abstracts\Authentication\CookieManager;
 use Controller\Exceptions\RenderTerminatedException;
+use Controller\Traits\KleinResponseFileStream;
 use Exception;
 use Model\Files\FileDao;
 use Model\FilesStorage\AbstractFilesStorage;
+use Model\FilesStorage\FilesStorageFactory;
+use Model\FilesStorage\S3FilesStorage;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use Predis\Connection\ConnectionException;
 use ReflectionException;
 use TypeError;
+use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\Tools\ContentDisposition;
+use Utils\Tools\Utils;
 use View\API\Commons\ZipContentObject;
 use ZipArchive;
 
 abstract class AbstractDownloadController extends AbstractStatefulKleinController
 {
+    /**
+     * Age, in seconds, after which getWorkDir() deletes a work folder as abandoned. 12 hours.
+     */
+    public const int WORK_DIR_MAX_AGE = 43200;
+
     public int $id_job;
     public string $password;
 
-    protected string $outputContent = "";
+    /**
+     * The file finalize() sends, streamed from the disk so it is never held in memory.
+     */
+    protected ?string $outputFile = null;
+
+    /**
+     * The folder this request writes its temporary files to, see getWorkDir().
+     */
+    private ?string $workDir = null;
+
     protected string $_filename = "";
 
     protected static string $ZIP_ARCHIVE = "application/zip";
@@ -62,28 +82,156 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
     }
 
     /**
-     * @param ZipContentObject $content
+     * Sets the file finalize() sends. A file on the local disk is sent as it is; any other content
+     * is written to the work folder first. Example: a zip in the work folder is sent from there.
      *
      * @return $this
+     * @throws ReflectionException
+     * @throws ConnectionException
      * @throws Exception
      * @throws TypeError
      */
     public function setOutputContent(ZipContentObject $content): AbstractDownloadController
     {
-        $this->outputContent = $content->getContent() ?? '';
+        $this->outputFile = $content->localPath();
+        if ($this->outputFile === null) {
+            $this->outputFile = $this->getWorkDir() . DIRECTORY_SEPARATOR . 'output';
+            if (file_put_contents($this->outputFile, $content->getContent() ?? '') === false) {
+                throw new Exception('Unable to write the download file ' . $this->outputFile);
+            }
+        }
 
         return $this;
     }
 
-    protected function setMimeType(): void
+    /**
+     * The folder where this request keeps its temporary files: the XLIFFs it rebuilds, the
+     * converted documents and the zip it sends. One folder per request, so two downloads of the
+     * same job never delete each other's files. Example: `<TMP_DOWNLOAD>/12345/6731f0c2a1b3e/`.
+     *
+     * Who deletes it: finalize() calls deleteWorkDir() just before the file goes out, because a
+     * client that cancels the download stops PHP inside the stream, and `exit` skips every
+     * `finally`. A download that fails, or is not sent (GDrive), is cleaned by the `finally` of the
+     * controller action. A request killed by a fatal error or a timeout runs neither: a later
+     * getWorkDir() deletes its folder once it is older than WORK_DIR_MAX_AGE.
+     *
+     * @throws Exception
+     */
+    public function getWorkDir(): string
     {
-        $extension = AbstractFilesStorage::pathinfo_fix($this->_filename, PATHINFO_EXTENSION);
+        if ($this->workDir === null) {
+            self::deleteAbandonedWorkDirs();
 
-        if (!is_string($extension)) {
-            $this->mimeType = self::$OCTET_STREAM;
+            $workDir = AppConfig::$TMP_DOWNLOAD . DIRECTORY_SEPARATOR . $this->id_job . DIRECTORY_SEPARATOR . uniqid('', true);
+            // A second try: another download that deletes its own folder also deletes the job
+            // folder when it looks empty, and that can happen between the two levels created here.
+            if (!mkdir($workDir, 0700, true) && !mkdir($workDir, 0700, true) && !is_dir($workDir)) {
+                throw new Exception('Unable to create the download folder ' . $workDir);
+            }
+            $this->workDir = $workDir;
+        }
 
+        return $this->workDir;
+    }
+
+    /**
+     * Deletes the folder of getWorkDir() with everything in it. A second call does nothing.
+     */
+    protected function deleteWorkDir(): void
+    {
+        if ($this->workDir === null) {
             return;
         }
+
+        self::deleteWorkDirAndEmptyJobDir($this->workDir);
+        $this->workDir = null;
+    }
+
+    /**
+     * Deletes the work folders, of any job, older than WORK_DIR_MAX_AGE. Example:
+     * `<TMP_DOWNLOAD>/12345/6731f0c2a1b3e/` last changed 13 hours ago is removed, one changed
+     * 5 minutes ago is in use and stays.
+     */
+    private static function deleteAbandonedWorkDirs(): void
+    {
+        $expired = time() - self::WORK_DIR_MAX_AGE;
+
+        foreach (glob(AppConfig::$TMP_DOWNLOAD . '/*/*', GLOB_ONLYDIR) ?: [] as $dir) {
+            $changed = filemtime($dir);
+            if ($changed !== false && $changed < $expired) {
+                self::deleteWorkDirAndEmptyJobDir($dir);
+            }
+        }
+    }
+
+    /**
+     * Deletes a work folder, then its job folder when no other download uses it. A folder that
+     * cannot be deleted is logged: it must not turn a sent download into an error, nor hide the
+     * error of a failed one.
+     */
+    private static function deleteWorkDirAndEmptyJobDir(string $dir): void
+    {
+        try {
+            Utils::deleteDir($dir);
+        } catch (Exception $e) {
+            LoggerFactory::getLogger('conversion')->warning('Failed to delete the download folder ' . $dir . ': ' . $e->getMessage());
+        }
+
+        @rmdir(dirname($dir));
+    }
+
+    /**
+     * The object that writes a file to the response. A method so a test can see what is sent.
+     */
+    protected function createFileStream(): KleinResponseFileStream
+    {
+        return new KleinResponseFileStream($this->response);
+    }
+
+    /**
+     * The storage that holds the job files. A method so a test can give its own files.
+     * Example: `FsFilesStorage` when AppConfig::$FILE_STORAGE_METHOD is 'fs'.
+     *
+     * @throws Exception
+     * @throws TypeError
+     */
+    protected function getFilesStorage(): AbstractFilesStorage
+    {
+        return FilesStorageFactory::create();
+    }
+
+    /**
+     * Copies a file from the S3 bucket of the file storage to the local disk. A method so a test
+     * can answer for S3. Example: `downloadFromS3('files/20261110/7/a.docx', $workDir . '/a.docx')`.
+     *
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    protected function downloadFromS3(string $key, string $saveAs): void
+    {
+        S3FilesStorage::getStaticS3Client()->downloadItem([
+            'bucket' => S3FilesStorage::getFilesStorageBucket(),
+            'key' => $key,
+            'save_as' => $saveAs,
+        ]);
+    }
+
+    /**
+     * Ends the request once the response is sent. Under the testing env it throws instead of
+     * calling exit, so the path can be tested.
+     *
+     * @throws RenderTerminatedException
+     */
+    protected function endRequest(): never
+    {
+        AppConfig::$ENV === 'testing' ? throw new RenderTerminatedException() : exit;
+    }
+
+    protected function setMimeType(): void
+    {
+        // One option gives one value: the extension, as a string.
+        /** @var string $extension */
+        $extension = AbstractFilesStorage::pathinfo_fix($this->_filename, PATHINFO_EXTENSION);
 
         switch (strtolower($extension)) {
             case "xlf":
@@ -158,15 +306,12 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
 
     protected function nocache(): void
     {
-        header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
-        header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
-        header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-        header("Cache-Control: post-check=0, pre-check=0", false);
-        header("Pragma: no-cache");
+        $this->createFileStream()->noCache();
     }
 
     /**
-     * @param bool $forceXliff
+     * Sends $outputFile and ends the request. A GDrive project gets no file, unless the xliff is
+     * forced: its files were uploaded to Google Drive.
      *
      * @throws Exception
      */
@@ -174,35 +319,53 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
     {
         $this->unlockToken();
 
-            if (empty($this->project)) {
-                $this->project = $this->getProjectDao()->findByJobId($this->id_job)
-                    ?? throw new Exception('Project not found for job ' . $this->id_job);
-            }
+        if (empty($this->project)) {
+            $this->project = $this->getProjectDao()->findByJobId($this->id_job)
+                ?? throw new Exception('Project not found for job ' . $this->id_job);
+        }
 
-            if (empty($this->_filename)) {
-                $this->_filename = $this->getDefaultFileName($this->project);
-            }
+        if (empty($this->_filename)) {
+            $this->_filename = $this->getDefaultFileName($this->project);
+        }
 
-            $projectId = $this->project->id ?? throw new Exception('Project not found');
-            $isGDriveProject = $this->getProjectDao()->isGDriveProject((int)$projectId);
+        $projectId = $this->project->id ?? throw new Exception('Project not found');
+        $isGDriveProject = $this->getProjectDao()->isGDriveProject((int)$projectId);
+        if ($isGDriveProject && !$forceXliff) {
+            return;
+        }
 
-            if (!$isGDriveProject || $forceXliff === true) {
-                ob_get_contents();
-                ob_get_clean();
-                ob_start("ob_gzhandler");  // compress page before sending
-                $this->nocache();
+        ob_get_clean();
+        $this->streamOutputFile();
+    }
 
-                header("Content-Type: $this->mimeType");
-                header("Content-Disposition: " . ContentDisposition::build($this->_filename));
-                header("Expires: 0");
-                header("Connection: close");
-                header("Content-Length: " . strlen($this->outputContent));
-                echo $this->outputContent;
-                if (AppConfig::$ENV === 'testing') {
-                    throw new RenderTerminatedException();
-                }
-                exit;
-            }
+    /**
+     * Sends $outputFile in chunks, with no output buffer, so the memory used does not grow with the
+     * file. No gzip: most files sent are archives or office documents, already compressed.
+     *
+     * @throws Exception
+     */
+    private function streamOutputFile(): never
+    {
+        if ($this->outputFile === null) {
+            throw new Exception('Unable to open the download file');
+        }
+
+        $filePointer = fopen($this->outputFile, 'rb');
+        if ($filePointer === false) {
+            throw new Exception('Unable to open the download file ' . $this->outputFile);
+        }
+
+        // The open handle still reads the file once its folder is gone.
+        $this->deleteWorkDir();
+
+        $this->createFileStream()->streamFileFromPointer(
+            $filePointer,
+            $this->mimeType,
+            'attachment',
+            $this->_filename
+        );
+
+        $this->endRequest();
     }
 
     /**
@@ -224,22 +387,22 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
     }
 
     /**
-     * @param ZipContentObject[] $output_content
-     * @param string|null $outputFile
-     * @param ?bool $isOriginalFile
+     * Writes the zip of $output_content to $outputFile and returns that path. An empty file is left
+     * out. Example: a 600 MB job is zipped from the disk with a few MB of memory.
      *
-     * @return string
+     * @param ZipContentObject[] $output_content
+     *
+     * @throws ReflectionException
+     * @throws ConnectionException
      * @throws Exception
      * @throws TypeError
      */
-    protected static function composeZip(array $output_content, ?string $outputFile = null, ?bool $isOriginalFile = false): string
+    protected static function composeZip(array $output_content, string $outputFile, bool $isOriginalFile = false): string
     {
-        if (empty($outputFile)) {
-            $outputFile = tempnam("/tmp", "zipmatecat");
-        }
-
         $zip = new ZipArchive();
-        $zip->open($outputFile, ZipArchive::OVERWRITE);
+        if ($zip->open($outputFile, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+            throw new Exception('Unable to create the zip file ' . $outputFile);
+        }
 
         $rev_index_name = [];
         $rev_index_duplicate_count = [];
@@ -260,27 +423,35 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
 
             $rev_index_name[$fName] = $fName;
 
-            $content = $f->getContent();
-            if (!empty($content)) {
-                $zip->addFromString($fName, $content);
+            $localPath = $f->localPath();
+            if ($localPath !== null ? filesize($localPath) === 0 : empty($f->getContent())) {
+                continue;
             }
+
+            $f->addToZip($zip, $fName);
         }
 
-        // Close and send to users
-        $zip->close();
+        self::closeZip($zip, $outputFile);
 
-        // ZipArchive::close() removes the file when the archive has no entries,
-        // so guard against a missing file before reading/unlinking it.
-        $zip_content = is_file($outputFile) ? file_get_contents($outputFile) : false;
-        if (is_file($outputFile)) {
-            unlink($outputFile);
+        // close() writes no file for an archive with no entries.
+        if (!is_file($outputFile)) {
+            throw new Exception('Unable to write the zip file ' . $outputFile . ': every file is empty');
         }
 
-        if ($zip_content === false) {
-            throw new Exception('Failed to read zip file: ' . $outputFile);
-        }
+        return $outputFile;
+    }
 
-        return $zip_content;
+    /**
+     * Closes $zip and fails when the archive cannot be written. libzip reads every file added by
+     * path only now, in chunks: their errors show up here. $name only names the archive in the error.
+     *
+     * @throws Exception
+     */
+    public static function closeZip(ZipArchive $zip, string $name): void
+    {
+        if ($zip->close() !== true) {
+            throw new Exception('Unable to write the zip file ' . $name . ': ' . $zip->getStatusString());
+        }
     }
 
     /**
@@ -304,11 +475,9 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
      */
     public static function forceOcrExtension(string $filename): string
     {
+        // With no option every field is there.
+        /** @var array{dirname: string, basename: string, extension: string, filename: string} $pathinfo */
         $pathinfo = AbstractFilesStorage::pathinfo_fix($filename);
-
-        if (!is_array($pathinfo) || !isset($pathinfo['extension'], $pathinfo['basename'])) {
-            return $filename;
-        }
 
         switch (strtolower($pathinfo['extension'])) {
             case 'pdf':

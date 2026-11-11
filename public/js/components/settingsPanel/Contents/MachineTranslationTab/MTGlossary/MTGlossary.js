@@ -17,7 +17,11 @@ import CreateProjectActions from '../../../../../actions/CreateProjectActions'
 import ModalsActions from '../../../../../actions/ModalsActions'
 import {ConfirmDeleteResourceProjectTemplates} from '../../../../modals/ConfirmDeleteResourceProjectTemplates'
 import {SCHEMA_KEYS} from '../../../../../hooks/useProjectTemplates'
-import {Button, BUTTON_TYPE} from '../../../../common/Button/Button'
+import {
+  Button,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../../../../common/Button/Button'
 
 const COLUMNS_TABLE = [
   {name: 'Active'},
@@ -135,7 +139,6 @@ export const MTGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
           type: 'error',
           text: 'Error deleting glossary',
           position: 'br',
-          allowHtml: true,
           timer: 5000,
         })
       })
@@ -349,6 +352,7 @@ export const MTGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
             {!shouldHideNewButton && (
               <Button
                 type={BUTTON_TYPE.PRIMARY}
+                size={BUTTON_SIZE.SMALL}
                 onClick={addGlossary}
                 title="Add glossary"
               >
@@ -365,7 +369,7 @@ export const MTGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
               onClick={addGlossary}
               title="Add glossary"
             >
-              <IconAdd size={18} />
+              <IconAdd size={22} />
               New glossary
             </Button>
           </div>

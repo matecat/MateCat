@@ -1,6 +1,8 @@
 @use 'tokens/colors';
 
 .container {
+  position: relative;
+  z-index: 0;
   display: flex;
   gap: 12px;
   align-items: center;
@@ -13,7 +15,8 @@
 .bar-wrapper {
   position: relative;
   display: flex;
-  min-width: 196px;
+  // A place that has less room (the cattool footer) can lower it
+  min-width: var(--job-progress-bar-min-width, 196px);
   height: 8px;
   border-radius: 10px;
   background-color: colors.$black100;
