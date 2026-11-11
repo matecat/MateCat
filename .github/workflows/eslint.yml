@@ -27,9 +27,21 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: '24'
-          cache: yarn
+
+      # Reads the yarn cache that the "JS tests" job of _ci-cd.yml saves on
+      # every push to develop or master. The path and the key must stay equal
+      # to the ones there. Nothing is saved here: a cache saved by a pull
+      # request serves that pull request only.
+      - name: Restore the yarn cache
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ runner.temp }}/ci-cache
+          key: js-deps-${{ hashFiles('yarn.lock', 'nodejs/package-lock.json') }}
+          restore-keys: js-deps-
 
       - name: Install dependencies
+        env:
+          YARN_CACHE_FOLDER: ${{ runner.temp }}/ci-cache/yarn
         run: yarn install --frozen-lockfile --ignore-scripts
 
       - name: Check out the base branch beside this one

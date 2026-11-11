@@ -30,6 +30,12 @@ on:
 env:
   AWS_REGION: 'eu-central-1'
   APP_NAME: matecat
+  # Ubuntu archive host for apt in the base-node build (docker/base-node/Dockerfile).
+  # The runners live on Azure, and the Dockerfile default, the mirror inside AWS
+  # eu-central-1, is far from them: on 2026-11-11 it served 120 kB/s and then
+  # refused connections. Set the repository variable UBUNTU_MIRROR to another host
+  # to switch mirror without a commit; the next run picks it up.
+  UBUNTU_MIRROR: ${{ vars.UBUNTU_MIRROR || 'azure.archive.ubuntu.com' }}
   # Opt into Node.js 24 for all JavaScript-based actions (checkout@v4, etc.)
   # Remove once actions/checkout@v5 is released with native Node 24 support.
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -38,13 +44,40 @@ env:
 # The calling workflow (aws_dev.yml / aws_prod.yml) sets the ceiling.
 jobs:
   # ───────────────────────────────────────────────────────────────────────────
-  # JOB 1 – tests
-  # Builds all Docker images using plain docker compose (same as Travis),
-  # then runs the PHPUnit test suite inside a test-node container with
-  # MySQL + Redis.
+  # JOBS 1a and 1b – php-tests and js-tests, run in parallel
+  #
+  # Both build the same test-node image, then run one script from
+  # .github/ci/ inside it, in place of the image's default command
+  # (docker/test-node/build_assets.sh, which runs both suites one after the
+  # other). Running them side by side cuts the wall time to the slower of the
+  # two, the JS one.
+  #
+  # The image layers of base-node and test-node come from the GitHub Actions
+  # cache when their Dockerfiles did not change. The cache holds no secret:
+  # the AWS keys of the tests reach the container when it starts, through
+  # docker-compose-ci.yml, and never enter the image. The cache scope changes
+  # every week (for example "test-images-2026-W46"), so the test image picks
+  # up the Ubuntu updates of base-node at least once a week. The deploy job
+  # builds its images without any cache.
+  #
+  # Only pushes to a branch (develop, master) save caches; pull requests only
+  # read them. GitHub lets a pull request read the caches of its base branch
+  # and of develop, the default branch, but the cache a pull request saves is
+  # readable by that pull request alone, so saving it would only fill the
+  # 10 GB the repository has for caches.
+  #
+  # Each job mounts two host folders into the container:
+  #   /ci-out    the coverage reports, uploaded for test-guard
+  #   /ci-cache  the composer, yarn and npm download caches, kept between
+  #              runs by actions/cache and keyed on the lock files
+  #
+  # On pull_request events, github.ref_name is "<pr_number>/merge" which
+  # Upgrade.php does not recognise. We use github.base_ref (the target
+  # branch, e.g. "develop" or "master") for PRs, and github.ref_name for
+  # pushes/tags.
   # ───────────────────────────────────────────────────────────────────────────
-  tests:
-    name: Run tests
+  php-tests:
+    name: PHP tests
     runs-on: ubuntu-24.04
     environment: ci_test
     permissions:
@@ -58,42 +91,166 @@ jobs:
         with:
           token: '${{ secrets.CI_USER_TOKEN_MATECATBOT || github.token }}'
           submodules: recursive
-      # On pull_request events, github.ref_name is "<pr_number>/merge" which
-      # Upgrade.php does not recognise. We use github.base_ref (the target
-      # branch, e.g. "develop" or "master") for PRs, and github.ref_name
-      # for pushes/tags.
-      - name: Build and test
+
+      - name: Restore the composer cache
+        id: deps_cache
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ runner.temp }}/ci-cache
+          key: php-deps-${{ hashFiles('composer.lock') }}
+          restore-keys: php-deps-
+
+      - name: Name the weekly image cache
+        id: image_cache
+        run: echo "scope=test-images-$(date -u +%G-W%V)" >> "$GITHUB_OUTPUT"
+
+      # The RUN steps of the build resolve names through fixed public DNS
+      # servers. On 2026-11-11 the runner's own resolver could not find
+      # eu-central-1.ec2.archive.ubuntu.com for two minutes, and apt-get
+      # update stopped both builds.
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+        with:
+          buildkitd-config-inline: |
+            [dns]
+              nameservers = ["1.1.1.1", "8.8.8.8"]
+
+      # test-node starts FROM matecat-base-node-24. The buildx builder cannot
+      # see the images of the local docker daemon, so the contexts line points
+      # that name at the base-node build of the same bake run. On a push to a
+      # branch this job also saves the image cache; the cache-to line is empty
+      # on pull requests.
+      - name: Build images
+        uses: docker/bake-action@v7
+        env:
+          REPOSITORY_BRANCH: ${{ github.base_ref || github.ref_name }}
+          REPOSITORY_TAG: ${{ github.base_ref || github.ref_name }}
+        with:
+          # Local files (the checkout, private submodule included), not the remote git context.
+          source: .
+          files: docker/docker-compose-ci.yml
+          targets: base-node,test-node
+          load: true
+          # The compose file sets context ".." for every image, meant for docker compose,
+          # which reads it from docker/. bake reads it from the working directory, the
+          # repository root, so "*.context=." points it back at the same folder.
+          set: |
+            *.context=.
+            *.cache-from=type=gha,scope=${{ steps.image_cache.outputs.scope }}
+            ${{ github.event_name == 'push' && github.ref_type == 'branch' && format('*.cache-to=type=gha,scope={0},mode=max', steps.image_cache.outputs.scope) || '' }}
+            test-node.contexts.matecat-base-node-24=target:base-node
+
+      # The AWS keys are needed by the PHP tests only, so only this job sets
+      # them; docker-compose-ci.yml hands them to the container.
+      - name: Run PHPUnit
         env:
           TEST_AWS_ACCESS_KEY_ID: ${{ vars.AWS_ACCESS_KEY_ID }}
           TEST_AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          REPOSITORY_BRANCH: ${{ github.base_ref || github.ref_name }}
-          REPOSITORY_TAG: ${{ github.base_ref || github.ref_name }}
         run: |
-          docker compose -f docker/docker-compose-ci.yml build mysql redis > /dev/null 2>&1
-          docker compose -f docker/docker-compose-ci.yml create mysql redis > /dev/null 2>&1
-          # Build base-node (keep logs — useful for debugging)
-          docker compose -f docker/docker-compose-ci.yml build base-node
-          echo "Build test node"
-          docker compose -f docker/docker-compose-ci.yml build test-node > /dev/null 2>&1
-          # Run tests — exit code propagated to the workflow step
-          docker compose -f docker/docker-compose-ci.yml up test-node --exit-code-from test-node || exit 1
+          mkdir -p ci-out "$RUNNER_TEMP/ci-cache"
+          docker compose -f docker/docker-compose-ci.yml run --rm -T \
+            -v "$PWD/ci-out:/ci-out" \
+            -v "$RUNNER_TEMP/ci-cache:/ci-cache" \
+            -e COMPOSER_CACHE_DIR=/ci-cache/composer \
+            test-node /var/www/matecat/.github/ci/php-tests.sh
 
-      # ── Coverage artifacts (consumed by test-guard job) ─────────────────
-      - name: Extract coverage reports from test container
-        run: |
-          CONTAINER_ID=$(docker compose -f docker/docker-compose-ci.yml ps -aq test-node | head -1)
-          docker cp "$CONTAINER_ID":/var/www/matecat/coverage.xml ./php-coverage.xml
-          docker cp "$CONTAINER_ID":/var/www/matecat/js-coverage/clover.xml ./js-coverage.xml
-          docker cp "$CONTAINER_ID":/var/www/matecat/nodejs/.coverage/clover.xml ./node-coverage.xml
+      - name: Save the composer cache
+        if: github.event_name == 'push' && github.ref_type == 'branch' && steps.deps_cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ runner.temp }}/ci-cache
+          key: php-deps-${{ hashFiles('composer.lock') }}
 
-      - name: Upload coverage artifacts
+      # ── Coverage artifact (consumed by test-guard job) ──────────────────
+      - name: Upload coverage artifact
         uses: actions/upload-artifact@v7
         with:
-          name: coverage-report
+          name: coverage-php
+          path: ci-out/php-coverage.xml
+          retention-days: 7
+
+  js-tests:
+    name: JS tests
+    runs-on: ubuntu-24.04
+    environment: ci_test
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          token: '${{ secrets.CI_USER_TOKEN_MATECATBOT || github.token }}'
+          submodules: recursive
+
+      - name: Restore the yarn and npm caches
+        id: deps_cache
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ runner.temp }}/ci-cache
+          key: js-deps-${{ hashFiles('yarn.lock', 'nodejs/package-lock.json') }}
+          restore-keys: js-deps-
+
+      - name: Name the weekly image cache
+        id: image_cache
+        run: echo "scope=test-images-$(date -u +%G-W%V)" >> "$GITHUB_OUTPUT"
+
+      # The RUN steps of the build resolve names through fixed public DNS
+      # servers. On 2026-11-11 the runner's own resolver could not find
+      # eu-central-1.ec2.archive.ubuntu.com for two minutes, and apt-get
+      # update stopped both builds.
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+        with:
+          buildkitd-config-inline: |
+            [dns]
+              nameservers = ["1.1.1.1", "8.8.8.8"]
+
+      # Same build as the PHP job; this one only reads the cache.
+      - name: Build images
+        uses: docker/bake-action@v7
+        env:
+          REPOSITORY_BRANCH: ${{ github.base_ref || github.ref_name }}
+          REPOSITORY_TAG: ${{ github.base_ref || github.ref_name }}
+        with:
+          # Local files (the checkout, private submodule included), not the remote git context.
+          source: .
+          files: docker/docker-compose-ci.yml
+          targets: base-node,test-node
+          load: true
+          # The compose file sets context ".." for every image, meant for docker compose,
+          # which reads it from docker/. bake reads it from the working directory, the
+          # repository root, so "*.context=." points it back at the same folder.
+          set: |
+            *.context=.
+            *.cache-from=type=gha,scope=${{ steps.image_cache.outputs.scope }}
+            test-node.contexts.matecat-base-node-24=target:base-node
+
+      - name: Run Jest and the nodejs tests
+        run: |
+          mkdir -p ci-out "$RUNNER_TEMP/ci-cache"
+          docker compose -f docker/docker-compose-ci.yml run --rm -T \
+            -v "$PWD/ci-out:/ci-out" \
+            -v "$RUNNER_TEMP/ci-cache:/ci-cache" \
+            -e YARN_CACHE_FOLDER=/ci-cache/yarn \
+            -e npm_config_cache=/ci-cache/npm \
+            test-node /var/www/matecat/.github/ci/js-tests.sh
+
+      # The ESLint workflow reads this cache too, for its own yarn install.
+      - name: Save the yarn and npm caches
+        if: github.event_name == 'push' && github.ref_type == 'branch' && steps.deps_cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ runner.temp }}/ci-cache
+          key: js-deps-${{ hashFiles('yarn.lock', 'nodejs/package-lock.json') }}
+
+      # ── Coverage artifact (consumed by test-guard job) ──────────────────
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-js
           path: |
-            php-coverage.xml
-            js-coverage.xml
-            node-coverage.xml
+            ci-out/js-coverage.xml
+            ci-out/node-coverage.xml
           retention-days: 7
   # ───────────────────────────────────────────────────────────────────────────
   # JOB 2 – deploy (only when should_deploy is true)
@@ -114,7 +271,8 @@ jobs:
       contents: read
     if: ${{ inputs.should_deploy }}
     needs:
-      - tests
+      - php-tests
+      - js-tests
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -190,13 +348,16 @@ jobs:
   # ───────────────────────────────────────────────────────────────────────────
   # JOB – test-guard (PR only)
   #
-  # Downloads the "coverage-report" artifact produced by the tests job and
-  # runs ostico/test-guard to evaluate test adequacy on changed files.
+  # Downloads the "coverage-php" and "coverage-js" artifacts produced by the
+  # test jobs and runs ostico/test-guard to evaluate test adequacy on changed
+  # files.
   # ───────────────────────────────────────────────────────────────────────────
   test-guard:
     name: Test adequacy gate
     runs-on: ubuntu-24.04
-    needs: tests
+    needs:
+      - php-tests
+      - js-tests
     if: >-
       github.event_name == 'pull_request' &&
       !contains(github.event.pull_request.labels.*.name, 'test-guard-exception')
@@ -214,10 +375,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Download coverage artifact
+      - name: Download coverage artifacts
         uses: actions/download-artifact@v8
         with:
-          name: coverage-report
+          pattern: coverage-*
+          merge-multiple: true
 
       - name: Test Guard
         uses: ostico/test-guard@v2
@@ -264,7 +426,8 @@ jobs:
     name: Slack Notification
     runs-on: ubuntu-24.04
     needs:
-      - tests
+      - php-tests
+      - js-tests
       - deploy
       - test-guard
     if: >-
@@ -277,4 +440,10 @@ jobs:
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_CHANNEL: travis-ci
+          # Without SLACK_COLOR the action paints every message green. job.status
+          # would not help either: it is the status of this job, which succeeds.
+          SLACK_COLOR: >-
+            ${{ contains(needs.*.result, 'failure') && 'failure'
+            || contains(needs.*.result, 'cancelled') && 'cancelled'
+            || 'success' }}
           SLACK_TITLE: GitHub CI/CD Pipeline Complete for ${{ github.head_ref || github.ref_name }}
