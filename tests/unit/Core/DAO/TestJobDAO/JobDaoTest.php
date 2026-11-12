@@ -658,6 +658,32 @@ class JobDaoTest extends AbstractTest
         $this->assertNull($result);
     }
 
+    public function testInstanceGetSegmentTranslationsCountBindsTheJobIds(): void
+    {
+        $struct = new ShapelessConcreteStruct();
+        $struct->total = '7';
+
+        $stmt = $this->createMock(PDOStatement::class);
+        $stmt->queryString = '';
+        $stmt->expects($this->once())->method('execute')->with($this->identicalTo([1, 2]));
+        $stmt->method('fetchAll')->willReturn([$struct]);
+
+        $pdo = $this->createMock(PDO::class);
+        $pdo->expects($this->once())->method('prepare')
+            ->with($this->stringContains('id_job IN ( ?,? )'))
+            ->willReturn($stmt);
+
+        $database = $this->createStub(IDatabase::class);
+        $database->method('getConnection')->willReturn($pdo);
+
+        $this->assertSame(7, (new JobDao($database))->getSegmentTranslationsCount([1, 2]));
+    }
+
+    public function testInstanceGetSegmentTranslationsCountReturnsNullForNoJobs(): void
+    {
+        $this->assertNull((new JobDao($this->dbStub))->getSegmentTranslationsCount([]));
+    }
+
     public function testInstanceGetSegmentTranslationsCountReturnsNullWhenTotalEmpty(): void
     {
         $struct = new ShapelessConcreteStruct();

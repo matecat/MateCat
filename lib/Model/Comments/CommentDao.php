@@ -27,7 +27,13 @@ class CommentDao extends AbstractDao
     const int TYPE_MENTION = 3;
 
     /**
-     * Returns a structure that lists open threads count
+     * Count the open comment threads of every job in the given projects.
+     *
+     * The ids are bound parameters, so the cache key names the projects: each project list gets
+     * its own Redis key and its own TTL.
+     *
+     * Example: with TTL 600, `getOpenThreadsForProjects([42])` is cached under
+     * `Model\Comments\CommentDao::getOpenThreadsForProjects-42` for 10 minutes.
      *
      * @param list<int> $projectIds
      *
@@ -39,10 +45,12 @@ class CommentDao extends AbstractDao
      */
     public function getOpenThreadsForProjects(array $projectIds): array
     {
-        $ids = implode(',', array_map(function ($id) {
-            return (int)$id;
-        }, $projectIds));
+        if ($projectIds === []) {
+            return [];
+        }
 
+        $ids = array_map(fn($id): int => (int)$id, array_values($projectIds));
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
         $sql = "
         SELECT id_project, jobs.password, id_job, COUNT( DISTINCT id_segment ) AS count
@@ -53,7 +61,7 @@ class CommentDao extends AbstractDao
               AND comments.id_segment <= jobs.job_last_segment
               AND comments.resolve_date IS NULL
 
-        WHERE projects.id IN ( $ids )
+        WHERE projects.id IN ( $placeholders )
 
         GROUP BY id_project, id_job, jobs.password
  ";
@@ -61,7 +69,7 @@ class CommentDao extends AbstractDao
         $con = $this->database->getConnection();
         $stmt = $con->prepare($sql);
 
-        return array_values($this->_fetchObjectMap($stmt, OpenThreadsStruct::class, []));
+        return array_values($this->_fetchObjectMap($stmt, OpenThreadsStruct::class, $ids));
     }
 
     /**

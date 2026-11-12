@@ -30,7 +30,7 @@ class SegmentMetadataDaoTest extends AbstractTest
     {
         $dao = new SegmentMetadataDao(obtainTestDatabase());
 
-        $result = $dao->getBySegmentIds([], 'context-url', 0);
+        $result = $dao->getBySegmentIds([], 'context-url');
 
         $this->assertSame([], $result);
     }
