@@ -89,6 +89,7 @@ class CommentEmailTest extends AbstractTest
         return new JobStruct([
             'id' => 100,
             'password' => 'abc123',
+            'id_project' => 1,
             'source' => 'en-US',
             'target' => 'it-IT',
         ]);
