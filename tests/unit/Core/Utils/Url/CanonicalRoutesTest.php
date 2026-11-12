@@ -81,5 +81,50 @@ class CanonicalRoutesTest extends AbstractTest
         $expectedSlug = 'project-' . rawurlencode('Проф');
         $this->assertEquals('https://example.org/analyze/' . $expectedSlug . '/101-jkl', $url);
     }
+
+    #[Test]
+    public function translateWritesTheProjectNameAsASlug(): void
+    {
+        $url = CanonicalRoutes::translate('My Project', 123, 'abcdef123456', 'en-US', 'it-IT');
+
+        $this->assertEquals('https://example.org/translate/my-project/en-US-it-IT/123-abcdef123456', $url);
+    }
+
+    #[Test]
+    public function reviseWritesTheProjectNameAsASlug(): void
+    {
+        $url = CanonicalRoutes::revise('My Project', 123, 'revpwd', 'en-US', 'it-IT');
+
+        $this->assertEquals('https://example.org/revise/my-project/en-US-it-IT/123-revpwd', $url);
+    }
+
+    #[Test]
+    public function aProjectNameCannotClimbOutOfTheTranslatePath(): void
+    {
+        $url = CanonicalRoutes::translate('../../gdrive/delete/all?', 123, 'abcdef123456', 'en-US', 'it-IT');
+
+        $this->assertEquals('https://example.org/translate/gdrivedeleteall/en-US-it-IT/123-abcdef123456', $url);
+    }
+
+    #[Test]
+    public function aProjectNameCannotClimbOutOfTheRevisePath(): void
+    {
+        $url = CanonicalRoutes::revise('../../gdrive/delete/all?', 123, 'revpwd', 'en-US', 'it-IT', ['revision_number' => 2, 'id_segment' => 42]);
+
+        $this->assertEquals('https://example.org/revise2/gdrivedeleteall/en-US-it-IT/123-revpwd#42', $url);
+    }
+
+    #[Test]
+    public function aProjectNameThatIsADotSegmentBecomesADash(): void
+    {
+        $translateUrl = CanonicalRoutes::translate('..', 123, 'abcdef123456', 'en-US', 'it-IT');
+        $this->assertEquals('https://example.org/translate/-/en-US-it-IT/123-abcdef123456', $translateUrl);
+
+        $reviseUrl = CanonicalRoutes::revise('.', 123, 'revpwd', 'en-US', 'it-IT');
+        $this->assertEquals('https://example.org/revise/-/en-US-it-IT/123-revpwd', $reviseUrl);
+
+        $analyzeUrl = CanonicalRoutes::analyze(['project_name' => '..', 'id_project' => 123, 'password' => 'abc']);
+        $this->assertEquals('https://example.org/analyze/-/123-abc', $analyzeUrl);
+    }
 }
 
