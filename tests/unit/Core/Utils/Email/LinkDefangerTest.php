@@ -146,13 +146,13 @@ class LinkDefangerTest extends AbstractTest
     #[Test]
     public function listedKeysAreWrittenVerbatim(): void
     {
-        $wrapped = EmailValue::wrapAll(
+        $escaped = EmailValue::escapeAll(
             ['signup_url' => 'https://dev.matecat.com/invite/abc', 'email' => 'victim@example.com'],
             ['signup_url', 'email']
         );
 
-        $this->assertSame('https://dev.matecat.com/invite/abc', (string)$wrapped['signup_url']);
-        $this->assertSame('victim@example.com', (string)$wrapped['email']);
+        $this->assertSame('https://dev.matecat.com/invite/abc', $escaped['signup_url']);
+        $this->assertSame('victim@example.com', $escaped['email']);
     }
 
     /**
@@ -163,9 +163,9 @@ class LinkDefangerTest extends AbstractTest
     #[Test]
     public function anUnlistedKeyIsDefangedEvenWhenItHoldsALink(): void
     {
-        $wrapped = EmailValue::wrapAll(['some_new_link' => 'https://dev.matecat.com/x'], ['signup_url']);
+        $escaped = EmailValue::escapeAll(['some_new_link' => 'https://dev.matecat.com/x'], ['signup_url']);
 
-        $this->assertSame('https[:]//dev[.]matecat[.]com/x', (string)$wrapped['some_new_link']);
+        $this->assertSame('https[:]//dev[.]matecat[.]com/x', $escaped['some_new_link']);
     }
 
     /**
@@ -176,10 +176,10 @@ class LinkDefangerTest extends AbstractTest
     #[Test]
     public function aValueCannotExemptItselfByLookingLikeAnAddress(): void
     {
-        $wrapped = EmailValue::wrapAll(['name' => 'evil@evil.com', 'email' => 'evil@evil.com'], ['email']);
+        $escaped = EmailValue::escapeAll(['name' => 'evil@evil.com', 'email' => 'evil@evil.com'], ['email']);
 
-        $this->assertSame('evil@evil.com', (string)$wrapped['email'], 'the address field is left alone');
-        $this->assertSame('evil@evil.com', (string)$wrapped['name'], 'an address shape is still an address');
+        $this->assertSame('evil@evil.com', $escaped['email'], 'the address field is left alone');
+        $this->assertSame('evil@evil.com', $escaped['name'], 'an address shape is still an address');
     }
 
     /**
@@ -189,13 +189,13 @@ class LinkDefangerTest extends AbstractTest
     #[Test]
     public function theKeyListAppliesAtAnyDepth(): void
     {
-        $wrapped = EmailValue::wrapAll(
+        $escaped = EmailValue::escapeAll(
             ['user' => ['email' => 'bob@example.com', 'company' => 'Acme.com']],
             ['email']
         );
 
-        $this->assertSame('bob@example.com', (string)$wrapped['user']['email']);
-        $this->assertSame('Acme[.]com', (string)$wrapped['user']['company']);
+        $this->assertSame('bob@example.com', $escaped['user']['email']);
+        $this->assertSame('Acme[.]com', $escaped['user']['company']);
     }
 
     /**

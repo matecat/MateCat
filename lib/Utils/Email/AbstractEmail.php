@@ -93,14 +93,14 @@ abstract class AbstractEmail
      *
      * Doing it here rather than in each `<?=` is the whole point: eighty of the eighty-seven
      * interpolations across `lib/View/Emails` were raw when this was written, which is what a rule
-     * applied by hand converges on. {@see EmailValue} escapes on read, so a template writes a value
-     * and gets a safe one without knowing to ask.
+     * applied by hand converges on. {@see EmailValue::escapeAll()} escapes every value before the
+     * template runs, so a template writes a value and gets a safe one without knowing to ask.
      * @throws Throwable
      */
     protected function _buildMessageContent(): string
     {
         return $this->capture(function (): void {
-            extract(EmailValue::wrapAll($this->_getTemplateVariables(), $this->verbatimKeys()));
+            extract(EmailValue::escapeAll($this->_getTemplateVariables(), $this->verbatimKeys()));
             include($this->_template_path);
         });
     }
@@ -134,14 +134,23 @@ abstract class AbstractEmail
     }
 
     /**
-     * @param string|null $messageContent
+     * Wraps the message, rendered by {@see _buildMessageContent()}, in the layout.
      *
-     * @return string
+     * It takes the content already rendered: rendering runs `_getTemplateVariables()`, queries
+     * included, and a second render can differ from the first (a token in a link is generated again).
+     *
+     * @throws Throwable
      */
-    protected function _buildHTMLMessage(?string $messageContent = null): string
+    protected function _buildHTMLMessage(string $messageContent): string
     {
         return $this->capture(function () use ($messageContent): void {
-            extract(EmailValue::wrapAll($this->_getLayoutVariables($messageContent), $this->verbatimKeys()));
+            // EXTR_SKIP: a layout variable must not replace $messageContent.
+            extract(EmailValue::escapeAll($this->_getLayoutVariables(), $this->verbatimKeys()), EXTR_SKIP);
+
+            // Set after escaping: the body is markup, already rendered from escaped values.
+            // Escaping it again would show the reader the tags of their own email.
+            $messageBody = $messageContent;
+
             include($this->_layout_path);
         });
     }
@@ -177,18 +186,14 @@ abstract class AbstractEmail
     }
 
     /**
-     * @param string|null $messageBody
+     * The layout's own variables. {@see _buildHTMLMessage()} adds the message body.
      *
      * @return array<string, mixed>
      */
-    protected function _getLayoutVariables(?string $messageBody = null): array
+    protected function _getLayoutVariables(): array
     {
         return [
             'title' => $this->title ?? 'Matecat',
-            // Already-rendered markup: it went through _buildMessageContent(), where its own values
-            // were escaped. Escaping it again would show the reader the tags of their own email.
-            // The allowlist in EmailTemplateEscapingTest names this and nothing else.
-            'messageBody' => EmailValue::raw(!empty($messageBody) ? $messageBody : $this->_buildMessageContent()),
             'closingLine' => "Kind regards, ",
             'showTitle' => false
         ];
@@ -214,17 +219,20 @@ abstract class AbstractEmail
     }
 
     /**
-     * @throws Exception
+     * Renders the message once and queues it for one recipient.
+     *
+     * @throws Throwable
      */
-    protected function sendTo(string $address, string $name): void
+    protected function sendTo(?string $address, ?string $name = null): void
     {
-        $recipient = [$address, $name];
+        $content = $this->_buildMessageContent();
 
         $this->doSend(
-            $recipient,
+            // MailWorker reads both: a missing name was an undefined index there.
+            [$address, $name ?? ''],
             $this->title ?? 'Matecat',
-            $this->_buildHTMLMessage(),
-            $this->_buildTxtMessage($this->_buildMessageContent())
+            $this->_buildHTMLMessage($content),
+            $this->_buildTxtMessage($content)
         );
     }
 

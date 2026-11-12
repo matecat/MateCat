@@ -27,14 +27,6 @@ use Utils\Email\InvitedToTeamEmail;
 class EmailTemplateEscapingTest extends AbstractTest
 {
 
-    /**
-     * The values that must never be escaped, because they are already markup. Anything added here
-     * is a decision to write unescaped text into an email and should be argued for in review.
-     *
-     * @var list<string>
-     */
-    private const array RAW_ALLOWLIST = ['messageBody'];
-
     private const string PAYLOAD = '<script>alert(1)</script><a href="https://evil.com">click</a>';
 
     /**
@@ -80,23 +72,24 @@ class EmailTemplateEscapingTest extends AbstractTest
     }
 
     /**
-     * The opt-out has to stay small and deliberate. A template writing `->value()` or `EmailValue::raw`
-     * is asking for unescaped output, which is exactly the state this whole change removed.
+     * The message body is the one value printed unescaped, and only the layouts print it. A template
+     * that printed `$messageBody`, or reached for `EmailValue` itself, would be writing markup nobody
+     * escaped.
      */
     #[Test]
     #[DataProvider('emailTemplates')]
-    public function noTemplateOptsOutOfEscaping(string $template): void
+    public function onlyTheLayoutsPrintUnescapedMarkup(string $template): void
     {
         $contents = file_get_contents($template);
         $this->assertIsString($contents, "cannot read $template");
 
-        foreach (['EmailValue::raw', '->value()'] as $escapeHatch) {
+        $this->assertStringNotContainsString('EmailValue', $contents, basename($template) . ' uses EmailValue');
+
+        if (!in_array(basename($template), ['skeleton.html', 'empty_skeleton.html'], true)) {
             $this->assertStringNotContainsString(
-                $escapeHatch,
+                '$messageBody',
                 $contents,
-                basename($template) . " uses $escapeHatch. The only value permitted to be raw is "
-                . implode(', ', self::RAW_ALLOWLIST) . ', and it is marked raw where it is built,'
-                . ' not in a template'
+                basename($template) . ' prints $messageBody, which only a layout may embed'
             );
         }
     }
@@ -133,17 +126,15 @@ class EmailTemplateEscapingTest extends AbstractTest
     }
 
     /**
-     * A payload written through the wrapper comes out as text, once.
+     * A payload comes out as text, once.
      */
     #[Test]
-    public function aWrappedValueIsEscapedExactlyOnce(): void
+    public function aValueIsEscapedExactlyOnce(): void
     {
         // No hostname in this one: a value that round-trips has to be one the defanger leaves
         // alone, or the assertion would be testing two transformations at once. Defanging has its
         // own tests.
-        $wrapped = EmailValue::wrapAll(['name' => '<script>alert(1)</script> O\'Brien & Sons <Ltd>']);
-
-        $rendered = (string)$wrapped['name'];
+        $rendered = EmailValue::escapeAll(['name' => '<script>alert(1)</script> O\'Brien & Sons <Ltd>'])['name'];
 
         $this->assertStringNotContainsString('<script', $rendered);
         $this->assertStringNotContainsString('<a href', $rendered);
@@ -156,15 +147,13 @@ class EmailTemplateEscapingTest extends AbstractTest
 
     /**
      * Nested values are the ones that were actually raw in production — `$sender['first_name']` and
-     * `$team['name']` are both array members, so wrapping only the top level would have changed
+     * `$team['name']` are both array members, so escaping only the top level would have changed
      * nothing where it mattered.
      */
     #[Test]
     public function nestedValuesAreEscapedToo(): void
     {
-        $wrapped = EmailValue::wrapAll(['sender' => ['first_name' => self::PAYLOAD]]);
-
-        $rendered = (string)$wrapped['sender']['first_name'];
+        $rendered = EmailValue::escapeAll(['sender' => ['first_name' => self::PAYLOAD]])['sender']['first_name'];
 
         $this->assertStringNotContainsString('<script', $rendered);
         $this->assertStringNotContainsString('<a href', $rendered);
@@ -179,9 +168,7 @@ class EmailTemplateEscapingTest extends AbstractTest
     #[Test]
     public function alreadyEncodedTextIsDecodedThenEscapedOnce(): void
     {
-        $wrapped = EmailValue::wrapAll(['name' => 'Ben &amp; Jerry&#39;s']);
-
-        $rendered = (string)$wrapped['name'];
+        $rendered = EmailValue::escapeAll(['name' => 'Ben &amp; Jerry&#39;s'])['name'];
 
         $this->assertSame('Ben &amp; Jerry&apos;s', $rendered);
         $this->assertStringNotContainsString('&amp;amp;', $rendered, 'must not double-encode');
@@ -196,24 +183,13 @@ class EmailTemplateEscapingTest extends AbstractTest
     #[Test]
     public function aSchemeSmuggledAsEntitiesIsStillDefanged(): void
     {
-        $wrapped = EmailValue::wrapAll(['name' => 'Visit https&#58;//evil&#46;com now']);
+        $escaped = EmailValue::escapeAll(['name' => 'Visit https&#58;//evil&#46;com now']);
 
-        $this->assertSame('Visit https[:]//evil[.]com now', (string)$wrapped['name']);
+        $this->assertSame('Visit https[:]//evil[.]com now', $escaped['name']);
     }
 
     /**
-     * The escape hatch still works, or the layout would print the tags of its own message body.
-     */
-    #[Test]
-    public function rawValuesPassThroughUntouched(): void
-    {
-        $markup = '<p>an already rendered message</p>';
-
-        $this->assertSame($markup, (string)EmailValue::raw($markup));
-    }
-
-    /**
-     * The wiring, through a real email rather than through the wrapper.
+     * The wiring, through a real email rather than through EmailValue alone.
      *
      * Deliberately asserted on the *inviter's name* and not the team name. The team name already had
      * tests, which is why it was the one field of three that was escaped; this is the field that had
@@ -245,104 +221,14 @@ class EmailTemplateEscapingTest extends AbstractTest
     }
 
     /**
-     * The escape hatch for a single value, as opposed to the key list: escaped, never defanged.
+     * Every member of a list is escaped, so the treatment does not stop at the first `foreach`.
      */
     #[Test]
-    public function verbatimEscapesButDoesNotDefang(): void
+    public function everyMemberOfAListIsEscaped(): void
     {
-        $value = EmailValue::verbatim('https://dev.matecat.com/x?a=1&b=<2>');
+        $escaped = EmailValue::escapeAll(['rows' => ['Acme.com', 'plain text']]);
 
-        $this->assertSame('https://dev.matecat.com/x?a=1&amp;b=&lt;2&gt;', (string)$value);
-    }
-
-    /**
-     * `value()` exists so a template can work with the value rather than write it — measure it,
-     * compare it, pass it on — and it has to hand back what was given, not a transformed copy.
-     */
-    #[Test]
-    public function theUnderlyingValueIsReadableUntransformed(): void
-    {
-        $wrapped = EmailValue::wrapAll(['name' => 'evil.com <b>']);
-
-        $this->assertSame('evil.com <b>', $wrapped['name']->value());
-        $this->assertSame('evil[.]com &lt;b&gt;', (string)$wrapped['name'], 'writing it still treats it');
-    }
-
-    /**
-     * A value already wrapped keeps its own treatment instead of being wrapped again, which is what
-     * lets `raw()` survive `wrapAll()` — the layout's message body is marked before it gets there.
-     */
-    #[Test]
-    public function anAlreadyWrappedValueIsNotWrappedAgain(): void
-    {
-        $raw = EmailValue::raw('<p>rendered</p>');
-
-        $wrapped = EmailValue::wrapAll(['messageBody' => $raw, 'nested' => ['inner' => $raw]]);
-
-        $this->assertSame($raw, $wrapped['messageBody']);
-        $this->assertSame('<p>rendered</p>', (string)$wrapped['nested']['inner']);
-    }
-
-    /**
-     * `isset($user['email'])` in a template has to answer about the underlying array, and answer
-     * false rather than fatally when the value is not one.
-     */
-    #[Test]
-    public function presenceIsReportedForNestedKeys(): void
-    {
-        $wrapped = EmailValue::wrapAll(['user' => ['email' => 'bob@example.com'], 'name' => 'plain']);
-
-        $this->assertTrue(isset($wrapped['user']['email']));
-        $this->assertFalse(isset($wrapped['user']['missing']));
-        $this->assertFalse(isset($wrapped['name']['anything']), 'a scalar has no offsets');
-        $this->assertNull($wrapped['user']['missing'], 'a missing key is null, so an if or empty() on it sees nothing');
-    }
-
-    /**
-     * Templates read; they do not assign. A write through the wrapper would produce a value whose
-     * treatment nobody had decided, so it is ignored rather than honoured.
-     */
-    #[Test]
-    public function writingThroughTheWrapperChangesNothing(): void
-    {
-        // Through the wrapper, not through the array wrapAll() returned: assigning to that array
-        // replaces the wrapper rather than reaching it.
-        $user = EmailValue::wrapAll(['user' => ['company' => 'Acme.com']])['user'];
-
-        $user['company'] = 'replaced';
-        $user['added'] = 'new';
-        unset($user['company']);
-
-        $this->assertSame('Acme[.]com', (string)$user['company'], 'the value is unchanged');
-        $this->assertNull($user['added'], 'and nothing was added');
-    }
-
-    /**
-     * A template looping a wrapped list gets wrapped members, or the treatment would stop at the
-     * first `foreach`.
-     */
-    #[Test]
-    public function iteratingAWrappedListYieldsWrappedMembers(): void
-    {
-        $wrapped = EmailValue::wrapAll(['rows' => ['Acme.com', 'plain text']]);
-
-        $seen = [];
-        foreach ($wrapped['rows'] as $key => $row) {
-            $seen[$key] = (string)$row;
-        }
-
-        $this->assertSame(['Acme[.]com', 'plain text'], $seen);
-    }
-
-    /**
-     * Iterating something that is not a list yields nothing rather than raising.
-     */
-    #[Test]
-    public function iteratingAScalarYieldsNothing(): void
-    {
-        $wrapped = EmailValue::wrapAll(['name' => 'plain']);
-
-        $this->assertSame([], iterator_to_array($wrapped['name']));
+        $this->assertSame(['Acme[.]com', 'plain text'], $escaped['rows']);
     }
 
     /**
@@ -397,18 +283,6 @@ class EmailTemplateEscapingTest extends AbstractTest
         $team->name = $teamName;
 
         return new InvitedToTeamEmail($sender, 'invited@example.com', $team);
-    }
-
-    /**
-     * A value the template cannot write — an array reached by mistake — emits nothing rather than
-     * "Array" plus a conversion notice.
-     */
-    #[Test]
-    public function anUnwritableValueEmitsNothing(): void
-    {
-        $wrapped = EmailValue::wrapAll(['rows' => [['a' => 1]]]);
-
-        $this->assertSame('', (string)$wrapped['rows']);
     }
 
 }
