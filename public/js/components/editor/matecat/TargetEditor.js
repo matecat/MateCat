@@ -37,6 +37,7 @@ import {chipTokens, setTagState} from '../core/tags'
 import {createTagTooltip} from './tagTooltip'
 import {layerTooltipExtensions} from './layerTooltip'
 import {searchChipRanges, searchRanges} from './layers/search'
+import {searchedTagText} from '../../segmentView/segmentModel'
 import {lexiqaRanges} from './layers/lexiqa'
 import {blacklistRanges} from './layers/blacklist'
 import {icuRanges} from './layers/icu'
@@ -501,7 +502,8 @@ const TargetEditor = forwardRef(
           TextUtils.escapeRegExp(searchParams.target),
           'gi',
         )
-        if (editor.replaceOccurrence(regex, index, text)) {
+        // Numbered as the cattool numbers the hits (in its search text, tags included): a hit in a tag is skipped.
+        if (editor.replaceOccurrence(regex, index, text, searchedTagText)) {
           updateTranslationDebounced.cancel()
           eventsRef.current.updateTranslationInStore()
         }

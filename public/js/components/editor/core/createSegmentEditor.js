@@ -185,10 +185,13 @@ export const createSegmentEditor = ({
     /** Replaces the selected text, between its tags, with `fn(text)`. False when nothing is selected. */
     transformSelection: (fn) =>
       dispatchSpec(transformSelectionSpec(view.state, fn), 'input'),
-    /** Replaces the `index`-th match of `regex` in the text between tags. False when there is none. */
-    replaceOccurrence: (regex, index, text) =>
+    /**
+     * Replaces the `index`-th match of `regex`, each tag searched as `tagText(its markup)`. False when there is none or
+     * it is in a tag (replaceOccurrenceSpec).
+     */
+    replaceOccurrence: (regex, index, text, tagText) =>
       dispatchSpec(
-        replaceOccurrenceSpec(view.state, regex, index, text),
+        replaceOccurrenceSpec(view.state, regex, index, text, tagText),
         'input.replace',
       ),
     /** Puts the tag `raw` in from the open tag menu (over the `<` that opened it) and closes the menu. */

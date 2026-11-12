@@ -224,6 +224,16 @@ const INTENTIONAL = [
       'Draft saves a lone zero-width space for a target emptied up to a tag',
   },
   {
+    id: /^pc, dataRef and compressed g \(e2e ph\) \| search replace occurrence 1 of "b" with "X"$/,
+    phase: 'edit',
+    // Draft wrong. The cattool numbers the hits in its search text, tag labels included, and Draft replaces the
+    // n-th match of its block text, where a tag is its label: when the current hit is inside a label, Modifier.replaceText
+    // rewrites the tag's characters, and the save keeps them as plain text. Here hit 1 is in the <b> label: Draft saves
+    // `<X>` as text in place of the tag. A tag is locked, so the new editor counts the hit and replaces nothing.
+    reason:
+      'Draft turns a tag into plain text when the replaced hit is in its label',
+  },
+  {
     id: /^(?!plain|nbsp tab line feed|entities).* \| tag menu: < then Enter \(first entry\) @/,
     phase: 'undo1',
     // A choice, both defensible. Draft merges the typed `<` and the tag that replaces it into one undo step (two

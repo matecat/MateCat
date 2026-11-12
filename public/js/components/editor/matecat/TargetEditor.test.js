@@ -362,6 +362,46 @@ describe('TargetEditor store events', () => {
     expect(SegmentActions.updateTranslation).toHaveBeenCalledTimes(1)
   })
 
+  describe('replacing a search occurrence when a hit is inside a tag label', () => {
+    // The cattool counts the hit in the ph label (its search text decodes equiv-text): occurrence 0 is in the
+    // label, occurrence 1 the word after the tag.
+    const ph = `<ph id="mtc_1" ctype="x-html" equiv-text="base64:${btoa('%mondo%')}"/>`
+    const searching = (current) =>
+      makeSegment({
+        translation: `un ${ph} mondo`,
+        currentInSearch: true,
+        currentInSearchIndex: current,
+        searchParams: {target: 'mondo'},
+        occurrencesInSearch: {
+          occurrences: [
+            {searchProgressiveIndex: 0},
+            {searchProgressiveIndex: 1},
+          ],
+        },
+      })
+    const replace = async (segment) => {
+      const {container} = renderTarget(segment)
+      await flush()
+      jest.clearAllMocks()
+      act(() =>
+        SegmentStore.emit(EditAreaConstants.REPLACE_SEARCH_RESULTS, 'terra'),
+      )
+      return container
+    }
+
+    test('the occurrence after it replaces the word it numbers', async () => {
+      const container = await replace(searching(1))
+      expect(docOf(container)).toBe(`un ${ph} terra`)
+      expect(SegmentActions.updateTranslation).toHaveBeenCalledTimes(1)
+    })
+
+    test('the occurrence inside the label replaces nothing: the tag is locked', async () => {
+      const container = await replace(searching(0))
+      expect(docOf(container)).toBe(`un ${ph} mondo`)
+      expect(SegmentActions.updateTranslation).not.toHaveBeenCalled()
+    })
+  })
+
   test('a search replace with no current occurrence in this segment changes nothing', () => {
     const {container} = renderTarget(
       makeSegment({currentInSearch: false, searchParams: {target: 'mondo'}}),

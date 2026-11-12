@@ -30,6 +30,7 @@ import {
   segmentClipboardHtml,
 } from '../../../segmentView/segmentModel'
 import {SEGMENTS} from '../../e2e/fixtures'
+import {searchedTagText} from '../../../segmentView/segmentModel'
 import {targetLayers} from '../../matecat/TargetEditor'
 import {tooltipContent} from '../../matecat/layerTooltip'
 import {insertRaw, toDoc} from '../docModel'
@@ -154,7 +155,12 @@ export const FIXTURES = [
       ['s', 'e'],
       ['at', 'm'],
     ],
-    searches: [['a', 3, 'A']],
+    // `b` is in the labels <br/>, <b> and </b> before Bob: hit 1 is in a tag, hit 3 the B of Bob.
+    searches: [
+      ['a', 3, 'A'],
+      ['b', 1, 'X'],
+      ['b', 3, 'X'],
+    ],
   },
   {
     name: 'nbsp tab line feed',
@@ -748,13 +754,15 @@ export const lexiqaReplace = (fx, word, index, suggestion) => ({
 
 // The search replace of occurrence `index` of `term` by `text`.
 export const searchReplace = (term, index, text) => ({
-  // replaceCurrentSearch (Editarea.js:274-301); TargetEditor replaceSearchResult (TargetEditor.js:377-395)
+  // replaceCurrentSearch (Editarea.js:274-301); TargetEditor replaceSearchResult, which searches each tag as its text
+  // in the cattool's search text
   draft: (s) => DraftMatecatUtils.replaceOccurrences(s, term, text, index),
   cm: (ed) =>
     ed.replaceOccurrence(
       new RegExp(TextUtils.escapeRegExp(term), 'gi'),
       index,
       text,
+      searchedTagText,
     ),
 })
 
