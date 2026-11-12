@@ -236,13 +236,19 @@ class Session
             );
 
             if ($path === false) {
-                unset($this->gDriveSession[self::FILE_LIST][$fileId]);
-                $this->persistGDriveSession();
+                $this->forgetMissingFile($fileId);
                 continue;
             }
 
             if ($this->files_storage instanceof S3FilesStorage) {
-                $s3 = $this->files_storage->getItem($path);
+                try {
+                    $s3 = $this->files_storage->getItem($path);
+                } catch (Exception) {
+                    // with the S3 cache on, the key comes from an index that can still list an object already gone:
+                    // treat it as a missing file instead of failing the whole list
+                    $this->forgetMissingFile($fileId);
+                    continue;
+                }
 
                 $fileSize = $s3['ContentLength'];
                 $fileExtension = AppConfig::$MIME_TYPES[$s3['ContentType']][0] ?? pathinfo($fileName, PATHINFO_EXTENSION);
@@ -260,6 +266,15 @@ class Session
         }
 
         return $response;
+    }
+
+    /**
+     * Drops a file the storage no longer holds from the session, and persists the session.
+     */
+    private function forgetMissingFile(string $fileId): void
+    {
+        unset($this->gDriveSession[self::FILE_LIST][$fileId]);
+        $this->persistGDriveSession();
     }
 
     /**

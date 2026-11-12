@@ -1068,10 +1068,20 @@ class SessionTest extends AbstractTest
         $this->assertSame([], $result['requestedKeys']);
     }
 
+    #[Test]
+    public function getFileStructureForJsonOutputRemovesFilesListedButGoneFromS3(): void
+    {
+        $result = $this->getS3FileStructure('mydoc.odt', 'application/x-unknown', true, true);
+
+        $this->assertSame([], $result['response']);
+        $this->assertFalse($result['session']->hasFiles());
+        $this->assertSame([$result['key']], $result['requestedKeys']);
+    }
+
     /**
      * @return array{response: array<string, mixed>, key: string, requestedKeys: list<string>, session: Session}
      */
-    private function getS3FileStructure(string $fileName, string $contentType, bool $stored = true): array
+    private function getS3FileStructure(string $fileName, string $contentType, bool $stored = true, bool $gone = false): array
     {
         $originalBucket = \Utils\Registry\AppConfig::$AWS_STORAGE_BASE_BUCKET;
         \Utils\Registry\AppConfig::$AWS_STORAGE_BASE_BUCKET = 'test-bucket';
@@ -1082,12 +1092,15 @@ class SessionTest extends AbstractTest
             $requestedKeys = [];
 
             $client = $this->createStub(ClientInterface::class);
-            $client->method('__call')->willReturnCallback(function (string $name, array $args) use ($key, $stored, $contentType, &$requestedKeys) {
+            $client->method('__call')->willReturnCallback(function (string $name, array $args) use ($key, $stored, $gone, $contentType, &$requestedKeys) {
                 if ($name === 'getItemsInABucket') {
                     return $stored ? [$key] : [];
                 }
                 if ($name === 'getItem') {
                     $requestedKeys[] = $args[0]['key'];
+                    if ($gone) {
+                        throw new Exception('The specified key does not exist.');
+                    }
 
                     return ['ContentLength' => 1234, 'ContentType' => $contentType];
                 }
