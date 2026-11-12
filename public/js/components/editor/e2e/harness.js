@@ -176,4 +176,9 @@ window.__editor = {
   },
   doc: (pane) =>
     (pane === 'source' ? source : target).view.state.doc.toString(),
+  /** The document ranges of the chips of a pane, as `{from, to}`. */
+  chipRanges: (pane) =>
+    chipTokens((pane === 'source' ? source : target).view.state).map(
+      ({from, to}) => ({from, to}),
+    ),
 }
