@@ -18,24 +18,26 @@ use PHPUnit\Framework\Attributes\Test;
 use ReflectionMethod;
 use ReflectionProperty;
 use Utils\Constants\Teams;
+use Utils\Email\AbstractEmail;
 use Utils\Tools\CatUtils;
 
-class FakeProjectAssignedEmail
+/**
+ * Stands in for ProjectAssignedEmail through {@see TestableProjectModel::assignedEmail()}, so the
+ * tests count the emails instead of queueing them.
+ */
+class FakeProjectAssignedEmail extends AbstractEmail
 {
     public static int $sent = 0;
-
-    public function __construct(...$args)
-    {
-    }
 
     public function send(): void
     {
         self::$sent++;
     }
-}
 
-if (!class_exists(\Utils\Email\ProjectAssignedEmail::class, false)) {
-    class_alias(FakeProjectAssignedEmail::class, \Utils\Email\ProjectAssignedEmail::class);
+    protected function _getTemplateVariables(): array
+    {
+        return [];
+    }
 }
 
 class ProjectModelTest extends AbstractTest
@@ -461,7 +463,7 @@ class ProjectModelTest extends AbstractTest
         $team = $this->createGeneralTeamWithMembers($owner, [$assignee->email]);
         $project = $this->createProject((int)$team->id, null, 'Combined Update');
 
-        $model = new ProjectModel($this->db, $project);
+        $model = new TestableProjectModel($this->db, $project);
         $model->setUser($owner);
         $model->prepareUpdate('id_team', (int)$team->id);
         $model->prepareUpdate('id_assignee', (int)$assignee->uid);
@@ -589,6 +591,11 @@ class ProjectModelTest extends AbstractTest
 
 class TestableProjectModel extends ProjectModel
 {
+    protected function assignedEmail(UserStruct $assignee, array $jobs): AbstractEmail
+    {
+        return new FakeProjectAssignedEmail();
+    }
+
     public function invokeCheckName(): void
     {
         $this->invokePrivate('checkName');
