@@ -560,11 +560,10 @@ class DownloadQRController extends KleinController
      */
     private function downloadFile(string $mimeType, string $filename, string $filePath): never
     {
-        // This class extends KleinController, so it never inherited the sweep that fixed the other
-        // downloads — the same reason XliffToTargetConverterController was missed. The value here is
-        // built from the job password, which getByIdAndPasswordOrFail() has already matched against
-        // a generated random string, so it cannot hold a quote or a CR today; that safety comes from
-        // the lookup rather than from this line, which is why the line gets its own.
+        // The value here is built from the job password, which getByIdAndPasswordOrFail() has already
+        // matched against a generated random string, so it cannot hold a quote or a CR today; that
+        // safety comes from the lookup, so the header still goes through ContentDisposition like
+        // every other download.
         $contentDisposition = ContentDisposition::build($filename);
 
         $outputContent = file_get_contents($filePath);

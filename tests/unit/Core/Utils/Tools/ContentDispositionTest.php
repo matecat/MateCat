@@ -25,7 +25,7 @@ class ContentDispositionTest extends AbstractTest
             'semicolon is replaced in the ascii copy' => ['a;b.txt', "attachment; filename=\"a_b.txt\"; filename*=UTF-8''a%3Bb.txt"],
             'header-breaking characters are stripped' => ["evil\".docx\r\nX-Injected: yes", 'attachment; filename="evil.docxX-Injected: yes"'],
             'backslash and nul are stripped' => ["a\\b\0.txt", 'attachment; filename="ab.txt"'],
-            'invalid utf-8 is replaced byte by byte' => ["bad\xC3.txt", "attachment; filename=\"bad_.txt\"; filename*=UTF-8''bad%C3.txt"],
+            'invalid utf-8 gets the ascii copy alone' => ["bad\xC3.txt", 'attachment; filename="bad_.txt"'],
         ];
     }
 
@@ -42,6 +42,15 @@ class ContentDispositionTest extends AbstractTest
         $this->assertSame(
             "inline; filename=\"___.pdf\"; filename*=UTF-8''%D0%B4%D0%BE%D0%BA.pdf",
             ContentDisposition::build('док.pdf', 'inline')
+        );
+    }
+
+    #[Test]
+    public function anUnknownTypeIsSentAsAttachment(): void
+    {
+        $this->assertSame(
+            'attachment; filename="report.docx"',
+            ContentDisposition::build('report.docx', "inline; filename=\"x.html\"\r\nX-Injected: yes")
         );
     }
 

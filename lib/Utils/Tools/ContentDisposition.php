@@ -13,18 +13,20 @@ final class ContentDisposition
 {
     /**
      * @param string $filename
-     * @param string $type `attachment` or `inline`
+     * @param string $type `attachment` or `inline`; any other value is sent as `attachment`
      *
      * @return string
      */
     public static function build(string $filename, string $type = 'attachment'): string
     {
+        $type = in_array($type, ['attachment', 'inline'], true) ? $type : 'attachment';
         $safeFilename = self::sanitize($filename);
         $asciiFilename = self::toAscii($safeFilename);
 
         $header = $type . '; filename="' . $asciiFilename . '"';
 
-        if ($asciiFilename !== $safeFilename) {
+        // `filename*` declares UTF-8: a name that is not valid UTF-8 is sent as the ASCII copy alone
+        if ($asciiFilename !== $safeFilename && mb_check_encoding($safeFilename, 'UTF-8')) {
             $header .= "; filename*=UTF-8''" . rawurlencode($safeFilename);
         }
 

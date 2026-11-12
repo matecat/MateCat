@@ -19,7 +19,6 @@ use ReflectionException;
 use TypeError;
 use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
-use Utils\Tools\ContentDisposition;
 use Utils\Tools\Utils;
 use View\API\Commons\ZipContentObject;
 use ZipArchive;
@@ -452,20 +451,6 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
         if ($zip->close() !== true) {
             throw new Exception('Unable to write the zip file ' . $name . ': ' . $zip->getStatusString());
         }
-    }
-
-    /**
-     * Removes characters that could break out of the quoted Content-Disposition
-     * filename value (double quote, backslash, CR, LF, NUL) — prevents header
-     * injection / disposition-parameter smuggling via user-controlled filenames.
-     *
-     * @param string $filename
-     *
-     * @return string
-     */
-    public static function sanitizeContentDispositionFilename(string $filename): string
-    {
-        return ContentDisposition::sanitize($filename);
     }
 
     /**
