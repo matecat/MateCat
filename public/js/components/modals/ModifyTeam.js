@@ -151,6 +151,7 @@ export const ModifyTeam = ({team}) => {
               ) : (
                 <Button
                   size={BUTTON_SIZE.SMALL}
+                  mode={BUTTON_MODE.OUTLINE}
                   className="remove-user-button"
                   onClick={() => confirmRemoveMember(user.get('uid'))}
                 >
@@ -357,6 +358,7 @@ export const ModifyTeam = ({team}) => {
         <div className="search-members">
           <IconSearch />
           <input
+            type="text"
             name="search_member"
             placeholder="Search member"
             value={searchMember}
@@ -368,7 +370,7 @@ export const ModifyTeam = ({team}) => {
             }`}
             onClick={() => setSearchMember('')}
           >
-            <IconClose />
+            <IconClose size={20} />
           </div>
         </div>
         <div className="members-list">
