@@ -1113,7 +1113,7 @@ class CatUtils
      *
      * Names are kept as typed now. A project name reaches a JSON response, an analysis report and
      * a download filename; the first two escape for themselves and the third goes through
-     * {@see \Controller\Abstracts\AbstractDownloadController::sanitizeContentDispositionFilename()}.
+     * {@see \Utils\Tools\ContentDisposition::sanitize()}.
      *
      * Cuts to fit rather than refusing, because the two project-creation callers fall back to a
      * generated name when this returns empty and must not throw. The rename endpoints check the

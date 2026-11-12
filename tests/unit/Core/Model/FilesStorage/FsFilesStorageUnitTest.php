@@ -1189,4 +1189,35 @@ class FsFilesStorageUnitTest extends AbstractTest
             });
         });
     }
+
+    /**
+     * The listing order of a directory is not under the test's control, so the preference is asserted on the call:
+     * both the orig and the work lookups ask for the content-hash prefix.
+     */
+    #[Test]
+    public function test_moveFromCacheToFileDir_asks_for_the_hashed_objects_of_the_package(): void
+    {
+        $mockFs = $this->createStub(FilesystemAdapter::class);
+
+        $partialMock = $this->getMockBuilder(FsFilesStorage::class)
+            ->onlyMethods(['getSingleFileInPath'])
+            ->setConstructorArgs([$mockFs])
+            ->getMock();
+
+        $mockFs->method('isDir')->willReturn(true);
+        $mockFs->method('isFile')->willReturn(true);
+        $mockFs->method('link')->willReturn(true);
+
+        $hash = 'abcdef1234567890abcdef1234567890abcdef12';
+        $calls = [];
+        $partialMock->expects($this->exactly(2))->method('getSingleFileInPath')
+            ->willReturnCallback(function (string $path, ?string $prefix) use (&$calls, $hash): string {
+                $calls[] = [basename($path), $prefix];
+
+                return $path . '/' . $hash . (basename($path) === 'orig' ? '.docx' : '.docx.sdlxliff');
+            });
+
+        $this->assertTrue($partialMock->moveFromCacheToFileDir('20240101' . DIRECTORY_SEPARATOR . $hash, 'en-US', '42'));
+        $this->assertSame([['orig', $hash . '.'], ['work', $hash . '.']], $calls);
+    }
 }
