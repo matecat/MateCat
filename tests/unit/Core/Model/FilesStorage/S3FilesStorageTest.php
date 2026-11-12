@@ -40,12 +40,31 @@ class S3FilesStorageTest extends AbstractTest
     }
 
     /**
+     * Deletes every key under $prefix. The bucket is shared by the CI runs of every branch, so a test clears the keys
+     * it reads back before it writes them: a reader prefers a hashed object over the legacy one it just wrote.
+     *
+     * @param string $prefix
+     */
+    private function deleteKeysUnder(string $prefix): void
+    {
+        $bucket = S3FilesStorage::getFilesStorageBucket();
+
+        foreach ($this->s3Client->getItemsInABucket(['bucket' => $bucket, 'prefix' => $prefix]) as $key) {
+            $this->s3Client->deleteItem(['bucket' => $bucket, 'key' => $key]);
+        }
+    }
+
+    /**
      * @test
      * @throws Exception
      */
     #[Test]
     public function test_creation_of_cache_package_into_a_bucket()
     {
+        $package = $this->fs->getCachePackageHashFolder(sha1_file(AppConfig::$ROOT . '/tests/resources/files/txt/hello.txt'), 'it-IT');
+        $this->deleteKeysUnder($package . '/orig');
+        $this->deleteKeysUnder($package . '/work');
+
         $filePath = AppConfig::$ROOT . '/tests/resources/files/txt/hello.txt';
         $xliffPath = AppConfig::$ROOT . '/tests/resources/files/xliff/file-with-hello-world.xliff';
         $xliffPathTarget = AppConfig::$STORAGE_DIR . '/file-with-hello-world(1).xliff';
@@ -72,6 +91,9 @@ class S3FilesStorageTest extends AbstractTest
     #[Test]
     public function test_copying_a_file_from_cache_package_bucket_to_file_bucket()
     {
+        $this->deleteKeysUnder(S3FilesStorage::FILES_FOLDER . '/20191212/13/orig');
+        $this->deleteKeysUnder(S3FilesStorage::FILES_FOLDER . '/20191212/13/xliff');
+
         $filePath = AppConfig::$ROOT . '/tests/resources/files/txt/hello.txt';
         $sha1 = sha1_file($filePath);
         $dateHashPath = '20191212' . DIRECTORY_SEPARATOR . $sha1;
@@ -89,9 +111,10 @@ class S3FilesStorageTest extends AbstractTest
     #[Test]
     public function testListItems()
     {
+        // the package test_creation_of_cache_package_into_a_bucket writes, which runs first
         $workItems = S3FilesStorage::getStaticS3Client()->getItemsInABucket([
             'bucket' => S3FilesStorage::getFilesStorageBucket(),
-            'prefix' => 'cache-package/c1/68/9bd71f45e76fd5e428f35c00d1f289a7e9e9__it-it/orig'
+            'prefix' => $this->fs->getCachePackageHashFolder(sha1_file(AppConfig::$ROOT . '/tests/resources/files/txt/hello.txt'), 'it-IT') . '/orig'
         ]);
 
         $this->assertNotEmpty($workItems);
