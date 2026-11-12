@@ -126,7 +126,7 @@ class S3FilesStorageTest extends AbstractTest
             'prefix' => $origPrefix
         ]);
 
-        $this->assertContains($origPrefix . '/hello.txt', $origItems);
+        $this->assertContains($origPrefix . '/' . $sha1 . '.txt', $origItems);
     }
 
     /**
