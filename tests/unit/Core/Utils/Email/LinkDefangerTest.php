@@ -123,8 +123,8 @@ class LinkDefangerTest extends AbstractTest
     }
 
     /**
-     * PCRE gives up on pathological input by returning null, and a value that fails to defang must
-     * still reach the reader. Emitting an empty string instead would delete it from the email.
+     * When PCRE gives up, the value still reaches the reader, with every dot and scheme broken: a
+     * live link is the one result that is never acceptable.
      */
     #[Test]
     public function textSurvivesWhenTheEngineGivesUp(): void
@@ -133,7 +133,8 @@ class LinkDefangerTest extends AbstractTest
         ini_set('pcre.backtrack_limit', '1');
 
         try {
-            $this->assertSame('evil.com', LinkDefanger::defang('evil.com'));
+            $this->assertSame('evil[.]com', LinkDefanger::defang('evil.com'));
+            $this->assertSame('https[:]//evil[.]com', LinkDefanger::defang('https://evil.com'));
         } finally {
             ini_set('pcre.backtrack_limit', (string)$previous);
         }
@@ -223,6 +224,141 @@ class LinkDefangerTest extends AbstractTest
 
         // The half that breaks loudly if the key list is wrong.
         $this->assertMatchesRegularExpression('~href="https://[^"\[]+"~', $body, 'the signup link must stay usable');
+    }
+
+    /**
+     * @return array<string, array{string, string}>
+     */
+    public static function linksABrowserResolves(): array
+    {
+        return [
+            'a dotted IPv4' => ['http://203.0.113.5/login', 'http[:]//203.0.113.5/login'],
+            'a decimal IPv4' => ['http://3405803781/login', 'http[:]//3405803781/login'],
+            'a hex IPv4' => ['http://0xCB007105/login', 'http[:]//0xCB007105/login'],
+            'an IPv6 address' => ['http://[2001:db8::1]/login', 'http[:]//[2001:db8::1]/login'],
+            'an IDN suffix' => ["https://matecat-support.\u{0440}\u{0444}/login", "https[:]//matecat-support[.]\u{0440}\u{0444}/login"],
+            'a fullwidth dot' => ["https://evil\u{FF0E}com", "https[:]//evil\u{FF0E}com"],
+            'an ideographic dot' => ["https://evil\u{3002}com", "https[:]//evil\u{3002}com"],
+            'a halfwidth dot' => ["https://evil\u{FF61}com", "https[:]//evil\u{FF61}com"],
+            'a percent-encoded dot' => ['https://evil%2Ecom/login', 'https[:]//evil%2Ecom/login'],
+            'a zero-width space in the host' => ["https://evil\u{200B}.com/login", "https[:]//evil\u{200B}[.]com/login"],
+            'a soft hyphen in the host' => ["https://evil\u{AD}.com/login", "https[:]//evil\u{AD}[.]com/login"],
+            'a user part' => ['http://support@evil.com/login', 'http[:]//support@evil[.]com/login'],
+            'a user part that names us' => ['https://matecat-support@matecat-login.com/reset', 'https[:]//matecat-support@matecat-login[.]com/reset'],
+            'backslashes' => ['http:\\\\evil.com', 'http[:]\\\\evil[.]com'],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('linksABrowserResolves')]
+    public function aSchemeIsBrokenWhateverHostFollowsIt(string $input, string $expected): void
+    {
+        $this->assertSame($expected, LinkDefanger::defang($input));
+    }
+
+    /**
+     * @return array<string, array{string, string}>
+     */
+    public static function bareHostnamesInAnyScript(): array
+    {
+        return [
+            'a Cyrillic hostname' => ["\u{043C}\u{0430}\u{0442}\u{0435}\u{043A}\u{0430}\u{0442}.\u{0440}\u{0444}", "\u{043C}\u{0430}\u{0442}\u{0435}\u{043A}\u{0430}\u{0442}[.]\u{0440}\u{0444}"],
+            'a zero-width space before the dot' => ["evil\u{200B}.com", "evil\u{200B}[.]com"],
+            'a soft hyphen inside a label' => ["ev\u{AD}il.com", "ev\u{AD}il[.]com"],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('bareHostnamesInAnyScript')]
+    public function aBareHostnameIsDefangedInAnyScript(string $input, string $expected): void
+    {
+        $this->assertSame($expected, LinkDefanger::defang($input));
+    }
+
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function textThatIsNotALink(): array
+    {
+        return [
+            'a Windows path' => ['C:\\\\server\\share'],
+            'Japanese prose' => ["\u{6771}\u{4EAC}\u{3002}\u{5927}\u{962A}"],
+            'version numbers' => ['1.5 million v5.0.6'],
+            'an address in prose' => ['Contact f.surname@example.com today'],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('textThatIsNotALink')]
+    public function textThatIsNotALinkIsKept(string $input): void
+    {
+        $this->assertSame($input, LinkDefanger::defang($input));
+    }
+
+    /**
+     * The JIT stack runs out on long input, and the value must still come back defanged rather
+     * than as it arrived with the link live.
+     */
+    #[Test]
+    public function aLinkStaysDefangedWhenTheEngineRunsOutOfStack(): void
+    {
+        $previous = ini_get('pcre.jit');
+        ini_set('pcre.jit', '1');
+
+        try {
+            $input = "Please re-verify your account at https://matecat-login.com/verify\n" . str_repeat('a.', 7000) . '1';
+            $output = LinkDefanger::defang($input);
+
+            $this->assertStringStartsWith("Please re-verify your account at https[:]//matecat-login[.]com/verify\n", $output);
+            $this->assertStringNotContainsString('https://matecat-login.com', $output);
+        } finally {
+            ini_set('pcre.jit', (string)$previous);
+        }
+    }
+
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function runsOfAddressCharacters(): array
+    {
+        return [
+            'dots' => ['.'],
+            'underscores' => ['_'],
+            'percent signs and dots' => ['%a.'],
+        ];
+    }
+
+    /**
+     * The same linear bound, for the characters an address may start with. A run of `.`, `_` or
+     * `%` started a new address attempt at every character, so its cost grew with the square of its
+     * length: 80KB of dots took a second for each email it was in.
+     */
+    #[Test]
+    #[DataProvider('runsOfAddressCharacters')]
+    public function defangingCostStaysLinearOnRunsOfAddressCharacters(string $unit): void
+    {
+        $measure = static function (string $unit, int $length): float {
+            $text = str_repeat($unit, intdiv($length, strlen($unit)));
+            LinkDefanger::defang($text);                      // warm, so the first call pays no setup
+
+            $started = hrtime(true);
+            for ($i = 0; $i < 5; $i++) {
+                LinkDefanger::defang($text);
+            }
+
+            return (hrtime(true) - $started) / 5;
+        };
+
+        $small = max($measure($unit, 2_000), 1.0);
+        $large = $measure($unit, 16_000);
+
+        // Eight times the input. Linear predicts about eight, quadratic about sixty-four; the bound
+        // is loose enough that a slow or contended machine cannot fail it by itself.
+        $this->assertLessThan(
+            24.0,
+            $large / $small,
+            'defanging is growing faster than the text it runs on'
+        );
     }
 
 }
