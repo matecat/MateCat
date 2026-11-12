@@ -1,6 +1,15 @@
 import React from 'react'
-import {fireEvent, render, screen} from '@testing-library/react'
+import {act, fireEvent, render, screen} from '@testing-library/react'
 import ReviewExtendedIssuesTabGroup from './ReviewExtendedIssuesTabGroup'
+import SegmentStore from '../../stores/SegmentStore'
+import SegmentConstants from '../../constants/SegmentConstants'
+
+jest.mock('../../stores/SegmentStore', () => {
+  const {EventEmitter} = require('events')
+  const store = new EventEmitter()
+  store.setMaxListeners(0)
+  return store
+})
 
 const tabs = [
   {
@@ -18,6 +27,10 @@ const tabs = [
 ]
 
 describe('ReviewExtendedIssuesTabGroup', () => {
+  afterEach(() => {
+    SegmentStore.removeAllListeners()
+  })
+
   test('renders all tab labels', () => {
     render(<ReviewExtendedIssuesTabGroup tabs={tabs} selectedTabId="r1" />)
     expect(screen.getByText('R1 issues')).toBeInTheDocument()
@@ -65,5 +78,39 @@ describe('ReviewExtendedIssuesTabGroup', () => {
     fireEvent.click(screen.getByText('R1 issues'))
     expect(screen.getByText('R1 issues')).toHaveClass('active')
     expect(screen.getByText('R1 content')).toBeInTheDocument()
+  })
+
+  test('switches to r1 on ISSUE_ADDED when there is no second revision pass', () => {
+    global.config = {secondRevisionsCount: 0}
+    render(<ReviewExtendedIssuesTabGroup tabs={tabs} selectedTabId="r2" />)
+    act(() => {
+      SegmentStore.emit(SegmentConstants.ISSUE_ADDED)
+    })
+    expect(screen.getByText('R1 issues')).toHaveClass('active')
+    expect(screen.getByText('R1 content')).toBeInTheDocument()
+  })
+
+  test('switches to r2 on ISSUE_ADDED when a second revision pass is enabled', () => {
+    global.config = {secondRevisionsCount: 1}
+    render(<ReviewExtendedIssuesTabGroup tabs={tabs} selectedTabId="r1" />)
+    act(() => {
+      SegmentStore.emit(SegmentConstants.ISSUE_ADDED)
+    })
+    expect(screen.getByText('R2 issues')).toHaveClass('active')
+    expect(screen.getByText('R2 content')).toBeInTheDocument()
+  })
+
+  test('removes the ISSUE_ADDED listener on unmount', () => {
+    global.config = {secondRevisionsCount: 0}
+    const {unmount} = render(
+      <ReviewExtendedIssuesTabGroup tabs={tabs} selectedTabId="r1" />,
+    )
+    unmount()
+    expect(() => {
+      act(() => {
+        SegmentStore.emit(SegmentConstants.ISSUE_ADDED)
+      })
+    }).not.toThrow()
+    expect(SegmentStore.listenerCount(SegmentConstants.ISSUE_ADDED)).toBe(0)
   })
 })
