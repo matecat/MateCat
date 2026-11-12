@@ -15,18 +15,35 @@ export const textRuns = (state, from = 0, to = state.doc.length) => {
   return runs
 }
 
+// The text character before `pos`, tags skipped; '' at the start of the document.
+const charBefore = (state, pos) => {
+  for (const tag of tagList(state, 0, pos).reverse()) {
+    if (tag.to === pos) pos = tag.from
+  }
+  return pos > 0 ? state.sliceDoc(pos - 1, pos) : ''
+}
+
 /**
  * Transaction spec replacing the text of the selection, run by run between tags, with `fn(text)`; the selection
  * still covers it. Null when the selection is empty.
+ *
+ * A run after a tag continues the text before the tag (a tag can sit inside a word), so it is transformed together
+ * with the character before the tag, which is then dropped: capitalize starts no word there. The selection's own
+ * start is a start, as in the Draft editor.
  */
 export const transformSelectionSpec = (state, fn) => {
   const sel = state.selection.main
   if (sel.empty) return null
+  const transform = (from, to) => {
+    const text = state.sliceDoc(from, to)
+    const before = from === sel.from ? '' : charBefore(state, from)
+    return before ? fn(before + text).slice(fn(before).length) : fn(text)
+  }
   const changes = state.changes(
     textRuns(state, sel.from, sel.to).map(({from, to}) => ({
       from,
       to,
-      insert: fn(state.sliceDoc(from, to)),
+      insert: transform(from, to),
     })),
   )
   const map = (pos) => changes.mapPos(pos, pos === sel.from ? -1 : 1)

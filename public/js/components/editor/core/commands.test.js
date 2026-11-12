@@ -53,6 +53,24 @@ describe('transform of the selection', () => {
     ])
   })
 
+  // A word start, as formatText's capitalize has it: the start of the text or after a space.
+  const capitalize = (t) => t.replace(/(^|\s)\p{L}/gu, (m) => m.toUpperCase())
+
+  test('text after a tag continues the word before it: a tag inside a word starts no new one', () => {
+    const segment = 'ka<g id="1">rl</g>sson and<x id="2"/> <g id="3">co</g>'
+    const state = stateWith(segment, 0, createSegmentState(segment).doc.length)
+    expect(
+      serialize(apply(state, transformSelectionSpec(state, capitalize))),
+    ).toBe('Ka<g id="1">rl</g>sson And<x id="2"/> <g id="3">Co</g>')
+  })
+
+  test('the start of the selection starts a word, even inside one', () => {
+    const state = stateWith('ab<x id="1"/>cd', 1, 15)
+    expect(
+      serialize(apply(state, transformSelectionSpec(state, capitalize))),
+    ).toBe('aB<x id="1"/>cd')
+  })
+
   test('does nothing on an empty selection', () => {
     expect(transformSelectionSpec(stateWith('ab', 1), (t) => t)).toBe(null)
   })
