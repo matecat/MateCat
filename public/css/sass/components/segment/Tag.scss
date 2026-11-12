@@ -750,6 +750,11 @@ body.tags-compressed {
   }
 }
 
+// A chip directly in a CodeMirror line flows inline, where Draft wraps each chip in an inline-block `.tag-container`.
+.cm-line .tag {
+  display: inline-flex;
+}
+
 // A search hit inside a tag label in the CodeMirror editors: the label is marked, with the colour of TagEntity's
 // markSearch (which marks only the matching part).
 .tag.tag-search-match .tag-text {

@@ -135,7 +135,8 @@ describe('api', () => {
   test('chips carry the cattool classes and the pair number', () => {
     const editor = mount('<g id="1">a</g>')
     const [open, close] = editor.view.contentDOM.querySelectorAll('.tag')
-    expect(open.className).toContain('tag small tag-open')
+    expect(open.className).toContain('tag tag-open')
+    expect(open).not.toHaveClass('small')
     expect(close.className).toContain('tag-close')
     expect(open).toHaveAttribute('contenteditable', 'false')
   })

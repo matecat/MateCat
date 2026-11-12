@@ -59,6 +59,58 @@ test('a long chip label ends in an ellipsis, a short one is shown whole', async 
   ])
 })
 
+for (const [side, pane] of [
+  ['source', SOURCE],
+  ['target', TARGET],
+]) {
+  test(`${side} chips have the size of Draft's open chips, not the closed segment's, and fit in their line`, async ({
+    page,
+  }) => {
+    await open(page)
+    const {editor, draft, fits} = await page.evaluate((pane) => {
+      // A chip as Draft's TagEntity draws it in an open segment
+      const container = document.body.appendChild(
+        document.createElement('span'),
+      )
+      container.className = 'tag-container'
+      container.innerHTML =
+        '<span class="tag tag-open"><span class="index-counter">1</span><span data-text="true">a</span></span>'
+      const look = (chip) => {
+        const style = getComputedStyle(chip)
+        const arrow = getComputedStyle(chip, '::before')
+        const label = getComputedStyle(
+          chip.querySelector('.tag-text, [data-text]'),
+        )
+        return {
+          fontSize: style.fontSize,
+          lineHeight: style.lineHeight,
+          padding: style.padding,
+          margin: style.margin,
+          arrow: [
+            arrow.right,
+            arrow.top,
+            arrow.borderLeftWidth,
+            arrow.borderTopWidth,
+            arrow.borderBottomWidth,
+          ],
+          label: [label.maxWidth, label.textOverflow, label.whiteSpace],
+        }
+      }
+      const chip = document.querySelector(`${pane} .tag.tag-open`)
+      const chipBox = chip.getBoundingClientRect()
+      const lineBox = chip.closest('.cm-line').getBoundingClientRect()
+      return {
+        editor: look(chip),
+        draft: look(container.firstChild),
+        fits: chipBox.top >= lineBox.top && chipBox.bottom <= lineBox.bottom,
+      }
+    }, pane)
+    expect(editor.fontSize).toBe('13px')
+    expect(editor).toEqual(draft)
+    expect(fits).toBe(true)
+  })
+}
+
 test('compacted tags hide the label of numbered chips and keep their number', async ({
   page,
 }) => {
