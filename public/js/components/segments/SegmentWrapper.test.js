@@ -186,16 +186,45 @@ describe('SegmentWrapper on a closed segment', () => {
       makeSegment({inSearch: true, segment: 'a &amp; <x id="1"/>b'}),
     )
 
-    expect(mockGetSearchMarks).toHaveBeenCalledWith('a & \uFFFCb', true, '42')
+    expect(mockGetSearchMarks).toHaveBeenCalledWith('a & \uFFFCb', true, '42', [
+      expect.any(String),
+    ])
     expect(screen.getByText('a &', {selector: 'mark'})).toHaveClass(
       'searchMarker',
     )
   })
 
+  test('counts the hits in tag labels but draws only the text ones: the chip is left unmarked', () => {
+    const label = 'name'
+    mockGetSearchMarks.mockReturnValueOnce([
+      {start: 0, end: 1, className: 'searchMarker', tag: true},
+      {start: 2, end: 6, className: 'searchMarker currSearchItem'},
+    ])
+    renderWrapper(
+      makeSegment({
+        inSearch: true,
+        segment: `<ph id="mtc_1" equiv-text="base64:${btoa(label)}"/> name`,
+      }),
+    )
+
+    expect(mockGetSearchMarks).toHaveBeenCalledWith('\uFFFC name', true, '42', [
+      label,
+    ])
+    const marks = screen.getAllByText(/./, {selector: 'mark'})
+    expect(marks).toHaveLength(1)
+    expect(marks[0]).toHaveTextContent('name')
+    expect(marks[0]).toHaveClass('searchMarker currSearchItem')
+  })
+
   test('marks the target search hits with isSource false', () => {
     renderWrapper(makeSegment({inSearch: true}), {isTarget: true})
 
-    expect(mockGetSearchMarks).toHaveBeenCalledWith('target text', false, '42')
+    expect(mockGetSearchMarks).toHaveBeenCalledWith(
+      'target text',
+      false,
+      '42',
+      [],
+    )
   })
 
   test('marks nothing when the segment is not in search', () => {

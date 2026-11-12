@@ -350,6 +350,51 @@ export const markableText = (segment, options) =>
   tokensMarkableText(tokenize(segment, options))
 
 /**
+ * The text of the tag `raw` in the text the cattool searches: SegmentStore's
+ * decodedSource / decodedTranslation, which transformTagsToText builds and
+ * SearchUtils.createSearchObject numbers the hits in. A tag with equiv-text
+ * is its decoded equiv-text (what a ph chip shows), a tag with a placeholder
+ * that placeholder, any other tag its markup: a `<g>` stays `<g id="1" …>`,
+ * whatever its chip shows, so a term in a compressible g's label is no hit.
+ */
+export const searchedTagText = (raw) => {
+  let text = raw ?? ''
+  Object.values(tagSignatures).forEach(
+    ({placeholderRegex, decodeNeeded, placeholder, regex}) => {
+      if (placeholderRegex) {
+        const all = new RegExp(
+          placeholderRegex.source,
+          placeholderRegex.flags + 'g',
+        )
+        text = text.replace(all, (match, captured) =>
+          decodeNeeded
+            ? Base64.decode(captured)
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&amp;/g, '&')
+            : match,
+        )
+      } else if (regex) {
+        text = text.replace(new RegExp(regex), (match) => placeholder || match)
+      }
+    },
+  )
+  return text
+}
+
+/**
+ * The searched text (`searchedTagText`) of each `OPAQUE_TAG` of
+ * `markableText(segment)`, in order: a search hit in it is counted too
+ * (SearchUtils.getSearchMarks).
+ */
+export const searchedTagTexts = (segment, options) =>
+  tokenize(segment, options)
+    .filter(
+      (token) => token.type === 'tag' && markableChar(token) === OPAQUE_TAG,
+    )
+    .map((token) => searchedTagText(token.raw))
+
+/**
  * Groups the tokens covered by `marks` ({start, end, className}, offsets in
  * `markableText`). Text is split at mark edges; a tag inside a mark is
  * wrapped whole. Empty and overlapped parts of marks are dropped.

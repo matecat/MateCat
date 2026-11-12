@@ -760,3 +760,11 @@ body.tags-compressed {
 .tag.tag-search-match .tag-text {
   background-color: rgb(255 255 0);
 }
+.tag.tag-search-match.tag-search-current .tag-text {
+  background-color: rgb(255 210 14);
+}
+// With the tags compressed, a chip holding a hit shows its label again, or the hit (and the current one) could not be
+// seen: Draft, while searching, draws the text of its chips with markSearch, which compaction does not hide.
+body.tags-compressed .tag.tag-numbered.tag-search-match .tag-text {
+  display: flow-root;
+}

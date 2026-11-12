@@ -7,7 +7,7 @@ import SegmentView from '../segmentView/SegmentView'
 import SegmentUtils from '../../utils/segmentUtils'
 import SearchUtils from '../header/cattol/search/searchUtils'
 import SegmentStringUtils from './utils/DraftMatecatUtils/segmentStringUtils'
-import {markableText} from '../segmentView/segmentModel'
+import {markableText, searchedTagTexts} from '../segmentView/segmentModel'
 import SourceEditor from '../editor/matecat/SourceEditor'
 import {isNewEditorActive} from '../editor/matecat/editorEngine'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
@@ -40,12 +40,14 @@ const SegmentWrapper = ({isTarget}) => {
     : textToDisplay
 
   const isRtl = isTarget ? config.isTargetRTL : config.isSourceRTL
+  // A hit inside a tag counts, so the current item lands right, but is not drawn: the chip stays as it was.
   const searchMarks = segment.inSearch
     ? SearchUtils.getSearchMarks(
         markableText(textToDisplay, {isRtl: !!isRtl}),
         !isTarget,
         segment.sid,
-      )
+        searchedTagTexts(textToDisplay, {isRtl: !!isRtl}),
+      ).filter((mark) => !mark.tag)
     : undefined
 
   return (

@@ -126,3 +126,26 @@ test('compacted tags hide the label of numbered chips and keep their number', as
     page.locator(`${TARGET} .tag:not(.tag-numbered) .tag-text`).first(),
   ).toBeVisible()
 })
+
+test('with compacted tags, a numbered chip holding the current search hit shows its label in the current hit colour', async ({
+  page,
+}) => {
+  await open(page, 'ph')
+  await page.evaluate(() => document.body.classList.add('tags-compressed'))
+  const numbered = page.locator(`${TARGET} .tag.tag-numbered`)
+  // The first numbered chip holds the current hit (search.js gives it both classes), the second none
+  await page.evaluate((pane) => {
+    const chips = [...document.querySelectorAll(`${pane} .tag`)]
+    const first = chips.findIndex((el) => el.matches('.tag-numbered'))
+    window.__editor.tagState('target', [
+      [first, 'tag-search-match tag-search-current'],
+    ])
+  }, TARGET)
+  await expect(numbered.first()).toHaveClass(/tag-search-current/)
+  const hit = numbered.first().locator('.tag-text')
+  await expect(hit).toBeVisible()
+  expect(await hit.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(
+    'rgb(255, 210, 14)',
+  )
+  await expect(numbered.nth(1).locator('.tag-text')).toBeHidden()
+})

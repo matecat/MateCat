@@ -13,6 +13,7 @@ import {replaceAllIntoSegments} from '../../../../api/replaceAllIntoSegments'
 import AlertModal from '../../../modals/AlertModal'
 import ModalsActions from '../../../../actions/ModalsActions'
 import {tagSignatures} from '../../../segments/utils/DraftMatecatUtils/tagModel'
+import {OPAQUE_TAG} from '../../../segmentView/segmentModel'
 import {
   REVISE_STEP_NUMBER,
   SEGMENTS_STATUS,
@@ -436,11 +437,16 @@ let SearchUtils = {
   },
 
   /**
-   * The search hits in a closed segment, as SegmentView marks: `text` is the
-   * segment's markable text (segmentModel.markableText), so a hit never lands
-   * inside a tag. The hit that is the current occurrence gets currSearchItem.
+   * The search hits of a segment, as SegmentView marks: `text` is the
+   * segment's markable text (segmentModel.markableText), every tag one
+   * `OPAQUE_TAG`, and `labels` the text of each `OPAQUE_TAG` in the text
+   * the cattool searches, in order (segmentModel.searchedTagText). The
+   * cattool numbers the hits of a segment in that text (createSearchObject),
+   * so the hits are searched with each tag as its text: a hit inside a tag
+   * takes its number and comes back as a mark over the tag, with `tag: true`.
+   * The hit that is the current occurrence gets currSearchItem.
    */
-  getSearchMarks: function (text, isSource, sid) {
+  getSearchMarks: function (text, isSource, sid, labels = []) {
     if (this.occurrencesList.indexOf(sid) === -1) return []
     let reg
     const isCurrent = this.occurrencesList[this.featuredSearchResult] === sid
@@ -473,9 +479,28 @@ let SearchUtils = {
     }
     if (!reg) return []
 
+    // The text with each tag as its label, and per character the offset in
+    // `text` it comes from and whether it is part of a label. A tag with no
+    // label stays `OPAQUE_TAG`, which no term matches.
+    let searched = ''
+    const offsets = []
+    const inLabel = []
+    let tag = 0
+    for (let i = 0; i < text.length; i++) {
+      const label = text[i] === OPAQUE_TAG ? labels[tag++] : undefined
+      const part = label || text[i]
+      searched += part
+      for (let k = 0; k < part.length; k++) {
+        offsets.push(i)
+        inLabel.push(!!label)
+      }
+    }
+
     const marks = []
-    for (const match of text.matchAll(reg)) {
+    for (const match of searched.matchAll(reg)) {
       if (!match[0]) continue
+      const from = match.index
+      const to = from + match[0].length
       const className =
         isCurrent &&
         occurrences[marks.length] &&
@@ -483,11 +508,9 @@ let SearchUtils = {
           this.featuredSearchResult
           ? searchMarker + ' currSearchItem'
           : searchMarker
-      marks.push({
-        start: match.index,
-        end: match.index + match[0].length,
-        className,
-      })
+      const mark = {start: offsets[from], end: offsets[to - 1] + 1, className}
+      if (inLabel.slice(from, to).some(Boolean)) mark.tag = true
+      marks.push(mark)
     }
     return marks
   },

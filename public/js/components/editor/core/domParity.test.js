@@ -184,20 +184,48 @@ const CHIP_STATES = [
         el.querySelector(h.draft),
       ),
   },
+  // markSearch colours the matching part of the label as the current hit; the new editor marks the chip current.
+  {
+    cm: 'tag-search-current',
+    draft: (el) =>
+      Boolean(
+        el.querySelector(
+          HIGHLIGHTS.find((h) => h.kind === 'currentSearch').draft,
+        ),
+      ),
+  },
 ]
 
 // A chip: its label as shown, its classes (what Tag.scss styles it by), its counter, and whether the label sits in the
 // element Tag.scss trims with an ellipsis (Draft `span[data-text]`, CodeMirror `.tag-text`).
 const chipToken = (el, ellipsis, hl, side) => {
-  const counter = el.querySelector('.index-counter')
+  let counter = el.querySelector('.index-counter')
   // Tag.scss hides the label of a compressed chip: one with `tag-compressed`, or any numbered chip while the body has
-  // `tags-compressed` (CatToolStore sets it with the user's option). Only the number shows.
-  const hidden =
+  // `tags-compressed` (CatToolStore sets it with the user's option). Only the number shows, but for a chip that holds a
+  // search hit in the new editor (`tag-search-match`), whose label shows again.
+  let hidden =
     el.classList.contains('tag-compressed') ||
     (document.body.classList.contains('tags-compressed') &&
-      el.classList.contains('tag-numbered'))
-  const labelEl = hidden ? null : el.querySelector(ellipsis)
-  const label = hidden
+      el.classList.contains('tag-numbered') &&
+      !el.classList.contains('tag-search-match'))
+  // Draft, while its side is searched, draws the tag text with markSearch and moves the chip's own content (number and
+  // label) into a `display: none` span: a compressed chip then shows its text, unstyled by compaction, and no number.
+  const searchHidden =
+    side === 'draft' &&
+    [...el.children].find((child) => child.style.display === 'none')
+  let label
+  if (hidden && searchHidden) {
+    hidden = false
+    counter = null
+    label = [...el.childNodes]
+      .filter((node) => node !== searchHidden)
+      .map((node) => node.textContent)
+      .join('')
+      .replace(ZWSP, '')
+  }
+  const labelEl =
+    hidden || label !== undefined ? null : el.querySelector(ellipsis)
+  label ??= hidden
     ? counter.textContent
     : (labelEl ?? el).textContent.replace(ZWSP, '')
   return {
@@ -642,19 +670,6 @@ const INTENTIONAL = [
       ),
   },
   {
-    name: 'chip size',
-    // NOT DECIDED, pinned so it is seen: the new editor draws its chips with the closed segment's classes, `tag small`
-    // (segmentModel.js), so an open segment looks like a closed one: Tag.scss `.tag.small` is 12px with 7px arrows,
-    // where Draft's open chips are `.tag`, 13px with 8px arrows. `small` is also what makes the chip inline-flex, which
-    // a chip directly in a CodeMirror line needs (Draft wraps each chip in an inline-block `.tag-container`).
-    reason:
-      'the new editor draws its chips at the closed segment size (.tag.small)',
-    cm: (tokens) =>
-      tokens.map((t) =>
-        t.classes ? {...t, classes: t.classes.filter((k) => k !== 'small')} : t,
-      ),
-  },
-  {
     name: 'compressed chips',
     // A difference of mechanism, not of drawing: Draft marks each compressed chip `tag-compressed` and leaves its label
     // out; the new editor keeps the label and Tag.scss hides it under `body.tags-compressed`. Both show the number.
@@ -668,6 +683,19 @@ const INTENTIONAL = [
       ),
   },
   {
+    name: 'chips of a searched side with the tags compressed',
+    id: /\| compressed search \|/,
+    // Two ways to show a hit the compaction would hide. Draft, while a side is searched, draws every chip of it as its
+    // tag text, with no number (TagEntity markSearch; the chip's own content goes into a `display: none` span), so no
+    // chip of that side is compressed any more. The new editor keeps its chips and shows again the label of a chip that
+    // holds a hit (Tag.scss, `tag-search-match`), number included. Compared: which chips hold a hit, the current one,
+    // and the label shown for them.
+    reason:
+      'while searching, Draft shows every chip as its text with no number; the new editor un-compresses a chip with a hit',
+    draft: (tokens) => tokens.map(searchedChip),
+    cm: (tokens) => tokens.map(searchedChip),
+  },
+  {
     name: 'focused chip after an undo or a drop',
     id: /\| (backspace @ at|delete @ bt|drag and drop \(move\) @ .*)$/,
     // Not judged here: which chip shows as focused (`tag-focused`) follows the selection, and this test compares
@@ -678,22 +706,17 @@ const INTENTIONAL = [
     draft: (tokens) => tokens.map(unfocus),
     cm: (tokens) => tokens.map(unfocus),
   },
-  {
-    name: 'current search hit after a hit in a tag label',
-    id: /\| search in a tag label$/,
-    // NOT a decision: a bug shared with the closed segment view, pinned here until it is fixed. The cattool numbers
-    // the hits of a segment in its decoded text, tag labels included (SearchUtils.createSearchObject), and Draft marks
-    // the featured one. The new editor, like the closed view (SegmentWrapper), asks SearchUtils.getSearchMarks for
-    // the marks of its markable text, where a tag is one opaque character: a hit inside a tag label is not counted, so
-    // every later hit takes the number of the one before it and the featured hit is not drawn as current.
-    reason:
-      'BUG: the new editor and the closed view miscount the current hit after a hit in a tag label',
-    draft: (tokens) =>
-      tokens.map((t) =>
-        t.hl ? {...t, hl: t.hl.filter((k) => k !== 'currentSearch')} : t,
-      ),
-  },
 ]
+
+const searchedChip = (t) =>
+  t.t !== 'chip'
+    ? t
+    : {
+        ...t,
+        label: t.classes.includes('tag-search-match') ? t.label : '',
+        counter: null,
+        ellipsis: true,
+      }
 
 const unfocus = (t) =>
   t.classes ? {...t, classes: t.classes.filter((k) => k !== 'tag-focused')} : t
@@ -810,10 +833,12 @@ const entry = (id, words, extra = {}) => ({
 })
 // A search for `term` in this segment (sid 1) with `count` hits, the featured one being hit `current`: the segment
 // fields Draft reads and the SearchUtils state the new editor reads, as SearchUtils.createSearchObject builds them
-// (one occurrencesList entry per hit; `ingnoreCase` is really "match case").
-const search = (side, term, count, current) => {
+// (one occurrencesList entry per hit; `ingnoreCase` is really "match case"). `positions`, where given, are the hits'
+// `matchPosition`s, by which Draft's markSearch finds the current hit inside a tag label.
+const search = (side, term, count, current, positions = []) => {
   const occurrences = Array.from({length: count}, (_, i) => ({
     searchProgressiveIndex: i,
+    ...(positions[i] === undefined ? {} : {matchPosition: positions[i]}),
   }))
   return {
     segment: {
@@ -930,6 +955,13 @@ const LAYER_CASES = [
       search: search(side, 'name', 2, 1),
     },
     {
+      name: 'current search hit in a tag label',
+      side,
+      raw: 'a <ph id="mtc_1" equiv-text="base64:' + btoa('%name%') + '"/> name',
+      // Draft's block text is `a %name% name`: the first hit is at 3, inside the chip.
+      search: search(side, 'name', 2, 0, [3, 9]),
+    },
+    {
       name: 'icu',
       side,
       raw: '{count, plural, one {# file} other {# files}}',
@@ -1018,6 +1050,41 @@ describe('compressed tags', () => {
       ).toBe(true)
       expect(cm.tooltips).toEqual(draft.tooltips)
       expect(draft.tooltips).not.toBeNull()
+    },
+  )
+
+  // A search hit in the label of a numbered chip: the label is hidden by compaction, so the hit must show some other
+  // way. The cattool counts it (its search text decodes the ph equiv-text); here it is the current hit.
+  const pc = (id, ctype, label) =>
+    `<ph id="${id}" ctype="${ctype}" equiv-text="base64:${btoa(label)}"/>`
+  const searchedRaw = `a ${pc('mtc_1', 'x-original_pc_open', '<b class="name">')}x${pc('mtc_2', 'x-original_pc_close', '</b>')} name`
+  test.each(['target', 'source'])(
+    '%s: a current hit in a compressed label is drawn on its chip',
+    (side) => {
+      // Draft's block text is `a ⁠<b class="name">…`, the chip from 3: markSearch finds the current hit in it there.
+      const s = search(side, 'name', 2, 0, [3, 40])
+      Object.assign(SearchUtils, s.searchUtils)
+      const {draft, cm} = drawBoth(
+        side,
+        makeSegment(searchedRaw),
+        makeSegment(searchedRaw, s.segment),
+        [[SegmentConstants.ADD_SEARCH_RESULTS, '1']],
+      )
+      expectSameDrawing(
+        `${side} | compressed search | ${searchedRaw}`,
+        searchedRaw,
+        draft,
+        cm,
+      )
+      // Both show the label of the chip holding the hit, and colour the hit as the current one.
+      const hit = (tokens) =>
+        tokens.find((t) => t.classes?.includes('tag-search-current'))
+      expect(hit(draft).label).toBe('<b class="name">')
+      expect(hit(cm).label).toBe('<b class="name">')
+      Object.assign(SearchUtils, {
+        occurrencesList: [],
+        searchResultsDictionary: {},
+      })
     },
   )
 })

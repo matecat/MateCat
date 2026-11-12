@@ -1,6 +1,11 @@
 import SearchUtils from '../../../header/cattol/search/searchUtils'
 import {createSegmentState} from '../../core/createSegmentEditor'
-import {SEARCH_CHIP_CLASS, searchChipRanges, searchRanges} from './search'
+import {
+  SEARCH_CHIP_CLASS,
+  SEARCH_CHIP_CURRENT_CLASS,
+  searchChipRanges,
+  searchRanges,
+} from './search'
 
 // The search state SearchUtils keeps after a search: the featured result (index 1) is the second hit of segment 7.
 const searchFor = (term, extra = {}) => {
@@ -113,5 +118,75 @@ describe('searchChipRanges (TagEntity markSearch)', () => {
     expect(
       searchChipRanges(state, {...segment({source: 'save'}), inSearch: false}),
     ).toEqual([])
+  })
+
+  describe('a hit in a tag label takes its number among the hits of the segment', () => {
+    // Segment 7 holds two hits of `name`: the first in the chip label, the second in the text.
+    const featured = (index) =>
+      Object.assign(SearchUtils, {
+        searchMode: 'normal',
+        searchParams: {source: 'name'},
+        occurrencesList: ['7', '7'],
+        featuredSearchResult: index,
+        searchResultsDictionary: {
+          7: {
+            occurrences: [
+              {searchProgressiveIndex: 0},
+              {searchProgressiveIndex: 1},
+            ],
+          },
+        },
+      })
+    const raw = () => 'a ' + ph('%name%') + ' name'
+
+    test('the current hit after it is the text one', () => {
+      featured(1)
+      const state = createSegmentState(raw())
+      expect(marked(state, segment({source: 'name'}))).toEqual([
+        ['name', 'searchMarker currSearchItem', 'mark'],
+      ])
+      expect(
+        searchChipRanges(state, segment({source: 'name'})).map(
+          (c) => c.className,
+        ),
+      ).toEqual([SEARCH_CHIP_CLASS])
+    })
+
+    test('the current hit inside the label marks its chip as current', () => {
+      featured(0)
+      const state = createSegmentState(raw())
+      expect(marked(state, segment({source: 'name'}))).toEqual([
+        ['name', 'searchMarker', 'mark'],
+      ])
+      const chips = searchChipRanges(state, segment({source: 'name'}))
+      expect(chips.map((c) => c.className)).toEqual([
+        `${SEARCH_CHIP_CLASS} ${SEARCH_CHIP_CURRENT_CLASS}`,
+      ])
+      expect(state.sliceDoc(chips[0].from, chips[0].to)).toContain('ph')
+    })
+  })
+
+  test('a term in the label of a compressible g is drawn on its chip but not counted, as the cattool does not count it', () => {
+    // The cattool searches the g as its markup: segment 7 has one hit, the word after the tag
+    Object.assign(SearchUtils, {
+      searchMode: 'normal',
+      searchParams: {source: 'name'},
+      occurrencesList: ['7'],
+      featuredSearchResult: 0,
+      searchResultsDictionary: {
+        7: {occurrences: [{searchProgressiveIndex: 0}]},
+      },
+    })
+    const state = createSegmentState(
+      `a <g id="1" equiv-text="base64:${btoa('%name%')}">b</g> name`,
+    )
+    expect(marked(state, segment({source: 'name'}))).toEqual([
+      ['name', 'searchMarker currSearchItem', 'mark'],
+    ])
+    expect(
+      searchChipRanges(state, segment({source: 'name'})).map(
+        (c) => c.className,
+      ),
+    ).toEqual([SEARCH_CHIP_CLASS])
   })
 })
