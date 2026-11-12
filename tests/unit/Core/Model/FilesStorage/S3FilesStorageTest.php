@@ -2,12 +2,14 @@
 
 
 namespace Matecat\Core\Model\FilesStorage;
+use Exception;
 use Matecat\SimpleS3\Client;
 use Matecat\TestHelpers\AbstractTest;
 use Model\FilesStorage\S3FilesStorage;
 use PHPUnit\Framework\Attributes\Depends;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use ReflectionException;
 use Utils\Registry\AppConfig;
 
 /**
@@ -30,6 +32,34 @@ class S3FilesStorageTest extends AbstractTest
     private $s3Client;
 
     /**
+     * The bucket is shared by every CI run, and the lookups return the first key in alphabetical
+     * order. Example: `c1689bd71f45e76fd5e428f35c00d1f289a7e9e9.txt` left next to `hello.txt` came
+     * back in its place. These tests write to the same keys on every run, so each run first deletes
+     * whatever is under them; a run that crashes leaves nothing the next run can trip on.
+     */
+    private const int ID_FILE = 13;
+
+    private static string $helloPath;
+
+    private static string $helloSha1;
+
+    /**
+     * @throws Exception
+     */
+    public static function setUpBeforeClass(): void
+    {
+        parent::setUpBeforeClass();
+
+        self::$helloPath = AppConfig::$ROOT . '/tests/resources/files/txt/hello.txt';
+        self::$helloSha1 = (string)sha1_file(self::$helloPath);
+
+        $client = S3FilesStorage::getStaticS3Client();
+        $bucket = S3FilesStorage::getFilesStorageBucket();
+        $client->deleteFolder(['bucket' => $bucket, 'prefix' => (new S3FilesStorage())->getCachePackageHashFolder(self::$helloSha1, 'it-IT')]);
+        $client->deleteFolder(['bucket' => $bucket, 'prefix' => S3FilesStorage::FILES_FOLDER . '/20191212/' . self::ID_FILE]);
+    }
+
+    /**
      * @throws ReflectionException
      */
     public function setUp(): void
@@ -47,13 +77,13 @@ class S3FilesStorageTest extends AbstractTest
     #[Test]
     public function test_creation_of_cache_package_into_a_bucket()
     {
-        $filePath = AppConfig::$ROOT . '/tests/resources/files/txt/hello.txt';
+        $filePath = self::$helloPath;
         $xliffPath = AppConfig::$ROOT . '/tests/resources/files/xliff/file-with-hello-world.xliff';
         $xliffPathTarget = AppConfig::$STORAGE_DIR . '/file-with-hello-world(1).xliff';
 
         copy($xliffPath, $xliffPathTarget); // I copy the original xliff file because then
 
-        $sha1 = sha1_file($filePath);
+        $sha1 = self::$helloSha1;
         $lang = 'it-IT';
 
         $hashTree = S3FilesStorage::composeCachePath($sha1);
@@ -71,17 +101,18 @@ class S3FilesStorageTest extends AbstractTest
      * @throws Exception
      */
     #[Test]
+    #[Depends('test_creation_of_cache_package_into_a_bucket')]
     public function test_copying_a_file_from_cache_package_bucket_to_file_bucket()
     {
-        $filePath = AppConfig::$ROOT . '/tests/resources/files/txt/hello.txt';
-        $sha1 = sha1_file($filePath);
-        $dateHashPath = '20191212' . DIRECTORY_SEPARATOR . $sha1;
+        $filePath = self::$helloPath;
+        $dateHashPath = '20191212' . DIRECTORY_SEPARATOR . self::$helloSha1;
         $lang = 'it-IT';
-        $idFile = 13;
+        $idFile = self::ID_FILE;
+        $fileDir = S3FilesStorage::FILES_FOLDER . '/20191212/' . $idFile;
 
         $this->assertTrue($this->fs->moveFromCacheToFileDir($dateHashPath, $lang, $idFile, $filePath));
-        $this->assertEquals(S3FilesStorage::FILES_FOLDER . '/20191212/13/orig/hello.txt', $this->fs->getOriginalFromFileDir($idFile, $dateHashPath));
-        $this->assertEquals(S3FilesStorage::FILES_FOLDER . '/20191212/13/xliff/hello.txt.sdlxliff', $this->fs->getXliffFromFileDir($idFile, $dateHashPath));
+        $this->assertEquals($fileDir . '/orig/hello.txt', $this->fs->getOriginalFromFileDir($idFile, $dateHashPath));
+        $this->assertEquals($fileDir . '/xliff/hello.txt.sdlxliff', $this->fs->getXliffFromFileDir($idFile, $dateHashPath));
     }
 
     /**
@@ -96,8 +127,7 @@ class S3FilesStorageTest extends AbstractTest
     #[Depends('test_creation_of_cache_package_into_a_bucket')]
     public function testListItems()
     {
-        $sha1 = sha1_file(AppConfig::$ROOT . '/tests/resources/files/txt/hello.txt');
-        $origPrefix = $this->fs->getCachePackageHashFolder($sha1, 'it-IT') . '/orig';
+        $origPrefix = $this->fs->getCachePackageHashFolder(self::$helloSha1, 'it-IT') . '/orig';
 
         $origItems = S3FilesStorage::getStaticS3Client()->getItemsInABucket([
             'bucket' => S3FilesStorage::getFilesStorageBucket(),
