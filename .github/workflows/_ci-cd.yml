@@ -314,14 +314,35 @@ jobs:
         id: login_ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # Build only base-node, web-node, and daemons-node (no test-node).
+      # Same builder as the test jobs, with the same fixed DNS servers. The
+      # builder of the docker daemon, used by "docker compose build", could not
+      # resolve azure.archive.ubuntu.com on 2026-11-11 and stopped the deploy.
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+        with:
+          buildkitd-config-inline: |
+            [dns]
+              nameservers = ["1.1.1.1", "8.8.8.8"]
+
+      # Build only base-node, web-node, and daemons-node (no test-node), with
+      # no cache: every deploy installs the current packages. load puts the
+      # images in the local docker daemon under the names of the compose file,
+      # which the next step tags and pushes.
       - name: Build images
+        uses: docker/bake-action@v7
         env:
           REPOSITORY_BRANCH: ${{ github.ref_name }}
           REPOSITORY_TAG: ${{ github.ref_name }}
-        run: |
-          docker compose -f docker/docker-compose-ci.yml build base-node
-          docker compose -f docker/docker-compose-ci.yml build web-node daemons-node || exit 1
+        with:
+          source: .
+          files: docker/docker-compose-ci.yml
+          targets: base-node,web-node,daemons-node
+          load: true
+          no-cache: true
+          set: |
+            *.context=.
+            web-node.contexts.matecat-base-node-24=target:base-node
+            daemons-node.contexts.matecat-base-node-24=target:base-node
 
       # Push order: versioned tags first, then :latest aliases together.
       - name: Tag and push images to ECR

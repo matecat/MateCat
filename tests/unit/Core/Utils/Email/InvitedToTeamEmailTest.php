@@ -88,6 +88,18 @@ class InvitedToTeamEmailTest extends AbstractTest
     }
 
     /**
+     * The invitation email must ask the reader to join the team with the correct wording.
+     */
+    #[Test]
+    public function theInvitationAsksTheReaderToJoinTheTeam(): void
+    {
+        $body = $this->renderBody($this->makeTeam());
+
+        $this->assertStringContainsString('has invited you to join the team "Test Team"', $body);
+        $this->assertStringNotContainsString('invited you join', $body);
+    }
+
+    /**
      * Renders the invitation body through the production template path.
      *
      * @throws \ReflectionException

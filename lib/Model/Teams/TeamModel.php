@@ -92,6 +92,13 @@ class TeamModel
             );
         }
 
+        // The invitation email prints the address as written, so it must be an address and nothing
+        // else: `victim+matecat-support.com/reset?u=victim@gmail.com` is valid and reaches the
+        // victim, and reads as a reset link.
+        if (filter_var($email, FILTER_VALIDATE_EMAIL) === false || strpbrk($email, '/?#') !== false) {
+            throw new InvalidArgumentException("Wrong parameter: a member email address is not valid", 400);
+        }
+
         $this->member_emails[] = $email;
     }
 

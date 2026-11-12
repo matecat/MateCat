@@ -19,6 +19,7 @@ use Model\Translators\JobsTranslatorsStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
+use Throwable;
 
 abstract class SendToTranslatorAbstract extends AbstractEmail
 {
@@ -51,28 +52,17 @@ abstract class SendToTranslatorAbstract extends AbstractEmail
     }
 
     /**
-     * @throws Exception
+     * @throws Throwable
      */
     public function send(): void
     {
-        $recipient = [$this->translator->email];
-
-        //we need to get the bodyHtmlMessage only once because JWT changes if called more than once
-        // otherwise html message will differ from the alternative text message
-        $bodyHtmlMessage = $this->_buildMessageContent();
-
-        $this->doSend(
-            $recipient,
-            $this->title,
-            $this->_buildHTMLMessage($bodyHtmlMessage),
-            $this->_buildTxtMessage($bodyHtmlMessage)
-        );
+        $this->sendTo($this->translator->email);
     }
 
     /**
      * @return array<string, mixed>
      * @throws ReflectionException
-     * @throws \Exception
+     * @throws Exception
      */
     protected function _getTemplateVariables(): array
     {
