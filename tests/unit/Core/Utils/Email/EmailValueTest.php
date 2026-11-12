@@ -4,126 +4,97 @@ declare(strict_types=1);
 
 namespace Matecat\Core\Utils\Email;
 
-use ArrayObject;
+use DateTimeImmutable;
+use LogicException;
 use Matecat\TestHelpers\AbstractTest;
+use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
-use TypeError;
+use Stringable;
 use Utils\Email\EmailValue;
 
 /**
- * The email templates test wrapped values with `if`, `empty()`, `count()` and `==`. A wrapper object
- * is always truthy and is not an array, so each of those must still see the value it wraps.
+ * What a template receives from {@see EmailValue::escapeAll()}: plain PHP values, so `if`, `empty()`,
+ * `count()` and `==` answer as they would for any value.
  */
 class EmailValueTest extends AbstractTest
 {
     #[Test]
-    public function aWrappedListCanBeCounted(): void
+    public function valuesThatCannotCarryMarkupKeepTheirType(): void
     {
-        $wrapped = EmailValue::wrapAll([
-            'issues' => [['category' => 'Style'], ['category' => 'Terminology']],
-            'none' => [],
-            'segmentInfo' => ['issues' => [1, 2, 3]],
+        $escaped = EmailValue::escapeAll([
+            'null' => null,
+            'false' => false,
+            'true' => true,
+            'int' => 0,
+            'float' => 1.5,
+            'emptyList' => [],
         ]);
 
-        $this->assertCount(2, $wrapped['issues']);
-        $this->assertCount(0, $wrapped['none']);
-        $this->assertCount(3, $wrapped['segmentInfo']['issues']);
+        $this->assertSame(
+            ['null' => null, 'false' => false, 'true' => true, 'int' => 0, 'float' => 1.5, 'emptyList' => []],
+            $escaped
+        );
+    }
+
+    /**
+     * A database row brings numbers as strings; they stay strings that compare equal to the number.
+     */
+    #[Test]
+    public function aNumericStringStaysAStringEqualToItsNumber(): void
+    {
+        $escaped = EmailValue::escapeAll(['source_page' => '2', 'empty' => '', 'zero' => '0']);
+
+        $this->assertSame('2', $escaped['source_page']);
+        $this->assertTrue($escaped['source_page'] == 2);
+        $this->assertSame('', $escaped['empty']);
+        $this->assertSame('0', $escaped['zero']);
     }
 
     #[Test]
-    public function aWrappedCountableObjectIsCountedByItself(): void
+    public function anArrayKeepsItsKeysAndCanBeCounted(): void
     {
-        $wrapped = EmailValue::wrapAll(['rows' => new ArrayObject(['a', 'b', 'c'])]);
+        $escaped = EmailValue::escapeAll(['issues' => [7 => ['category' => 'Style <b>'], 9 => ['category' => 'Terms']]]);
 
-        $this->assertCount(3, $wrapped['rows']);
+        $this->assertCount(2, $escaped['issues']);
+        $this->assertSame([7, 9], array_keys($escaped['issues']));
+        $this->assertSame('Style &lt;b&gt;', $escaped['issues'][7]['category']);
+    }
+
+    /**
+     * Example: an object with `__toString()` is printed as its string, so it is escaped like one.
+     */
+    #[Test]
+    public function aStringableObjectBecomesAnEscapedString(): void
+    {
+        $value = new class implements Stringable {
+            public function __toString(): string
+            {
+                return 'Ben & Jerry <b>';
+            }
+        };
+
+        $this->assertSame('Ben &amp; Jerry &lt;b&gt;', EmailValue::escapeAll(['name' => $value])['name']);
+    }
+
+    /**
+     * A struct cannot be escaped, so it never reaches a template: the error names the key, which is
+     * where the fix goes (`->toArray()`, or only the fields the template reads).
+     */
+    #[Test]
+    public function anObjectThatIsNotStringableIsRefusedByItsKey(): void
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage("'data.recipient' is a Model\\Users\\UserStruct");
+
+        EmailValue::escapeAll(['data' => ['recipient' => new UserStruct(), 'isPreviousChangeAuthor' => true]]);
     }
 
     #[Test]
-    public function countingAWrappedStringFailsLikeCountingAString(): void
+    public function aDateObjectIsRefusedToo(): void
     {
-        $wrapped = EmailValue::wrapAll(['name' => 'Giulia']);
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage("'due_date' is a DateTimeImmutable");
 
-        $this->expectException(TypeError::class);
-
-        count($wrapped['name']);
-    }
-
-    #[Test]
-    public function emptyValuesStayEmpty(): void
-    {
-        $wrapped = EmailValue::wrapAll([
-            'senderEmail' => '',
-            'zero' => '0',
-            'issues' => [],
-            'user' => ['email' => '', 'comments' => []],
-        ]);
-
-        $this->assertSame('', $wrapped['senderEmail']);
-        $this->assertSame('0', $wrapped['zero']);
-        $this->assertSame([], $wrapped['issues']);
-        $this->assertSame('', $wrapped['user']['email']);
-        $this->assertSame([], $wrapped['user']['comments']);
-    }
-
-    #[Test]
-    public function numericStringsArePassedAsTheyAre(): void
-    {
-        $wrapped = EmailValue::wrapAll([
-            'id_job' => '12885070',
-            'penalty' => '2.50',
-            'comment' => ['source_page' => '2'],
-        ]);
-
-        $this->assertSame('12885070', $wrapped['id_job']);
-        $this->assertSame('2.50', $wrapped['penalty']);
-        $this->assertSame('2', $wrapped['comment']['source_page']);
-    }
-
-    #[Test]
-    public function falseAndNullStayFalsy(): void
-    {
-        $wrapped = EmailValue::wrapAll([
-            'showTitle' => false,
-            'changeAuthor' => null,
-            'data' => ['isPreviousChangeAuthor' => false, 'author' => null],
-        ]);
-
-        $this->assertFalse($wrapped['showTitle']);
-        $this->assertNull($wrapped['changeAuthor']);
-        $this->assertFalse($wrapped['data']['isPreviousChangeAuthor']);
-        $this->assertNull($wrapped['data']['author']);
-        $this->assertNull($wrapped['data']['missing_key']);
-    }
-
-    #[Test]
-    public function numbersAndTrueArePassedAsTheyAre(): void
-    {
-        $wrapped = EmailValue::wrapAll([
-            'total' => 12,
-            'penalty' => 2.5,
-            'showTitle' => true,
-            'comment' => ['source_page' => 1],
-            'ids' => [4, 5],
-        ]);
-
-        $this->assertSame(12, $wrapped['total']);
-        $this->assertSame(2.5, $wrapped['penalty']);
-        $this->assertTrue($wrapped['showTitle']);
-        $this->assertSame(1, $wrapped['comment']['source_page']);
-        $this->assertSame([4, 5], iterator_to_array($wrapped['ids']));
-    }
-
-    #[Test]
-    public function stringsAndArraysAreStillWrapped(): void
-    {
-        $wrapped = EmailValue::wrapAll([
-            'name' => '<b>Giulia</b>',
-            'user' => ['first_name' => '<b>Giulia</b>'],
-        ]);
-
-        $this->assertInstanceOf(EmailValue::class, $wrapped['name']);
-        $this->assertInstanceOf(EmailValue::class, $wrapped['user']);
-        $this->assertSame('&lt;b&gt;Giulia&lt;/b&gt;', (string)$wrapped['name']);
-        $this->assertSame('&lt;b&gt;Giulia&lt;/b&gt;', (string)$wrapped['user']['first_name']);
+        EmailValue::escapeAll(['due_date' => new DateTimeImmutable('2026-11-11 17:04:15')]);
     }
 }
