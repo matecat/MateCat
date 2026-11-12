@@ -781,6 +781,41 @@ describe('ManageActions', () => {
     })
   })
 
+  test('addUserToTeam rejects with the API error and dispatches nothing', async () => {
+    const rejection = {
+      errors: [
+        {
+          code: 400,
+          message: 'Wrong parameter: a member email address is not valid',
+        },
+      ],
+    }
+    addUserTeam.mockRejectedValueOnce(rejection)
+
+    await expect(
+      ManageActions.addUserToTeam(fromJS({id: 1}), 'a?b@example.org'),
+    ).rejects.toEqual(rejection)
+    expect(AppDispatcher.dispatch).not.toHaveBeenCalled()
+  })
+
+  test('addUserToTeam resolves after dispatching UPDATE_TEAM_MEMBERS', async () => {
+    addUserTeam.mockResolvedValueOnce({
+      members: ['m1'],
+      pending_invitations: [],
+    })
+    const team = fromJS({id: 1})
+
+    await expect(
+      ManageActions.addUserToTeam(team, 'user@test.com'),
+    ).resolves.toBeUndefined()
+    expect(AppDispatcher.dispatch).toHaveBeenCalledWith({
+      actionType: 'UPDATE_TEAM_MEMBERS',
+      team,
+      members: ['m1'],
+      pending_invitations: [],
+    })
+  })
+
   test('removeUserFromTeam removes another member and dispatches updates', async () => {
     removeTeamUser.mockResolvedValueOnce({
       members: ['m1'],
