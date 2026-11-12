@@ -1084,38 +1084,38 @@ class S3FilesStorageUnitTest extends AbstractTest
         );
     }
 
+    /**
+     * W3: the Redis index leaves out an object uploaded in parts, so a cache package is always listed from S3.
+     */
     #[Test]
-    public function test_moveFromCacheToFileDir_empty_items_retry_without_cache(): void
+    public function test_cache_package_lookups_never_list_from_the_redis_index(): void
     {
-        $callIndex = 0;
-        $client = $this->stubClient(function (string $name, array $args) use (&$callIndex) {
+        $calls = [];
+        $client = $this->stubClient(function (string $name, array $args) use (&$calls) {
+            $calls[] = [$name, $args[0]];
             if ($name === 'getItemsInABucket') {
-                $callIndex++;
-                if ($callIndex <= 2) {
-                    return [];
-                }
-                if ($callIndex === 3) {
-                    return ['cache-package/ab/cd/rest__en-US/orig/file.txt'];
-                }
-                if ($callIndex === 4) {
-                    return ['cache-package/ab/cd/rest__en-US/work/file.xliff'];
-                }
-                return [];
+                $folder = str_ends_with($args[0]['prefix'], '/orig') ? 'orig' : 'work';
+
+                return ['cache-package/ab/cd/rest__en-US/' . $folder . '/' . self::HASH . ($folder === 'orig' ? '.txt' : '.txt.sdlxliff')];
             }
-            if ($name === 'copyInBatch') {
-                return true;
-            }
-            return null;
+
+            return true;
         });
 
         $fs = $this->createS3WithMocks($client);
-        $hash = 'abcdef1234567890abcdef1234567890abcdef12';
-        $result = $fs->moveFromCacheToFileDir('20230115' . DIRECTORY_SEPARATOR . $hash, 'en-US', '13');
-        $this->assertTrue($result);
+        $this->assertTrue($fs->moveFromCacheToFileDir('20230115' . DIRECTORY_SEPARATOR . self::HASH, 'en-US', '13'));
+        $this->assertNotFalse($fs->getOriginalFromCache(self::HASH, 'en-US'));
+        $this->assertNotFalse($fs->getXliffFromCache(self::HASH, 'en-US'));
+
+        $listings = $this->argsOf($calls, 'getItemsInABucket');
+        $this->assertCount(4, $listings);
+        foreach ($listings as $listing) {
+            $this->assertTrue($listing['exclude-cache'] ?? false, 'listed from the index: ' . $listing['prefix']);
+        }
     }
 
     #[Test]
-    public function test_moveFromCacheToFileDir_empty_items_both_calls_returns_false(): void
+    public function test_moveFromCacheToFileDir_returns_false_on_an_empty_package(): void
     {
         $client = $this->stubClient(function (string $name, array $args) {
             if ($name === 'getItemsInABucket') {

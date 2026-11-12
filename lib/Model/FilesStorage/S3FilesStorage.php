@@ -298,6 +298,8 @@ class S3FilesStorage extends AbstractFilesStorage
     }
 
     /**
+     * Listed from S3, never from the Redis index: see {@see self::getCachePackageItemsToCopy()}.
+     *
      * @param string $hash
      * @param string $lang
      * @param string $keyToSearch
@@ -307,7 +309,7 @@ class S3FilesStorage extends AbstractFilesStorage
     private function findAKeyInCachePackageBucket(string $hash, string $lang, string $keyToSearch): false|string
     {
         $prefix = $this->getCachePackageHashFolder($hash, $lang) . DIRECTORY_SEPARATOR . $keyToSearch; // example: c1/68/9bd71f45e76fd5e428f35c00d1f289a7e9e9__it-IT/work
-        $items = $this->s3Client->getItemsInABucket(['bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $prefix]);
+        $items = $this->s3Client->getItemsInABucket(['bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $prefix, 'exclude-cache' => true]);
 
         return $this->pickPreferredKey($items, $hash . '.');
     }
@@ -360,15 +362,9 @@ class S3FilesStorage extends AbstractFilesStorage
         $origPrefix = $this->getCachePackageHashFolder($hash, $lang) . '/orig';
         $workPrefix = $this->getCachePackageHashFolder($hash, $lang) . '/work';
 
-        // get records from S3 cache
-        $sourceItems = $this->getCachePackageItemsToCopy($origPrefix, $workPrefix, $hash, false);
+        $sourceItems = $this->getCachePackageItemsToCopy($origPrefix, $workPrefix, $hash);
 
-        // if $sourceItems is empty, try to get the records from S3, skipping the cache
-        if (empty($sourceItems)) {
-            $sourceItems = $this->getCachePackageItemsToCopy($origPrefix, $workPrefix, $hash, true);
-        }
-
-        // if $sourceItems is still empty, return false and then throw an Exception
+        // if $sourceItems is empty, return false and then throw an Exception
         if (empty($sourceItems)) {
             return false;
         }
@@ -413,22 +409,22 @@ class S3FilesStorage extends AbstractFilesStorage
      * One original and one xliff out of the cache package: a package written before the storage names were hashed can
      * hold a legacy object next to a hashed one, and a project needs exactly one of each.
      *
+     * Listed from S3, never from the Redis index: the client leaves an object uploaded in parts (over 6 MB) out of the
+     * index, so a hashed object written into a package whose legacy keys are indexed would not be listed, and the
+     * project would get the legacy file, or a legacy original with a hashed xliff.
+     *
      * @param string $origPrefix
      * @param string $workPrefix
      * @param string $hash
-     * @param bool $excludeCache
      *
      * @return list<string>
      */
-    private function getCachePackageItemsToCopy(string $origPrefix, string $workPrefix, string $hash, bool $excludeCache): array
+    private function getCachePackageItemsToCopy(string $origPrefix, string $workPrefix, string $hash): array
     {
         $items = [];
 
         foreach ([$origPrefix, $workPrefix] as $prefix) {
-            $params = ['bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $prefix];
-            if ($excludeCache) {
-                $params['exclude-cache'] = true;
-            }
+            $params = ['bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $prefix, 'exclude-cache' => true];
 
             $key = $this->pickPreferredKey($this->s3Client->getItemsInABucket($params), $hash . '.');
             if ($key !== false) {
