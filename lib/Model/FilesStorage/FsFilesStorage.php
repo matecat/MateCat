@@ -6,6 +6,7 @@ use Exception;
 use InvalidArgumentException;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
 use Model\FilesStorage\Exceptions\FileSystemException;
+use Random\RandomException;
 use UnexpectedValueException;
 use Utils\Registry\AppConfig;
 
@@ -54,6 +55,35 @@ class FsFilesStorage extends AbstractFilesStorage
      */
 
     /**
+     * Writes $source to $dest in the cache without ever rewriting the file already stored under $dest.
+     *
+     * Projects hard-link the cache files, and a content-hash name is written again by every upload of the same
+     * content: a copy onto $dest would truncate and rewrite the inode those projects point at. The bytes go to a
+     * temporary name in the same directory first, then a rename swaps them in atomically, under a new inode, so the
+     * files already linked keep the bytes they were created with. The cache readers skip the temporary name.
+     *
+     * @param string $source
+     * @param string $dest
+     *
+     * @return bool
+     * @throws RandomException
+     */
+    private function copyIntoCache(string $source, string $dest): bool
+    {
+        $tmp = dirname($dest) . DIRECTORY_SEPARATOR . self::TEMPORARY_FILE_PREFIX . bin2hex(random_bytes(8));
+
+        if ($this->filesystem->copy($source, $tmp) && $this->filesystem->rename($tmp, $dest)) {
+            return true;
+        }
+
+        if ($this->filesystem->fileExists($tmp)) {
+            $this->filesystem->unlink($tmp);
+        }
+
+        return false;
+    }
+
+    /**
      * @param string $hash
      * @param string $lang
      * @param string|null $originalPath
@@ -88,7 +118,7 @@ class FsFilesStorage extends AbstractFilesStorage
             //move original, under a name taken from the content hash: the same content always lands on the same file
             $file_name = static::getCacheFileName($hash, $originalPath);
 
-            $outcome1 = $this->filesystem->copy($originalPath, $cacheDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . $file_name);
+            $outcome1 = $this->copyIntoCache($originalPath, $cacheDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . $file_name);
 
             if (!$outcome1) {
                 // Original directory deleted!!!
@@ -115,7 +145,7 @@ class FsFilesStorage extends AbstractFilesStorage
         //move converted xliff
         //In Unix you can't rename or move between filesystems,
         //Instead you must copy the file from one source location to the destination location, then delete the source.
-        $outcome2 = $this->filesystem->copy($xliffPath, $xliffDestination);
+        $outcome2 = $this->copyIntoCache($xliffPath, $xliffDestination);
 
         if (!$outcome2) {
             //Original directory deleted!!!

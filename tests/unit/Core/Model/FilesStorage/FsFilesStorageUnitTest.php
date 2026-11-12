@@ -547,6 +547,7 @@ class FsFilesStorageUnitTest extends AbstractTest
         $mockFs->method('fileExists')->willReturn(false);
         $mockFs->method('mkdir')->willReturn(true);
         $mockFs->expects($this->exactly(2))->method('copy')->willReturn(true);
+        $mockFs->expects($this->exactly(2))->method('rename')->willReturn(true);
         $mockFs->expects($this->once())->method('unlink')->willReturn(true);
 
         $fs = new FsFilesStorage($mockFs);
@@ -563,7 +564,8 @@ class FsFilesStorageUnitTest extends AbstractTest
         $mockFs->method('fileExists')->willReturnCallback(function () use (&$callCount) {
             $callCount++;
             // First 4 calls are ensureDirectoryExists (return false to trigger mkdir)
-            // 5th call is the check after copy failure (return true so deleteDir is called)
+            // 5th call looks for the temporary copy, 6th is the check after the copy failure (return true so
+            // deleteDir is called)
             return $callCount >= 5;
         });
         $mockFs->method('mkdir')->willReturn(true);
@@ -599,11 +601,11 @@ class FsFilesStorageUnitTest extends AbstractTest
         $mockFs->method('fileExists')->willReturnCallback(function () use (&$fileExistsCallCount) {
             $fileExistsCallCount++;
             // ensureDirectoryExists calls fileExists 4 times (all return false to trigger mkdir)
-            // then after xliff copy failure, fileExists is called once more to check cache dir exists
-            // That's the 5th call - return true
+            // then after xliff copy failure, fileExists looks for the temporary copy and then checks the cache dir
             return $fileExistsCallCount >= 5;
         });
         $mockFs->method('mkdir')->willReturn(true);
+        $mockFs->method('rename')->willReturn(true);
         // First copy succeeds (original), second fails (xliff)
         $mockFs->method('copy')->willReturnCallback(function () use (&$copyCallCount) {
             $copyCallCount++;
@@ -621,6 +623,7 @@ class FsFilesStorageUnitTest extends AbstractTest
         $mockFs = $this->createStub(FilesystemAdapter::class);
         $mockFs->method('fileExists')->willReturn(false);
         $mockFs->method('mkdir')->willReturn(true);
+        $mockFs->method('rename')->willReturn(true);
         $copyCallCount = 0;
         $mockFs->method('copy')->willReturnCallback(function () use (&$copyCallCount) {
             $copyCallCount++;
@@ -1219,5 +1222,83 @@ class FsFilesStorageUnitTest extends AbstractTest
 
         $this->assertTrue($partialMock->moveFromCacheToFileDir('20240101' . DIRECTORY_SEPARATOR . $hash, 'en-US', '42'));
         $this->assertSame([['orig', $hash . '.'], ['work', $hash . '.']], $calls);
+    }
+
+    /**
+     * Projects hard-link the cache files. The same content uploaded again writes the same content-hash names: the
+     * cache gets the new bytes, under a new inode, and the files of the project created in between are left as they
+     * were.
+     */
+    #[Test]
+    public function test_makeCachePackage_never_rewrites_a_file_a_project_links(): void
+    {
+        $this->withTempDir(function (string $tempDir): void {
+            $this->withStorageIn($tempDir, function (FsFilesStorage $fs) use ($tempDir): void {
+                file_put_contents($tempDir . '/a.docx', 'original');
+                file_put_contents($tempDir . '/MAT_XLF1', 'first xliff');
+                $this->assertTrue($fs->makeCachePackage(self::HASH, 'en-US', $tempDir . '/a.docx', $tempDir . '/MAT_XLF1'));
+                $this->assertTrue($fs->moveFromCacheToFileDir('20261111/' . self::HASH, 'en-US', '7', 'a.docx'));
+
+                file_put_contents($tempDir . '/b.docx', 'original');
+                file_put_contents($tempDir . '/MAT_XLF2', 'second xliff');
+                $this->assertTrue($fs->makeCachePackage(self::HASH, 'en-US', $tempDir . '/b.docx', $tempDir . '/MAT_XLF2'));
+
+                $fileDir = $tempDir . '/files/20261111/7';
+                $this->assertSame('first xliff', file_get_contents($fileDir . '/xliff/' . sha1('a.docx') . '.docx.sdlxliff'));
+                $this->assertSame('original', file_get_contents($fileDir . '/orig/' . sha1('a.docx') . '.docx'));
+
+                $package = $this->packageDir($tempDir);
+                $this->assertSame('second xliff', file_get_contents($package . '/work/' . self::HASH . '.docx.sdlxliff'));
+                $this->assertSame([self::HASH . '.docx'], $this->namesIn($package . '/orig'), 'no temporary file is left');
+                $this->assertSame([self::HASH . '.docx.sdlxliff'], $this->namesIn($package . '/work'), 'no temporary file is left');
+            });
+        });
+    }
+
+    #[Test]
+    public function test_makeCachePackage_removes_the_temporary_copy_when_the_rename_fails(): void
+    {
+        $mockFs = $this->createMock(FilesystemAdapter::class);
+        $mockFs->method('mkdir')->willReturn(true);
+
+        $copiedTo = null;
+        $mockFs->expects($this->once())->method('copy')
+            ->willReturnCallback(function (string $source, string $dest) use (&$copiedTo): bool {
+                $copiedTo = $dest;
+
+                return true;
+            });
+        $mockFs->expects($this->once())->method('rename')->willReturn(false);
+        // the temporary copy exists, and so does the cache dir to clear
+        $mockFs->method('fileExists')->willReturnCallback(function (string $path) use (&$copiedTo): bool {
+            return $path === $copiedTo || str_ends_with($path, '__en-US');
+        });
+        $mockFs->expects($this->once())->method('unlink')
+            ->willReturnCallback(function (string $path) use (&$copiedTo): bool {
+                $this->assertSame($copiedTo, $path);
+
+                return true;
+            });
+        $mockFs->expects($this->once())->method('deleteDir');
+
+        $fs = new FsFilesStorage($mockFs);
+        $this->assertFalse($fs->makeCachePackage(self::HASH, 'en-US', '/tmp/original.docx', '/tmp/converted.xlf'));
+        $this->assertNotNull($copiedTo);
+        $this->assertStringStartsWith('.tmp-', basename($copiedTo));
+        $this->assertSame('orig', basename(dirname($copiedTo)));
+    }
+
+    #[Test]
+    public function test_getSingleFileInPath_skips_a_write_in_progress(): void
+    {
+        $this->withTempDir(function (string $tempDir): void {
+            touch($tempDir . '/' . FsFilesStorage::TEMPORARY_FILE_PREFIX . 'abc');
+
+            $fs = new FsFilesStorage();
+            $this->assertFalse($fs->getSingleFileInPath($tempDir));
+
+            touch($tempDir . '/legacy.docx');
+            $this->assertSame($tempDir . '/legacy.docx', $fs->getSingleFileInPath($tempDir, self::HASH . '.'));
+        });
     }
 }

@@ -34,6 +34,11 @@ abstract class AbstractFilesStorage implements IFilesStorage
     const string OBJECTS_SAFE_DELIMITER = '__';
 
     /**
+     * Prefix of the file a cache write goes to before it is renamed onto its final name: never a stored file.
+     */
+    const string TEMPORARY_FILE_PREFIX = '.tmp-';
+
+    /**
      * A name produced by getStorageFileName() or getCacheFileName(): a sha1, plus the extension when it has one.
      */
     const string STORED_NAME_PATTERN = '/^[0-9a-f]{40}(\.[a-z0-9]{1,16})?$/';
@@ -216,7 +221,7 @@ abstract class AbstractFilesStorage implements IFilesStorage
      * Returns the file in $path whose name starts with $preferredPrefix, otherwise the first file found.
      *
      * A directory written before the storage names were hashed can hold a legacy object next to a hashed one:
-     * the prefix makes the choice deterministic.
+     * the prefix makes the choice deterministic. A write still in progress is never returned.
      *
      * @param string $path
      * @param string|null $preferredPrefix
@@ -236,7 +241,7 @@ abstract class AbstractFilesStorage implements IFilesStorage
         }
 
         foreach ($files as $file) {
-            if ($file->isDot()) {
+            if ($file->isDot() || str_starts_with($file->getFilename(), self::TEMPORARY_FILE_PREFIX)) {
                 continue;
             }
 
