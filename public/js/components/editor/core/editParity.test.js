@@ -18,7 +18,12 @@ import keyCommandPlainBackspace from 'draft-js/lib/keyCommandPlainBackspace'
 import keyCommandPlainDelete from 'draft-js/lib/keyCommandPlainDelete'
 import keyCommandInsertNewline from 'draft-js/lib/keyCommandInsertNewline'
 import {runScopeHandlers} from '@codemirror/view'
+import {cloneDeep} from 'lodash'
 import DraftMatecatUtils from '../../segments/utils/DraftMatecatUtils'
+import updateOffsetBasedOnEditorState from '../../segments/utils/DraftMatecatUtils/updateOffsetBasedOnEditorState'
+import canDecorateRange from '../../segments/utils/DraftMatecatUtils/canDecorateRange'
+import {LEXIQA_DECORATOR} from '../../segments/utils/DraftMatecatUtils/editorConstants'
+import LexiqaUtils from '../../../utils/lxq.main'
 import resolveEditorCommand from '../../segments/utils/DraftMatecatUtils/resolveEditorCommand'
 import buildPastedEditorState from '../../segments/utils/DraftMatecatUtils/buildPastedEditorState'
 import resolveDrop from '../../segments/utils/DraftMatecatUtils/resolveDrop'
@@ -35,8 +40,11 @@ import {
   segmentClipboardHtml,
 } from '../../segmentView/segmentModel'
 import {SEGMENTS} from '../e2e/fixtures'
+import {targetLayers} from '../matecat/TargetEditor'
+import {tooltipContent} from '../matecat/layerTooltip'
 import {createSegmentEditor} from './createSegmentEditor'
 import {insertRaw, toDoc} from './docModel'
+import {layerRangesAt, replaceLayerRange, setLayer} from './layers'
 
 // ---------- fixtures ----------
 // Named positions are written into the segment as ⟨name⟩, always between tags, never inside one.
@@ -68,6 +76,7 @@ const FIXTURES = [
       ['m', 'e'],
     ],
     searches: [['o', 1, 'O']],
+    lexiqa: [['world', 0, 'earth']],
   },
   {
     name: 'g',
@@ -88,6 +97,10 @@ const FIXTURES = [
       ['save', 0, 'Keep'],
       ['c', 1, 'K'],
     ],
+    lexiqa: [
+      ['Save', 0, 'Store'],
+      ['now', 0, 'then'],
+    ],
   },
   {
     // A tag inside a word: the text after it continues the word.
@@ -103,6 +116,7 @@ const FIXTURES = [
       ['karlsson', 0, 'K'],
       ['s', 1, 'z'],
     ],
+    lexiqa: [['sson', 0, 'sen']],
   },
   {
     name: 'nested g and x',
@@ -127,6 +141,7 @@ const FIXTURES = [
     ],
     drops: [['at', 'm', 'e']],
     searches: [['t', 2, 'T']],
+    lexiqa: [['Start', 0, 'Begin']],
   },
   {
     name: 'ph equiv-text',
@@ -140,6 +155,7 @@ const FIXTURES = [
     ],
     drops: [['m', 'e', 's']],
     searches: [['e', 2, 'E']],
+    lexiqa: [['new', 0, 'fresh']],
   },
   {
     name: 'pc, dataRef and compressed g (e2e ph)',
@@ -166,6 +182,11 @@ const FIXTURES = [
       ['t', 2, 'T'],
       ['two', 1, '2'],
     ],
+    lexiqa: [
+      ['two', 0, 'deux'],
+      ['two', 1, 'zwei'],
+      ['three', 0, '3'],
+    ],
   },
   {
     name: 'entities',
@@ -180,6 +201,7 @@ const FIXTURES = [
       ['&', 0, '+'],
       ['<b>', 0, '<i>'],
     ],
+    lexiqa: [['5', 0, 'five']],
   },
   {
     name: 'rtl',
@@ -192,6 +214,7 @@ const FIXTURES = [
       ['gi', 'at'],
     ],
     searches: [['ו', 1, 'ש']],
+    lexiqa: [['טוב', 0, 'רע']],
   },
   {
     name: 'cjk emoji',
@@ -203,6 +226,10 @@ const FIXTURES = [
     ],
     drops: [['at', 'm', 's']],
     searches: [['界', 0, '间']],
+    lexiqa: [
+      ['世界', 0, '地球'],
+      ['ok', 0, 'okay'],
+    ],
   },
   {
     name: 'multi-line g',
@@ -217,6 +244,12 @@ const FIXTURES = [
     searches: [
       ['line', 1, 'row'],
       ['e', 3, 'E'],
+    ],
+    lexiqa: [
+      ['one', 0, 'uno'],
+      ['line', 1, 'row'],
+      ['two', 0, 'three'],
+      ['end', 0, 'fin'],
     ],
   },
 ]
@@ -618,6 +651,117 @@ const DROP_ACTIONS = {
   'ctrl + drag and drop (copy)': dragDrop({ctrlKey: true}),
 }
 
+// A Lexiqa suggestion clicked on a target warning. The store holds the Lexiqa text of the target
+// (lxqDecodedTranslation: prepareTextForLexiqa of the saved segment, Editarea.js:323-324) and Lexiqa's results on it:
+// one spelling warning on occurrence `index` of `word`, offering `suggestion`. Both sides read them through the real
+// LexiqaUtils.getRanges and buildTooltipMessages.
+const LEXIQA_SID = '1'
+const LEXIQA_MODULES = [
+  'numbers',
+  'punctuation',
+  'spaces',
+  'specialchardetect',
+  'mspolicheck',
+  'urls',
+  'spelling',
+  'glossary',
+  'blacklist',
+]
+const lexiqaSegment = (fx, word, index, suggestion) => {
+  const lxqDecodedTranslation = DraftMatecatUtils.prepareTextForLexiqa(
+    draftSave(draftLoad(fx.clean)),
+  )
+  let start = -1
+  for (let i = 0; i <= index; i++)
+    start = lxqDecodedTranslation.indexOf(word, start + 1)
+  if (start < 0)
+    throw new Error(`no ${word} #${index} in ${lxqDecodedTranslation}`)
+  const warning = {
+    start,
+    end: start + word.length,
+    module: 'spelling',
+    errorid: `lxq_${LEXIQA_SID}_0_t`,
+    color: '#563d7c',
+    suggestions: [suggestion],
+  }
+  return {
+    sid: LEXIQA_SID,
+    lxqDecodedTranslation,
+    // every module Lexiqa reports on, as it sends them (cleanRanges needs them all)
+    lexiqa: {
+      target: {
+        ...Object.fromEntries(LEXIQA_MODULES.map((m) => [m, []])),
+        spelling: [warning],
+      },
+    },
+  }
+}
+
+const lexiqaReplace = (fx, word, index, suggestion) => ({
+  draft: (s) => {
+    const segment = lexiqaSegment(fx, word, index, suggestion)
+    // addLexiqaDecorator (Editarea.js:206-227): Lexiqa offsets made relative to each block, no tag correction
+    const ranges = LexiqaUtils.getRanges(
+      cloneDeep(segment.lexiqa.target),
+      segment.lxqDecodedTranslation,
+      false,
+    )
+    const warnings = updateOffsetBasedOnEditorState(s, ranges)
+    // activateLexiqa strategy (activateLexiqa.js:84-96): the warnings of each block that canDecorateRange allows
+    const content = s.getCurrentContent()
+    const warn = warnings.find((w) => {
+      const block = content.getBlockForKey(w.blockKey)
+      return canDecorateRange(w.start, w.end, block, content, LEXIQA_DECORATOR)
+    })
+    if (!warn) return s
+    // LexiqaHighlight getWarning + LexiqaTooltipInfo click (LexiqaHighlight.component.js:21-55,
+    // LexiqaTooltipInfo.component.js:37-46): the suggestion carries the warning's offsets and block
+    const {start, end, msg} = LexiqaUtils.buildTooltipMessages(
+      warn,
+      segment.sid,
+      false,
+    ).find((m) => m.type === 'suggestion')
+    // replaceWordAt (Editarea.js:531-551)
+    const selection = s.getSelection().merge({
+      anchorKey: warn.blockKey,
+      anchorOffset: start,
+      focusKey: warn.blockKey,
+      focusOffset: end,
+      isBackward: false,
+    })
+    return DraftState.push(s, Modifier.replaceText(content, selection, msg))
+  },
+  cm: (ed) => {
+    const {view} = ed
+    const segment = lexiqaSegment(fx, word, index, suggestion)
+    // TargetEditor targetLayers (TargetEditor.js:90-147): the lexiqa layer, set volatile as the target sets it
+    const layer = targetLayers(view.state, segment, false).find(
+      (l) => l.name === 'lexiqa',
+    )
+    view.dispatch({
+      effects: setLayer.of({
+        name: layer.name,
+        ranges: layer.ranges(),
+        volatile: layer.volatile,
+      }),
+    })
+    const [range] = layer.ranges()
+    if (!range) return
+    // The hover tooltip on the mark (createLayerTooltip, layerTooltip.js:145-155) and its suggestion click
+    const content = tooltipContent(layerRangesAt(view.state, range.from), {
+      onReplace: (r, text) => replaceLayerRange(view, r, text),
+    })
+    const pick = content.range.data.messages.find(
+      (m) => m.type === 'suggestion',
+    )
+    content.element.props.onReplaceWord({
+      newWord: pick.msg,
+      start: pick.start,
+      end: pick.end,
+    })
+  },
+})
+
 // ---------- the cases ----------
 
 const caseList = []
@@ -716,6 +860,16 @@ FIXTURES.forEach((f) => {
       cm: (ed) => ed.setValue('Nuova <g id="1">traduzione</g>##$_A0$##ok'),
     },
   })
+  ;(f.lexiqa ?? []).forEach(([word, index, suggestion]) =>
+    caseList.push({
+      fx,
+      action: `lexiqa replace occurrence ${index} of ${JSON.stringify(word)} with ${JSON.stringify(suggestion)}`,
+      at: [],
+      oneStep: true,
+      changes: true,
+      impl: lexiqaReplace(fx, word, index, suggestion),
+    }),
+  )
 })
 
 const caseId = (c) =>
@@ -874,13 +1028,14 @@ describe('an edit saves what Draft saves', () => {
     const phases = ['clip', 'edit', 'undo1']
     expect(phases.map(parity)).toEqual(phases.map(expected))
     // In each editor, undoing everything gives back what was loaded and redoing everything the edit; an edit marked
-    // `oneStep` is taken back by a single undo.
+    // `oneStep` is taken back by a single undo. An edit marked `changes` changed the segment: two no-ops agree too.
     const history = (r) => ({
       undoAll: r.undoAll === r.loaded,
       redoAll: r.redoAll === r.edit,
       oneStep: !c.oneStep || r.undo1 === r.loaded,
+      changed: !c.changes || r.edit !== r.loaded,
     })
-    const whole = {undoAll: true, redoAll: true, oneStep: true}
+    const whole = {undoAll: true, redoAll: true, oneStep: true, changed: true}
     expect({cm: history(cm), draft: history(draft)}).toEqual({
       cm: whole,
       draft: whole,
