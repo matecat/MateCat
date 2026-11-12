@@ -4,6 +4,7 @@ namespace Matecat\Core\Model\Projects;
 
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\Exceptions\NotFoundException;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
@@ -366,5 +367,18 @@ class ProjectDaoTest extends AbstractTest
         $serviceNames = $dao->getRemoteFileServiceName([self::PROJECT_ID_1, self::PROJECT_ID_2]);
 
         $this->assertSame([], $serviceNames);
+    }
+
+    /**
+     * An empty list returns before any query: written into the SQL, it used to build `IN (  )`,
+     * which MySQL rejects.
+     */
+    #[Test]
+    public function getRemoteFileServiceNameReturnsEmptyArrayForNoProjectIdsWithoutQuerying(): void
+    {
+        $database = $this->createMock(IDatabase::class);
+        $database->expects($this->never())->method('getConnection');
+
+        $this->assertSame([], (new ProjectDao($database))->getRemoteFileServiceName([]));
     }
 }
