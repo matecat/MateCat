@@ -295,7 +295,7 @@ class EmailTemplateEscapingTest extends AbstractTest
         $this->assertTrue(isset($wrapped['user']['email']));
         $this->assertFalse(isset($wrapped['user']['missing']));
         $this->assertFalse(isset($wrapped['name']['anything']), 'a scalar has no offsets');
-        $this->assertNull($wrapped['user']['missing']->value());
+        $this->assertNull($wrapped['user']['missing'], 'a missing key is null, so an if or empty() on it sees nothing');
     }
 
     /**
@@ -314,7 +314,7 @@ class EmailTemplateEscapingTest extends AbstractTest
         unset($user['company']);
 
         $this->assertSame('Acme[.]com', (string)$user['company'], 'the value is unchanged');
-        $this->assertNull($user['added']->value(), 'and nothing was added');
+        $this->assertNull($user['added'], 'and nothing was added');
     }
 
     /**

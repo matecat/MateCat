@@ -5,6 +5,7 @@ namespace Matecat\Core\Model\FilesStorage;
 use Matecat\SimpleS3\Client;
 use Matecat\TestHelpers\AbstractTest;
 use Model\FilesStorage\S3FilesStorage;
+use PHPUnit\Framework\Attributes\Depends;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Utils\Registry\AppConfig;
@@ -84,17 +85,26 @@ class S3FilesStorageTest extends AbstractTest
     }
 
     /**
+     * Lists the cache package that test_creation_of_cache_package_into_a_bucket uploads. The prefix
+     * comes from getCachePackageHashFolder(), so it keeps the language as it is written ("it-IT"):
+     * a hardcoded "__it-it" only matched an object left in the bucket by the code before 2019,
+     * which lowercased the language.
+     *
      * @throws ReflectionException
      */
     #[Test]
+    #[Depends('test_creation_of_cache_package_into_a_bucket')]
     public function testListItems()
     {
-        $workItems = S3FilesStorage::getStaticS3Client()->getItemsInABucket([
+        $sha1 = sha1_file(AppConfig::$ROOT . '/tests/resources/files/txt/hello.txt');
+        $origPrefix = $this->fs->getCachePackageHashFolder($sha1, 'it-IT') . '/orig';
+
+        $origItems = S3FilesStorage::getStaticS3Client()->getItemsInABucket([
             'bucket' => S3FilesStorage::getFilesStorageBucket(),
-            'prefix' => 'cache-package/c1/68/9bd71f45e76fd5e428f35c00d1f289a7e9e9__it-it/orig'
+            'prefix' => $origPrefix
         ]);
 
-        $this->assertNotEmpty($workItems);
+        $this->assertContains($origPrefix . '/hello.txt', $origItems);
     }
 
     /**
