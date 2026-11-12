@@ -129,6 +129,61 @@ class TeamModelTest extends AbstractTest
         $this->assertSame(['a@example.org', 'b@example.org'], $ref->getValue($model));
     }
 
+    public function test_addMemberEmail_refuses_an_address_that_is_not_valid(): void
+    {
+        $struct = new TeamStruct(['name' => 'test', 'type' => Teams::GENERAL, 'created_by' => $this->user->uid]);
+        $model = new TeamModel($struct, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
+
+        $model->addMemberEmail('victim+matecat@gmail.com');
+
+        $ref = new ReflectionProperty($model, 'member_emails');
+        $this->assertSame(['victim+matecat@gmail.com'], $ref->getValue($model));
+
+        $struct2 = new TeamStruct(['name' => 'test', 'type' => Teams::GENERAL, 'created_by' => $this->user->uid]);
+        $model2 = new TeamModel($struct2, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
+
+        try {
+            $model2->addMemberEmail('not an address');
+            $this->fail('Expected InvalidArgumentException was not thrown');
+        } catch (InvalidArgumentException $e) {
+            $this->assertSame(400, $e->getCode());
+            $ref2 = new ReflectionProperty($model2, 'member_emails');
+            $this->assertSame([], $ref2->getValue($model2));
+        }
+    }
+
+    public function test_addMemberEmail_refuses_a_url_character_in_the_address(): void
+    {
+        $struct = new TeamStruct(['name' => 'test', 'type' => Teams::GENERAL, 'created_by' => $this->user->uid]);
+        $model = new TeamModel($struct, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
+
+        $model->addMemberEmail('a.b@example.org');
+
+        $ref = new ReflectionProperty($model, 'member_emails');
+        $this->assertSame(['a.b@example.org'], $ref->getValue($model));
+
+        $refusedAddresses = [
+            'victim+matecat-support.com/reset?u=victim@gmail.com',
+            'a/b@example.org',
+            'a?b@example.org',
+            'a#b@example.org',
+        ];
+
+        foreach ($refusedAddresses as $address) {
+            $struct2 = new TeamStruct(['name' => 'test', 'type' => Teams::GENERAL, 'created_by' => $this->user->uid]);
+            $model2 = new TeamModel($struct2, new UserDao(obtainTestDatabase()), new TeamDao(obtainTestDatabase()));
+
+            try {
+                $model2->addMemberEmail($address);
+                $this->fail('Expected InvalidArgumentException was not thrown for address: ' . $address);
+            } catch (InvalidArgumentException $e) {
+                $this->assertSame(400, $e->getCode());
+                $ref2 = new ReflectionProperty($model2, 'member_emails');
+                $this->assertSame([], $ref2->getValue($model2));
+            }
+        }
+    }
+
     // ─── removeMemberUids ────────────────────────────────────────────────────
 
     public function test_removeMemberUids_accumulates(): void
