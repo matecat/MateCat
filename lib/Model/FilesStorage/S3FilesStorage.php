@@ -9,6 +9,7 @@ use Matecat\SimpleS3\ClientInterface;
 use Matecat\SimpleS3\Components\Cache\RedisCache;
 use InvalidArgumentException;
 use ReflectionException;
+use RuntimeException;
 use TypeError;
 use UnexpectedValueException;
 use Utils\Logger\LoggerFactory;
@@ -215,13 +216,36 @@ class S3FilesStorage extends AbstractFilesStorage
      */
     private function uploadCacheObject(string $key, string $source): void
     {
-        $this->s3Client->uploadItem([
+        $this->uploadObject($key, $source);
+
+        $this->logger->info('Successfully uploaded file ' . $key . ' into ' . static::$FILES_STORAGE_BUCKET . ' bucket.');
+    }
+
+    /**
+     * Uploads $source under $key, and throws when the upload fails.
+     *
+     * The client reports a failed upload in two ways: an exception, or `false` when S3 answers with a status other
+     * than 200. Both must stop the caller, which would otherwise go on as if the object had been stored.
+     *
+     * @param string $key
+     * @param string $source
+     *
+     * @return void
+     * @throws RuntimeException
+     */
+    private function uploadObject(string $key, string $source): void
+    {
+        $uploaded = $this->s3Client->uploadItem([
             'bucket' => static::$FILES_STORAGE_BUCKET,
             'key' => $key,
             'source' => $source
         ]);
 
-        $this->logger->info('Successfully uploaded file ' . $key . ' into ' . static::$FILES_STORAGE_BUCKET . ' bucket.');
+        if ($uploaded === false) {
+            $this->logger->error('Unable to upload file ' . $key . ' into ' . static::$FILES_STORAGE_BUCKET . ' bucket.');
+
+            throw new RuntimeException('Unable to store the file. Try again.');
+        }
     }
 
     /**
@@ -533,11 +557,7 @@ class S3FilesStorage extends AbstractFilesStorage
                 $isLinkFile = !str_contains($subPathName, '.');
                 $storedName = $isLinkFile ? static::basename_fix($subPathName) : static::getStorageFileName($subPathName);
 
-                $this->s3Client->uploadItem([
-                    'bucket' => static::$FILES_STORAGE_BUCKET,
-                    'key' => $prefix . DIRECTORY_SEPARATOR . $storedName,
-                    'source' => $item->getPathName()
-                ]);
+                $this->uploadObject($prefix . DIRECTORY_SEPARATOR . $storedName, $item->getPathName());
 
                 // save on redis the hash map files
                 if ($isLinkFile) {

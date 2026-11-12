@@ -10,6 +10,7 @@ use Model\FilesStorage\NativeFilesystemAdapter;
 use Model\FilesStorage\S3FilesStorage;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
+use RuntimeException;
 use UnexpectedValueException;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
@@ -537,7 +538,7 @@ class S3FilesStorageUnitTest extends AbstractTest
     private const string HASH = 'abcdef1234567890abcdef1234567890abcdef12';
 
     /**
-     * A client recording every call; uploadItem calls $onUpload, when given, with the key.
+     * A client recording every call; uploadItem calls $onUpload, when given, with the key, and fails when it returns false.
      *
      * @param list<array{0: string, 1: array<string, mixed>}> $calls
      */
@@ -548,8 +549,9 @@ class S3FilesStorageUnitTest extends AbstractTest
             if ($name === 'hasItem') {
                 return $hasItem;
             }
-            if ($name === 'uploadItem' && $onUpload !== null) {
-                $onUpload($args[0]['key']);
+            if ($name === 'uploadItem' && $onUpload !== null && $onUpload($args[0]['key']) === false) {
+                // S3 answered with a status other than 200
+                return false;
             }
 
             return true;
@@ -672,6 +674,58 @@ class S3FilesStorageUnitTest extends AbstractTest
         );
     }
 
+    /**
+     * The client returns false, with no exception, when S3 answers with a status other than 200: the failure must
+     * reach the caller, the original key must be removed and the local xliff kept.
+     */
+    #[Test]
+    public function test_makeCachePackage_treats_an_xliff_upload_returning_false_as_a_failure(): void
+    {
+        AppConfig::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION = false;
+        $calls = [];
+        $client = $this->recordingClient($calls, false, fn(string $key) => !str_contains($key, '/work/'));
+
+        $fsMock = $this->createMock(FilesystemAdapter::class);
+        $fsMock->expects($this->never())->method('unlink');
+
+        $fs = $this->createS3WithMocks($client, $fsMock);
+        $prefix = $fs->getCachePackageHashFolder(self::HASH, 'en-US');
+
+        try {
+            $fs->makeCachePackage(self::HASH, 'en-US', '/upload/session/a.txt', '/tmp/MAT_XLF');
+            $this->fail('The upload failure must reach the caller');
+        } catch (RuntimeException $e) {
+            $this->assertSame('Unable to store the file. Try again.', $e->getMessage());
+        }
+
+        $this->assertSame(
+            [['bucket' => S3FilesStorage::getFilesStorageBucket(), 'key' => $prefix . '/orig/' . self::HASH . '.txt']],
+            $this->argsOf($calls, 'deleteItem')
+        );
+    }
+
+    #[Test]
+    public function test_makeCachePackage_treats_a_native_xliff_upload_returning_false_as_a_failure(): void
+    {
+        AppConfig::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION = false;
+        $calls = [];
+        $dir = sys_get_temp_dir() . '/s3_native_' . uniqid();
+        mkdir($dir);
+
+        try {
+            $xliff = $this->nativeXliff($dir, 'file.xlf', 'test-propagation.xlf');
+            $fsMock = $this->createMock(FilesystemAdapter::class);
+            $fsMock->expects($this->never())->method('unlink');
+            $fs = $this->createS3WithMocks($this->recordingClient($calls, false, fn() => false), $fsMock);
+
+            $this->expectException(RuntimeException::class);
+            $fs->makeCachePackage(self::HASH, 'en-US', null, $xliff);
+        } finally {
+            array_map('unlink', glob($dir . '/*') ?: []);
+            rmdir($dir);
+        }
+    }
+
     #[Test]
     public function test_makeCachePackage_original_upload_failure_reaches_the_caller_with_nothing_deleted(): void
     {
@@ -776,6 +830,41 @@ class S3FilesStorageUnitTest extends AbstractTest
      * A real file goes to the queue under its fixed-length name; the hash-link file and the zip placeholder, named by
      * MateCat, keep theirs, and the Redis file map still lists the hash-link file with the original names it holds.
      */
+    /**
+     * A queue upload that fails stops the project before it is queued, and leaves the upload session in place.
+     */
+    #[Test]
+    public function test_moveFileFromUploadSessionToQueuePath_stops_when_an_upload_returns_false(): void
+    {
+        $originalUpload = AppConfig::$UPLOAD_REPOSITORY;
+        $uploadRepository = sys_get_temp_dir() . '/s3_queue_' . uniqid();
+        $session = '{AB12CD34-0000-4000-8000-' . strtoupper(substr(uniqid(), 0, 12)) . '}';
+        $sessionDir = $uploadRepository . '/' . $session;
+        mkdir($sessionDir, 0755, true);
+        file_put_contents($sessionDir . '/a.docx', 'docx');
+
+        try {
+            AppConfig::$UPLOAD_REPOSITORY = $uploadRepository;
+            $calls = [];
+            $fs = $this->createS3WithMocks($this->recordingClient($calls, false, fn() => false), new NativeFilesystemAdapter());
+
+            try {
+                $fs->moveFileFromUploadSessionToQueuePath($session);
+                $this->fail('The upload failure must reach the caller');
+            } catch (RuntimeException $e) {
+                $this->assertSame('Unable to store the file. Try again.', $e->getMessage());
+            }
+
+            $this->assertCount(1, $this->argsOf($calls, 'uploadItem'));
+            $this->assertFileExists($sessionDir . '/a.docx', 'the upload session is kept');
+        } finally {
+            AppConfig::$UPLOAD_REPOSITORY = $originalUpload;
+            array_map('unlink', glob($sessionDir . '/*') ?: []);
+            @rmdir($sessionDir);
+            @rmdir($uploadRepository);
+        }
+    }
+
     #[Test]
     public function test_moveFileFromUploadSessionToQueuePath_uploads_real_files_under_the_hashed_name(): void
     {
