@@ -660,6 +660,7 @@ class S3FilesStorage extends AbstractFilesStorage
      * `fd750c37-2d33-4913-bdd1-1c71be9d2435`.
      *
      * @param string $uploadDir
+     * @throws Exception
      */
     public function deleteQueue(string $uploadDir): void
     {
