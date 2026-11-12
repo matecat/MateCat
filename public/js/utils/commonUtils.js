@@ -205,11 +205,7 @@ const CommonUtils = {
         return leave_message
       }
     }
-    if (
-      $('#action-download').hasClass('disabled') ||
-      $('tr td a.downloading').length ||
-      $('.popup-tm td.uploadfile.uploading').length
-    ) {
+    if ($('.popup-tm td.uploadfile.uploading').length) {
       return say_goodbye(
         'You have a pending operation. Are you sure you want to quit?',
       )

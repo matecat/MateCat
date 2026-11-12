@@ -1,7 +1,7 @@
 import React from 'react'
 import {render, screen, waitFor} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import {DropdownMenu} from './DropdownMenu'
+import {DROPDOWN_MENU_TRIGGER_MODE, DropdownMenu} from './DropdownMenu'
 
 // Radix positions its content with ResizeObserver and pointer-capture APIs,
 // none of which jsdom implements.
@@ -80,6 +80,40 @@ describe('DropdownMenu', () => {
       await user.click(screen.getByText('Inert'))
 
       expect(screen.getByRole('menu')).toBeInTheDocument()
+    })
+  })
+
+  describe('hover trigger', () => {
+    const renderHoverMenu = (items) =>
+      render(
+        <DropdownMenu
+          triggerMode={DROPDOWN_MENU_TRIGGER_MODE.HOVER}
+          items={items}
+        />,
+      )
+
+    test('does not mark an item disabled when disabled is false', async () => {
+      const user = userEvent.setup()
+      renderHoverMenu([
+        {label: 'Download draft', onClick: jest.fn(), disabled: false},
+      ])
+
+      await user.hover(screen.getByRole('button'))
+      const item = await screen.findByText('Download draft')
+
+      expect(item).not.toHaveAttribute('data-disabled')
+    })
+
+    test('marks a disabled item', async () => {
+      const user = userEvent.setup()
+      renderHoverMenu([
+        {label: 'Download draft', onClick: jest.fn(), disabled: true},
+      ])
+
+      await user.hover(screen.getByRole('button'))
+      const item = await screen.findByText('Download draft')
+
+      expect(item).toHaveAttribute('data-disabled')
     })
   })
 })
