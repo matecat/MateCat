@@ -131,7 +131,7 @@ test('Add MT provider dropdown renders through a portal', async () => {
     currentProjectTemplate: projectTemplatesMock.items[0],
     projectTemplates: projectTemplatesMock.items,
   }
-  const {container} = render(
+  render(
     <SettingsPanelContext.Provider value={values}>
       <MachineTranslationTab />
     </SettingsPanelContext.Provider>,
@@ -139,12 +139,12 @@ test('Add MT provider dropdown renders through a portal', async () => {
   await userEvent.click(screen.getByTitle('Add MT engine'))
   await userEvent.click(screen.getByPlaceholderText('Choose provider'))
 
-  const dropdownWrapper = document.querySelector(
-    '.select-with-label__wrapper-is-portal',
-  )
-  expect(dropdownWrapper).toBeInTheDocument()
-  expect(container.contains(dropdownWrapper)).toBe(false)
-  expect(document.body.contains(dropdownWrapper)).toBe(true)
+  const engineName = 'Google Translate'
+  const providerWrapper = screen.getByTestId('add-mt-provider')
+  expect(
+    within(providerWrapper).queryByText(engineName),
+  ).not.toBeInTheDocument()
+  expect(screen.getByText(engineName)).toBeInTheDocument()
 })
 
 test('In cattool', async () => {
