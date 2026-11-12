@@ -150,7 +150,7 @@ class CanonicalRoutes
             $revise .= $options['revision_number'];
         }
 
-        $url = "$host/$revise/$project_name/$source-$target/$id_job-$password";
+        $url = "$host/$revise/" . self::projectSlug($project_name) . "/$source-$target/$id_job-$password";
 
         if (isset($options['id_segment'])) {
             $url .= '#' . $options['id_segment'];
@@ -174,7 +174,7 @@ class CanonicalRoutes
     {
         $host = self::httpHost($options);
 
-        return "$host/translate/$project_name/$source-$target/$id_job-$password";
+        return "$host/translate/" . self::projectSlug($project_name) . "/$source-$target/$id_job-$password";
     }
 
     /**
@@ -193,9 +193,22 @@ class CanonicalRoutes
 
         $host = self::httpHost($options);
 
-        $project_name = Utils::friendlySlug($params['project_name']);
+        return $host . "/analyze/" . self::projectSlug($params['project_name']) . "/" . $params['id_project'] . "-" . $params['password'];
+    }
 
-        return $host . "/analyze/" . $project_name . "/" . $params['id_project'] . "-" . $params['password'];
+    /**
+     * The project name as a path segment of a link.
+     *
+     * The owner chooses the name, and these links are emailed to translators and revisors as
+     * written. Put in the path as typed, `../../gdrive/delete/all?` sends the reader to
+     * `/gdrive/delete/all?` on our own host. The slug keeps only letters, digits and dashes, and a
+     * name made only of dots, whose slug is still `.` or `..`, becomes `-`.
+     */
+    private static function projectSlug(string $project_name): string
+    {
+        $slug = Utils::friendlySlug($project_name);
+
+        return ($slug === '.' || $slug === '..') ? '-' : $slug;
     }
 
     /**
