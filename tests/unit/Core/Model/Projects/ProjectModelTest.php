@@ -8,6 +8,7 @@ use Matecat\TestHelpers\Factory\User;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Model\Exceptions\ValidationError;
+use Model\Jobs\JobStruct;
 use Model\Projects\ProjectModel;
 use Model\Projects\ProjectStruct;
 use Model\Teams\TeamDao;
@@ -19,6 +20,7 @@ use ReflectionMethod;
 use ReflectionProperty;
 use Utils\Constants\Teams;
 use Utils\Email\AbstractEmail;
+use Utils\Email\ProjectAssignedEmail;
 use Utils\Tools\CatUtils;
 
 /**
@@ -317,6 +319,36 @@ class ProjectModelTest extends AbstractTest
         $cacheTeams = $model->getCacheTeamsToCleanForTest();
         $this->assertContains((int)$personalTeam->id, $cacheTeams);
         $this->assertContains((int)$oldTeam->id, $cacheTeams);
+    }
+
+    /**
+     * The other tests replace the email with a fake, so this one checks the real email the model
+     * builds: a ProjectAssignedEmail for the new assignee and the project's jobs. It is built, not
+     * sent.
+     */
+    #[Test]
+    public function theAssignmentEmailIsAProjectAssignedEmailForTheNewAssignee(): void
+    {
+        $owner = new UserStruct();
+        $owner->uid = 1;
+        $owner->email = 'owner@example.org';
+
+        $assignee = new UserStruct();
+        $assignee->uid = 2;
+        $assignee->email = 'assignee@example.org';
+
+        $job = new JobStruct();
+        $job->id = 10;
+
+        $model = new ProjectModel($this->db, new ProjectStruct());
+        $model->setUser($owner);
+
+        $email = (new ReflectionMethod($model, 'assignedEmail'))->invoke($model, $assignee, [$job]);
+
+        $this->assertInstanceOf(ProjectAssignedEmail::class, $email);
+        $this->assertSame($assignee, (new ReflectionProperty($email, 'assignee'))->getValue($email));
+        $this->assertSame($owner, (new ReflectionProperty($email, 'user'))->getValue($email));
+        $this->assertSame([$job], (new ReflectionProperty($email, 'jobs'))->getValue($email));
     }
 
     #[Test]
