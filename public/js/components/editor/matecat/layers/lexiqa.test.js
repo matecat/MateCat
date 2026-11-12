@@ -51,6 +51,9 @@ describe('lexiqaDocRanges: Lexiqa offsets back on the document', () => {
     ['on a later line', 'one##$_0A$##two wrld', 'wrld'],
     ['after a carriage return', 'one##$_0D$##wrld', 'wrld'],
     ['after decoded entities', 'A &amp; B &lt;c&gt; wrld', 'wrld'],
+    // Regression: an emoji is two positions in the document, the warning after it was placed one position early
+    ['after an emoji', 'a 😀 wrld', 'wrld'],
+    ['after an emoji and a tag', '😀<x id="1"/>😀 wrld', 'wrld'],
   ])('%s', (_, segment, word) => {
     expect(placed(segment, word)).toEqual([word])
   })

@@ -53,9 +53,12 @@ export const alignLexiqaText = (state, lexiqaText) => {
     const run = doc.slice(at, end)
     const match = matchRun(lexiqaText, j, run)
     if (!match) return false
-    match.starts.forEach((start, i) => {
-      const next = i + 1 < run.length ? match.starts[i + 1] : match.end
-      for (let k = start; k < next; k++) map.push(at + i)
+    // A character outside the BMP is two positions in the document: `pos` steps by character, not by index.
+    let pos = at
+    ;[...run].forEach((ch, i) => {
+      const next = i + 1 < match.starts.length ? match.starts[i + 1] : match.end
+      for (let k = match.starts[i]; k < next; k++) map.push(pos)
+      pos += ch.length
     })
     j = match.end
     at = end
