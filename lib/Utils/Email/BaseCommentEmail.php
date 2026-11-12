@@ -17,6 +17,7 @@ use Model\Jobs\JobStruct;
 use Model\Users\UserStruct;
 use ReflectionException;
 use RuntimeException;
+use Throwable;
 
 class BaseCommentEmail extends AbstractEmail
 {
@@ -65,18 +66,11 @@ class BaseCommentEmail extends AbstractEmail
     }
 
     /**
-     * @throws Exception
+     * @throws Throwable
      */
     public function send(): void
     {
-        $recipient = [$this->user->email, $this->user->first_name];
-
-        $this->doSend(
-            $recipient,
-            $this->title ?? '',
-            $this->_buildHTMLMessage(),
-            $this->_buildTxtMessage($this->_buildMessageContent())
-        );
+        $this->sendTo($this->user->email, $this->user->first_name);
     }
 
     /**
@@ -92,8 +86,10 @@ class BaseCommentEmail extends AbstractEmail
 
         return [
             'user' => $this->user->toArray(),
-            'project' => $this->project,
-            'job' => $this->job,
+            // Only what the template prints. The project row comes from ProjectDao::getProjectData(),
+            // whose `id` is the id of a file: the project id is the job's.
+            'project' => ['id' => $this->job->id_project, 'name' => $this->project->name],
+            'job' => ['source' => $this->job->source, 'target' => $this->job->target],
             'commenter' => $this->comment->getFullName(true),
             'url' => $this->url . ",comment",
             'content' => $content

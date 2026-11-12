@@ -135,7 +135,7 @@ class AbstractEmailTest extends AbstractTest
         $level = ob_get_level();
 
         $content = $this->invoke($email, '_buildMessageContent');
-        $html = $this->invoke($email, '_buildHTMLMessage');
+        $html = $this->invoke($email, '_buildHTMLMessage', [$content]);
 
         $this->assertSame('<p>Hi Giulia</p>', $content);
         $this->assertSame('<div><p>Hi Giulia</p></div>', $html);
