@@ -8,16 +8,17 @@
   gap: 30px;
   height: 685px;
 
+  .team-name-container .team-name-error,
+  .team-invite-error {
+    margin: 8px 0 0;
+    color: colors.$redDefault;
+    font-size: 12px;
+    line-height: 16px;
+  }
+
   .team-name-container {
     align-items: center;
     justify-content: space-between;
-
-    .team-name-error {
-      margin: 8px 0 0;
-      color: colors.$redDefault;
-      font-size: 12px;
-      line-height: 16px;
-    }
 
     .container-input {
       display: flex;

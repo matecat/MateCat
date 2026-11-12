@@ -35,6 +35,7 @@ export const ModifyTeam = ({team}) => {
   const [searchMember, setSearchMember] = useState('')
   const [removeUserId, setRemoveUserId] = useState()
   const [resendInvitesCollection, setResendInvitesCollection] = useState([])
+  const [inviteError, setInviteError] = useState(null)
 
   useEffect(() => {
     const updateTeam = (teamUpdated) => {
@@ -226,19 +227,30 @@ export const ModifyTeam = ({team}) => {
     setSearchMember(event.target.value)
   }
 
-  const onChangeAddMembers = useCallback(
-    (emails) => setEmailsCollection(emails),
-    [],
-  )
+  const onChangeAddMembers = useCallback((emails) => {
+    setInviteError(null)
+    setEmailsCollection(emails)
+  }, [])
 
+  // The server refuses the whole request when one address is not a plain email address. Keep
+  // the addresses on a rejection so the reason shows next to them and the wrong one can be
+  // removed, instead of the field emptying as if the invitations had gone out.
   const inviteMembers = () => {
+    setInviteError(null)
     ManageActions.addUserToTeam(teamState, emailsCollection)
-    setEmailsCollection([])
+      .then(() => setEmailsCollection([]))
+      .catch((rejection) => setInviteError(getApiErrorMessage(rejection)))
   }
 
   const resendInvite = (email) => {
-    ManageActions.addUserToTeam(teamState, email)
+    setInviteError(null)
     setResendInvitesCollection((prevState) => [...prevState, email])
+    ManageActions.addUserToTeam(teamState, email).catch((rejection) => {
+      setResendInvitesCollection((prevState) =>
+        prevState.filter((resendEmail) => resendEmail !== email),
+      )
+      setInviteError(getApiErrorMessage(rejection))
+    })
   }
 
   const userlist = getUserList()
@@ -323,6 +335,11 @@ export const ModifyTeam = ({team}) => {
             onChange={onChangeAddMembers}
             placeholder="Add new members by entering their email addresses"
           />
+          {inviteError && (
+            <p className="team-invite-error" role="alert">
+              {inviteError}
+            </p>
+          )}
           <div className="modal-buttons">
             <Button
               type={BUTTON_TYPE.PRIMARY}
