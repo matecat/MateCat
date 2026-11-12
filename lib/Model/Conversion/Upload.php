@@ -144,6 +144,11 @@ class Upload
      */
     protected function _uploadFile(UploadElement $fileUp, ?bool $disable_upload_limit = false): object
     {
+        // checked first: a name over the limit is otherwise refused as an invalid file name
+        if (Utils::isFileNameTooLong($fileUp['name'])) {
+            throw new InvalidArgumentException(Utils::FILE_NAME_TOO_LONG);
+        }
+
         // reject invalid file names
         if (!Utils::isValidFileName($fileUp['name'])) {
             throw new InvalidArgumentException("Invalid file name: {$fileUp['name']}");

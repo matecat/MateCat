@@ -561,6 +561,25 @@ class Utils
 
 
     /**
+     * Shown as it is to the user when the name of a file is longer than the storage accepts.
+     */
+    const string FILE_NAME_TOO_LONG = "The file name is too long. Shorten it and try again.";
+
+    /**
+     * True when $fileName is longer, in bytes, than a stored file name can be.
+     *
+     * Checked before {@see self::isValidFileName()}, which refuses a name over 255 bytes with a generic message.
+     *
+     * @param string $fileName
+     *
+     * @return bool
+     */
+    public static function isFileNameTooLong(string $fileName): bool
+    {
+        return strlen($fileName) > AppConfig::$MAX_FILENAME_LENGTH;
+    }
+
+    /**
      * Validates if the given file name is valid, according to various rules, including
      * checks for empty names, control characters, invalid characters in file systems,
      * reserved names, and length limitations.

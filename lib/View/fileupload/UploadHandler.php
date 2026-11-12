@@ -21,7 +21,7 @@ class UploadHandler
     /**
      * Shown as it is next to the file in the upload list.
      */
-    const string FILE_NAME_TOO_LONG = "The file name is too long. Shorten it and try again.";
+    const string FILE_NAME_TOO_LONG = Utils::FILE_NAME_TOO_LONG;
 
     /**
      * @var array<string, mixed>
@@ -179,7 +179,7 @@ class UploadHandler
         }
 
         // checked first: a name over the limit is otherwise refused as an invalid file name
-        if (strlen($file->name) > AppConfig::$MAX_FILENAME_LENGTH) {
+        if (Utils::isFileNameTooLong($file->name)) {
             $file->error = self::FILE_NAME_TOO_LONG;
 
             return false;
