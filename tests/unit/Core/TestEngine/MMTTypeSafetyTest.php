@@ -40,28 +40,6 @@ class MMTTypeSafetyTest extends AbstractTest
     }
 
     // ──────────────────────────────────────────────
-    // getG2FallbackSecretKey() — static, no DB needed
-    // ──────────────────────────────────────────────
-
-    #[Test]
-    public function getG2FallbackSecretKeyReturnsNullableString(): void
-    {
-        $result = MMT::getG2FallbackSecretKey();
-
-        $this->assertTrue($result === null || is_string($result));
-    }
-
-    #[Test]
-    public function getG2FallbackSecretKeyReturnsString(): void
-    {
-        // Return type should be ?string (nullable string)
-        $result = MMT::getG2FallbackSecretKey();
-
-        // Result is either null or a string, never array or other type
-        $this->assertTrue($result === null || is_string($result));
-    }
-
-    // ──────────────────────────────────────────────
     // _reMapKeyList() — protected, test via reflection
     // ──────────────────────────────────────────────
 
@@ -175,7 +153,7 @@ class MMTTypeSafetyTest extends AbstractTest
         $result = $method->invoke($mmt, $config);
 
         $this->assertIsArray($result);
-        $this->assertArrayHasKey('secret_key', $result);
+        $this->assertArrayNotHasKey('secret_key', $result);
         $this->assertArrayHasKey('keys', $result);
         $this->assertArrayHasKey('priority', $result);
     }

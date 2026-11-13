@@ -541,24 +541,6 @@ class MMTEngineMethodsTest extends AbstractTest
     }
 
     #[Test]
-    public function getQualityEstimationHandlesSuccessAndNullCases(): void
-    {
-        $client = $this->createMock(MMTServiceApi::class);
-        $client->expects(self::exactly(3))
-            ->method('qualityEstimation')
-            ->willReturnOnConsecutiveCalls(
-                ['score' => 0.77],
-                null,
-                ['foo' => 'bar']
-            );
-
-        $engine = $this->createEngineWithClient($client);
-        self::assertSame(0.77, $engine->getQualityEstimation('en-US', 'it-IT', 's', 't'));
-        self::assertNull($engine->getQualityEstimation('en-US', 'it-IT', 's', 't'));
-        self::assertNull($engine->getQualityEstimation('en-US', 'it-IT', 's', 't'));
-    }
-
-    #[Test]
     public function getAvailableLanguagesDelegatesToClient(): void
     {
         $client = $this->createMock(MMTServiceApi::class);
@@ -598,7 +580,7 @@ class MMTEngineMethodsTest extends AbstractTest
 
         self::assertSame(['x_mm-k1', 'x_mm-k2'], $normal['keys']);
         self::assertSame('normal', $normal['priority']);
-        self::assertArrayHasKey('secret_key', $normal);
+        self::assertArrayNotHasKey('secret_key', $normal);
 
         $engine->setAnalysis(true);
         $analysis = $this->invokeConfigureContribution($engine, [
@@ -760,29 +742,6 @@ class MMTEngineMethodsTest extends AbstractTest
     }
 
     #[Test]
-    public function getG2FallbackSecretKeyReturnsNullWhenFileMissingAndReadsIniWhenPresent(): void
-    {
-        $originalRoot = AppConfig::$ROOT ?? null;
-
-        $tmpRoot = sys_get_temp_dir() . '/mmt-fallback-' . uniqid('', true);
-        mkdir($tmpRoot . '/inc', 0777, true);
-
-        AppConfig::$ROOT = $tmpRoot;
-        self::assertNull(MMT::getG2FallbackSecretKey());
-
-        file_put_contents($tmpRoot . '/inc/mmt_fallback_key.ini', "secret_key = \"s3cr3t\"\n");
-        self::assertSame('s3cr3t', MMT::getG2FallbackSecretKey());
-
-        @unlink($tmpRoot . '/inc/mmt_fallback_key.ini');
-        @rmdir($tmpRoot . '/inc');
-        @rmdir($tmpRoot);
-
-        if ($originalRoot !== null) {
-            AppConfig::$ROOT = $originalRoot;
-        }
-    }
-
-    #[Test]
     public function getClientBuildsApiClientFromEngineConfiguration(): void
     {
         $originalBuild = AppConfig::$BUILD_NUMBER;
@@ -795,6 +754,14 @@ class MMTEngineMethodsTest extends AbstractTest
         self::assertInstanceOf(MMTServiceApi::class, $client);
 
         AppConfig::$BUILD_NUMBER = $originalBuild;
+    }
+
+    #[Test]
+    public function hasBuiltInQualityEstimationIsTrue(): void
+    {
+        $engine = new MMT($this->createEngineStruct(), obtainTestDatabase());
+
+        self::assertTrue($engine->hasBuiltInQualityEstimation());
     }
 }
 
