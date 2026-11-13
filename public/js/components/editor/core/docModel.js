@@ -1,9 +1,9 @@
 // The document model of the segment editor.
 //
 // The CodeMirror document is the text the translator sees: entities decoded (`&amp;` is one `&`), a line feed a real
-// "\n", an nbsp a real U+00A0, a tab a real "\t". Every other tag keeps its raw markup in the document, and the
-// `tagRanges` field records which stretches of the document are tags. Only those stretches are tags: markup that is
-// typed or pasted as plain text stays text, and is stored encoded (`&lt;x id="9"/&gt;`).
+// "\n", an nbsp a real U+00A0, a tab a real "\t", a word joiner a real U+2060. Every other tag keeps its raw markup
+// in the document, and the `tagRanges` field records which stretches of the document are tags. Only those stretches
+// are tags: markup that is typed or pasted as plain text stays text, and is stored encoded (`&lt;x id="9"/&gt;`).
 //
 // Tag rules come from segmentView/segmentModel only.
 import {StateEffect, StateField} from '@codemirror/state'
@@ -16,16 +16,19 @@ import {
   OPAQUE_TAG,
   tokenize,
 } from '../../segmentView/segmentModel'
+import {CHARACTER_TAGS} from '../../../utils/segmentText/specialChars'
 
 export const LF = '##$_0A$##'
 export const NBSP = '##$_A0$##'
 export const TAB = '##$_09$##'
 export const CR = '##$_0D$##'
 
-// Placeholders the document holds as the character they stand for.
-const CHAR_FOR_TAG = {lineFeed: '\n', nbsp: '\u00a0', tab: '\t'}
+// Placeholders the document holds as the character they stand for. The word joiner is already that character in the
+// segment string, so it serialises as itself and needs no placeholder.
+const CHAR_FOR_TAG = CHARACTER_TAGS
 const PLACEHOLDER_FOR_CHAR = {'\n': LF, '\u00a0': NBSP, '\t': TAB}
 const PLACEHOLDER_CHARS = /[\n\u00a0\t]/g
+const WORD_JOINER = CHAR_FOR_TAG.wordJoiner
 
 /**
  * The tags of a segment string with their raw offsets, in document order. XLIFF markup that `tokenize` does not
@@ -212,7 +215,8 @@ export const insertRaw = (state, from, to, raw) =>
 
 /**
  * The text `marks` offsets refer to (segmentModel `markableText`: every tag one character) and, per character, its
- * document position. A tag's character sits at the tag's start.
+ * document position. A tag's character sits at the tag's start. The word joiner is a character here but a tag to
+ * segmentModel, so it is `OPAQUE_TAG` too.
  * @returns {{text: string, pos: number[]}}
  */
 export const visibleDoc = (state) => {
@@ -222,7 +226,7 @@ export const visibleDoc = (state) => {
   let i = 0
   const take = (end) => {
     for (; i < end; i++) {
-      text += doc[i]
+      text += doc[i] === WORD_JOINER ? OPAQUE_TAG : doc[i]
       pos.push(i)
     }
   }

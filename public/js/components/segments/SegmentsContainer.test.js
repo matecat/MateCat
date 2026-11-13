@@ -655,9 +655,15 @@ describe('SegmentsContainer height measuring markup', () => {
       }),
     )
     expect(within(markup).getByText(/Tom &/)).toHaveClass('source')
-    expect(within(markup).getByText('<br/>')).toHaveClass('tag')
+    // the measuring markup is not in the document: getByText itself finds the chip label
+    expect(
+      within(markup).getByText('<br/>', {selector: '.tag > .tag-text'}),
+    ).toHaveTextContent('<br/>')
     expect(within(markup).getByText(/Ciao <mondo>/)).toHaveClass('targetarea')
-    expect(within(markup).getByText('<hr/>')).toHaveClass('tag')
+    // the measuring markup is not in the document: getByText itself finds the chip label
+    expect(
+      within(markup).getByText('<hr/>', {selector: '.tag > .tag-text'}),
+    ).toHaveTextContent('<hr/>')
     expect(within(markup).queryByText(/equiv-text/)).not.toBeInTheDocument()
   })
 

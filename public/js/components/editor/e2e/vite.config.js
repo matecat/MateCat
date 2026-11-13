@@ -9,4 +9,10 @@ export default defineConfig({
   root: here,
   logLevel: 'warn',
   server: {fs: {allow: [path.resolve(here, '../../../../..')]}},
+  // the cattool tooltip stylesheet (harness.js) resolves its `@use` from the sass root, as the app build does
+  css: {
+    preprocessorOptions: {
+      scss: {loadPaths: [path.resolve(here, '../../../../css/sass')]},
+    },
+  },
 })

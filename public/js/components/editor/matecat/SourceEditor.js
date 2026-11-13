@@ -16,6 +16,7 @@ import SegmentConstants from '../../../constants/SegmentConstants'
 import {Shortcuts} from '../../../utils/shortcuts'
 import {UseHotKeysComponent} from '../../../hooks/UseHotKeysComponent'
 import {SegmentContext} from '../../segments/SegmentContext'
+import {ApplicationWrapperContext} from '../../common/ApplicationWrapper/ApplicationWrapperContext'
 import {TERM_FORM_FIELDS} from '../../segments/SegmentFooterTabGlossary/GlossaryConstants'
 import {
   Button,
@@ -34,6 +35,7 @@ import {glossaryRanges, qaCheckGlossaryRanges} from './layers/glossary'
 import {lexiqaRanges} from './layers/lexiqa'
 import {icuRanges} from './layers/icu'
 import {layerTooltipExtensions} from './layerTooltip'
+import {createTagTooltip} from './tagTooltip'
 
 export const SPLIT_PLACEHOLDER = '##$_SPLIT$##'
 
@@ -75,13 +77,16 @@ export const highlightedChips = (chips, {tagId, tagPlaceholder, key}) =>
     )
     .map(({from, to}) => ({from, to, className: 'tag-clicked'}))
 
-// Each chip with its Draft identity: the n-th chip with some markup is the n-th Draft tag with that markup.
-const chipsWithIdentity = (state, identities, sid) => {
+/**
+ * Each chip with its Draft identity (the n-th chip with some markup is the n-th Draft tag with that markup) and the
+ * key a highlight event names it by: `<keyPrefix>-<from>`.
+ */
+export const chipsWithIdentity = (state, identities, keyPrefix) => {
   const seen = {}
   return chipTokens(state).map(({from, to, token}) => {
     const n = (seen[token.raw] = (seen[token.raw] ?? -1) + 1)
     const identity = identities.filter(({raw}) => raw === token.raw)[n]
-    return {from, to, token, identity, key: `cm-source-${sid}-${from}`}
+    return {from, to, token, identity, key: `${keyPrefix}-${from}`}
   })
 }
 
@@ -102,6 +107,10 @@ const isArrowKey = (key) =>
  */
 const SourceEditor = ({segment, value, bridge}) => {
   const {segment: contextSegment, userInfo} = useContext(SegmentContext)
+  // The user's show whitespace option, from the application context: it changes live when the user toggles it.
+  const showWhitespace =
+    useContext(ApplicationWrapperContext).userInfo?.metadata
+      ?.show_whitespace === 1
 
   const parentRef = useRef(null)
   // Set by a click on a chip, so the click that follows it does not also add a split point.
@@ -146,7 +155,7 @@ const SourceEditor = ({segment, value, bridge}) => {
     return chipsWithIdentity(
       state,
       bridge?.tagIdentities?.(serialize(state)) ?? [],
-      segment.sid,
+      `cm-source-${segment.sid}`,
     )
   }
 
@@ -245,16 +254,20 @@ const SourceEditor = ({segment, value, bridge}) => {
   eventsRef.current = {onTagClick, focusSelectedChips, applyTagState}
 
   useEffect(() => {
+    const tagTooltip = createTagTooltip()
     const editor = createSegmentEditor({
       parent: parentRef.current,
+      showWhitespace,
       value,
       mode: 'source',
       lang: config.source_code,
       dir: config.isSourceRTL ? 'rtl' : 'ltr',
       onEvent: (name, payload) => {
+        tagTooltip.onEvent(name, payload)
         if (name === 'tagClick') eventsRef.current.onTagClick(payload)
       },
       extensions: [
+        tagTooltip.extension,
         layerTooltipExtensions(),
         Prec.highest(
           EditorView.domEventHandlers({
@@ -298,10 +311,16 @@ const SourceEditor = ({segment, value, bridge}) => {
       clearTimeout(delayAiAssistantRef.current)
       editorRef.current = null
       editor.destroy()
+      tagTooltip.destroy()
     }
     // Mounted once per segment, as SegmentSource builds its editor state once.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // The show whitespace option applies live, without reopening the segment.
+  useEffect(() => {
+    editorRef.current?.setShowWhitespace(showWhitespace)
+  }, [showWhitespace])
 
   // Store events: tag map refreshes and Guess tag reload the source; tag highlights come from either editor.
   useEffect(() => {

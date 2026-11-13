@@ -1,8 +1,11 @@
 import React, {useContext, useEffect, useRef, useState} from 'react'
-import $ from 'jquery'
 import {isEmpty, isUndefined} from 'lodash'
 
 import EditArea from './Editarea'
+import TargetEditor from '../editor/matecat/TargetEditor'
+import {isNewEditorActive} from '../editor/matecat/editorEngine'
+import {targetEditorBridge} from './targetEditorBridge'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import CursorUtils from '../../utils/cursorUtils'
 import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentStore from '../../stores/SegmentStore'
@@ -25,6 +28,7 @@ import SegmentView from '../segmentView/SegmentView'
 
 const SegmentTarget = ({segment}) => {
   const context = useContext(SegmentContext)
+  const {userInfo} = useContext(ApplicationWrapperContext)
 
   const [showFormatMenu, setShowFormatMenu] = useState(false)
   const [charactersCounter, setCharactersCounter] = useState(0)
@@ -104,9 +108,8 @@ const SegmentTarget = ({segment}) => {
 
   const selectIssueText = (event) => {
     let selection = document.getSelection()
-    const container = $(issuesHighlightAreaRef.current).find(
-      '.errorTaggingArea',
-    )
+    const container =
+      issuesHighlightAreaRef.current?.querySelector('.errorTaggingArea')
     if (textSelectedInsideSelectionArea(selection, container)) {
       event.preventDefault()
       event.stopPropagation()
@@ -127,11 +130,10 @@ const SegmentTarget = ({segment}) => {
   }
 
   const textSelectedInsideSelectionArea = (selection, container) => {
+    const text = container ? container.textContent : ''
     return (
-      container.contents().text().indexOf(selection.focusNode.textContent) >=
-        0 &&
-      container.contents().text().indexOf(selection.anchorNode.textContent) >=
-        0 &&
+      text.indexOf(selection.focusNode.textContent) >= 0 &&
+      text.indexOf(selection.anchorNode.textContent) >= 0 &&
       selection.toString().length > 0
     )
   }
@@ -261,13 +263,29 @@ const SegmentTarget = ({segment}) => {
       //Text Area
       textAreaContainer = (
         <div className="textarea-container">
-          <EditArea
-            ref={(ref) => (editAreaRef.current = ref)}
-            segment={segment}
-            translation={translation}
-            toggleFormatMenu={toggleFormatMenu}
-            updateCounter={updateCounter}
-          />
+          {isNewEditorActive(userInfo?.metadata) ? (
+            <TargetEditor
+              ref={(ref) => (editAreaRef.current = ref)}
+              segment={segment}
+              value={
+                SegmentUtils.checkCurrentSegmentTPEnabled(segment)
+                  ? removeTagsFromTextUtil(translation)
+                  : translation
+              }
+              translation={translation}
+              toggleFormatMenu={toggleFormatMenu}
+              updateCounter={updateCounter}
+              bridge={targetEditorBridge}
+            />
+          ) : (
+            <EditArea
+              ref={(ref) => (editAreaRef.current = ref)}
+              segment={segment}
+              translation={translation}
+              toggleFormatMenu={toggleFormatMenu}
+              updateCounter={updateCounter}
+            />
+          )}
           {s2tMicro}
           <div className="segment-actions-container">
             <SegmentTargetToolbar

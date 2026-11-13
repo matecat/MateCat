@@ -93,6 +93,13 @@ describe('round trip: where Draft is wrong or the model decides otherwise', () =
     expect(roundTrip('a\rb')).toBe('a##$_0D$##b')
   })
 
+  test.each(corpus.filter((c) => c.from.endsWith('editor/core/display.js')))(
+    'special characters other than nbsp, tab, line feed and carriage return save as themselves: $segment',
+    ({segment}) => {
+      expect(roundTrip(segment)).toBe(segment)
+    },
+  )
+
   test('a zero-width space in the text is kept; Draft deletes it', () => {
     expect(draftRoundTrip('a\u200bb')).toBe('ab')
     expect(roundTrip('a\u200bb')).toBe('a\u200bb')
@@ -104,6 +111,14 @@ describe('toDoc', () => {
     const {text, tags} = toDoc('a &amp; b##$_0A$##c##$_A0$##d##$_09$##e')
     expect(text).toBe('a & b\nc\u00a0d\te')
     expect(tags).toEqual([])
+  })
+
+  test('the word joiner is a character, not a tag, and serialises back as itself', () => {
+    const segment = 'a\u2060<x id="1"/>\u2060b'
+    const {text, tags} = toDoc(segment)
+    expect(text).toBe(segment)
+    expect(tags.map((r) => text.slice(r.from, r.to))).toEqual(['<x id="1"/>'])
+    expect(roundTrip(segment)).toBe(segment)
   })
 
   test('tags keep their markup and are recorded as ranges', () => {
@@ -188,6 +203,11 @@ describe('visibleDoc', () => {
       expect(pos).toHaveLength(text.length)
     },
   )
+
+  test('a word joiner is the opaque tag character, as markableText has it, so no term runs across it', () => {
+    const state = createSegmentState('a\u2060b')
+    expect(visibleDoc(state)).toEqual({text: 'a\ufffcb', pos: [0, 1, 2]})
+  })
 
   test('positions point at the document character, a tag at its start', () => {
     const state = createSegmentState('a<x id="1"/>b##$_0A$##c')

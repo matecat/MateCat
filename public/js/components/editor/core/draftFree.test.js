@@ -41,6 +41,10 @@ describe('code independent of Draft.js', () => {
     expect(() => require('../matecat/editorEngine')).not.toThrow()
   })
 
+  test('the CodeMirror target editor and its tag menu load without draft-js', () => {
+    expect(() => require('../matecat/TargetEditor')).not.toThrow()
+  })
+
   test('the segment view component loads without draft-js', () => {
     expect(() => require('../../segmentView/SegmentView')).not.toThrow()
   })

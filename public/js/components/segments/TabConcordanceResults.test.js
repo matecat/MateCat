@@ -72,9 +72,7 @@ describe('TabConcordanceResults', () => {
     act(() => {
       SegmentStore.__emit(SegmentConstants.CONCORDANCE_RESULT, '3', [])
     })
-    expect(
-      screen.getByText(/Can't find any matches/i),
-    ).toBeInTheDocument()
+    expect(screen.getByText(/Can't find any matches/i)).toBeInTheDocument()
   })
 
   test('ignores non-array result data', () => {
@@ -82,9 +80,7 @@ describe('TabConcordanceResults', () => {
     act(() => {
       SegmentStore.__emit(SegmentConstants.CONCORDANCE_RESULT, '3', null)
     })
-    expect(
-      screen.getByText(/Can't find any matches/i),
-    ).toBeInTheDocument()
+    expect(screen.getByText(/Can't find any matches/i)).toBeInTheDocument()
   })
 
   test('renders results and filters out entries missing segment/translation', () => {
@@ -126,7 +122,9 @@ describe('TabConcordanceResults', () => {
 
     expect(screen.getByText('&', {selector: 'mark'})).toBeInTheDocument()
     expect(screen.getByText('Jerry', {selector: 'mark'})).toBeInTheDocument()
-    expect(screen.getByText('4')).toHaveClass('tag')
+    expect(
+      screen.getByText('4', {selector: '.tag > .tag-text'}),
+    ).toBeInTheDocument()
     expect(screen.queryByText(/#\{|\}#/)).not.toBeInTheDocument()
   })
 

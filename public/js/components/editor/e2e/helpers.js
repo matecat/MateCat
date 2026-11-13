@@ -66,7 +66,9 @@ export const expectedChipTexts = (page, raw) =>
         .filter(
           (t) =>
             t.type === 'tag' &&
-            !['lineFeed', 'nbsp', 'tab', 'space'].includes(t.name),
+            !['lineFeed', 'nbsp', 'tab', 'wordJoiner', 'space'].includes(
+              t.name,
+            ),
         )
         .map((t) =>
           t.index !== undefined && t.index !== null
