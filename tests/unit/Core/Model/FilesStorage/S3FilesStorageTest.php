@@ -39,6 +39,8 @@ class S3FilesStorageTest extends AbstractTest
      */
     private const int ID_FILE = 13;
 
+    private const string UPLOAD_SESSION = '{CAD1B6E1-B312-8713-E8C3-97145410FD37}';
+
     private static string $helloPath;
 
     private static string $helloSha1;
@@ -144,19 +146,8 @@ class S3FilesStorageTest extends AbstractTest
     #[Test]
     public function test_uploading_files_from_queue_folder_to_queue_bucket()
     {
-        // create a backup file from fixtures folder because the folder in upload folder is deleted every time
-        $uploadSession = '{CAD1B6E1-B312-8713-E8C3-97145410FD37}';
-        $source = AppConfig::$ROOT . '/tests/resources/files/queue/' . $uploadSession . '/test.txt';
-        $source2 = AppConfig::$ROOT . '/tests/resources/files/queue/' . $uploadSession . '/aad03b600bc4792b3dc4bf3a2d7191327a482d4a|it-IT';
-        $destinationFolder = AppConfig::$STORAGE_DIR . "/upload/" . $uploadSession;
-        $destination = $destinationFolder . '/test.txt';
-        $destination2 = $destinationFolder . '/aad03b600bc4792b3dc4bf3a2d7191327a482d4a|it-IT';
-
-        if (!file_exists($destinationFolder)) {
-            mkdir($destinationFolder, 0755);
-        }
-        copy($source, $destination);
-        copy($source2, $destination2);
+        $uploadSession = self::UPLOAD_SESSION;
+        $this->stageUploadSession();
 
         // TEST
         $this->fs->moveFileFromUploadSessionToQueuePath($uploadSession);
@@ -180,17 +171,25 @@ class S3FilesStorageTest extends AbstractTest
     }
 
     /**
-     * @depends test_uploading_files_from_queue_folder_to_queue_bucket
-     * @test
+     * Uploads its own session: the file map it reads lives only until deleteQueue(), so it cannot
+     * read the one test_uploading_files_from_queue_folder_to_queue_bucket leaves behind.
+     *
      * @throws Exception
      */
     #[Test]
     public function test_get_hashes_from_dir()
     {
-        $uploadSession = '{CAD1B6E1-B312-8713-E8C3-97145410FD37}';
+        $uploadSession = self::UPLOAD_SESSION;
         $dirToScan = AppConfig::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession;
 
-        $hashes = $this->fs->getHashesFromDir($dirToScan);
+        $this->stageUploadSession();
+        $this->fs->moveFileFromUploadSessionToQueuePath($uploadSession);
+
+        try {
+            $hashes = $this->fs->getHashesFromDir($dirToScan);
+        } finally {
+            $this->fs->deleteQueue($dirToScan);
+        }
 
         $this->assertArrayHasKey('conversionHashes', $hashes);
         $this->assertArrayHasKey('zipHashes', $hashes);
@@ -198,6 +197,25 @@ class S3FilesStorageTest extends AbstractTest
         $originalFileNames = $hashes['conversionHashes']['fileName']['queue-projects/cad1b6e1-b312-8713-e8c3-97145410fd37/61d1a18ea9eb9e6c63de278388abd39410b5911c__it-IT'];
 
         $this->assertEquals('test.txt', $originalFileNames[0]);
+        $this->assertSame([], $this->fs->getHashesFromDir($dirToScan)['conversionHashes']);
+    }
+
+    /**
+     * Copy the fixture files of the upload session into the upload folder, as the upload controller
+     * does: moveFileFromUploadSessionToQueuePath() deletes that folder every time.
+     */
+    private function stageUploadSession(): void
+    {
+        $source = AppConfig::$ROOT . '/tests/resources/files/queue/' . self::UPLOAD_SESSION;
+        $destinationFolder = AppConfig::$STORAGE_DIR . '/upload/' . self::UPLOAD_SESSION;
+
+        if (!file_exists($destinationFolder)) {
+            mkdir($destinationFolder, 0755, true);
+        }
+
+        foreach (['test.txt', 'aad03b600bc4792b3dc4bf3a2d7191327a482d4a|it-IT'] as $file) {
+            copy($source . '/' . $file, $destinationFolder . '/' . $file);
+        }
     }
 
     /**
