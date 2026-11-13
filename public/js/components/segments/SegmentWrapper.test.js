@@ -78,7 +78,7 @@ function renderWrapper(segment, props = {}, metadata = {}) {
   return render(tree(segment, props, metadata))
 }
 
-// The build flag isNewEditorEnabled() reads; the user's choice sits on top of it
+// The build flag isNewEditorEnabled() reads
 const setBuildFlag = (on) =>
   (process.env.ENABLE_NEW_EDITOR = on ? 'true' : 'false')
 const originalBuildFlag = process.env.ENABLE_NEW_EDITOR
@@ -265,45 +265,5 @@ describe('SegmentWrapper editor switch (ENABLE_NEW_EDITOR)', () => {
     setBuildFlag(true)
     renderWrapper(makeSegment({opened: true}), {isTarget: true})
     expect(screen.getByTestId('segment-target')).toBeInTheDocument()
-  })
-})
-
-describe('SegmentWrapper per-user editor choice (editor_engine)', () => {
-  beforeEach(() => setBuildFlag(true))
-
-  test('a user who never picked an editor gets the CodeMirror source', () => {
-    renderWrapper(makeSegment({opened: true}), {}, {})
-    expect(screen.getByTestId('source-editor')).toBeInTheDocument()
-  })
-
-  test('a user who switched back to the previous editor gets the Draft source', () => {
-    renderWrapper(makeSegment({opened: true}), {}, {editor_engine: 'draft'})
-    expect(screen.getByTestId('segment-source')).toBeInTheDocument()
-    expect(screen.queryByTestId('source-editor')).not.toBeInTheDocument()
-  })
-
-  test('the user choice cannot turn the new editor on when the build switches it off', () => {
-    setBuildFlag(false)
-    renderWrapper(makeSegment({opened: true}), {}, {editor_engine: 'cm6'})
-    expect(screen.getByTestId('segment-source')).toBeInTheDocument()
-  })
-
-  test('a user outside the application context (no user info) gets the CodeMirror source', () => {
-    render(
-      <SegmentContext.Provider value={{segment: makeSegment({opened: true})}}>
-        <SegmentWrapper />
-      </SegmentContext.Provider>,
-    )
-    expect(screen.getByTestId('source-editor')).toBeInTheDocument()
-  })
-
-  test('changing the setting swaps the open source editor without reopening the segment', () => {
-    const segment = makeSegment({opened: true})
-    const {rerender} = renderWrapper(segment, {}, {editor_engine: 'cm6'})
-    expect(screen.getByTestId('source-editor')).toBeInTheDocument()
-
-    rerender(tree(segment, {}, {editor_engine: 'draft'}))
-    expect(screen.getByTestId('segment-source')).toBeInTheDocument()
-    expect(screen.queryByTestId('source-editor')).not.toBeInTheDocument()
   })
 })

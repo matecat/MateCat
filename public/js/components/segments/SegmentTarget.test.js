@@ -22,7 +22,7 @@ jest.mock('./Editarea', () => (props) => (
 
 let mockNewEditor = false
 jest.mock('../editor/matecat/editorEngine', () => ({
-  isNewEditorActive: () => mockNewEditor,
+  isNewEditorEnabled: () => mockNewEditor,
 }))
 jest.mock('../editor/matecat/TargetEditor', () => {
   const React = require('react')
