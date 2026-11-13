@@ -145,8 +145,7 @@ class SegmentMetadataDaoInstanceTest extends AbstractTest
 
         $results = $this->dao->getBySegmentIds(
             [self::SEGMENT_ID_1, self::SEGMENT_ID_2, self::SEGMENT_ID_3],
-            'shared_key',
-            0
+            'shared_key'
         );
 
         $this->assertIsArray($results);
@@ -162,8 +161,7 @@ class SegmentMetadataDaoInstanceTest extends AbstractTest
     {
         $results = $this->dao->getBySegmentIds(
             [self::SEGMENT_ID_1, self::SEGMENT_ID_2],
-            'nonexistent_key',
-            0
+            'nonexistent_key'
         );
 
         $this->assertIsArray($results);
@@ -227,30 +225,19 @@ class SegmentMetadataDaoInstanceTest extends AbstractTest
     }
 
     #[Test]
-    public function testDestroyCacheBustsStaleCachedResultOfTheRangeRead(): void
+    public function testGetAllInRangeSeesARowWrittenBehindTheDao(): void
     {
-        $ttl = 60;
-
-        // Warm the cache for a range where SEGMENT_ID_1 has no metadata yet.
-        $before = $this->dao->getAllInRange(self::SEGMENT_ID_1, self::SEGMENT_ID_1, $ttl);
+        // Read the range while SEGMENT_ID_1 has no metadata yet.
+        $before = $this->dao->getAllInRange(self::SEGMENT_ID_1, self::SEGMENT_ID_1);
         $this->assertArrayNotHasKey(self::SEGMENT_ID_1, $before);
 
-        // Insert directly, bypassing save()/upsert() (which already bust this cache), to
-        // simulate any writer unaware of getAllInRange's cache.
+        // Insert directly, bypassing save()/upsert(), so no eviction runs.
         $this->database->getConnection()->prepare(
             "INSERT INTO segment_metadata (id_segment, meta_key, meta_value) VALUES (?, ?, ?)"
         )->execute([self::SEGMENT_ID_1, 'direct_key', 'direct_value']);
 
-        // Without busting, the stale (empty) result is still served from cache.
-        $stillStale = $this->dao->getAllInRange(self::SEGMENT_ID_1, self::SEGMENT_ID_1, $ttl);
-        $this->assertArrayNotHasKey(self::SEGMENT_ID_1, $stillStale);
-
-        $struct = new SegmentMetadataStruct();
-        $struct->id_segment = self::SEGMENT_ID_1;
-        $struct->meta_key = 'direct_key';
-        $this->dao->destroyCache($struct);
-
-        $fresh = $this->dao->getAllInRange(self::SEGMENT_ID_1, self::SEGMENT_ID_1, $ttl);
+        // The range read is not cached, so the next call sees the row at once.
+        $fresh = $this->dao->getAllInRange(self::SEGMENT_ID_1, self::SEGMENT_ID_1);
         $this->assertArrayHasKey(self::SEGMENT_ID_1, $fresh);
         $this->assertCount(1, $fresh[self::SEGMENT_ID_1]);
     }
@@ -265,7 +252,7 @@ class SegmentMetadataDaoInstanceTest extends AbstractTest
         $this->dao->save($this->makeStruct(self::SEGMENT_ID_2, 'key_a', 'val_c'));
         $this->dao->save($this->makeStruct(self::SEGMENT_ID_3, 'key_a', 'val_d'));
 
-        $result = $this->dao->getAllInRange(self::SEGMENT_ID_1, self::SEGMENT_ID_3, 0);
+        $result = $this->dao->getAllInRange(self::SEGMENT_ID_1, self::SEGMENT_ID_3);
 
         $this->assertIsArray($result);
         $this->assertCount(3, $result);
@@ -283,7 +270,7 @@ class SegmentMetadataDaoInstanceTest extends AbstractTest
     #[Test]
     public function testGetAllInRangeReturnsEmptyArrayWhenNoDataInRange(): void
     {
-        $result = $this->dao->getAllInRange(self::SEGMENT_ID_1, self::SEGMENT_ID_3, 0);
+        $result = $this->dao->getAllInRange(self::SEGMENT_ID_1, self::SEGMENT_ID_3);
 
         $this->assertIsArray($result);
         $this->assertCount(0, $result);
@@ -295,7 +282,7 @@ class SegmentMetadataDaoInstanceTest extends AbstractTest
         $this->dao->save($this->makeStruct(self::SEGMENT_ID_1, 'key_a', 'val_a'));
         $this->dao->save($this->makeStruct(self::SEGMENT_ID_3, 'key_a', 'val_b'));
 
-        $result = $this->dao->getAllInRange(self::SEGMENT_ID_1, self::SEGMENT_ID_2, 0);
+        $result = $this->dao->getAllInRange(self::SEGMENT_ID_1, self::SEGMENT_ID_2);
 
         $this->assertCount(1, $result);
         $this->assertArrayHasKey(self::SEGMENT_ID_1, $result);

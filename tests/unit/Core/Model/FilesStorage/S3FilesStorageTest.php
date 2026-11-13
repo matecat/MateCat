@@ -2,12 +2,14 @@
 
 
 namespace Matecat\Core\Model\FilesStorage;
+use Exception;
 use Matecat\SimpleS3\Client;
 use Matecat\TestHelpers\AbstractTest;
 use Model\FilesStorage\S3FilesStorage;
 use PHPUnit\Framework\Attributes\Depends;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use ReflectionException;
 use Utils\Registry\AppConfig;
 
 /**
@@ -30,6 +32,36 @@ class S3FilesStorageTest extends AbstractTest
     private $s3Client;
 
     /**
+     * The bucket is shared by every CI run, and the lookups return the first key in alphabetical
+     * order. Example: `c1689bd71f45e76fd5e428f35c00d1f289a7e9e9.txt` left next to `hello.txt` came
+     * back in its place. These tests write to the same keys on every run, so each run first deletes
+     * whatever is under them; a run that crashes leaves nothing the next run can trip on.
+     */
+    private const int ID_FILE = 13;
+
+    private const string UPLOAD_SESSION = '{CAD1B6E1-B312-8713-E8C3-97145410FD37}';
+
+    private static string $helloPath;
+
+    private static string $helloSha1;
+
+    /**
+     * @throws Exception
+     */
+    public static function setUpBeforeClass(): void
+    {
+        parent::setUpBeforeClass();
+
+        self::$helloPath = AppConfig::$ROOT . '/tests/resources/files/txt/hello.txt';
+        self::$helloSha1 = (string)sha1_file(self::$helloPath);
+
+        $client = S3FilesStorage::getStaticS3Client();
+        $bucket = S3FilesStorage::getFilesStorageBucket();
+        $client->deleteFolder(['bucket' => $bucket, 'prefix' => (new S3FilesStorage())->getCachePackageHashFolder(self::$helloSha1, 'it-IT')]);
+        $client->deleteFolder(['bucket' => $bucket, 'prefix' => S3FilesStorage::FILES_FOLDER . '/20191212/' . self::ID_FILE]);
+    }
+
+    /**
      * @throws ReflectionException
      */
     public function setUp(): void
@@ -41,38 +73,19 @@ class S3FilesStorageTest extends AbstractTest
     }
 
     /**
-     * Deletes every key under $prefix. The bucket is shared by the CI runs of every branch, so a test clears the keys
-     * it reads back before it writes them: a reader prefers a hashed object over the legacy one it just wrote.
-     *
-     * @param string $prefix
-     */
-    private function deleteKeysUnder(string $prefix): void
-    {
-        $bucket = S3FilesStorage::getFilesStorageBucket();
-
-        foreach ($this->s3Client->getItemsInABucket(['bucket' => $bucket, 'prefix' => $prefix]) as $key) {
-            $this->s3Client->deleteItem(['bucket' => $bucket, 'key' => $key]);
-        }
-    }
-
-    /**
      * @test
      * @throws Exception
      */
     #[Test]
     public function test_creation_of_cache_package_into_a_bucket()
     {
-        $package = $this->fs->getCachePackageHashFolder(sha1_file(AppConfig::$ROOT . '/tests/resources/files/txt/hello.txt'), 'it-IT');
-        $this->deleteKeysUnder($package . '/orig');
-        $this->deleteKeysUnder($package . '/work');
-
-        $filePath = AppConfig::$ROOT . '/tests/resources/files/txt/hello.txt';
+        $filePath = self::$helloPath;
         $xliffPath = AppConfig::$ROOT . '/tests/resources/files/xliff/file-with-hello-world.xliff';
         $xliffPathTarget = AppConfig::$STORAGE_DIR . '/file-with-hello-world(1).xliff';
 
         copy($xliffPath, $xliffPathTarget); // I copy the original xliff file because then
 
-        $sha1 = sha1_file($filePath);
+        $sha1 = self::$helloSha1;
         $lang = 'it-IT';
 
         $hashTree = S3FilesStorage::composeCachePath($sha1);
@@ -90,20 +103,18 @@ class S3FilesStorageTest extends AbstractTest
      * @throws Exception
      */
     #[Test]
+    #[Depends('test_creation_of_cache_package_into_a_bucket')]
     public function test_copying_a_file_from_cache_package_bucket_to_file_bucket()
     {
-        $this->deleteKeysUnder(S3FilesStorage::FILES_FOLDER . '/20191212/13/orig');
-        $this->deleteKeysUnder(S3FilesStorage::FILES_FOLDER . '/20191212/13/xliff');
-
-        $filePath = AppConfig::$ROOT . '/tests/resources/files/txt/hello.txt';
-        $sha1 = sha1_file($filePath);
-        $dateHashPath = '20191212' . DIRECTORY_SEPARATOR . $sha1;
+        $filePath = self::$helloPath;
+        $dateHashPath = '20191212' . DIRECTORY_SEPARATOR . self::$helloSha1;
         $lang = 'it-IT';
-        $idFile = 13;
+        $idFile = self::ID_FILE;
+        $fileDir = S3FilesStorage::FILES_FOLDER . '/20191212/' . $idFile;
 
         $this->assertTrue($this->fs->moveFromCacheToFileDir($dateHashPath, $lang, $idFile, $filePath));
-        $this->assertEquals(S3FilesStorage::FILES_FOLDER . '/20191212/13/orig/hello.txt', $this->fs->getOriginalFromFileDir($idFile, $dateHashPath));
-        $this->assertEquals(S3FilesStorage::FILES_FOLDER . '/20191212/13/xliff/hello.txt.sdlxliff', $this->fs->getXliffFromFileDir($idFile, $dateHashPath));
+        $this->assertEquals($fileDir . '/orig/hello.txt', $this->fs->getOriginalFromFileDir($idFile, $dateHashPath));
+        $this->assertEquals($fileDir . '/xliff/hello.txt.sdlxliff', $this->fs->getXliffFromFileDir($idFile, $dateHashPath));
     }
 
     /**
@@ -118,8 +129,7 @@ class S3FilesStorageTest extends AbstractTest
     #[Depends('test_creation_of_cache_package_into_a_bucket')]
     public function testListItems()
     {
-        $sha1 = sha1_file(AppConfig::$ROOT . '/tests/resources/files/txt/hello.txt');
-        $origPrefix = $this->fs->getCachePackageHashFolder($sha1, 'it-IT') . '/orig';
+        $origPrefix = $this->fs->getCachePackageHashFolder(self::$helloSha1, 'it-IT') . '/orig';
 
         $origItems = S3FilesStorage::getStaticS3Client()->getItemsInABucket([
             'bucket' => S3FilesStorage::getFilesStorageBucket(),
@@ -136,19 +146,8 @@ class S3FilesStorageTest extends AbstractTest
     #[Test]
     public function test_uploading_files_from_queue_folder_to_queue_bucket()
     {
-        // create a backup file from fixtures folder because the folder in upload folder is deleted every time
-        $uploadSession = '{CAD1B6E1-B312-8713-E8C3-97145410FD37}';
-        $source = AppConfig::$ROOT . '/tests/resources/files/queue/' . $uploadSession . '/test.txt';
-        $source2 = AppConfig::$ROOT . '/tests/resources/files/queue/' . $uploadSession . '/aad03b600bc4792b3dc4bf3a2d7191327a482d4a|it-IT';
-        $destinationFolder = AppConfig::$STORAGE_DIR . "/upload/" . $uploadSession;
-        $destination = $destinationFolder . '/test.txt';
-        $destination2 = $destinationFolder . '/aad03b600bc4792b3dc4bf3a2d7191327a482d4a|it-IT';
-
-        if (!file_exists($destinationFolder)) {
-            mkdir($destinationFolder, 0755);
-        }
-        copy($source, $destination);
-        copy($source2, $destination2);
+        $uploadSession = self::UPLOAD_SESSION;
+        $this->stageUploadSession();
 
         // TEST
         $this->fs->moveFileFromUploadSessionToQueuePath($uploadSession);
@@ -172,17 +171,25 @@ class S3FilesStorageTest extends AbstractTest
     }
 
     /**
-     * @depends test_uploading_files_from_queue_folder_to_queue_bucket
-     * @test
+     * Uploads its own session: the file map it reads lives only until deleteQueue(), so it cannot
+     * read the one test_uploading_files_from_queue_folder_to_queue_bucket leaves behind.
+     *
      * @throws Exception
      */
     #[Test]
     public function test_get_hashes_from_dir()
     {
-        $uploadSession = '{CAD1B6E1-B312-8713-E8C3-97145410FD37}';
+        $uploadSession = self::UPLOAD_SESSION;
         $dirToScan = AppConfig::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession;
 
-        $hashes = $this->fs->getHashesFromDir($dirToScan);
+        $this->stageUploadSession();
+        $this->fs->moveFileFromUploadSessionToQueuePath($uploadSession);
+
+        try {
+            $hashes = $this->fs->getHashesFromDir($dirToScan);
+        } finally {
+            $this->fs->deleteQueue($dirToScan);
+        }
 
         $this->assertArrayHasKey('conversionHashes', $hashes);
         $this->assertArrayHasKey('zipHashes', $hashes);
@@ -190,6 +197,25 @@ class S3FilesStorageTest extends AbstractTest
         $originalFileNames = $hashes['conversionHashes']['fileName']['queue-projects/cad1b6e1-b312-8713-e8c3-97145410fd37/61d1a18ea9eb9e6c63de278388abd39410b5911c__it-IT'];
 
         $this->assertEquals('test.txt', $originalFileNames[0]);
+        $this->assertSame([], $this->fs->getHashesFromDir($dirToScan)['conversionHashes']);
+    }
+
+    /**
+     * Copy the fixture files of the upload session into the upload folder, as the upload controller
+     * does: moveFileFromUploadSessionToQueuePath() deletes that folder every time.
+     */
+    private function stageUploadSession(): void
+    {
+        $source = AppConfig::$ROOT . '/tests/resources/files/queue/' . self::UPLOAD_SESSION;
+        $destinationFolder = AppConfig::$STORAGE_DIR . '/upload/' . self::UPLOAD_SESSION;
+
+        if (!file_exists($destinationFolder)) {
+            mkdir($destinationFolder, 0755, true);
+        }
+
+        foreach (['test.txt', 'aad03b600bc4792b3dc4bf3a2d7191327a482d4a|it-IT'] as $file) {
+            copy($source . '/' . $file, $destinationFolder . '/' . $file);
+        }
     }
 
     /**

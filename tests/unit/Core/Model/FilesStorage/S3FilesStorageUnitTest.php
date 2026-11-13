@@ -6,10 +6,12 @@ use Exception;
 use Matecat\SimpleS3\ClientInterface;
 use Matecat\TestHelpers\AbstractTest;
 use Model\FilesStorage\FilesystemAdapter;
+use Model\FilesStorage\NativeFilesystemAdapter;
 use Model\FilesStorage\S3FilesStorage;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use UnexpectedValueException;
+use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
 class S3FilesStorageUnitTest extends AbstractTest
@@ -453,6 +455,66 @@ class S3FilesStorageUnitTest extends AbstractTest
 
         $fs = $this->createS3WithMocks($client);
         $fs->deleteQueue('/path/{ABC-123}');
+    }
+
+    /**
+     * The worker no longer needs the file map once it deletes the queue. Left behind, the key had no
+     * TTL and 350,000 of them had piled up in the production Redis.
+     */
+    #[Test]
+    public function test_deleteQueue_deletes_the_redis_file_map(): void
+    {
+        $uploadSession = 'fd750c37-2d33-4913-bdd1-' . bin2hex(random_bytes(6));
+        $redis = (new RedisHandler())->getConnection();
+        $redis->hset($uploadSession, 'file_map', serialize([]));
+
+        $fs = $this->createS3WithMocks($this->stubClient(fn() => true));
+        $fs->deleteQueue('/path/{' . strtoupper($uploadSession) . '}');
+
+        $this->assertSame(0, $redis->exists($uploadSession));
+    }
+
+    // ========================================================================
+    // moveFileFromUploadSessionToQueuePath
+    // ========================================================================
+
+    /**
+     * The file map gets a TTL, so Redis can drop it even when deleteQueue() never runs, such as when
+     * the project creation message is lost.
+     */
+    #[Test]
+    public function test_moveFileFromUploadSessionToQueuePath_writes_a_file_map_with_a_ttl(): void
+    {
+        $uploadSession = 'fd750c37-2d33-4913-bdd1-' . bin2hex(random_bytes(6));
+        $originalUpload = AppConfig::$UPLOAD_REPOSITORY;
+        $uploadRepository = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'file_map_ttl_' . uniqid();
+        mkdir($uploadRepository . DIRECTORY_SEPARATOR . $uploadSession, 0755, true);
+        file_put_contents($uploadRepository . DIRECTORY_SEPARATOR . $uploadSession . DIRECTORY_SEPARATOR . 'abc123', "file.txt\n");
+
+        $redis = (new RedisHandler())->getConnection();
+
+        try {
+            AppConfig::$UPLOAD_REPOSITORY = $uploadRepository;
+
+            $fs = $this->createS3WithMocks($this->stubClient(fn() => true), new NativeFilesystemAdapter());
+            $fs->moveFileFromUploadSessionToQueuePath($uploadSession);
+
+            $ttl = $redis->ttl($uploadSession);
+            $this->assertGreaterThan(0, $ttl);
+            $this->assertLessThanOrEqual(S3FilesStorage::UPLOAD_FILE_MAP_TTL, $ttl);
+
+            $fileMap = unserialize((string)$redis->hget($uploadSession, 'file_map'));
+            $this->assertSame(
+                [S3FilesStorage::QUEUE_FOLDER . DIRECTORY_SEPARATOR . $uploadSession . DIRECTORY_SEPARATOR . 'abc123' => ['file.txt']],
+                $fileMap
+            );
+        } finally {
+            AppConfig::$UPLOAD_REPOSITORY = $originalUpload;
+            $redis->unlink($uploadSession);
+            if (is_dir($uploadRepository)) {
+                exec('rm -rf ' . escapeshellarg($uploadRepository));
+            }
+        }
     }
 
     // ========================================================================

@@ -236,7 +236,7 @@ class EmailTemplateRenderTest extends AbstractTest
                     'team' => ['id' => '10', 'name' => 'Ben & Jerry <b>'],
                     'signup_url' => 'https://dev.matecat.com/signup',
                 ],
-                ['Hi new@example.com,', 'Ada Lovelace has invited you join the team "Ben &amp; Jerry &lt;b&gt;"'],
+                ['Hi new@example.com,', 'Ada Lovelace has invited you to join the team "Ben &amp; Jerry &lt;b&gt;"'],
                 ['<b>'],
             ],
             'Team/membership_created_content.html' => [
@@ -362,7 +362,7 @@ class EmailTemplateRenderTest extends AbstractTest
                 static fn(self $t): AbstractEmail => new class($t->sender(), 'new@example.com', $t->team()) extends InvitedToTeamEmail {
                     use RecordsDelivery;
                 },
-                'has invited you join the team',
+                'has invited you to join the team',
             ],
             'MembershipCreatedEmail' => [
                 static fn(self $t): AbstractEmail => new class($t->sender(), $t->membership(), $t->userDao(), $t->teamDao()) extends MembershipCreatedEmail {
