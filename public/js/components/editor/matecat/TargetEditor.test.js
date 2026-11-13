@@ -265,6 +265,37 @@ describe('TargetEditor store updates', () => {
     expect(updateCounter).toHaveBeenLastCalledWith(13)
   })
 
+  test('an edit still waiting for the store reaches it when the segment closes, before the close saves it', async () => {
+    const segment = makeSegment()
+    const {container, update} = renderTarget(segment)
+    await flush()
+    jest.clearAllMocks()
+    const view = viewOf(container)
+    select(view, view.state.doc.length)
+    type(view, ' ab')
+    update({...segment, opened: false})
+    expect(SegmentActions.updateTranslation).toHaveBeenCalledTimes(1)
+    expect(SegmentActions.updateTranslation.mock.calls[0][1]).toBe(
+      'Ciao <g id="1">mondo</g> ab',
+    )
+    await flush(150)
+    expect(SegmentActions.updateTranslation).toHaveBeenCalledTimes(1)
+  })
+
+  test('an edit still waiting for the store reaches it when the editor unmounts', async () => {
+    const {container, unmount} = renderTarget()
+    await flush()
+    jest.clearAllMocks()
+    const view = viewOf(container)
+    select(view, view.state.doc.length)
+    type(view, ' ab')
+    unmount()
+    expect(SegmentActions.updateTranslation).toHaveBeenCalledTimes(1)
+    expect(SegmentActions.updateTranslation.mock.calls[0][1]).toBe(
+      'Ciao <g id="1">mondo</g> ab',
+    )
+  })
+
   test('an empty target only zeroes the counter', async () => {
     const {updateCounter} = renderTarget(makeSegment({translation: ''}))
     await flush()

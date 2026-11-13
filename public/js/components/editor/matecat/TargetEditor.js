@@ -463,7 +463,8 @@ const TargetEditor = forwardRef(
       })
       return () => {
         clearTimeout(timer)
-        updateTranslationDebounced.cancel()
+        // An edit still waiting for the store is not lost: it goes in before the editor does.
+        updateTranslationDebounced.flush()
         refreshWarningsDebounced.cancel()
         editorRef.current = null
         editor.destroy()
@@ -626,13 +627,15 @@ const TargetEditor = forwardRef(
       editorRef.current?.setShowWhitespace(showWhitespace)
     }, [showWhitespace])
 
-    // Opening the segment focuses the target at the end.
+    // Opening the segment focuses the target at the end. Closing it saves the store translation (Segment, after this
+    // effect): an edit still waiting for the store goes in first.
     const prevOpenedRef = useRef(segment.opened)
     useEffect(() => {
       const wasOpened = prevOpenedRef.current
       prevOpenedRef.current = segment.opened
       if (!wasOpened && segment.opened) editorRef.current?.focus('end')
-    }, [segment.opened])
+      if (wasOpened && !segment.opened) updateTranslationDebounced.flush()
+    }, [segment.opened, updateTranslationDebounced])
 
     // Appends the source tags missing from the target, then updates the store and runs the QA check, as Editarea.
     const addMissingSourceTagsToTarget = () => {
