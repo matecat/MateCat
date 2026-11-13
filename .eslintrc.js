@@ -68,6 +68,39 @@ module.exports = {
     'no-undef': 'warn',
   },
   overrides: [
+    // Draft-free boundary: the CodeMirror editor, the read-only segment view and
+    // the segment text model must never depend on Draft.js, so that removing
+    // Draft (and DraftMatecatUtils) cannot change them.
+    {
+      files: [
+        'public/js/components/editor/**/*.js',
+        'public/js/components/segmentView/**/*.js',
+        'public/js/utils/segmentText/**/*.js',
+      ],
+      excludedFiles: ['**/*.test.js'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            paths: [
+              {name: 'draft-js', message: 'Keep this code independent of Draft.js.'},
+            ],
+            patterns: [
+              {
+                group: [
+                  'draft-js/*',
+                  '**/DraftMatecatUtils',
+                  '**/DraftMatecatUtils/*',
+                  '**/segments/Editarea',
+                  '**/segments/SegmentSource',
+                ],
+                message: 'Keep this code independent of Draft.js.',
+              },
+            ],
+          },
+        ],
+      },
+    },
     // Node-side files: build and tooling config plus the socket server. They
     // are not browser code and need `module`, `require` and `process`.
     {
