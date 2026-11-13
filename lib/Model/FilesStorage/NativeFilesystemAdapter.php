@@ -20,6 +20,11 @@ class NativeFilesystemAdapter implements FilesystemAdapter
         return link($target, $link);
     }
 
+    public function rename(string $from, string $to): bool
+    {
+        return rename($from, $to);
+    }
+
     public function mkdir(string $path, int $mode = 0755, bool $recursive = true): bool
     {
         return mkdir($path, $mode, $recursive);

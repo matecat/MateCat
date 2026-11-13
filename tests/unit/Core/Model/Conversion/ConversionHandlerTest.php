@@ -632,7 +632,8 @@ class ConversionHandlerTest extends AbstractTest
         $result = $handler->getResult();
 
         $this->assertEquals(ConversionHandlerStatus::S3_ERROR, $result->getCode());
-        $this->assertStringContainsString('file name too long', $result->getMessage());
+        // a storage failure says nothing about the file name
+        $this->assertSame('Error while saving the file. Try again.', $result->getMessage());
     }
 
     // ================================================

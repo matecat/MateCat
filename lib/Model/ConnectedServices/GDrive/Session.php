@@ -664,13 +664,16 @@ class Session
         $mime = RemoteFileService::officeMimeFromGoogle($meta->mimeType);
 
         // get filename
-        $fileName = $this->sanitizeFileName($meta->getName());
+        $fileName = $meta->getName();
         $file_extension = RemoteFileService::officeExtensionFromMime((string)$mime);
 
         // add the extension to filename
         if (substr($fileName, -5) !== $file_extension) {
             $fileName .= $file_extension;
         }
+
+        // checked with the extension added: it is the name the file is stored under
+        $fileName = $this->sanitizeFileName($fileName);
 
         // export the file
         $optParams = [
@@ -715,6 +718,10 @@ class Session
     private function sanitizeFileName(string $fileName): string
     {
         $fileName = str_replace('/', '_', $fileName);
+        // checked first: a name over the limit is otherwise refused as an invalid file name
+        if (Utils::isFileNameTooLong($fileName)) {
+            throw new InvalidArgumentException(Utils::FILE_NAME_TOO_LONG, ConversionHandlerStatus::INVALID_FILE);
+        }
         if (!Utils::isValidFileName($fileName) || empty($fileName)) {
             throw new InvalidArgumentException("Invalid file name: " . $fileName, ConversionHandlerStatus::INVALID_FILE);
         }

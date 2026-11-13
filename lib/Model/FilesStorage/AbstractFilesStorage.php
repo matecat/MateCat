@@ -4,6 +4,7 @@ namespace Model\FilesStorage;
 
 use Exception;
 use InvalidArgumentException;
+use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Model\DataAccess\IDatabase;
 use PDO;
 use PDOException;
@@ -31,6 +32,11 @@ abstract class AbstractFilesStorage implements IFilesStorage
 
     const string ORIGINAL_ZIP_PLACEHOLDER = "__##originalZip##";
     const string OBJECTS_SAFE_DELIMITER = '__';
+
+    /**
+     * Prefix of the file a cache write goes to before it is renamed onto its final name: never a stored file.
+     */
+    const string TEMPORARY_FILE_PREFIX = '.tmp-';
 
     /**
      * A name produced by getStorageFileName() or getCacheFileName(): a sha1, plus the extension when it has one.
@@ -173,6 +179,25 @@ abstract class AbstractFilesStorage implements IFilesStorage
     }
 
     /**
+     * Name a native xliff is stored under in the work folder of the cache package: its cache name, plus `.sdlxliff`
+     * when it is a plain xliff not already named so, because the readers take the converted file type from it.
+     *
+     * The detection reads the local file at $xliffPath, still under its original name.
+     *
+     * @param string $cacheHash
+     * @param string $xliffPath
+     *
+     * @return string
+     */
+    protected static function getNativeXliffCacheFileName(string $cacheHash, string $xliffPath): string
+    {
+        $fileType = (new XliffProprietaryDetect())->getInfo($xliffPath);
+        $forcedExtension = (!$fileType['proprietary'] && $fileType['info']['extension'] != 'sdlxliff') ? '.sdlxliff' : '';
+
+        return static::getCacheFileName($cacheHash, $xliffPath) . $forcedExtension;
+    }
+
+    /**
      * The extension of $basename with its leading dot, or an empty string when it has none a stored name can carry.
      *
      * @param string $basename
@@ -196,7 +221,7 @@ abstract class AbstractFilesStorage implements IFilesStorage
      * Returns the file in $path whose name starts with $preferredPrefix, otherwise the first file found.
      *
      * A directory written before the storage names were hashed can hold a legacy object next to a hashed one:
-     * the prefix makes the choice deterministic.
+     * the prefix makes the choice deterministic. A write still in progress is never returned.
      *
      * @param string $path
      * @param string|null $preferredPrefix
@@ -216,7 +241,7 @@ abstract class AbstractFilesStorage implements IFilesStorage
         }
 
         foreach ($files as $file) {
-            if ($file->isDot()) {
+            if ($file->isDot() || str_starts_with($file->getFilename(), self::TEMPORARY_FILE_PREFIX)) {
                 continue;
             }
 

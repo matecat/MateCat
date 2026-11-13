@@ -21,7 +21,10 @@ import CreateProjectActions from '../actions/CreateProjectActions'
 import ModalsActions from '../actions/ModalsActions'
 import CommonUtils from './commonUtils'
 import UserStore from '../stores/UserStore'
-import {handleCreationStatus} from './newProjectUtils'
+import {
+  getCreateProjectErrorMessage,
+  handleCreationStatus,
+} from './newProjectUtils'
 
 const flush = async () => {
   await Promise.resolve()
@@ -109,4 +112,38 @@ test('shows the error notification when the API call rejects with errors', async
 
   expect(CreateProjectActions.hideErrors).toHaveBeenCalled()
   expect(CreateProjectActions.showError).toHaveBeenCalledWith('Failed')
+})
+
+describe('getCreateProjectErrorMessage', () => {
+  const generic =
+    'Sorry, an error occurred while creating the project, please try again after refreshing the page.'
+
+  test('-230 shows the message the backend sent, not a file-name text', () => {
+    expect(
+      getCreateProjectErrorMessage([
+        {code: -230, message: 'Failed to cache file a.xlf'},
+      ]),
+    ).toBe('Failed to cache file a.xlf')
+  })
+
+  test('-230 with no message falls back to the generic text', () => {
+    expect(getCreateProjectErrorMessage([{code: -230}])).toBe(generic)
+  })
+
+  test('-235 keeps the generic text', () => {
+    expect(
+      getCreateProjectErrorMessage([{code: -235, message: 'internal'}]),
+    ).toBe(generic)
+  })
+
+  test('any other code shows the backend message', () => {
+    expect(
+      getCreateProjectErrorMessage([{code: -1, message: 'Invalid source'}]),
+    ).toBe('Invalid source')
+  })
+
+  test('no errors gives the generic text', () => {
+    expect(getCreateProjectErrorMessage(undefined)).toBe(generic)
+    expect(getCreateProjectErrorMessage([])).toBe(generic)
+  })
 })

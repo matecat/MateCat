@@ -41,7 +41,10 @@ import useProjectTemplates, {SCHEMA_KEYS} from '../hooks/useProjectTemplates'
 import {TemplateSelect} from '../components/settingsPanel/ProjectTemplate/TemplateSelect'
 import {getMMTKeys} from '../api/getMMTKeys'
 import {AlertDeleteResourceProjectTemplates} from '../components/modals/AlertDeleteResourceProjectTemplates'
-import {handleCreationStatus} from '../utils/newProjectUtils'
+import {
+  getCreateProjectErrorMessage,
+  handleCreationStatus,
+} from '../utils/newProjectUtils'
 import {getPretranslateParams} from '../utils/editorStatusLock'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
 import {mountPage} from './mountPage'
@@ -597,26 +600,7 @@ const NewProject = () => {
           handleCreationStatus(data.id_project, data.password)
         })
         .catch(({errors}) => {
-          let errorMsg
-          if (errors && errors.length) {
-            switch (errors[0].code) {
-              case -230: {
-                errorMsg =
-                  'Sorry, file name too long. Try shortening it and try again.'
-                break
-              }
-              case -235: {
-                errorMsg =
-                  'Sorry, an error occurred while creating the project, please try again after refreshing the page.'
-                break
-              }
-              default:
-                errorMsg = errors[0].message
-            }
-          } else {
-            errorMsg =
-              'Sorry, an error occurred while creating the project, please try again after refreshing the page.'
-          }
+          const errorMsg = getCreateProjectErrorMessage(errors)
           setErrors(errorMsg)
           setProjectSent(false)
         })

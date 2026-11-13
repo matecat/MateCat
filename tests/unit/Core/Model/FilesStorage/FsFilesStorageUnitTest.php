@@ -547,6 +547,7 @@ class FsFilesStorageUnitTest extends AbstractTest
         $mockFs->method('fileExists')->willReturn(false);
         $mockFs->method('mkdir')->willReturn(true);
         $mockFs->expects($this->exactly(2))->method('copy')->willReturn(true);
+        $mockFs->expects($this->exactly(2))->method('rename')->willReturn(true);
         $mockFs->expects($this->once())->method('unlink')->willReturn(true);
 
         $fs = new FsFilesStorage($mockFs);
@@ -563,7 +564,8 @@ class FsFilesStorageUnitTest extends AbstractTest
         $mockFs->method('fileExists')->willReturnCallback(function () use (&$callCount) {
             $callCount++;
             // First 4 calls are ensureDirectoryExists (return false to trigger mkdir)
-            // 5th call is the check after copy failure (return true so deleteDir is called)
+            // 5th call looks for the temporary copy, 6th is the check after the copy failure (return true so
+            // deleteDir is called)
             return $callCount >= 5;
         });
         $mockFs->method('mkdir')->willReturn(true);
@@ -599,11 +601,11 @@ class FsFilesStorageUnitTest extends AbstractTest
         $mockFs->method('fileExists')->willReturnCallback(function () use (&$fileExistsCallCount) {
             $fileExistsCallCount++;
             // ensureDirectoryExists calls fileExists 4 times (all return false to trigger mkdir)
-            // then after xliff copy failure, fileExists is called once more to check cache dir exists
-            // That's the 5th call - return true
+            // then after xliff copy failure, fileExists looks for the temporary copy and then checks the cache dir
             return $fileExistsCallCount >= 5;
         });
         $mockFs->method('mkdir')->willReturn(true);
+        $mockFs->method('rename')->willReturn(true);
         // First copy succeeds (original), second fails (xliff)
         $mockFs->method('copy')->willReturnCallback(function () use (&$copyCallCount) {
             $copyCallCount++;
@@ -621,6 +623,7 @@ class FsFilesStorageUnitTest extends AbstractTest
         $mockFs = $this->createStub(FilesystemAdapter::class);
         $mockFs->method('fileExists')->willReturn(false);
         $mockFs->method('mkdir')->willReturn(true);
+        $mockFs->method('rename')->willReturn(true);
         $copyCallCount = 0;
         $mockFs->method('copy')->willReturnCallback(function () use (&$copyCallCount) {
             $copyCallCount++;
@@ -744,10 +747,10 @@ class FsFilesStorageUnitTest extends AbstractTest
         $result = $partialMock->moveFromCacheToFileDir($dateHashPath, 'en-US', '42', 'renamed.docx');
         $this->assertTrue($result);
 
-        // Verify orig link uses new filename
-        $this->assertStringEndsWith('renamed.docx', $linkPaths[0]);
-        // Verify xliff link uses new filename + extension
-        $this->assertStringEndsWith('renamed.docx.sdlxliff', $linkPaths[1]);
+        // the orig link is named after the new file name, hashed
+        $this->assertStringEndsWith('/orig/' . sha1('renamed.docx') . '.docx', $linkPaths[0]);
+        // the xliff link is the same name plus the converted extension
+        $this->assertStringEndsWith('/xliff/' . sha1('renamed.docx') . '.docx.sdlxliff', $linkPaths[1]);
     }
 
     #[Test]
@@ -963,39 +966,230 @@ class FsFilesStorageUnitTest extends AbstractTest
         });
     }
 
+    // ── Hashed storage names: writers ──
+
+    private const string HASH = 'abcdef1234567890abcdef1234567890abcdef12';
+
     /**
-     * A package holding a legacy pair next to a hashed pair: the project links the hashed pair, the one the segments
-     * are read from, and not whichever pair is listed first.
+     * Points the cache and files repositories at $tempDir for the call.
      */
+    private function withStorageIn(string $tempDir, callable $fn): void
+    {
+        $originalCache = AppConfig::$CACHE_REPOSITORY;
+        $originalFiles = AppConfig::$FILES_REPOSITORY;
+        $originalZip = AppConfig::$ZIP_REPOSITORY;
+        try {
+            AppConfig::$CACHE_REPOSITORY = $tempDir . '/cache';
+            AppConfig::$FILES_REPOSITORY = $tempDir . '/files';
+            AppConfig::$ZIP_REPOSITORY = $tempDir . '/zip';
+            $fn(new FsFilesStorage());
+        } finally {
+            AppConfig::$CACHE_REPOSITORY = $originalCache;
+            AppConfig::$FILES_REPOSITORY = $originalFiles;
+            AppConfig::$ZIP_REPOSITORY = $originalZip;
+        }
+    }
+
+    private function packageDir(string $tempDir, string $lang = 'en-US'): string
+    {
+        return $tempDir . '/cache/' . implode('/', FsFilesStorage::composeCachePath(self::HASH)) . '__' . $lang . '/package';
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function namesIn(string $dir): array
+    {
+        $names = array_values(array_diff(scandir($dir) ?: [], ['.', '..']));
+        sort($names);
+
+        return $names;
+    }
+
     #[Test]
-    public function test_moveFromCacheToFileDir_prefers_the_hashed_objects_of_a_mixed_package(): void
+    public function test_makeCachePackage_stores_a_converted_file_under_the_content_hash(): void
     {
         $this->withTempDir(function (string $tempDir): void {
-            $hash = 'abcdef1234567890abcdef1234567890abcdef12';
-            $originalCache = AppConfig::$CACHE_REPOSITORY;
-            $originalFiles = AppConfig::$FILES_REPOSITORY;
-            try {
-                AppConfig::$CACHE_REPOSITORY = $tempDir . '/cache';
-                AppConfig::$FILES_REPOSITORY = $tempDir . '/files';
-                $fs = new FsFilesStorage();
+            $this->withStorageIn($tempDir, function (FsFilesStorage $fs) use ($tempDir): void {
+                $original = $tempDir . '/' . str_repeat('ب', 120) . '.DOCX';
+                $xliff = $tempDir . '/MAT_XLF1234';
+                file_put_contents($original, 'original');
+                file_put_contents($xliff, 'xliff');
 
-                $package = $tempDir . '/cache/' . implode('/', FsFilesStorage::composeCachePath($hash)) . '__en-US/package';
+                $this->assertTrue($fs->makeCachePackage(self::HASH, 'en-US', $original, $xliff));
+
+                $package = $this->packageDir($tempDir);
+                $this->assertSame([self::HASH . '.docx'], $this->namesIn($package . '/orig'));
+                $this->assertSame([self::HASH . '.docx.sdlxliff'], $this->namesIn($package . '/work'));
+                $this->assertSame('original', file_get_contents($package . '/orig/' . self::HASH . '.docx'));
+                $this->assertSame('xliff', file_get_contents($package . '/work/' . self::HASH . '.docx.sdlxliff'));
+                $this->assertFileExists($original, 'the upload stays where it is');
+                $this->assertFileDoesNotExist($xliff, 'the temporary xliff is removed');
+            });
+        });
+    }
+
+    #[Test]
+    public function test_makeCachePackage_overwrites_the_same_content_uploaded_under_another_name(): void
+    {
+        $this->withTempDir(function (string $tempDir): void {
+            $this->withStorageIn($tempDir, function (FsFilesStorage $fs) use ($tempDir): void {
+                foreach (['first name.txt', 'second name.txt'] as $name) {
+                    file_put_contents($tempDir . '/' . $name, 'same content');
+                    file_put_contents($tempDir . '/MAT_XLF', 'xliff of ' . $name);
+                    $this->assertTrue($fs->makeCachePackage(self::HASH, 'en-US', $tempDir . '/' . $name, $tempDir . '/MAT_XLF'));
+                }
+
+                $package = $this->packageDir($tempDir);
+                $this->assertSame([self::HASH . '.txt'], $this->namesIn($package . '/orig'));
+                $this->assertSame([self::HASH . '.txt.sdlxliff'], $this->namesIn($package . '/work'));
+                $this->assertSame('xliff of second name.txt', file_get_contents($package . '/work/' . self::HASH . '.txt.sdlxliff'));
+            });
+        });
+    }
+
+    #[Test]
+    public function test_makeCachePackage_stores_a_plain_native_xliff_with_the_forced_sdlxliff_extension(): void
+    {
+        $this->withTempDir(function (string $tempDir): void {
+            $this->withStorageIn($tempDir, function (FsFilesStorage $fs) use ($tempDir): void {
+                $xliff = $tempDir . '/' . str_repeat('x', 240) . '.xlf';
+                copy(AppConfig::$ROOT . '/tests/resources/files/test-propagation.xlf', $xliff);
+
+                $this->assertTrue($fs->makeCachePackage(self::HASH, 'en-US', null, $xliff));
+
+                $package = $this->packageDir($tempDir);
+                $this->assertSame([], $this->namesIn($package . '/orig'));
+                $this->assertSame([self::HASH . '.xlf.sdlxliff'], $this->namesIn($package . '/work'));
+            });
+        });
+    }
+
+    #[Test]
+    public function test_makeCachePackage_stores_a_native_sdlxliff_with_no_extra_extension(): void
+    {
+        $this->withTempDir(function (string $tempDir): void {
+            $this->withStorageIn($tempDir, function (FsFilesStorage $fs) use ($tempDir): void {
+                $xliff = $tempDir . '/спасибо.sdlxliff';
+                copy(AppConfig::$ROOT . '/tests/resources/files/small-with-notes.sdlxliff', $xliff);
+
+                $this->assertTrue($fs->makeCachePackage(self::HASH, 'en-US', null, $xliff));
+
+                $this->assertSame([self::HASH . '.sdlxliff'], $this->namesIn($this->packageDir($tempDir) . '/work'));
+            });
+        });
+    }
+
+    /**
+     * The new file name is hashed for both links; the cache name is linked as it is.
+     */
+    #[Test]
+    public function test_moveFromCacheToFileDir_links_a_converted_file_under_the_hashed_file_name(): void
+    {
+        $this->withTempDir(function (string $tempDir): void {
+            $this->withStorageIn($tempDir, function (FsFilesStorage $fs) use ($tempDir): void {
+                $name = str_repeat('ب', 120) . '.docx';
+                file_put_contents($tempDir . '/' . $name, 'original');
+                file_put_contents($tempDir . '/MAT_XLF', 'xliff');
+                $fs->makeCachePackage(self::HASH, 'en-US', $tempDir . '/' . $name, $tempDir . '/MAT_XLF');
+
+                $this->assertTrue($fs->moveFromCacheToFileDir('20261111/' . self::HASH, 'en-US', '7', $name));
+
+                $fileDir = $tempDir . '/files/20261111/7';
+                $this->assertSame([sha1($name) . '.docx'], $this->namesIn($fileDir . '/orig'));
+                $this->assertSame([sha1($name) . '.docx.sdlxliff'], $this->namesIn($fileDir . '/xliff'));
+                $this->assertSame('original', file_get_contents($fileDir . '/orig/' . sha1($name) . '.docx'));
+                $this->assertSame('xliff', file_get_contents($fileDir . '/xliff/' . sha1($name) . '.docx.sdlxliff'));
+            });
+        });
+    }
+
+    #[Test]
+    public function test_moveFromCacheToFileDir_keeps_the_cache_name_of_a_native_xliff(): void
+    {
+        $this->withTempDir(function (string $tempDir): void {
+            $this->withStorageIn($tempDir, function (FsFilesStorage $fs) use ($tempDir): void {
+                $xliff = $tempDir . '/a.xlf';
+                copy(AppConfig::$ROOT . '/tests/resources/files/test-propagation.xlf', $xliff);
+                $fs->makeCachePackage(self::HASH, 'en-US', null, $xliff);
+
+                $this->assertTrue($fs->moveFromCacheToFileDir('20261111/' . self::HASH, 'en-US', '7', 'a.xlf'));
+
+                $fileDir = $tempDir . '/files/20261111/7';
+                $this->assertSame([], $this->namesIn($fileDir . '/orig'));
+                $this->assertSame([self::HASH . '.xlf.sdlxliff'], $this->namesIn($fileDir . '/xliff'));
+            });
+        });
+    }
+
+    #[Test]
+    public function test_moveFromCacheToFileDir_without_a_new_name_links_the_cache_names(): void
+    {
+        $this->withTempDir(function (string $tempDir): void {
+            $this->withStorageIn($tempDir, function (FsFilesStorage $fs) use ($tempDir): void {
+                file_put_contents($tempDir . '/a.docx', 'original');
+                file_put_contents($tempDir . '/MAT_XLF', 'xliff');
+                $fs->makeCachePackage(self::HASH, 'en-US', $tempDir . '/a.docx', $tempDir . '/MAT_XLF');
+
+                $this->assertTrue($fs->moveFromCacheToFileDir('20261111/' . self::HASH, 'en-US', '7'));
+
+                $fileDir = $tempDir . '/files/20261111/7';
+                $this->assertSame([self::HASH . '.docx'], $this->namesIn($fileDir . '/orig'));
+                $this->assertSame([self::HASH . '.docx.sdlxliff'], $this->namesIn($fileDir . '/xliff'));
+            });
+        });
+    }
+
+    /**
+     * A package written before the names were hashed, uploaded again: the project gets the hashed pair, the one
+     * the segments are read from, and not the legacy file listed first.
+     */
+    #[Test]
+    public function test_moveFromCacheToFileDir_takes_the_hashed_objects_of_a_legacy_package(): void
+    {
+        $this->withTempDir(function (string $tempDir): void {
+            $this->withStorageIn($tempDir, function (FsFilesStorage $fs) use ($tempDir): void {
+                $package = $this->packageDir($tempDir);
                 mkdir($package . '/orig', 0755, true);
                 mkdir($package . '/work', 0755, true);
                 file_put_contents($package . '/orig/0-legacy.docx', 'legacy original');
                 file_put_contents($package . '/work/0-legacy.docx.sdlxliff', 'legacy xliff');
-                file_put_contents($package . '/orig/' . $hash . '.docx', 'original');
-                file_put_contents($package . '/work/' . $hash . '.docx.sdlxliff', 'xliff');
 
-                $this->assertTrue($fs->moveFromCacheToFileDir('20261111/' . $hash, 'en-US', '7', '0-legacy.docx'));
+                file_put_contents($tempDir . '/0-legacy.docx', 'original');
+                file_put_contents($tempDir . '/MAT_XLF', 'xliff');
+                $fs->makeCachePackage(self::HASH, 'en-US', $tempDir . '/0-legacy.docx', $tempDir . '/MAT_XLF');
+
+                $this->assertTrue($fs->moveFromCacheToFileDir('20261111/' . self::HASH, 'en-US', '7', '0-legacy.docx'));
 
                 $fileDir = $tempDir . '/files/20261111/7';
-                $this->assertSame('original', file_get_contents($fileDir . '/orig/0-legacy.docx'));
-                $this->assertSame('xliff', file_get_contents($fileDir . '/xliff/0-legacy.docx.sdlxliff'));
-            } finally {
-                AppConfig::$CACHE_REPOSITORY = $originalCache;
-                AppConfig::$FILES_REPOSITORY = $originalFiles;
-            }
+                $this->assertSame('original', file_get_contents($fileDir . '/orig/' . sha1('0-legacy.docx') . '.docx'));
+                $this->assertSame('xliff', file_get_contents($fileDir . '/xliff/' . sha1('0-legacy.docx') . '.docx.sdlxliff'));
+            });
+        });
+    }
+
+    #[Test]
+    public function test_cacheZipArchive_stores_the_zip_under_the_hashed_name_and_links_it_to_the_project(): void
+    {
+        $this->withTempDir(function (string $tempDir): void {
+            $this->withStorageIn($tempDir, function (FsFilesStorage $fs) use ($tempDir): void {
+                $zipName = 'Архив ' . str_repeat('z', 200) . '.ZIP';
+                mkdir($tempDir . '/upload');
+                file_put_contents($tempDir . '/upload/' . $zipName, 'zip bytes');
+
+                $this->assertTrue($fs->cacheZipArchive(self::HASH, $tempDir . '/upload/' . $zipName));
+                $this->assertSame(
+                    [sha1($zipName) . '.zip'],
+                    $this->namesIn($tempDir . '/zip/' . self::HASH . FsFilesStorage::ORIGINAL_ZIP_PLACEHOLDER)
+                );
+
+                $this->assertTrue($fs->linkZipToProject('2026-11-11 10:00:00', self::HASH . FsFilesStorage::ORIGINAL_ZIP_PLACEHOLDER, '9'));
+
+                // the download finds it from the original name kept in the database
+                $zipPath = $fs->getOriginalZipPath('2026-11-11 10:00:00', '9', $zipName);
+                $this->assertSame(sha1($zipName) . '.zip', basename($zipPath));
+                $this->assertSame('zip bytes', file_get_contents($zipPath));
+            });
         });
     }
 
@@ -1028,5 +1222,83 @@ class FsFilesStorageUnitTest extends AbstractTest
 
         $this->assertTrue($partialMock->moveFromCacheToFileDir('20240101' . DIRECTORY_SEPARATOR . $hash, 'en-US', '42'));
         $this->assertSame([['orig', $hash . '.'], ['work', $hash . '.']], $calls);
+    }
+
+    /**
+     * Projects hard-link the cache files. The same content uploaded again writes the same content-hash names: the
+     * cache gets the new bytes, under a new inode, and the files of the project created in between are left as they
+     * were.
+     */
+    #[Test]
+    public function test_makeCachePackage_never_rewrites_a_file_a_project_links(): void
+    {
+        $this->withTempDir(function (string $tempDir): void {
+            $this->withStorageIn($tempDir, function (FsFilesStorage $fs) use ($tempDir): void {
+                file_put_contents($tempDir . '/a.docx', 'original');
+                file_put_contents($tempDir . '/MAT_XLF1', 'first xliff');
+                $this->assertTrue($fs->makeCachePackage(self::HASH, 'en-US', $tempDir . '/a.docx', $tempDir . '/MAT_XLF1'));
+                $this->assertTrue($fs->moveFromCacheToFileDir('20261111/' . self::HASH, 'en-US', '7', 'a.docx'));
+
+                file_put_contents($tempDir . '/b.docx', 'original');
+                file_put_contents($tempDir . '/MAT_XLF2', 'second xliff');
+                $this->assertTrue($fs->makeCachePackage(self::HASH, 'en-US', $tempDir . '/b.docx', $tempDir . '/MAT_XLF2'));
+
+                $fileDir = $tempDir . '/files/20261111/7';
+                $this->assertSame('first xliff', file_get_contents($fileDir . '/xliff/' . sha1('a.docx') . '.docx.sdlxliff'));
+                $this->assertSame('original', file_get_contents($fileDir . '/orig/' . sha1('a.docx') . '.docx'));
+
+                $package = $this->packageDir($tempDir);
+                $this->assertSame('second xliff', file_get_contents($package . '/work/' . self::HASH . '.docx.sdlxliff'));
+                $this->assertSame([self::HASH . '.docx'], $this->namesIn($package . '/orig'), 'no temporary file is left');
+                $this->assertSame([self::HASH . '.docx.sdlxliff'], $this->namesIn($package . '/work'), 'no temporary file is left');
+            });
+        });
+    }
+
+    #[Test]
+    public function test_makeCachePackage_removes_the_temporary_copy_when_the_rename_fails(): void
+    {
+        $mockFs = $this->createMock(FilesystemAdapter::class);
+        $mockFs->method('mkdir')->willReturn(true);
+
+        $copiedTo = null;
+        $mockFs->expects($this->once())->method('copy')
+            ->willReturnCallback(function (string $source, string $dest) use (&$copiedTo): bool {
+                $copiedTo = $dest;
+
+                return true;
+            });
+        $mockFs->expects($this->once())->method('rename')->willReturn(false);
+        // the temporary copy exists, and so does the cache dir to clear
+        $mockFs->method('fileExists')->willReturnCallback(function (string $path) use (&$copiedTo): bool {
+            return $path === $copiedTo || str_ends_with($path, '__en-US');
+        });
+        $mockFs->expects($this->once())->method('unlink')
+            ->willReturnCallback(function (string $path) use (&$copiedTo): bool {
+                $this->assertSame($copiedTo, $path);
+
+                return true;
+            });
+        $mockFs->expects($this->once())->method('deleteDir');
+
+        $fs = new FsFilesStorage($mockFs);
+        $this->assertFalse($fs->makeCachePackage(self::HASH, 'en-US', '/tmp/original.docx', '/tmp/converted.xlf'));
+        $this->assertNotNull($copiedTo);
+        $this->assertStringStartsWith('.tmp-', basename($copiedTo));
+        $this->assertSame('orig', basename(dirname($copiedTo)));
+    }
+
+    #[Test]
+    public function test_getSingleFileInPath_skips_a_write_in_progress(): void
+    {
+        $this->withTempDir(function (string $tempDir): void {
+            touch($tempDir . '/' . FsFilesStorage::TEMPORARY_FILE_PREFIX . 'abc');
+
+            $fs = new FsFilesStorage();
+            $this->assertFalse($fs->getSingleFileInPath($tempDir));
+
+            touch($tempDir . '/legacy.docx');
+            $this->assertSame($tempDir . '/legacy.docx', $fs->getSingleFileInPath($tempDir, self::HASH . '.'));
+        });
     }
 }

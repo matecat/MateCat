@@ -5,8 +5,8 @@ namespace Model\FilesStorage;
 use Exception;
 use InvalidArgumentException;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
-use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Model\FilesStorage\Exceptions\FileSystemException;
+use Random\RandomException;
 use UnexpectedValueException;
 use Utils\Registry\AppConfig;
 
@@ -55,6 +55,35 @@ class FsFilesStorage extends AbstractFilesStorage
      */
 
     /**
+     * Writes $source to $dest in the cache without ever rewriting the file already stored under $dest.
+     *
+     * Projects hard-link the cache files, and a content-hash name is written again by every upload of the same
+     * content: a copy onto $dest would truncate and rewrite the inode those projects point at. The bytes go to a
+     * temporary name in the same directory first, then a rename swaps them in atomically, under a new inode, so the
+     * files already linked keep the bytes they were created with. The cache readers skip the temporary name.
+     *
+     * @param string $source
+     * @param string $dest
+     *
+     * @return bool
+     * @throws RandomException
+     */
+    private function copyIntoCache(string $source, string $dest): bool
+    {
+        $tmp = dirname($dest) . DIRECTORY_SEPARATOR . self::TEMPORARY_FILE_PREFIX . bin2hex(random_bytes(8));
+
+        if ($this->filesystem->copy($source, $tmp) && $this->filesystem->rename($tmp, $dest)) {
+            return true;
+        }
+
+        if ($this->filesystem->fileExists($tmp)) {
+            $this->filesystem->unlink($tmp);
+        }
+
+        return false;
+    }
+
+    /**
      * @param string $hash
      * @param string $lang
      * @param string|null $originalPath
@@ -83,24 +112,13 @@ class FsFilesStorage extends AbstractFilesStorage
 
         //if it's not a xliff as original
         if (!$originalPath) {
-            //if there is not an original path this is an unconverted file,
-            // the original does not exist
-            // detect which type of xliff
-            //check also for the extension, if already present do not force
-            $force_extension = "";
-            $fileType = (new XliffProprietaryDetect())->getInfo($xliffPath);
-            if (!$fileType['proprietary'] && $fileType['info']['extension'] != 'sdlxliff') {
-                $force_extension = '.sdlxliff';
-            }
-
-            //use original xliff
-            $xliffDestination = $cacheDir . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . static::basename_fix($xliffPath) . $force_extension;
+            //if there is not an original path this is an unconverted file: the original does not exist, the xliff is stored as it is
+            $xliffDestination = $cacheDir . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . static::getNativeXliffCacheFileName($hash, $xliffPath);
         } else {
-            //move original
-            $raw_file_path = explode(DIRECTORY_SEPARATOR, $originalPath);
-            $file_name = array_pop($raw_file_path);
+            //move original, under a name taken from the content hash: the same content always lands on the same file
+            $file_name = static::getCacheFileName($hash, $originalPath);
 
-            $outcome1 = $this->filesystem->copy($originalPath, $cacheDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . $file_name);
+            $outcome1 = $this->copyIntoCache($originalPath, $cacheDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . $file_name);
 
             if (!$outcome1) {
                 // Original directory deleted!!!
@@ -127,7 +145,7 @@ class FsFilesStorage extends AbstractFilesStorage
         //move converted xliff
         //In Unix you can't rename or move between filesystems,
         //Instead you must copy the file from one source location to the destination location, then delete the source.
-        $outcome2 = $this->filesystem->copy($xliffPath, $xliffDestination);
+        $outcome2 = $this->copyIntoCache($xliffPath, $xliffDestination);
 
         if (!$outcome2) {
             //Original directory deleted!!!
@@ -243,8 +261,9 @@ class FsFilesStorage extends AbstractFilesStorage
         // take the hashed one, which is the file the segments are read from
         $origFilePath = $this->getSingleFileInPath($origDir, $hash . '.');
         if (is_string($origFilePath) && $this->filesystem->isFile($origFilePath)) {
-            $tmpOrigFileName = !empty($newFileName) ? $newFileName : $origFilePath;
-            $res &= $this->filesystem->link($origFilePath, $fileDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . static::basename_fix($tmpOrigFileName));
+            // the file the cache already stores is never hashed again
+            $origFileName = !empty($newFileName) ? static::getStorageFileName($newFileName) : static::basename_fix($origFilePath);
+            $res &= $this->filesystem->link($origFilePath, $fileDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . $origFileName);
         }
 
         //work
@@ -261,18 +280,17 @@ class FsFilesStorage extends AbstractFilesStorage
 
         $this->logger->debug($convertedFilePath);
 
-        $tmpConvertedFilePath = $convertedFilePath;
-        if (!empty($newFileName)) {
-            if (!XliffFiles::isXliff($newFileName)) {
-                /** @var string $convertedExtension */
-                $convertedExtension = static::pathinfo_fix($convertedFilePath, PATHINFO_EXTENSION);
-                $tmpConvertedFilePath = $newFileName . "." . $convertedExtension;
-            }
+        // a native xliff keeps the name the cache stores it under, which is never hashed again
+        $convertedFileName = static::basename_fix($convertedFilePath);
+        if (!empty($newFileName) && !XliffFiles::isXliff($newFileName)) {
+            /** @var string $convertedExtension */
+            $convertedExtension = static::pathinfo_fix($convertedFilePath, PATHINFO_EXTENSION);
+            $convertedFileName = static::getStorageFileName($newFileName) . "." . $convertedExtension;
         }
 
         $this->logger->debug($convertedFilePath);
 
-        $dest = $fileDir . DIRECTORY_SEPARATOR . "xliff" . DIRECTORY_SEPARATOR . static::basename_fix($tmpConvertedFilePath);
+        $dest = $fileDir . DIRECTORY_SEPARATOR . "xliff" . DIRECTORY_SEPARATOR . $convertedFileName;
 
         $this->logger->debug($dest);
 
@@ -530,7 +548,7 @@ class FsFilesStorage extends AbstractFilesStorage
         }
 
         //move original
-        $outcome1 = $this->filesystem->copy($zipPath, $thisZipDir . DIRECTORY_SEPARATOR . static::basename_fix($zipPath));
+        $outcome1 = $this->filesystem->copy($zipPath, $thisZipDir . DIRECTORY_SEPARATOR . static::getStorageFileName($zipPath));
 
         if (!$outcome1) {
             //Original directory deleted!!!
