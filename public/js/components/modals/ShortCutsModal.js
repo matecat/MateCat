@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react'
-import {each} from 'lodash/collection'
+import {each} from 'lodash'
 
 import {Shortcuts} from '../../utils/shortcuts'
 import {isMacOS} from '../../utils/Utils'

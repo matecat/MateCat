@@ -220,6 +220,8 @@ export default defineConfig(({mode, command}) => {
 
     resolve: {
       extensions: ['.js', '.jsx', '.json'],
+      // lodash is CommonJS and cannot be tree-shaken: every named import ships all of it.
+      alias: [{find: /^lodash$/, replacement: 'lodash-es'}],
     },
 
     base: command === 'serve' ? '/' : '/public/build/',
@@ -241,18 +243,8 @@ export default defineConfig(({mode, command}) => {
             groups: [
               {
                 name: 'react-vendor',
-                test: /node_modules[\\/](react|react-dom|scheduler)/,
+                test: /node_modules[\\/](react|react-dom|scheduler)[\\/]/,
                 priority: 20,
-              },
-              {
-                name: 'editor-vendor',
-                test: /node_modules[\\/](draft-js|immutable)/,
-                priority: 15,
-              },
-              {
-                name: 'vendor',
-                test: /node_modules/,
-                priority: 10,
               },
             ],
           },

@@ -1,4 +1,4 @@
-import {forEach, isUndefined} from 'lodash'
+import {forEach, isUndefined, union} from 'lodash'
 import React, {
   useState,
   useRef,
@@ -6,7 +6,6 @@ import React, {
   useEffect,
   useCallback,
 } from 'react'
-import {union} from 'lodash/array'
 import $ from 'jquery'
 import SegmentCommentsContainer from './SegmentCommentsContainer'
 import SegmentsCommentsIcon from './SegmentsCommentsIcon'

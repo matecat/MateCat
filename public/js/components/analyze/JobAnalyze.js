@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useRef} from 'react'
-import {map} from 'lodash/collection'
+import {map} from 'lodash'
 import $ from 'jquery'
 import JobAnalyzeHeader from './JobAnalyzeHeader'
 import JobTableHeader from './JobTableHeader'
