@@ -35,13 +35,23 @@ const decodeSegment = (editorState) => {
     totalBlocksLength += block.getLength() + 1
   })
 
-  let decodedSegmentPlain = plainEditorText
+  return {
+    entitiesRange: entities,
+    decodedSegment: encodeEditorText(plainEditorText),
+  }
+}
+
+/**
+ * Turns editor text, whose tag entities are already replaced by their
+ * `encodedText`, into a segment string: line breaks become the line feed
+ * placeholder and the text is HTML-encoded, the tags left as they are.
+ */
+export const encodeEditorText = (plainEditorText) => {
+  const decodedSegmentPlain = plainEditorText
     .replace(/\n/gi, config.lfPlaceholder)
     .replace(new RegExp(String.fromCharCode(parseInt('200B', 16)), 'gi'), '')
-  let {tags, text} = TextUtils.replaceTempTags(decodedSegmentPlain)
-  decodedSegmentPlain = encodeHtmlEntities(text)
-  decodedSegmentPlain = TextUtils.restoreTempTags(tags, decodedSegmentPlain)
-  return {entitiesRange: entities, decodedSegment: decodedSegmentPlain}
+  const {tags, text} = TextUtils.replaceTempTags(decodedSegmentPlain)
+  return TextUtils.restoreTempTags(tags, encodeHtmlEntities(text))
 }
 
 export default decodeSegment

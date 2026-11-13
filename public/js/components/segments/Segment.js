@@ -27,7 +27,7 @@ import ModalsActions from '../../actions/ModalsActions'
 import {SegmentContext} from './SegmentContext'
 import CatToolConstants from '../../constants/CatToolConstants'
 import CatToolStore from '../../stores/CatToolStore'
-import DraftMatecatUtils from './utils/DraftMatecatUtils'
+import SegmentStringUtils from './utils/DraftMatecatUtils/segmentStringUtils'
 import CommentsStore from '../../stores/CommentsStore'
 import {SEGMENTS_STATUS} from '../../constants/Constants'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
@@ -89,8 +89,8 @@ const SegmentComponent = ({
     segment.status &&
     (segment.status.toLowerCase() === 'draft' ||
       segment.status.toLowerCase() === 'new') &&
-    !DraftMatecatUtils.checkXliffTagsInText(segment.translation) &&
-    DraftMatecatUtils.removeTagsFromText(segment.segment) !== ''
+    !SegmentStringUtils.checkXliffTagsInText(segment.translation) &&
+    SegmentStringUtils.removeTagsFromText(segment.segment) !== ''
   const dataAttrTagged =
     tagProjectionEnabled && !segment.tagged ? 'nottagged' : 'tagged'
 

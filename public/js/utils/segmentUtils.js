@@ -1,5 +1,5 @@
 import SegmentStore from '../stores/SegmentStore'
-import DraftMatecatUtils from '../components/segments/utils/DraftMatecatUtils'
+import SegmentStringUtils from '../components/segments/utils/DraftMatecatUtils/segmentStringUtils'
 import {
   SEGMENTS_STATUS,
   splittedTranslationPlaceholder,
@@ -42,11 +42,11 @@ const SegmentUtils = {
       : SegmentStore.getCurrentSegment()
     if (currentSegment && this.checkTPEnabled()) {
       // If the segment has tag projection enabled (has tags and has the enableTP class)
-      var segmentNoTags = DraftMatecatUtils.removeTagsFromText(
+      var segmentNoTags = SegmentStringUtils.removeTagsFromText(
         currentSegment.segment,
       )
       var tagProjectionEnabled =
-        DraftMatecatUtils.hasDataOriginalTags(currentSegment.segment) &&
+        SegmentStringUtils.hasDataOriginalTags(currentSegment.segment) &&
         !currentSegment.tagged &&
         segmentNoTags !== ''
       // If the segment has already be tagged
@@ -290,17 +290,17 @@ const SegmentUtils = {
       .filter((segment) => segment.sid !== sid)
       .reduce((acc, cur) => {
         const cleanTagsTranslation = shouldCountTagsAsChars
-          ? DraftMatecatUtils.excludeSomeTagsTransformToText(cur.translation, [
+          ? SegmentStringUtils.excludeSomeTagsTransformToText(cur.translation, [
               'g',
               'bx',
               'ex',
               'x',
             ])
-          : DraftMatecatUtils.decodePlaceholdersToPlainText(
-              DraftMatecatUtils.removeTagsFromText(cur.translation),
+          : SegmentStringUtils.decodePlaceholdersToPlainText(
+              SegmentStringUtils.removeTagsFromText(cur.translation),
             )
         return (
-          acc + DraftMatecatUtils.getCharactersCounter(cleanTagsTranslation)
+          acc + SegmentStringUtils.getCharactersCounter(cleanTagsTranslation)
         )
       }, charactersCounter)
 

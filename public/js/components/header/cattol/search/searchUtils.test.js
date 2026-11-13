@@ -1,4 +1,5 @@
 import SearchUtils from './searchUtils'
+import {markableText} from '../../../segmentView/segmentModel'
 import SegmentStore from '../../../../stores/SegmentStore'
 import CatToolActions from '../../../../actions/CatToolActions'
 import ModalsActions from '../../../../actions/ModalsActions'
@@ -473,156 +474,87 @@ describe('updateFeaturedResult', () => {
   })
 })
 
-describe('prepareTextToReplace', () => {
-  test('replaces angle brackets with placeholders and records their intervals', () => {
-    const {text, tagsIntervals} = SearchUtils.prepareTextToReplace('a<b>c')
+describe('getSearchMarks', () => {
+  const setSearch = ({params, mode = 'normal', featured = 0, occurrences}) => {
+    const hits = occurrences ?? [{searchProgressiveIndex: 0}]
+    // One entry per occurrence, as createSearchObject builds it
+    SearchUtils.occurrencesList = hits.map(() => 5)
+    SearchUtils.featuredSearchResult = featured
+    SearchUtils.searchResultsDictionary = {5: {occurrences: hits}}
+    SearchUtils.searchParams = {
+      'match-case': false,
+      'exact-match': false,
+      ...params,
+    }
+    SearchUtils.searchMode = mode
+  }
+  const marksOn = (segment, isSource = true) =>
+    SearchUtils.getSearchMarks(markableText(segment), isSource, 5)
 
-    expect(text).toBe('a##LESSTHAN##b##GREATERTHAN##c')
-    expect(tagsIntervals.length).toBe(1)
-    expect(tagsIntervals[0].start).toBeLessThan(tagsIntervals[0].end)
-  })
-
-  test('returns no intervals for plain text without tags', () => {
-    const {text, tagsIntervals} = SearchUtils.prepareTextToReplace('plain text')
-
-    expect(text).toBe('plain text')
-    expect(tagsIntervals).toEqual([])
-  })
-})
-
-describe('restoreTextAfterReplace', () => {
-  test('converts placeholders back into angle brackets', () => {
-    const result = SearchUtils.restoreTextAfterReplace(
-      'a##LESSTHAN##b##GREATERTHAN##c',
-    )
-    expect(result).toBe('a<b>c')
-  })
-})
-
-describe('markText', () => {
-  test('returns the text unchanged when the sid is not part of the results', () => {
+  test('returns no marks when the sid is not part of the results', () => {
     SearchUtils.occurrencesList = [1, 2]
-    const result = SearchUtils.markText('hello', true, 99)
-    expect(result).toBe('hello')
+    expect(SearchUtils.getSearchMarks('hello', true, 99)).toEqual([])
   })
 
-  test('wraps the current featured source match with the current-item class', () => {
-    SearchUtils.occurrencesList = [5]
-    SearchUtils.featuredSearchResult = 0
-    SearchUtils.searchResultsDictionary = {
-      5: {occurrences: [{searchProgressiveIndex: 0}]},
-    }
-    SearchUtils.searchParams = {
-      source: 'foo',
-      target: undefined,
-      'match-case': false,
-      'exact-match': false,
-    }
-    SearchUtils.searchMode = 'normal'
-
-    const result = SearchUtils.markText('foo bar', true, 5)
-
-    expect(result).toBe(
-      '<mark class="searchMarker currSearchItem">foo</mark> bar',
-    )
+  test('marks the featured source hit as the current item', () => {
+    setSearch({params: {source: 'foo'}})
+    expect(marksOn('foo bar')).toEqual([
+      {start: 0, end: 3, className: 'searchMarker currSearchItem'},
+    ])
   })
 
-  test('wraps a non-featured target match without the current-item class', () => {
-    SearchUtils.occurrencesList = [5]
-    SearchUtils.featuredSearchResult = 1
-    SearchUtils.searchResultsDictionary = {
-      5: {occurrences: [{searchProgressiveIndex: 0}]},
-    }
-    SearchUtils.searchParams = {
-      source: undefined,
-      target: 'bar',
-      'match-case': false,
-      'exact-match': false,
-    }
-    SearchUtils.searchMode = 'normal'
-
-    const result = SearchUtils.markText('foo bar', false, 5)
-
-    expect(result).toBe('foo <mark class="searchMarker">bar</mark>')
+  test('marks a non-featured target hit without the current-item class', () => {
+    setSearch({params: {target: 'bar'}, featured: 1})
+    expect(marksOn('foo bar', false)).toEqual([
+      {start: 4, end: 7, className: 'searchMarker'},
+    ])
   })
 
-  test('builds the regex from source or target when in source&target mode', () => {
-    SearchUtils.occurrencesList = [5]
-    SearchUtils.featuredSearchResult = 0
-    SearchUtils.searchResultsDictionary = {
-      5: {occurrences: [{searchProgressiveIndex: 0}]},
-    }
-    SearchUtils.searchParams = {
-      source: 'foo',
-      target: 'bar',
-      'match-case': false,
-      'exact-match': false,
-    }
-    SearchUtils.searchMode = 'source&target'
-
-    const result = SearchUtils.markText('foo baz', true, 5)
-
-    expect(result).toContain('<mark')
+  test('gives the current-item class only to the featured occurrence', () => {
+    setSearch({
+      params: {source: 'a'},
+      featured: 1,
+      occurrences: [{searchProgressiveIndex: 0}, {searchProgressiveIndex: 1}],
+    })
+    expect(marksOn('a a').map(({className}) => className)).toEqual([
+      'searchMarker',
+      'searchMarker currSearchItem',
+    ])
   })
 
-  test('applies word-boundary matching for exact-match searches', () => {
-    SearchUtils.occurrencesList = [5]
-    SearchUtils.featuredSearchResult = 0
-    SearchUtils.searchResultsDictionary = {
-      5: {occurrences: [{searchProgressiveIndex: 0}]},
-    }
-    SearchUtils.searchParams = {
-      source: 'foo',
-      target: undefined,
-      'match-case': false,
-      'exact-match': true,
-    }
-    SearchUtils.searchMode = 'normal'
-
-    const result = SearchUtils.markText('foofoo foo', true, 5)
-
-    expect(result).toBe(
-      'foofoo <mark class="searchMarker currSearchItem">foo</mark>',
-    )
+  test('uses the side-specific term in source&target mode', () => {
+    setSearch({params: {source: 'foo', target: 'baz'}, mode: 'source&target'})
+    expect(marksOn('foo baz', true)).toMatchObject([{start: 0, end: 3}])
+    expect(marksOn('foo baz', false)).toMatchObject([{start: 4, end: 7}])
   })
 
-  test('matches a double space using the nbsp fallback regex', () => {
-    SearchUtils.occurrencesList = [5]
-    SearchUtils.featuredSearchResult = 0
-    SearchUtils.searchResultsDictionary = {
-      5: {occurrences: [{searchProgressiveIndex: 0}]},
-    }
-    SearchUtils.searchParams = {
-      source: '  ',
-      target: undefined,
-      'match-case': false,
-      'exact-match': false,
-    }
-    SearchUtils.searchMode = 'normal'
-
-    const result = SearchUtils.markText('a&nbsp; b', true, 5)
-
-    expect(result).toContain('<mark')
+  test('applies word boundaries for exact-match searches', () => {
+    setSearch({params: {source: 'foo', 'exact-match': true}})
+    expect(marksOn('foofoo foo')).toMatchObject([{start: 7, end: 10}])
   })
 
-  test('skips wrapping matches that fall inside a tag placeholder', () => {
-    SearchUtils.occurrencesList = [5]
-    SearchUtils.featuredSearchResult = 0
-    SearchUtils.searchResultsDictionary = {
-      5: {occurrences: [{searchProgressiveIndex: 0}]},
-    }
-    SearchUtils.searchParams = {
-      source: 'b',
-      target: undefined,
-      'match-case': false,
-      'exact-match': false,
-    }
-    SearchUtils.searchMode = 'normal'
+  test('matches a double space as a non-breaking space followed by a space', () => {
+    setSearch({params: {source: '  '}})
+    expect(marksOn('a&nbsp; b')).toMatchObject([{start: 1, end: 3}])
+  })
 
-    const result = SearchUtils.markText('a<b>c', true, 5)
+  test('matches the decoded text, not its HTML entities', () => {
+    setSearch({params: {source: 'a & b'}})
+    expect(marksOn('a &amp; b')).toMatchObject([{start: 0, end: 5}])
+    setSearch({params: {source: 'amp'}})
+    expect(marksOn('a &amp; b')).toEqual([])
+  })
 
-    expect(result).toBe('a<b>c')
-    expect(result).not.toContain('<mark')
+  test('never matches inside a tag nor across one', () => {
+    setSearch({params: {source: 'id'}})
+    expect(marksOn('a<x id="1"/>b')).toEqual([])
+    setSearch({params: {source: 'ab'}})
+    expect(marksOn('a<x id="1"/>b')).toEqual([])
+  })
+
+  test('returns no marks when this side has no search term', () => {
+    setSearch({params: {target: 'undefined'}})
+    expect(marksOn('undefined', true)).toEqual([])
   })
 })
 

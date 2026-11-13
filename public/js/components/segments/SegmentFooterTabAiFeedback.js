@@ -4,7 +4,7 @@ import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
 import {aiFeedback} from '../../api/aiFeedback/aiFeedback'
 import CatToolStore from '../../stores/CatToolStore'
-import DraftMatecatUtils from './utils/DraftMatecatUtils'
+import SegmentStringUtils from './utils/DraftMatecatUtils/segmentStringUtils'
 import {Badge, BADGE_TYPE} from '../common/Badge/Badge'
 import {Button, BUTTON_MODE, BUTTON_TYPE} from '../common/Button/Button'
 import {decodeTagsToUnicodeChar} from './utils/DraftMatecatUtils/tagUtils'
@@ -34,14 +34,14 @@ export const SegmentFooterTabAiFeedback = ({
       setFeedback()
       setFeedbackLeave(undefined)
 
-      const decodedSource = DraftMatecatUtils.transformTagsToText(
-        DraftMatecatUtils.excludeSomeTagsFromText(
+      const decodedSource = SegmentStringUtils.transformTagsToText(
+        SegmentStringUtils.excludeSomeTagsFromText(
           decodeTagsToUnicodeChar(segment.segment),
           ['g', 'bx', 'ex', 'x'],
         ),
       ).replace(/·/g, ' ')
-      const decodedTarget = DraftMatecatUtils.transformTagsToText(
-        DraftMatecatUtils.excludeSomeTagsFromText(
+      const decodedTarget = SegmentStringUtils.transformTagsToText(
+        SegmentStringUtils.excludeSomeTagsFromText(
           decodeTagsToUnicodeChar(segment.translation),
           ['g', 'bx', 'ex', 'x'],
         ),

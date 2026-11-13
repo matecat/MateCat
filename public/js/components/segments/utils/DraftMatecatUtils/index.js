@@ -5,13 +5,13 @@ import decodeSegment from './decodeSegment'
 import duplicateFragment from './duplicateFragment'
 import applyEntityToContentBlock from './applyEntityToContentBlock'
 import getEntitiesInFragment from './getEntitiesInFragment'
+import getSegmentSlice from './getSegmentSlice'
 import createNewEntitiesFromMap from './createNewEntitiesFromMap'
 import linkEntities from './linkEntities'
 import beautifyEntities from './beautifyEntities'
 import decodeTagInfo from './decodeTagInfo'
 import replaceOccurrences from './replaceOccurrences'
 import {formatText, getCharactersCounter} from './textUtils'
-import buildFragmentFromJson from './buildFragmentFromJson'
 import insertText from './insertText'
 import updateEntityData from './updateEntityData'
 import tagFromEntity from './tagFromEntity'
@@ -24,7 +24,6 @@ import selectionIsEntity from './selectionIsEntity'
 import insertEntityAtSelection from './insertEntityAtSelection'
 import structFromName from './tagFromTagType'
 import splitBlockAtSelection from './splitBlockAtSelection'
-import getFragmentFromSelection from './DraftSource/src/component/handlers/edit/getFragmentFromSelection'
 import buildFragmentFromText from './buildFragmentFromText'
 import activateSearch from './activateSearch'
 import activateLexiqa from './activateLexiqa'
@@ -35,7 +34,6 @@ import prepareTextForLexiqa from './prepareTextForLexiqa'
 import getSelectedTextWithoutEntities from './getSelectedTextWithoutEntities'
 import replaceMultipleText from './replaceMultipleText'
 import {
-  transformTagsToHtml,
   transformTagsToText,
   decodeHtmlEntities,
   encodeHtmlEntities,
@@ -79,9 +77,8 @@ const DraftMatecatUtils = {
   // Fragment Utils
   duplicateFragment,
   getEntitiesInFragment,
-  buildFragmentFromJson,
+  getSegmentSlice,
   buildFragmentFromText,
-  getFragmentFromSelection, // Duplicated from draft-js/lib, not part of the draft-js public API
   // Segment Utils
   encodeContent,
   decodeSegment,
@@ -100,7 +97,6 @@ const DraftMatecatUtils = {
   getCharactersCounter,
   getSelectedTextWithoutEntities,
   replaceMultipleText,
-  transformTagsToHtml,
   transformTagsToText,
   decodeHtmlEntities,
   encodeHtmlEntities,

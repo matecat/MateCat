@@ -85,5 +85,25 @@ test('forwards replaceWordAt to LexiqaTooltipInfo through the tooltip content', 
     newWord: 'fixed',
     start: 0,
     end: 5,
+    blockKey: 'block-1',
   })
+})
+
+test('replaces the word in the warning block, not the block holding the caret', async () => {
+  // Regression: a suggestion on line 2 of a multi-line target was applied with
+  // line 2 offsets to whichever line held the caret
+  const secondLine = {...warning, blockKey: 'block-2', errorid: 'e2'}
+  render(
+    <LexiqaHighlight {...baseProps} blockKey="block-2" warnings={[secondLine]}>
+      wrng word
+    </LexiqaHighlight>,
+  )
+
+  fireEvent.pointerEnter(screen.getByText('wrng word'))
+  await act(() => new Promise((resolve) => setTimeout(resolve, 350)))
+  fireEvent.click(await screen.findByTestId('tooltip-info'))
+
+  expect(baseProps.replaceWordAt).toHaveBeenCalledWith(
+    expect.objectContaining({blockKey: 'block-2', start: 0, end: 5}),
+  )
 })

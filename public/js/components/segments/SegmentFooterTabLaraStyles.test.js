@@ -1,6 +1,7 @@
 import React from 'react'
 import {render, screen, act, fireEvent} from '@testing-library/react'
 import {SegmentFooterTabLaraStyles} from './SegmentFooterTabLaraStyles'
+import {setTagSignatureMiddleware} from './utils/DraftMatecatUtils/tagModel'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
 import {SegmentContext} from './SegmentContext'
@@ -29,13 +30,6 @@ jest.mock('../../utils/segmentUtils', () => ({
     contextListBefore: [],
     contextListAfter: [],
   })),
-}))
-
-jest.mock('./utils/DraftMatecatUtils', () => ({
-  __esModule: true,
-  default: {
-    transformTagsToHtml: jest.fn((text) => text),
-  },
 }))
 
 jest.mock('./utils/DraftMatecatUtils/tagUtils', () => ({
@@ -133,6 +127,9 @@ const stylesPayload = {
   ],
 }
 
+// Spaces as plain text, as with the show-whitespace switch off
+setTagSignatureMiddleware('space', () => false)
+
 const laraValues = [
   {
     translation: [
@@ -188,6 +185,8 @@ describe('SegmentFooterTabLaraStyles', () => {
     expect(screen.getByText('Formal')).toBeInTheDocument()
     expect(screen.getByText('Casual')).toBeInTheDocument()
     expect(screen.getByText('(Original)')).toBeInTheDocument()
+    expect(screen.getByText('Formal translation')).toBeInTheDocument()
+    expect(screen.getByText('Casual translation')).toBeInTheDocument()
   })
 
   test('renders error message when lara translate rejects', async () => {

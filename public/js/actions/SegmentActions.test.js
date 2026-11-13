@@ -79,7 +79,7 @@ jest.mock('../components/segments/utils/translationMatches', () => ({
   },
 }))
 
-jest.mock('../components/segments/utils/DraftMatecatUtils', () => ({
+jest.mock('../components/segments/utils/DraftMatecatUtils/segmentStringUtils', () => ({
   __esModule: true,
   default: {
     removePlaceholdersForGlossary: jest.fn((t) => t),
@@ -690,7 +690,6 @@ describe('SegmentActions — simple dispatch actions', () => {
   })
 
   test('editarea / misc dispatchers', () => {
-    SegmentActions.copyFragmentToClipboard('f', 'p')
     SegmentActions.editAreaChanged('1', true)
     SegmentActions.highlightTags('t', 'p', 'k', true)
     SegmentActions.hideAiAssistant()

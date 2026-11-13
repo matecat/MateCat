@@ -48,7 +48,11 @@ const LexiqaHighlight = ({
           warning.messages && (
             <LexiqaTooltipInfo
               messages={warning.messages}
-              onReplaceWord={replaceWordAt}
+              onReplaceWord={(replacement) =>
+                // The warning's offsets are relative to its own block, which
+                // may not be the block holding the caret
+                replaceWordAt({...replacement, blockKey})
+              }
             />
           )
         }
