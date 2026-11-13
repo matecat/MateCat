@@ -18,6 +18,7 @@ use Predis\Client;
 use ReflectionException;
 use RuntimeException;
 use Utils\Logger\LoggerFactory;
+use Utils\Registry\AppConfig;
 
 class SessionTokenStoreHandler
 {
@@ -72,12 +73,18 @@ class SessionTokenStoreHandler
     }
 
     /**
-     * Log cache operations for debugging and monitoring purposes.
+     * Log a token store operation to the `login_cookie_cache` channel.
      *
-     * @param string $type The type of cache operation (e.g., set, get, remove).
-     * @param string $key The cache key being operated on.
-     * @param mixed $value The value associated with the cache key.
-     * @param string $sqlQuery The SQL query related to the cache operation.
+     * The record names the operation and the field (an md5 of the cookie). It leaves out
+     * `$sqlQuery`: for this class that argument is the login cookie itself, and a cookie in a log
+     * file is a credential anyone reading the log can replay.
+     *
+     * Example record: `["type" => "SETMAP: active_user_login_tokens:123", "key" => "8602...3b4c"]`.
+     *
+     * @param string $type The operation and the map it ran on.
+     * @param string $key The field name, an md5 of the cookie value.
+     * @param mixed $value Unused.
+     * @param string $sqlQuery The login cookie value. Never logged.
      *
      * @return void
      * @throws Exception
@@ -87,8 +94,6 @@ class SessionTokenStoreHandler
         LoggerFactory::getLogger("login_cookie_cache")->debug([
             "type" => $type,
             "key" => $key,
-            "value" => preg_replace("/ +/", " ", str_replace("\n", " ", $sqlQuery)),
-            //"result_set" => $value,
         ]);
     }
 
@@ -99,6 +104,13 @@ class SessionTokenStoreHandler
      * and ensures it is active for the user's session. It should be called only
      * once when the user is authenticated and the session is established
      * or when the cookie expires during the current session.
+     *
+     * The field name is an md5 of the cookie and the stored value is the issue time. The cookie
+     * itself is never written to Redis: a stored copy would let anyone who can read Redis sign in
+     * as the user. {@see pruneExpiredLoginTokens()} reads the issue time back.
+     *
+     * Example: `setCookieLoginTokenActive(123, $cookie)` writes field `md5($cookie)` with value
+     * `serialize([1794578400])` in the hash `active_user_login_tokens:123`.
      *
      * @param int $userId The unique identifier of the user.
      * @param string $loginCookieValue The value of the login cookie to activate.
@@ -111,7 +123,7 @@ class SessionTokenStoreHandler
     {
         $key = $this->mapKey($userId);
         $this->_cacheSetConnection();
-        $this->_setInCacheMap($key, $loginCookieValue, [$loginCookieValue]);
+        $this->_setInCacheMap($key, $loginCookieValue, [time()]);
     }
 
     /**
@@ -248,32 +260,44 @@ class SessionTokenStoreHandler
     }
 
     /**
-     * Drops tokens the caller judges expired.
+     * Drops the fields of tokens that have expired.
      *
      * Redis here is 7.1.0, so there is no HEXPIRE (7.4+) and hash fields carry no individual TTL.
      * Worse, {@see DaoCacheTrait::_setInCacheMap()} refreshes the *whole map's* TTL on every write,
      * so for a user who keeps logging in nothing in the map ever expires on its own. Renewal
      * retires the grandparent and keeps the steady state at roughly two fields per device, which
      * leaves exactly one leak this closes: fields belonging to devices that stopped coming back.
-     * Those hold expired tokens, so they cannot authenticate — this is hygiene, not a hole.
+     * Those hold expired tokens, so they cannot authenticate; this is hygiene, not a hole.
      *
-     * The expiry judgement is the caller's because JWT parsing needs the auth secret, which this
-     * class has no business knowing. Anything the predicate cannot judge is kept: a slightly
-     * larger hash beats logging someone out over an unreadable value.
+     * A field stores the issue time of its token, and a token lives for
+     * {@see AppConfig::$AUTHCOOKIEDURATION} seconds, so a field older than that is dropped.
+     *
+     * Fields written before the issue time was stored hold the cookie value itself. Only the
+     * caller can judge those, because parsing the JWT needs the auth secret, which this class has
+     * no business knowing: they go to `$isLegacyCookieExpired`. No such field outlives one cookie
+     * lifetime after the deploy that stopped writing them, and the callback can go then.
+     *
+     * Anything of neither shape is kept: a slightly larger hash beats logging someone out over an
+     * unreadable value.
+     *
+     * Example: with a 7 day lifetime, a field holding an issue time of 8 days ago is dropped and
+     * one holding an issue time of 1 hour ago is kept.
      *
      * @param int $userId The unique identifier of the user.
-     * @param callable(string): bool $isExpired Receives a stored cookie value, returns true to drop it.
+     * @param callable(string): bool $isLegacyCookieExpired Receives a stored cookie value, returns true to drop it.
      *
      * @return void
      * @throws ReflectionException If there is an issue with the cache operation.
      * @throws Exception
      */
-    public function pruneExpiredLoginTokens(int $userId, callable $isExpired): void
+    public function pruneExpiredLoginTokens(int $userId, callable $isLegacyCookieExpired): void
     {
         $redis = $this->connection();
 
         /** @var array<string, string> $fields */
         $fields = $redis->hgetall($this->mapKey($userId));
+
+        $oldestLiveIssueTime = time() - AppConfig::$AUTHCOOKIEDURATION;
 
         foreach ($fields as $fieldName => $storedValue) {
             // _setInCacheMap() wraps values in an XFetchEnvelope or not depending on $xFetchEnabled
@@ -281,13 +305,17 @@ class SessionTokenStoreHandler
             // This class disables xFetch, but values written under a different setting can outlive
             // that decision in Redis.
             $unserialized = $this->_unwrapCacheMapValue(unserialize($storedValue));
-            $token = is_array($unserialized) ? ($unserialized[0] ?? null) : null;
+            $stored = is_array($unserialized) ? ($unserialized[0] ?? null) : null;
 
-            if (!is_string($token) || !$isExpired($token)) {
-                continue;
+            $expired = match (true) {
+                is_int($stored) => $stored < $oldestLiveIssueTime,
+                is_string($stored) => $isLegacyCookieExpired($stored),
+                default => false,
+            };
+
+            if ($expired) {
+                $this->retireLoginToken($userId, $fieldName);
             }
-
-            $this->retireLoginToken($userId, $fieldName);
         }
     }
 
