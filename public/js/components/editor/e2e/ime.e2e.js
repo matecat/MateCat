@@ -71,7 +71,7 @@ test('a composed word, then a tag from the tag menu right after it', async ({
   await page.keyboard.type('<')
   await expect
     .poll(async () => (await events(page, 'tagMenu')).at(-1)?.payload)
-    .not.toBeNull()
+    .toBeTruthy()
   await call(page, 'insertMenuTag', '<x id="9"/>')
   expect(await value(page)).toBe(
     replaceOnce(target, 'Seconda', '\ud55c<x id="9"/>Seconda'),
