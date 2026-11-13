@@ -488,6 +488,7 @@ abstract class AbstractDao
             // IN list written into the SQL puts every call in the same hash, which then grows forever.
             // A heuristic: it does not see a scalar written into the SQL (`WHERE id = 42` with
             // nothing bound), an IN list beside other bound values, or a constant explicit key map.
+            // DaoCacheTrait::CACHE_MAP_FIELD_CAP bounds the hash in those cases.
             if ($bindParams === [] && $this->cacheTTL > 0 && preg_match('/\bIN\s*\(/i', $stmt->queryString) === 1) {
                 throw new UnscopedCacheKeyMap(
                     'A cached query writes its IN list into the SQL, so every call shares one Redis key. ' .
