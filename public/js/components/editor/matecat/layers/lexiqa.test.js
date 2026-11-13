@@ -51,6 +51,9 @@ describe('lexiqaDocRanges: Lexiqa offsets back on the document', () => {
     ['on a later line', 'one##$_0A$##two wrld', 'wrld'],
     ['after a carriage return', 'one##$_0D$##wrld', 'wrld'],
     ['after decoded entities', 'A &amp; B &lt;c&gt; wrld', 'wrld'],
+    // Regression: an emoji is two positions in the document, the warning after it was placed one position early
+    ['after an emoji', 'a 😀 wrld', 'wrld'],
+    ['after an emoji and a tag', '😀<x id="1"/>😀 wrld', 'wrld'],
   ])('%s', (_, segment, word) => {
     expect(placed(segment, word)).toEqual([word])
   })
@@ -167,5 +170,51 @@ describe('lexiqaRanges (activateLexiqa on the source)', () => {
   test('Lexiqa reporting nothing gives no ranges', () => {
     mockGetRanges.mockReturnValue({})
     expect(lexiqaRanges(createSegmentState('one tow'), segment)).toEqual([])
+  })
+})
+
+describe('lexiqaRanges (activateLexiqa on the target)', () => {
+  const target = 'line one##$_0A$##line tow'
+  const segment = {
+    sid: '5',
+    lexiqa: {source: {spelling: [{}]}, target: {spelling: [{}]}},
+    lxqDecodedSource: prepareTextForLexiqa('nothing here'),
+    lxqDecodedTranslation: prepareTextForLexiqa(target),
+  }
+
+  beforeEach(() => {
+    mockGetRanges.mockReset()
+    mockBuildTooltipMessages.mockReset()
+  })
+
+  test('the target results are placed over the Lexiqa text of the translation, on the right line', () => {
+    const start = segment.lxqDecodedTranslation.indexOf('tow')
+    mockGetRanges.mockReturnValue([
+      {start, end: start + 3, myClass: 'spelling', errorid: 'e2'},
+    ])
+    mockBuildTooltipMessages.mockReturnValue([{msg: 'two', type: 'suggestion'}])
+    const state = createSegmentState(target)
+    const [range] = lexiqaRanges(state, segment, false)
+    expect(state.sliceDoc(range.from, range.to)).toBe('tow')
+    expect(state.doc.lineAt(range.from).number).toBe(2)
+    expect(range.data.messages).toEqual([{msg: 'two', type: 'suggestion'}])
+    expect(mockGetRanges).toHaveBeenCalledWith(
+      segment.lexiqa.target,
+      segment.lxqDecodedTranslation,
+      false,
+    )
+    expect(mockBuildTooltipMessages).toHaveBeenCalledWith(
+      expect.objectContaining({errorid: 'e2'}),
+      '5',
+      false,
+    )
+  })
+
+  test('source results are never shown on the target', () => {
+    const state = createSegmentState(target)
+    expect(
+      lexiqaRanges(state, {...segment, lexiqa: {source: {a: [{}]}}}, false),
+    ).toEqual([])
+    expect(mockGetRanges).not.toHaveBeenCalled()
   })
 })

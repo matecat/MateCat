@@ -45,7 +45,14 @@ describe('code independent of Draft.js', () => {
     expect(() => require('../matecat/TargetEditor')).not.toThrow()
   })
 
-  test('the segment view component loads without draft-js', () => {
+  test('the segment view component and its tag tooltip load without draft-js', () => {
     expect(() => require('../../segmentView/SegmentView')).not.toThrow()
+    expect(() => require('../../segmentView/tagTooltip')).not.toThrow()
+  })
+
+  test('the layer hover tooltip and the target layers load without draft-js', () => {
+    expect(() => require('./layerHover')).not.toThrow()
+    expect(() => require('../matecat/layerTooltip')).not.toThrow()
+    expect(() => require('../matecat/layers/blacklist')).not.toThrow()
   })
 })

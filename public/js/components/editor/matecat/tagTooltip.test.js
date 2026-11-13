@@ -53,7 +53,7 @@ const hover = (chip) => {
   act(() => jest.advanceTimersByTime(300))
 }
 
-const shownTooltip = () => document.querySelector('.cm-tag-tooltip')
+const shownTooltip = () => document.querySelector('.tag-full-text-tooltip')
 
 beforeEach(() => {
   jest.useFakeTimers()

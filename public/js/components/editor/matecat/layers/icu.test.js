@@ -138,3 +138,37 @@ describe('icuRanges (the source ICU layer)', () => {
     expect(marked).toEqual(['{', 'n', '}'])
   })
 })
+
+describe('icuRanges on the target (IcuHighlight with isTarget)', () => {
+  test('an error token is marked as an error and keeps its messages for the tooltip', () => {
+    // Russian plurals need few and many too
+    const text = '{count, plural, one {# item} other {# items}}'
+    const state = createSegmentState(text)
+    const errors = icuRanges(state, 'ru', {showErrors: true}).filter(
+      (r) => r.data,
+    )
+    expect(errors).toHaveLength(1)
+    expect(errors[0].className).toBe('icuItem icuItem-error')
+    expect(errors[0].data.type).toBe('icu')
+    expect(errors[0].data.messages).toEqual(
+      expect.arrayContaining([
+        "Missing required category 'few' in plural block for locale 'ru'.",
+      ]),
+    )
+  })
+
+  test('without showErrors (the source) the same token is a plain ICU mark', () => {
+    const state = createSegmentState('{count, plural, one {# item}}')
+    const ranges = icuRanges(state, 'en-US')
+    expect(ranges.every((r) => r.className === 'icuItem' && !r.data)).toBe(true)
+  })
+
+  test('a valid message has no error marks on the target either', () => {
+    const state = createSegmentState(
+      '{count, plural, one {# item} other {# items}}',
+    )
+    expect(
+      icuRanges(state, 'en-US', {showErrors: true}).some((r) => r.data),
+    ).toBe(false)
+  })
+})

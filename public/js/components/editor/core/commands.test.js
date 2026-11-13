@@ -101,4 +101,34 @@ describe('replace of one occurrence', () => {
     const state = stateWith('ab', 0)
     expect(replaceOccurrenceSpec(state, /x*/g, 0, 'y')).toBe(null)
   })
+
+  describe('with each tag searched as its text', () => {
+    // The x tag is searched as `name`: hit 0 is in it, hit 1 is the word after it.
+    const tagText = (markup) => (markup.startsWith('<x') ? 'name' : markup)
+    const state = stateWith('a <x id="1"/> name', 0)
+
+    test('a hit in a tag takes its number, so the one after it replaces the right word', () => {
+      expect(
+        serialize(
+          apply(
+            state,
+            replaceOccurrenceSpec(state, /name/gi, 1, 'XX', tagText),
+          ),
+        ),
+      ).toBe('a <x id="1"/> XX')
+    })
+
+    test('a hit in a tag is never replaced: the tag is locked', () => {
+      expect(
+        replaceOccurrenceSpec(state, /name/gi, 0, 'XX', tagText),
+      ).toBeNull()
+    })
+
+    test('a hit running from the text into a tag is not replaced either', () => {
+      const next = stateWith('ab<x id="1"/>', 0)
+      expect(
+        replaceOccurrenceSpec(next, /bn/gi, 0, 'XX', () => 'name'),
+      ).toBeNull()
+    })
+  })
 })

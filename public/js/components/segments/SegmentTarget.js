@@ -3,9 +3,8 @@ import {isEmpty, isUndefined} from 'lodash'
 
 import EditArea from './Editarea'
 import TargetEditor from '../editor/matecat/TargetEditor'
-import {isNewEditorActive} from '../editor/matecat/editorEngine'
+import {isNewEditorEnabled} from '../editor/matecat/editorEngine'
 import {targetEditorBridge} from './targetEditorBridge'
-import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import CursorUtils from '../../utils/cursorUtils'
 import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentStore from '../../stores/SegmentStore'
@@ -28,7 +27,6 @@ import SegmentView from '../segmentView/SegmentView'
 
 const SegmentTarget = ({segment}) => {
   const context = useContext(SegmentContext)
-  const {userInfo} = useContext(ApplicationWrapperContext)
 
   const [showFormatMenu, setShowFormatMenu] = useState(false)
   const [charactersCounter, setCharactersCounter] = useState(0)
@@ -263,7 +261,7 @@ const SegmentTarget = ({segment}) => {
       //Text Area
       textAreaContainer = (
         <div className="textarea-container">
-          {isNewEditorActive(userInfo?.metadata) ? (
+          {isNewEditorEnabled() ? (
             <TargetEditor
               ref={(ref) => (editAreaRef.current = ref)}
               segment={segment}

@@ -1,5 +1,5 @@
 import SearchUtils from './searchUtils'
-import {markableText} from '../../../segmentView/segmentModel'
+import {markableText, searchedTagTexts} from '../../../segmentView/segmentModel'
 import SegmentStore from '../../../../stores/SegmentStore'
 import CatToolActions from '../../../../actions/CatToolActions'
 import ModalsActions from '../../../../actions/ModalsActions'
@@ -555,6 +555,85 @@ describe('getSearchMarks', () => {
   test('returns no marks when this side has no search term', () => {
     setSearch({params: {target: 'undefined'}})
     expect(marksOn('undefined', true)).toEqual([])
+  })
+
+  describe('hits inside tag labels', () => {
+    // A ph tag whose chip shows `label`
+    const ph = (label) => `<ph id="mtc_1" equiv-text="base64:${btoa(label)}"/>`
+    const hits = (count) =>
+      Array.from({length: count}, (_, i) => ({searchProgressiveIndex: i}))
+    const marksWithLabels = (segment) =>
+      SearchUtils.getSearchMarks(
+        markableText(segment),
+        true,
+        5,
+        searchedTagTexts(segment),
+      )
+
+    test('a hit in a label before the current one takes its number, so the current hit is the right one', () => {
+      setSearch({params: {source: 'name'}, featured: 1, occurrences: hits(2)})
+      expect(marksWithLabels(`a ${ph('%name%')} name`)).toEqual([
+        {start: 2, end: 3, className: 'searchMarker', tag: true},
+        {start: 4, end: 8, className: 'searchMarker currSearchItem'},
+      ])
+    })
+
+    test('the current hit inside a label comes back on its tag', () => {
+      setSearch({params: {source: 'name'}, featured: 0, occurrences: hits(2)})
+      expect(marksWithLabels(`a ${ph('%name%')} name`)).toEqual([
+        {start: 2, end: 3, className: 'searchMarker currSearchItem', tag: true},
+        {start: 4, end: 8, className: 'searchMarker'},
+      ])
+    })
+
+    test('hits are numbered in document order across text and several labels', () => {
+      setSearch({params: {source: 'name'}, featured: 3, occurrences: hits(4)})
+      const marks = marksWithLabels(`${ph('name name')} name ${ph('%name%')}`)
+      expect(
+        marks.map(({start, tag, className}) => [start, !!tag, className]),
+      ).toEqual([
+        [0, true, 'searchMarker'],
+        [0, true, 'searchMarker'],
+        [2, false, 'searchMarker'],
+        [7, true, 'searchMarker currSearchItem'],
+      ])
+    })
+
+    test('a label hit counts case-insensitively unless match case is on', () => {
+      setSearch({params: {source: 'name'}, featured: 1, occurrences: hits(2)})
+      expect(marksWithLabels(`${ph('%NAME%')} name`)[1]).toEqual({
+        start: 2,
+        end: 6,
+        className: 'searchMarker currSearchItem',
+      })
+      setSearch({
+        params: {source: 'name', 'match-case': true},
+        featured: 0,
+        occurrences: hits(1),
+      })
+      expect(marksWithLabels(`${ph('%NAME%')} name`)).toEqual([
+        {start: 2, end: 6, className: 'searchMarker currSearchItem'},
+      ])
+    })
+
+    test('a label is searched as the chip shows it, not as its entities', () => {
+      setSearch({params: {source: 'R&D'}, featured: 1, occurrences: hits(2)})
+      expect(marksWithLabels(`${ph('R&D')} R&amp;D`)).toEqual([
+        {start: 0, end: 1, className: 'searchMarker', tag: true},
+        {start: 2, end: 5, className: 'searchMarker currSearchItem'},
+      ])
+      setSearch({params: {source: 'amp'}})
+      expect(marksWithLabels(`${ph('R&D')} R&amp;D`)).toEqual([])
+    })
+
+    test('a compressible g is searched as its markup, as the cattool counts it: a term in its label is no hit', () => {
+      // The store's search text keeps `<g id="1" equiv-text="…">` (transformTagsToText), so it counts one hit here
+      setSearch({params: {source: 'name'}, featured: 0, occurrences: hits(1)})
+      const g = `<g id="1" equiv-text="base64:${btoa('%name%')}">`
+      expect(marksWithLabels(`a ${g}b</g> name`)).toEqual([
+        {start: 6, end: 10, className: 'searchMarker currSearchItem'},
+      ])
+    })
   })
 })
 
