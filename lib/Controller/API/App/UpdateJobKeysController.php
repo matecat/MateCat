@@ -9,6 +9,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 use DomainException;
 use Exception;
 use InvalidArgumentException;
+use JsonException;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\JobsMetadataMarshaller;
@@ -20,6 +21,7 @@ use Utils\TmKeyManagement\ClientTmKeyStruct;
 use Utils\TmKeyManagement\Filter;
 use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\TMS\TMSService;
 use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
 use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
 use Utils\Validator\JSONSchema\JSONValidator;
@@ -148,6 +150,7 @@ class UpdateJobKeysController extends KleinController
         $tm_keys = array_merge($tm_keys['ownergroup'], $tm_keys['mine'], $tm_keys['anonymous']);
         $tm_keys = json_encode($tm_keys);
 
+        $this->assertNewKeysAreValid((string)$tm_keys, $jobData['tm_keys']);
 
         $totalTmKeys = TmKeyManager::mergeJsonKeys((string)$tm_keys, $jobData['tm_keys'], $this->getDatabase(), $userRole, $this->user->uid);
 
@@ -219,6 +222,47 @@ class UpdateJobKeysController extends KleinController
      *
      * @return bool
      */
+    /**
+     * The MyMemory service new keys are checked with. Tests replace it.
+     *
+     * @throws Exception
+     */
+    protected function getTmService(): TMSService
+    {
+        return new TMSService($this->getDatabase());
+    }
+
+    /**
+     * Checks every key that is new to the job with MyMemory, as project creation does, before
+     * the merge writes it into the job and into the user's keyring.
+     *
+     * A key MyMemory does not accept refuses the whole request; a MyMemory error is not caught,
+     * so the request fails and nothing changes. The check also refreshes the key's TTL on MyMemory.
+     *
+     * Example: the job has key `aaa1`, the client sends `aaa1` and `bbb2` → only `bbb2` is checked.
+     *
+     * @throws InvalidArgumentException when MyMemory does not accept a new key
+     * @throws JsonException
+     * @throws DomainException
+     * @throws Exception when MyMemory cannot be reached
+     */
+    private function assertNewKeysAreValid(string $Json_clientKeys, string $Json_jobKeys): void
+    {
+        $newKeys = TmKeyManager::getNewKeys($Json_clientKeys, $Json_jobKeys);
+
+        if (empty($newKeys)) {
+            return;
+        }
+
+        $tmService = $this->getTmService();
+
+        foreach ($newKeys as $newKey) {
+            if ($tmService->checkCorrectKey($newKey) !== true) {
+                throw new InvalidArgumentException('One of the TM keys you added is not valid. Please check it and try again.', -7);
+            }
+        }
+    }
+
     private function jobOwnerIsMe(?string $owner): bool
     {
         return $this->userIsLogged && $owner == $this->user->email;
