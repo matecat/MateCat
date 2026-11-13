@@ -8,6 +8,7 @@ import {createSegmentState} from '../core/createSegmentEditor'
 import TargetEditor, {
   tagMenuPosition,
   tagWarningClass,
+  unpairedTagStarts,
   targetLayers,
 } from './TargetEditor'
 import SearchUtils from '../../header/cattol/search/searchUtils'
@@ -532,6 +533,41 @@ describe('TargetEditor store events', () => {
       expect(container.querySelector('.tag-mismatch-error')).toBeNull()
     })
   })
+
+  // The QA check names no tag for an unclosed <g> (it only says "should be <g ...> ... </g>"): the editor marks the
+  // closing tag with no opening before it, and the opening tag that is never closed.
+  describe('unpaired tags', () => {
+    const errorFlags = (container) =>
+      chipEls(container).map((el) =>
+        el.classList.contains('tag-mismatch-error'),
+      )
+    const warnAbout = async (translation, overrides = {}) => {
+      const segment = makeSegment({translation, ...overrides})
+      const utils = renderTarget(segment)
+      act(() => SegmentStore.emit(SegmentConstants.SET_SEGMENT_WARNINGS, '10'))
+      await flush(550)
+      return utils
+    }
+
+    test('a closing tag before its opening tag marks both as errors', async () => {
+      const {container} = await warnAbout('Ciao </g>mondo<g id="1"> fine')
+      expect(errorFlags(container)).toEqual([true, true])
+    })
+
+    test('well nested pairs are not marked', async () => {
+      const {container} = await warnAbout(
+        '<g id="1">Ciao <g id="2">mondo</g></g> <x id="3"/>',
+      )
+      expect(errorFlags(container)).toEqual([false, false, false, false, false])
+    })
+
+    test('a closed segment marks nothing', async () => {
+      const {container} = await warnAbout('Ciao </g>mondo<g id="1"> fine', {
+        opened: false,
+      })
+      expect(container.querySelector('.tag-mismatch-error')).toBeNull()
+    })
+  })
 })
 
 describe('TargetEditor tags', () => {
@@ -749,6 +785,21 @@ describe('helpers', () => {
     expect(tagWarningClass(PC_OPEN, {tagMismatch: {target: [PC_OPEN]}})).toBe(
       '',
     )
+  })
+
+  test('a closing tag pairs with the nearest open tag before it; the rest are unpaired', () => {
+    const chip = (from, name) => ({from, token: {name}})
+    // </g> <g> <g> </g> <x/> : the first closing tag has no opening before it, the first opening is never closed
+    expect([
+      ...unpairedTagStarts([
+        chip(0, 'gCl'),
+        chip(4, 'g'),
+        chip(9, 'g'),
+        chip(14, 'gCl'),
+        chip(20, 'x'),
+      ]),
+    ]).toEqual([0, 4])
+    expect([...unpairedTagStarts([chip(0, 'g'), chip(5, 'gCl')])]).toEqual([])
   })
 })
 

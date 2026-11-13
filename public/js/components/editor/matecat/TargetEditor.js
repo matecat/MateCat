@@ -73,6 +73,27 @@ export const tagWarningClass = (raw, {tagMismatch} = {}) => {
   return ''
 }
 
+/**
+ * Where the unpaired `g` tags start: a closing tag with no open tag before it (the chip labelled `?`), and an open tag
+ * never closed. A closing tag pairs with the nearest open tag before it, as the chip labels do. The QA check reports an
+ * unclosed `g` without naming the tag, so the target marks these itself.
+ * @param {Array<{from: number, token: {name: string}}>} chips the chips in document order (chipTokens)
+ * @returns {Set<number>}
+ */
+export const unpairedTagStarts = (chips) => {
+  const open = []
+  const unpaired = new Set()
+  chips.forEach(({from, token}) => {
+    if (token.name === 'g') open.push(from)
+    else if (token.name === 'gCl') {
+      if (open.length) open.pop()
+      else unpaired.add(from)
+    }
+  })
+  open.forEach((from) => unpaired.add(from))
+  return unpaired
+}
+
 // The menu entries in the order the menu shows them: tags missing from the target first.
 const menuEntries = ({missingTags = [], sourceTags = []}) => [
   ...missingTags,
@@ -317,11 +338,16 @@ const TargetEditor = forwardRef(
     const refreshWarnings = () => {
       if (!editorRef.current) return
       const {segment} = latestRef.current
-      warningRef.current = chipTokens(editorRef.current.view.state)
+      const chips = chipTokens(editorRef.current.view.state)
+      // Only the open segment shows tag warnings, as Draft's tags do.
+      const unpaired = segment.opened ? unpairedTagStarts(chips) : new Set()
+      warningRef.current = chips
         .map(({from, to, token}) => ({
           from,
           to,
-          className: tagWarningClass(token.raw, segment),
+          className:
+            tagWarningClass(token.raw, segment) ||
+            (unpaired.has(from) ? 'tag-mismatch-error' : ''),
         }))
         .filter((r) => r.className)
       applyTagState()
