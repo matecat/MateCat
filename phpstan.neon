@@ -26,6 +26,20 @@ services:
                 - lib/Model/DataAccess/Database.php
 
     -
+        # A cached DAO read with a constant key map and changing bound values piles every call
+        # into one Redis hash. See the class docblock.
+        class: Matecat\PhpStan\Rules\NoConstantCacheKeyMapRule
+        tags:
+            - phpstan.rules.rule
+
+    -
+        # A class that uses DaoCacheTrait and declares its own cache write method skips the
+        # 10,000-field cap. See the class docblock.
+        class: Matecat\PhpStan\Rules\NoCacheMapWriteOverrideRule
+        tags:
+            - phpstan.rules.rule
+
+    -
         class: Matecat\PhpStan\Rules\NoDirectSessionSuperglobalRule
         tags:
             - phpstan.rules.rule
