@@ -309,7 +309,9 @@ class AuthCookie
         }
 
         // Collect fields left behind by devices that stopped renewing. Runs here rather than on the
-        // hot path: this is once per renewal interval per device, not once per request.
+        // hot path: this is once per renewal interval per device, not once per request. The store
+        // judges a field by its issue time; the callback is asked only about fields written before
+        // the store kept one, which hold the cookie itself.
         $this->tokenStore->pruneExpiredLoginTokens($userId, static function (string $token): bool {
             try {
                 SimpleJWT::getValidatedInstanceFromString($token, AppConfig::$AUTHSECRET);
