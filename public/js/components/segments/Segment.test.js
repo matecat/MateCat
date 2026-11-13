@@ -154,10 +154,6 @@ jest.mock('./utils/DraftMatecatUtils', () => ({
   },
 }))
 
-jest.mock('lodash/array', () => ({
-  union: jest.fn((...args) => [].concat(...args)),
-}))
-
 jest.mock('immutable', () => {
   const createImmutable = (value) => ({
     value,

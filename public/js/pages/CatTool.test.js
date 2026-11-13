@@ -222,12 +222,12 @@ jest.mock('../components/header/cattol/Header', () => ({
 jest.mock('../components/segments/SegmentsContainer', () => () => (
   <div data-testid="segments-container" />
 ))
-jest.mock('../components/settingsPanel', () => ({
-  SETTINGS_PANEL_TABS: {editorSettings: 'editorSettings'},
+jest.mock('../components/settingsPanel/SettingsPanel', () => ({
   SettingsPanel: () => <div data-testid="settings-panel" />,
 }))
 jest.mock('../components/settingsPanel/SettingsPanelConstants', () => ({
   DEFAULT_ENGINE_MEMORY: {id: 0, name: 'No engine'},
+  SETTINGS_PANEL_TABS: {editorSettings: 'editorSettings'},
 }))
 jest.mock('../components/footer/CattoolFooter', () => ({
   CattoolFooter: () => <div data-testid="cattool-footer" />,
@@ -397,7 +397,8 @@ describe('CatTool', () => {
           value: 'editorSettings',
         })
       })
-      expect(screen.getByTestId('settings-panel')).toBeInTheDocument()
+      // The panel is lazy-loaded, so it appears once its chunk resolves.
+      expect(await screen.findByTestId('settings-panel')).toBeInTheDocument()
     })
   })
 

@@ -1,9 +1,6 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react'
 import $ from 'jquery'
-import {isUndefined} from 'lodash'
-import {cloneDeep} from 'lodash/lang'
-import {find, map} from 'lodash/collection'
-import {findIndex, remove} from 'lodash/array'
+import {isUndefined, cloneDeep, find, map, findIndex, remove} from 'lodash'
 
 import CattolConstants from '../../../../constants/CatToolConstants'
 import SegmentStore from '../../../../stores/SegmentStore'

@@ -154,13 +154,10 @@ jest.mock('lodash', () => {
     each: actual.each,
     forEach: actual.forEach,
     isUndefined: (v) => typeof v === 'undefined',
+    debounce: (fn) => fn,
   }
 })
-jest.mock('lodash/function', () => ({
-  debounce: (fn) => fn,
-}))
 jest.mock('immutable', () => ({fromJS: jest.fn()}))
-jest.mock('lodash/array', () => ({union: jest.fn()}))
 
 jest.mock('../utils/speech2text', () => ({
   __esModule: true,

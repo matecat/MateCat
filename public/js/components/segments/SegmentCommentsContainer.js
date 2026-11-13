@@ -1,6 +1,5 @@
 import React, {useContext, useEffect, useMemo, useRef, useState} from 'react'
-import {isUndefined} from 'lodash'
-import {debounce} from 'lodash/function'
+import {isUndefined, debounce} from 'lodash'
 import CommentsStore from '../../stores/CommentsStore'
 import CommentsActions from '../../actions/CommentsActions'
 import CommentsConstants from '../../constants/CommentsConstants'

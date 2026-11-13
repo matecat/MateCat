@@ -1,6 +1,5 @@
 import React from 'react'
-import {each, forEach, isUndefined} from 'lodash'
-import {debounce} from 'lodash/function'
+import {each, forEach, isUndefined, debounce} from 'lodash'
 import $ from 'jquery'
 
 import AppDispatcher from '../stores/AppDispatcher'

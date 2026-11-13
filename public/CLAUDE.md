@@ -53,7 +53,7 @@ terminal, including for a single file (`yarn test --watchAll=false public/js/pat
 
 Vite entries are defined in `vite-entries/groups.json`. Adding a new page requires a new entry file in `vite-entries/` and a corresponding entry in `groups.json`.
 
-Build output goes to `public/build/`. Vite also injects asset tags into PHP/PHPTAL templates under `lib/View/` via the HTML template injection plugin — check `vite.config.js` if you need to wire up a new page template.
+Build output goes to `public/build/`. Vite also injects asset tags into PHP/PHPTAL templates under `lib/View/` via the HTML template injection plugin — check `vite.config.mjs` if you need to wire up a new page template.
 
 ## Git
 
