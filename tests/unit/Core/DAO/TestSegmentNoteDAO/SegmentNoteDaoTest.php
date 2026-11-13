@@ -142,6 +142,32 @@ class SegmentNoteDaoTest extends AbstractTest
         $this->assertArrayHasKey(1, $result);
     }
 
+    /**
+     * The ids are bound. Written into the SQL and cached, every page of ids landed in one Redis
+     * hash that reached 18.9 GB on production.
+     */
+    public function testGetBySegmentIdsBindsTheIds(): void
+    {
+        $stmt = $this->createMock(PDOStatement::class);
+        $stmt->expects($this->once())->method('execute')->with($this->identicalTo([10, 11]));
+        $stmt->method('fetchAll')->willReturn([]);
+
+        $pdo = $this->createMock(PDO::class);
+        $pdo->expects($this->once())->method('prepare')
+            ->with($this->stringContains('id_segment IN ( ?,? )'))
+            ->willReturn($stmt);
+
+        $database = $this->createStub(IDatabase::class);
+        $database->method('getConnection')->willReturn($pdo);
+
+        $this->assertSame([], (new SegmentNoteDao($database))->getBySegmentIds([10, 11]));
+    }
+
+    public function testGetBySegmentIdsReturnsEmptyArrayForNoIds(): void
+    {
+        $this->assertSame([], (new SegmentNoteDao($this->dbStub))->getBySegmentIds([]));
+    }
+
 
     // ── getAggregatedBySegmentIdInInterval ──────────────────────────────────
 

@@ -41,6 +41,13 @@ class S3FilesStorage extends AbstractFilesStorage
     const string FAST_ANALYSIS_FOLDER = 'fast-analysis';
 
     /**
+     * Seconds the Redis file map of an upload session lives, in case the project creation worker
+     * never runs and deleteQueue() never deletes it. Without a TTL, Redis (volatile-lru) can never
+     * evict the key: 350,000 of them had piled up on production.
+     */
+    const int UPLOAD_FILE_MAP_TTL = 604800;
+
+    /**
      * @var ClientInterface
      */
     protected ClientInterface $s3Client;
@@ -562,7 +569,10 @@ class S3FilesStorage extends AbstractFilesStorage
             }
         }
 
-        (new RedisHandler())->getConnection()->hset(self::getUploadSessionSafeName($uploadSession), 'file_map', serialize($hasSet));
+        $fileMapKey = self::getUploadSessionSafeName($uploadSession);
+        $redis = (new RedisHandler())->getConnection();
+        $redis->hset($fileMapKey, 'file_map', serialize($hasSet));
+        $redis->expire($fileMapKey, self::UPLOAD_FILE_MAP_TTL);
         $this->filesystem->deleteDir(AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession);
     }
 
@@ -689,9 +699,17 @@ class S3FilesStorage extends AbstractFilesStorage
     }
 
     /**
-     * Delete the entire queue folder
+     * Delete the queue folder of an upload session on S3, and its file map in Redis.
+     *
+     * The project creation worker calls it once it no longer needs the uploaded files, whether the
+     * project was created or not.
+     *
+     * Example: `deleteQueue('/queue/{FD750C37-2D33-4913-BDD1-1C71BE9D2435}')` deletes the S3 folder
+     * `queue-projects/fd750c37-2d33-4913-bdd1-1c71be9d2435` and the Redis key
+     * `fd750c37-2d33-4913-bdd1-1c71be9d2435`.
      *
      * @param string $uploadDir
+     * @throws Exception
      */
     public function deleteQueue(string $uploadDir): void
     {
@@ -700,10 +718,14 @@ class S3FilesStorage extends AbstractFilesStorage
             return;
         }
 
+        $uploadSession = self::getUploadSessionSafeName($lastPart);
+
         $this->s3Client->deleteFolder([
             'bucket' => static::$FILES_STORAGE_BUCKET,
-            'prefix' => self::QUEUE_FOLDER . DIRECTORY_SEPARATOR . self::getUploadSessionSafeName($lastPart)
+            'prefix' => self::QUEUE_FOLDER . DIRECTORY_SEPARATOR . $uploadSession
         ]);
+
+        (new RedisHandler())->getConnection()->unlink($uploadSession);
     }
 
     /**
