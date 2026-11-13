@@ -478,6 +478,60 @@ describe('TargetEditor store events', () => {
       ),
     ).toEqual([false, true])
   })
+
+  describe('QA warnings through edits', () => {
+    // Errors thrown in a timer reach window, not the test: collect them.
+    let errors
+    const onError = (event) => {
+      errors.push(event.error)
+      event.preventDefault()
+    }
+    beforeEach(() => {
+      errors = []
+      window.addEventListener('error', onError)
+    })
+    afterEach(() => window.removeEventListener('error', onError))
+
+    const renderWarned = async () => {
+      const segment = makeSegment()
+      const utils = renderTarget(segment)
+      utils.update({...segment, tagMismatch: {target: ['</g>']}})
+      act(() => SegmentStore.emit(SegmentConstants.SET_SEGMENT_WARNINGS, '10'))
+      await flush(550)
+      return utils
+    }
+    const removeText = (view, from, to) =>
+      act(() => {
+        view.dispatch({changes: {from, to}, userEvent: 'delete'})
+      })
+    const errorFlags = (container) =>
+      chipEls(container).map((el) =>
+        el.classList.contains('tag-mismatch-error'),
+      )
+
+    test('a warning stays on its tag when text before the tag is deleted and the caret moves', async () => {
+      const {container} = await renderWarned()
+      const view = viewOf(container)
+      removeText(view, 0, 5)
+      select(view, 0)
+      await flush()
+      expect(errors).toEqual([])
+      expect(errorFlags(container)).toEqual([false, true])
+    })
+
+    test('deleting the warned tag and moving the caret marks nothing and does not throw', async () => {
+      const {container} = await renderWarned()
+      const view = viewOf(container)
+      const end = view.state.doc.length
+      removeText(view, 0, end)
+      type(view, 'x')
+      select(view, 0)
+      await flush()
+      expect(errors).toEqual([])
+      expect(docOf(container)).toBe('x')
+      expect(container.querySelector('.tag-mismatch-error')).toBeNull()
+    })
+  })
 })
 
 describe('TargetEditor tags', () => {

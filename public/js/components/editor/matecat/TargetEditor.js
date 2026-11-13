@@ -147,6 +147,20 @@ export const targetLayers = (state, segment, haveKeysGlossary) => {
   ]
 }
 
+/**
+ * Chip ranges kept outside the editor state, moved through an edit: a range whose chip the edit removed is dropped.
+ * @param {Array<{from: number, to: number}>} ranges
+ * @param {import('@codemirror/state').ChangeSet} changes
+ */
+export const mapChipRanges = (ranges, changes) =>
+  ranges
+    .map((r) => ({
+      ...r,
+      from: changes.mapPos(r.from, 1),
+      to: changes.mapPos(r.to, -1),
+    }))
+    .filter((r) => r.to > r.from)
+
 const isArrowKey = (key) =>
   key === 'ArrowLeft' ||
   key === 'ArrowRight' ||
@@ -437,6 +451,12 @@ const TargetEditor = forwardRef(
             }),
           ),
           EditorView.updateListener.of((update) => {
+            // The chip classes are dispatched again on every selection change: their ranges follow the text.
+            if (update.docChanged) {
+              ;[highlightRef, focusRef, warningRef, searchChipRef].forEach(
+                (r) => (r.current = mapChipRanges(r.current, update.changes)),
+              )
+            }
             if (!update.selectionSet && !update.focusChanged) return
             const {state} = update
             const byUser = update.transactions.some(
