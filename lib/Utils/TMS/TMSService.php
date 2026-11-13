@@ -140,10 +140,18 @@ class TMSService
 
             $this->logger->debug($file);
 
+            // The default key is the TM everyone shares: its TMX stays on MyMemory and reaches no
+            // adaptive engine. The engines are read before the import because they decide mt_import,
+            // checked in this order: default key → false; any adaptive engine (Lara, ModernMT) →
+            // false, Matecat imports on them itself; no engine → true, MyMemory imports into Lara.
+            $isSharedTmKey = $file->getTmKey() === AppConfig::$DEFAULT_TM_KEY;
+            $userAdaptiveEngines = $isSharedTmKey ? [] : $this->getUserAdaptiveMTEngines($user);
+
             $importStatus = $this->mymemory_engine->importMemory(
                 $file->getFilePath(),
                 $file->getTmKey(),
-                $user
+                $user,
+                !$isSharedTmKey && $userAdaptiveEngines === []
             );
 
             //check for errors during the import
@@ -162,10 +170,6 @@ class TMSService
             $file->setUuid($importStatus->id);
 
             $warnings = [];
-
-            // The default key is the TM everyone shares: its TMX stays on MyMemory and never
-            // reaches an adaptive engine such as Lara.
-            $userAdaptiveEngines = $this->isSharedTmKey($file->getTmKey()) ? [] : $this->getUserAdaptiveMTEngines($user);
             foreach ($userAdaptiveEngines as $engine) {
                 try {
                     $engine->importMemory($file->getFilePath(), $file->getTmKey(), $user);
@@ -182,15 +186,6 @@ class TMSService
         }
 
         return $warnings;
-    }
-
-    /**
-     * Tells whether a TMX on this key belongs to the TM everyone shares, the configured default
-     * key, not to one user. Example: with `DEFAULT_TM_KEY = 'abc'`, `'abc'` → true.
-     */
-    private function isSharedTmKey(string $tmKey): bool
-    {
-        return $tmKey === AppConfig::$DEFAULT_TM_KEY;
     }
 
     /**
