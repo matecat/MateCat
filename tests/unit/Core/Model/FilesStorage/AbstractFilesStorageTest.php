@@ -7,6 +7,7 @@ use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\IDatabase;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\FsFilesStorage;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Utils\Registry\AppConfig;
 
@@ -244,6 +245,110 @@ class AbstractFilesStorageTest extends AbstractTest
     {
         $result = $this->fs->getSingleFileInPath('/tmp/opencode/nonexistent_' . uniqid());
         $this->assertFalse($result);
+    }
+
+    /**
+     * A legacy object next to a hashed one: the hashed one wins, whatever the directory order.
+     */
+    #[Test]
+    public function test_getSingleFileInPath_returns_the_preferred_file(): void
+    {
+        $hash = str_repeat('a', 40);
+        $tempDir = '/tmp/opencode/preferred_file_test_' . uniqid();
+        mkdir($tempDir, 0755, true);
+        file_put_contents($tempDir . '/0-legacy.docx', 'legacy');
+        file_put_contents($tempDir . '/' . $hash . '.docx', 'hashed');
+        file_put_contents($tempDir . '/zz-legacy.docx', 'legacy');
+        try {
+            $result = $this->fs->getSingleFileInPath($tempDir, $hash . '.');
+            $this->assertSame($tempDir . DIRECTORY_SEPARATOR . $hash . '.docx', $result);
+        } finally {
+            array_map('unlink', glob($tempDir . '/*'));
+            rmdir($tempDir);
+        }
+    }
+
+    #[Test]
+    public function test_getSingleFileInPath_falls_back_to_the_first_file_without_a_preferred_one(): void
+    {
+        $tempDir = '/tmp/opencode/preferred_fallback_test_' . uniqid();
+        mkdir($tempDir, 0755, true);
+        file_put_contents($tempDir . '/legacy.docx', 'legacy');
+        try {
+            $result = $this->fs->getSingleFileInPath($tempDir, str_repeat('a', 40) . '.');
+            $this->assertSame($tempDir . DIRECTORY_SEPARATOR . 'legacy.docx', $result);
+        } finally {
+            unlink($tempDir . '/legacy.docx');
+            rmdir($tempDir);
+        }
+    }
+
+    #[Test]
+    public function test_getSingleFileInPath_with_a_preferred_prefix_returns_false_for_empty_dir(): void
+    {
+        $tempDir = '/tmp/opencode/preferred_empty_test_' . uniqid();
+        mkdir($tempDir, 0755, true);
+        try {
+            $this->assertFalse($this->fs->getSingleFileInPath($tempDir, str_repeat('a', 40) . '.'));
+        } finally {
+            rmdir($tempDir);
+        }
+    }
+
+    /**
+     * @return array<string, array{string, string}>
+     */
+    public static function storageFileNameProvider(): array
+    {
+        $arabic = str_repeat('حديث_أمني_', 12) . '.docx';
+
+        return [
+            'ascii' => ['report.docx', sha1('report.docx') . '.docx'],
+            'uppercase extension is lowercased' => ['REPORT.DOCX', sha1('REPORT.DOCX') . '.docx'],
+            'only the last extension is kept' => ['archive.tar.gz', sha1('archive.tar.gz') . '.gz'],
+            'no dot means no extension' => ['README', sha1('README')],
+            'trailing dot means no extension' => ['report.', sha1('report.')],
+            'leading dot' => ['.htaccess', sha1('.htaccess') . '.htaccess'],
+            'cyrillic' => ['спасибо.txt', sha1('спасибо.txt') . '.txt'],
+            'long multibyte name' => [$arabic, sha1($arabic) . '.docx'],
+            'name over 255 bytes' => [str_repeat('a', 1000) . '.xlsx', sha1(str_repeat('a', 1000) . '.xlsx') . '.xlsx'],
+            'only the basename of a path' => ['/upload/dir/report.docx', sha1('report.docx') . '.docx'],
+            'extension with a character outside a-z0-9' => ['report.d%c', sha1('report.d%c')],
+            'non-ascii extension' => ['report.дoc', sha1('report.дoc')],
+            'extension longer than 16 characters' => ['report.' . str_repeat('x', 17), sha1('report.' . str_repeat('x', 17))],
+            'extension of 16 characters' => ['report.' . str_repeat('x', 16), sha1('report.' . str_repeat('x', 16)) . '.' . str_repeat('x', 16)],
+            'a stored name is not hashed again' => [sha1('report.docx') . '.docx', sha1('report.docx') . '.docx'],
+            'a bare stored name is not hashed again' => [sha1('README'), sha1('README')],
+            'sha1 with a bad extension is hashed' => [sha1('x') . '.d%c', sha1(sha1('x') . '.d%c')],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('storageFileNameProvider')]
+    public function test_getStorageFileName(string $originalName, string $expected): void
+    {
+        $result = AbstractFilesStorage::getStorageFileName($originalName);
+
+        $this->assertSame($expected, $result);
+        $this->assertMatchesRegularExpression(AbstractFilesStorage::STORED_NAME_PATTERN, $result);
+        $this->assertLessThanOrEqual(57, strlen($result));
+    }
+
+    #[Test]
+    public function test_getStorageFileName_is_deterministic_and_distinct(): void
+    {
+        $this->assertSame(AbstractFilesStorage::getStorageFileName('a.docx'), AbstractFilesStorage::getStorageFileName('a.docx'));
+        $this->assertNotSame(AbstractFilesStorage::getStorageFileName('a.docx'), AbstractFilesStorage::getStorageFileName('b.docx'));
+    }
+
+    #[Test]
+    public function test_getCacheFileName_keeps_the_extension_of_the_original(): void
+    {
+        $hash = sha1('content');
+
+        $this->assertSame($hash . '.docx', AbstractFilesStorage::getCacheFileName($hash, '/upload/dir/Report.DOCX'));
+        $this->assertSame($hash . '.txt', AbstractFilesStorage::getCacheFileName($hash, 'спасибо.txt'));
+        $this->assertSame($hash, AbstractFilesStorage::getCacheFileName($hash, 'README'));
     }
 
     #[Test]

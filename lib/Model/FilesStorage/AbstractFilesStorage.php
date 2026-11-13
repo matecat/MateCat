@@ -32,6 +32,11 @@ abstract class AbstractFilesStorage implements IFilesStorage
     const string ORIGINAL_ZIP_PLACEHOLDER = "__##originalZip##";
     const string OBJECTS_SAFE_DELIMITER = '__';
 
+    /**
+     * A name produced by getStorageFileName() or getCacheFileName(): a sha1, plus the extension when it has one.
+     */
+    const string STORED_NAME_PATTERN = '/^[0-9a-f]{40}(\.[a-z0-9]{1,16})?$/';
+
     protected string $filesDir;
     protected string $cacheDir;
     protected string $zipDir;
@@ -131,11 +136,74 @@ abstract class AbstractFilesStorage implements IFilesStorage
     }
 
     /**
+     * Fixed-length name a project file or an original zip is stored under, in place of the user's file name.
+     *
+     * Only an original name goes in. The original name is never read back from storage: it lives in files.filename.
+     * The extension is kept, because the xliff checks at project creation and the converted-file naming depend on it.
+     *
+     * @param string $originalName
+     *
+     * @return string
+     */
+    public static function getStorageFileName(string $originalName): string
+    {
+        $basename = static::basename_fix($originalName);
+
+        if (preg_match(self::STORED_NAME_PATTERN, $basename)) {
+            return $basename;
+        }
+
+        return sha1($basename) . self::storageExtension($basename);
+    }
+
+    /**
+     * Fixed-length name an object of the cache package is stored under.
+     *
+     * The cache package is shared by every upload of the same content, so the name comes from the content hash:
+     * uploading the same content again, under any name, overwrites the same object.
+     *
+     * @param string $cacheHash
+     * @param string $originalName
+     *
+     * @return string
+     */
+    public static function getCacheFileName(string $cacheHash, string $originalName): string
+    {
+        return $cacheHash . self::storageExtension(static::basename_fix($originalName));
+    }
+
+    /**
+     * The extension of $basename with its leading dot, or an empty string when it has none a stored name can carry.
+     *
+     * @param string $basename
+     *
+     * @return string
+     */
+    private static function storageExtension(string $basename): string
+    {
+        // pathinfo_fix() reads a name with no dot as all extension
+        if (!str_contains($basename, '.')) {
+            return '';
+        }
+
+        /** @var string $extension */
+        $extension = static::pathinfo_fix($basename, PATHINFO_EXTENSION);
+
+        return preg_match('/^[a-z0-9]{1,16}$/', $extension) ? '.' . $extension : '';
+    }
+
+    /**
+     * Returns the file in $path whose name starts with $preferredPrefix, otherwise the first file found.
+     *
+     * A directory written before the storage names were hashed can hold a legacy object next to a hashed one:
+     * the prefix makes the choice deterministic.
+     *
      * @param string $path
+     * @param string|null $preferredPrefix
      *
      * @return false|string
      */
-    public function getSingleFileInPath(string $path): false|string
+    public function getSingleFileInPath(string $path, ?string $preferredPrefix = null): false|string
     {
         //check if it actually exists
         $filePath = false;
@@ -152,10 +220,18 @@ abstract class AbstractFilesStorage implements IFilesStorage
                 continue;
             }
 
-            //get the remaining file (it's the only file in dir)
-            $filePath = $path . DIRECTORY_SEPARATOR . $file->getFilename();
-            //no need to loop anymore
-            break;
+            if ($preferredPrefix !== null && str_starts_with($file->getFilename(), $preferredPrefix)) {
+                return $path . DIRECTORY_SEPARATOR . $file->getFilename();
+            }
+
+            //keep the first file, unless a preferred one turns up
+            if ($filePath === false) {
+                $filePath = $path . DIRECTORY_SEPARATOR . $file->getFilename();
+            }
+
+            if ($preferredPrefix === null) {
+                break;
+            }
         }
 
         return $filePath;

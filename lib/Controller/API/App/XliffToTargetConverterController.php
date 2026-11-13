@@ -8,7 +8,6 @@
 
 namespace Controller\API\App;
 
-use Controller\Abstracts\AbstractDownloadController;
 use Controller\Abstracts\KleinController;
 use JsonException;
 use Klein\Exceptions\ResponseAlreadySentException;
@@ -16,6 +15,7 @@ use LogicException;
 use Model\Conversion\Filters;
 use Model\Conversion\MimeTypes\MimeTypes;
 use RuntimeException;
+use Utils\Tools\ContentDisposition;
 
 set_time_limit(180);
 
@@ -78,14 +78,9 @@ class XliffToTargetConverterController extends KleinController
             $this->response->header("Content-Type", "application/octet-stream");
             $this->response->header("Content-Type", "application/download");
             // The name comes from the file the caller uploaded, by way of the filters service, so a
-            // quote or a CR in it either closes the quoted value early or ends the header. Called
-            // statically because this controller extends KleinController directly and so does not
-            // inherit the download hierarchy's copy of the sweep.
-            $safeFilename = AbstractDownloadController::sanitizeContentDispositionFilename($filename);
-            $this->response->header(
-                'Content-Disposition',
-                'attachment; filename="' . $safeFilename . '"'
-            ); // enclose file name in double quotes in order to avoid duplicate header error. Reference https://github.com/prior/prawnto/pull/16
+            // quote or a CR in it would either close the quoted value early or end the header:
+            // ContentDisposition strips both and encodes the rest.
+            $this->response->header('Content-Disposition', ContentDisposition::build($filename));
             $this->response->header('Content-Transfer-Encoding', 'binary');
             $this->response->header('Expires', "0");
             $this->response->header('Connection', "close");
