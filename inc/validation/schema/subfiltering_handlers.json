@@ -24,6 +24,7 @@
           "objective_c_ns",
           "double_percent",
           "square_sprintf",
+          "single_square",
           "sprintf"
         ]
       }

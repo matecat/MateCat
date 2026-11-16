@@ -334,13 +334,13 @@ test('selecting a status submits the filter and the reset button clears it', () 
   jest.useRealTimers()
 })
 
-test('selecting APPROVED-2 submits the filter with revision number 2', () => {
+test('selecting APPROVED2 submits the filter with revision number 2', () => {
   jest.useFakeTimers()
   config.secondRevisionsCount = true
   renderFilter()
 
   fireEvent.click(document.querySelector('.filter-status .select'))
-  fireEvent.click(screen.getByTestId('option-APPROVED-2'))
+  fireEvent.click(screen.getByTestId('option-APPROVED2'))
   act(() => {
     jest.advanceTimersByTime(100)
   })
@@ -522,4 +522,36 @@ test('lists the locked filters first, then the 101% ones', () => {
           Node.DOCUMENT_POSITION_FOLLOWING,
       ).toBeTruthy(),
     )
+})
+
+test('offers the "with issues" filter only in review mode', () => {
+  config.isReview = false
+  const {rerender} = renderFilter()
+  fireEvent.click(screen.getByText('Others'))
+  expect(screen.queryByTestId('option-with_issues')).not.toBeInTheDocument()
+
+  config.isReview = true
+  rerender(<SegmentsFilter active={true} />)
+  expect(screen.getByTestId('option-with_issues')).toHaveTextContent(
+    'With issues',
+  )
+})
+
+test('selecting "with issues" submits the filter with that sample type', () => {
+  config.isReview = true
+  jest.useFakeTimers()
+  renderFilter()
+
+  fireEvent.click(screen.getByText('Others'))
+  fireEvent.click(screen.getByTestId('option-with_issues'))
+  act(() => {
+    jest.advanceTimersByTime(100)
+  })
+
+  expect(SegmentFilterUtils.filterSubmit).toHaveBeenLastCalledWith(
+    expect.objectContaining({sample: {type: 'with_issues'}}),
+    expect.objectContaining({samplingType: 'with_issues'}),
+  )
+
+  jest.useRealTimers()
 })

@@ -5,7 +5,6 @@ namespace Matecat\Core\TestMyMemory;
 use Matecat\TestHelpers\AbstractTest;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
-use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\MockObject\Stub;
@@ -72,7 +71,7 @@ class CallAbstractMyMemoryTest extends AbstractTest
         $this->resultProperty = $reflector->getProperty("result");
 
 
-        $this->test_key = "a6043e606ac9b5d7ff24";
+        $this->test_key = "00000000000000000001";
 
         $this->str_seg_1 = "Il Sistema genera un numero di serie per quella copia e lo stampa (anche sotto forma di codice a barre) su un’etichetta adesiva.";
         $this->str_seg_2 = 'Ad esempio, una copia del film <g id="10">Blade Runner</g> in formato DVD, con numero di serie 6457.';
@@ -375,15 +374,11 @@ class CallAbstractMyMemoryTest extends AbstractTest
 
     /**
      * @group   regression
-     * @group   ExternalServices
-     * @group   MyMemory
      * @covers  AbstractEngine::call
      * @throws Exception
      */
-    #[Group('ExternalServices')]
-    #[Group('MyMemory')]
     #[Test]
-    public function test_real_get()
+    public function test_call_translate_relative_url_with_mock()
     {
         $params = [
             'de' => $this->param_de,
@@ -393,12 +388,25 @@ class CallAbstractMyMemoryTest extends AbstractTest
         ];
 
         $url_mock_param = 'https://api.mymemory.translated.net/get';
+        $curl_mock_param = [
+            CURLOPT_POSTFIELDS => $params,
+            CURLINFO_HEADER_OUT => true,
+            CURLOPT_TIMEOUT => 120,
+        ];
+
+        $mock_json_return = <<<'TAB'
+{"responseData":{"translatedText":"Each copy has a unique serial number.","match":1},"responseDetails":"","responseStatus":200,"responderId":"238","matches":[{"id":"484523811","segment":"Ciascuna copia \u00e8 dotata di un numero di serie univoco.","translation":"Each copy has a unique serial number.","quality":"74","reference":"","usage-count":1,"subject":"All","created-by":"MyMemory_65655950851269d899c7","last-updated-by":"MyMemory_65655950851269d899c7","create-date":"2016-05-02 17:15:11","last-update-date":"2016-05-02 17:15:11","tm_properties":"[{\"type\":\"x-project_id\",\"value\":\"9\"},{\"type\":\"x-project_name\",\"value\":\"eryt\"},{\"type\":\"x-job_id\",\"value\":\"9\"}]","match":1,"key":"00000000000000000001"},{"id":0,"segment":"Ciascuna copia \u00e8 dotata di un numero di serie univoco.","translation":"Each copy has a unique serial number.","quality":70,"reference":"Machine Translation provided by Google, Microsoft, Worldlingo or MyMemory customized engine.","usage-count":1,"subject":false,"created-by":"MT!","last-updated-by":"MT!","create-date":"2016-05-02 17:20:51","last-update-date":"2016-05-02 17:20:51","tm_properties":"","match":0.85},{"id":"418675820","segment":"- un numero di serie univoco;","translation":"- a unique serial number;","quality":"0","reference":"http:\/\/eur-lex.europa.eu\/LexUriServ\/LexUriServ.do?uri=OJ:L:2007:084:0007:01:EN:HTML|@|http:\/\/eur-lex.europa.eu\/LexUriServ\/LexUriServ.do?uri=OJ:L:2007:084:0007:01:IT:HTML","usage-count":1,"subject":"Legal_and_Notarial","created-by":"Europa.eu","last-updated-by":"Europa.eu","create-date":"0000-00-00 00:00:00","last-update-date":"0000-00-00 00:00:00","tm_properties":null,"match":0.58}]}
+TAB;
 
         $engine_struct_MyMemory = EngineStruct::getStruct();
         $engine_struct_MyMemory->id = 1;
-
         $engine_struct_MyMemory = (new EngineDAO(obtainTestDatabase()))->read($engine_struct_MyMemory)[0];
-        $engine_MyMemory = new MyMemory($engine_struct_MyMemory, $this->createStub(\Model\DataAccess\IDatabase::class));
+
+        /**
+         * @var $engine_MyMemory MockObject|MyMemory
+         */
+        $engine_MyMemory = @$this->getMockBuilder(MyMemory::class)->setConstructorArgs([$engine_struct_MyMemory, $this->createStub(\Model\DataAccess\IDatabase::class)])->onlyMethods(['_call'])->getMock();
+        $engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param, $curl_mock_param)->willReturn($mock_json_return);
 
         $engine_MyMemory->call("translate_relative_url", $params, true);
 

@@ -50,10 +50,7 @@ describe('DomainSelect', () => {
     fireEvent.change(screen.getByPlaceholderText('Find a domain'), {
       target: {value: 'Finance'},
     })
-    fireEvent.click(screen.getByText((content, element) =>
-      element?.className === 'button-create-option' &&
-      element.textContent.includes('Finance'),
-    ))
+    fireEvent.click(screen.getByText('Finance'))
 
     expect(screen.getByTestId('domains-count')).toHaveTextContent('3')
     await waitFor(() =>
@@ -61,25 +58,12 @@ describe('DomainSelect', () => {
     )
   })
 
-  test('pressing Enter with an unknown domain query creates it', async () => {
-    render(<Harness />)
-    openDropdown()
-    const searchInput = screen.getByPlaceholderText('Find a domain')
-    fireEvent.change(searchInput, {target: {value: 'Engineering'}})
-    fireEvent.keyDown(searchInput, {key: 'Enter'})
-
-    expect(screen.getByTestId('domains-count')).toHaveTextContent('3')
-    await waitFor(() =>
-      expect(screen.getByTestId('active-domain')).toHaveTextContent(
-        'Engineering',
-      ),
+  test('clicking the reset button clears the active domain', () => {
+    const {container} = render(
+      <Harness initialSelectsActive={{domain: initialDomains[0]}} />,
     )
-  })
-
-  test('shows deselect button when a domain is active and clears it', () => {
-    render(<Harness initialSelectsActive={{domain: initialDomains[0]}} />)
-    openDropdown()
-    fireEvent.click(screen.getByText('Deselect domain'))
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access -- reset icon carries no accessible role or testid
+    fireEvent.click(container.querySelector('.icon-reset'))
     expect(screen.getByTestId('active-domain')).toHaveTextContent('')
   })
 

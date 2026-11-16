@@ -480,6 +480,7 @@ export const ResourceManagement = () => {
         <div className="translation-memory-glossary-tab-table-title">
           <h2>Inactive resources</h2>
           <input
+            type="text"
             className="translation-memory-glossary-tab-input-text"
             placeholder="Search resources by name or key"
             value={filterInactiveKeys}

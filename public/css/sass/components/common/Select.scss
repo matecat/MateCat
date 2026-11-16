@@ -1,5 +1,8 @@
 @use '../../tokens/colors';
 @use '../../commons/variables';
+@use './Dropdown' as dropdown;
+
+$select-height: 40px;
 
 //selects
 .select {
@@ -48,6 +51,8 @@
 .select-with-label__wrapper label {
   width: 100%;
   display: flex;
+  font-size: variables.$font-size-small;
+  color: colors.$grey700;
   justify-content: space-between;
   align-items: center;
 }
@@ -56,16 +61,17 @@
   display: flex;
   align-items: center;
   margin: 0;
-  border: 1px solid colors.$grey300;
+  border: 1px solid colors.$grey200;
   border-radius: variables.$border-radius-default;
-  padding: 4px 8px;
+  padding: 8px 28px 8px 12px;
   outline: none;
   font-size: variables.$font-size-small;
-  //line-height: 16px;
+  line-height: variables.$line-height-small;
+  min-height: $select-height;
   width: 100%;
   background-color: colors.$white;
   white-space: nowrap;
-  color: colors.$grey700;
+  color: colors.$grey1300;
   transition: box-shadow 0.3s cubic-bezier(0.77, 0, 0.175, 1);
 
   &::placeholder {
@@ -81,8 +87,8 @@
     align-items: center;
     justify-content: center;
     background-color: colors.$grey100;
-    width: 14px;
-    height: 14px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
 
     &:hover {
@@ -93,6 +99,10 @@
     overflow: hidden;
     text-overflow: ellipsis;
     display: block;
+  }
+
+  &:not(.select--is-disabled):hover {
+    border-color: colors.$grey400;
   }
 }
 
@@ -142,8 +152,6 @@
 }
 
 .select {
-  padding-right: 25px;
-
   &:has(.icon-reset) {
     padding-right: 50px;
   }
@@ -155,16 +163,10 @@
   z-index: 2;
   width: 100%;
 
-  &.select__dropdown--is-reversed {
+  &.select__dropdown--is-reversed:not(.select-with-label__wrapper-is-portal) {
     top: auto;
-    bottom: 100%;
+    bottom: calc($select-height + dropdown.$dropdown-top-bottom-margin);
   }
-}
-label
-  ~ .select__dropdown-wrapper:not(
-    .select__dropdown-wrapper--is-multiselect
-  ).select__dropdown--is-reversed {
-  bottom: calc(100% - 32px); // 32px = label height
 }
 
 .select__dropdown-wrapper.select__dropdown-wrapper--is-multiselect {
@@ -177,7 +179,7 @@ label
 
 // Disabled state
 .select--is-disabled {
-  //background-color: colors.$grey700;
+  background-color: colors.$grey75;
   box-shadow: none;
   color: colors.$grey400;
   cursor: not-allowed;
@@ -198,10 +200,6 @@ label
   top: 0;
 }
 
-.select__dropdown-wrapper.select-with-label__wrapper-is-portal.select__dropdown--is-reversed {
-  top: 0;
-  bottom: auto;
-}
 .select,
 .select__dropdown-wrapper {
   .new-color {

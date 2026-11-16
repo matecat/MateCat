@@ -133,11 +133,12 @@ export const DropdownMenu = ({
               e.preventDefault()
               e.stopPropagation()
             } else {
-              item.onClick(e)
+              item.onClick?.(e)
             }
             setOpen(false)
           }}
-          data-disabled={item.disabled}
+          // CSS matches the attribute's presence: never write data-disabled="false"
+          data-disabled={item.disabled || undefined}
           data-testid={item.testId}
           aria-label={item.tooltip}
         >

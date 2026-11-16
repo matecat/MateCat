@@ -6,8 +6,7 @@ import React, {
   useContext,
 } from 'react'
 import {fromJS} from 'immutable'
-import {isEmpty} from 'lodash'
-import {debounce} from 'lodash/function'
+import {isEmpty, debounce} from 'lodash'
 import ReactDOM, {flushSync} from 'react-dom'
 
 import {ProjectsContainer} from '../components/projects/ProjectsContainer'
@@ -62,6 +61,7 @@ const Dashboard = () => {
           null,
           job.id,
           job.password,
+          true,
           callback,
         )
       }
@@ -238,6 +238,9 @@ const Dashboard = () => {
       if (!isEmpty(Search.current.filter)) {
         Search.current.currentPage = 1
       }
+
+      // The team is not loaded yet: getData fetches the projects with this filter
+      if (!selectedTeamRef.current) return
 
       getProjects({
         team: selectedTeamRef.current,

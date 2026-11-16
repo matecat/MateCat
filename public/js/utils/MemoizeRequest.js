@@ -1,4 +1,4 @@
-import CryptoJS from 'crypto-js'
+import SHA256 from 'crypto-js/sha256'
 
 export class MemoizeRequest {
   constructor(limit = 10) {
@@ -8,7 +8,7 @@ export class MemoizeRequest {
 
   getKey(params) {
     const normalized = this.stableStringify(params)
-    return CryptoJS.SHA256(normalized).toString()
+    return SHA256(normalized).toString()
   }
 
   get(params) {

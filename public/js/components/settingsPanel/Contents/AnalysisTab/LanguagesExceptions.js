@@ -22,6 +22,7 @@ import {cloneDeep, isEqual} from 'lodash'
 import {v4 as uuidV4} from 'uuid'
 import IconAdd from '../../../../../img/icons/IconAdd'
 import Switch from '../../../../../img/icons/Switch'
+import {SELECT_HEIGHT} from '../../../../constants/Constants'
 
 export const LanguagesExceptions = ({breakdowns, updateExceptions}) => {
   const {analysisTemplates} = useContext(SettingsPanelContext)
@@ -235,6 +236,7 @@ const LanguageException = ({
           dropdownClassName="select-dropdown__wrapper-portal"
           showSearchBar={true}
           options={languages}
+          maxHeightDroplist={SELECT_HEIGHT}
           onSelect={(option) => {
             setSource(option)
             setModified(true)
@@ -269,6 +271,7 @@ const LanguageException = ({
           dropdownClassName="select-dropdown__wrapper-portal"
           showSearchBar={true}
           options={languages}
+          maxHeightDroplist={SELECT_HEIGHT}
           onSelect={(option) => {
             setTarget(option)
             setModified(true)
@@ -300,11 +303,11 @@ const LanguageException = ({
       {confirmed && !modified ? (
         <div className="analysis-tab-buttons">
           <Button
-            size={BUTTON_SIZE.SMALL}
-            mode={BUTTON_MODE.GHOST}
+            size={BUTTON_SIZE.ICON_STANDARD}
+            mode={BUTTON_MODE.OUTLINE}
             onClick={removeException}
           >
-            <IconClose />
+            <IconClose size={20} />
           </Button>
         </div>
       ) : (
@@ -322,6 +325,7 @@ const LanguageException = ({
           </Button>
           <Button
             type={BUTTON_TYPE.WARNING}
+            size={BUTTON_SIZE.ICON_STANDARD}
             className="close-button"
             onClick={removeException}
           >

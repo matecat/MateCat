@@ -170,7 +170,6 @@ class AIAssistantWorkerTest extends AbstractTest
             'localized_target' => 'Italian',
             'text' => 'Hello',
             'translation' => 'Ciao',
-            'style' => 'formal',
             'id_client' => 'client1',
             'id_segment' => '1',
         ];
@@ -262,7 +261,6 @@ class AIAssistantWorkerTest extends AbstractTest
             'localized_target' => 'Italian',
             'text' => 'Hello',
             'translation' => 'Ciao',
-            'style' => 'formal',
             'id_client' => 'client1',
             'id_segment' => '1',
         ];
@@ -294,7 +292,6 @@ class AIAssistantWorkerTest extends AbstractTest
             'localized_target' => 'Italian',
             'text' => 'Hello',
             'translation' => 'Ciao',
-            'style' => 'formal',
             'id_client' => 'client1',
             'id_segment' => '1',
         ];
@@ -319,7 +316,6 @@ class AIAssistantWorkerTest extends AbstractTest
             'localized_target' => 'Italian',
             'text' => 'Hello',
             'translation' => 'Ciao',
-            'style' => 'formal',
             'id_client' => 'client1',
             'id_segment' => '1',
         ];
