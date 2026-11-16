@@ -11,7 +11,9 @@ const ini = require('ini')
 const matecatConfig = ini.parse(readFileSync('./inc/config.ini', 'utf-8'))
 
 // Single source of truth: template name → Vite entry names
-const entryGroups = JSON.parse(readFileSync('./public/vite-entries/groups.json', 'utf-8'))
+const entryGroups = JSON.parse(
+  readFileSync('./public/vite-entries/groups.json', 'utf-8'),
+)
 
 const allEntryNames = [...new Set(Object.values(entryGroups).flat())]
 const input = Object.fromEntries(
@@ -117,7 +119,9 @@ function htmlTemplatePlugin() {
         // Empty entries — just copy template without injection
         if (entries.length === 0) {
           writeFileSync(outputPath, html)
-          console.log(`[html-templates] _${templateName} → ${templateName} (copy)`)
+          console.log(
+            `[html-templates] _${templateName} → ${templateName} (copy)`,
+          )
           continue
         }
 
@@ -171,8 +175,8 @@ function htmlTemplatePlugin() {
           )
         }
 
-        const headTags = tags.filter(t => t.includes('rel="stylesheet"'))
-        const bodyTags = tags.filter(t => !t.includes('rel="stylesheet"'))
+        const headTags = tags.filter((t) => t.includes('rel="stylesheet"'))
+        const bodyTags = tags.filter((t) => !t.includes('rel="stylesheet"'))
 
         html = html.replace('</head>', headTags.join('\n') + '\n</head>')
         html = html.replace('</body>', bodyTags.join('\n') + '\n</body>')
@@ -186,7 +190,8 @@ function htmlTemplatePlugin() {
   }
 }
 
-const cliHttpHost = matecatConfig.CLI_HTTP_HOST?.replace(/"/g, '') || 'https://dev.matecat.com'
+const cliHttpHost =
+  matecatConfig.CLI_HTTP_HOST?.replace(/"/g, '') || 'https://dev.matecat.com'
 const hostUrl = new URL(cliHttpHost)
 
 export default defineConfig(({mode, command}) => {
@@ -215,10 +220,6 @@ export default defineConfig(({mode, command}) => {
       'process.env.version': JSON.stringify(matecatConfig.BUILD_NUMBER ?? ''),
       'process.env.MODE': JSON.stringify(mode),
       'process.env.SENTRY_DSN': JSON.stringify(matecatConfig.SENTRY_DSN ?? ''),
-      // On by default: only false, 0 or "false" in config.ini switch back to Draft.
-      'process.env.ENABLE_NEW_EDITOR': JSON.stringify(
-        ![false, 'false', 0, '0'].includes(matecatConfig.ENABLE_NEW_EDITOR),
-      ),
       global: 'globalThis',
     },
 
@@ -247,11 +248,6 @@ export default defineConfig(({mode, command}) => {
                 name: 'react-vendor',
                 test: /node_modules[\\/](react|react-dom|scheduler)/,
                 priority: 20,
-              },
-              {
-                name: 'editor-vendor',
-                test: /node_modules[\\/](draft-js|immutable)/,
-                priority: 15,
               },
               {
                 name: 'vendor',
@@ -307,4 +303,5 @@ export default defineConfig(({mode, command}) => {
         ],
       },
     },
-  }})
+  }
+})

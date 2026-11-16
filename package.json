@@ -30,7 +30,6 @@
     "classnames": "^2.2.6",
     "crypto-js": "^4.1.1",
     "diff-match-patch": "^1.0.5",
-    "draft-js": "^0.11.4",
     "events": "^3.3.0",
     "file-saver": "^2.0.5",
     "flux": "^4.0.4",
@@ -105,7 +104,6 @@
     "whatwg-fetch": "^3.6.20"
   },
   "resolutions": {
-    "draft-js/immutable": "^3.8.4",
     "wrap-ansi": "^7.0.0"
   },
   "version": "5.0.4"

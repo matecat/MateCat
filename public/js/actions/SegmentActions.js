@@ -1648,13 +1648,12 @@ const SegmentActions = {
       isTarget,
     })
   },
-  highlightTags: function (tagId, tagPlaceholder, entityKey, isTarget) {
+  highlightTags: function (tagId, tagPlaceholder, chipKey) {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.HIGHLIGHT_TAGS,
       tagId,
       tagPlaceholder,
-      entityKey,
-      isTarget,
+      chipKey,
     })
   },
   hideAiAssistant: () => {

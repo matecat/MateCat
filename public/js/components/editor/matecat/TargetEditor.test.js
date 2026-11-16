@@ -21,7 +21,7 @@ import SegmentConstants from '../../../constants/SegmentConstants'
 import EditAreaConstants from '../../../constants/EditAreaConstants'
 import ContextPreviewChannel from '../../../utils/contextPreviewChannel'
 import {translationUpdate} from '../../../utils/segmentText/segmentStoreData'
-import {setTagSignatureMiddleware} from '../../segments/utils/DraftMatecatUtils/tagModel'
+import {setTagSignatureMiddleware} from '../../../utils/segmentText/tagModel'
 
 setTagSignatureMiddleware('space', () => false)
 
@@ -566,7 +566,7 @@ describe('TargetEditor store events', () => {
 })
 
 describe('TargetEditor tags', () => {
-  test('clicking a target tag highlights it and its twin in the source, by the Draft id and placeholder', async () => {
+  test('clicking a target tag highlights it and its twin in the source, by the tag id and placeholder', async () => {
     const {container} = renderTarget()
     fireEvent.mouseDown(chipEls(container)[0], {button: 0})
     await flush()
@@ -850,7 +850,7 @@ describe('TargetEditor show whitespace option', () => {
   })
 })
 
-describe('TargetEditor layers (Editarea checkDecorators)', () => {
+describe('TargetEditor layers', () => {
   const TARGET = 'Una casa economica##$_0A$##una casa tow'
   const blacklisted = {
     term_id: 1,
@@ -858,7 +858,7 @@ describe('TargetEditor layers (Editarea checkDecorators)', () => {
     source: {term: 'cheap'},
     target: {term: 'economica'},
   }
-  // What the store holds for the target (Editarea's prepareTextForLexiqa of the decoded segment)
+  // What the store holds for the target (prepareTextForLexiqa of the decoded segment)
   window.config = {...window.config, lfPlaceholder: '##$_0A$##'}
   const lexiqaText = translationUpdate(
     TARGET,

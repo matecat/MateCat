@@ -94,10 +94,9 @@ With `compareTo` only the new side (`segment`) is copied: removed parts are
 skipped. A selection that runs outside the view is left to the browser.
 
 This clipboard format is the one format of every copy, cut and drag in
-Matecat: the Draft editors write it too (`getSegmentSlice`, for the target and
-the source) and read it on paste (`buildPastedEditorState`) and drop
-(`resolveDrop`). Any editor that replaces them must write and read the same
-format. `readSegmentClipboard(html)` decodes it
+Matecat: the CodeMirror editors write it too (`editor/core/clipboard.js`) and
+read it on paste and drop. Any editor that replaces them must write and read the
+same format. `readSegmentClipboard(html)` decodes it
 and validates it — the attribute can come from any page, so only markup that is
 exactly one of the segment's tags stays a tag, the rest becomes text.
 `sliceSegment(segment, start, end)` and `segmentClipboardHtml(slice)` write it.
@@ -106,9 +105,7 @@ exactly one of the segment's tags stays a tag, the rest becomes text.
 
 - Everything comes through props. No stores, actions, dispatcher or the global
   `config`: callers read those and pass values in.
-- Only the Draft-free tag modules of `segments/utils/DraftMatecatUtils/` may be
-  imported (`tagModel`, `compressibleTagUtils`), never that folder's `index.js`
-  nor anything that pulls in draft-js.
+- Tag rules come from `utils/segmentText/` (`tagModel`, `compressibleTagUtils`).
 - The tag signatures are shared with the cattool, including the user's
   show-whitespace switch (`initTagSignature`): without `showWhitespace` the view
   follows it. Pass the prop where the view must follow a change of the switch

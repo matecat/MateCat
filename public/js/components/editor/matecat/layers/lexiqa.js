@@ -91,7 +91,7 @@ export const alignLexiqaText = (state, lexiqaText) => {
   return map
 }
 
-// Draft's canDecorateRange: a warning covering a tag Lexiqa must not check is not shown at all.
+// A warning covering a tag Lexiqa must not check is not shown at all.
 const coversNoLexiqaTag = (state, from, to) => {
   const excluded = getNoLexiqaTag()
   return chipTokens(state).some(

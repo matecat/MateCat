@@ -79,7 +79,7 @@ class TagWidget extends WidgetType {
   toDOM(view) {
     const {token} = this
     const el = document.createElement('span')
-    // Draft's open chip, `.tag` (13px, 8px arrows), not the closed segment's `.tag.small` that tokenize gives.
+    // The open segment's chip, `.tag` (13px, 8px arrows), not the closed segment's `.tag.small` that tokenize gives.
     const className = token.className
       .split(' ')
       .filter((name) => name !== 'small')

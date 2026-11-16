@@ -30,7 +30,7 @@ export const insertDocText = (text) => (view) => {
 }
 
 /**
- * What a key does in the target beyond typing, decided as the Draft target decides it (resolveEditorCommand):
+ * What a key does in the target beyond typing:
  * `{text}` typed as text (the word joiner too: a character, never a tag), `{swallow: true}` only the browser default
  * stopped (the key still reaches the page shortcuts), or null.
  * @param {KeyboardEvent} e

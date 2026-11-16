@@ -24,7 +24,7 @@ import {replaceOccurrenceSpec, transformSelectionSpec} from './commands'
 const theme = EditorView.theme({
   '&': {fontFamily: 'inherit', fontSize: 'inherit'},
   '&.cm-focused': {outline: 'none'},
-  // The editor grows with its text, like the Draft editors, and never scrolls inside itself: with the default
+  // The editor grows with its text and never scrolls inside itself: with the default
   // `overflow: auto` the cattool tooltips of the marks on the first line were cut off.
   '.cm-scroller': {
     fontFamily: 'inherit',

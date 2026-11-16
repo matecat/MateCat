@@ -18,7 +18,7 @@ export const tagMenu = StateField.define({
   },
 })
 
-/** Alt+T, or Option+T on macOS (which reports '†' or '™'), as the Draft target reads it. */
+/** Alt+T, or Option+T on macOS (which reports '†' or '™'). */
 const isMenuShortcut = (e) =>
   (e.keyCode === 84 || e.key === 't' || e.key === '™') &&
   e.altKey &&

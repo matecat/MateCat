@@ -1158,8 +1158,7 @@ describe('SegmentStore', () => {
           actionType: SegmentConstants.HIGHLIGHT_TAGS,
           tagId: 't',
           tagPlaceholder: 'p',
-          entityKey: 'e',
-          isTarget: true,
+          chipKey: 'e',
         },
         {actionType: 'UNKNOWN_ACTION_TYPE', sid: '1', data: 'x'},
       ]

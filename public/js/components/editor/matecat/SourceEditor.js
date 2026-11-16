@@ -1,5 +1,4 @@
-// The source of the open segment in the CodeMirror editor: read-only, wired to the segment store and actions the way
-// SegmentSource (the Draft source) is. Picked by SegmentWrapper when the build enables the new editor.
+// The source of the open segment in the CodeMirror editor: read-only, wired to the segment store and actions.
 import React, {
   useCallback,
   useContext,
@@ -61,7 +60,7 @@ export const isValidPhraseToAiAssistant = ({
 }
 
 /**
- * The source of a split group joined back, a split point between each part, as SegmentSource shows it when a
+ * The source of a split group joined back, a split point between each part, as shown when a
  * segment that was split enters split mode.
  */
 export const joinSplitGroup = (splitGroup) =>
@@ -69,7 +68,7 @@ export const joinSplitGroup = (splitGroup) =>
     .map((sid) => SegmentStore.getSegmentByIdToJS(sid).segment)
     .join(SPLIT_PLACEHOLDER)
 
-/** Chip classes for a HIGHLIGHT_TAGS event: the clicked chip and every chip with the same Draft id and placeholder. */
+/** Chip classes for a HIGHLIGHT_TAGS event: the clicked chip and every chip with the same tag id and placeholder. */
 export const highlightedChips = (chips, {tagId, tagPlaceholder, key}) =>
   chips
     .filter(
@@ -82,7 +81,7 @@ export const highlightedChips = (chips, {tagId, tagPlaceholder, key}) =>
     .map(({from, to}) => ({from, to, className: 'tag-clicked'}))
 
 /**
- * Each chip with its Draft identity (the n-th chip with some markup is the n-th Draft tag with that markup) and the
+ * Each chip with its tag identity (the n-th chip with some markup is the n-th tag with that markup) and the
  * key a highlight event names it by: `<keyPrefix>-<from>`.
  */
 export const chipsWithIdentity = (state, identities, keyPrefix) => {
@@ -122,7 +121,7 @@ const SourceEditor = ({segment, value}) => {
   const focusRef = useRef([])
   const searchChipRef = useRef([])
 
-  // Fixed for the life of the segment, as in SegmentSource: what split mode goes back to, and data-original.
+  // Fixed for the life of the segment: what split mode goes back to, and data-original.
   const [initialValue] = useState(() => value)
   const [originalSource] = useState(() => segment.segment)
   const [splitCount, setSplitCount] = useState(() =>
@@ -186,7 +185,7 @@ const SourceEditor = ({segment, value}) => {
     const inSearch = segment.inSearch && segment.searchParams?.source
     const icu =
       segment.icu && !inSearch ? icuRanges(state, config.source_code) : []
-    // ICU syntax wins over the glossary and Lexiqa, as SegmentSource's ICU decorator does: a mark touching it is not shown.
+    // ICU syntax wins over the glossary and Lexiqa: a mark touching it is not shown.
     const outsideIcu = (ranges) => withoutRangesOverlapping(ranges, icu)
     const layers = {
       [SEARCH_LAYER]: inSearch ? searchRanges(state, segment) : [],
@@ -265,7 +264,7 @@ const SourceEditor = ({segment, value}) => {
     )
   }
 
-  // The chips covered by a selection look focused, as the Draft source shows the tags it selects.
+  // The chips covered by a selection look focused.
   const focusSelectedChips = (state) => {
     const {from, to, empty} = state.selection.main
     focusRef.current = empty
@@ -296,7 +295,7 @@ const SourceEditor = ({segment, value}) => {
         layerTooltipExtensions(),
         Prec.highest(
           EditorView.domEventHandlers({
-            // The source is never cut, not even as a copy (SegmentSource swallows cut)
+            // The source is never cut, not even as a copy
             cut: (event) => {
               event.preventDefault()
               return true
@@ -338,7 +337,7 @@ const SourceEditor = ({segment, value}) => {
       editor.destroy()
       tagTooltip.destroy()
     }
-    // Mounted once per segment, as SegmentSource builds its editor state once.
+    // Mounted once per segment.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

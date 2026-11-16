@@ -101,7 +101,7 @@ export const layerRangesAt = (state, pos) => {
 
 /**
  * The `ranges` that share no character with any of `blockers` (all `{from, to}`): a range overlapping one is dropped
- * whole, as Draft's CompositeDecorator skips a decorator range when a decorator before it took one of its characters.
+ * whole: a character is decorated by one layer only.
  */
 export const withoutRangesOverlapping = (ranges, blockers) =>
   blockers.length

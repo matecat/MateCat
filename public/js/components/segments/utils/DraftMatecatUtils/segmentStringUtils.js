@@ -1,9 +1,7 @@
 /**
  * Helpers that work on segment strings only (tags, placeholders, plain text).
  *
- * Nothing here depends on Draft.js, so code that renders or checks text without
- * an editor imports this module instead of the DraftMatecatUtils index, which
- * pulls in the whole editor layer.
+ * Code that renders or checks text without an editor imports this module.
  */
 import {
   autoFillTagsInTarget,

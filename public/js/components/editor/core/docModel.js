@@ -32,8 +32,7 @@ const WORD_JOINER = CHAR_FOR_TAG.wordJoiner
 
 /**
  * The tags of a segment string with their raw offsets, in document order. XLIFF markup that `tokenize` does not
- * know (a `<ph>` without equiv-text, `<bpt>`, `<mrk>`…) is a tag too, with no token: it is kept as it is, as Draft
- * does. `space` tokens are not tags here: a space is text, shown by the display layer only.
+ * know (a `<ph>` without equiv-text, `<bpt>`, `<mrk>`…) is a tag too, with no token: it is kept as it is. `space` tokens are not tags here: a space is text, shown by the display layer only.
  * @returns {Array<{token: object|null, from: number, to: number}>}
  */
 export const locateTags = (raw, {isRtl = false} = {}) => {

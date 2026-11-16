@@ -13,7 +13,7 @@ import {
  * Turns a cattool segment string (layer 2: XLIFF tags as markup, text
  * HTML-encoded, `##$_XX$##` placeholders) into display tokens.
  *
- * The rules mirror `transformTagsToHtml` in DraftMatecatUtils/tagUtils.js,
+ * The rules mirror `transformTagsToHtml` in utils/segmentText/tagUtils.js,
  * which renders the same string as an HTML string: same signatures, same
  * order, same numbering, same `<g>` id pairing. That function replaces one
  * signature at a time on the growing HTML, so a later signature also matches
@@ -618,14 +618,14 @@ export const segmentClipboardHtml = ({raw, text}) =>
 
 /**
  * External text with every XLIFF tag markup removed (what a paste from
- * outside the app keeps; see `removeTagsFromText` in DraftMatecatUtils).
+ * outside the app keeps; see `removeTagsFromText` in utils/segmentText/tagUtils).
  */
 export const stripTagMarkup = (text) =>
   text.replace(getXliffRegExpression(), '')
 
 /**
  * Where `text` holds XLIFF tag markup (known to `tokenize` or not), as
- * `{from, to}` offsets. The Draft editors save such markup as it is.
+ * `{from, to}` offsets. The editors save such markup as it is.
  */
 export const findTagMarkup = (text) =>
   [...text.matchAll(getXliffRegExpression())].map((match) => ({

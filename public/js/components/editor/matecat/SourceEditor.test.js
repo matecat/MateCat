@@ -17,7 +17,7 @@ import SegmentStore from '../../../stores/SegmentStore'
 import SegmentConstants from '../../../constants/SegmentConstants'
 import SearchUtils from '../../header/cattol/search/searchUtils'
 import {readSegmentClipboard} from '../../segmentView/segmentModel'
-import {setTagSignatureMiddleware} from '../../segments/utils/DraftMatecatUtils/tagModel'
+import {setTagSignatureMiddleware} from '../../../utils/segmentText/tagModel'
 
 setTagSignatureMiddleware('space', () => false)
 
@@ -391,7 +391,7 @@ describe('SourceEditor layers', () => {
 })
 
 describe('SourceEditor tags', () => {
-  test('clicking a tag highlights it and its twin in the target, by the Draft id and placeholder', async () => {
+  test('clicking a tag highlights it and its twin in the target, by the tag id and placeholder', async () => {
     const {container} = renderSource(makeSegment())
     fireEvent.mouseDown(chipEls(container)[0], {button: 0})
     await flush()
@@ -407,7 +407,7 @@ describe('SourceEditor tags', () => {
       makeSegment({segment: 'a <g id="1">b</g> <x id="2"/>'}),
     )
     act(() =>
-      SegmentStore.emit(SegmentConstants.HIGHLIGHT_TAGS, '1', '1', 'draft-key'),
+      SegmentStore.emit(SegmentConstants.HIGHLIGHT_TAGS, '1', '1', 'other-key'),
     )
     await flush()
     expect(

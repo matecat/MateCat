@@ -29,7 +29,7 @@ const charBefore = (state, pos) => {
  *
  * A run after a tag continues the text before the tag (a tag can sit inside a word), so it is transformed together
  * with the character before the tag, which is then dropped: capitalize starts no word there. The selection's own
- * start is a start, as in the Draft editor.
+ * start is a start.
  */
 export const transformSelectionSpec = (state, fn) => {
   const sel = state.selection.main

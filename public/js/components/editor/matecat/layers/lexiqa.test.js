@@ -1,4 +1,4 @@
-import prepareTextForLexiqa from '../../../segments/utils/DraftMatecatUtils/prepareTextForLexiqa'
+import prepareTextForLexiqa from '../../../../utils/segmentText/prepareTextForLexiqa'
 import {createSegmentState} from '../../core/createSegmentEditor'
 import {serialize} from '../../core/docModel'
 import {initTagSignature} from '../../../../utils/segmentText/tagModel'

@@ -68,40 +68,6 @@ module.exports = {
     'no-undef': 'warn',
   },
   overrides: [
-    // Draft-free boundary: the CodeMirror editor, the read-only segment view and
-    // the segment text model must never depend on Draft.js, so that removing
-    // Draft (and DraftMatecatUtils) cannot change them.
-    {
-      files: [
-        'public/js/components/editor/**/*.js',
-        'public/js/components/segmentView/**/*.js',
-        'public/js/utils/segmentText/**/*.js',
-      ],
-      // Tests, and the harness the Draft parity tests share (editor/core/__parity__), compare against Draft.
-      excludedFiles: ['**/*.test.js', '**/__parity__/**'],
-      rules: {
-        'no-restricted-imports': [
-          'error',
-          {
-            paths: [
-              {name: 'draft-js', message: 'Keep this code independent of Draft.js.'},
-            ],
-            patterns: [
-              {
-                group: [
-                  'draft-js/*',
-                  '**/DraftMatecatUtils',
-                  '**/DraftMatecatUtils/*',
-                  '**/segments/Editarea',
-                  '**/segments/SegmentSource',
-                ],
-                message: 'Keep this code independent of Draft.js.',
-              },
-            ],
-          },
-        ],
-      },
-    },
     // Node-side files: build and tooling config plus the socket server. They
     // are not browser code and need `module`, `require` and `process`.
     {
@@ -169,10 +135,6 @@ module.exports = {
       },
       rules: {
         'react/prop-types': 'off',
-        // `unselectable` is not a React DOM property, but the DraftJS decorator
-        // spans set it deliberately to keep a tag from being selected inside the
-        // contenteditable. Dropping it would change editor selection, not lint.
-        'react/no-unknown-property': ['error', {ignore: ['unselectable']}],
         // The class form is gone from the tree; keep it out. Until the
         // migration finished this was a per-directory allowlist that grew
         // one PR at a time.

@@ -50,7 +50,7 @@ const fire = (target, name, props = {}) => {
 
 const slice = (raw, text) => segmentClipboardHtml({raw, text})
 
-describe('clipboard content (buildPastedEditorState)', () => {
+describe('clipboard content', () => {
   test('a segment slice keeps its tags', () => {
     const html = slice('a<x id="1"/>&amp;', 'a1&')
     const {text, tags} = transferContent(fakeTransfer({'text/html': html}))
@@ -121,7 +121,7 @@ describe('copy and cut (getSegmentSlice)', () => {
   })
 })
 
-describe('paste (buildPastedEditorState)', () => {
+describe('paste', () => {
   test('a segment slice is inserted at the selection with its tags locked', () => {
     const editor = mount('abc')
     select(editor, 1, 2)
@@ -153,7 +153,9 @@ describe('paste (buildPastedEditorState)', () => {
       clipboardData: fakeTransfer({'text/plain': '25°C'}),
     })
     expect(editor.getValue()).toBe('a25°Cb')
-    expect(editor.view.contentDOM.querySelector('.special-char-nbsp')).toBeNull()
+    expect(
+      editor.view.contentDOM.querySelector('.special-char-nbsp'),
+    ).toBeNull()
   })
 
   test('a paste into the read-only source changes nothing', () => {

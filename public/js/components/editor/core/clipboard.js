@@ -1,5 +1,5 @@
 // Copy, cut, paste and drop. A copy carries the raw segment slice in the `text/html` flavour (the format SegmentView
-// and the Draft editors use), so tags survive a copy between segment editors; outside text is pasted with its tag
+// uses), so tags survive a copy between segment editors; outside text is pasted with its tag
 // markup stripped.
 import {EditorView} from '@codemirror/view'
 import {

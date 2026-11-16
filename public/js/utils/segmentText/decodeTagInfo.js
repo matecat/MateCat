@@ -46,7 +46,7 @@ const decodeTagInfo = (tag) => {
     // A <g> with equiv-text shows that text instead of its id
     const gEquivText = tagName === 'g' && getGEquivText(tagEncodedText)
     if (gEquivText) {
-      // A line break would split the Draft block in the middle of the tag
+      // A line break would split the tag across two lines
       decodedTagData.content = unescapeHTMLRecursive(gEquivText).replace(
         /\r\n?|\n/g,
         ' ',
