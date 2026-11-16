@@ -206,6 +206,18 @@ class BootstrapConfigTest extends AbstractTest
     }
 
     #[Test]
+    public function pluginCspSourcesAreLeftToTheCspMetaTag(): void
+    {
+        // render() sets them on every page for the CSP meta tag; nothing in the page's JavaScript reads them.
+        $this->view->set('x_plugin_csp', ['default-src' => 'a0.muscache.com']);
+
+        $config = (string)$this->config();
+
+        $this->assertSame('{}', $config);
+        $this->assertStringNotContainsString('muscache', $config);
+    }
+
+    #[Test]
     public function flashMessagesAreLeftToTheFooterMacro(): void
     {
         // The macro emits them as config.flash_messages, which is the name the page reads. Carrying

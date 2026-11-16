@@ -30,6 +30,7 @@ import {SegmentFooterTabAiFeedback} from './SegmentFooterTabAiFeedback'
 import SegmentFooterTabIcu from './SegmentFooterTabIcu'
 
 import {TAB} from '../../constants/SegmentTabConstants'
+import CatToolActions from '../../actions/CatToolActions'
 
 const TAB_ITEMS = {
   [TAB.MATCHES]: {
@@ -244,8 +245,18 @@ function SegmentFooter() {
     const addTabIndex = (sidProp, name, index) =>
       segment.sid === sidProp && setTabStateChanges({name, index})
     const closeAllTabs = () => setTabStateChanges({visible: false})
-    const showMessage = (sidProp, message) =>
-      segment.sid === sidProp && setMessage(message)
+    const showMessage = (sidProp, message) => {
+      const {title, text, type} = message
+      const notification = {
+        title,
+        text,
+        type: type ?? 'success',
+        position: 'bl',
+        allowHtml: true,
+        timer: 3000,
+      }
+      CatToolActions.addNotification(notification)
+    }
     const hideAIAssistant = () =>
       setTabStateChanges({
         name: TAB.AI_ASSISTANT,

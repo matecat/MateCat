@@ -57,33 +57,32 @@ class SegmentTranslationStructTest extends AbstractTest
     }
 
     #[Test]
-    public function isICEReturnsTrueForLockedIce(): void
-    {
-        $struct = new SegmentTranslationStruct();
-        $struct->match_type = 'ICE';
-        $struct->locked = true;
-
-        $this->assertTrue($struct->isICE());
-    }
-
-    #[Test]
-    public function isICEReturnsFalseForUnlockedIce(): void
-    {
-        $struct = new SegmentTranslationStruct();
-        $struct->match_type = 'ICE';
-        $struct->locked = false;
-
-        $this->assertFalse($struct->isICE());
-    }
-
-    #[Test]
-    public function isICEReturnsFalseForNonIce(): void
+    public function isLockedReturnsTrueForLockedNonIce(): void
     {
         $struct = new SegmentTranslationStruct();
         $struct->match_type = '100%';
         $struct->locked = true;
 
-        $this->assertFalse($struct->isICE());
+        $this->assertTrue($struct->isLocked());
+    }
+
+    #[Test]
+    public function isLockedReturnsFalseForUnlockedIce(): void
+    {
+        $struct = new SegmentTranslationStruct();
+        $struct->match_type = 'ICE';
+        $struct->locked = false;
+
+        $this->assertFalse($struct->isLocked());
+    }
+
+    #[Test]
+    public function isLockedReturnsFalseForNull(): void
+    {
+        $struct = new SegmentTranslationStruct();
+        $struct->locked = null;
+
+        $this->assertFalse($struct->isLocked());
     }
 
     #[Test]

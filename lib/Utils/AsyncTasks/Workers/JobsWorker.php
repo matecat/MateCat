@@ -10,6 +10,7 @@ use PDOException;
 use ReflectionException;
 use TypeError;
 use Utils\ActiveMQ\AMQHandler;
+use Utils\Logger\MatecatLogger;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\QueueElement;
@@ -21,11 +22,13 @@ class JobsWorker extends AbstractWorker
     private JobDao $jobDao;
 
     /**
-     * @throws ReflectionException
+     * @param AMQHandler $queueHandler
+     * @param IDatabase $database
+     * @param JobDao|null $jobDao
      */
-    public function __construct(AMQHandler $queueHandler, IDatabase $database, ?JobDao $jobDao = null)
+    public function __construct(AMQHandler $queueHandler, IDatabase $database, ?JobDao $jobDao = null, ?MatecatLogger $logger = null)
     {
-        parent::__construct($queueHandler, $database);
+        parent::__construct($queueHandler, $database, $logger);
         $this->jobDao = $jobDao ?? new JobDao($this->database);
     }
 
@@ -61,7 +64,7 @@ class JobsWorker extends AbstractWorker
         if ($queueElement->reQueueNum >= 100) {
             $msg = "\n\n Error Set Contribution  \n\n " . var_export($queueElement, true);
             Utils::sendErrMailReport($msg);
-            $this->_doLog("--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip.");
+            $this->logger->debug("--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip.");
             throw new EndQueueException("--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip.", self::ERR_REQUEUE_END);
         }
     }
@@ -90,9 +93,12 @@ class JobsWorker extends AbstractWorker
         $keyLength = strlen($jobStruct->password ?? '');
         $last_digits = substr($jobStruct->password ?? '', -4);
         $hidedPassword = str_repeat("*", max(0, $keyLength - 4)) . $last_digits;
-        $this->_doLog("***** Job Split " . $jobStruct->id . "-" . $hidedPassword . " AvgPee: " . $Pee_weighted . " ***** ");
+        $this->logger->debug("***** Job Split " . $jobStruct->id . "-" . $hidedPassword . " AvgPee: " . $Pee_weighted . " ***** ");
 
-        $this->jobDao->updateJobWeightedPeeAndTTE($jobStruct);
+        // rowCount() counts changed rows, so 0 also covers totals identical to the stored ones.
+        if ($this->jobDao->updateJobWeightedPeeAndTTE($jobStruct) === 0) {
+            $this->logger->debug("***** Job Split " . $jobStruct->id . "-" . $hidedPassword . " no row changed: the chunk was merged or split again since the recount was queued, or its totals were already current ***** ");
+        }
     }
 
 }

@@ -1,4 +1,5 @@
 @use 'tokens/colors';
+@use 'commons/variables';
 
 .dropdownmenu {
   > * {
@@ -7,15 +8,17 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  border-radius: 4px;
   padding: 8px;
   max-height: var(--radix-dropdown-menu-content-available-height);
   overflow-y: auto;
-  background-color: colors.$white;
   color: colors.$grey700;
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
   animation: 0.3s cubic-bezier(0.77, 0, 0.175, 1) forwards dropdownmenu-fadeIn;
   z-index: 7;
+  border-radius: variables.$border-radius-default;
+  box-shadow: 0 0 24px rgba(colors.$black, 0.15);
+  background-color: colors.$white;
+  border: 1px solid colors.$grey100;
+
   &.subDropdown {
     background-color: colors.$white;
   }

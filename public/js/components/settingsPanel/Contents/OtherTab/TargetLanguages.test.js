@@ -34,7 +34,7 @@ const languages = [
 const renderTargetLanguages = (targetLangs, setTargetLangs = jest.fn()) =>
   render(
     <CreateProjectContext.Provider
-      value={{SELECT_HEIGHT: 200, languages, targetLangs, setTargetLangs}}
+      value={{languages, targetLangs, setTargetLangs}}
     >
       <TargetLanguages />
     </CreateProjectContext.Provider>,
@@ -45,9 +45,7 @@ describe('TargetLanguages', () => {
     renderTargetLanguages([])
     expect(screen.getByText('Target language(s)')).toBeInTheDocument()
     expect(
-      screen.getByText(
-        'Select one or more target languages for your project.',
-      ),
+      screen.getByText('Select one or more target languages for your project.'),
     ).toBeInTheDocument()
   })
 

@@ -18,7 +18,8 @@ if (typeof global.BroadcastChannel === 'undefined') {
     close() {}
   }
 }
-const {TextDecoder, TextEncoder, ReadableStream} = require('node:util')
+const {TextDecoder, TextEncoder} = require('node:util')
+const {ReadableStream} = require('node:stream/web')
 
 Object.defineProperties(globalThis, {
   TextDecoder: {value: TextDecoder},

@@ -151,12 +151,16 @@ class SaveMetadataTest extends AbstractTest
         // metadata is already empty by default in ProjectStructure
         $this->service->save($this->projectStructure, $this->features);
 
-        // pretranslate_101 always exists (DTO default = 1)
+        // pretranslate_101, both lock options and both status options always exist (DTO defaults)
         $metadata = $this->getSinglePersistedMetadataMap();
-        self::assertCount(1, $metadata);
+        self::assertCount(5, $metadata);
 
         $keys = array_keys($metadata);
         self::assertContains(ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value, $keys);
+        self::assertSame('1', $metadata[ProjectsMetadataMarshaller::PRE_TRANSLATE_101_LOCK->value]);
+        self::assertSame('1', $metadata[ProjectsMetadataMarshaller::PRE_TRANSLATE_100_LOCK->value]);
+        self::assertSame('APPROVED', $metadata[ProjectsMetadataMarshaller::PRE_TRANSLATE_101_STATUS->value]);
+        self::assertSame('APPROVED', $metadata[ProjectsMetadataMarshaller::PRE_TRANSLATE_100_STATUS->value]);
     }
 
     // =========================================================================
@@ -261,6 +265,30 @@ class SaveMetadataTest extends AbstractTest
         $this->service->save($this->projectStructure, $this->features);
 
         self::assertSame('1', $this->getPersistedValue(ProjectsMetadataMarshaller::PRE_TRANSLATE_101->value));
+    }
+
+    #[Test]
+    public function testPretranslateLockOptionsArePersistedWhenSet(): void
+    {
+        $this->projectStructure->pretranslate_101_lock = 0;
+        $this->projectStructure->pretranslate_100_lock = 1;
+
+        $this->service->save($this->projectStructure, $this->features);
+
+        self::assertSame('0', $this->getPersistedValue(ProjectsMetadataMarshaller::PRE_TRANSLATE_101_LOCK->value));
+        self::assertSame('1', $this->getPersistedValue(ProjectsMetadataMarshaller::PRE_TRANSLATE_100_LOCK->value));
+    }
+
+    #[Test]
+    public function testPretranslateStatusOptionsArePersistedWhenSet(): void
+    {
+        $this->projectStructure->pretranslate_101_status = 'APPROVED2';
+        $this->projectStructure->pretranslate_100_status = 'APPROVED';
+
+        $this->service->save($this->projectStructure, $this->features);
+
+        self::assertSame('APPROVED2', $this->getPersistedValue(ProjectsMetadataMarshaller::PRE_TRANSLATE_101_STATUS->value));
+        self::assertSame('APPROVED', $this->getPersistedValue(ProjectsMetadataMarshaller::PRE_TRANSLATE_100_STATUS->value));
     }
 
     // =========================================================================
@@ -376,9 +404,9 @@ class SaveMetadataTest extends AbstractTest
 
         $this->service->save($this->projectStructure, $this->features);
 
-        // 3 metadata keys + 1 pretranslate_101 (DTO default) = 4 total
+        // 3 metadata keys + pretranslate_101, both lock and both status options (DTO defaults) = 8 total
         $metadata = $this->getSinglePersistedMetadataMap();
-        self::assertCount(4, $metadata);
+        self::assertCount(8, $metadata);
 
         self::assertSame('1', $this->getPersistedValue(ProjectsMetadataMarshaller::ICU_ENABLED->value));
         self::assertSame('0', $this->getPersistedValue(ProjectsMetadataMarshaller::MT_EVALUATION->value));

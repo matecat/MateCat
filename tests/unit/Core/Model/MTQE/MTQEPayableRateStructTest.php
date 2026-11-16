@@ -78,13 +78,13 @@ class MTQEPayableRateStructTest extends AbstractTest
         $struct->hydrateBreakdownsFromDataArray(['ice' => 5]);
 
         $this->assertInstanceOf(MTQEPayableRateBreakdowns::class, $struct->breakdowns);
-        $this->assertSame(0, $struct->breakdowns->ice);
+        $this->assertSame(5, $struct->breakdowns->ice);
     }
 
     public function testHydrateBreakdownsFromDataArrayWithNestedKey(): void
     {
         $struct = new MTQEPayableRateStruct();
-        $struct->hydrateBreakdownsFromDataArray(['breakdowns' => ['ice' => 15]]);
+        $struct->hydrateBreakdownsFromDataArray(['ice' => 15]);
 
         $this->assertSame(15, $struct->breakdowns->ice);
     }

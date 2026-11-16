@@ -13,7 +13,6 @@ use Exception;
 use Model\ConnectedServices\ConnectedServiceDao;
 use Model\ConnectedServices\GDrive\GDriveUserAuthorizationModel;
 use Model\Exceptions\ValidationError;
-use Psr\Log\InvalidArgumentException;
 use ReflectionException;
 use TypeError;
 use Utils\Registry\AppConfig;
@@ -59,9 +58,6 @@ EOF;
         $this->response->body($body);
     }
 
-    /**
-     * @throws InvalidArgumentException
-     */
     private function __handleError(mixed $error): void
     {
         $this->logger->warning('GDrive OAuth authorization returned an error', ['error' => $error]);

@@ -12,15 +12,19 @@ use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\Hook\Event\Filter\FilterCreateProjectFeaturesEvent;
 use Model\FeaturesBase\Hook\Event\Run\AlterChunkReviewStructEvent;
+use Model\FeaturesBase\Hook\Event\Run\PostJobMergedEvent;
+use Model\FeaturesBase\Hook\Event\Run\PostJobSplittedEvent;
 use Model\FeaturesBase\Hook\Event\Run\ProjectCompletionEventSavedEvent;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\JobSplitMerge\SplitMergeProjectData;
 use Model\LQA\ChunkReviewStruct;
 use Model\ProjectCreation\ProjectStructure;
 use Model\QualityReport\QualityReportModel;
+use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
 use Plugins\Features\AbstractRevisionFeature;
-use Plugins\Features\ReviewExtended;
+use Plugins\Features\SecondPassReview;
 
 /**
  * Records what resetScore() wrote instead of talking to a database, so the reset itself can be
@@ -65,11 +69,6 @@ class ConcreteTestRevisionFeature extends AbstractRevisionFeature
     {
         return $this->qualityReportModel ?? parent::createQualityReportModel($chunk);
     }
-}
-
-class ReviewExtendedProbe extends ReviewExtended
-{
-    public const string FEATURE_CODE = 'review_extended_probe';
 }
 
 class TestChunkReviewStruct extends ChunkReviewStruct
@@ -230,17 +229,6 @@ class AbstractRevisionFeatureTest extends AbstractTest
         $this->assertNotEmpty($projectStructure->result['errors']);
         $this->assertSame('-900', $projectStructure->result['errors'][0]['code']);
         $this->assertNull($projectStructure->features['quality_framework']);
-    }
-
-    #[Test]
-    public function loadAndValidateQualityFrameworkReturnsEarlyForReviewExtendedClass(): void
-    {
-        $projectStructure = new ProjectStructure();
-
-        ReviewExtendedProbe::loadAndValidateQualityFramework($projectStructure, '/not/existing/qa_model.json');
-
-        $this->assertArrayNotHasKey('quality_framework', $projectStructure->features);
-        $this->assertSame([], $projectStructure->result['errors']);
     }
 
     #[Test]
@@ -439,4 +427,69 @@ class AbstractRevisionFeatureTest extends AbstractTest
         $this->feature->alterChunkReviewStruct($this->makeAlterEvent());
     }
 
+    private function makeSecondPassReviewOutsideATransaction(): SecondPassReview
+    {
+        $feature = new SecondPassReview(new BasicFeatureStruct([
+            'feature_code' => SecondPassReview::FEATURE_CODE,
+        ]));
+
+        [$database] = $this->createDatabaseMock(inTransaction: false);
+        $feature->setDatabase($database);
+
+        return $feature;
+    }
+
+    private function makeSplitEvent(): PostJobSplittedEvent
+    {
+        $data = new SplitMergeProjectData(1);
+        $data->jobToSplit = 999999;
+
+        return new PostJobSplittedEvent($data, new UserStruct());
+    }
+
+    private function makeMergeEvent(): PostJobMergedEvent
+    {
+        $data = new SplitMergeProjectData(1);
+        $data->jobToMerge = 999999;
+
+        return new PostJobMergedEvent($data, new JobStruct(['id' => 999999, 'password' => 'pw']), new UserStruct());
+    }
+
+    #[Test]
+    public function postJobSplittedReachesTheChunkReviewLockForSecondPassReview(): void
+    {
+        // Reaching the qa_chunk_reviews lock proves SecondPassReview runs the hook against the database.
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('requires an open transaction');
+
+        $this->makeSecondPassReviewOutsideATransaction()->postJobSplitted($this->makeSplitEvent());
+    }
+
+    #[Test]
+    public function postJobMergedReachesTheChunkReviewLockForSecondPassReview(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('requires an open transaction');
+
+        $this->makeSecondPassReviewOutsideATransaction()->postJobMerged($this->makeMergeEvent());
+    }
+
+    #[Test]
+    public function projectCompletionEventSavedReachesTheChunkReviewLockForSecondPassReview(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('requires an open transaction');
+
+        $this->makeSecondPassReviewOutsideATransaction()
+            ->projectCompletionEventSaved($this->makeCompletionEventSavedEvent());
+    }
+
+    #[Test]
+    public function alterChunkReviewStructReachesTheChunkReviewLockForSecondPassReview(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('requires an open transaction');
+
+        $this->makeSecondPassReviewOutsideATransaction()->alterChunkReviewStruct($this->makeAlterEvent());
+    }
 }

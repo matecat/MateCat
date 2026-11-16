@@ -12,6 +12,7 @@ use PDOException;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
 use ReflectionException;
 use Utils\ActiveMQ\AMQHandler;
+use Utils\Logger\MatecatLogger;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\Params;
@@ -28,9 +29,10 @@ class PropagationWorker extends AbstractWorker
     public function __construct(
         AMQHandler $queueHandler,
         IDatabase $database,
-        ?TranslationVersionDao $translationVersionsDao = null
+        ?TranslationVersionDao $translationVersionsDao = null,
+        ?MatecatLogger $logger = null,
     ) {
-        parent::__construct($queueHandler, $database);
+        parent::__construct($queueHandler, $database, $logger);
         $this->translationVersionsDao = $translationVersionsDao ?? new TranslationVersionDao($this->database);
     }
 

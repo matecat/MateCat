@@ -58,8 +58,7 @@ class QAModelTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
         // Here rather than in the controller, so create and update are covered by one call: both
         // hydrate through this method. Unlike its siblings, `qa_model_templates` has a plain
         // KEY (uid) and no name column at all, so this is about the value being stored as one
-        // spelling rather than about an index seeing a clash — and its `label` is a varchar(45),
-        // not the 255 the other template names get.
+        // spelling rather than about an index seeing a clash.
         $QAModelTemplateStruct->label = UserSuppliedName::validated(
             $jsonModel->label,
             'label',

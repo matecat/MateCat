@@ -102,7 +102,7 @@ describe('Xliff12', () => {
     const {modifyingCurrentTemplate, currentTemplate, container} = setup()
 
     const deleteButtons = container.querySelectorAll(
-      '.xliff-settings-table button',
+      'button.xliff-settings-column-content',
     )
     fireEvent.click(deleteButtons[0])
 

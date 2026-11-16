@@ -99,7 +99,9 @@ class AnalyzeController extends BaseKleinViewController implements IController
         if (!empty($jid)) {
             // we are looking for a chunk
             $chunkStruct = (new JobDao($this->getDatabase()))->getByIdAndPassword($jid, $pass);
-            if (empty($chunkStruct) || $chunkStruct->isDeleted()) {
+            // The job password authorizes this job only: the job must also belong to the project
+            // in the URL, or the page would render that project's password-derived access token.
+            if (empty($chunkStruct) || $chunkStruct->isDeleted() || $chunkStruct->id_project !== (int)$projectStruct->id) {
                 $this->setView("job_not_found.html", [], 404);
                 $this->render();
             }

@@ -28,7 +28,7 @@ const ReviewExtendedTranslationIssuesSideButton = ({sid, segment, open}) => {
   const hidden = issuesCount === 0 && !(open && segment.opened)
   if (
     config.isReview &&
-    !(SegmentUtils.isIceSegment(segment) && !segment.unlocked)
+    !(SegmentUtils.isLockedSegment(segment) && !segment.unlocked)
   ) {
     return (
       <div

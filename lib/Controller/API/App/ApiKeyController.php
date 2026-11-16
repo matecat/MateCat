@@ -96,5 +96,8 @@ class ApiKeyController extends KleinController
 
         $apiKeyDao->getByUid($uid) ?: throw new NotFoundException('The user has not a valid API key');
         $apiKeyDao->deleteByUid($uid);
+
+        $this->response->status()->setCode(200);
+        $this->response->json(['message' => ['success']]);
     }
 }

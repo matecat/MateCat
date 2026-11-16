@@ -26,9 +26,6 @@ describe('SourceLanguage', () => {
     const select = screen.getByTestId('source-language-select')
     expect(select).toBeInTheDocument()
     expect(select).toHaveAttribute('data-is-rendered-inside-tab', 'true')
-    expect(select).toHaveAttribute(
-      'data-dropdown-class-name',
-      'select-dropdown__wrapper-portal',
-    )
+    expect(select).not.toHaveAttribute('data-dropdown-class-name')
   })
 })

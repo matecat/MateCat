@@ -315,7 +315,7 @@ class Translated extends AbstractProvider
         foreach ($res as $jobCredentials => $outsourceInfo) {
             $result_outsource = json_decode($outsourceInfo, true);
 
-            LoggerFactory::doJsonLog($outsourceInfo);
+            LoggerFactory::getLogger('outsource')->debug($outsourceInfo);
 
             // if some error occurred, or the job has not been outsourced yet, then skip this job
             if ($result_outsource["code"] != 1 || $result_outsource["outsourced"] != 1) {
@@ -417,7 +417,7 @@ class Translated extends AbstractProvider
                         'of' => 'json'
                     ], '', '&', PHP_QUERY_RFC3986);
 
-                LoggerFactory::doJsonLog("Not Found in Cache. Call url for Quote:  " . $url);
+                LoggerFactory::getLogger('outsource')->debug("Not Found in Cache. Call url for Quote:  " . $url);
                 $mh->createResource($url, $this->_curlOptions, $job['jid'] . "-" . $job['jpassword'] . "-" . $this->fixedDelivery);
             }
         }
@@ -434,16 +434,16 @@ class Translated extends AbstractProvider
         foreach ($res as $jpid => $quote) {
             // if some error occurred, log it and skip this job
             if ($mh->hasError($jpid)) {
-                LoggerFactory::doJsonLog($mh->getError($jpid));
+                LoggerFactory::getLogger('outsource')->error($mh->getError($jpid));
                 continue;
             }
 
-            LoggerFactory::doJsonLog($quote);
+            LoggerFactory::getLogger('outsource')->debug($quote);
 
             // Parse the result and check if the vendor returned some error. In case, skip the quote
             $result_quote = json_decode($quote, true);
             if ($result_quote['code'] != 1) {
-                LoggerFactory::doJsonLog("HTS returned an error. Skip quote");
+                LoggerFactory::getLogger('outsource')->warning("HTS returned an error. Skip quote");
                 continue;
             }
 
@@ -456,7 +456,7 @@ class Translated extends AbstractProvider
             // See GUIDE->"NORMAL QUOTES vs OUTSOURCED QUOTES" for details
             $this->__addCartElement($itemCart);
 
-            LoggerFactory::doJsonLog($itemCart);
+            LoggerFactory::getLogger('outsource')->debug($itemCart);
         }
     }
 

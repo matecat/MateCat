@@ -1,13 +1,9 @@
 import React, {useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {Select} from '../../common/Select'
-import {
-  Button,
-  BUTTON_MODE,
-  BUTTON_SIZE,
-  BUTTON_TYPE,
-} from '../../common/Button/Button'
+import {Button, BUTTON_MODE, BUTTON_TYPE} from '../../common/Button/Button'
 import ModalsActions from '../../../actions/ModalsActions'
+import {SELECT_HEIGHT} from '../../../constants/Constants'
 
 const BulkMoveToTeam = ({teams, projects, successCallback}) => {
   const [teamSelected, setTeamSelected] = useState()
@@ -38,19 +34,17 @@ const BulkMoveToTeam = ({teams, projects, successCallback}) => {
         activeOption={teamSelected}
         checkSpaceToReverse={false}
         onSelect={onSelect}
-        maxHeightDroplist={300}
+        maxHeightDroplist={SELECT_HEIGHT}
       />
       <div className="content-bulk-modal-control">
         <Button
           mode={BUTTON_MODE.OUTLINE}
-          size={BUTTON_SIZE.MEDIUM}
           onClick={() => ModalsActions.onCloseModal()}
         >
           Cancel
         </Button>
         <Button
           type={BUTTON_TYPE.PRIMARY}
-          size={BUTTON_SIZE.MEDIUM}
           disabled={typeof teamSelected === 'undefined'}
           onClick={() => successCallback({id_team: parseInt(teamSelected?.id)})}
         >

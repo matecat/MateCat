@@ -3,7 +3,7 @@
  * @author: Domenico <ostico@gmail.com>, <domenico@translated.net>
  * Date: 11/11/2024
  */
-const {logger} = require("../utils");
+import {logger} from '../utils.js';
 
 const AI_ASSISTANT_EXPLAIN_MEANING = 'ai_assistant_explain_meaning';
 const COMMENTS_TYPE = 'comment';
@@ -26,13 +26,10 @@ const LOGOUT = 'logout';
 const UPGRADE = 'upgrade';
 const RELOAD = 'force_reload';
 const ENGINE_QUOTA_EXCEEDED = 'quota_exceeded';
-const MESSAGE_NAME = 'message';
-const GLOBAL_MESSAGES = 'global_messages';
+export const MESSAGE_NAME = 'message';
+export const GLOBAL_MESSAGES = 'global_messages';
 
-module.exports.MESSAGE_NAME = MESSAGE_NAME;
-module.exports.GLOBAL_MESSAGES = GLOBAL_MESSAGES;
-
-module.exports.MessageHandler = class {
+export class MessageHandler {
 
   constructor(application) {
     this.application = application;
@@ -99,7 +96,7 @@ module.exports.MessageHandler = class {
   }
 }
 
-const notifyUpgrade = (application, isRebooting = true) => {
+export const notifyUpgrade = (application, isRebooting = true) => {
 
   const disconnectMessage = {
     payload: {
@@ -128,5 +125,3 @@ const notifyUpgrade = (application, isRebooting = true) => {
   }
 
 }
-
-module.exports.notifyUpgrade = notifyUpgrade;

@@ -4,7 +4,6 @@
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 04/05/15
  * Time: 13.37
- *
  */
 
 namespace Utils\TaskRunner;
@@ -16,11 +15,9 @@ use Monolog\Handler\StreamHandler;
 use PDOException;
 use Predis\Connection\ConnectionException;
 use Predis\Response\ServerException;
-use Psr\Log\InvalidArgumentException;
 use ReflectionException;
 use RuntimeException;
-use SplObserver;
-use SplSubject;
+use Stomp\Exception\ConnectionException as StompConnectionException;
 use Stomp\Transport\Frame;
 use Throwable;
 use Utils\ActiveMQ\AMQHandler;
@@ -44,7 +41,7 @@ use Utils\TaskRunner\Exceptions\WorkerClassException;
  *
  * @package TaskRunner
  */
-class Executor implements SplObserver
+class Executor
 {
 
     use SignalHandlerTrait;
@@ -262,21 +259,16 @@ class Executor implements SplObserver
                     if (!$this->isAllowedWorkerClass($queueElement->classLoad)) {
                         throw new WorkerClassException("--- (Executor " . $this->_executor_instance_id . ") : class " . $queueElement->classLoad . " is not in an allowed namespace");
                     }
-                    $workerInstance = new $queueElement->classLoad($this->_queueHandler, $this->database);
+                    $workerInstance = new $queueElement->classLoad($this->_queueHandler, $this->database, logger: $this->logger);
                     if (!$workerInstance instanceof AbstractWorker) {
                         throw new WorkerClassException("--- (Executor " . $this->_executor_instance_id . ") : class " . $queueElement->classLoad . " is not an AbstractWorker");
                     }
                     $this->_worker = $workerInstance;
-                    $workerInstance->attach($this);
                     $workerInstance->setPid($this->_executor_instance_id);
                     $workerInstance->setContext($this->_executionContext);
                 }
 
-                $worker = $this->_worker;
-                if ($worker === null) {
-                    continue;
-                }
-                $worker->process($queueElement);
+                $this->_worker->process($queueElement);
             } catch (EndQueueException $e) {
                 $this->logger->debug("--- (Executor " . $this->_executor_instance_id . ") : End queue limit reached. Acknowledged. - " . $e->getMessage()); // ERROR End Queue
 
@@ -337,7 +329,6 @@ class Executor implements SplObserver
      *
      * @return array{0: Frame, 1: QueueElement}
      * @throws FrameException
-     * @throws InvalidArgumentException
      */
     protected function _readAMQFrame(): array
     {
@@ -416,20 +407,6 @@ class Executor implements SplObserver
     }
 
     /**
-     * Update method, called by the subject when the application tells him to notify the Observer
-     *
-     * @param SplSubject $subject
-     *
-     * @throws Exception
-     */
-    public function update(SplSubject $subject): void
-    {
-        if ($subject instanceof AbstractWorker) {
-            $this->logger->debug($subject->getLogMsg());
-        }
-    }
-
-    /**
      * Acknowledge the original frame and re-publish the element with incremented requeue counter.
      * Acks first to prevent message duplication if a crash occurs after requeue.
      *
@@ -437,7 +414,7 @@ class Executor implements SplObserver
      * @param QueueElement $queueElement The element to re-publish
      *
      * @throws Exception
-     * @throws \Stomp\Exception\ConnectionException
+     * @throws StompConnectionException
      */
     private function _ackAndRequeue(Frame $msgFrame, QueueElement $queueElement): void
     {
@@ -453,7 +430,7 @@ class Executor implements SplObserver
     }
 
     /**
-     * @throws \Stomp\Exception\ConnectionException
+     * @throws StompConnectionException
      */
     protected function _createPublisher(): AMQHandler
     {

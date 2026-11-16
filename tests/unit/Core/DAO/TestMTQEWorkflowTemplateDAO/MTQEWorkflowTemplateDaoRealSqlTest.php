@@ -16,10 +16,6 @@ use PHPUnit\Framework\Attributes\Test;
  * round-tripped data (DoD b). Test rows live under an assignable uid >= ASSIGNABLE_ID_FLOOR
  * (M-2). Cleanup is a uid-scoped DELETE; the residue gate asserts whole-table COUNT(*) is
  * unchanged across the test.
- *
- * Fixtures are seeded against the LIVE schema: `mt_qe_templates` stores the workflow params in
- * the `params` column (the checked-in unittest_matecat_local.sql still names it `rules`; the
- * live DB has migrated — see Findings).
  */
 #[Group('PersistenceNeeded')]
 #[Group('DaoRealSql')]
@@ -57,13 +53,13 @@ class MTQEWorkflowTemplateDaoRealSqlTest extends AbstractTest
     {
         $conn = $this->realSqlDb->getConnection();
         $stmt = $conn->prepare(
-            "INSERT INTO mt_qe_templates (uid, name, params, created_at, deleted_at) "
-            . "VALUES (:uid, :name, :params, NOW(), :deleted)"
+            "INSERT INTO mt_qe_templates (uid, name, rules, created_at, deleted_at) "
+            . "VALUES (:uid, :name, :rules, NOW(), :deleted)"
         );
         $stmt->execute([
             'uid' => $this->uid,
             'name' => $name,
-            'params' => json_encode(['rules' => ['threshold' => 80]]),
+            'rules' => json_encode(['rules' => ['threshold' => 80]]),
             'deleted' => $deletedAt,
         ]);
 

@@ -40,9 +40,7 @@ services:
                 # plugins/aligner/lib/Features/Aligner.php used to be listed here and has been
                 # dropped as dead configuration, on two independent counts: `plugins/aligner` is in
                 # excludePaths below so the rule never analyses it, and the file no longer names the
-                # superglobal at all. The only $_SESSION left anywhere under plugins/aligner/lib is
-                # prose in a ConfigsController docblock, which is not a Variable node and so was
-                # never a violation.
+                # superglobal at all. No file under plugins/aligner/lib names $_SESSION any more.
 
     -
         class: Matecat\PhpStan\Rules\NoDirectSessionFunctionRule
@@ -83,7 +81,6 @@ parameters:
         # inside the submodule doesn't flood the root scan with third-party errors.
         - internal_scripts/*/vendor/* (?)
         # Legacy plugin: cannot be economically cleaned; intentionally not analyzed.
-        # Its own phpstan-baseline.neon lives in the aligner submodule, unused by matecat.
         - plugins/aligner (?)
     universalObjectCratesClasses:
         - Model\DataAccess\ShapelessConcreteStruct
@@ -109,6 +106,10 @@ parameters:
             # own. Like the above, catching it is never the right response: the allocation boundary
             # is drawn in the wrong place and the fix belongs at the call site, not in a catch block.
             - 'Model\DataAccess\SequenceAllocationInTransaction'
+            # Thrown by AbstractDao::_fetchObjectMap() when a cached query binds nothing and writes
+            # an IN list into its SQL, so every call would share one Redis hash. A mistake in the
+            # DAO, fixed at the call site; never something to catch.
+            - 'Model\DataAccess\UnscopedCacheKeyMap'
         check:
             # Report when code throws an exception that has no
             # matching @throws tag in the method's PHPDoc

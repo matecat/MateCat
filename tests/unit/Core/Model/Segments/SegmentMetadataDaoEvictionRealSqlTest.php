@@ -14,9 +14,10 @@ use TypeError;
  * Cache-eviction coverage for Model\Segments\SegmentMetadataDao against the live segment_metadata
  * table.
  *
- * One row is read at four addresses — by segment, by segment and key, by a key across a set of
- * segments, and across a segment range — with TTLs of one to seven days. These tests pin that one
- * write clears all four, so a caller cannot be left compensating for the ones the DAO forgot.
+ * One row is cached at two addresses with TTLs of one to seven days: by segment, and by segment
+ * and key. These tests pin that one write clears both, so a caller cannot be left compensating
+ * for the one the DAO forgot. `getBySegmentIds()` and `getAllInRange()` read without the cache,
+ * so they have no address to clear.
  */
 #[Group('PersistenceNeeded')]
 #[Group('DaoRealSql')]
@@ -51,7 +52,7 @@ class SegmentMetadataDaoEvictionRealSqlTest extends AbstractTest
     }
 
     /**
-     * The defect: `delete()` removed the row and evicted nothing, so all four reads kept serving it
+     * The defect: `delete()` removed the row and evicted nothing, so every cached read kept serving it
      * — `get()` for seven days. It worked only because `SegmentDisabledService::enable()` made the
      * four eviction calls itself, which is the arrangement one forgotten call breaks.
      */
@@ -62,15 +63,11 @@ class SegmentMetadataDaoEvictionRealSqlTest extends AbstractTest
 
         self::assertSame('1', $this->dao->get($this->idSegment, self::KEY)?->meta_value);
         self::assertCount(1, iterator_to_array($this->dao->getAll($this->idSegment)));
-        self::assertCount(1, $this->dao->getBySegmentIds([$this->idSegment], self::KEY));
-        self::assertCount(1, $this->dao->getAllInRange($this->idSegment, $this->idSegment));
 
         $this->dao->delete($this->idSegment, self::KEY);
 
         self::assertNull($this->dao->get($this->idSegment, self::KEY));
         self::assertCount(0, iterator_to_array($this->dao->getAll($this->idSegment)));
-        self::assertCount(0, $this->dao->getBySegmentIds([$this->idSegment], self::KEY));
-        self::assertCount(0, $this->dao->getAllInRange($this->idSegment, $this->idSegment));
     }
 
     #[Test]
@@ -80,8 +77,6 @@ class SegmentMetadataDaoEvictionRealSqlTest extends AbstractTest
 
         self::assertSame('1', $this->dao->get($this->idSegment, self::KEY)?->meta_value);
         self::assertSame('1', iterator_to_array($this->dao->getAll($this->idSegment))[0]->meta_value);
-        self::assertSame('1', $this->dao->getBySegmentIds([$this->idSegment], self::KEY)[0]->meta_value);
-        self::assertSame('1', iterator_to_array($this->dao->getAllInRange($this->idSegment, $this->idSegment)[$this->idSegment])[0]->meta_value);
 
         $this->editBehindTheCache('0');
 
@@ -89,8 +84,6 @@ class SegmentMetadataDaoEvictionRealSqlTest extends AbstractTest
 
         self::assertSame('0', $this->dao->get($this->idSegment, self::KEY)?->meta_value);
         self::assertSame('0', iterator_to_array($this->dao->getAll($this->idSegment))[0]->meta_value);
-        self::assertSame('0', $this->dao->getBySegmentIds([$this->idSegment], self::KEY)[0]->meta_value);
-        self::assertSame('0', iterator_to_array($this->dao->getAllInRange($this->idSegment, $this->idSegment)[$this->idSegment])[0]->meta_value);
     }
 
     /** Without this the test above would also pass on a door that cleared the whole DAO. */

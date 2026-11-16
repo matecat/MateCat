@@ -4,7 +4,6 @@
  * @author ostico domenico@translated.net / ostico@gmail.com
  * Date: 20/06/19
  * Time: 15.07
- *
  */
 
 namespace Model\TMSService;
@@ -95,7 +94,7 @@ class TMSServiceDao
             ]);
             $results = $stmt->fetchAll();
         } catch (PDOException $e) {
-            LoggerFactory::doJsonLog($e->getMessage());
+            LoggerFactory::getLogger('dao')->error($e->getMessage());
 
             throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
@@ -142,7 +141,7 @@ class TMSServiceDao
             ]);
             $results = $stmt->fetchAll();
         } catch (PDOException $e) {
-            LoggerFactory::doJsonLog($e->getMessage());
+            LoggerFactory::getLogger('dao')->error($e->getMessage());
             throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
 

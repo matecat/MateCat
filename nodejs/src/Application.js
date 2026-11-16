@@ -3,16 +3,16 @@
  * @author: Domenico <ostico@gmail.com>, <domenico@translated.net>
  * Date: 11/11/2024
  */
-const io = require('socket.io');
-const {setupWorker} = require('@socket.io/sticky');
-const {createAdapter} = require('@socket.io/redis-adapter');
-const {Reader} = require('./amq/AMQconnector');
-const {MessageHandler, MESSAGE_NAME, GLOBAL_MESSAGES} = require('./amq/MessageHandler');
-const {logger, getWebSocketClientAddress} = require('./utils');
-const {verify} = require('jsonwebtoken');
-const Redis = require('ioredis');
+import {Server} from 'socket.io';
+import {setupWorker} from '@socket.io/sticky';
+import {createAdapter} from '@socket.io/redis-adapter';
+import jwt from 'jsonwebtoken';
+import {Redis} from 'ioredis';
+import {Reader} from './amq/AMQconnector.js';
+import {MessageHandler, MESSAGE_NAME, GLOBAL_MESSAGES} from './amq/MessageHandler.js';
+import {logger, getWebSocketClientAddress} from './utils.js';
 
-const createAuthMiddleware = (authSecretKey, log) => {
+export const createAuthMiddleware = (authSecretKey, log) => {
   return (socket, next) => {
     let auth = null;
 
@@ -34,7 +34,7 @@ const createAuthMiddleware = (authSecretKey, log) => {
       return next(new Error('Authentication not provided'));
     }
 
-    verify(
+    jwt.verify(
         auth['x-token'],
         authSecretKey,
         {
@@ -71,13 +71,11 @@ const createAuthMiddleware = (authSecretKey, log) => {
   };
 };
 
-module.exports.createAuthMiddleware = createAuthMiddleware;
-
-module.exports.Application = class {
+export class Application {
 
   constructor(server, amqParameters, options, deps = {}) {
     const RedisClient = deps.Redis || Redis;
-    const socketIO = deps.io || io;
+    const SocketIOServer = deps.Server || Server;
     const socketSetupWorker = deps.setupWorker || setupWorker;
     const ReaderClass = deps.Reader || Reader;
     const MessageHandlerClass = deps.MessageHandler || MessageHandler;
@@ -97,7 +95,7 @@ module.exports.Application = class {
 
     const subClient = pubClient.duplicate();
 
-    this._socketIOServer = socketIO(server, {
+    this._socketIOServer = new SocketIOServer(server, {
       path: this.options.path,
       pingTimeout: 5000,
       cors: {
@@ -251,4 +249,4 @@ module.exports.Application = class {
     );
 
   };
-};
+}

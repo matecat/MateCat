@@ -16,6 +16,27 @@ import SegmentStore from '../stores/SegmentStore'
 import {lexiqaTooltipwarnings} from '../api/lexiqaTooltipwarnings'
 import UserStore from '../stores/UserStore'
 import {getLexiqaQa} from '../api/getLexiqaQa'
+import {getLexiqaSupportedLocales} from '../api/getLexiqaSupportedLocales/getLexiqaSupportedLocales'
+
+// lexiQA and MateCat name a handful of languages differently for the same locale.
+// Keyed by lexiQA's code, valued by MateCat's code for that same language.
+const languageMapping = {
+  'ku-TR': 'kmr-TR',
+  'cb-IQ': 'ckb-IQ',
+  pau: 'pau-PW',
+  'or-IN': 'ory-IN',
+}
+
+// lexiQA's /supportedLocales response speaks lexiQA's code-space, matching these keys;
+// config.source_code/target_code and the outgoing QA request speak MateCat's, matching
+// these values. These two convert between the two, in opposite directions.
+const getLexiqaLanguageCodeFromMatecat = (matecatCode) =>
+  Object.entries(languageMapping).find(
+    ([, value]) => value === matecatCode,
+  )?.[0] ?? matecatCode
+
+const getMatecatLanguageCodeFromLexiqa = (lexiqaCode) =>
+  languageMapping[lexiqaCode] ?? lexiqaCode
 
 const LXQ = {
   partnerid: config.lxq_partnerid,
@@ -78,6 +99,7 @@ const LXQ = {
     default: {t: 'not found in source', s: 'missing from target'},
   },
   modulesNoHighlight: ['b1g', 'g1g', 'g2g', 'g3g'],
+  _supportedLocales: [],
   init: () => {
     LXQ.initialized = true
     let globalReceived = false
@@ -142,6 +164,19 @@ const LXQ = {
         .map(([key]) => key)
     })
   },
+  retrieveSupportedLocales: function (metadata) {
+    getLexiqaSupportedLocales().then((languages) => {
+      LXQ._supportedLocales = languages
+      if (LXQ.enabled(metadata)) LXQ.init()
+    })
+  },
+  getSupportedLocales: function () {
+    return [
+      ...new Set(
+        LXQ._supportedLocales.map((code) => getMatecatLanguageCodeFromLexiqa(code)),
+      ),
+    ]
+  },
   enabled: function ({lexiqa} = {}) {
     return (
       LXQ.checkCanActivate() &&
@@ -166,8 +201,8 @@ const LXQ = {
   checkCanActivate: function () {
     if (isUndefined(this.canActivate)) {
       this.canActivate =
-        config.lexiqa_languages.indexOf(config.source_code) > -1 &&
-        config.lexiqa_languages.indexOf(config.target_code) > -1
+        LXQ.getSupportedLocales().indexOf(config.source_code) > -1 &&
+        LXQ.getSupportedLocales().indexOf(config.target_code) > -1
     }
     return this.canActivate
   },
@@ -197,8 +232,8 @@ const LXQ = {
 
     const returnUrl = window.location.href.split('#')[0] + '#' + id_segment
     const data = {
-      sourcelanguage: config.source_code,
-      targetlanguage: config.target_code,
+      sourcelanguage: getLexiqaLanguageCodeFromMatecat(config.source_code),
+      targetlanguage: getLexiqaLanguageCodeFromMatecat(config.target_code),
       sourcetext: sourcetext,
       targettext: translation,
       returnUrl: returnUrl,

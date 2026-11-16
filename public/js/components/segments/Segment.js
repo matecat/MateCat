@@ -43,6 +43,7 @@ import {
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../common/Button/Button'
+import {TOOLTIP_POSITION} from '../common/Tooltip'
 
 const SegmentComponent = ({
   segment,
@@ -318,8 +319,8 @@ const SegmentComponent = ({
     const seg = segmentRef.current
     if (
       parseInt(data.sid) === parseInt(seg.sid) &&
-      (!SegmentUtils.isIceSegment(seg) ||
-        (SegmentUtils.isIceSegment(seg) && seg.unlocked))
+      (!SegmentUtils.isLockedSegment(seg) ||
+        (SegmentUtils.isLockedSegment(seg) && seg.unlocked))
     ) {
       setSelectedTextObj(data.selection)
     } else {
@@ -503,7 +504,10 @@ const SegmentComponent = ({
 
     if (readonly) classes.push('readonly')
 
-    if ((SegmentUtils.isIceSegment(segment) && !readonly) || secondPassLocked) {
+    if (
+      (SegmentUtils.isLockedSegment(segment) && !readonly) ||
+      secondPassLocked
+    ) {
       if (segment.unlocked) {
         classes.push('ice-unlocked')
       } else {
@@ -626,7 +630,10 @@ const SegmentComponent = ({
   }
 
   const onClickEvent = () => {
-    if (readonly || (!segment.unlocked && SegmentUtils.isIceSegment(segment))) {
+    if (
+      readonly ||
+      (!segment.unlocked && SegmentUtils.isLockedSegment(segment))
+    ) {
       SegmentActions.handleClickOnReadOnly(segment)
     } else if (segment.muted) {
       return
@@ -642,7 +649,7 @@ const SegmentComponent = ({
   // Render
   // ------------------------------------------------------------------
 
-  const showLockIcon = SegmentUtils.isIceSegment(segment) || secondPassLocked
+  const showLockIcon = SegmentUtils.isLockedSegment(segment) || secondPassLocked
   const segment_classes = checkSegmentClasses()
   const split_group = segment.split_group || []
   const autoPropagable = segment.repetitions_in_chunk !== 1
@@ -650,7 +657,7 @@ const SegmentComponent = ({
   const translationIssues = getTranslationIssues()
   const locked =
     !segment.unlocked &&
-    (SegmentUtils.isIceSegment(segment) || secondPassLocked)
+    (SegmentUtils.isLockedSegment(segment) || secondPassLocked)
   const segmentHasIssues = SegmentStore.segmentHasIssues(segment)
 
   const contextValue = {
@@ -723,9 +730,7 @@ const SegmentComponent = ({
             />
           </div>
 
-          {!segment.ice_locked &&
-          config.splitSegmentEnabled &&
-          segment.opened ? (
+          {!segment.locked && config.splitSegmentEnabled && segment.opened ? (
             !segment.openSplit ? (
               <div className="actions">
                 <Button
@@ -733,6 +738,7 @@ const SegmentComponent = ({
                   mode={BUTTON_MODE.GHOST}
                   size={BUTTON_SIZE.ICON_STANDARD}
                   tooltip={`Click to split segment (${Shortcuts.cattol.events.splitSegment.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase()})`}
+                  tooltipPosition={TOOLTIP_POSITION.RIGHT}
                   onClick={() => SegmentActions.openSplitSegment(segment.sid)}
                 >
                   <IconSplit />
@@ -746,6 +752,7 @@ const SegmentComponent = ({
                   mode={BUTTON_MODE.GHOST}
                   size={BUTTON_SIZE.ICON_STANDARD}
                   tooltip="Click to close split segment"
+                  tooltipPosition={TOOLTIP_POSITION.RIGHT}
                   onClick={() => SegmentActions.closeSplitSegment()}
                 >
                   <IconSplit />

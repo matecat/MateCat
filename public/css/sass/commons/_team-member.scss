@@ -1,6 +1,13 @@
+@use '../tokens/colors';
+
 .ui-user-top-image {
-  float: right;
-  margin-left: 10px;
-  margin-right: 20px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid colors.$blue500;
+  color: colors.$blue500;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
 }

@@ -420,7 +420,7 @@ class Utils
 
         WorkerClient::enqueue('MAIL', ErrMailWorker::class, $queue_element, ['persistent' => WorkerClient::$_HANDLER->persistent]);
 
-        LoggerFactory::doJsonLog('Message has been sent');
+        LoggerFactory::getLogger('mail', 'mail.log')->info('Message has been sent');
     }
 
     /**
@@ -499,7 +499,7 @@ class Utils
      */
     public static function isTokenValid(?string $token = null): bool
     {
-        if (empty($token) || !preg_match('|^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$|', $token)) {
+        if (empty($token) || !preg_match('|^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$|D', $token)) {
             return false;
         }
 
@@ -703,7 +703,7 @@ class Utils
                     }
                     $outcome = unlink($fileInfo->getPathname());
                     if (!$outcome) {
-                        LoggerFactory::doJsonLog("fail deleting " . $fileInfo->getPathname());
+                        LoggerFactory::getLogger('files')->warning("fail deleting " . $fileInfo->getPathname());
                     }
                 }
             }
@@ -738,13 +738,21 @@ class Utils
     /**
      * uploadDirFromSessionCookie
      *
+     * The guid comes from the upload token cookie, so it is checked here, where it becomes a path:
+     * anything but a UUID could point outside the upload repository.
+     *
      * @param string $guid
      * @param $file_name string|null optional file name to append to the upload path
      *
      * @return string
+     * @throws InvalidArgumentException when the guid is not a valid upload token
      */
     public static function uploadDirFromSessionCookie(string $guid, string $file_name = null): string
     {
+        if (!self::isTokenValid($guid)) {
+            throw new InvalidArgumentException('Invalid upload token.');
+        }
+
         return AppConfig::$UPLOAD_REPOSITORY . "/" .
             $guid . '/' .
             $file_name;

@@ -181,7 +181,7 @@ class MembershipEmailTest extends AbstractTest
             $this->makeUserDao(),
             $this->makeTeamDao()
         );
-        $vars = $email->_getLayoutVariables();
+        $vars = (new ReflectionMethod(MembershipCreatedEmail::class, '_getLayoutVariables'))->invoke($email);
 
         $this->assertArrayHasKey('title', $vars);
         $this->assertStringContainsString('Test Team', $vars['title']);

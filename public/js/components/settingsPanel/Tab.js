@@ -3,26 +3,29 @@ import PropTypes from 'prop-types'
 import {SettingsPanelContext} from './SettingsPanelContext'
 import {TEMPLATE_PROPS_BY_TAB} from './SettingsPanelConstants'
 
-export const Tab = ({id, label}) => {
+export const useAreTemplatePropsModified = (props = []) => {
   const {
-    tabs,
-    setTabs,
     checkSpecificTemplatePropsAreModified,
     isEnabledProjectTemplateComponent,
     subtemplatesNotSaved,
   } = useContext(SettingsPanelContext)
+
+  return (
+    isEnabledProjectTemplateComponent &&
+    (checkSpecificTemplatePropsAreModified(props) ||
+      subtemplatesNotSaved.some((value) => props.includes(value)))
+  )
+}
+
+export const Tab = ({id, label}) => {
+  const {tabs, setTabs} = useContext(SettingsPanelContext)
   const clickHandler = () =>
     setTabs((prevState) =>
       prevState.map((tab) => ({...tab, isOpened: tab.id === id})),
     )
 
   const isActive = tabs.find((tab) => tab.id === id)?.isOpened ?? false
-  const isModifyng =
-    isEnabledProjectTemplateComponent &&
-    (checkSpecificTemplatePropsAreModified(TEMPLATE_PROPS_BY_TAB[id] ?? []) ||
-      subtemplatesNotSaved.some((value) =>
-        TEMPLATE_PROPS_BY_TAB[id].includes(value),
-      ))
+  const isModifyng = useAreTemplatePropsModified(TEMPLATE_PROPS_BY_TAB[id])
 
   return (
     <li

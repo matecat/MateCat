@@ -1,11 +1,4 @@
-import React, {
-  useState,
-  useMemo,
-  useRef,
-  useEffect,
-  useCallback,
-  createRef,
-} from 'react'
+import React, {useState, useMemo, useRef, useEffect, useCallback} from 'react'
 import classnames from 'classnames'
 
 import TextUtils from '../../utils/textUtils'
@@ -20,8 +13,6 @@ import SegmentQA from '../../../img/icons/SegmentQA'
 import AlertIcon from '../../../img/icons/AlertIcon'
 import InfoIcon from '../../../img/icons/InfoIcon'
 import {Badge, BADGE_TYPE} from '../common/Badge'
-import Tooltip from '../common/Tooltip'
-import ReviseIssuesIcon from '../../../img/icons/ReviseIssuesIcon'
 import {Button, BUTTON_SIZE, BUTTON_MODE} from '../common/Button/Button'
 import ChevronDown from '../../../img/icons/ChevronDown'
 import ChevronUp from '../../../img/icons/ChevronUp'
@@ -289,7 +280,11 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
     segmentHistory.length > 0 ? (
       <div style={{alignSelf: 'center', marginRight: 24, marginLeft: 'auto'}}>
         {!showHistory ? (
-          <Button onClick={() => setShowHistory(true)} size={BUTTON_SIZE.SMALL}>
+          <Button
+            onClick={() => setShowHistory(true)}
+            size={BUTTON_SIZE.SMALL}
+            mode={BUTTON_MODE.OUTLINE}
+          >
             Open history
             <ChevronDown size={16} />
           </Button>
@@ -297,6 +292,7 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
           <Button
             onClick={() => setShowHistory(false)}
             size={BUTTON_SIZE.SMALL}
+            mode={BUTTON_MODE.OUTLINE}
           >
             Close history
             <ChevronUp size={16} />
@@ -338,33 +334,6 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
               ),
             }}
           />
-          {elem.issues.length > 0 && (
-            <Tooltip
-              content={
-                <div>
-                  {elem.issues.map((issue) => (
-                    <div
-                      key={issue.issue_id}
-                      className="qr-history-issue"
-                      style={{fontWeight: '700'}}
-                    >
-                      {issue.issue_category}:{' '}
-                      <span style={{fontWeight: '400'}}>
-                        {issue.issue_severity}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              }
-            >
-              <div ref={createRef()}>
-                <Badge type={BADGE_TYPE.RED}>
-                  <ReviseIssuesIcon size={16} />
-                  Issues
-                </Badge>
-              </div>
-            </Tooltip>
-          )}
         </div>
       )
     })
@@ -478,9 +447,7 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
             diffActive={translateDiffOn}
             showIceMatchInfo={true}
             tte={segment.get('time_to_edit_translation')}
-            showIsPretranslated={
-              segment.get('is_pre_translated') && !segment.get('ice_locked')
-            }
+            showIsPretranslated={segment.get('is_pre_translated')}
             rev={0}
           />
         ) : null}
@@ -496,9 +463,7 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
             diffActive={reviseDiffOn}
             showIceMatchInfo={target === null}
             tte={segment.get('time_to_edit_revise')}
-            showIsPretranslated={
-              segment.get('is_pre_translated') && !segment.get('ice_locked')
-            }
+            showIsPretranslated={segment.get('is_pre_translated')}
             rev={1}
           />
         ) : null}
@@ -514,9 +479,7 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
             diffActive={revise2DiffOn}
             showIceMatchInfo={target === null && revise === null}
             tte={segment.get('time_to_edit_revise_2')}
-            showIsPretranslated={
-              segment.get('is_pre_translated') && !segment.get('ice_locked')
-            }
+            showIsPretranslated={segment.get('is_pre_translated')}
             rev={2}
           />
         ) : null}

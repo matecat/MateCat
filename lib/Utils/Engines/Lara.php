@@ -46,7 +46,6 @@ use Utils\TmKeyManagement\TmKeyStruct;
  * @author Domenico Lupinetti (hashashiyyin) domenico@translated.net / ostico@gmail.com
  * Date: 04/12/24
  * Time: 17:56
- *
  */
 class Lara extends AbstractEngine
 {
@@ -482,8 +481,7 @@ class Lara extends AbstractEngine
      * @param string $mt_qe_engine_id
      *
      * @return float|null
-     * @throws \Psr\Log\InvalidArgumentException
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
     public function getQualityEstimation(
         string $source,
@@ -709,7 +707,6 @@ class Lara extends AbstractEngine
      * @param array<int, array<string, mixed>>|null $segments
      *
      * @return void
-     * @throws \Psr\Log\InvalidArgumentException
      */
     public function syncMemories(array $projectRow, ?array $segments = []): void
     {
