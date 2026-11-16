@@ -4,6 +4,7 @@ namespace Utils\TmKeyManagement;
 
 use DomainException;
 use Exception;
+use JsonException;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Model\TmKeyManagement\MemoryKeyDao;
@@ -68,6 +69,50 @@ class TmKeyManager
     public static function getClientTmKeyStructure(?array $tmKey_arr = null): ClientTmKeyStruct
     {
         return new ClientTmKeyStruct($tmKey_arr);
+    }
+
+    /**
+     * Tells which keys sent by the client are not in the job yet, so they can be checked before
+     * they are added.
+     *
+     * A key already in the job is left out whether the client sends it in full or masked. A masked
+     * key (with `*`) is always left out: it can only be the form of a key someone else owns, and it
+     * must never reach a key check. Empty keys are left out too.
+     *
+     * Example: client keys `aaa1` and `bbb2`, job key `aaa1` → `['bbb2']`.
+     *
+     * @param string $Json_clientKeys A json_encoded array of client keys, as for mergeJsonKeys()
+     * @param string $Json_jobKeys    A json_encoded array of the job's TmKeyStruct objects
+     *
+     * @return list<string> The new keys, each once, in the client's order
+     *
+     * @throws JsonException
+     * @throws DomainException
+     */
+    public static function getNewKeys(string $Json_clientKeys, string $Json_jobKeys): array
+    {
+        $clientKeys = array_map(self::getTmKeyStructure(...), json_decode($Json_clientKeys, true, 512, JSON_THROW_ON_ERROR));
+        $jobKeys    = array_map(self::getTmKeyStructure(...), json_decode($Json_jobKeys, true, 512, JSON_THROW_ON_ERROR));
+
+        // A masked client key is skipped below, so only the job's full keys need to be known.
+        $known = [];
+        foreach ($jobKeys as $jobKey) {
+            $known[(string)$jobKey->key] = true;
+        }
+
+        $newKeys = [];
+        foreach ($clientKeys as $clientKey) {
+            $key = (string)$clientKey->key;
+
+            if ($key === '' || $clientKey->isEncryptedKey() || isset($known[$key])) {
+                continue;
+            }
+
+            $known[$key] = true;
+            $newKeys[]   = $key;
+        }
+
+        return $newKeys;
     }
 
     /**
@@ -487,10 +532,11 @@ class TmKeyManager
          * There are some new keys from client? Add them
          */
         if (!empty($reverse_lookup_client_json['pos'])) {
-            $justCreatedKey = new TmKeyStruct();
-
             foreach ($reverse_lookup_client_json['elements'] as $_pos => $newClientKey) {
                 /** @var TmKeyStruct $newClientKey */
+
+                // A new struct for each key: they all end up in $server_reorder_position.
+                $justCreatedKey = new TmKeyStruct();
 
                 //set the key value
                 $justCreatedKey->key = $newClientKey->key;
