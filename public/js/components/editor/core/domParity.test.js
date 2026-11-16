@@ -19,11 +19,7 @@ import SegmentSource from '../../segments/SegmentSource'
 import TargetEditor from '../matecat/TargetEditor'
 import SourceEditor from '../matecat/SourceEditor'
 import {SegmentContext} from '../../segments/SegmentContext'
-import {
-  targetEditorBridge,
-  translationUpdate,
-} from '../../segments/targetEditorBridge'
-import {sourceEditorBridge} from '../../segments/sourceEditorBridge'
+import {translationUpdate} from '../../../utils/segmentText/segmentStoreData'
 import {initTagSignature} from '../../../utils/segmentText/tagModel'
 import {SPECIAL_CHARS, TAB} from '../../../utils/segmentText/specialChars'
 import CORPUS from './__fixtures__/roundTripCorpus.json'
@@ -453,7 +449,6 @@ const ELEMENTS = {
         segment={seg}
         value={seg.translation}
         translation={seg.translation}
-        bridge={targetEditorBridge}
         updateCounter={() => {}}
         toggleFormatMenu={() => {}}
       />
@@ -461,13 +456,7 @@ const ELEMENTS = {
   },
   source: {
     draft: (seg) => <SegmentSource segment={seg} />,
-    cm: (seg) => (
-      <SourceEditor
-        segment={seg}
-        value={seg.segment}
-        bridge={sourceEditorBridge}
-      />
-    ),
+    cm: (seg) => <SourceEditor segment={seg} value={seg.segment} />,
   },
 }
 

@@ -17,7 +17,6 @@ import SegmentStore from '../../../stores/SegmentStore'
 import SegmentConstants from '../../../constants/SegmentConstants'
 import SearchUtils from '../../header/cattol/search/searchUtils'
 import {readSegmentClipboard} from '../../segmentView/segmentModel'
-import {sourceEditorBridge} from '../../segments/sourceEditorBridge'
 import {setTagSignatureMiddleware} from '../../segments/utils/DraftMatecatUtils/tagModel'
 
 setTagSignatureMiddleware('space', () => false)
@@ -96,18 +95,10 @@ const makeSegment = (overrides = {}) => ({
   ...overrides,
 })
 
-const fakeBridge = () => ({
-  publishSource: jest.fn(),
-  tagIdentities: jest.fn(() => []),
-})
-
-const renderSource = (
-  segment,
-  {value = segment.segment, bridge, userInfo} = {},
-) => {
+const renderSource = (segment, {value = segment.segment, userInfo} = {}) => {
   const tree = (seg, val) => (
     <SegmentContext.Provider value={{segment: seg, userInfo}}>
-      <SourceEditor segment={seg} value={val} bridge={bridge} />
+      <SourceEditor segment={seg} value={val} />
     </SegmentContext.Provider>
   )
   const utils = render(tree(segment, value))
@@ -187,46 +178,61 @@ describe('SourceEditor rendering', () => {
 
 describe('SourceEditor store wiring', () => {
   test('publishes the source into the store once mounted', async () => {
-    const bridge = fakeBridge()
-    renderSource(makeSegment(), {bridge})
-    expect(bridge.publishSource).not.toHaveBeenCalled()
+    SegmentActions.updateSource.mockClear()
+    renderSource(makeSegment())
+    expect(SegmentActions.updateSource).not.toHaveBeenCalled()
     await flush()
-    expect(bridge.publishSource).toHaveBeenCalledWith(
+    // decoded, plain (tags as their placeholders), the tag range and the Lexiqa text
+    expect(SegmentActions.updateSource).toHaveBeenCalledWith(
       '10',
       'Hello <g id="1">world</g>',
+      'Hello 1world1',
+      [
+        expect.objectContaining({
+          offset: 6,
+          data: expect.objectContaining({name: 'g', id: '1'}),
+        }),
+        expect.objectContaining({
+          offset: 21,
+          data: expect.objectContaining({name: 'gCl', id: '1'}),
+        }),
+      ],
+      expect.any(String),
     )
   })
 
   test('a tag map refresh reloads the current value and publishes it again', async () => {
-    const bridge = fakeBridge()
     const segment = makeSegment()
-    const {container, update} = renderSource(segment, {bridge})
+    const {container, update} = renderSource(segment)
     await flush()
     update(segment, 'Hello world')
-    bridge.publishSource.mockClear()
+    SegmentActions.updateSource.mockClear()
     act(() => SegmentStore.emit(SegmentConstants.REFRESH_TAG_MAP))
     expect(viewOf(container).state.doc.toString()).toBe('Hello world')
-    expect(bridge.publishSource).toHaveBeenCalledWith('10', 'Hello world')
+    expect(SegmentActions.updateSource).toHaveBeenCalledWith(
+      '10',
+      'Hello world',
+      'Hello world',
+      [],
+      'Hello world',
+    )
   })
 
   test('Guess tag reloads the source of its own segment only', async () => {
-    const bridge = fakeBridge()
-    renderSource(makeSegment(), {bridge})
+    renderSource(makeSegment())
     await flush()
-    bridge.publishSource.mockClear()
+    SegmentActions.updateSource.mockClear()
     act(() => SegmentStore.emit(SegmentConstants.SET_SEGMENT_TAGGED, '99'))
     await flush()
-    expect(bridge.publishSource).not.toHaveBeenCalled()
+    expect(SegmentActions.updateSource).not.toHaveBeenCalled()
     act(() => SegmentStore.emit(SegmentConstants.SET_SEGMENT_TAGGED, '10'))
     await flush()
-    expect(bridge.publishSource).toHaveBeenCalledTimes(1)
+    expect(SegmentActions.updateSource).toHaveBeenCalledTimes(1)
   })
 
   test('a new value is loaded and published (tag projection turned off)', async () => {
-    const bridge = fakeBridge()
     const segment = makeSegment()
     const {container, update} = renderSource(segment, {
-      bridge,
       value: 'Hello world',
     })
     await flush()
@@ -234,10 +240,20 @@ describe('SourceEditor store wiring', () => {
     expect(viewOf(container).state.doc.toString()).toBe(
       'Hello <g id="1">world</g>',
     )
-    expect(bridge.publishSource).toHaveBeenLastCalledWith(
+    expect(SegmentActions.updateSource).toHaveBeenLastCalledWith(
       '10',
       'Hello <g id="1">world</g>',
+      'Hello 1world1',
+      expect.any(Array),
+      expect.any(String),
     )
+  })
+
+  test('an empty source is never published', async () => {
+    SegmentActions.updateSource.mockClear()
+    renderSource(makeSegment({segment: ''}))
+    await flush()
+    expect(SegmentActions.updateSource).not.toHaveBeenCalled()
   })
 
   test('removes every store listener it added when unmounted', () => {
@@ -376,9 +392,7 @@ describe('SourceEditor layers', () => {
 
 describe('SourceEditor tags', () => {
   test('clicking a tag highlights it and its twin in the target, by the Draft id and placeholder', async () => {
-    const {container} = renderSource(makeSegment(), {
-      bridge: sourceEditorBridge,
-    })
+    const {container} = renderSource(makeSegment())
     fireEvent.mouseDown(chipEls(container)[0], {button: 0})
     await flush()
     expect(SegmentActions.highlightTags).toHaveBeenLastCalledWith(
@@ -391,7 +405,6 @@ describe('SourceEditor tags', () => {
   test('a highlight event marks the clicked chip and every chip with the same id and placeholder', async () => {
     const {container} = renderSource(
       makeSegment({segment: 'a <g id="1">b</g> <x id="2"/>'}),
-      {bridge: sourceEditorBridge},
     )
     act(() =>
       SegmentStore.emit(SegmentConstants.HIGHLIGHT_TAGS, '1', '1', 'draft-key'),
@@ -758,11 +771,7 @@ describe('SourceEditor show whitespace option', () => {
         value={{userInfo: {metadata: {show_whitespace: showWhitespace}}}}
       >
         <SegmentContext.Provider value={{segment}}>
-          <SourceEditor
-            segment={segment}
-            value={segment.segment}
-            bridge={fakeBridge()}
-          />
+          <SourceEditor segment={segment} value={segment.segment} />
         </SegmentContext.Provider>
       </ApplicationWrapperContext.Provider>
     )
@@ -783,11 +792,7 @@ describe('SourceEditor show whitespace option', () => {
     const segment = makeSegment({segment: 'a b c'})
     const {container} = render(
       <SegmentContext.Provider value={{segment}}>
-        <SourceEditor
-          segment={segment}
-          value={segment.segment}
-          bridge={fakeBridge()}
-        />
+        <SourceEditor segment={segment} value={segment.segment} />
       </SegmentContext.Provider>,
     )
     await flush()

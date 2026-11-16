@@ -36,6 +36,10 @@ import {lexiqaRanges} from './layers/lexiqa'
 import {icuRanges} from './layers/icu'
 import {layerTooltipExtensions} from './layerTooltip'
 import {createTagTooltip} from './tagTooltip'
+import {
+  sourceStoreData,
+  tagIdentities,
+} from '../../../utils/segmentText/segmentStoreData'
 
 export const SPLIT_PLACEHOLDER = '##$_SPLIT$##'
 
@@ -100,12 +104,8 @@ const isArrowKey = (key) =>
  * @param {object} props
  * @param {object} props.segment the segment from the store
  * @param {string} props.value the segment string to show (tags already removed when tag projection is on)
- * @param {{publishSource: (sid: string, source: string) => void,
- *   tagIdentities: (source: string) => Array<{raw: string, id: string, placeholder: string}>}} [props.bridge]
- *   what the target editor needs from the source: the store update after a load, and the tag identities a tag
- *   click highlights in the target
  */
-const SourceEditor = ({segment, value, bridge}) => {
+const SourceEditor = ({segment, value}) => {
   const {segment: contextSegment, userInfo} = useContext(SegmentContext)
   // The user's show whitespace option, from the application context: it changes live when the user toggles it.
   const showWhitespace =
@@ -133,7 +133,7 @@ const SourceEditor = ({segment, value, bridge}) => {
 
   // Read by the editor callbacks and store listeners, which are created once.
   const latestRef = useRef({})
-  latestRef.current = {segment, contextSegment, userInfo, value, bridge}
+  latestRef.current = {segment, contextSegment, userInfo, value}
 
   const applyTagState = () => {
     const editor = editorRef.current
@@ -155,11 +155,11 @@ const SourceEditor = ({segment, value, bridge}) => {
   }
 
   const chips = () => {
-    const {bridge, segment} = latestRef.current
+    const {segment} = latestRef.current
     const state = editorRef.current.view.state
     return chipsWithIdentity(
       state,
-      bridge?.tagIdentities?.(serialize(state)) ?? [],
+      tagIdentities(serialize(state)),
       `cm-source-${segment.sid}`,
     )
   }
@@ -209,9 +209,19 @@ const SourceEditor = ({segment, value, bridge}) => {
   }, [])
 
   const publish = useCallback(() => {
-    const {bridge, segment} = latestRef.current
-    if (editorRef.current) {
-      bridge?.publishSource?.(segment.sid, editorRef.current.getValue())
+    const {segment} = latestRef.current
+    const source = editorRef.current?.getValue()
+    // The store keeps an empty source as it is
+    if (source) {
+      const {decodedSegment, plainText, tagRange, lxqText} =
+        sourceStoreData(source)
+      SegmentActions.updateSource(
+        segment.sid,
+        decodedSegment,
+        plainText,
+        tagRange,
+        lxqText,
+      )
     }
   }, [])
 

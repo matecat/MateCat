@@ -33,16 +33,11 @@ jest.mock('../editor/matecat/TargetEditor', () => {
         data-testid="target-editor"
         data-value={props.value}
         data-translation={props.translation}
-        data-bridge={props.bridge?.name}
       />
     )
   })
 })
 const mockTargetHandle = {addMissingSourceTagsToTarget: jest.fn()}
-jest.mock('./targetEditorBridge', () => ({
-  targetEditorBridge: {name: 'target-bridge'},
-}))
-
 jest.mock('./SegmentButtons', () => (props) => (
   <div data-testid="segment-buttons" data-disabled={String(props.disabled)} />
 ))
@@ -401,12 +396,11 @@ describe('SegmentTarget editor engine', () => {
     SegmentUtils.checkCurrentSegmentTPEnabled.mockReturnValue(false)
   })
 
-  test('with the new editor active the target opens in the CodeMirror editor, wired to the Draft bridge', () => {
+  test('with the new editor active the target opens in the CodeMirror editor', () => {
     mockNewEditor = true
     renderTarget()
     const editor = screen.getByTestId('target-editor')
     expect(editor).toHaveAttribute('data-value', 'some translation')
-    expect(editor).toHaveAttribute('data-bridge', 'target-bridge')
     expect(screen.queryByTestId('edit-area')).not.toBeInTheDocument()
   })
 

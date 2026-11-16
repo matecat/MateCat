@@ -10,7 +10,6 @@ import SegmentStringUtils from './utils/DraftMatecatUtils/segmentStringUtils'
 import {markableText, searchedTagTexts} from '../segmentView/segmentModel'
 import SourceEditor from '../editor/matecat/SourceEditor'
 import {isNewEditorEnabled} from '../editor/matecat/editorEngine'
-import {sourceEditorBridge} from './sourceEditorBridge'
 
 const SegmentWrapper = ({isTarget}) => {
   const {segment} = useContext(SegmentContext)
@@ -26,7 +25,6 @@ const SegmentWrapper = ({isTarget}) => {
             ? SegmentStringUtils.removeTagsFromText(segment.segment)
             : segment.segment
         }
-        bridge={sourceEditorBridge}
       />
     )
   }

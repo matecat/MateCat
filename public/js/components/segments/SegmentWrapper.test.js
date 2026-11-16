@@ -13,12 +13,8 @@ jest.mock('./SegmentSource', () => ({
 
 jest.mock('../editor/matecat/SourceEditor', () => ({
   __esModule: true,
-  default: ({segment, value, bridge}) => (
-    <div
-      data-testid="source-editor"
-      data-value={value}
-      data-bridge={Object.keys(bridge).sort().join(',')}
-    >
+  default: ({segment, value}) => (
+    <div data-testid="source-editor" data-value={value}>
       {segment.sid}
     </div>
   ),
@@ -242,12 +238,11 @@ describe('SegmentWrapper editor switch (ENABLE_NEW_EDITOR)', () => {
     expect(screen.queryByTestId('source-editor')).not.toBeInTheDocument()
   })
 
-  test('with the flag on the opened source is the CodeMirror editor, given the Draft bridge', () => {
+  test('with the flag on the opened source is the CodeMirror editor', () => {
     setBuildFlag(true)
     renderWrapper(makeSegment({opened: true}))
     const editor = screen.getByTestId('source-editor')
     expect(editor).toHaveAttribute('data-value', 'source text')
-    expect(editor).toHaveAttribute('data-bridge', 'publishSource,tagIdentities')
     expect(screen.queryByTestId('segment-source')).not.toBeInTheDocument()
   })
 

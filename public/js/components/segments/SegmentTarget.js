@@ -4,7 +4,6 @@ import {isEmpty, isUndefined} from 'lodash'
 import EditArea from './Editarea'
 import TargetEditor from '../editor/matecat/TargetEditor'
 import {isNewEditorEnabled} from '../editor/matecat/editorEngine'
-import {targetEditorBridge} from './targetEditorBridge'
 import CursorUtils from '../../utils/cursorUtils'
 import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentStore from '../../stores/SegmentStore'
@@ -273,7 +272,6 @@ const SegmentTarget = ({segment}) => {
               translation={translation}
               toggleFormatMenu={toggleFormatMenu}
               updateCounter={updateCounter}
-              bridge={targetEditorBridge}
             />
           ) : (
             <EditArea

@@ -20,10 +20,7 @@ import SegmentStore from '../../../stores/SegmentStore'
 import SegmentConstants from '../../../constants/SegmentConstants'
 import EditAreaConstants from '../../../constants/EditAreaConstants'
 import ContextPreviewChannel from '../../../utils/contextPreviewChannel'
-import {
-  targetEditorBridge,
-  translationUpdate,
-} from '../../segments/targetEditorBridge'
+import {translationUpdate} from '../../../utils/segmentText/segmentStoreData'
 import {setTagSignatureMiddleware} from '../../segments/utils/DraftMatecatUtils/tagModel'
 
 setTagSignatureMiddleware('space', () => false)
@@ -112,7 +109,7 @@ const makeSegment = (overrides = {}) => ({
 
 const renderTarget = (
   segment = makeSegment(),
-  {value = segment.translation, context = {}, bridge = targetEditorBridge} = {},
+  {value = segment.translation, context = {}} = {},
 ) => {
   const ref = createRef()
   const props = {
@@ -126,7 +123,6 @@ const renderTarget = (
         segment={seg}
         value={value}
         translation={seg.translation}
-        bridge={bridge}
         {...props}
       />
     </SegmentContext.Provider>
@@ -198,7 +194,6 @@ describe('TargetEditor rendering', () => {
           segment={segment}
           value={segment.translation}
           translation={segment.translation}
-          bridge={targetEditorBridge}
           updateCounter={jest.fn()}
           toggleFormatMenu={jest.fn()}
         />
@@ -818,7 +813,6 @@ describe('TargetEditor show whitespace option', () => {
             segment={segment}
             value={segment.translation}
             translation={segment.translation}
-            bridge={targetEditorBridge}
             updateCounter={jest.fn()}
             toggleFormatMenu={jest.fn()}
           />
@@ -846,7 +840,6 @@ describe('TargetEditor show whitespace option', () => {
           segment={segment}
           value={segment.translation}
           translation={segment.translation}
-          bridge={targetEditorBridge}
           updateCounter={jest.fn()}
           toggleFormatMenu={jest.fn()}
         />

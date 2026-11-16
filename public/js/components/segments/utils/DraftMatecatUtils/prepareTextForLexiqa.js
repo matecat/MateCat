@@ -1,8 +1,3 @@
-import {transformTagsToLexiqaText} from './tagUtils'
-
-const prepareTextForLexiqa = (textSource) => {
-  let newText = transformTagsToLexiqaText(textSource)
-  return newText
-}
-
-export default prepareTextForLexiqa
+// Moved to utils/segmentText so the CodeMirror editor never depends on this
+// folder. Kept for the Draft code until Draft is removed (M5).
+export {default} from '../../../../utils/segmentText/prepareTextForLexiqa'

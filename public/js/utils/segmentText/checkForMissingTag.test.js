@@ -1,6 +1,6 @@
 import checkForMissingTags from './checkForMissingTag'
 
-jest.mock('../tagModel', () => ({
+jest.mock('./tagModel', () => ({
   getErrorCheckTag: () => ['ph', 'g', 'x', 'bx', 'ex', 'bpt', 'ept'],
 }))
 

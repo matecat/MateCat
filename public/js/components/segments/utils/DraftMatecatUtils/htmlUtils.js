@@ -1,32 +1,3 @@
-export const getIdAttributeRegEx = () => {
-  return /id="(-?\w+)"/g
-}
-
-export const unescapeHTMLinTags = (escapedHTML) => {
-  try {
-    return escapedHTML
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&amp;amp;/g, '&')
-      .replace(/&amp;/g, '&')
-      .replace(/&nbsp;/g, ' ')
-      .replace(/&apos;/g, "'")
-      .replace(/&quot;/g, '"')
-  } catch (e) {
-    return ''
-  }
-}
-
-export const unescapeHTMLRecursive = (escapedHTML) => {
-  const regex = /&amp;|&lt;|&gt;|&nbsp;|&apos;|&quot;/
-
-  try {
-    while (regex.exec(escapedHTML) !== null) {
-      escapedHTML = unescapeHTMLinTags(escapedHTML)
-    }
-  } catch (e) {
-    console.error('Error unescapeHTMLRecursive')
-  }
-
-  return escapedHTML
-}
+// Moved to utils/segmentText so the CodeMirror editor never depends on this
+// folder. Kept for the Draft code until Draft is removed (M5).
+export * from '../../../../utils/segmentText/htmlUtils'

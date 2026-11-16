@@ -22,6 +22,12 @@ import EditAreaConstants from '../../../constants/EditAreaConstants'
 import ContextPreviewChannel from '../../../utils/contextPreviewChannel'
 import TextUtils from '../../../utils/textUtils'
 import {classifyCompressibleTag} from '../../../utils/segmentText/compressibleTagUtils'
+import {
+  charactersCounter,
+  formatText,
+  tagIdentities,
+  translationUpdate,
+} from '../../../utils/segmentText/segmentStoreData'
 import {SegmentContext} from '../../segments/SegmentContext'
 import {ApplicationWrapperContext} from '../../common/ApplicationWrapper/ApplicationWrapperContext'
 import TagBox from '../../segments/TagMenu/TagBox'
@@ -195,13 +201,9 @@ const isArrowKey = (key) =>
  * @param {string} props.translation the translation of the store, which the counter starts from
  * @param {(counter: number) => void} props.updateCounter
  * @param {(show: boolean) => void} props.toggleFormatMenu
- * @param {object} props.bridge targetEditorBridge: what the store and the counter need computed by Draft
  */
 const TargetEditor = forwardRef(
-  (
-    {segment, value, translation, updateCounter, toggleFormatMenu, bridge},
-    ref,
-  ) => {
+  ({segment, value, translation, updateCounter, toggleFormatMenu}, ref) => {
     const context = useContext(SegmentContext)
     // The user's show whitespace option, from the application context: it changes live when the user toggles it.
     const showWhitespace =
@@ -233,12 +235,11 @@ const TargetEditor = forwardRef(
       translation,
       updateCounter,
       toggleFormatMenu,
-      bridge,
       menu,
     }
 
     const counterOf = (str) =>
-      latestRef.current.bridge.charactersCounter(
+      charactersCounter(
         str,
         CatToolStore.getCurrentProjectTemplate().characterCounterCountTags,
       )
@@ -247,14 +248,14 @@ const TargetEditor = forwardRef(
     const updateTranslationInStore = () => {
       const editor = editorRef.current
       if (!editor) return
-      const {segment, bridge, updateCounter} = latestRef.current
+      const {segment, updateCounter} = latestRef.current
       const str = editor.getValue()
       if (str === '') {
         updateCounter(0)
         return
       }
       const {plainText, tagMap, missingTags, lxqDecodedTranslation} =
-        bridge.translationUpdate(str, segment.sourceTagMap)
+        translationUpdate(str, segment.sourceTagMap)
       SegmentActions.updateTranslation(
         segment.sid,
         str,
@@ -273,14 +274,11 @@ const TargetEditor = forwardRef(
     }
 
     const chips = () => {
-      const {bridge, segment} = latestRef.current
+      const {segment} = latestRef.current
       const {state} = editorRef.current.view
       return chipsWithIdentity(
         state,
-        bridge.tagIdentities(
-          editorRef.current.getValue(),
-          segment.sourceTagMap,
-        ),
+        tagIdentities(editorRef.current.getValue(), segment.sourceTagMap),
         `cm-target-${segment.sid}`,
       )
     }
@@ -717,9 +715,7 @@ const TargetEditor = forwardRef(
 
     // The toolbar's upper case, lower case and capitalize, applied to the selected text and never to its tags.
     const formatSelection = (format) => {
-      editorRef.current?.transformSelection((text) =>
-        latestRef.current.bridge.formatText(text, format),
-      )
+      editorRef.current?.transformSelection((text) => formatText(text, format))
     }
 
     // Editarea's handle: SegmentTarget, the toolbar and AiAlternatives reach the editor through it.
