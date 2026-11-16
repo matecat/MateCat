@@ -127,6 +127,7 @@ const SegmentTarget = ({segment}) => {
   }
 
   const textSelectedInsideSelectionArea = (selection, container) => {
+    if (!selection?.focusNode || !selection.anchorNode) return false
     return (
       container.contents().text().indexOf(selection.focusNode.textContent) >=
         0 &&

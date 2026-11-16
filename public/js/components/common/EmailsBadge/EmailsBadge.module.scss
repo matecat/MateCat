@@ -25,7 +25,6 @@
   min-height: 90px;
   max-height: 200px;
   padding: 12px;
-  outline: none;
   cursor: text;
   overflow-y: auto;
   border: 1px solid colors.$grey200;
@@ -36,6 +35,7 @@
   }
   &:focus-within {
     border-color: colors.$grey400;
+    outline: 1px solid colors.$grey400;
   }
 }
 

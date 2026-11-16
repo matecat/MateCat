@@ -70,6 +70,7 @@ jobs:
   #   /ci-out    the coverage reports, uploaded for test-guard
   #   /ci-cache  the composer, yarn and npm download caches, kept between
   #              runs by actions/cache and keyed on the lock files
+  # The JS job also mounts /jest-cache, Jest's transform cache (see the job).
   #
   # On pull_request events, github.ref_name is "<pr_number>/merge" which
   # Upgrade.php does not recognise. We use github.base_ref (the target
@@ -194,6 +195,25 @@ jobs:
         id: image_cache
         run: echo "scope=test-images-$(date -u +%G-W%V)" >> "$GITHUB_OUTPUT"
 
+      # Jest's transform cache: every source file compiled by Babel and instrumented for
+      # coverage. Without it each run starts cold, and the first suite on every worker
+      # pays for compiling the code the whole suite shares, which made the first suites
+      # take 8-18 s. Jest checks each entry against the file and the config, so a stale
+      # entry is only a miss. Entries for old file versions are never removed, so the
+      # cache starts over every week and whenever the dependencies or the Babel and Jest
+      # config change. Each save gets a new key (a saved cache cannot be overwritten), and
+      # a run restores the newest one with the same prefix.
+      - name: Name the Jest cache
+        id: jest_cache_name
+        run: echo "prefix=jest-$(date -u +%G-W%V)-${{ hashFiles('yarn.lock', 'babel.config.js', 'babel.utils.js', 'jest.config.js') }}-" >> "$GITHUB_OUTPUT"
+
+      - name: Restore the Jest cache
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ runner.temp }}/jest-cache
+          key: ${{ steps.jest_cache_name.outputs.prefix }}${{ github.sha }}
+          restore-keys: ${{ steps.jest_cache_name.outputs.prefix }}
+
       # The RUN steps of the build resolve names through fixed public DNS
       # servers. On 2026-11-11 the runner's own resolver could not find
       # eu-central-1.ec2.archive.ubuntu.com for two minutes, and apt-get
@@ -227,10 +247,11 @@ jobs:
 
       - name: Run Jest and the nodejs tests
         run: |
-          mkdir -p ci-out "$RUNNER_TEMP/ci-cache"
+          mkdir -p ci-out "$RUNNER_TEMP/ci-cache" "$RUNNER_TEMP/jest-cache"
           docker compose -f docker/docker-compose-ci.yml run --rm -T \
             -v "$PWD/ci-out:/ci-out" \
             -v "$RUNNER_TEMP/ci-cache:/ci-cache" \
+            -v "$RUNNER_TEMP/jest-cache:/jest-cache" \
             -e YARN_CACHE_FOLDER=/ci-cache/yarn \
             -e npm_config_cache=/ci-cache/npm \
             test-node /var/www/matecat/.github/ci/js-tests.sh
@@ -242,6 +263,13 @@ jobs:
         with:
           path: ${{ runner.temp }}/ci-cache
           key: js-deps-${{ hashFiles('yarn.lock', 'nodejs/package-lock.json') }}
+
+      - name: Save the Jest cache
+        if: github.event_name == 'push' && github.ref_type == 'branch'
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ runner.temp }}/jest-cache
+          key: ${{ steps.jest_cache_name.outputs.prefix }}${{ github.sha }}
 
       # ── Coverage artifact (consumed by test-guard job) ──────────────────
       - name: Upload coverage artifact
@@ -314,14 +342,35 @@ jobs:
         id: login_ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # Build only base-node, web-node, and daemons-node (no test-node).
+      # Same builder as the test jobs, with the same fixed DNS servers. The
+      # builder of the docker daemon, used by "docker compose build", could not
+      # resolve azure.archive.ubuntu.com on 2026-11-11 and stopped the deploy.
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+        with:
+          buildkitd-config-inline: |
+            [dns]
+              nameservers = ["1.1.1.1", "8.8.8.8"]
+
+      # Build only base-node, web-node, and daemons-node (no test-node), with
+      # no cache: every deploy installs the current packages. load puts the
+      # images in the local docker daemon under the names of the compose file,
+      # which the next step tags and pushes.
       - name: Build images
+        uses: docker/bake-action@v7
         env:
           REPOSITORY_BRANCH: ${{ github.ref_name }}
           REPOSITORY_TAG: ${{ github.ref_name }}
-        run: |
-          docker compose -f docker/docker-compose-ci.yml build base-node
-          docker compose -f docker/docker-compose-ci.yml build web-node daemons-node || exit 1
+        with:
+          source: .
+          files: docker/docker-compose-ci.yml
+          targets: base-node,web-node,daemons-node
+          load: true
+          no-cache: true
+          set: |
+            *.context=.
+            web-node.contexts.matecat-base-node-24=target:base-node
+            daemons-node.contexts.matecat-base-node-24=target:base-node
 
       # Push order: versioned tags first, then :latest aliases together.
       - name: Tag and push images to ECR

@@ -656,15 +656,23 @@ ul {
 
     > :first-child {
       border-right: 1px solid colors.$grey150;
+      svg {
+        color: colors.$grey600;
+      }
     }
 
     input {
       border-top-right-radius: 0px;
       border-bottom-right-radius: 0px;
 
+      &::placeholder {
+        color: colors.$grey400;
+      }
+
       &:active,
       &:focus {
-        box-shadow: inset 0 0 0 1px colors.$blue600;
+        box-shadow: inset 0 0 0 1px colors.$grey400;
+        outline-color: colors.$white;
       }
     }
   }

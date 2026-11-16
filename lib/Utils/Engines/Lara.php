@@ -33,7 +33,6 @@ use Utils\Engines\Lara\Headers;
 use Utils\Engines\Lara\HttpClientInterface;
 use Utils\Engines\Lara\LaraClient;
 use Utils\Engines\MMT as MMTEngine;
-use Utils\Engines\MMT\MMTServiceApiException;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Engines\Results\MyMemory\Matches;
 use Utils\Redis\RedisHandler;
@@ -70,11 +69,6 @@ class Lara extends AbstractEngine
     protected bool $_isAdaptiveMT = true;
 
     private ?LaraClient $clientLoaded = null;
-
-    /**
-     * @var MMTEngine
-     */
-    private MMTEngine $mmt_GET_Fallback;
 
     /**
      * @var ?MMTEngine
@@ -114,6 +108,19 @@ class Lara extends AbstractEngine
     }
 
     /**
+     * Returns the Lara client this engine translates with, so a caller in the same run can reuse its
+     * authentication instead of building a second client.
+     *
+     * Example: $score = $laraEngine->getLaraClient()->qualityEstimation('en-US', 'it-IT', 'Hello', 'Ciao');
+     *
+     * @throws Exception
+     */
+    public function getLaraClient(): LaraClient
+    {
+        return $this->_getClient();
+    }
+
+    /**
      * Get MMTServiceApi client
      *
      * @return LaraClient
@@ -128,17 +135,6 @@ class Lara extends AbstractEngine
 
         $extraParams = $this->getEngineRecord()->getExtraParamsAsArray();
         $credentials = new AccessKey($extraParams['Lara-AccessKeyId'], $extraParams['Lara-AccessKeySecret']);
-
-        $mmtStruct = MMTStruct::getStruct();
-        $mmtStruct->type = EngineConstants::MT;
-        $mmtStruct->extra_parameters = [
-            'MMT-License' => $extraParams['MMT-License'] ?: AppConfig::$DEFAULT_MMT_KEY,
-        ];
-        /**
-         * @var MMTEngine $engine
-         */
-        $engine = EnginesFactory::createTempInstance($mmtStruct, $this->database);
-        $this->mmt_GET_Fallback = $engine;
 
         if (!empty($extraParams['MMT-License'])) {
             $mmtStruct = MMTStruct::getStruct();
@@ -356,17 +352,6 @@ class Lara extends AbstractEngine
                     }
                 }
 
-                // Get score from MMT Quality Estimation
-                if (isset($_config['include_score']) && $_config['include_score']) {
-                    $score = $this->getQualityEstimation(
-                        $_config['source'],
-                        $_config['target'],
-                        $_config['segment'],
-                        $translation,
-                        $_config['mt_qe_engine_id'] ?? '2'
-                    );
-                }
-
                 $this->logger->debug([
                     'LARA REQUEST' => 'GET https://api.laratranslate.com/translate',
                     'timing' => ['Total Time' => $time, 'Get Start Time' => $time_start, 'Get End Time' => $time_end],
@@ -381,7 +366,6 @@ class Lara extends AbstractEngine
                     'glossaries' => is_array($laraGlossaries ?? null) ? implode(",", $laraGlossaries) : null,
                     'multiline' => $multiline,
                     'translation' => $translation,
-                    'score' => $score ?? null,
                     'extra_headers' => $headers->getArrayCopy(),
                 ]);
             } catch (LaraException $t) {
@@ -422,23 +406,11 @@ class Lara extends AbstractEngine
                     $this->logger->error(["Lara API Exception.", $t->getMessage(), $t->getCode(), $t->getTrace()]);
                 }
 
-                // mmt fallback
-                return $this->mmt_GET_Fallback->get($_config);
+                return $this->GoogleTranslateFallback($_config);
             }
         } else {
             $reasoning = !is_bool($_config['reasoning']) || $_config['reasoning'];
             $translation = $_config['translation'];
-            // Get score from MMT Quality Estimation
-            if (isset($_config['include_score']) && $_config['include_score']) {
-                $score = $this->getQualityEstimation(
-                    $_config['source'],
-                    $_config['target'],
-                    $_config['segment'],
-                    $translation,
-                    $_config['mt_qe_engine_id'] ?? '2'
-                );
-            }
-
             $this->logger->debug([
                 'LARA THINK REQUEST' => 'from browser',
                 'source' => $_config['source'],
@@ -446,7 +418,6 @@ class Lara extends AbstractEngine
                 'content_type' => 'application/xliff+xml',
                 'multiline' => $multiline,
                 'translation' => $translation,
-                'score' => $score ?? null,
                 'reasoning' => $reasoning,
                 'style' => $laraStyle ?? null,
                 'style_guideline_id' => $laraStyleGuidelineId,
@@ -463,7 +434,6 @@ class Lara extends AbstractEngine
             'match' => $this->getStandardMtPenaltyString(),
             'created-by' => $this->getMTName($this->engineRecord->name . ($laraModel === 'think' ? ' Think' : ($laraModel === 'prosa' ? ' Prosa' : ''))),
             'create-date' => date("Y-m-d"),
-            'score' => $score ?? null
         ]);
         $match->featureSet($this->featureSet);
 
@@ -471,53 +441,6 @@ class Lara extends AbstractEngine
         $response->matches = [$match];
 
         return $response;
-    }
-
-    /**
-     * @param string $source
-     * @param string $target
-     * @param string $sentence
-     * @param string $translation
-     * @param string $mt_qe_engine_id
-     *
-     * @return float|null
-     * @throws RuntimeException
-     */
-    public function getQualityEstimation(
-        string $source,
-        string $target,
-        string $sentence,
-        string $translation,
-        string $mt_qe_engine_id = '2'
-    ): ?float {
-        $score = null;
-
-        try {
-            $score = $this->mmt_GET_Fallback->getQualityEstimation(
-                $source,
-                $target,
-                $sentence,
-                $translation,
-                $mt_qe_engine_id
-            );
-
-            $this->logger->debug([
-                'MMT QUALITY ESTIMATION' => 'GET https://api.modernmt.com/translate/qe',
-                'source' => $source,
-                'target' => $target,
-                'segment' => $sentence,
-                'translation' => $translation,
-                'score' => $score,
-                'purfect_version' => $mt_qe_engine_id
-            ]);
-        } catch (MMTServiceApiException $exception) {
-            $this->logger->debug([
-                'MMT QUALITY ESTIMATION ERROR' => 'GET https://api.modernmt.com/translate/qe',
-                'error' => $exception->getMessage(),
-            ]);
-        } finally {
-            return $score;
-        }
     }
 
     /**

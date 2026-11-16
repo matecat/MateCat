@@ -1,0 +1,69 @@
+@use 'commons/variables';
+@use 'tokens/colors';
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 260px;
+}
+
+.status {
+  display: block;
+}
+
+.track {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  height: 4px;
+  border-radius: 6px;
+  background-color: rgba(colors.$blue500, 0.24);
+}
+
+.bar {
+  display: block;
+  height: 100%;
+  border-radius: 6px;
+  background-color: colors.$blue500;
+  transition: width 0.2s linear;
+}
+
+.indeterminate {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 35%;
+  height: 100%;
+  border-radius: 6px;
+  background-color: colors.$blue500;
+  animation: download-progress-slide 1.4s ease-in-out infinite;
+}
+
+.hint {
+  color: colors.$grey700;
+  font-size: variables.$font-size-xsmall;
+}
+
+.cancel {
+  align-self: flex-end;
+  margin-top: 2px;
+}
+
+@keyframes download-progress-slide {
+  0% {
+    left: -35%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .indeterminate {
+    animation: none;
+    width: 100%;
+    opacity: 0.5;
+  }
+}
