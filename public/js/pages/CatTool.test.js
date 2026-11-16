@@ -222,12 +222,12 @@ jest.mock('../components/header/cattol/Header', () => ({
 jest.mock('../components/segments/SegmentsContainer', () => () => (
   <div data-testid="segments-container" />
 ))
-jest.mock('../components/settingsPanel', () => ({
-  SETTINGS_PANEL_TABS: {editorSettings: 'editorSettings'},
+jest.mock('../components/settingsPanel/SettingsPanel', () => ({
   SettingsPanel: () => <div data-testid="settings-panel" />,
 }))
 jest.mock('../components/settingsPanel/SettingsPanelConstants', () => ({
   DEFAULT_ENGINE_MEMORY: {id: 0, name: 'No engine'},
+  SETTINGS_PANEL_TABS: {editorSettings: 'editorSettings'},
 }))
 jest.mock('../components/footer/CattoolFooter', () => ({
   CattoolFooter: () => <div data-testid="cattool-footer" />,
@@ -397,7 +397,8 @@ describe('CatTool', () => {
           value: 'editorSettings',
         })
       })
-      expect(screen.getByTestId('settings-panel')).toBeInTheDocument()
+      // The panel is lazy-loaded, so it appears once its chunk resolves.
+      expect(await screen.findByTestId('settings-panel')).toBeInTheDocument()
     })
   })
 
@@ -845,6 +846,56 @@ describe('CatTool', () => {
       })
       openSpy.mockRestore()
       jest.useRealTimers()
+    })
+  })
+
+  describe('context preview auto-open', () => {
+    const toggleHotkey = () => useHotkeys.mock.calls[1][1]()
+    const isCollapsed = () => screen.queryByTitle('Close preview') === null
+
+    const openSegment = async (sid, contextFields) => {
+      SegmentStore.getCurrentSegment.mockReturnValue({sid})
+      SegmentStore.getSegmentById.mockReturnValueOnce({toJS: () => ({sid})})
+      extractSegmentContextFields.mockReturnValueOnce(contextFields)
+      await act(async () => {
+        SegmentStore.emit(SegmentConstants.RENDER_SEGMENTS)
+      })
+    }
+
+    afterEach(() => {
+      SegmentStore.getCurrentSegment.mockReturnValue(null)
+    })
+
+    test('opens the panel on the first segment that has a preview', async () => {
+      renderCatTool()
+      expect(isCollapsed()).toBe(true)
+      await openSegment(8, {context_url: 'http://x'})
+      expect(isCollapsed()).toBe(false)
+    })
+
+    test('waits for a segment with a preview before opening', async () => {
+      renderCatTool()
+      await openSegment(5, {})
+      expect(isCollapsed()).toBe(true)
+      await openSegment(6, {screenshot: 'http://x/shot.png'})
+      expect(isCollapsed()).toBe(false)
+    })
+
+    test('stays closed on later segments once the user closes it', async () => {
+      renderCatTool()
+      await openSegment(8, {context_url: 'http://x'})
+      act(() => toggleHotkey())
+      expect(isCollapsed()).toBe(true)
+      await openSegment(9, {context_url: 'http://y'})
+      expect(isCollapsed()).toBe(true)
+    })
+
+    test('does not open once the user has toggled the panel by hand', async () => {
+      renderCatTool()
+      act(() => toggleHotkey())
+      act(() => toggleHotkey())
+      await openSegment(8, {context_url: 'http://x'})
+      expect(isCollapsed()).toBe(true)
     })
   })
 

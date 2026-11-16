@@ -1,4 +1,6 @@
 import React, {
+  lazy,
+  Suspense,
   useCallback,
   useContext,
   useEffect,
@@ -20,8 +22,10 @@ import useSegmentsLoader from '../hooks/useSegmentsLoader'
 import LXQ from '../utils/lxq.main'
 import {getTmKeysUser} from '../api/getTmKeysUser'
 import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
-import {SETTINGS_PANEL_TABS, SettingsPanel} from '../components/settingsPanel'
-import {DEFAULT_ENGINE_MEMORY} from '../components/settingsPanel/SettingsPanelConstants'
+import {
+  DEFAULT_ENGINE_MEMORY,
+  SETTINGS_PANEL_TABS,
+} from '../components/settingsPanel/SettingsPanelConstants'
 import {getTmKeysJob} from '../api/getTmKeysJob'
 import {getSupportedLanguages} from '../api/getSupportedLanguages'
 import ApplicationStore from '../stores/ApplicationStore'
@@ -58,6 +62,16 @@ import {
 } from '../components/common/Button/Button'
 import UserStore from '../stores/UserStore'
 
+// Share of the window height the context preview panel takes when it opens.
+const CONTEXT_PREVIEW_HEIGHT_RATIO = 0.4
+
+// The settings panel opens on demand and is the largest piece of the cattool; load it when first opened.
+const SettingsPanel = lazy(() =>
+  import('../components/settingsPanel/SettingsPanel').then((module) => ({
+    default: module.SettingsPanel,
+  })),
+)
+
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
 
@@ -89,7 +103,7 @@ function CatTool() {
     height: contextPreviewHeight,
     isDragging: isResizing,
     handleMouseDown: onResizeMouseDown,
-  } = useResizable({initialHeight: 500, minHeight: 100})
+  } = useResizable({initialRatio: CONTEXT_PREVIEW_HEIGHT_RATIO, minHeight: 100})
 
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const [segmentHasPreview, setSegmentHasPreview] = useState(false)
@@ -97,8 +111,12 @@ function CatTool() {
   const contextPreviewUrl = `${window.origin}/context-preview/${config.id_job}/${config.password}?source_code=${encodeURIComponent(config.source_code)}&target_code=${encodeURIComponent(config.target_code)}`
   const popupWindowRef = useRef(null)
   const previewDesiredOpenRef = useRef(false)
+  // Open the panel by itself on the first segment that has a preview, once per page load.
+  // Any manual open, close or pop-out cancels it.
+  const autoOpenPendingRef = useRef(true)
 
   const togglePreview = useCallback(() => {
+    autoOpenPendingRef.current = false
     setIsPreviewOpen((prev) => {
       const next = !prev
       previewDesiredOpenRef.current = next
@@ -120,6 +138,7 @@ function CatTool() {
   )
 
   const openPreviewInNewWindow = useCallback(() => {
+    autoOpenPendingRef.current = false
     if (popupWindowRef.current && !popupWindowRef.current.closed) {
       popupWindowRef.current.focus()
     } else {
@@ -138,6 +157,7 @@ function CatTool() {
   }, [contextPreviewUrl])
 
   const closePopupAndOpenInline = useCallback(() => {
+    autoOpenPendingRef.current = false
     if (popupWindowRef.current && !popupWindowRef.current.closed) {
       popupWindowRef.current.close()
     }
@@ -363,6 +383,10 @@ function CatTool() {
       setSegmentHasPreview(hasContent)
       if (hasContent) {
         if (!popupWindowRef.current || popupWindowRef.current.closed) {
+          if (autoOpenPendingRef.current) {
+            autoOpenPendingRef.current = false
+            previewDesiredOpenRef.current = true
+          }
           setIsPreviewOpen(previewDesiredOpenRef.current)
         }
       } else {
@@ -794,34 +818,36 @@ function CatTool() {
       </div>
 
       {isUserLogged && openSettings.isOpen && isFakeCurrentTemplateReady && (
-        <SettingsPanel
-          {...{
-            onClose: closeSettings,
-            isOpened: openSettings.isOpen,
-            tabOpen: openSettings.tab,
-            tmKeys,
-            setTmKeys,
-            mtEngines,
-            setMtEngines,
-            sourceLang: {
-              name: ApplicationStore.getLanguageNameFromLocale(
-                config.source_code,
-              ),
-              code: config.source_code,
-            },
-            targetLangs: [
-              {
+        <Suspense fallback={null}>
+          <SettingsPanel
+            {...{
+              onClose: closeSettings,
+              isOpened: openSettings.isOpen,
+              tabOpen: openSettings.tab,
+              tmKeys,
+              setTmKeys,
+              mtEngines,
+              setMtEngines,
+              sourceLang: {
                 name: ApplicationStore.getLanguageNameFromLocale(
-                  config.target_code,
+                  config.source_code,
                 ),
-                code: config.target_code,
+                code: config.source_code,
               },
-            ],
-            projectTemplates,
-            currentProjectTemplate,
-            modifyingCurrentTemplate,
-          }}
-        />
+              targetLangs: [
+                {
+                  name: ApplicationStore.getLanguageNameFromLocale(
+                    config.target_code,
+                  ),
+                  code: config.target_code,
+                },
+              ],
+              projectTemplates,
+              currentProjectTemplate,
+              modifyingCurrentTemplate,
+            }}
+          />
+        </Suspense>
       )}
       {isUserLogged && (
         <CattoolFooter

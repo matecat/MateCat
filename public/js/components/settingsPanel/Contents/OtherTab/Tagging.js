@@ -4,7 +4,6 @@ import {SettingsPanelContext} from '../../SettingsPanelContext'
 import SegmentActions from '../../../../actions/SegmentActions'
 import CatToolActions from '../../../../actions/CatToolActions'
 import SegmentStore from '../../../../stores/SegmentStore'
-import {SELECT_HEIGHT} from '../../../../constants/Constants'
 
 export const taggingTypes = [
   {id: 'markup', name: 'Markup', code: '<text>', default: true},
@@ -16,6 +15,12 @@ export const taggingTypes = [
     name: 'Double square brackets',
     code: '[[text]]',
     default: true,
+  },
+  {
+    id: 'single_square',
+    name: 'Single square brackets',
+    code: '[text]',
+    default: false,
   },
   {
     id: 'dollar_curly',
@@ -143,13 +148,13 @@ export const Tagging = () => {
           name={'project-tagging'}
           isPortalDropdown={true}
           dropdownClassName="select-dropdown__wrapper-portal"
-          maxHeightDroplist={SELECT_HEIGHT}
           showSearchBar={true}
           options={taggingTypes}
           activeOptions={activeOptions}
           checkSpaceToReverse={true}
           onToggleOption={toggleOption}
           multipleSelect={'dropdown'}
+          isActiveOptionCheckmarkVisible={false}
           onCloseSelect={() => onClose()}
         >
           {({name, code, html}) => ({

@@ -42,7 +42,7 @@ export const FilesMenu = ({projectName}) => {
       if (current && current.opened) {
         setCurrentSegment(current.sid)
         // check if use id_file or id_file_part
-        const idFileProp = files.find(
+        const idFileProp = files?.find(
           ({id}) => id === parseInt(current.id_file),
         )
           ? 'id_file'

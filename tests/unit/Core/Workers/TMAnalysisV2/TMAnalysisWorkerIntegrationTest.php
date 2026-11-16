@@ -10,16 +10,17 @@ use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use Predis\Client;
+use Psr\Log\NullLogger;
 use ReflectionClass;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\AnalysisRedisService;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\DefaultEngineResolver;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\EngineService;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\MatchProcessorService;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\ProjectCompletionService;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\SegmentUpdaterService;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysisWorker;
 use Utils\AsyncTasks\Workers\Service\MatchSorter;
+use Utils\Engines\Lara\LaraQualityEstimator;
 use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\Context;
 use Utils\TaskRunner\Commons\Params;
@@ -376,7 +377,10 @@ class TMAnalysisWorkerIntegrationTest extends AbstractTest
             $redisService ?? $this->createStub(AnalysisRedisService::class),
             $segmentUpdater ?? $this->createStub(SegmentUpdaterService::class),
             $projectCompletion ?? $this->createStub(ProjectCompletionService::class),
-            new EngineService(new DefaultEngineResolver(obtainTestDatabase()), obtainTestDatabase()),
+            new EngineService(
+                obtainTestDatabase(),
+                new LaraQualityEstimator(obtainTestDatabase(), new NullLogger())
+            ),
             new MatchProcessorService(new MatchSorter(), obtainTestDatabase()),
         );
 

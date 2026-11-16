@@ -19,35 +19,27 @@ const CommentsActions = {
       username: UserStore.getUserName(),
       message: text,
       isAnonymous,
+    }).then((resp) => {
+      AppDispatcher.dispatch({
+        actionType: CommentsConstants.ADD_COMMENT,
+        comment: resp.data.entries.comments[0],
+        sid: sid,
+      })
+      return resp
     })
-      .then((resp) => {
-        AppDispatcher.dispatch({
-          actionType: CommentsConstants.ADD_COMMENT,
-          comment: resp.data.entries.comments[0],
-          sid: sid,
-        })
-        return resp
-      })
-      .catch(() => {
-        // showGenericWarning();
-      })
   },
   resolveThread: function (sid, isAnonymous = false) {
-    markAsResolvedThread({
+    return markAsResolvedThread({
       idSegment: sid,
       isAnonymous: isAnonymous,
       username: UserStore.getUserName(),
+    }).then((resp) => {
+      AppDispatcher.dispatch({
+        actionType: CommentsConstants.ADD_COMMENT,
+        comment: resp.data.entries.comments[0],
+        sid: sid,
+      })
     })
-      .then((resp) => {
-        AppDispatcher.dispatch({
-          actionType: CommentsConstants.ADD_COMMENT,
-          comment: resp.data.entries.comments[0],
-          sid: sid,
-        })
-      })
-      .catch(() => {
-        // showGenericWarning();
-      })
   },
   updateCommentsFromSse: function (data) {
     const {id_segment: sid} = data

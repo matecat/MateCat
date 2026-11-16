@@ -91,11 +91,20 @@ class ICUChecker
             return;
         }
 
+        // The message ends up in ErrObject::$debug, which the editor injects as HTML. These parts are
+        // built from the translator's own segment (argument names, plural selectors), so they are
+        // escaped here and the <br/> separators stay the only markup that reaches the browser.
+        $escape = static fn(string $text): string => htmlspecialchars(
+            $text,
+            ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5,
+            'UTF-8'
+        );
+
         try {
             $errorMessage = [];
             $complaints = $this->icuPatternComparator->validate(validateTarget: true);
             foreach ($complaints->targetWarnings?->getArgumentWarnings() ?? [] as $complaint) {
-                $errorMessage[] = implode('<br/><br/>', $complaint->getMessages());
+                $errorMessage[] = implode('<br/><br/>', array_map($escape, $complaint->getMessages()));
             }
 
             if ($errorMessage) {
@@ -106,7 +115,7 @@ class ICUChecker
                 $this->errorManager->addError(ErrorManager::ERR_ICU_VALIDATION);
             }
         } catch (Exception $e) {
-            $this->errorManager->setErrorMessage(ErrorManager::ERR_ICU_VALIDATION, $e->getMessage());
+            $this->errorManager->setErrorMessage(ErrorManager::ERR_ICU_VALIDATION, $escape($e->getMessage()));
             $this->errorManager->addError(ErrorManager::ERR_ICU_VALIDATION);
         }
     }

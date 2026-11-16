@@ -46,7 +46,7 @@ export default {
         {
           glos: true,
           is_shared: false,
-          key: '74b6c82408a028b6f020',
+          key: '00000000000000000010',
           name: 'abc',
           owner: true,
           tm: true,
@@ -56,7 +56,7 @@ export default {
         {
           glos: true,
           is_shared: false,
-          key: '21df10c8cce1b31f2d0d',
+          key: '00000000000000000012',
           name: 'myKey',
           owner: true,
           tm: true,

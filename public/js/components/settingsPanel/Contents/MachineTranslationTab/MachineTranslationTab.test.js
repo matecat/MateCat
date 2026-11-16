@@ -115,11 +115,36 @@ test('Add MT', async () => {
   const select = screen.getByPlaceholderText('Choose provider')
   expect(select).toBeInTheDocument()
   await userEvent.click(select)
-  const container = screen.getByTestId('add-mt-provider')
   engineListMock.forEach((en) => {
-    const mtName = within(container).getAllByText(en.name)[0]
+    const mtName = screen.getAllByText(en.name)[0]
     expect(mtName).toBeInTheDocument()
   })
+})
+
+test('Add MT provider dropdown renders through a portal', async () => {
+  global.config.isLoggedIn = true
+  const values = {
+    mtEngines: mtEnginesMock,
+    setMtEngines: () => {},
+    openLoginModal: jest.fn(),
+    modifyingCurrentTemplate: () => {},
+    currentProjectTemplate: projectTemplatesMock.items[0],
+    projectTemplates: projectTemplatesMock.items,
+  }
+  render(
+    <SettingsPanelContext.Provider value={values}>
+      <MachineTranslationTab />
+    </SettingsPanelContext.Provider>,
+  )
+  await userEvent.click(screen.getByTitle('Add MT engine'))
+  await userEvent.click(screen.getByPlaceholderText('Choose provider'))
+
+  const engineName = 'Google Translate'
+  const providerWrapper = screen.getByTestId('add-mt-provider')
+  expect(
+    within(providerWrapper).queryByText(engineName),
+  ).not.toBeInTheDocument()
+  expect(screen.getByText(engineName)).toBeInTheDocument()
 })
 
 test('In cattool', async () => {

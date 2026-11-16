@@ -209,17 +209,17 @@ const SegmentsFilter = ({active}) => {
   const handleFilterSelectChanged = useCallback(
     (value) => {
       let revNum = null
-      if (value === 'APPROVED-2') {
+      if (value === SEGMENTS_STATUS.APPROVED2) {
         revNum = 2
         value = SEGMENTS_STATUS.APPROVED2
       }
 
       const isTodoConflict =
         (!config.isReview &&
-          value === 'TRANSLATED' &&
+          value === SEGMENTS_STATUS.TRANSLATED &&
           stateRef.current.samplingType === 'todo') ||
         (config.isReview &&
-          value === 'APPROVED' &&
+          value === SEGMENTS_STATUS.APPROVED &&
           stateRef.current.samplingType === 'todo')
 
       if (isTodoConflict) {
@@ -237,10 +237,10 @@ const SegmentsFilter = ({active}) => {
     (value) => {
       const isTodoConflict =
         (!config.isReview &&
-          stateRef.current.selectedStatus === 'TRANSLATED' &&
+          stateRef.current.selectedStatus === SEGMENTS_STATUS.TRANSLATED &&
           value === 'todo') ||
         (config.isReview &&
-          stateRef.current.selectedStatus === 'APPROVED' &&
+          stateRef.current.selectedStatus === SEGMENTS_STATUS.APPROVED &&
           value === 'todo')
 
       if (isTodoConflict) {
@@ -323,7 +323,7 @@ const SegmentsFilter = ({active}) => {
           APPROVED 2
         </>
       ),
-      id: 'APPROVED-2',
+      id: SEGMENTS_STATUS.APPROVED2,
     })
   }
 
@@ -352,6 +352,7 @@ const SegmentsFilter = ({active}) => {
             <div className="filter-dropdown">
               <Select
                 className={'filter-status ' + statusFilterClass}
+                isPortalDropdown={true}
                 options={statusOptions}
                 onSelect={(value) => handleFilterSelectChanged(value.id)}
                 activeOption={
@@ -362,12 +363,13 @@ const SegmentsFilter = ({active}) => {
                 checkSpaceToReverse={false}
                 showResetButton={true}
                 resetFunction={() => handleFilterSelectChanged()}
-                maxHeightDroplist={200}
               />
             </div>
             <div className="filter-dropdown">
               <Select
                 className={'filter-activities ' + filterClassEnabled}
+                dropdownClassName="segment-filter-other-select-portal"
+                isPortalDropdown={true}
                 options={moreOptions}
                 onSelect={(value) => handleMoreFilterSelectChanged(value.id)}
                 activeOption={
@@ -378,7 +380,6 @@ const SegmentsFilter = ({active}) => {
                 checkSpaceToReverse={false}
                 showResetButton={true}
                 resetFunction={() => handleMoreFilterSelectChanged()}
-                maxHeightDroplist={400}
                 enabled={!dataSampleEnabled}
               />
             </div>

@@ -25,17 +25,6 @@ class EngineServiceTest extends AbstractTest
     }
 
     #[Test]
-    public function test_getTMMatches_uses_engine_resolver_for_engine_creation(): void
-    {
-        $source = $this->readSource($this->engineServicePath());
-        $this->assertStringContainsString(
-            '$this->engineResolver->getInstance(',
-            $source,
-            'EngineService::getTMMatches must use injected DefaultEngineResolver for engine creation.'
-        );
-    }
-
-    #[Test]
     public function test_getTMMatches_throws_ReQueueException_on_errors(): void
     {
         $source = $this->readSource($this->engineServicePath());

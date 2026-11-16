@@ -8,6 +8,8 @@ use InvalidArgumentException;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
 use Model\DataAccess\Database;
+use Model\Engines\EngineDAO;
+use Model\Engines\Structs\EngineStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\LQA\ModelStruct;
 use Model\Teams\TeamStruct;
@@ -16,6 +18,9 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
 use ReflectionException;
+use Utils\Constants\EngineConstants;
+use Utils\Engines\AbstractEngine;
+use Utils\Engines\Lara;
 
 /**
  * Real-DB driven coverage for the DAO-backed validator helpers of
@@ -76,6 +81,7 @@ class NewControllerDbValidatorsTest extends AbstractTest
     private function cleanDb(): void
     {
         $c = $this->seedConnection();
+        $c->exec("DELETE FROM engines WHERE uid IN (" . (self::BASE + 20) . ", " . (self::BASE + 21) . ")");
         $c->exec("DELETE FROM qa_models WHERE id = " . $this->qaModelId(self::BASE));
         $c->exec("DELETE FROM teams_users WHERE id = " . $this->teamUserId(self::BASE));
         $c->exec("DELETE FROM teams WHERE id = " . $this->teamId(self::BASE));
@@ -104,6 +110,37 @@ class NewControllerDbValidatorsTest extends AbstractTest
     private function invokeMethod(string $name, array $args = []): mixed
     {
         return $this->reflector->getMethod($name)->invokeArgs($this->controller, $args);
+    }
+
+    private function mtEngine(int $ownerUid, bool $builtInQualityEstimation = false): AbstractEngine
+    {
+        $record = EngineStruct::getStruct();
+        $record->id = self::BASE + 30;
+        $record->uid = $ownerUid;
+
+        $engine = $this->createStub(AbstractEngine::class);
+        $engine->method('getEngineRecord')->willReturn($record);
+        $engine->method('hasBuiltInQualityEstimation')->willReturn($builtInQualityEstimation);
+
+        return $engine;
+    }
+
+    private function seedLaraEngine(int $uid): void
+    {
+        $engine = new EngineStruct();
+        $engine->name = 'ctrltest lara engine';
+        $engine->type = EngineConstants::MT;
+        $engine->description = 'ctrltest lara engine';
+        $engine->base_url = 'https://example.invalid/api';
+        $engine->translate_relative_url = 'get';
+        $engine->others = [];
+        $engine->extra_parameters = ['Lara-AccessKeyId' => 'kid', 'Lara-AccessKeySecret' => 'ksecret'];
+        $engine->class_load = Lara::class;
+        $engine->penalty = 14;
+        $engine->active = true;
+        $engine->uid = $uid;
+
+        (new EngineDAO(obtainTestDatabase()))->create($engine);
     }
 
     // ──────────────── validateTeam() ────────────────
@@ -200,5 +237,67 @@ class NewControllerDbValidatorsTest extends AbstractTest
         $this->expectExceptionMessage('This QA model template does not exist or does not belong to the logged-in user');
         // No qa_model_templates row is seeded for this reserved id.
         $this->invokeMethod('validateQaModelTemplate', [(string)(self::BASE + 8)]);
+    }
+
+    // ──────────────── validateMtEvaluationLicense() ────────────────
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function validateMtEvaluationLicense_refuses_an_engine_without_its_own_score_when_the_owner_has_no_lara_engine(): void
+    {
+        $engine = $this->mtEngine(self::BASE + 20);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('MT evaluation requires an active Lara license');
+        $this->expectExceptionCode(-2);
+
+        $this->invokeMethod('validateMtEvaluationLicense', [$engine]);
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function validateMtEvaluationLicense_accepts_an_engine_when_the_owner_has_an_active_lara_engine(): void
+    {
+        $this->seedLaraEngine(self::BASE + 21);
+        $engine = $this->mtEngine(self::BASE + 21);
+
+        $this->assertNull($this->invokeMethod('validateMtEvaluationLicense', [$engine]));
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function validateMtEvaluationLicense_accepts_an_engine_with_its_own_score_without_a_lara_engine(): void
+    {
+        $engine = $this->mtEngine(self::BASE + 20, builtInQualityEstimation: true);
+
+        $this->assertNull($this->invokeMethod('validateMtEvaluationLicense', [$engine]));
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function validateMtEvaluationLicense_accepts_a_lara_engine_without_looking_up_the_owner(): void
+    {
+        $engine = $this->createMock(Lara::class);
+        $engine->expects($this->never())->method('getEngineRecord');
+        $engine->method('hasBuiltInQualityEstimation')->willReturn(false);
+
+        $this->assertNull($this->invokeMethod('validateMtEvaluationLicense', [$engine]));
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function validateMtEvaluationLicense_accepts_no_mt_engine(): void
+    {
+        $this->assertNull($this->invokeMethod('validateMtEvaluationLicense', [null]));
     }
 }
