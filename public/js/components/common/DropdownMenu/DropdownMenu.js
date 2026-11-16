@@ -133,7 +133,7 @@ export const DropdownMenu = ({
               e.preventDefault()
               e.stopPropagation()
             } else {
-              item.onClick(e)
+              item.onClick?.(e)
             }
             setOpen(false)
           }}

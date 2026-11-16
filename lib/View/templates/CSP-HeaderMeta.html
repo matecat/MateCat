@@ -23,5 +23,6 @@
             *.googletagmanager.com *.live.com *.githubusercontent.com media.licdn.com *.fbcdn.net ${x_plugin_csp/default-src | nothing};
       script-src-elem 'self' 'nonce-${x_nonce_unique_id}' *.googletagmanager.com ${x_plugin_csp/script-src-elem | nothing};
       child-src 'self' *.google.com *.hubspot.com ${x_plugin_csp/child-src | nothing};
+      worker-src 'self' ${x_plugin_csp/worker-src | nothing};
       font-src 'self' fonts.gstatic.com data: ${x_plugin_csp/font-src | nothing};
       style-src 'self' 'unsafe-inline' *.googleapis.com ${x_plugin_csp/style-src | nothing}"/>

@@ -1,7 +1,6 @@
 <?php
 
 use Controller\Exceptions\RenderTerminatedException;
-use LogicException;
 use Model\Conversion\MimeTypes\MimeTypes;
 use Model\Conversion\ZipArchiveHandler;
 use Model\DataAccess\IDatabase;

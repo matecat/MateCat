@@ -29,6 +29,7 @@ const SearchInput = ({onChange}) => {
 
   return (
     <Input
+      type="text"
       name="searchByProjectName"
       placeholder="Search by project name"
       value={searchFilter}

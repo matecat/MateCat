@@ -612,7 +612,9 @@ let ManageActions = {
   },
 
   addUserToTeam: function (team, userEmail) {
-    addUserTeam(team.toJS(), userEmail).then(function (data) {
+    // returned for the same reason as createTeam above: the server refuses an address that is
+    // not a plain email address, and the modal has to show why
+    return addUserTeam(team.toJS(), userEmail).then(function (data) {
       AppDispatcher.dispatch({
         actionType: ManageConstants.UPDATE_TEAM_MEMBERS,
         team: team,
