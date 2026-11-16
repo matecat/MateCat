@@ -185,9 +185,7 @@
 }
 
 .translation-memory-glossary-tab-input-text {
-  border-radius: variables.$border-radius-default;
-  border: 1px solid colors.$grey200;
-  padding: 6px;
+  padding: 6px !important;
   width: 350px;
   font-size: variables.$font-size-xsmall;
 }
@@ -297,10 +295,8 @@
 
 .tm-key-row-name {
   width: 100%;
-  padding: 4px 8px;
   background-color: unset;
-  border: 1px solid colors.$grey200;
-  border-radius: variables.$border-radius-default;
+  padding: 4px 8px !important;
 
   &:focus,
   &:hover {
@@ -313,10 +309,13 @@
 }
 
 .tm-key-row-name-disabled {
-  border: unset;
+  border: none !important;
+  background-color: unset !important;
+  color: colors.$black !important;
+
   &:focus,
   &:hover {
-    background-color: unset;
+    background-color: unset !important;
   }
 }
 
@@ -370,9 +369,10 @@
 
 .tm-key-create-resource-row-input {
   width: 100%;
-  padding: 4px 8px;
+  padding: 4px 8px !important;
   border-radius: variables.$border-radius-default;
   border: solid 1px colors.$grey150;
+  background-color: colors.$white !important;
 
   &.error {
     border: solid 1px colors.$red500;

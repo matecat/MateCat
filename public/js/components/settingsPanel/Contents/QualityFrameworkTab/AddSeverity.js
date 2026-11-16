@@ -136,6 +136,7 @@ export const AddSeverity = ({numbersOfColumns}) => {
         >
           <input
             className={`quality-framework-input input${error ? ' quality-framework-input-error' : ''}`}
+            type="text"
             placeholder="Name"
             value={name}
             onChange={(e) => {

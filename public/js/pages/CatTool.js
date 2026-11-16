@@ -1,4 +1,6 @@
 import React, {
+  lazy,
+  Suspense,
   useCallback,
   useContext,
   useEffect,
@@ -20,8 +22,10 @@ import useSegmentsLoader from '../hooks/useSegmentsLoader'
 import LXQ from '../utils/lxq.main'
 import {getTmKeysUser} from '../api/getTmKeysUser'
 import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
-import {SETTINGS_PANEL_TABS, SettingsPanel} from '../components/settingsPanel'
-import {DEFAULT_ENGINE_MEMORY} from '../components/settingsPanel/SettingsPanelConstants'
+import {
+  DEFAULT_ENGINE_MEMORY,
+  SETTINGS_PANEL_TABS,
+} from '../components/settingsPanel/SettingsPanelConstants'
 import {getTmKeysJob} from '../api/getTmKeysJob'
 import {getSupportedLanguages} from '../api/getSupportedLanguages'
 import ApplicationStore from '../stores/ApplicationStore'
@@ -60,6 +64,13 @@ import UserStore from '../stores/UserStore'
 
 // Share of the window height the context preview panel takes when it opens.
 const CONTEXT_PREVIEW_HEIGHT_RATIO = 0.4
+
+// The settings panel opens on demand and is the largest piece of the cattool; load it when first opened.
+const SettingsPanel = lazy(() =>
+  import('../components/settingsPanel/SettingsPanel').then((module) => ({
+    default: module.SettingsPanel,
+  })),
+)
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -807,34 +818,36 @@ function CatTool() {
       </div>
 
       {isUserLogged && openSettings.isOpen && isFakeCurrentTemplateReady && (
-        <SettingsPanel
-          {...{
-            onClose: closeSettings,
-            isOpened: openSettings.isOpen,
-            tabOpen: openSettings.tab,
-            tmKeys,
-            setTmKeys,
-            mtEngines,
-            setMtEngines,
-            sourceLang: {
-              name: ApplicationStore.getLanguageNameFromLocale(
-                config.source_code,
-              ),
-              code: config.source_code,
-            },
-            targetLangs: [
-              {
+        <Suspense fallback={null}>
+          <SettingsPanel
+            {...{
+              onClose: closeSettings,
+              isOpened: openSettings.isOpen,
+              tabOpen: openSettings.tab,
+              tmKeys,
+              setTmKeys,
+              mtEngines,
+              setMtEngines,
+              sourceLang: {
                 name: ApplicationStore.getLanguageNameFromLocale(
-                  config.target_code,
+                  config.source_code,
                 ),
-                code: config.target_code,
+                code: config.source_code,
               },
-            ],
-            projectTemplates,
-            currentProjectTemplate,
-            modifyingCurrentTemplate,
-          }}
-        />
+              targetLangs: [
+                {
+                  name: ApplicationStore.getLanguageNameFromLocale(
+                    config.target_code,
+                  ),
+                  code: config.target_code,
+                },
+              ],
+              projectTemplates,
+              currentProjectTemplate,
+              modifyingCurrentTemplate,
+            }}
+          />
+        </Suspense>
       )}
       {isUserLogged && (
         <CattoolFooter

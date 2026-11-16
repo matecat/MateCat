@@ -826,12 +826,18 @@ class JobDao extends AbstractDao
      */
     public function getSegmentTranslationsCount(array $idJobs, int $ttl = 0): ?int
     {
+        if ($idJobs === []) {
+            return null;
+        }
+
+        $ids = array_map(fn($id): int => (int)$id, array_values($idJobs));
+
         $conn = $this->database->getConnection();
 
-        $query = "select count(*) as total from segment_translations where id_job IN ( " . implode(', ', $idJobs) . " );";
+        $query = "select count(*) as total from segment_translations where id_job IN ( " . implode(',', array_fill(0, count($ids), '?')) . " );";
 
         $stmt = $conn->prepare($query);
-        $records = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, []);
+        $records = $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, ShapelessConcreteStruct::class, $ids);
 
         if (empty($records)) {
             return null;

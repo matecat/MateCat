@@ -90,53 +90,6 @@ class SetMyMemoryTest extends AbstractTest
 
     /**
      * @group  regression
-     * @group  ExternalServices
-     * @group  MyMemory
-     * @covers MyMemory::set
-     */
-    #[Group('ExternalServices')]
-    #[Group('MyMemory')]
-    #[Test]
-    public function test_set_segment_1_general_check()
-    {
-        $params = [
-            'tnote' => null,
-            'source' => "it-IT",
-            'target' => "en-US",
-            'email' => "demo@matecat.com",
-            'prop' => $this->prop,
-            'get_mt' => 1,
-            'num_result' => 3,
-            'mt_only' => false,
-            'isConcordance' => false,
-            'isGlossary' => false,
-            'id_user' => [],
-            'segment' => $this->str_seg_1,
-            'translation' => $this->str_tra_1,
-            'key' => 'a6043e606ac9b5d7ff24'
-        ];
-
-        $result = $this->engine_MyMemory->set($params);
-
-        $this->assertTrue((bool)preg_match('/^[\dA-F]{8}-[\dA-F]{4}-[\dA-F]{4}-[\dA-F]{4}-[\dA-F]{12}$/i', $result->responseDetails[0]));
-
-        /**
-         *  general check of the SetContributionResponse object
-         * @var $result_object SetContributionResponse
-         */
-        $result_object = $this->property->getValue($this->engine_MyMemory);
-
-        $this->assertTrue($result_object instanceof SetContributionResponse);
-        $this->assertFalse(property_exists($result_object, 'matches'));
-        $this->assertTrue(property_exists($result_object, 'responseStatus'));
-        $this->assertTrue(property_exists($result_object, 'responseDetails'));
-        $this->assertTrue(property_exists($result_object, 'responseData'));
-        $this->assertTrue(property_exists($result_object, 'error'));
-        $this->assertTrue(property_exists($result_object, '_rawResponse'));
-    }
-
-    /**
-     * @group  regression
      * @covers MyMemory::set
      */
     #[Test]
@@ -153,7 +106,7 @@ class SetMyMemoryTest extends AbstractTest
             'mt_only' => false,
             'isConcordance' => false,
             'isGlossary' => false,
-            'id_user' => ['a6043e606ac9b5d7ff24'],
+            'id_user' => ['00000000000000000001'],
             'segment' => $this->str_seg_1,
             'translation' => $this->str_tra_1
         ];
@@ -174,7 +127,7 @@ TAB;
                 'mt' => true,
                 'client_id' => 0,
                 'prop' => '{"project_id":"987654","project_name":"barfoo","job_id":"321"}',
-                'key' => 'a6043e606ac9b5d7ff24'
+                'key' => '00000000000000000001'
             ],
         ];
 
@@ -210,53 +163,6 @@ TAB;
         $this->assertEquals("", $property->getValue($result_object));
     }
 
-    /**
-     * @group  regression
-     * @group  ExternalServices
-     * @group  MyMemory
-     * @covers MyMemory::set
-     */
-    #[Group('ExternalServices')]
-    #[Group('MyMemory')]
-    #[Test]
-    public function test_set_segment_2_general_check_with_id_user_not_in_array_coverage_purpose()
-    {
-        $params = [
-            'tnote' => null,
-            'source' => "it-IT",
-            'target' => "en-US",
-            'email' => "demo@matecat.com",
-            'prop' => $this->prop,
-            'get_mt' => 1,
-            'num_result' => 3,
-            'mt_only' => false,
-            'isConcordance' => false,
-            'isGlossary' => false,
-            'id_user' => [],
-            'segment' => $this->str_seg_1,
-            'translation' => $this->str_tra_1,
-            'key' => 'a6043e606ac9b5d7ff24'
-        ];
-
-        $result = $this->engine_MyMemory->set($params);
-
-        $this->assertTrue((bool)preg_match('/^[\dA-F]{8}-[\dA-F]{4}-[\dA-F]{4}-[\dA-F]{4}-[\dA-F]{12}$/i', $result->responseDetails[0]));
-
-        /**
-         *  general check of the SetContributionResponse object
-         * @var $result_object SetContributionResponse
-         */
-        $result_object = $this->property->getValue($this->engine_MyMemory);
-
-        $this->assertTrue($result_object instanceof SetContributionResponse);
-        $this->assertFalse(property_exists($result_object, 'matches'));
-        $this->assertTrue(property_exists($result_object, 'responseStatus'));
-        $this->assertTrue(property_exists($result_object, 'responseDetails'));
-        $this->assertTrue(property_exists($result_object, 'responseData'));
-        $this->assertTrue(property_exists($result_object, 'error'));
-        $this->assertTrue(property_exists($result_object, '_rawResponse'));
-    }
-
     #[Test]
     public function test_set_segment_2_with_mock()
     {
@@ -273,7 +179,7 @@ TAB;
             'isGlossary' => false,
             'segment' => $this->str_seg_2,
             'translation' => $this->str_tra_2,
-            'id_user' => ['a6043e606ac9b5d7ff24']
+            'id_user' => ['00000000000000000001']
         ];
 
         $url_mock_param = "https://api.mymemory.translated.net/set";
@@ -292,7 +198,7 @@ TAB;
                 'mt' => true,
                 'client_id' => 0,
                 'prop' => '{"project_id":"987654","project_name":"barfoo","job_id":"321"}',
-                'key' => 'a6043e606ac9b5d7ff24'
+                'key' => '00000000000000000001'
             ],
             CURLINFO_HEADER_OUT => true,
             CURLOPT_TIMEOUT => 120,
@@ -353,7 +259,7 @@ TAB;
             'isGlossary' => false,
             'segment' => $this->str_seg_1,
             'translation' => $this->str_tra_1,
-            'id_user' => ['a6043e606ac9b5d7ff24']
+            'id_user' => ['00000000000000000001']
         ];
 
         $url_mock_param = "https://api.mymemory.translated.net/set";
@@ -376,7 +282,7 @@ TAB;
                 'langpair' => 'it-IT|en-US',
                 'de' => 'demo@matecat.com',
                 'prop' => '{"project_id":"987654","project_name":"barfoo","job_id":"321"}',
-                'key' => 'a6043e606ac9b5d7ff24',
+                'key' => '00000000000000000001',
                 'mt' => true,
                 'client_id' => 0
             ],

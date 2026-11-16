@@ -1,5 +1,7 @@
+import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
-import {describe, test, expect, beforeEach, afterEach, vi} from 'vitest';
+import {describe, test, expect, beforeAll, afterAll, beforeEach, afterEach, vi} from 'vitest';
 import {loadConfig, startMaster, startWorker} from '../src/bootstrap.js';
 import {Application} from '../src/Application.js';
 import {notifyUpgrade} from '../src/amq/MessageHandler.js';
@@ -39,7 +41,20 @@ vi.mock('@socket.io/cluster-adapter', () => ({
 
 describe('loadConfig', () => {
   const configPath = path.resolve(import.meta.dirname, '../config.ini');
-  const secretPath = path.resolve(import.meta.dirname, '../../inc/login_secret.dat');
+  // The real inc/login_secret.dat only exists once PHP has booted, so the tests write their own.
+  const secretKey = 'test-login-secret';
+  let secretDir;
+  let secretPath;
+
+  beforeAll(() => {
+    secretDir = fs.mkdtempSync(path.join(os.tmpdir(), 'matecat-bootstrap-'));
+    secretPath = path.join(secretDir, 'login_secret.dat');
+    fs.writeFileSync(secretPath, secretKey);
+  });
+
+  afterAll(() => {
+    fs.rmSync(secretDir, {recursive: true, force: true});
+  });
 
   test('parses config and returns structured result', () => {
     const result = loadConfig(configPath, secretPath);
@@ -65,10 +80,9 @@ describe('loadConfig', () => {
     expect(result.serverPath).toBeDefined();
   });
 
-  test('returns authSecretKey as string', () => {
+  test('returns the content of the secret file as authSecretKey', () => {
     const result = loadConfig(configPath, secretPath);
-    expect(typeof result.authSecretKey).toBe('string');
-    expect(result.authSecretKey.length).toBeGreaterThan(0);
+    expect(result.authSecretKey).toBe(secretKey);
   });
 });
 

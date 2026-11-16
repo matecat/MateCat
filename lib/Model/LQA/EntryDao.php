@@ -26,7 +26,7 @@ class EntryDao extends AbstractDao
      * @throws PDOException
      * @throws ReflectionException
      */
-    public function getIssuesGroupedByIdFilePart(int $id_job, string $password, int $revisionNumber, int $idFilePart = null, int $ttl = 0): array
+    public function getIssuesGroupedByIdFilePart(int $id_job, string $password, int $revisionNumber, ?int $idFilePart = null, int $ttl = 0): array
     {
         $conn = $this->database->getConnection();
         $sql = "SELECT
@@ -69,6 +69,12 @@ class EntryDao extends AbstractDao
     }
 
     /**
+     * Read the issues of a set of segments, for one page of the segment analysis API.
+     *
+     * An empty list returns an empty result without a query: a page with no segments passes one.
+     *
+     * Example: `getBySegmentIds([10, 11])` returns the issues of segments 10 and 11.
+     *
      * @param array<int, int> $ids
      *
      * @return ShapelessConcreteStruct[]
@@ -76,6 +82,10 @@ class EntryDao extends AbstractDao
      */
     public function getBySegmentIds(array $ids = []): array
     {
+        if ($ids === []) {
+            return [];
+        }
+
         $sql = "SELECT
             q.id_job,
             q.id_segment,
@@ -92,11 +102,10 @@ class EntryDao extends AbstractDao
             qa_categories cat ON q.id_category = cat.id
         WHERE
             q.deleted_at IS NULL
-                AND q.id_segment IN ( " . implode(', ', $ids) . " ) ";
-        $conn = $this->database->getConnection();
-        $stmt = $conn->prepare($sql);
-        $stmt->execute();
+                AND q.id_segment IN ( " . implode(',', array_fill(0, count($ids), '?')) . " ) ";
+        $stmt = $this->_getStatementForQuery($sql);
         $stmt->setFetchMode(PDO::FETCH_CLASS, ShapelessConcreteStruct::class);
+        $stmt->execute(array_values($ids));
 
         return $stmt->fetchAll();
     }

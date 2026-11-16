@@ -1,7 +1,6 @@
 import React, {useContext} from 'react'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {Select} from '../../../common/Select'
-import {SELECT_HEIGHT} from '../../../../constants/Constants'
 
 const OPTIONS = [
   {
@@ -48,7 +47,6 @@ export const MandatoryIssues = () => {
           name="mandatory-issue"
           isPortalDropdown={true}
           dropdownClassName="select-dropdown__wrapper-portal"
-          maxHeightDroplist={SELECT_HEIGHT}
           options={OPTIONS}
           activeOption={OPTIONS.find(
             ({id}) =>

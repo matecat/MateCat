@@ -33,8 +33,8 @@ export const Dropdown = forwardRef(
       onSearchBarFocus = () => {},
       optionsSelectedCopySingular = () => {},
       optionsSelectedCopyPlural = () => {},
-      resetSelectedOptions = () => {},
       onClose = () => {},
+      isActiveOptionCheckmarkVisible = true,
       children,
     },
     ref,
@@ -339,7 +339,8 @@ export const Dropdown = forwardRef(
           return activeOption.id === option.id
         }).length > 0
       const isNoResultsFound = option.id === 'noResultsFound'
-      const showActiveOptionIcon = isActiveOption || isActiveOptions
+      const showActiveOptionIcon =
+        isActiveOptionCheckmarkVisible && (isActiveOption || isActiveOptions)
       const {
         beforeRow,
         row,
@@ -398,7 +399,10 @@ export const Dropdown = forwardRef(
             onMouseLeave={() => setRowTooltip()}
           >
             {row && !isNoResultsFound ? (
-              row
+              <>
+                {row}
+                {showActiveOptionIcon && <Check size={16} />}
+              </>
             ) : (
               <>
                 <span>{option.name}</span>
@@ -525,7 +529,7 @@ Dropdown.propTypes = {
   onSearchBarFocus: PropTypes.func,
   optionsSelectedCopySingular: PropTypes.func,
   optionsSelectedCopyPlural: PropTypes.func,
-  resetSelectedOptions: PropTypes.func,
   onClose: PropTypes.func,
+  isActiveOptionCheckmarkVisible: PropTypes.bool,
   children: PropTypes.func,
 }

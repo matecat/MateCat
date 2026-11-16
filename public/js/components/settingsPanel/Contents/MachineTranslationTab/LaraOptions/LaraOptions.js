@@ -162,15 +162,7 @@ export const LaraOptions = ({isCattoolPage}) => {
                 placeholder="Select a style guide"
                 isPortalDropdown={true}
                 dropdownClassName="select-dropdown__wrapper-portal option-dropdown-with-descrition"
-                options={styleGuidesOptions.map((option) => ({
-                  ...option,
-                  name: (
-                    <div className="option-dropdown-with-descrition-select-content">
-                      {option.name}
-                      <p>{option.description}</p>
-                    </div>
-                  ),
-                }))}
+                options={styleGuidesOptions}
                 activeOption={styleGuidesOptions.find(({id}) => id === value)}
                 checkSpaceToReverse={true}
                 onSelect={(option) => onChange(option.id)}
