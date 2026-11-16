@@ -1,7 +1,7 @@
 import React from 'react'
-import {render, screen, waitFor} from '@testing-library/react'
+import {fireEvent, render, screen, waitFor} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import {DropdownMenu} from './DropdownMenu'
+import {DropdownMenu, DROPDOWN_MENU_TRIGGER_MODE} from './DropdownMenu'
 
 // Radix positions its content with ResizeObserver and pointer-capture APIs,
 // none of which jsdom implements.
@@ -80,6 +80,35 @@ describe('DropdownMenu', () => {
       await user.click(screen.getByText('Inert'))
 
       expect(screen.getByRole('menu')).toBeInTheDocument()
+    })
+  })
+
+  describe('hover trigger', () => {
+    // MATECAT-5NN: the bundled segment toolbar passes items that are only a
+    // label (the button inside handles its own click)
+    test('clicking an item with no onClick closes the menu without throwing', async () => {
+      const user = userEvent.setup()
+      const errors = []
+      const onError = (event) => {
+        errors.push(event.error)
+        event.preventDefault()
+      }
+      window.addEventListener('error', onError)
+      render(
+        <DropdownMenu
+          triggerMode={DROPDOWN_MENU_TRIGGER_MODE.HOVER}
+          items={[{label: 'Label only'}]}
+        />,
+      )
+
+      await user.hover(screen.getByRole('button'))
+      fireEvent.click(await screen.findByText('Label only'))
+
+      await waitFor(() =>
+        expect(screen.queryByText('Label only')).not.toBeInTheDocument(),
+      )
+      window.removeEventListener('error', onError)
+      expect(errors).toEqual([])
     })
   })
 })
