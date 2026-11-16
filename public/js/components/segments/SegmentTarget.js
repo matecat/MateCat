@@ -9,11 +9,11 @@ import SegmentButtons from './SegmentButtons'
 import SegmentWarnings from './SegmentWarnings'
 import SegmentActions from '../../actions/SegmentActions'
 import {SegmentContext} from './SegmentContext'
-import SegmentStringUtils from './utils/DraftMatecatUtils/segmentStringUtils'
+import SegmentStringUtils from '../../utils/segmentText/segmentStringUtils'
 import {
   removeTagsFromText as removeTagsFromTextUtil,
   textHasTags,
-} from './utils/DraftMatecatUtils/tagUtils'
+} from '../../utils/segmentText/tagUtils'
 import {Button, BUTTON_MODE, BUTTON_SIZE} from '../common/Button/Button'
 import ReviseLockIcon from '../../../img/icons/ReviseLockIcon'
 import OfflineUtils from '../../utils/offlineUtils'

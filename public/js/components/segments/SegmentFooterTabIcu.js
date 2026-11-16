@@ -4,7 +4,7 @@ import formatMessage from 'format-message'
 import {
   removeTagsFromText,
   transformTagsToText,
-} from './utils/DraftMatecatUtils/tagUtils'
+} from '../../utils/segmentText/tagUtils'
 import textUtils from '../../utils/textUtils'
 import ApplicationStore from '../../stores/ApplicationStore'
 import Tooltip from '../common/Tooltip'

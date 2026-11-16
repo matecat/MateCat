@@ -106,7 +106,7 @@ jest.mock('../../utils/segmentUtils', () => ({
   checkCurrentSegmentTPEnabled: jest.fn(() => false),
 }))
 
-jest.mock('./utils/DraftMatecatUtils/segmentStringUtils', () => ({
+jest.mock('../../utils/segmentText/segmentStringUtils', () => ({
   removeTagsFromText: jest.fn((t) => t),
 }))
 
@@ -598,11 +598,11 @@ describe('SegmentsContainer height calculation', () => {
 describe('SegmentsContainer height measuring markup', () => {
   const ReactDOMServer = require('react-dom/server')
   const SegmentUtils = require('../../utils/segmentUtils')
-  const SegmentStringUtils = require('./utils/DraftMatecatUtils/segmentStringUtils')
+  const SegmentStringUtils = require('../../utils/segmentText/segmentStringUtils')
   const {Base64} = require('js-base64')
   const {
     setTagSignatureMiddleware,
-  } = require('./utils/DraftMatecatUtils/tagModel')
+  } = require('../../utils/segmentText/tagModel')
 
   const ph = (html) =>
     `<ph id="m1" ctype="x-html" equiv-text="base64:${Base64.encode(html)}"/>`

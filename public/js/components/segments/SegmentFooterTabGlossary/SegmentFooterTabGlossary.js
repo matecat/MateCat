@@ -21,7 +21,7 @@ import SegmentUtils from '../../../utils/segmentUtils'
 import {SegmentFooterTabError} from '../SegmentFooterTabError'
 import {checkMymemoryStatus} from '../../../api/checkMymemoryStatus'
 import AppDispatcher from '../../../stores/AppDispatcher'
-import {removeZeroWidthSpace} from '../utils/DraftMatecatUtils/tagUtils'
+import {removeZeroWidthSpace} from '../../../utils/segmentText/tagUtils'
 
 import {TERM_FORM_FIELDS} from './GlossaryConstants'
 import {Button, BUTTON_TYPE} from '../../common/Button/Button'

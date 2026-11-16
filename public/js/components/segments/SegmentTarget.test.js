@@ -10,7 +10,7 @@ import OfflineUtils from '../../utils/offlineUtils'
 import SegmentUtils from '../../utils/segmentUtils'
 import CursorUtils from '../../utils/cursorUtils'
 import {Base64} from 'js-base64'
-import {setTagSignatureMiddleware} from './utils/DraftMatecatUtils/tagModel'
+import {setTagSignatureMiddleware} from '../../utils/segmentText/tagModel'
 
 jest.mock('../editor/matecat/TargetEditor', () => {
   const React = require('react')
@@ -65,11 +65,11 @@ jest.mock('../../actions/SegmentActions', () => ({
   characterCounter: jest.fn(),
 }))
 
-jest.mock('./utils/DraftMatecatUtils/segmentStringUtils', () => ({
+jest.mock('../../utils/segmentText/segmentStringUtils', () => ({
   autoFillTagsInTarget: jest.fn(() => 'auto-filled-translation'),
 }))
 
-jest.mock('./utils/DraftMatecatUtils/tagUtils', () => ({
+jest.mock('../../utils/segmentText/tagUtils', () => ({
   removeTagsFromText: jest.fn((text) => `clean-${text}`),
   textHasTags: jest.fn(() => false),
 }))

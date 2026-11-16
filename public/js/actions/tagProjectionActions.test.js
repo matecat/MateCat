@@ -1,4 +1,4 @@
-jest.mock('../components/segments/utils/DraftMatecatUtils/tagUtils', () => ({
+jest.mock('../utils/segmentText/tagUtils', () => ({
   hasDataOriginalTags: jest.fn(),
 }))
 jest.mock('./segmentDispatchActions', () => ({
@@ -12,7 +12,7 @@ jest.mock('../utils/tagProjectionUtils', () => ({
 }))
 
 import {disableTPOnSegment} from './tagProjectionActions'
-import {hasDataOriginalTags} from '../components/segments/utils/DraftMatecatUtils/tagUtils'
+import {hasDataOriginalTags} from '../utils/segmentText/tagUtils'
 import {setSegmentAsTagged} from './segmentDispatchActions'
 import SegmentStore from '../stores/SegmentStore'
 import {checkTPEnabled} from '../utils/tagProjectionUtils'

@@ -209,7 +209,7 @@ jest.mock('../utils/shortcuts', () => ({
   },
 }))
 
-jest.mock('../components/segments/utils/DraftMatecatUtils/tagModel', () => ({
+jest.mock('../utils/segmentText/tagModel', () => ({
   initTagSignature: jest.fn(),
 }))
 

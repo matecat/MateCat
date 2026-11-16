@@ -1,7 +1,7 @@
 import {isUndefined} from 'lodash'
-import {regexWordDelimiter} from '../components/segments/utils/DraftMatecatUtils/textConstants'
+import {regexWordDelimiter} from './segmentText/textConstants'
 import CommonUtils from './commonUtils'
-import {tagSignatures} from '../components/segments/utils/DraftMatecatUtils/tagModel'
+import {tagSignatures} from './segmentText/tagModel'
 
 const TEXT_UTILS = {
   /**

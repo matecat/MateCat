@@ -14,7 +14,7 @@ jest.mock('./AppDispatcher', () => ({
   default: {register: jest.fn(), dispatch: jest.fn()},
 }))
 
-jest.mock('../components/segments/utils/DraftMatecatUtils/tagUtils', () => ({
+jest.mock('../utils/segmentText/tagUtils', () => ({
   transformTagsToText: (t) => (t === undefined || t === null ? '' : t),
   removeTagsFromText: (t) => t,
   checkXliffTagsInText: () => false,

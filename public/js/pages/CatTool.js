@@ -37,7 +37,7 @@ import {mountPage} from './mountPage'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
 import SocketListener from '../sse/SocketListener'
 import Speech2Text from '../utils/speech2text'
-import {initTagSignature} from '../components/segments/utils/DraftMatecatUtils/tagModel'
+import {initTagSignature} from '../utils/segmentText/tagModel'
 import {
   ONBOARDING_PAGE,
   OnboardingTooltips,

@@ -5,7 +5,7 @@ import SegmentTarget from './SegmentTarget'
 import SegmentView from '../segmentView/SegmentView'
 import SegmentUtils from '../../utils/segmentUtils'
 import SearchUtils from '../header/cattol/search/searchUtils'
-import SegmentStringUtils from './utils/DraftMatecatUtils/segmentStringUtils'
+import SegmentStringUtils from '../../utils/segmentText/segmentStringUtils'
 import {markableText, searchedTagTexts} from '../segmentView/segmentModel'
 import SourceEditor from '../editor/matecat/SourceEditor'
 

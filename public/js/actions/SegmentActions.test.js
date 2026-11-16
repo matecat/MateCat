@@ -79,16 +79,13 @@ jest.mock('../components/segments/utils/translationMatches', () => ({
   },
 }))
 
-jest.mock(
-  '../components/segments/utils/DraftMatecatUtils/segmentStringUtils',
-  () => ({
-    __esModule: true,
-    default: {
-      removePlaceholdersForGlossary: jest.fn((t) => t),
-      removeTagsFromText: jest.fn((t) => t),
-    },
-  }),
-)
+jest.mock('../utils/segmentText/segmentStringUtils', () => ({
+  __esModule: true,
+  default: {
+    removePlaceholdersForGlossary: jest.fn((t) => t),
+    removeTagsFromText: jest.fn((t) => t),
+  },
+}))
 
 jest.mock('../components/header/cattol/segment_filter/segment_filter', () => ({
   __esModule: true,

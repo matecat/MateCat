@@ -1,7 +1,7 @@
 import {
   excludeSomeTagsTransformToText,
   removeTagsFromText,
-} from '../components/segments/utils/DraftMatecatUtils/tagUtils'
+} from './segmentText/tagUtils'
 import {Base64} from 'js-base64'
 import {findElementByMetadata} from './contextPreviewLookup'
 

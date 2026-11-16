@@ -56,7 +56,7 @@ import {
 } from './segmentDispatchActions'
 import CatToolActions from './CatToolActions'
 import OfflineUtils from '../utils/offlineUtils'
-import SegmentStringUtils from '../components/segments/utils/DraftMatecatUtils/segmentStringUtils'
+import SegmentStringUtils from '../utils/segmentText/segmentStringUtils'
 import SegmentUtils from '../utils/segmentUtils'
 import {getTranslationMismatches as getTranslationMismatchesApi} from '../api/getTranslationMismatches'
 import TextUtils from '../utils/textUtils'

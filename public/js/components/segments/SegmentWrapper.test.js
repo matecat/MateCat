@@ -33,7 +33,7 @@ jest.mock('../header/cattol/search/searchUtils', () => ({
   default: {getSearchMarks: (...args) => mockGetSearchMarks(...args)},
 }))
 
-jest.mock('./utils/DraftMatecatUtils/segmentStringUtils', () => ({
+jest.mock('../../utils/segmentText/segmentStringUtils', () => ({
   __esModule: true,
   default: {removeTagsFromText: (...args) => mockRemoveTagsFromText(...args)},
 }))
@@ -41,7 +41,7 @@ jest.mock('./utils/DraftMatecatUtils/segmentStringUtils', () => ({
 import SegmentWrapper from './SegmentWrapper'
 import {SegmentContext} from './SegmentContext'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
-import {setTagSignatureMiddleware} from './utils/DraftMatecatUtils/tagModel'
+import {setTagSignatureMiddleware} from '../../utils/segmentText/tagModel'
 
 // Spaces as plain text, as with the show-whitespace switch off
 setTagSignatureMiddleware('space', () => false)

@@ -48,7 +48,7 @@ import {
   transformTagsToText,
   removeTagsFromText,
   checkXliffTagsInText,
-} from '../components/segments/utils/DraftMatecatUtils/tagUtils'
+} from '../utils/segmentText/tagUtils'
 import {
   checkTPEnabled,
   checkCurrentSegmentTPEnabled,
