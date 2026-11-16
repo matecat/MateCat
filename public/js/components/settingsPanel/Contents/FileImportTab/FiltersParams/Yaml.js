@@ -143,7 +143,6 @@ export const Yaml = () => {
                 ({id}) => id === value,
               )}
               onSelect={(option) => onChange(option.id)}
-              maxHeightDroplist={260}
             />
           )}
         />

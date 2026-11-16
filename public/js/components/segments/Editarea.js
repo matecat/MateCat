@@ -747,6 +747,7 @@ const Editarea = forwardRef(
 
     const onFocus = () => {
       editorSyncRef.current.editorFocused = true
+      editorRef.current.focus()
     }
 
     const onCompositionStopRef = useRef(() => {

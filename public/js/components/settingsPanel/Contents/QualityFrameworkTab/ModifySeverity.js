@@ -93,6 +93,7 @@ export const ModifySeverity = ({
       onKeyUp={confirmWithKeyboard}
     >
       <input
+        type="text"
         className={`quality-framework-input input${error ? ' quality-framework-input-error' : ''}`}
         placeholder="Name"
         value={labelState}

@@ -330,7 +330,7 @@ const executeMswServer = () => {
               uid_transl: null,
               uid_rev: null,
               name: 'Test',
-              key: 'c52da4a03d6aea33f242',
+              key: '00000000000000000007',
               r: true,
               w: true,
               r_transl: null,

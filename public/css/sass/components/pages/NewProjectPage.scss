@@ -209,12 +209,6 @@ a {
     font-size: variables.$font-size-small;
     font-weight: normal;
   }
-
-  .select-with-label__wrapper {
-    .select__dropdown-wrapper {
-      min-width: 350px;
-    }
-  }
 }
 
 .translate-box.settings {
@@ -440,25 +434,26 @@ a {
       white-space: normal;
     }
   }
+}
 
-  .tmx-dropdown-row {
+.tmx-dropdown-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: space-between;
+  text-align: left;
+
+  > :first-child {
     display: flex;
-    align-items: center;
-    width: 100%;
-    justify-content: space-between;
+    flex-direction: column;
 
     > :first-child {
-      display: flex;
-      flex-direction: column;
+      color: black;
+      max-width: 260px;
+    }
 
-      > :first-child {
-        color: black;
-        max-width: 260px;
-      }
-
-      > :last-child {
-        font-weight: normal;
-      }
+    > :last-child {
+      font-weight: normal;
     }
   }
 }
@@ -752,5 +747,12 @@ a {
   button {
     width: 100%;
     justify-content: start !important;
+  }
+}
+
+.new-project-form-select-portal {
+  .custom-dropdown {
+    width: max-content;
+    max-width: 350px;
   }
 }

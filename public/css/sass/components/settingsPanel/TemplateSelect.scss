@@ -21,19 +21,6 @@
       opacity: 1;
     }
   }
-
-  .dropdown__option--is-active-option {
-    .select-item-default {
-      margin-right: 4px;
-      color: colors.$white;
-    }
-  }
-}
-
-.translate-box .project-template-select .dropdown__option--is-active-option {
-  .select-item-default {
-    color: colors.$black;
-  }
 }
 
 .project-template-select-unsaved {

@@ -112,21 +112,26 @@
 
 .comment-textarea {
   position: relative;
-  word-break: normal;
-  outline: none;
-  color: colors.$black;
-  border: 1px solid colors.$grey200;
-  min-height: 40px;
-  overflow-y: auto !important;
-  max-height: 160px;
-  border-radius: 20px;
 
   .comment-input__highlighter,
   textarea {
-    border: unset !important;
-    outline: unset !important;
-    padding: 10px;
-    line-height: 1.5;
+    word-break: normal;
+    min-height: 40px;
+    overflow-y: auto !important;
+    max-height: 160px;
+
+    outline-color: colors.$grey400;
+    border: 1px solid colors.$grey200;
+    border-radius: variables.$border-radius-default;
+    padding: 8px 12px;
+
+    &:hover {
+      border: 1px solid colors.$grey400;
+    }
+    &:focus,
+    &:active {
+      border: 1px solid colors.$grey400;
+    }
   }
 }
 
@@ -542,6 +547,7 @@ section:hover .comment-icon-btn,
 .comment-thread-footer {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: 8px;
   padding-top: 20px;
   button {

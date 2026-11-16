@@ -112,7 +112,7 @@ const fakeProjectsData = {
           pee: 0,
           tte: 0,
           private_tm_key: [
-            {key: 'c52da4a03d6aea33f242', r: 1, w: 1, name: 'Test'},
+            {key: '00000000000000000007', r: 1, w: 1, name: 'Test'},
           ],
           warnings_count: 0,
           warning_segments: [],
@@ -184,7 +184,7 @@ const fakeProjectsData = {
           pee: 0,
           tte: 0,
           private_tm_key: [
-            {key: 'c52da4a03d6aea33f242', r: 1, w: 1, name: 'Test'},
+            {key: '00000000000000000007', r: 1, w: 1, name: 'Test'},
           ],
           warnings_count: 0,
           warning_segments: [],
@@ -256,7 +256,7 @@ const fakeProjectsData = {
           pee: 0,
           tte: 0,
           private_tm_key: [
-            {key: 'c52da4a03d6aea33f242', r: 1, w: 1, name: 'Test'},
+            {key: '00000000000000000007', r: 1, w: 1, name: 'Test'},
           ],
           warnings_count: 0,
           warning_segments: [],
@@ -328,7 +328,7 @@ const fakeProjectsData = {
           pee: 0,
           tte: 0,
           private_tm_key: [
-            {key: 'c52da4a03d6aea33f242', r: 1, w: 1, name: 'Test'},
+            {key: '00000000000000000007', r: 1, w: 1, name: 'Test'},
           ],
           warnings_count: 0,
           warning_segments: [],
@@ -600,7 +600,7 @@ const fakeProjectsData = {
           pee: 0,
           tte: 0,
           private_tm_key: [
-            {key: 'c52da4a03d6aea33f242', r: 1, w: 1, name: 'Test'},
+            {key: '00000000000000000007', r: 1, w: 1, name: 'Test'},
           ],
           warnings_count: 0,
           warning_segments: [],
@@ -687,7 +687,7 @@ const fakeProjectsData = {
           pee: 0,
           tte: 0,
           private_tm_key: [
-            {key: 'c52da4a03d6aea33f242', r: 1, w: 1, name: 'Test'},
+            {key: '00000000000000000007', r: 1, w: 1, name: 'Test'},
           ],
           warnings_count: 0,
           warning_segments: [],
@@ -759,7 +759,7 @@ const fakeProjectsData = {
           pee: 0,
           tte: 0,
           private_tm_key: [
-            {key: 'c52da4a03d6aea33f242', r: 1, w: 1, name: 'Test'},
+            {key: '00000000000000000007', r: 1, w: 1, name: 'Test'},
           ],
           warnings_count: 0,
           warning_segments: [],
@@ -831,7 +831,7 @@ const fakeProjectsData = {
           pee: 0,
           tte: 0,
           private_tm_key: [
-            {key: 'c52da4a03d6aea33f242', r: 1, w: 1, name: 'Test'},
+            {key: '00000000000000000007', r: 1, w: 1, name: 'Test'},
           ],
           warnings_count: 0,
           warning_segments: [],

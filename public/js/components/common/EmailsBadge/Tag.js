@@ -22,7 +22,11 @@ export const Tag = ({
   }
 
   return (
-    <div className={[styles['email-badge-tag'], styles[status]].filter(Boolean).join(' ')}>
+    <div
+      className={[styles['email-badge-tag'], styles[status]]
+        .filter(Boolean)
+        .join(' ')}
+    >
       {children}
       {removable && (
         <div

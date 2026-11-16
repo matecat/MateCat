@@ -42,6 +42,7 @@ export const TemplateNameInput = () => {
   return (
     <input
       ref={container}
+      type="text"
       className="template-name"
       data-testid="template-name-input"
       value={templateName}

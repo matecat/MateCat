@@ -151,7 +151,6 @@ export const Json = () => {
                 ({id}) => id === value,
               )}
               onSelect={(option) => onChange(option.id)}
-              maxHeightDroplist={260}
             />
           )}
         />

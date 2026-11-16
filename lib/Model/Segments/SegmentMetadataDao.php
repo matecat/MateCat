@@ -4,6 +4,7 @@ namespace Model\Segments;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
+use PDO;
 use PDOException;
 use ReflectionException;
 use TypeError;
@@ -13,8 +14,6 @@ class SegmentMetadataDao extends AbstractDao
     const string TABLE = 'segment_metadata';
     const string _query_get_all = "SELECT * FROM " . self::TABLE . " WHERE id_segment = ? ";
     const string _query_get = "SELECT * FROM " . self::TABLE . " WHERE id_segment = ? and meta_key = ? ";
-    const string _keymap_get_by_segment_ids = "Model\\Segments\\SegmentMetadataDao::getBySegmentIds-";
-    const string _keymap_get_all_in_range = "Model\\Segments\\SegmentMetadataDao::getAllInRange";
 
 /**
      * @throws ReflectionException
@@ -34,26 +33,39 @@ class SegmentMetadataDao extends AbstractDao
     }
 
     /**
+     * Read one metadata key for a set of segments, such as one page of the segment analysis API.
+     *
+     * Not cached. Each call asks for a different list of ids, so a cached result was almost never
+     * read again, and every list landed in the same Redis hash for that key, which grew to 896 MB
+     * on production. The query uses the `(id_segment, meta_key)` index.
+     *
+     * Example: `getBySegmentIds([10, 11], 'id_request')` returns the `id_request` rows of segments
+     * 10 and 11.
+     *
      * @param int[] $ids
-     * @return SegmentMetadataStruct[]
-     * @throws ReflectionException
-     * @throws Exception
+     *
+     * @return list<SegmentMetadataStruct>
+     * @throws PDOException
      */
-    public function getBySegmentIds(array $ids, string $key, int $ttl = 86400): array
+    public function getBySegmentIds(array $ids, string $key): array
     {
         if (empty($ids)) {
             return [];
         }
 
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
-        $stmt = $this->database->getConnection()->prepare("SELECT * FROM segment_metadata WHERE id_segment IN ($placeholders) and meta_key = ? ");
+        $stmt = $this->_getStatementForQuery("SELECT * FROM segment_metadata WHERE id_segment IN ($placeholders) and meta_key = ? ");
+        $stmt->setFetchMode(PDO::FETCH_CLASS, SegmentMetadataStruct::class);
+        $stmt->execute([...array_values($ids), $key]);
 
-        return $this->setCacheTTL($ttl)->_fetchObjectMap(
-            $stmt,
-            SegmentMetadataStruct::class,
-            [...array_values($ids), $key],
-            self::_keymap_get_by_segment_ids . $key
-        );
+        $rows = [];
+        foreach ($stmt->fetchAll() as $row) {
+            if ($row instanceof SegmentMetadataStruct) {
+                $rows[] = $row;
+            }
+        }
+
+        return $rows;
     }
 
     /**
@@ -135,8 +147,8 @@ class SegmentMetadataDao extends AbstractDao
     }
 
     /**
-     * Evict every address one metadata row is read at: by segment, by segment and key, by that key
-     * across a set of segments, and across a segment range.
+     * Evict every cached address one metadata row is read at: by segment, and by segment and key.
+     * `getBySegmentIds()` and `getAllInRange()` are not cached, so they have nothing to evict.
      *
      * The struct has to name the segment and the key. Every write in this DAO goes through here, so
      * a caller never holds a list of evictions it can be one short of.
@@ -158,8 +170,6 @@ class SegmentMetadataDao extends AbstractDao
 
         $this->destroyCacheAll((int)$metadata->id_segment);
         $this->destroyCacheKey((int)$metadata->id_segment, $metadata->meta_key);
-        $this->destroyCacheBySegmentIds($metadata->meta_key);
-        $this->destroyCacheAllInRange();
     }
 
     /** The struct a write holds only as a pair of values. */
@@ -195,48 +205,33 @@ class SegmentMetadataDao extends AbstractDao
     }
 
     /**
-     * @throws ReflectionException
-     * @throws Exception
-     */
-    private function destroyCacheBySegmentIds(string $key): bool
-    {
-        $keyMap = self::_keymap_get_by_segment_ids . $key;
-
-        return $this->_deleteCacheByKey($keyMap, false);
-    }
-
-    /**
-     * @throws ReflectionException
-     * @throws Exception
-     */
-    private function destroyCacheAllInRange(): void
-    {
-        $this->_deleteCacheByKey(self::_keymap_get_all_in_range, false);
-    }
-
-    /**
-     * The default TTL is not actually in effect in production: its only current caller,
-     * `GetSegmentsController`, deliberately passes `ttl = 0` to avoid a cache-aside race where a
-     * concurrent read can re-cache a stale result after a disable/enable write's eviction runs.
+     * Read every metadata row of a range of segments, grouped by segment, such as one page of the
+     * editor in `GetSegmentsController`.
+     *
+     * Not cached. The rows decide whether a segment can be edited, and a cached copy can go stale:
+     * a read that started before a disable/enable write commits can store the old rows after that
+     * write's eviction. The query uses the `(id_segment, meta_key)` index.
+     *
+     * Example: `getAllInRange(5000, 5200)` returns `[5003 => SegmentMetadataCollection, ...]`, one
+     * entry per segment that has metadata.
      *
      * @return array<int, SegmentMetadataCollection>
-     * @throws ReflectionException
-     * @throws Exception
+     * @throws PDOException
      */
-    public function getAllInRange(int $startSid, int $stopSid, int $ttl = 86400): array
+    public function getAllInRange(int $startSid, int $stopSid): array
     {
-        $conn = $this->getDatabaseHandler();
-        $stmt = $conn->getConnection()->prepare(
+        $stmt = $this->_getStatementForQuery(
             "SELECT * FROM " . self::TABLE . " WHERE id_segment BETWEEN ? AND ? ORDER BY id_segment"
         );
+        $stmt->setFetchMode(PDO::FETCH_CLASS, SegmentMetadataStruct::class);
+        $stmt->execute([$startSid, $stopSid]);
 
-        /** @var SegmentMetadataStruct[] $results */
-        $results = $this->setCacheTTL($ttl)->_fetchObjectMap(
-            $stmt,
-            SegmentMetadataStruct::class,
-            [$startSid, $stopSid],
-            self::_keymap_get_all_in_range
-        );
+        $results = [];
+        foreach ($stmt->fetchAll() as $row) {
+            if ($row instanceof SegmentMetadataStruct) {
+                $results[] = $row;
+            }
+        }
 
         $grouped = [];
         foreach ($results as $struct) {

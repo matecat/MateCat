@@ -163,7 +163,7 @@ $select-height: 40px;
   z-index: 2;
   width: 100%;
 
-  &.select__dropdown--is-reversed:not(.select-dropdown__wrapper-portal) {
+  &.select__dropdown--is-reversed:not(.select-with-label__wrapper-is-portal) {
     top: auto;
     bottom: calc($select-height + dropdown.$dropdown-top-bottom-margin);
   }

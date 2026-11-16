@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import {Select} from '../../common/Select'
 import {IconPin} from '../../../../img/icons/IconPin'
 import {ApplicationWrapperContext} from '../../common/ApplicationWrapper/ApplicationWrapperContext'
+import {SELECT_HEIGHT} from '../../../constants/Constants'
 
 export const TemplateSelect = ({
   projectTemplates,
@@ -10,7 +11,7 @@ export const TemplateSelect = ({
   currentProjectTemplate,
   label,
   subtemplatesNotSaved,
-  maxHeightDroplist,
+  dropdownClassName = '',
 }) => {
   const {isUserLogged} = useContext(ApplicationWrapperContext)
 
@@ -57,10 +58,12 @@ export const TemplateSelect = ({
         label={label}
         placeholder="Select template"
         className={`project-template-select${isModifyingTemplate ? ' project-template-select-unsaved' : ''}`}
+        dropdownClassName={`${dropdownClassName} project-template-select`}
         id="project-template"
         tooltipPosition="right"
+        maxHeightDroplist={SELECT_HEIGHT}
+        isPortalDropdown={true}
         checkSpaceToReverse={false}
-        maxHeightDroplist={maxHeightDroplist ?? 100}
         options={options}
         activeOption={activeOption}
         onSelect={onSelect}
@@ -106,4 +109,5 @@ TemplateSelect.propTypes = {
   label: PropTypes.string,
   subtemplatesNotSaved: PropTypes.array,
   maxHeightDroplist: PropTypes.number,
+  dropdownClassName: PropTypes.string,
 }

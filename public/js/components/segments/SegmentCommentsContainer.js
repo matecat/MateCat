@@ -40,6 +40,7 @@ const SegmentCommentsContainer = () => {
   ])
   const [teamUsers, setTeamUsers] = useState(() => CommentsStore.getTeamUsers())
   const [sendCommentError, setSendCommentError] = useState(false)
+  const [resolveThreadError, setResolveThreadError] = useState(false)
   const [mentionsInputValue, setMentionsInputValue] = useState('')
   const [mentionsMarkup, setMentionsMarkup] = useState('')
   const [anonymousComments, setAnonymousComments] = useState(
@@ -120,17 +121,6 @@ const SegmentCommentsContainer = () => {
     wrap.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0
   })
 
-  // Workaround - textarea fit to content. The class started this timer from
-  // inside render and never cleared it.
-  useEffect(() => {
-    if (!commentInputRef.current) return
-    const timer = setTimeout(() => {
-      const input = commentInputRef.current
-      if (input) input.style.height = `${input.parentNode.clientHeight}px`
-    }, 200)
-    return () => clearTimeout(timer)
-  })
-
   const closeComments = (e) => {
     e.preventDefault()
     e.stopPropagation()
@@ -156,6 +146,8 @@ const SegmentCommentsContainer = () => {
 
   const resolveThread = () =>
     CommentsActions.resolveThread(originalSid, anonymousComments)
+      .then(() => setResolveThreadError(false))
+      .catch(() => setResolveThreadError(true))
 
   const handleChangeMentionsInputValue = (
     event,
@@ -336,7 +328,14 @@ const SegmentCommentsContainer = () => {
           data-count={count}
         >
           {threadWrap}
-          <div className={'comment-thread-footer'}>{resolveButton}</div>
+          <div className={'comment-thread-footer'}>
+            {resolveButton && resolveThreadError ? (
+              <span className="comment-warnings">
+                Oops, the thread could not be resolved. Please try again later.
+              </span>
+            ) : null}
+            {resolveButton}
+          </div>
         </div>,
       )
     }
@@ -368,7 +367,7 @@ const SegmentCommentsContainer = () => {
           className="comment-close-btn"
           onClick={closeComments}
         >
-          <IconClose size={10} />
+          <IconClose size={16} />
         </Button>
         {comments.length > 0 && (
           <div className="comments-wrap-container">
