@@ -15,6 +15,7 @@ use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
 use RuntimeException;
+use Throwable;
 use Utils\Url\CanonicalRoutes;
 
 class MembershipCreatedEmail extends AbstractEmail
@@ -64,18 +65,11 @@ class MembershipCreatedEmail extends AbstractEmail
     }
 
     /**
-     * @throws Exception
+     * @throws Throwable
      */
     public function send(): void
     {
-        $recipient = [$this->user->email, $this->user->fullName()];
-
-        $this->doSend(
-            $recipient,
-            $this->title ?? '',
-            $this->_buildHTMLMessage(),
-            $this->_buildTxtMessage($this->_buildMessageContent())
-        );
+        $this->sendTo($this->user->email, $this->user->fullName());
     }
 
     /**
@@ -86,16 +80,6 @@ class MembershipCreatedEmail extends AbstractEmail
         return parent::_getDefaultMailConf();
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    public function _getLayoutVariables($messageBody = null): array
-    {
-        $vars = parent::_getLayoutVariables();
-        $vars['title'] = $this->title;
-
-        return $vars;
-    }
 
     /**
      * @return array<string, mixed>

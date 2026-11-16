@@ -63,9 +63,7 @@ test('shows the draft download and export items when the job is not completed', 
 test('shows google drive labels when the project is a google drive project', () => {
   render(<DownloadMenu password="secret" jid="10" isGDriveProject={true} />)
   expect(screen.getByText('Open preview in Google Drive')).toBeInTheDocument()
-  expect(
-    screen.getByText('Open original in Google Drive'),
-  ).toBeInTheDocument()
+  expect(screen.getByText('Open original in Google Drive')).toBeInTheDocument()
 })
 
 test('dispatches an analytics event and downloads the draft when the toggle button is clicked', () => {
@@ -83,25 +81,31 @@ test('dispatches an analytics event and downloads the draft when the toggle butt
   )
 })
 
-test('opens the original file in a new tab', () => {
+test('downloads the original file without opening a tab', () => {
   render(<DownloadMenu password="secret" jid="10" isGDriveProject={false} />)
   fireEvent.click(screen.getByText('Download original'))
-  expect(window.open).toHaveBeenCalledWith('/api/v2/original/10/secret', '_blank')
+  expect(DownloadFileUtils.downloadUrl).toHaveBeenCalledWith(
+    '/api/v2/original/10/secret',
+  )
+  expect(window.open).not.toHaveBeenCalled()
 })
 
-test('opens the xliff export in a new tab', () => {
+test('downloads the xliff export without opening a tab', () => {
   render(<DownloadMenu password="secret" jid="10" isGDriveProject={false} />)
   fireEvent.click(screen.getByText('Export XLIFF'))
-  expect(window.open).toHaveBeenCalledWith(
+  expect(DownloadFileUtils.downloadUrl).toHaveBeenCalledWith(
     '/api/v2/xliff/10/secret/10.zip',
-    '_blank',
   )
+  expect(window.open).not.toHaveBeenCalled()
 })
 
-test('opens the job tmx export in a new tab', () => {
+test('downloads the job tmx export without opening a tab', () => {
   render(<DownloadMenu password="secret" jid="10" isGDriveProject={false} />)
   fireEvent.click(screen.getByText('Export job TMX'))
-  expect(window.open).toHaveBeenCalledWith('/api/v2/tmx/10/secret', '_blank')
+  expect(DownloadFileUtils.downloadUrl).toHaveBeenCalledWith(
+    '/api/v2/tmx/10/secret',
+  )
+  expect(window.open).not.toHaveBeenCalled()
 })
 
 test('downloads the original file to google drive', () => {
@@ -151,7 +155,8 @@ test('shows the download warnings modal instead of downloading directly when the
   )
   expect(DownloadFileUtils.downloadFile).not.toHaveBeenCalled()
 
-  const goToFirstError = ModalsActions.showDownloadWarningsModal.mock.calls[0][2]
+  const goToFirstError =
+    ModalsActions.showDownloadWarningsModal.mock.calls[0][2]
   goToFirstError()
   expect(CatToolActions.toggleQaIssues).toHaveBeenCalledTimes(1)
 })

@@ -1,5 +1,4 @@
-import {isUndefined, clone} from 'lodash'
-import {findIndex} from 'lodash/array'
+import {isUndefined, clone, findIndex} from 'lodash'
 
 import {
   addSearchResultToSegments,

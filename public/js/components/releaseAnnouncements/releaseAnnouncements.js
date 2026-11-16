@@ -8,7 +8,7 @@
 import React from 'react'
 import Cookies from 'js-cookie'
 import {addNotification} from '../../actions/notificationActions'
-import {SETTINGS_PANEL_TABS} from '../settingsPanel/SettingsPanel'
+import {SETTINGS_PANEL_TABS} from '../settingsPanel/SettingsPanelConstants'
 
 export const SHOW_UNTIL = new Date('2026-11-30T23:59:59Z')
 const AUTO_DISMISS_MS = 30000

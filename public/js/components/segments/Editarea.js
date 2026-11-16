@@ -15,8 +15,7 @@ import {
   getDefaultKeyBinding,
   CompositeDecorator,
 } from 'draft-js'
-import {remove, cloneDeep, findIndex, size, isEqual} from 'lodash'
-import {debounce} from 'lodash/function'
+import {remove, cloneDeep, findIndex, size, isEqual, debounce} from 'lodash'
 
 import SegmentConstants from '../../constants/SegmentConstants'
 import EditAreaConstants from '../../constants/EditAreaConstants'

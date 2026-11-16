@@ -1,6 +1,6 @@
 import React, {useState, useRef, useEffect, useCallback, useMemo} from 'react'
 import PropTypes from 'prop-types'
-import {debounce} from 'lodash/function'
+import {debounce} from 'lodash'
 import IconClose from '../../../img/icons/IconClose'
 import {Input} from './Input/Input'
 

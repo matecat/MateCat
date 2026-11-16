@@ -30,7 +30,6 @@ export const BulkChangePassword = ({jobs, successCallback}) => {
         activeOption={typeSelected}
         checkSpaceToReverse={false}
         onSelect={onSelect}
-        maxHeightDroplist={300}
       />
       <div className="content-bulk-modal-control">
         <Button
