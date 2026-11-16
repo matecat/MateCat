@@ -762,15 +762,19 @@ class MyMemory extends AbstractEngine
       * @param string $filePath
       * @param string $memoryKey
       * @param UserStruct $user * Not used
+      * @param bool $mtImport true asks MyMemory to also import the TMX into Lara with its own license.
+      *                       Example: `true` → `mt_import=true`.
       *
       * @return FileImportAndStatusResponse
       * @throws RuntimeException
       */
-     public function importMemory(string $filePath, string $memoryKey, UserStruct $user): FileImportAndStatusResponse
+     public function importMemory(string $filePath, string $memoryKey, UserStruct $user, bool $mtImport = false): FileImportAndStatusResponse
      {
         $postFields = [
-            'tmx' => $this->getCurlFile($filePath),
-            'key' => trim($memoryKey)
+            'tmx'       => $this->getCurlFile($filePath),
+            'key'       => trim($memoryKey),
+            // MyMemory expects the literal strings: a bool in multipart becomes "1" or "".
+            'mt_import' => $mtImport ? 'true' : 'false',
         ];
 
         $this->call("tmx_import_relative_url", $postFields, true);

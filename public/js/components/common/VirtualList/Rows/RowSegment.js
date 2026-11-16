@@ -237,7 +237,7 @@ export const ProjectBar = ({
           className={`projectbar-filename ${isBlinkingState ? 'project-bar-blink' : ''}`}
           onAnimationEnd={() => setIsBlinkingState(false)}
         >
-          {CommonUtils.getFileIcon(fileType[0])}
+          {CommonUtils.getFileIcon(fileType?.[0])}
           <span className="fileFormat" title={segment.filename}>
             {file.file_name}
           </span>

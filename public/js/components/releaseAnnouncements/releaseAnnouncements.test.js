@@ -1,6 +1,6 @@
 import Cookies from 'js-cookie'
 import {addNotification} from '../../actions/notificationActions'
-import {SETTINGS_PANEL_TABS} from '../settingsPanel/SettingsPanel'
+import {SETTINGS_PANEL_TABS} from '../settingsPanel/SettingsPanelConstants'
 import {
   RELEASE_ANNOUNCEMENTS,
   SHOW_UNTIL,
