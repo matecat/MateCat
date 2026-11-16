@@ -315,7 +315,8 @@ export const MachineTranslationTab = () => {
             <Select
               placeholder="Choose provider"
               id="mt-engine"
-              maxHeightDroplist={100}
+              isPortalDropdown={true}
+              maxHeightDroplist={400}
               options={enginesList}
               activeOption={activeAddEngine}
               onSelect={(option) => {

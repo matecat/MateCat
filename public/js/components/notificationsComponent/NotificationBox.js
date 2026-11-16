@@ -11,9 +11,11 @@
  *                      tc (top center), br (bottom right), bl (bottom left), bc (bottom center)
  * autoDismiss:     (Boolean, Default true) Set if notification is dismissible by the user.
  * closeCallback    (Function) A callback function that will be called when the notification is about to be removed.
+ *                      It receives true when the user closed it with the X, false when it timed out or was removed.
  * openCallback     (Function) A callback function that will be called when the notification is successfully added.
  * dismissable      (Boolean, Default true) If show or not the button to close the notification
  * timer            (Number, Default 700) The timer to auto dismiss the notification
+ * allowHtml        (Boolean, Default false) Render the HTML of a string title/text, keeping only safe tags (see htmlToReact)
  */
 import React, {useState, useRef, useEffect} from 'react'
 
@@ -135,6 +137,7 @@ const NotificationBox = () => {
                     closeCallback={notification.closeCallback}
                     openCallback={notification.openCallback}
                     dismissable={notification.dismissable}
+                    allowHtml={notification.allowHtml}
                     key={notification.uid}
                     uid={notification.uid}
                     remove={notification.remove}

@@ -8,6 +8,22 @@ import Tooltip from './Tooltip'
 import usePortal from '../../hooks/usePortal'
 import IconClose from '../../../img/icons/IconClose'
 import classnames from 'classnames'
+
+// Flip-decision threshold for call sites that don't pass their own
+// maxHeightDroplist — kept identical to the old hardcoded default so flip
+// timing for those call sites doesn't change, only the height applied once
+// opened (see clampToAvailableSpace below).
+const DEFAULT_FLIP_THRESHOLD = 420
+
+// The value actually applied as the dropdown's max-height is always the real
+// available space in the chosen direction, never the list's own natural
+// height — callers that explicitly pass maxHeightDroplist keep that as a
+// hard ceiling; callers that don't get the full available space.
+const clampToAvailableSpace = (availableSpace, maxHeightDroplist) =>
+  maxHeightDroplist !== undefined
+    ? Math.min(availableSpace, maxHeightDroplist)
+    : availableSpace
+
 export const Select = ({
   className,
   label,
@@ -30,15 +46,15 @@ export const Select = ({
   onCloseSelect = () => {},
   optionsSelectedCopySingular = () => {},
   optionsSelectedCopyPlural = () => {},
-  resetSelectedOptions = () => {},
   checkSpaceToReverse = true,
-  maxHeightDroplist = 400,
+  maxHeightDroplist,
   isPortalDropdown,
   isActiveOptionOnTop,
   dropdownClassName,
   showResetButton = false,
   resetFunction = () => {},
   tooltipContent,
+  isActiveOptionCheckmarkVisible,
   children,
 }) => {
   const dropDownRef = useRef()
@@ -101,77 +117,128 @@ export const Select = ({
   }
 
   useEffect(() => {
-    if (
+    if (!(
       isDropdownVisible &&
       multipleSelect !== 'modal' &&
       wrapperRef.current &&
       dropDownRef.current
-    ) {
-      const {setListMaxHeight} = dropDownRef.current
-      const wrapperNode = wrapperRef.current
+    )) {
+      return
+    }
+
+    const {setListMaxHeight} = dropDownRef.current
+    const wrapperNode = wrapperRef.current
+
+    const SEARCH_BAR_HEIGHT = 56
+    const MARGIN_DROPDOWN = 4
+
+    const hasExplicitCap = maxHeightDroplist !== undefined
+    const flipThreshold = maxHeightDroplist ?? DEFAULT_FLIP_THRESHOLD
+
+    // Decide which side's available space the dropdown actually gets sized
+    // against, then apply it (optionally clamped to an explicit cap).
+    const applyMaxHeight = (availableHeightBelow, availableHeightAbove) => {
+      const notEnoughRoomBelow = availableHeightBelow <= flipThreshold
+      const willReverse = checkSpaceToReverse && notEnoughRoomBelow
+
+      if (willReverse) {
+        setDropdownReversed(true)
+      }
+
+      // A caller with an explicit cap keeps today's behavior of measuring
+      // against the space above whenever space below is tight, even when
+      // checkSpaceToReverse keeps it anchored below (existing, tested
+      // behavior for those ~25 call sites). A caller relying on the default
+      // always measures against whichever side the dropdown actually
+      // renders on, so it's never sized against space it doesn't occupy.
+      const usesSpaceAbove =
+        willReverse || (hasExplicitCap && notEnoughRoomBelow)
+
+      setListMaxHeight(
+        Math.max(
+          0,
+          clampToAvailableSpace(
+            usesSpaceAbove ? availableHeightAbove : availableHeightBelow,
+            maxHeightDroplist,
+          ),
+        ),
+      )
+    }
+
+    const getLabelHeight = () =>
+      wrapperNode.getElementsByTagName('label')?.[0]?.getBoundingClientRect()
+        .height ?? 0
+
+    // Available space is measured against the viewport (or offsetParent), so
+    // a window resize can make a previously-computed max-height stale —
+    // recompute whenever the window is resized while the dropdown stays open,
+    // not just once when it first opens.
+    const recalculateMaxHeight = () => {
+      const wrapperRect = wrapperNode.getBoundingClientRect()
 
       if (isPortalDropdown) {
-        const wrapperRect = wrapperNode.getBoundingClientRect()
         const referenceRect = offsetParent
           ? offsetParent.getBoundingClientRect()
           : {top: 0, bottom: window.innerHeight}
 
-        const availableHeightBelow =
-          referenceRect.bottom - wrapperRect.bottom - 16 // 16 = margins
-        if (availableHeightBelow > maxHeightDroplist) {
-          setListMaxHeight(maxHeightDroplist)
-        } else {
-          if (checkSpaceToReverse) {
-            setDropdownReversed(true)
-          }
-          const availableHeightAbove =
-            wrapperRect.top -
-            referenceRect.top +
-            (label ? 32 : 0) -
-            32 -
-            (showSearchBar ? 48 : 0) // 32 = margins; 32 = label height; 48 = searchBar height
-          setListMaxHeight(
-            Math.max(0, Math.min(availableHeightAbove, maxHeightDroplist)),
-          )
-        }
+        const availableHeightBelow = Math.abs(
+          wrapperRect.y +
+            wrapperRect.height +
+            (MARGIN_DROPDOWN + 20) +
+            (showSearchBar ? SEARCH_BAR_HEIGHT : 0) -
+            referenceRect.bottom,
+        )
+        const availableHeightAbove =
+          wrapperRect.y -
+          (MARGIN_DROPDOWN + 20) -
+          (showSearchBar ? SEARCH_BAR_HEIGHT : 0) -
+          getLabelHeight() -
+          referenceRect.top
+
+        applyMaxHeight(availableHeightBelow, availableHeightAbove)
         return
       }
 
-      const listTopPosition = wrapperNode.getBoundingClientRect().height
-
-      const wrapperTopPosition = wrapperNode.offsetTop
       const offsetParentElement = offsetParent
         ? offsetParent
         : (wrapperNode.offsetParent ?? document.body)
+
       const parentHeight = offsetParentElement.getBoundingClientRect().height
+
       const parentScrollTop =
         offsetParentElement === document.body
           ? document.documentElement.scrollTop
-          : offsetParentElement.scrollTop
-      let availableHeight =
-        parentHeight +
-        parentScrollTop -
-        wrapperTopPosition -
-        listTopPosition -
-        16 // 16 = margins
-      if (availableHeight > maxHeightDroplist) {
-        setListMaxHeight(availableHeight)
-      } else {
-        if (checkSpaceToReverse) {
-          setDropdownReversed(true)
-        }
-        availableHeight =
-          wrapperTopPosition -
-          parentScrollTop +
-          (label ? 32 : 0) -
-          32 -
-          (showSearchBar ? 48 : 0) // 32 = margins; 32 = label height; 48 = searchBar height
-        setListMaxHeight(
-          availableHeight > maxHeightDroplist
-            ? availableHeight
-            : maxHeightDroplist,
-        )
-      }
+          : offsetParentElement.offsetTop
+
+      const availableHeightBelow = Math.abs(
+        wrapperRect.y +
+          wrapperRect.height +
+          (MARGIN_DROPDOWN + 20) +
+          (showSearchBar ? SEARCH_BAR_HEIGHT : 0) -
+          (parentHeight + parentScrollTop),
+      )
+      const availableHeightAbove =
+        wrapperRect.y -
+        (MARGIN_DROPDOWN + 20) -
+        getLabelHeight() -
+        parentScrollTop
+
+      applyMaxHeight(availableHeightBelow, availableHeightAbove)
+    }
+
+    recalculateMaxHeight()
+
+    let rafId
+    const handleResize = () => {
+      cancelAnimationFrame(rafId)
+      rafId = requestAnimationFrame(recalculateMaxHeight)
+    }
+
+    window.addEventListener('resize', handleResize)
+
+    return () => {
+      cancelAnimationFrame(rafId)
+      window.removeEventListener('resize', handleResize)
     }
   }, [
     isDropdownVisible,
@@ -192,7 +259,7 @@ export const Select = ({
     // Matches Dropdown.scss's $dropdown-to-bottom-margin — the same gap the
     // non-reversed (opens-below) case gets between the trigger and the
     // dropdown.
-    const DROPDOWN_TO_TRIGGER_GAP = 10
+    const DROPDOWN_TO_TRIGGER_GAP = 4
 
     const updatePosition = () => {
       const rect = wrapperRef.current?.getBoundingClientRect()
@@ -218,9 +285,7 @@ export const Select = ({
 
           style.transform = `translateX(${x}px)`
           style.top = 'auto'
-          style.bottom = `${
-            window.innerHeight - y + DROPDOWN_TO_TRIGGER_GAP
-          }px`
+          style.bottom = `${window.innerHeight - y + DROPDOWN_TO_TRIGGER_GAP}px`
         } else {
           style.transform = `translate(${x}px,${y + rect.height}px)`
           style.top = ''
@@ -349,8 +414,8 @@ export const Select = ({
           isActiveOptionOnTop,
           optionsSelectedCopySingular,
           optionsSelectedCopyPlural,
-          resetSelectedOptions,
           onClose: hideDropdown.current,
+          isActiveOptionCheckmarkVisible,
         }}
       >
         {children}
@@ -450,7 +515,6 @@ Select.propTypes = {
   onToggleOption: PropTypes.func,
   optionsSelectedCopySingular: PropTypes.func,
   optionsSelectedCopyPlural: PropTypes.func,
-  resetSelectedOptions: PropTypes.func,
   checkSpaceToReverse: PropTypes.bool,
   maxHeightDroplist: PropTypes.number,
   isPortalDropdown: PropTypes.bool,
@@ -459,5 +523,6 @@ Select.propTypes = {
   showResetButton: PropTypes.bool,
   resetFunction: PropTypes.func,
   tooltipContent: PropTypes.string,
+  isActiveOptionCheckmarkVisible: PropTypes.bool,
   children: PropTypes.func,
 }

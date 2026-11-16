@@ -22,14 +22,14 @@ describe('GMTSelect', () => {
     Cookies.remove('matecat_timezone')
   })
 
-  test('shows the GMT label when showLabel is true', () => {
+  test('shows the Time zone label when showLabel is true', () => {
     render(<GMTSelect showLabel={true} changeValue={jest.fn()} />)
-    expect(screen.getByText('GMT')).toBeInTheDocument()
+    expect(screen.getByText('Time zone')).toBeInTheDocument()
   })
 
   test('hides the label when showLabel is false', () => {
     render(<GMTSelect showLabel={false} changeValue={jest.fn()} />)
-    expect(screen.queryByText('GMT')).not.toBeInTheDocument()
+    expect(screen.queryByText('Time zone')).not.toBeInTheDocument()
   })
 
   test('defaults to the first GMT option when no cookie is set', () => {

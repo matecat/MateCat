@@ -158,7 +158,6 @@ const FilterSegments = ({
               undefined
             }
             placeholder="Segment status"
-            checkSpaceToReverse={false}
             showResetButton={true}
             resetFunction={() =>
               updateFilter({status: '', revision_number: null})
@@ -177,7 +176,6 @@ const FilterSegments = ({
                 (option) => option.id === String(filter.issues_in_r),
               )}
               placeholder="Revision phase"
-              checkSpaceToReverse={false}
               showResetButton={true}
               resetFunction={() => updateFilter({issues_in_r: null})}
             />
@@ -209,14 +207,11 @@ const FilterSegments = ({
                 : undefined
             }
             placeholder="Issue category"
-            checkSpaceToReverse={false}
             showResetButton={true}
             resetFunction={() => updateFilter({issue_category: null})}
           />
         </div>
-        <div
-          className={`filter-category ${getFilterClassName(filter.severity)}`}
-        >
+        <div className={`${getFilterClassName(filter.severity)}`}>
           <Select
             options={optionsSeverities}
             onSelect={(value) => filterSelectChanged('severity', value.id)}
@@ -225,7 +220,6 @@ const FilterSegments = ({
               undefined
             }
             placeholder="Issue severity"
-            checkSpaceToReverse={false}
             showResetButton={true}
             resetFunction={() => updateFilter({severity: null})}
           />

@@ -1,5 +1,5 @@
 import React from 'react'
-import {render, screen, fireEvent, act} from '@testing-library/react'
+import {render, screen, fireEvent, act, waitFor} from '@testing-library/react'
 import {fromJS} from 'immutable'
 import {ModifyTeam} from './ModifyTeam'
 import ManageActions from '../../actions/ManageActions'
@@ -137,6 +137,7 @@ test('pressing Enter while editing the team name saves it', () => {
 })
 
 test('inviting members calls ManageActions.addUserToTeam and resets the field', () => {
+  ManageActions.addUserToTeam.mockResolvedValue({})
   const team = buildTeam()
   renderModifyTeam(team)
 
@@ -164,6 +165,7 @@ test('personal teams hide the manage-members / invite section', () => {
 })
 
 test('resending an invite marks it as sent', () => {
+  ManageActions.addUserToTeam.mockResolvedValue({})
   const team = buildTeam()
   renderModifyTeam(team)
 
@@ -294,4 +296,63 @@ test('re-renders when UserStore emits an update for this team', () => {
   act(() => listener(updatedTeam))
 
   expect(screen.getByText('New Member')).toBeInTheDocument()
+})
+
+const inviteRejection = {
+  errors: [
+    {
+      code: 400,
+      message: 'Wrong parameter: a member email address is not valid',
+    },
+  ],
+}
+
+test('a rejected invite shows the server message and keeps the addresses', async () => {
+  ManageActions.addUserToTeam.mockRejectedValue(inviteRejection)
+  renderModifyTeam()
+
+  fireEvent.click(screen.getByTestId('emails-badge-mock'))
+  fireEvent.click(screen.getByText('Invite members'))
+
+  expect(await screen.findByRole('alert')).toHaveTextContent(
+    'Wrong parameter: a member email address is not valid',
+  )
+  expect(screen.getByText('Invite members')).toBeEnabled()
+})
+
+test('a successful invite clears the addresses and shows no error', async () => {
+  ManageActions.addUserToTeam.mockResolvedValue({})
+  renderModifyTeam()
+
+  fireEvent.click(screen.getByTestId('emails-badge-mock'))
+  fireEvent.click(screen.getByText('Invite members'))
+
+  await waitFor(() => expect(screen.getByText('Invite members')).toBeDisabled())
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+})
+
+test('changing the addresses hides the invite error', async () => {
+  ManageActions.addUserToTeam.mockRejectedValue(inviteRejection)
+  renderModifyTeam()
+
+  fireEvent.click(screen.getByTestId('emails-badge-mock'))
+  fireEvent.click(screen.getByText('Invite members'))
+  await screen.findByRole('alert')
+
+  fireEvent.click(screen.getByTestId('emails-badge-mock'))
+
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+})
+
+test('a rejected resend shows the server message and offers the resend again', async () => {
+  ManageActions.addUserToTeam.mockRejectedValue(inviteRejection)
+  renderModifyTeam()
+
+  fireEvent.click(screen.getByText('Resend invite'))
+
+  expect(await screen.findByRole('alert')).toHaveTextContent(
+    'Wrong parameter: a member email address is not valid',
+  )
+  expect(screen.getByText('Resend invite')).toBeInTheDocument()
+  expect(screen.queryByText('Invite sent')).not.toBeInTheDocument()
 })

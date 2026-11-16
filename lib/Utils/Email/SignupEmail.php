@@ -11,6 +11,7 @@ namespace Utils\Email;
 
 use Exception;
 use Model\Users\UserStruct;
+use Throwable;
 use Utils\Registry\AppConfig;
 use Utils\Url\CanonicalRoutes;
 
@@ -32,18 +33,11 @@ class SignupEmail extends AbstractEmail
     }
 
     /**
-     * @throws Exception
+     * @throws Throwable
      */
     public function send(): void
     {
-        $recipient = [$this->user->email, $this->user->fullName()];
-
-        $this->doSend(
-            $recipient,
-            $this->title,
-            $this->_buildHTMLMessage(),
-            $this->_buildTxtMessage($this->_buildMessageContent())
-        );
+        $this->sendTo($this->user->email, $this->user->fullName());
     }
 
     /**
@@ -59,16 +53,6 @@ class SignupEmail extends AbstractEmail
         ];
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    protected function _getLayoutVariables($messageBody = null): array
-    {
-        $vars = parent::_getLayoutVariables();
-        $vars['title'] = $this->title;
-
-        return $vars;
-    }
 
     /**
      * @return array<string, mixed>

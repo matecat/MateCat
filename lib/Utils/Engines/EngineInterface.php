@@ -113,13 +113,10 @@ interface EngineInterface
     public function getMemoryIfMine(MemoryKeyStruct $memoryKey): ?array;
 
     /**
-     * @param string $source
-     * @param string $target
-     * @param string $sentence
-     * @param string $translation
-     * @param string $mt_qe_engine_id
+     * Indicates whether the engine computes its own quality estimation score inside its translate call,
+     * so Lara must not score its matches.
      *
-     * @return float|null
+     * Example: $mtEngine->hasBuiltInQualityEstimation(); // true for ModernMT, false for Lara or DeepL
      */
-    public function getQualityEstimation(string $source, string $target, string $sentence, string $translation, string $mt_qe_engine_id = 'default'): ?float;
+    public function hasBuiltInQualityEstimation(): bool;
 }

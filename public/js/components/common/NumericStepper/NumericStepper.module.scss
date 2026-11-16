@@ -10,12 +10,12 @@
   input {
     width: 100%;
     height: 100%;
-    outline: none;
     border: 1px solid colors.$grey200;
     border-radius: variables.$border-radius-default 0 0
-      variables.$border-radius-default;
+      variables.$border-radius-default !important;
     border-right: unset;
     text-align: center;
+    padding: 0 !important;
 
     &:disabled {
       border-color: colors.$grey200 !important;

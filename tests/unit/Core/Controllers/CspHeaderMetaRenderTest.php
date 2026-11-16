@@ -21,7 +21,7 @@ use Utils\Templating\PHPTALWithAppend;
  */
 class CspHeaderMetaRenderTest extends AbstractTest
 {
-    private const array DIRECTIVES = ['default-src', 'script-src-elem', 'child-src', 'font-src', 'style-src'];
+    private const array DIRECTIVES = ['default-src', 'script-src-elem', 'child-src', 'worker-src', 'font-src', 'style-src'];
 
     #[Test]
     public function withoutPluginSourcesThePolicyIsTheTemplatesOwn(): void
@@ -45,6 +45,7 @@ class CspHeaderMetaRenderTest extends AbstractTest
 
         self::assertSame(["'self'", "'nonce-test-nonce'", '*.googletagmanager.com'], $policy['script-src-elem']);
         self::assertSame(["'self'", '*.google.com', '*.hubspot.com'], $policy['child-src']);
+        self::assertSame(["'self'"], $policy['worker-src']);
         self::assertSame(["'self'", 'fonts.gstatic.com', 'data:'], $policy['font-src']);
         self::assertSame(["'self'", "'unsafe-inline'", '*.googleapis.com'], $policy['style-src']);
 

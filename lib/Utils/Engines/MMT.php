@@ -710,30 +710,11 @@ class MMT extends AbstractEngine
     }
 
     /**
-     * @param string $source
-     * @param string $target
-     * @param string $sentence
-     * @param string $translation
-     * @param string $mt_qe_engine_id
-     *
-     * @return float|null
-     * @throws MMTServiceApiException
-     * @throws RuntimeException
+     * ModernMT computes the quality estimation score itself inside its translate call.
      */
-    public function getQualityEstimation(
-        string $source,
-        string $target,
-        string $sentence,
-        string $translation,
-        string $mt_qe_engine_id = '2'
-    ): ?float {
-        $client = $this->_getClient();
-        $qualityEstimation = $client->qualityEstimation($source, $target, $sentence, $translation, $mt_qe_engine_id);
-        if ($qualityEstimation === null || !isset($qualityEstimation['score'])) {
-            return null;
-        }
-
-        return $qualityEstimation['score'];
+    public function hasBuiltInQualityEstimation(): bool
+    {
+        return true;
     }
 
     /**
@@ -759,9 +740,6 @@ class MMT extends AbstractEngine
             }
         }
 
-        // Common config values
-        $config['secret_key'] = self::getG2FallbackSecretKey();
-
         // Branch-specific values
         if ($id_job && $this->_isAnalysis) {
             $idUsers = $config['id_user'] ?? [];
@@ -777,25 +755,6 @@ class MMT extends AbstractEngine
 
         return $config;
     }
-
-    /**
-     * @return string|null
-     */
-    public static function getG2FallbackSecretKey(): ?string
-    {
-        $configFilePath = realpath(AppConfig::$ROOT . '/inc/mmt_fallback_key.ini');
-        if ($configFilePath === false || !file_exists($configFilePath)) {
-            return null;
-        }
-
-        $secret_key = parse_ini_file($configFilePath);
-        if ($secret_key === false) {
-            return null;
-        }
-
-        return $secret_key['secret_key'] ?? null;
-    }
-
 
     /**
      * @inheritDoc
