@@ -243,6 +243,60 @@ class DownloadControllerTest extends AbstractTest
         return $this->reflector->getMethod($method)->invoke($this->controller, ...$args);
     }
 
+    // ─── abortOnFailedConversions (private) ───
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function abortOnFailedConversionsDoesNothingWhenEveryConversionSucceeded(): void
+    {
+        $this->setProp('downloadToken', 'token_ok');
+
+        $this->invokePrivate('abortOnFailedConversions', [
+            [10 => ['successful' => true, 'document_content' => 'converted']],
+            [10 => ['output_filename' => 'file.docx']],
+        ]);
+
+        // the token is left for finalize() to report "Download complete."
+        self::assertSame('token_ok', $this->reflector->getProperty('downloadToken')->getValue($this->controller));
+    }
+
+    /**
+     * A failed xliff-to-target conversion must fail the download: otherwise the intermediate
+     * XLIFF is served under the original filename as if it were the target file.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function abortOnFailedConversionsFailsTheDownloadAndReleasesTheToken(): void
+    {
+        $this->setProp('id_job', self::BASE + 2);
+        $this->setProp('downloadToken', 'token_failed');
+
+        try {
+            $this->invokePrivate('abortOnFailedConversions', [
+                [
+                    10 => ['successful' => true, 'document_content' => 'converted'],
+                    11 => ['successful' => false, 'errorMessage' => 'conversion exploded'],
+                ],
+                [
+                    10 => ['output_filename' => 'file.docx'],
+                    11 => ['output_filename' => '<b>file</b>.idml'],
+                ],
+            ]);
+            self::fail('Expected ExternalServiceException');
+        } catch (ExternalServiceException $e) {
+            self::assertStringStartsWith('Download failed: a file could not be converted back', $e->getMessage());
+            self::assertStringContainsString(AppConfig::$SUPPORT_MAIL, $e->getMessage());
+            // the message is rendered as HTML by the client: user-supplied filenames stay out of it
+            self::assertStringNotContainsString('<b>file</b>', $e->getMessage());
+        }
+
+        // unlockToken() consumed the token, so finalize() can never report a successful download
+        self::assertNull($this->reflector->getProperty('downloadToken')->getValue($this->controller));
+    }
+
     // ─── pathinfoString (private, pure) ───
 
     /**
