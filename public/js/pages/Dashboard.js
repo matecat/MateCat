@@ -62,6 +62,7 @@ const Dashboard = () => {
           null,
           job.id,
           job.password,
+          true,
           callback,
         )
       }

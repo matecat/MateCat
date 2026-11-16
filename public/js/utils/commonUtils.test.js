@@ -94,7 +94,8 @@ describe('genericErrorAlertMessage', () => {
 
 describe('goodbye', () => {
   it('warns about pending operations', () => {
-    document.body.innerHTML = '<a id="action-download" class="disabled"></a>'
+    document.body.innerHTML =
+      '<table class="popup-tm"><tr><td class="uploadfile uploading"></td></tr></table>'
     const message = CommonUtils.goodbye({})
     expect(message).toContain('pending operation')
   })
