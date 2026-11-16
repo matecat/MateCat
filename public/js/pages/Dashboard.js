@@ -6,8 +6,7 @@ import React, {
   useContext,
 } from 'react'
 import {fromJS} from 'immutable'
-import {isEmpty} from 'lodash'
-import {debounce} from 'lodash/function'
+import {isEmpty, debounce} from 'lodash'
 import ReactDOM, {flushSync} from 'react-dom'
 
 import {ProjectsContainer} from '../components/projects/ProjectsContainer'
