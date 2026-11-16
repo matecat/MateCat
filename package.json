@@ -43,6 +43,7 @@
     "js-cookie": "^3.0.0",
     "keymirror": "^0.1.1",
     "lodash": "^4.17.21",
+    "lodash-es": "^4.17.21",
     "make-plural": "^8.1.0",
     "moment": "^2.29.4",
     "object-assign": "^4.1.1",
@@ -108,5 +109,5 @@
     "draft-js/immutable": "^3.8.4",
     "wrap-ansi": "^7.0.0"
   },
-  "version": "5.0.4"
+  "version": "5.0.10"
 }
