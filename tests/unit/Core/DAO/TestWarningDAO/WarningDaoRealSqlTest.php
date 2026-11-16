@@ -6,6 +6,8 @@ use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\RealSqlDaoTestTrait;
 use Model\Jobs\JobStruct;
 use Model\Jobs\WarningsCountStruct;
+use Model\Translations\SegmentTranslationDao;
+use Model\Translations\SegmentTranslationStruct;
 use Model\Translations\WarningDao;
 use Model\Warnings\GlobalWarningStruct;
 use PHPUnit\Framework\Attributes\Group;
@@ -15,7 +17,7 @@ use Utils\Constants\TranslationStatus;
 /**
  * Real-SQL coverage for WarningDao (campaign dao-realsql-90).
  *
- * All three public methods (getWarningsByProjectIds, getErrorsByChunk,
+ * The public read methods (getWarningsCountByJob, getErrorsByChunk,
  * getWarningsByJobIdAndPassword) run against the real unittest DB. One job + four
  * segment_translations rows (varying warning bitmask and status) drive every filter branch.
  * Rows are inserted directly under assignable ids (>= ASSIGNABLE_ID_FLOOR) and cleaned
@@ -106,28 +108,121 @@ class WarningDaoRealSqlTest extends AbstractTest
     }
 
     #[Test]
-    public function getWarningsByProjectIds_counts_warned_segments_per_job(): void
+    public function getWarningsCountByJob_counts_warned_segments_of_the_chunk(): void
     {
-        $result = $this->dao->getWarningsByProjectIds([$this->idProject]);
+        $row = $this->dao->getWarningsCountByJob($this->jobId, $this->password);
 
-        $this->assertCount(1, $result);
-        $row = $result[0];
         $this->assertInstanceOf(WarningsCountStruct::class, $row);
         $this->assertSame($this->jobId, (int)$row->id_job);
-        $this->assertSame(2, (int)$row->count); // the TRANSLATED + APPROVED ERROR rows
-        // segment_list aggregates the two counted segment ids in order
-        $this->assertStringContainsString((string)($this->firstSeg + 1), (string)$row->segment_list);
-        $this->assertStringContainsString((string)($this->firstSeg + 2), (string)$row->segment_list);
+        $this->assertSame(2, (int)$row->count); // the TRANSLATED + APPROVED ERROR rows; NEW is not counted
+        $this->assertSame(($this->firstSeg + 1) . ',' . ($this->firstSeg + 2), $row->segment_list);
     }
 
     #[Test]
-    public function getWarningsByProjectIds_builds_multi_placeholder_in_clause(): void
+    public function getWarningsCountByJob_counts_every_status_but_new(): void
     {
-        // two project ids exercises the str_repeat(",?") placeholder branch
-        $result = $this->dao->getWarningsByProjectIds([$this->idProject, $this->idProject + 999999]);
+        $this->insertTranslation($this->firstSeg + 5, 1, TranslationStatus::STATUS_APPROVED2, '{"e":5}');
+        $this->insertTranslation($this->firstSeg + 6, 1, TranslationStatus::STATUS_DRAFT, '{"e":6}');
+        $this->insertTranslation($this->firstSeg + 7, 1, TranslationStatus::STATUS_REJECTED, '{"e":7}');
+        $this->insertTranslation($this->firstSeg + 8, 1, TranslationStatus::STATUS_FIXED, '{"e":8}');
 
-        $this->assertCount(1, $result);
-        $this->assertSame($this->jobId, (int)$result[0]->id_job);
+        $row = $this->dao->getWarningsCountByJob($this->jobId, $this->password);
+
+        // The same segments /warnings lists, so the count and the endpoint never disagree.
+        $listed = array_map(
+            fn(GlobalWarningStruct $g) => (int)$g->id_segment,
+            $this->dao->getWarningsByJobIdAndPassword($this->jobId, $this->password)
+        );
+        sort($listed);
+
+        $this->assertSame(6, (int)$row?->count);
+        $this->assertSame(implode(',', $listed), $row?->segment_list);
+    }
+
+    #[Test]
+    public function getWarningsCountByJob_counts_any_bitmask_with_the_error_bit(): void
+    {
+        $this->setWarningDirectly($this->firstSeg + 3, 3);
+
+        $this->assertSame(3, (int)$this->dao->getWarningsCountByJob($this->jobId, $this->password)?->count);
+    }
+
+    #[Test]
+    public function getWarningsCountByJob_returns_null_for_a_wrong_password(): void
+    {
+        $this->assertNull($this->dao->getWarningsCountByJob($this->jobId, 'wrong-password'));
+    }
+
+    #[Test]
+    public function getWarningsCountByJob_is_cached_until_evicted(): void
+    {
+        $this->assertSame(2, (int)$this->cachedCount()?->count);
+
+        // A write that bypasses the DAO evicts nothing: the cached count must still be served.
+        $this->setWarningDirectly($this->firstSeg + 3, 1);
+        $this->assertSame(2, (int)$this->cachedCount()?->count);
+
+        $this->dao->destroyCachesByJobId($this->jobId);
+        $this->assertSame(3, (int)$this->cachedCount()?->count);
+    }
+
+    #[Test]
+    public function addTranslation_evicts_the_cached_warnings_count(): void
+    {
+        $this->assertSame(2, (int)$this->cachedCount()?->count);
+
+        $translation = new SegmentTranslationStruct();
+        $translation->id_segment = $this->firstSeg + 3;
+        $translation->id_job = $this->jobId;
+        $translation->status = TranslationStatus::STATUS_TRANSLATED;
+        $translation->translation = 'Ciao';
+        $translation->serialized_errors_list = '{"e":4}';
+        $translation->warning = true;
+        $translation->translation_date = date('Y-m-d H:i:s');
+
+        (new SegmentTranslationDao($this->realSqlDb))->addTranslation($translation, false);
+
+        $this->assertSame(3, (int)$this->cachedCount()?->count);
+    }
+
+    #[Test]
+    public function updateTranslationAndStatusAndDateByList_evicts_the_cached_warnings_count(): void
+    {
+        $this->assertSame(2, (int)$this->cachedCount()?->count);
+
+        // The APPROVED row moves back to NEW, the one status the count ignores.
+        $translation = new SegmentTranslationStruct();
+        $translation->id_segment = $this->firstSeg + 2;
+        $translation->id_job = $this->jobId;
+        $translation->status = TranslationStatus::STATUS_NEW;
+        $translation->translation = 'Ciao';
+        $translation->translation_date = date('Y-m-d H:i:s');
+        $translation->version_number = 0;
+
+        (new SegmentTranslationDao($this->realSqlDb))->updateTranslationAndStatusAndDateByList([$translation]);
+
+        $this->assertSame(1, (int)$this->cachedCount()?->count);
+    }
+
+    private function cachedCount(): ?WarningsCountStruct
+    {
+        return (new WarningDao($this->realSqlDb))->setCacheTTL(WarningDao::WARNINGS_CACHE_TTL)->getWarningsCountByJob($this->jobId, $this->password);
+    }
+
+    /**
+     * @return array<int, GlobalWarningStruct>
+     */
+    private function cachedWarnings(): array
+    {
+        return (new WarningDao($this->realSqlDb))->setCacheTTL(WarningDao::WARNINGS_CACHE_TTL)->getWarningsByJobIdAndPassword($this->jobId, $this->password);
+    }
+
+    private function setWarningDirectly(int $idSegment, int $warning): void
+    {
+        $stmt = $this->realSqlDb->getConnection()->prepare(
+            "UPDATE segment_translations SET warning = :w, serialized_errors_list = COALESCE(serialized_errors_list, '{}') WHERE id_segment = :s AND id_job = :j"
+        );
+        $stmt->execute(['w' => $warning, 's' => $idSegment, 'j' => $this->jobId]);
     }
 
     #[Test]
@@ -161,6 +256,39 @@ class WarningDaoRealSqlTest extends AbstractTest
         $segIds = array_map(fn(GlobalWarningStruct $g) => (int)$g->id_segment, $rows);
         $this->assertContains($this->firstSeg + 1, $segIds);
         $this->assertContains($this->firstSeg + 2, $segIds);
+    }
+
+    #[Test]
+    public function getWarningsByJobIdAndPassword_is_cached_until_evicted(): void
+    {
+        $this->assertCount(2, $this->cachedWarnings());
+
+        $this->setWarningDirectly($this->firstSeg + 3, 1);
+        $this->assertCount(2, $this->cachedWarnings());
+
+        $this->dao->destroyCachesByJobId($this->jobId);
+        $this->assertCount(3, $this->cachedWarnings());
+    }
+
+    #[Test]
+    public function one_eviction_refreshes_both_the_count_and_the_warnings_list(): void
+    {
+        $this->assertSame(2, (int)$this->cachedCount()?->count);
+        $this->assertCount(2, $this->cachedWarnings());
+
+        $translation = new SegmentTranslationStruct();
+        $translation->id_segment = $this->firstSeg + 3;
+        $translation->id_job = $this->jobId;
+        $translation->status = TranslationStatus::STATUS_APPROVED2;
+        $translation->translation = 'Ciao';
+        $translation->serialized_errors_list = '{"e":4}';
+        $translation->warning = true;
+        $translation->translation_date = date('Y-m-d H:i:s');
+
+        (new SegmentTranslationDao($this->realSqlDb))->addTranslation($translation, true);
+
+        $this->assertSame(3, (int)$this->cachedCount()?->count);
+        $this->assertCount(3, $this->cachedWarnings());
     }
 
     #[Test]

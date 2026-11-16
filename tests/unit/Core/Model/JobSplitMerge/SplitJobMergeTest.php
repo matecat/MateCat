@@ -30,6 +30,7 @@ use Utils\Logger\MatecatLogger;
 use Utils\Shop\Cart;
 use Model\Translators\JobsTranslatorsStruct;
 use Model\Users\UserStruct;
+use Model\Translations\WarningDao;
 use Throwable;
 use Utils\AsyncTasks\Workers\JobsWorker;
 
@@ -53,6 +54,9 @@ class SplitJobMergeTest extends AbstractTest
 
     /** @var string[] The order in which the cart and the transaction scope were reached */
     private array $callOrder = [];
+
+    /** @var list<int> */
+    private array $evictedWarningsJobIds = [];
 
     /** How many workers were queued when the transaction scope returned, null if no scope ran. */
     private ?int $enqueuedWhenScopeClosed = null;
@@ -100,6 +104,12 @@ class SplitJobMergeTest extends AbstractTest
 
         $this->jobDaoMock = $this->createMock(JobDao::class);
         $this->service->setJobDao($this->jobDaoMock);
+
+        $warningDao = $this->createStub(WarningDao::class);
+        $warningDao->method('destroyCachesByJobId')->willReturnCallback(function (int $jobId): void {
+            $this->evictedWarningsJobIds[] = $jobId;
+        });
+        $this->service->setWarningDao($warningDao);
 
         $this->cartMock = $this->createMock(Cart::class);
         $this->service->setCart($this->cartMock);
@@ -497,6 +507,8 @@ class SplitJobMergeTest extends AbstractTest
 
         $this->assertTrue($this->service->wasDestroyAnalysisCacheCalled());
         $this->assertEquals(999, $this->service->getDestroyAnalysisCacheProjectId());
+        // The chunks own new segment ranges: their cached warnings_count must go.
+        $this->assertSame([(int)$ps->jobToSplit], $this->evictedWarningsJobIds);
     }
 
     /**
@@ -849,6 +861,7 @@ class SplitJobMergeTest extends AbstractTest
 
         $this->assertTrue($this->service->wasDestroyAnalysisCacheCalled());
         $this->assertEquals(999, $this->service->getDestroyAnalysisCacheProjectId());
+        $this->assertSame([(int)$chunks[0]->id], $this->evictedWarningsJobIds);
 
         // Both chunk passwords are swept: the first one's row was rewritten, and the second one's row
         // was deleted, so neither answers what the cache still holds for it.
