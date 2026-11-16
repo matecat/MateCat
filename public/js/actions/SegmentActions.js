@@ -933,6 +933,7 @@ const SegmentActions = {
       let segment = SegmentStore.getSegmentByIdToJS(request.sid)
       if (
         segment &&
+        request.text &&
         (typeof segment.glossary === 'undefined' || sid === request.sid)
       ) {
         const source = DraftMatecatUtils.removePlaceholdersForGlossary(
@@ -1739,6 +1740,7 @@ const SegmentActions = {
     })
   },
   setCurrentSegment: function (id_segment) {
+    if (id_segment == null) return
     setLastSegmentFromLocalStorage(id_segment.toString())
     const requestData = {
       action: 'setCurrentSegment',

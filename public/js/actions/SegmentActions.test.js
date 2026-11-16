@@ -2024,3 +2024,14 @@ describe('SegmentActions.refreshTagMap', () => {
     renderSpy.mockRestore()
   })
 })
+
+describe('SegmentActions.setCurrentSegment', () => {
+  // MATECAT-5NX: called on mount with the sid of a segment that has none
+  test('does nothing when no segment id is given', () => {
+    jest.clearAllMocks()
+
+    expect(() => SegmentActions.setCurrentSegment(undefined)).not.toThrow()
+    expect(setLastSegmentFromLocalStorage).not.toHaveBeenCalled()
+    expect(setCurrentSegment).not.toHaveBeenCalled()
+  })
+})
