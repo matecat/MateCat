@@ -1,6 +1,5 @@
 import React, {useContext, useEffect, useMemo, useRef, useState} from 'react'
-import {isUndefined} from 'lodash'
-import {debounce} from 'lodash/function'
+import {isUndefined, debounce} from 'lodash'
 import CommentsStore from '../../stores/CommentsStore'
 import CommentsActions from '../../actions/CommentsActions'
 import CommentsConstants from '../../constants/CommentsConstants'
@@ -40,6 +39,7 @@ const SegmentCommentsContainer = () => {
   ])
   const [teamUsers, setTeamUsers] = useState(() => CommentsStore.getTeamUsers())
   const [sendCommentError, setSendCommentError] = useState(false)
+  const [resolveThreadError, setResolveThreadError] = useState(false)
   const [mentionsInputValue, setMentionsInputValue] = useState('')
   const [mentionsMarkup, setMentionsMarkup] = useState('')
   const [anonymousComments, setAnonymousComments] = useState(
@@ -120,17 +120,6 @@ const SegmentCommentsContainer = () => {
     wrap.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0
   })
 
-  // Workaround - textarea fit to content. The class started this timer from
-  // inside render and never cleared it.
-  useEffect(() => {
-    if (!commentInputRef.current) return
-    const timer = setTimeout(() => {
-      const input = commentInputRef.current
-      if (input) input.style.height = `${input.parentNode.clientHeight}px`
-    }, 200)
-    return () => clearTimeout(timer)
-  })
-
   const closeComments = (e) => {
     e.preventDefault()
     e.stopPropagation()
@@ -156,6 +145,8 @@ const SegmentCommentsContainer = () => {
 
   const resolveThread = () =>
     CommentsActions.resolveThread(originalSid, anonymousComments)
+      .then(() => setResolveThreadError(false))
+      .catch(() => setResolveThreadError(true))
 
   const handleChangeMentionsInputValue = (
     event,
@@ -336,7 +327,14 @@ const SegmentCommentsContainer = () => {
           data-count={count}
         >
           {threadWrap}
-          <div className={'comment-thread-footer'}>{resolveButton}</div>
+          <div className={'comment-thread-footer'}>
+            {resolveButton && resolveThreadError ? (
+              <span className="comment-warnings">
+                Oops, the thread could not be resolved. Please try again later.
+              </span>
+            ) : null}
+            {resolveButton}
+          </div>
         </div>,
       )
     }
@@ -368,11 +366,16 @@ const SegmentCommentsContainer = () => {
           className="comment-close-btn"
           onClick={closeComments}
         >
-          <IconClose size={10} />
+          <IconClose size={16} />
         </Button>
-        <div className="comments-wrap" ref={wrapRef}>
-          {htmlComments}
-        </div>
+        {comments.length > 0 && (
+          <div className="comments-wrap-container">
+            <div className="comments-wrap" ref={wrapRef}>
+              {htmlComments}
+            </div>
+          </div>
+        )}
+
         <div className="comment-thread comment-post-wrap comment-clearfix comment-first-input">
           <div className="comment-post">
             <span className="comment-label comment-username comment-username-label comment-truncate comment-anonymous-label">

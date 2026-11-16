@@ -4,7 +4,6 @@
  * @author ostico domenico@translated.net / ostico@gmail.com
  * Date: 14/06/19
  * Time: 9.45
- *
  */
 
 namespace Model\WordCount;
@@ -63,7 +62,7 @@ class WordCounterDao extends AbstractDao
             $stmt = $db->getConnection()->prepare($query);
             $stmt->execute($bind_keys);
         } catch (PDOException $e) {
-            LoggerFactory::doJsonLog($e->getMessage());
+            LoggerFactory::getLogger('dao')->error($e->getMessage());
 
             return $e->getCode() * -1;
         }
@@ -98,7 +97,7 @@ class WordCounterDao extends AbstractDao
         try {
             $db->update('jobs', $data, $where);
         } catch (PDOException $e) {
-            LoggerFactory::doJsonLog($e->getMessage());
+            LoggerFactory::getLogger('dao')->error($e->getMessage());
 
             return $e->getCode() * -1;
         }
@@ -134,7 +133,6 @@ class WordCounterDao extends AbstractDao
          * - match_type is ICE
          * - suggestion_match IS NULL ( since those segments are not sent to the TM analysis )
          * - equivalent_word_count = 0 ( case to disambiguate ) and raw_word_count != 0 ( this means that the payable rate is Zero )
-         *
          */
         $query = "
                 SELECT

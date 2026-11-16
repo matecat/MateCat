@@ -12,6 +12,7 @@ use Model\Jobs\MetadataDao;
 use Model\Projects\ProjectStruct;
 use Model\Translations\SegmentTranslationStruct;
 use Model\Users\UserStruct;
+use PDO;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
@@ -473,12 +474,46 @@ class JobDaoRealSqlTest extends AbstractTest
     {
         $job = $this->seedJob();
 
-        $affected = $this->dao->updateStdWcAndTotalWc($job->id, 111, 222);
+        $affected = $this->dao->updateStdWcAndTotalWc($job->id, $job->password, 111, 222);
 
         self::assertSame(1, $affected);
         $reloaded = $this->dao->getByIdAndPassword($job->id, $job->password);
         self::assertSame(111, $reloaded->standard_analysis_wc);
         self::assertSame(222, $reloaded->total_raw_wc);
+    }
+
+    public function testUpdateStdWcAndTotalWcLeavesTheOtherChunksAlone(): void
+    {
+        $job = $this->seedJob();
+        $sibling = $this->seedSiblingChunk($job, 'sibling_chunk_pw');
+
+        $affected = $this->dao->updateStdWcAndTotalWc($job->id, $job->password, 111, 222);
+
+        self::assertSame(1, $affected);
+        $reloadedSibling = $this->dao->getByIdAndPassword($sibling->id, $sibling->password);
+        self::assertSame($sibling->standard_analysis_wc, $reloadedSibling->standard_analysis_wc);
+        self::assertSame($sibling->total_raw_wc, $reloadedSibling->total_raw_wc);
+    }
+
+    /**
+     * A second chunk of $job: the same row under another password, the way a split stores it.
+     */
+    private function seedSiblingChunk(JobStruct $job, string $password): JobStruct
+    {
+        $conn = $this->realSqlDb()->getConnection();
+        $select = $conn->prepare('SELECT * FROM jobs WHERE id = ? AND password = ?');
+        $select->execute([$job->id, $job->password]);
+        $row = $select->fetch(\PDO::FETCH_ASSOC);
+        $row['password'] = $password;
+        $row['standard_analysis_wc'] = 7;
+        $row['total_raw_wc'] = 8;
+
+        $columns = array_keys($row);
+        $conn->prepare(
+            'INSERT INTO jobs (`' . implode('`, `', $columns) . '`) VALUES (' . implode(', ', array_fill(0, count($columns), '?')) . ')'
+        )->execute(array_values($row));
+
+        return $this->dao->getByIdAndPassword($job->id, $password);
     }
 
     public function testUpdateJobWeightedPeeAndTTE(): void
@@ -487,11 +522,30 @@ class JobDaoRealSqlTest extends AbstractTest
         $job->avg_post_editing_effort = 12.5;
         $job->total_time_to_edit = 9999;
 
-        $this->dao->updateJobWeightedPeeAndTTE($job);
+        self::assertSame(1, $this->dao->updateJobWeightedPeeAndTTE($job));
 
         $reloaded = $this->dao->getByIdAndPassword($job->id, $job->password);
         self::assertEqualsWithDelta(12.5, $reloaded->avg_post_editing_effort, 0.001);
         self::assertSame(9999, $reloaded->total_time_to_edit);
+    }
+
+    /**
+     * The frame was queued before a re-split moved the chunk's range: its totals must not land on
+     * the chunk as it is now, which keeps the same id and password.
+     */
+    public function testUpdateJobWeightedPeeAndTTESkipsAChunkWhoseRangeMoved(): void
+    {
+        $job = $this->seedJob();
+        $queued = clone $job;
+        $queued->avg_post_editing_effort = 12.5;
+        $queued->total_time_to_edit = 9999;
+        $queued->job_last_segment = $job->job_last_segment + 1;
+
+        self::assertSame(0, $this->dao->updateJobWeightedPeeAndTTE($queued));
+
+        $reloaded = $this->dao->getByIdAndPassword($job->id, $job->password);
+        self::assertEqualsWithDelta((float)$job->avg_post_editing_effort, $reloaded->avg_post_editing_effort, 0.001);
+        self::assertSame($job->total_time_to_edit, $reloaded->total_time_to_edit);
     }
 
     // ---------------------------------------------------------------------------------------
@@ -731,7 +785,7 @@ class JobDaoRealSqlTest extends AbstractTest
     }
 
     // ---------------------------------------------------------------------------------------
-    // updateForMerge / deleteOnMerge (merge lifecycle)
+    // updateForMerge / deleteChunk (merge lifecycle)
     // ---------------------------------------------------------------------------------------
 
     public function testUpdateForMergeChangesPassword(): void
@@ -759,21 +813,48 @@ class JobDaoRealSqlTest extends AbstractTest
         self::assertInstanceOf(JobStruct::class, $this->dao->getByIdAndPassword($job->id, $original));
     }
 
-    public function testDeleteOnMergeRemovesOtherPasswordRow(): void
+    public function testDeleteChunkRemovesOnlyThatChunk(): void
     {
-        // Create a second job in the same project with a DIFFERENT password; deleteOnMerge
-        // removes the row matching id but NOT the "first_job_password".
-        $job = $this->seedJob();
-        $firstJobPassword = 'kept_' . bin2hex(random_bytes(4));
+        $first = $this->seedJob();
+        $second = $this->seedSecondChunk($first);
 
-        $merge = new JobStruct();
-        $merge->id = $job->id;
-        $merge->password = $firstJobPassword; // the surviving password
+        self::assertSame(1, $this->dao->deleteChunk($second));
 
-        $result = $this->dao->deleteOnMerge($merge);
+        self::assertNull($this->dao->getByIdAndPassword($second->id, $second->password));
+        self::assertInstanceOf(JobStruct::class, $this->dao->getByIdAndPassword($first->id, $first->password));
+    }
 
-        self::assertTrue($result);
-        // the original (different-password) row is gone
-        self::assertNull($this->dao->getByIdAndPassword($job->id, $job->password));
+    public function testDeleteChunkOfAChunkAlreadyGoneDeletesNothing(): void
+    {
+        $first = $this->seedJob();
+        $gone = clone $first;
+        $gone->password = 'gone_' . bin2hex(random_bytes(4));
+
+        self::assertSame(0, $this->dao->deleteChunk($gone));
+        self::assertInstanceOf(JobStruct::class, $this->dao->getByIdAndPassword($first->id, $first->password));
+    }
+
+    /**
+     * A second chunk of $job: the same row under another password, as a split leaves it. Cleaned up
+     * with $job, since the fixture tracks the job by id.
+     */
+    private function seedSecondChunk(JobStruct $job): JobStruct
+    {
+        $conn = $this->realSqlDb()->getConnection();
+        $select = $conn->prepare('SELECT * FROM jobs WHERE id = ? AND password = ?');
+        $select->execute([$job->id, $job->password]);
+        $row = $select->fetch(PDO::FETCH_ASSOC);
+        self::assertIsArray($row);
+
+        $row['password'] = 'chunk2_' . bin2hex(random_bytes(4));
+        $columns = array_keys($row);
+        $conn->prepare(
+            'INSERT INTO jobs (`' . implode('`,`', $columns) . '`) VALUES (' . implode(',', array_fill(0, count($columns), '?')) . ')'
+        )->execute(array_values($row));
+
+        $loaded = $this->dao->getByIdAndPassword($job->id, $row['password']);
+        self::assertInstanceOf(JobStruct::class, $loaded);
+
+        return $loaded;
     }
 }

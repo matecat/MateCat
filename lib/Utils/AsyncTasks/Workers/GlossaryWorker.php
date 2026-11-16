@@ -40,7 +40,7 @@ class GlossaryWorker extends AbstractWorker
 
         $this->_checkDatabaseConnection();
 
-        $this->_doLog('GLOSSARY: ' . $action . ' action invoked with payload ' . json_encode($payload));
+        $this->logger->debug('GLOSSARY: ' . $action . ' action invoked with payload ' . json_encode($payload));
 
         switch ($action) {
             case self::CHECK_ACTION:

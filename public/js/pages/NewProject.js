@@ -46,6 +46,7 @@ import {getPretranslateParams} from '../utils/editorStatusLock'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
 import {mountPage} from './mountPage'
 import {HomePageSection} from '../components/createProject/HomePageSection'
+import {announceSettingsTab} from '../components/releaseAnnouncements/releaseAnnouncements'
 import UserActions from '../actions/UserActions'
 import {getDeepLGlosssaries} from '../api/getDeepLGlosssaries'
 import SocketListener from '../sse/SocketListener'
@@ -69,8 +70,7 @@ import {ANALYSIS_SCHEMA_KEYS} from '../components/settingsPanel/Contents/Analysi
 import {FILTERS_PARAMS_SCHEMA_KEYS} from '../components/settingsPanel/Contents/FileImportTab/FiltersParams/FiltersParams'
 import {XLIFF_SETTINGS_SCHEMA_KEYS} from '../components/settingsPanel/Contents/FileImportTab/XliffSettings/XliffSettings'
 import {DEEPL_GLOSSARY_ROW_NONE} from '../components/settingsPanel/Contents/MachineTranslationTab/DeepLGlossary'
-
-const SELECT_HEIGHT = 324
+import {SELECT_HEIGHT} from '../constants/Constants'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -907,7 +907,6 @@ const NewProject = () => {
   return isDeviceCompatible ? (
     <CreateProjectContext.Provider
       value={{
-        SELECT_HEIGHT,
         tmKeys,
         setTmKeys,
         languages: supportedLanguages,
@@ -974,11 +973,11 @@ const NewProject = () => {
               <TemplateSelect
                 {...{
                   label: 'Project template',
-                  maxHeightDroplist: SELECT_HEIGHT,
                   projectTemplates,
                   setProjectTemplates,
                   currentProjectTemplate,
                   subtemplatesNotSaved,
+                  dropdownClassName: 'new-project-form-select-portal',
                 }}
               />
             </div>
@@ -988,6 +987,8 @@ const NewProject = () => {
                 label="Team"
                 id="project-team"
                 name={'project-team'}
+                dropdownClassName="new-project-form-select-portal"
+                isPortalDropdown={true}
                 maxHeightDroplist={SELECT_HEIGHT}
                 showSearchBar={true}
                 options={
@@ -1033,6 +1034,8 @@ const NewProject = () => {
                 label="Subject"
                 id="project-subject"
                 name={'project-subject'}
+                dropdownClassName="new-project-form-select-portal"
+                isPortalDropdown={true}
                 maxHeightDroplist={SELECT_HEIGHT}
                 showSearchBar={true}
                 options={subjectsArray}
@@ -1168,6 +1171,7 @@ const NewProject = () => {
         <SettingsPanel
           {...{
             onClose: closeSettings,
+            onTabOpened: announceSettingsTab,
             isOpened: openSettings.isOpen,
             tabOpen: openSettings.tab,
             user: userInfo,

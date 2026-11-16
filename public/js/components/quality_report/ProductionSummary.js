@@ -85,9 +85,9 @@ export const ProductionSummary = ({
           <div className="percent">
             {Math.round(
               ((qualitySummary.get('revision_number') === 1
-                ? stats.equivalent.approved + stats.equivalent.approved2
-                : stats.equivalent.approved2) /
-                stats.equivalent.total) *
+                ? stats.raw.approved + stats.raw.approved2
+                : stats.raw.approved2) /
+                stats.raw.total) *
                 100,
             )}
             %
@@ -168,7 +168,7 @@ export const ProductionSummary = ({
                 <div className="qr-pass-score">Fail</div>
               </div>
             )}
-            <div className="qr-threshold">Threshold {limit}</div>
+            <div className="qr-threshold">Threshold: {limit}</div>
           </div>
         </div>
       ) : null}

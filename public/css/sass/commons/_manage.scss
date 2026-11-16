@@ -15,7 +15,6 @@ body.manage {
   overflow-y: hidden;
   overflow-x: auto;
   font-size: variables.$font-size-xsmall;
-  line-height: 1.4285em;
 }
 
 div#manage-container {
@@ -543,13 +542,6 @@ div#manage-container {
   }
 }
 
-.project-activity-icon button.project-team-dropdown {
-  font-size: variables.$font-size-xsmall;
-  color: colors.$black;
-  padding: 5px 15px;
-  background-color: colors.$white;
-}
-
 .project-title-editing-name-mode {
   > .label {
     padding-top: 1px !important;
@@ -574,6 +566,10 @@ ul {
     display: flex;
     justify-content: space-between;
     margin: 40px 0 16px;
+
+    h3 {
+      font-size: variables.$font-size-page-title;
+    }
 
     > :last-child {
       display: flex;
@@ -660,15 +656,23 @@ ul {
 
     > :first-child {
       border-right: 1px solid colors.$grey150;
+      svg {
+        color: colors.$grey600;
+      }
     }
 
     input {
       border-top-right-radius: 0px;
       border-bottom-right-radius: 0px;
 
+      &::placeholder {
+        color: colors.$grey400;
+      }
+
       &:active,
       &:focus {
-        box-shadow: inset 0 0 0 1px colors.$blue600;
+        box-shadow: inset 0 0 0 1px colors.$grey400;
+        outline-color: colors.$white;
       }
     }
   }

@@ -3,11 +3,11 @@ import {Select} from '../../../common/Select'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import UserActions from '../../../../actions/UserActions'
 import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
+import {SELECT_HEIGHT} from '../../../../constants/Constants'
 
 export const Team = () => {
   const {user} = useContext(SettingsPanelContext)
-  const {SELECT_HEIGHT, selectedTeam, setSelectedTeam} =
-    useContext(CreateProjectContext)
+  const {selectedTeam, setSelectedTeam} = useContext(CreateProjectContext)
 
   useEffect(() => {
     if (Array.isArray(user?.teams)) {

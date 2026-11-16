@@ -19,6 +19,10 @@
  ******
  */
 
+.comments-wrap-container {
+  padding-top: 40px;
+}
+
 .comments-wrap {
   min-height: 100%;
   max-height: 200px;
@@ -108,23 +112,26 @@
 
 .comment-textarea {
   position: relative;
-  word-break: normal;
-  outline: none;
-  color: colors.$black;
-  border: 1px solid colors.$grey200;
-  box-shadow: inset 0 1px 2px colors.$grey200;
-  -webkit-box-shadow: inset 0 1px 2px colors.$grey200;
-  min-height: 40px;
-  overflow-y: auto !important;
-  max-height: 160px;
-  border-radius: 20px;
 
   .comment-input__highlighter,
   textarea {
-    border: unset !important;
-    outline: unset !important;
-    padding: 10px;
-    line-height: 1.5;
+    word-break: normal;
+    min-height: 40px;
+    overflow-y: auto !important;
+    max-height: 160px;
+
+    outline-color: colors.$grey400;
+    border: 1px solid colors.$grey200;
+    border-radius: variables.$border-radius-default;
+    padding: 8px 12px;
+
+    &:hover {
+      border: 1px solid colors.$grey400;
+    }
+    &:focus,
+    &:active {
+      border: 1px solid colors.$grey400;
+    }
   }
 }
 
@@ -202,6 +209,8 @@
   font-weight: bold;
   margin-bottom: 4px;
   padding: 5px 5px 2px 0;
+  line-height: 1;
+  margin-bottom: 10px;
   span {
     color: colors.$grey400;
   }
@@ -470,8 +479,8 @@ Close icon ballon - Right panel
   background: colors.$white !important;
   position: absolute !important;
   z-index: 1;
-  right: 16px;
-  top: 2px;
+  right: 20px;
+  top: 8px;
   border-radius: 50% !important;
   color: colors.$grey600 !important;
   cursor: pointer;
@@ -527,8 +536,9 @@ section:hover .comment-icon-btn,
 .comment-bottom {
   display: flex;
   justify-content: space-between;
-  align-items: center;
   padding: 8px 4px;
+  flex-direction: column;
+  gap: 8px;
   div[class*='input-checkbox'] > span {
     color: colors.$grey400;
     font-size: variables.$font-size-xsmall;
@@ -537,6 +547,7 @@ section:hover .comment-icon-btn,
 .comment-thread-footer {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: 8px;
   padding-top: 20px;
   button {

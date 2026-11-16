@@ -1,4 +1,4 @@
-import {forEach, isUndefined} from 'lodash'
+import {forEach, isUndefined, union} from 'lodash'
 import React, {
   useState,
   useRef,
@@ -6,7 +6,6 @@ import React, {
   useEffect,
   useCallback,
 } from 'react'
-import {union} from 'lodash/array'
 import $ from 'jquery'
 import SegmentCommentsContainer from './SegmentCommentsContainer'
 import SegmentsCommentsIcon from './SegmentsCommentsIcon'
@@ -43,6 +42,7 @@ import {
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../common/Button/Button'
+import {TOOLTIP_POSITION} from '../common/Tooltip'
 
 const SegmentComponent = ({
   segment,
@@ -737,6 +737,7 @@ const SegmentComponent = ({
                   mode={BUTTON_MODE.GHOST}
                   size={BUTTON_SIZE.ICON_STANDARD}
                   tooltip={`Click to split segment (${Shortcuts.cattol.events.splitSegment.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase()})`}
+                  tooltipPosition={TOOLTIP_POSITION.RIGHT}
                   onClick={() => SegmentActions.openSplitSegment(segment.sid)}
                 >
                   <IconSplit />
@@ -750,6 +751,7 @@ const SegmentComponent = ({
                   mode={BUTTON_MODE.GHOST}
                   size={BUTTON_SIZE.ICON_STANDARD}
                   tooltip="Click to close split segment"
+                  tooltipPosition={TOOLTIP_POSITION.RIGHT}
                   onClick={() => SegmentActions.closeSplitSegment()}
                 >
                   <IconSplit />

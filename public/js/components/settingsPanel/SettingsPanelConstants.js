@@ -12,13 +12,25 @@ export const SETTINGS_PANEL_TABS = {
   editorOther: 'editorOther',
 }
 
-export const TEMPLATE_PROPS_BY_TAB = {
-  [SETTINGS_PANEL_TABS.translationMemoryGlossary]: [
+export const TM_SUBTABS = {
+  resourceManagement: 'resourceManagement',
+  advanced: 'advanced',
+}
+
+export const TEMPLATE_PROPS_BY_TM_SUBTAB = {
+  [TM_SUBTABS.resourceManagement]: [
     SCHEMA_KEYS.tm,
     SCHEMA_KEYS.getPublicMatches,
     SCHEMA_KEYS.publicTmPenalty,
-    SCHEMA_KEYS.pretranslate,
     SCHEMA_KEYS.tmPrioritization,
+  ],
+  [TM_SUBTABS.advanced]: [SCHEMA_KEYS.pretranslate, SCHEMA_KEYS.dialectStrict],
+}
+
+export const TEMPLATE_PROPS_BY_TAB = {
+  [SETTINGS_PANEL_TABS.translationMemoryGlossary]: [
+    ...TEMPLATE_PROPS_BY_TM_SUBTAB[TM_SUBTABS.resourceManagement],
+    ...TEMPLATE_PROPS_BY_TM_SUBTAB[TM_SUBTABS.advanced],
   ],
   [SETTINGS_PANEL_TABS.machineTranslation]: [SCHEMA_KEYS.mt],
   [SETTINGS_PANEL_TABS.qualityFramework]: [SCHEMA_KEYS.qaModelTemplateId],

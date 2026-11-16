@@ -3,13 +3,18 @@
 
 namespace Matecat\Core\TestContribution;
 
+use Exception;
 use Matecat\TestHelpers\AbstractTest;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
+use Monolog\Handler\TestHandler;
+use Monolog\Level;
+use Monolog\Logger;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionMethod;
 use Utils\ActiveMQ\AMQHandler;
@@ -18,8 +23,12 @@ use Utils\Constants\EngineConstants;
 use Utils\Constants\TranslationStatus;
 use Utils\Contribution\GetContributionRequest;
 use Utils\Engines\AbstractEngine;
+use Utils\Engines\Lara\LaraQualityEstimator;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
+use Utils\LQA\QA\ErrObject;
+use Utils\LQA\QA\ErrorManager;
+use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\Params;
@@ -547,6 +556,75 @@ class GetContributionWorkerTest extends AbstractTest
     }
 
     #[Test]
+    public function test_getMatches_scores_the_mt_response_with_lara(): void
+    {
+        $request = $this->makeBaseRequest([
+            'mt_quality_value_in_editor' => 100,
+            'mt_evaluation' => true,
+        ]);
+        $request->setJobStruct(new JobStruct([
+            'id' => self::TEST_JOB_ID,
+            'id_project' => self::TEST_PROJECT_ID,
+            'password' => 'pw',
+            'source' => 'en-US',
+            'target' => 'it-IT',
+            'job_first_segment' => self::TEST_SEGMENT_ID,
+            'job_last_segment' => self::TEST_SEGMENT_ID,
+            'id_tms' => 0,
+            'id_mt_engine' => 2,
+            'tm_keys' => '[]',
+        ]));
+
+        $featureSet = new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class));
+
+        $mtResponse = new GetMemoryResponse([
+            'responseStatus' => 200,
+            'matches' => [[
+                'id' => 2,
+                'segment' => 'Hello',
+                'translation' => 'Ciao MT',
+                'match' => 0.91,
+                'created-by' => 'MT',
+                'last-update-date' => '2025-01-01 10:00:00',
+                'create-date' => '2025-01-01 10:00:00',
+                'tm_properties' => '[]',
+                'target_note' => '',
+            ]],
+        ]);
+        $mtResponse->featureSet($featureSet);
+
+        $mtEngine = $this->getMockBuilder(MyMemory::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getConfigStruct', 'setMTPenalty', 'get'])
+            ->getMock();
+        $mtEngine->method('getConfigStruct')->willReturn([]);
+        $mtEngine->method('setMTPenalty')->willReturnSelf();
+        $mtEngine->expects($this->once())->method('get')->willReturn($mtResponse);
+        $request->forcedMTEngine = $mtEngine;
+
+        $estimator = $this->createMock(LaraQualityEstimator::class);
+        $estimator->expects($this->once())->method('scoreIfRequested')
+            ->with($mtEngine, $mtResponse, $this->callback(
+                static fn(array $config): bool => $config['include_score'] === true && $config['source'] === 'en-US'
+            ))
+            ->willReturnCallback(static function (AbstractEngine $engine, GetMemoryResponse $response): void {
+                $response->matches[0]->score = 0.92;
+            });
+
+        $worker = new GetContributionWorker(
+            self::getStubBuilder(AMQHandler::class)->getStub(),
+            obtainTestDatabase(),
+            qualityEstimator: $estimator
+        );
+
+        $method = new ReflectionMethod($worker, '_getMatches');
+        [$mt] = $method->invoke($worker, $request, $request->getJobStruct(), 'it-IT', $featureSet, false);
+
+        $this->assertSame('91%', $mt['match']);
+        $this->assertSame(0.92, $mt['score']);
+    }
+
+    #[Test]
     public function test_getMatches_inverts_direction_for_concordance_from_target(): void
     {
         $request = $this->makeBaseRequest([
@@ -583,6 +661,42 @@ class GetContributionWorkerTest extends AbstractTest
         $method->invoke($this->worker, $request, $request->getJobStruct(), 'it-IT', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)), false);
 
         $this->assertTrue(true);
+    }
+
+    #[Test]
+    public function test_getMatches_sends_only_the_owner_keys_as_mt_key(): void
+    {
+        $request = $this->makeBaseRequest();
+        $request->setJobStruct(new JobStruct([
+            'id' => self::TEST_JOB_ID,
+            'id_project' => self::TEST_PROJECT_ID,
+            'password' => 'pw',
+            'source' => 'en-US',
+            'target' => 'it-IT',
+            'job_first_segment' => self::TEST_SEGMENT_ID,
+            'job_last_segment' => self::TEST_SEGMENT_ID,
+            'id_tms' => 1,
+            'id_mt_engine' => 1,
+            // an owner key and the translator's (uid 999) own key
+            'tm_keys' => '[{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"","key":"OWNERKEY","r":true,"w":true,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"penalty":0},'
+                . '{"tm":true,"glos":true,"owner":false,"uid_transl":999,"uid_rev":null,"name":"","key":"TRANSLATORKEY","r":false,"w":false,"r_transl":true,"w_transl":true,"r_rev":null,"w_rev":null,"penalty":0}]',
+        ]));
+
+        $tmEngine = $this->getMockBuilder(MyMemory::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getConfigStruct', 'setMTPenalty', 'get'])
+            ->getMock();
+
+        $tmEngine->method('getConfigStruct')->willReturn([]);
+        $tmEngine->method('setMTPenalty')->willReturnSelf();
+        $tmEngine->expects($this->once())->method('get')->with($this->callback(function (array $config): bool {
+            return $config['id_user'] === ['OWNERKEY', 'TRANSLATORKEY'] && $config['mt_key'] === ['OWNERKEY'];
+        }))->willReturn(new GetMemoryResponse(['responseStatus' => 200, 'matches' => []]));
+
+        $request->forcedTMEngine = $tmEngine;
+
+        $method = new ReflectionMethod($this->worker, '_getMatches');
+        $method->invoke($this->worker, $request, $request->getJobStruct(), 'it-IT', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)), false);
     }
 
     #[Test]
@@ -651,6 +765,88 @@ class GetContributionWorkerTest extends AbstractTest
         $this->assertSame('ICE_MT', $matches[0]['match']);
         $this->assertStringContainsString('#{Hello}#', $matches[0]['segment']);
         $this->assertSame('Ciao', $matches[0]['translation']);
+    }
+
+    /**
+     * When the MT translation has different tags from the source, the spaces cannot be realigned:
+     * the QA errors are logged and the translation is left as the engine returned it.
+     */
+    #[Test]
+    public function test_normalizeMTMatches_logs_the_qa_errors_when_the_tags_do_not_match(): void
+    {
+        $logHandler = new TestHandler();
+        $worker = new GetContributionWorker(
+            self::getStubBuilder(AMQHandler::class)->getStub(),
+            obtainTestDatabase(),
+            logger: new MatecatLogger(new Logger('test', [$logHandler]))
+        );
+
+        $matches = [[
+            'match' => '80%',
+            'score' => 0.8,
+            'created_by' => 'MT',
+            'memory_key' => 'abc',
+            'segment' => 'Hello <g id="1">world</g>',
+            'translation' => 'Ciao mondo',
+            'raw_translation' => 'Ciao mondo',
+        ]];
+
+        $worker->normalizeMTMatches($matches, $this->makeBaseRequest(), new FeatureSet($this->createStub(IDatabase::class)));
+
+        $this->assertSame(EngineConstants::MT, $matches[0]['match']);
+        $this->assertSame('Ciao mondo', $matches[0]['translation']);
+        // MatecatLogger logs an array under 'Log Entry:', with the array itself as the context.
+        $entries = array_values(array_filter($logHandler->getRecords(), fn($record) => $record->message === 'Log Entry:'));
+        $this->assertCount(1, $entries, 'the QA errors must be logged');
+        $errors = $entries[0]->context;
+        $this->assertCount(1, $errors);
+        $this->assertInstanceOf(ErrObject::class, $errors[0]);
+        $this->assertSame(ErrorManager::ERR_TAG_MISMATCH, $errors[0]->outcome);
+    }
+
+    /**
+     * A failing MT engine must not break the request: the error is logged and no MT match is returned.
+     */
+    #[Test]
+    public function test_getMatches_logs_the_error_when_the_mt_engine_fails(): void
+    {
+        $logHandler = new TestHandler();
+        $worker = new GetContributionWorker(
+            self::getStubBuilder(AMQHandler::class)->getStub(),
+            obtainTestDatabase(),
+            logger: new MatecatLogger(new Logger('test', [$logHandler]))
+        );
+
+        $request = $this->makeBaseRequest();
+        $request->setJobStruct(new JobStruct([
+            'id' => self::TEST_JOB_ID,
+            'id_project' => self::TEST_PROJECT_ID,
+            'password' => 'pw',
+            'source' => 'en-US',
+            'target' => 'it-IT',
+            'job_first_segment' => self::TEST_SEGMENT_ID,
+            'job_last_segment' => self::TEST_SEGMENT_ID,
+            'id_tms' => 0,
+            'id_mt_engine' => 2,
+            'tm_keys' => '[]',
+        ]));
+
+        $mtEngine = $this->getMockBuilder(MyMemory::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getConfigStruct', 'setMTPenalty', 'get'])
+            ->getMock();
+        $mtEngine->method('getConfigStruct')->willReturn([]);
+        $mtEngine->method('setMTPenalty')->willReturnSelf();
+        $mtEngine->expects($this->once())->method('get')->willThrowException(new Exception('MT engine timed out'));
+
+        $request->forcedMTEngine = $mtEngine;
+
+        $method = new ReflectionMethod($worker, '_getMatches');
+        [$mt, $matches] = $method->invoke($worker, $request, $request->getJobStruct(), 'it-IT', new FeatureSet($this->createStub(IDatabase::class)), false);
+
+        $this->assertSame([], $mt);
+        $this->assertSame([], $matches);
+        $this->assertTrue($logHandler->hasRecordThatContains('MT engine timed out', Level::Debug));
     }
 
     #[Test]
@@ -838,8 +1034,6 @@ class WorkerHarnessGetContributionWorker extends GetContributionWorker
     public array $queuedMatchResults = [];
     /** @var list<array<string, mixed>> */
     public array $publishedPayloads = [];
-    /** @var list<array|string> */
-    public array $logs = [];
 
     public function queueMatchResult(array $mt, array $matches): void
     {
@@ -854,11 +1048,6 @@ class WorkerHarnessGetContributionWorker extends GetContributionWorker
     protected function publishToNodeJsClients($_object): void
     {
         $this->publishedPayloads[] = $_object;
-    }
-
-    protected function _doLog(array|string $msg): void
-    {
-        $this->logs[] = $msg;
     }
 }
 

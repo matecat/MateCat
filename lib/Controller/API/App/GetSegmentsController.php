@@ -5,6 +5,7 @@ namespace Controller\API\App;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\API\Commons\Exceptions\ValidationError as ControllerValidationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use DomainException;
 use Exception;
@@ -13,6 +14,7 @@ use Matecat\ICU\MessagePatternValidator;
 use Matecat\Locales\Languages;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Conversion\ZipArchiveHandler;
+use Model\Exceptions\NotFoundException as ModelNotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\Hook\Event\Filter\FilterGetSegmentsResultEvent;
 use Model\FeaturesBase\Hook\Event\Filter\PrepareNotesForRenderingEvent;
@@ -54,7 +56,7 @@ class GetSegmentsController extends KleinController
      * @throws AuthenticationError
      * @throws ReQueueException
      * @throws ValidationError
-     * @throws \Model\Exceptions\NotFoundException
+     * @throws ModelNotFoundException
      * @throws EndQueueException
      * @throws ReflectionException
      * @throws NotFoundException
@@ -124,12 +126,7 @@ class GetSegmentsController extends KleinController
             $start = (int)$data[0]['sid'];
             $last = end($data);
             $stop = (int)$last['sid'];
-            // TTL is 0 deliberately: getAllInRange() defaults to a 24h cache, but a concurrent
-            // read that started before a disable/enable write commits can still cache a stale
-            // result after that write's eviction runs, silently re-poisoning the cache for up to
-            // 24h. The underlying query is a single indexed BETWEEN, so leaving this uncached is
-            // cheap, and correctness here gates whether a segment can be edited.
-            $segmentMetadataMap = $this->createSegmentMetadataDao()->getAllInRange($start, $stop, 0);
+            $segmentMetadataMap = $this->createSegmentMetadataDao()->getAllInRange($start, $stop);
         }
 
         foreach ($data as $seg) {
@@ -280,7 +277,8 @@ class GetSegmentsController extends KleinController
      * @throws EndQueueException
      * @throws ReQueueException
      * @throws ValidationError
-     * @throws \Model\Exceptions\NotFoundException
+     * @throws ControllerValidationError
+     * @throws ModelNotFoundException
      * @throws DomainException
      */
     private function attachNotes(SegmentUIStruct &$segment, array $segment_notes): void

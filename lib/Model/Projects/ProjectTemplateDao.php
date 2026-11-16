@@ -3,6 +3,7 @@
 namespace Model\Projects;
 
 use DateTime;
+use DivisionByZeroError;
 use Exception;
 use Matecat\Locales\Languages;
 use Matecat\SubFiltering\Enum\InjectableFiltersTags;
@@ -309,8 +310,8 @@ class ProjectTemplateDao extends AbstractDao
      *
      * @return array<string, mixed>
      * @throws Exception
-     * @throws \DivisionByZeroError
-     * @throws \TypeError
+     * @throws DivisionByZeroError
+     * @throws TypeError
      */
     public function getAllPaginated(int $uid, string $baseRoute, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24): array
     {
@@ -703,7 +704,6 @@ class ProjectTemplateDao extends AbstractDao
      *
      * @throws PDOException
      * @throws ReflectionException
-     * @throws \Psr\Log\InvalidArgumentException
      */
     private function destroyQueryByIdAndUserCache(PDO $conn, int $id, int $uid): void
     {
@@ -728,7 +728,6 @@ class ProjectTemplateDao extends AbstractDao
      *
      * @throws PDOException
      * @throws ReflectionException
-     * @throws \Psr\Log\InvalidArgumentException
      */
     public function destroyDefaultTemplateCache(PDO $conn, int $uid): void
     {

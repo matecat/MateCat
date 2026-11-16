@@ -2,13 +2,23 @@
 
 namespace Matecat\Core\TmKeyManagement;
 
+use Exception;
+use JsonException;
 use Matecat\TestHelpers\AbstractTest;
+use Matecat\TestHelpers\CapturesNamedLogs;
+use Model\DataAccess\IDatabase;
+use PDOException;
+use PHPUnit\Framework\MockObject\Exception as MockObjectException;
+use Utils\TmKeyManagement\Filter;
 use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TmKeyManagement\TmKeyStruct;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 
 class TmKeyManagerTest extends AbstractTest
 {
+    use CapturesNamedLogs;
+
     #[Test]
     public function testSanitizePreservesCurlyBraces()
     {
@@ -73,5 +83,127 @@ class TmKeyManagerTest extends AbstractTest
         TmKeyManager::sanitize($obj);
 
         $this->assertSame('メモリ', $obj->name);
+    }
+
+    #[Test]
+    public function testGetOwnerJobTmKeysReturnsOnlyOwnerKeysWithTheGrant()
+    {
+        $tmKeys = json_encode([
+            ['tm' => true, 'glos' => true, 'owner' => true, 'uid_transl' => null, 'uid_rev' => null, 'key' => 'owner_rw', 'r' => true, 'w' => true, 'r_transl' => null, 'w_transl' => null, 'r_rev' => null, 'w_rev' => null],
+            ['tm' => true, 'glos' => true, 'owner' => true, 'uid_transl' => null, 'uid_rev' => null, 'key' => 'owner_r', 'r' => true, 'w' => false, 'r_transl' => null, 'w_transl' => null, 'r_rev' => null, 'w_rev' => null],
+            ['tm' => true, 'glos' => true, 'owner' => false, 'uid_transl' => 42, 'uid_rev' => null, 'key' => 'translator', 'r' => false, 'w' => false, 'r_transl' => true, 'w_transl' => true, 'r_rev' => null, 'w_rev' => null],
+            ['tm' => false, 'glos' => true, 'owner' => true, 'uid_transl' => null, 'uid_rev' => null, 'key' => 'owner_glossary', 'r' => true, 'w' => true, 'r_transl' => null, 'w_transl' => null, 'r_rev' => null, 'w_rev' => null],
+        ]);
+
+        $this->assertSame(['owner_rw', 'owner_r'], TmKeyManager::getOwnerJobTmKeys($tmKeys, 'r'));
+        $this->assertSame(['owner_rw'], TmKeyManager::getOwnerJobTmKeys($tmKeys, 'w'));
+        $this->assertSame([], TmKeyManager::getOwnerJobTmKeys('[]', 'r'));
+    }
+
+    /**
+     * A string that is not valid JSON is logged and refused with code -2.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function getOwnerKeysLogsAndThrowsOnInvalidJson(): void
+    {
+        $log = $this->captureLog('engines');
+
+        // The code throws a plain Exception, which is also the parent of PHPUnit's own failures,
+        // so a fail() inside the try would be caught here. Keep the exception and assert after.
+        $thrown = null;
+        try {
+            TmKeyManager::getOwnerKeys(['{not json']);
+        } catch (Exception $e) {
+            $thrown = $e;
+        }
+
+        $this->assertNotNull($thrown, 'An invalid JSON string must be refused.');
+        $this->assertSame(-2, $thrown->getCode());
+        $this->assertTrue($log->hasErrorThatContains('Invalid JSON.'));
+    }
+
+    /**
+     * A new client key is still merged into the job when it cannot be saved to the user's
+     * keyring: the error is logged and the merge goes on.
+     *
+     * @throws Exception
+     * @throws MockObjectException
+     */
+    #[Test]
+    public function mergeJsonKeysLogsTheErrorAndKeepsTheNewKeyWhenTheKeyringCannotBeRead(): void
+    {
+        $log = $this->captureLog('engines');
+
+        $database = $this->createStub(IDatabase::class);
+        $database->method('getConnection')->willThrowException(new PDOException('Keyring read failed'));
+
+        $merged = TmKeyManager::mergeJsonKeys(
+            '[{"key":"0123456789abcdef0123","name":"New key","r":true,"w":true,"tm":true,"glos":true}]',
+            '[]',
+            $database,
+            Filter::OWNER,
+            9_937_001
+        );
+
+        $this->assertTrue($log->hasErrorThatContains('Keyring read failed'));
+        $this->assertCount(1, $merged);
+        $this->assertSame('0123456789abcdef0123', $merged[0]->key);
+        $this->assertTrue($merged[0]->owner);
+    }
+
+    /**
+     * @throws Exception
+     * @throws MockObjectException
+     */
+    #[Test]
+    public function mergeJsonKeysKeepsEachNewKeyWhenSeveralAreAdded(): void
+    {
+        $merged = TmKeyManager::mergeJsonKeys(
+            '[{"key":"aaaaaaaaaaaaaaaaaaa1","name":"A","r":true,"w":true,"tm":true,"glos":true},{"key":"bbbbbbbbbbbbbbbbbbb2","name":"B","r":true,"w":true,"tm":true,"glos":true}]',
+            '[]',
+            $this->createStub(IDatabase::class),
+            Filter::OWNER,
+            null
+        );
+
+        $this->assertCount(2, $merged);
+        $this->assertSame(['aaaaaaaaaaaaaaaaaaa1', 'bbbbbbbbbbbbbbbbbbb2'], array_map(fn($k) => $k->key, array_values($merged)));
+        $this->assertSame(['A', 'B'], array_map(fn($k) => $k->name, array_values($merged)));
+    }
+
+    /**
+     * The client keys getNewKeys() reads, with the job keys it compares them to.
+     *
+     * @return array<string, array{list<string>, list<string>, list<string>}> client keys, job keys, expected
+     */
+    public static function newKeysCases(): array
+    {
+        return [
+            'a key not in the job'          => [['aaaaaaaaaaaaaaaaaaa1'], [], ['aaaaaaaaaaaaaaaaaaa1']],
+            'a key already in the job'      => [['aaaaaaaaaaaaaaaaaaa1'], ['aaaaaaaaaaaaaaaaaaa1'], []],
+            'the masked form of a job key'  => [[(new TmKeyStruct(['key' => 'aaaaaaaaaaaaaaaaaaa1']))->getCrypt()], ['aaaaaaaaaaaaaaaaaaa1'], []],
+            'a masked key not in the job'   => [['****************zzz9'], [], []],
+            'an empty key'                  => [[''], [], []],
+            'only the new one of two keys'  => [['aaaaaaaaaaaaaaaaaaa1', 'bbbbbbbbbbbbbbbbbbb2'], ['aaaaaaaaaaaaaaaaaaa1'], ['bbbbbbbbbbbbbbbbbbb2']],
+        ];
+    }
+
+    /**
+     * @param list<string> $clientKeys
+     * @param list<string> $jobKeys
+     * @param list<string> $expected
+     *
+     * @throws JsonException
+     */
+    #[Test]
+    #[DataProvider('newKeysCases')]
+    public function getNewKeysReturnsTheClientKeysThatAreNotInTheJob(array $clientKeys, array $jobKeys, array $expected): void
+    {
+        $clientJson = (string) json_encode(array_map(fn(string $k) => ['key' => $k, 'name' => 'A', 'r' => true, 'w' => true, 'tm' => true, 'glos' => true], $clientKeys));
+        $jobJson    = (string) json_encode(array_map(fn(string $k) => ['key' => $k, 'owner' => true, 'r' => true, 'w' => true], $jobKeys));
+
+        $this->assertSame($expected, TmKeyManager::getNewKeys($clientJson, $jobJson));
     }
 }

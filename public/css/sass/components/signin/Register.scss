@@ -103,6 +103,7 @@
       .input-container > span {
         display: flex;
         color: colors.$grey700;
+        align-items: center;
       }
     }
 
@@ -118,6 +119,7 @@
     justify-content: center;
     font-size: variables.$font-size-small;
     color: colors.$grey700;
+    align-items: center;
   }
 }
 

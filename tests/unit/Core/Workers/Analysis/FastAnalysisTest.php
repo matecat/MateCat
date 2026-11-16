@@ -185,6 +185,39 @@ class FastAnalysisTest extends AbstractTest
     /**
      * @param FastAnalysisFakeRedis $redis
      *
+     * @return list<array{0: string, 1: string}> the [key, token] of each lock release, in order
+     */
+    private function releasedLocks(FastAnalysisFakeRedis $redis): array
+    {
+        $out = [];
+        foreach ($redis->calls as $call) {
+            if ($call[0] === 'eval') {
+                $out[] = [$call[1], $call[2]];
+            }
+        }
+
+        return $out;
+    }
+
+    /**
+     * @param FastAnalysisFakeRedis $redis
+     *
+     * @return string the token the daemon stored when it took the processing lock
+     */
+    private function acquiredToken(FastAnalysisFakeRedis $redis): string
+    {
+        foreach ($redis->calls as $call) {
+            if ($call[0] === 'set') {
+                return $call[2];
+            }
+        }
+
+        $this->fail('the processing lock was never acquired');
+    }
+
+    /**
+     * @param FastAnalysisFakeRedis $redis
+     *
      * @return list<string> the command names invoked, in order
      */
     private function redisCommands(FastAnalysisFakeRedis $redis): array
@@ -218,6 +251,7 @@ class FastAnalysisTest extends AbstractTest
         $daemon = $this->daemonExpectingStatusChange(7, ProjectStatus::STATUS_NEW);
         $redis  = $this->seedQueueHandlerWithRedis($daemon);
         $redis->incrReturn = 2; // below MAX_FAST_ANALYSIS_ATTEMPTS
+        $this->setProp($daemon, 'processingLockTokens', [7 => 'token-7']);
 
         $this->invoke($daemon, '_releaseFailedProject', 7, 'insert/publish failed', true);
 
@@ -226,7 +260,21 @@ class FastAnalysisTest extends AbstractTest
         $this->assertContains('expire', $this->redisCommands($redis));
         $this->assertNotContains('get', $this->redisCommands($redis));
         // below the cap: only the processing lock is released, the attempt counter is kept
-        $this->assertSame([['_fPid:7']], $this->delArgs($redis));
+        $this->assertSame([], $this->delArgs($redis));
+        $this->assertSame([['_fPid:7', 'token-7']], $this->releasedLocks($redis));
+    }
+
+    #[Test]
+    public function releaseFailedProjectReleasesNoLockThisBatchDidNotTake(): void
+    {
+        // No token stored for the project: the lock, if any, belongs to another daemon and stays.
+        $daemon = $this->daemonExpectingStatusChange(7, ProjectStatus::STATUS_NEW);
+        $redis  = $this->seedQueueHandlerWithRedis($daemon);
+        $redis->incrReturn = 2;
+
+        $this->invoke($daemon, '_releaseFailedProject', 7, 'insert/publish failed', true);
+
+        $this->assertSame([], $this->releasedLocks($redis));
     }
 
     #[Test]
@@ -239,11 +287,13 @@ class FastAnalysisTest extends AbstractTest
         $daemon = $this->daemonExpectingStatusChange(7, ProjectStatus::STATUS_NOT_TO_ANALYZE);
         $redis  = $this->seedQueueHandlerWithRedis($daemon);
         $redis->incrReturn = $cap; // reaches the cap
+        $this->setProp($daemon, 'processingLockTokens', [7 => 'token-7']);
 
         $this->invoke($daemon, '_releaseFailedProject', 7, 'insert/publish failed', true);
 
         // at the cap: both the attempt counter and the processing lock are cleared
-        $this->assertEqualsCanonicalizing([['_fAttempts:7'], ['_fPid:7']], $this->delArgs($redis));
+        $this->assertSame([['_fAttempts:7']], $this->delArgs($redis));
+        $this->assertSame([['_fPid:7', 'token-7']], $this->releasedLocks($redis));
     }
 
     #[Test]
@@ -255,13 +305,14 @@ class FastAnalysisTest extends AbstractTest
         $daemon = $this->daemonExpectingStatusChange(7, ProjectStatus::STATUS_NEW);
         $redis  = $this->seedQueueHandlerWithRedis($daemon);
         $redis->getReturn = null; // no prior attempts recorded
+        $this->setProp($daemon, 'processingLockTokens', [7 => 'token-7']);
 
         $this->invoke($daemon, '_releaseFailedProject', 7, 'broker unreachable', false);
 
         // infrastructure failure: counter is read-only (get), never incremented or TTL'd
         $this->assertNotContains('incr', $this->redisCommands($redis));
         $this->assertNotContains('expire', $this->redisCommands($redis));
-        $this->assertSame([['_fPid:7']], $this->delArgs($redis));
+        $this->assertSame([['_fPid:7', 'token-7']], $this->releasedLocks($redis));
     }
 
     #[Test]
@@ -910,7 +961,7 @@ class FastAnalysisTest extends AbstractTest
 
         $this->assertCount(1, $result);
         $this->assertSame('42', array_values($result)[0]['id']);
-        $this->assertNotContains(['del', '_fPid:42'], $redis->calls); // lock kept
+        $this->assertSame([], $this->releasedLocks($redis)); // lock kept
     }
 
     #[Test]
@@ -926,7 +977,11 @@ class FastAnalysisTest extends AbstractTest
         $result = $this->invoke($daemon, '_getLockProjectForVolumeAnalysis', 5);
 
         $this->assertSame([], $result, 'the un-BUSYable project must not be returned to main()');
-        $this->assertContains(['del', '_fPid:42'], $redis->calls, 'the processing lock must be released');
+        $this->assertSame(
+            [['_fPid:42', $this->acquiredToken($redis)]],
+            $this->releasedLocks($redis),
+            'the processing lock must be released with the token that took it'
+        );
     }
 
     #[Test]
@@ -942,7 +997,7 @@ class FastAnalysisTest extends AbstractTest
         $result = $this->invoke($daemon, '_getLockProjectForVolumeAnalysis', 5);
 
         $this->assertSame([], $result);
-        $this->assertContains(['del', '_fPid:42'], $redis->calls);
+        $this->assertSame([['_fPid:42', $this->acquiredToken($redis)]], $this->releasedLocks($redis));
     }
 
     #[Test]
@@ -1033,11 +1088,23 @@ class FastAnalysisTest extends AbstractTest
 
         $this->invoke($daemon, '_getLockProjectForVolumeAnalysis', 5);
 
-        $this->assertContains(['set', '_fPid:42', 1, 'EX', 86400, 'NX'], $redis->calls);
+        $this->assertContains(['set', '_fPid:42', $this->acquiredToken($redis), 'EX', 86400, 'NX'], $redis->calls);
         foreach ($redis->calls as $call) {
             $this->assertNotSame('expire', $call[0], 'lock acquisition must not use a separate expire');
             $this->assertNotSame('setnx', $call[0], 'lock acquisition must be an atomic SET, not setnx');
         }
+    }
+
+    #[Test]
+    public function lockProjectForgetsTheTokensOfThePreviousBatch(): void
+    {
+        [$daemon, $redis] = $this->daemonLockingOneProject(fn () => 1);
+        $this->setProp($daemon, 'processingLockTokens', [7 => 'token-of-the-previous-batch']);
+
+        $this->invoke($daemon, '_getLockProjectForVolumeAnalysis', 5);
+
+        $tokens = (new ReflectionClass(FastAnalysis::class))->getProperty('processingLockTokens')->getValue($daemon);
+        $this->assertSame([42 => $this->acquiredToken($redis)], $tokens);
     }
 
     #[Test]
@@ -1051,7 +1118,7 @@ class FastAnalysisTest extends AbstractTest
         $result = $this->invoke($daemon, '_getLockProjectForVolumeAnalysis', 5);
 
         $this->assertSame([], $result);
-        $this->assertNotContains(['del', '_fPid:42'], $redis->calls);
+        $this->assertSame([], $this->releasedLocks($redis));
     }
 
     /**
@@ -1274,6 +1341,11 @@ class FastAnalysisTest extends AbstractTest
         // No project reaches the publish step; every arm routes to a status write / release instead.
         $this->assertSame(0, $probe->insertCallCount, 'a fetch failure must never reach the publish step');
         $this->assertContains('incr', $this->redisCommands($redis), 'the counted-retry arm bumps the attempt counter');
+        // PARK keeps its lock; RESET and both retries release theirs with the token that took it.
+        $this->assertSame(
+            [['_fPid:12', 'token-12'], ['_fPid:13', 'token-13'], ['_fPid:14', 'token-14']],
+            $this->releasedLocks($redis)
+        );
         $this->assertFalse($this->readRunning($probe));
     }
 
@@ -1319,6 +1391,7 @@ class FastAnalysisTest extends AbstractTest
 
         $this->assertSame([], $probe->purgedPids, 'a failed publish must not finalize the project');
         $this->assertContains('incr', $this->redisCommands($redis), 'a countable failure bumps the attempt counter');
+        $this->assertSame([['_fPid:1606', 'token-1606']], $this->releasedLocks($redis));
     }
 
     #[Test]
@@ -1353,7 +1426,7 @@ class FastAnalysisTest extends AbstractTest
         $this->runMain($probe);
 
         $this->assertSame(0, $probe->insertCallCount, 'a deleted project must not be published');
-        $this->assertContains('del', $this->redisCommands($redis), 'the inert processing lock is dropped');
+        $this->assertSame([['_fPid:1606', 'token-1606']], $this->releasedLocks($redis), 'the inert processing lock is dropped');
     }
 
     #[Test]
@@ -1375,6 +1448,7 @@ class FastAnalysisTest extends AbstractTest
 
         $this->assertFalse($this->readRunning($probe), 'the daemon should have completed its cycles, not crashed');
         $this->assertContains('incr', $this->redisCommands($redis), 'the recovered project is released for retry');
+        $this->assertSame([['_fPid:1606', 'token-1606']], $this->releasedLocks($redis));
     }
 
     #[Test]
@@ -1564,16 +1638,18 @@ class FastAnalysisTest extends AbstractTest
      * every message it publishes. The engine lookup reads engine 0 (NONE) from the test database;
      * the insert, the queue-total bookkeeping and the queue routing are stubbed by the probe.
      *
-     * @param array<int, mixed> $pretranslateArgs
+     * @param array<int, mixed>  $pretranslateArgs
+     * @param int                $wordCount        the fast analysis word count of the segment; 0 skips it
+     * @param MatecatLogger|null $logger           where the daemon logs; a silent stub when null
      *
      * @return list<array<string, mixed>>
      */
-    private function publishedParams(array $pretranslateArgs): array
+    private function publishedParams(array $pretranslateArgs, int $wordCount = 2, ?MatecatLogger $logger = null): array
     {
         $ref    = new ReflectionClass(FastAnalysisPublishProbe::class);
         $daemon = $ref->newInstanceWithoutConstructor();
         $this->setProp($daemon, 'db', obtainTestDatabase());
-        $this->setProp($daemon, 'logger', $this->createStub(MatecatLogger::class));
+        $this->setProp($daemon, 'logger', $logger ?? $this->createStub(MatecatLogger::class));
         $this->setProp($daemon, 'projectDao', $this->createStub(ProjectDao::class));
 
         $published = [];
@@ -1602,7 +1678,7 @@ class FastAnalysisTest extends AbstractTest
             'segment_hash' => 'abc',
             'raw_word_count' => 2,
             'match_type' => 'NO_MATCH',
-            'wc' => 2,
+            'wc' => $wordCount,
             'source' => 'en-US',
             'target' => '99999991:it-IT',
             'payable_rates' => ['99999991' => '{"NO_MATCH":100}'],
@@ -1664,6 +1740,44 @@ class FastAnalysisTest extends AbstractTest
             $this->assertArrayHasKey($key->value, $params);
             $this->assertNull($params[$key->value], $key->value . ' must stay null for the worker to default it');
         }
+    }
+
+    #[Test]
+    public function insertFastAnalysisLogsAndDropsASegmentWithNoWordsToAnalyze(): void
+    {
+        // A segment whose fast analysis word count is 0 is not sent to the TM analysis queue:
+        // the daemon logs it as skipped and publishes nothing for it.
+        $logged    = [];
+        $published = $this->publishedParams([], 0, $this->capturingStructuredLogger($logged));
+
+        $this->assertSame([], $published);
+        $skipped = array_filter($logged, fn(array $entry): bool => $entry['level'] === 'debug'
+            && str_starts_with((string)$entry['message'], 'Skipped Fast Segment: '));
+        $this->assertCount(1, $skipped);
+    }
+
+    #[Test]
+    public function getSegmentsForFastVolumeAnalysisLogsAndRethrowsWhenTheQueryFails(): void
+    {
+        // The query error is logged at error level, then re-thrown for main() to classify.
+        $pdo = $this->createStub(PDO::class);
+        $pdo->method('prepare')->willThrowException(new PDOException('Segments query failed'));
+
+        $injected = $this->createStub(IDatabase::class);
+        $injected->method('getConnection')->willReturn($pdo);
+
+        $logged = [];
+        $daemon = $this->daemonWithDb($injected);
+        $this->setProp($daemon, 'logger', $this->capturingStructuredLogger($logged));
+
+        try {
+            $this->invoke($daemon, '_getSegmentsForFastVolumeAnalysis', 7);
+            $this->fail('The PDOException must reach the caller');
+        } catch (PDOException $e) {
+            $this->assertSame('Segments query failed', $e->getMessage());
+        }
+
+        $this->assertSame([['level' => 'error', 'message' => 'Segments query failed', 'context' => []]], $logged);
     }
 
     private function stubDatabase(): IDatabase
@@ -1734,6 +1848,16 @@ class FastAnalysisFakeRedis extends PredisClient
         $this->calls[] = array_merge(['set', $key, $value], $options);
 
         return $this->setReturn;
+    }
+
+    /**
+     * The only script the daemon sends is RedisLock's release, recorded as ['eval', key, token].
+     */
+    public function eval($script, $numkeys, ...$keyOrArg): int
+    {
+        $this->calls[] = ['eval', $keyOrArg[0], $keyOrArg[1]];
+
+        return 1;
     }
 
     public function setex($key, $seconds, $value): string
@@ -1885,7 +2009,16 @@ class FastAnalysisMainProbe extends FastAnalysis
 
     protected function _getLockProjectForVolumeAnalysis(int $limit = 1): array
     {
-        return array_shift($this->lockBatches) ?? [];
+        $batch = array_shift($this->lockBatches) ?? [];
+
+        // Store a token per project, as the real picker does, so the tests can assert main()'s releases.
+        $tokens = [];
+        foreach ($batch as $row) {
+            $tokens[(int)$row['id']] = 'token-' . $row['id'];
+        }
+        (new ReflectionClass(FastAnalysis::class))->getProperty('processingLockTokens')->setValue($this, $tokens);
+
+        return $batch;
     }
 
     protected function _newFeatureSet(): FeatureSet

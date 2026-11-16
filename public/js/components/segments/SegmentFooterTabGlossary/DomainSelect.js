@@ -1,28 +1,19 @@
-import React, {useContext, useEffect, useRef} from 'react'
+import React, {useContext, useRef, useState} from 'react'
 import {Select} from '../../common/Select'
 import {TabGlossaryContext} from './TabGlossaryContext'
+import IconAdd from '../../../../img/icons/IconAdd'
+import Tooltip, {TOOLTIP_POSITION} from '../../common/Tooltip'
+import TEXT_UTILS from '../../../utils/textUtils'
 
 export const DomainSelect = ({disabled = false}) => {
   const {domains, setDomains, selectsActive, setSelectsActive} =
     useContext(TabGlossaryContext)
 
+  const [isCreateItemTooltipVisible, setIsCreateItemTooltipVisible] =
+    useState(false)
+
   const ref = useRef()
-  const createDomainFnRef = useRef()
-
-  useEffect(() => {
-    const {current} = ref
-
-    const onKeyDown = (e) => {
-      if (e.key === 'Enter') {
-        createDomainFnRef?.current?.()
-        e.stopPropagation()
-      }
-    }
-
-    current.addEventListener('keydown', onKeyDown)
-
-    return () => current.removeEventListener('keydown', onKeyDown)
-  }, [])
+  const createButtonRef = useRef()
 
   const updateSelectActive = (key, value) =>
     setSelectsActive((prevState) => ({...prevState, [key]: value}))
@@ -31,6 +22,8 @@ export const DomainSelect = ({disabled = false}) => {
     <div ref={ref}>
       <Select
         className="glossary-select domain-select"
+        dropdownClassName="glossary-domain-subdomain-dropdown"
+        isPortalDropdown={true}
         isDisabled={disabled}
         name="glossary-term-domain"
         label="Domain"
@@ -45,8 +38,10 @@ export const DomainSelect = ({disabled = false}) => {
             updateSelectActive('domain', option)
           }
         }}
+        showResetButton={true}
+        resetFunction={() => updateSelectActive('domain', undefined)}
       >
-        {({name, index, queryFilter, resetQueryFilter, onClose}) => {
+        {({index, queryFilter, resetQueryFilter, onClose}) => {
           const createDomainFn =
             queryFilter.trim() &&
             !domains.find(({name}) => name === queryFilter)
@@ -62,37 +57,55 @@ export const DomainSelect = ({disabled = false}) => {
                   onClose()
                 }
               : () => false
-          createDomainFnRef.current = createDomainFn
+
+          const createButtonElement = (
+            <div ref={createButtonRef} className="button-create-option-content">
+              <IconAdd size={18} />
+              <span>
+                Create domain &quot;<b>{queryFilter}</b>&quot;
+              </span>
+            </div>
+          )
 
           return {
             ...(index === 0 && {
               beforeRow: (
                 <>
+                  {!queryFilter && !domains.length && (
+                    <span className="glossary-domain-subdomain-no-records">
+                      No domain available.
+                      <br />
+                      Start typing to create one.
+                    </span>
+                  )}
                   {queryFilter.trim() &&
                     !domains.find(({name}) => name === queryFilter) && (
-                      <button
-                        className="button-create-option"
+                      <li
+                        className="dropdown__option button-create-option"
                         onClick={createDomainFn}
+                        onMouseEnter={() =>
+                          setIsCreateItemTooltipVisible(
+                            TEXT_UTILS.isContentTextEllipsis(
+                              createButtonRef.current.children[1],
+                            ),
+                          )
+                        }
                       >
-                        + Create domain <b>{queryFilter}</b>
-                      </button>
+                        {isCreateItemTooltipVisible ? (
+                          <Tooltip
+                            content={queryFilter}
+                            position={TOOLTIP_POSITION.LEFT}
+                          >
+                            {createButtonElement}
+                          </Tooltip>
+                        ) : (
+                          createButtonElement
+                        )}
+                      </li>
                     )}
-                  {!queryFilter && selectsActive.domain && (
-                    <button
-                      className="button-create-option"
-                      onClick={() => {
-                        updateSelectActive('domain', undefined)
-                        onClose()
-                      }}
-                    >
-                      Deselect domain
-                    </button>
-                  )}
                 </>
               ),
             }),
-            // override row content
-            row: <div className="domain-option">{name}</div>,
           }
         }}
       </Select>

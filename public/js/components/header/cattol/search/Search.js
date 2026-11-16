@@ -1,9 +1,6 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react'
 import $ from 'jquery'
-import {isUndefined} from 'lodash'
-import {cloneDeep} from 'lodash/lang'
-import {find, map} from 'lodash/collection'
-import {findIndex, remove} from 'lodash/array'
+import {isUndefined, cloneDeep, find, map, findIndex, remove} from 'lodash'
 
 import CattolConstants from '../../../../constants/CatToolConstants'
 import SegmentStore from '../../../../stores/SegmentStore'
@@ -16,13 +13,29 @@ import AlertModal from '../../../modals/AlertModal'
 import ModalsActions from '../../../../actions/ModalsActions'
 import {tagSignatures} from '../../../segments/utils/DraftMatecatUtils/tagModel'
 import CommonUtils from '../../../../utils/commonUtils'
-import {REVISE_STEP_NUMBER} from '../../../../constants/Constants'
+import SegmentUtils from '../../../../utils/segmentUtils'
+import {
+  REVISE_STEP_NUMBER,
+  SEGMENTS_STATUS,
+} from '../../../../constants/Constants'
 import {Select} from '../../../common/Select'
 import {segmentTranslation} from '../../../../setTranslationUtil'
 import {Button, BUTTON_MODE, BUTTON_SIZE} from '../../../common/Button/Button'
 import ChevronLeft from '../../../../../img/icons/ChevronLeft'
 import ChevronRight from '../../../../../img/icons/ChevronRight'
 import {MODAL_KEY} from '../../../../constants/ModalKeys'
+
+// Mirrors TranslationStatus::$REVISION_STATUSES on the server
+const REVISION_STATUSES = [
+  SEGMENTS_STATUS.APPROVED,
+  SEGMENTS_STATUS.APPROVED2,
+  'REJECTED',
+]
+
+const isRevisedSegmentInTranslate = (segment) =>
+  !config.isReview &&
+  !!segment &&
+  REVISION_STATUSES.includes(segment.status?.toUpperCase())
 
 // mirrors the class's `defaultState.search` object, used both as the initial
 // value and as the value restored by handleCancelClick/handleClearClick
@@ -94,10 +107,10 @@ const Search = (props) => {
   const handleStatusChange = (value) => {
     const nextSearch = cloneDeep(search)
     nextSearch.selectStatus = value
-    if (value === 'APPROVED-2') {
+    if (value === SEGMENTS_STATUS.APPROVED2) {
       nextSearch.revisionNumber = REVISE_STEP_NUMBER.REVISE2
-      nextSearch.selectStatus = 'APPROVED'
-    } else if (value === 'APPROVED') {
+      nextSearch.selectStatus = SEGMENTS_STATUS.APPROVED2
+    } else if (value === SEGMENTS_STATUS.APPROVED) {
       nextSearch.revisionNumber = REVISE_STEP_NUMBER.REVISE1
     }
     setSearch(nextSearch)
@@ -211,15 +224,50 @@ const Search = (props) => {
     // replace the next occurrence, or nothing at all when it was the last one.
     // It is applied synchronously to the store, so the segment read below
     // already carries the new text and that is what gets saved.
+    const sid = occurrencesList[featuredSearchResult]
+    const segmentToReplace = SegmentStore.getSegmentByIdToJS(sid)
+    const previousTranslation = segmentToReplace?.translation
+
+    // A locked segment is usually approved too, so check it first: show the
+    // same alert as clicking on it, not the revised state error below
+    if (
+      segmentToReplace &&
+      !segmentToReplace.unlocked &&
+      SegmentUtils.isLockedSegment(segmentToReplace)
+    ) {
+      SegmentActions.showLockedSegmentModal()
+      return false
+    }
+
+    // The server refuses to save a revised segment from the translate page,
+    // so refuse here too, before the text is changed
+    if (isRevisedSegmentInTranslate(segmentToReplace)) {
+      ModalsActions.showModalComponent(
+        MODAL_KEY.ALERT,
+        {text: 'Setting revised state from translation is not allowed.'},
+        'Error',
+      )
+      return false
+    }
+
     SegmentActions.replaceCurrentSearch(search.replaceTarget)
 
     setTimeout(() => {
-      const segment = SegmentStore.getSegmentByIdToJS(
-        occurrencesList[featuredSearchResult],
-      )
+      const segment = SegmentStore.getSegmentByIdToJS(sid)
       if (segment) {
         updateAfterReplace(segment.original_sid)
-        segmentTranslation(segment, segment.status, () => {}, false)
+        segmentTranslation(
+          segment,
+          segment.status,
+          () => {},
+          false,
+          () => {
+            // The server refused the replacement: put the text back and
+            // search again, so the results match what is actually saved
+            SegmentActions.replaceEditAreaTextContent(sid, previousTranslation)
+            SearchUtils.execFind(search)
+          },
+        )
       }
     })
   }
@@ -573,10 +621,10 @@ const Search = (props) => {
       name: (
         <>
           <div className={'status-dot approved-2ndpass-color'} />
-          APPROVED
+          APPROVED 2
         </>
       ),
-      id: 'APPROVED-2',
+      id: SEGMENTS_STATUS.APPROVED2,
     })
   }
   let findIsDisabled = true
@@ -608,6 +656,7 @@ const Search = (props) => {
     search.searchTarget !== '' ||
     search.searchSource !== '' ||
     (search.selectStatus !== '' && search.selectStatus !== 'all')
+
   return props.active ? (
     <div className="search-form">
       <div className="find-wrapper">
@@ -703,6 +752,7 @@ const Search = (props) => {
                     ' ' +
                     statusDropdownDisabled
                   }
+                  isPortalDropdown={true}
                   isDisabled={
                     search.searchTarget === '' && search.searchSource === ''
                   }

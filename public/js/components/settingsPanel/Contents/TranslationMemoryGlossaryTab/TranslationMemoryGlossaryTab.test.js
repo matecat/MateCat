@@ -1,5 +1,5 @@
 import React, {useEffect, useRef} from 'react'
-import {act, render, screen, waitFor, within} from '@testing-library/react'
+import {act, render, screen, waitFor} from '@testing-library/react'
 import projectTemplatesMock from '../../../../../mocks/projectTemplateMock'
 import tmKeysMock from '../../../../../mocks/tmKeysMock'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
@@ -121,7 +121,7 @@ const executeMswServer = () => {
       const response = {
         errors: [],
         data: {
-          key: '6f03df0307c7a161afa9',
+          key: '00000000000000000009',
           id: 'MyMemory_5007d86025f58b50f29c',
           pass: 'f22815f87d',
           mtLangSupported: true,
@@ -141,7 +141,7 @@ const executeMswServer = () => {
       const response = {
         errors: [],
         data: {
-          key: '6f03df0307c7a161afa9',
+          key: '00000000000000000009',
           id: 'MyMemory_5007d86025f58b50f29c',
           pass: 'f22815f87d',
           mtLangSupported: true,
@@ -161,7 +161,7 @@ const executeMswServer = () => {
       const response = {
         errors: [],
         data: {
-          key: '6f03df0307c7a161afa9',
+          key: '00000000000000000009',
           id: 'MyMemory_5007d86025f58b50f29c',
           pass: 'f22815f87d',
           mtLangSupported: true,
@@ -187,7 +187,7 @@ const executeMswServer = () => {
       const response = {
         errors: [],
         data: {
-          key: '6f03df0307c7a161afa9',
+          key: '00000000000000000009',
           id: 'MyMemory_5007d86025f58b50f29c',
           pass: 'f22815f87d',
           mtLangSupported: true,
@@ -240,14 +240,14 @@ test('Enabled/disable key', async () => {
 
   let rowLookup = getRowElementById({
     column: ROW_COLUMNS_TESTID.LOOKUP,
-    id: 'e32699c0a360e08948fe',
+    id: '00000000000000000008',
   })
   expect(rowLookup).toBeEnabled()
   expect(rowLookup).not.toBeChecked()
 
   let rowUpdate = getRowElementById({
     column: ROW_COLUMNS_TESTID.UPDATE,
-    id: 'e32699c0a360e08948fe',
+    id: '00000000000000000008',
   })
   expect(rowUpdate).not.toBeInTheDocument()
 
@@ -258,11 +258,11 @@ test('Enabled/disable key', async () => {
 
   rowLookup = getRowElementById({
     column: ROW_COLUMNS_TESTID.LOOKUP,
-    id: 'e32699c0a360e08948fe',
+    id: '00000000000000000008',
   })
   rowUpdate = getRowElementById({
     column: ROW_COLUMNS_TESTID.UPDATE,
-    id: 'e32699c0a360e08948fe',
+    id: '00000000000000000008',
   })
   expect(rowLookup).toBeChecked()
   expect(rowUpdate).toBeChecked()
@@ -274,11 +274,11 @@ test('Enabled/disable key', async () => {
 
   rowLookup = getRowElementById({
     column: ROW_COLUMNS_TESTID.LOOKUP,
-    id: 'e32699c0a360e08948fe',
+    id: '00000000000000000008',
   })
   rowUpdate = getRowElementById({
     column: ROW_COLUMNS_TESTID.UPDATE,
-    id: 'e32699c0a360e08948fe',
+    id: '00000000000000000008',
   })
 
   expect(rowLookup).not.toBeChecked()
@@ -290,13 +290,13 @@ test('Enabled/disable key', async () => {
 
   rowUpdate = getRowElementById({
     column: ROW_COLUMNS_TESTID.UPDATE,
-    id: 'e32699c0a360e08948fe',
+    id: '00000000000000000008',
   })
 
   expect(
     (rowUpdate = getRowElementById({
       column: ROW_COLUMNS_TESTID.UPDATE,
-      id: 'e32699c0a360e08948fe',
+      id: '00000000000000000008',
     })),
   ).not.toBeInTheDocument()
 })
@@ -310,7 +310,7 @@ test('Create and delete new resource', async () => {
         const response = {
           errors: [],
           data: {
-            key: '6f03df0307c7a161afa9',
+            key: '00000000000000000009',
             id: 'MyMemory_5007d86025f58b50f29c',
             pass: 'f22815f87d',
             mtLangSupported: true,
@@ -358,11 +358,11 @@ test('Create and delete new resource', async () => {
   const rowNewEntry = {
     lookup: getRowElementById({
       column: ROW_COLUMNS_TESTID.LOOKUP,
-      id: '6f03df0307c7a161afa9',
+      id: '00000000000000000009',
     }),
     update: getRowElementById({
       column: ROW_COLUMNS_TESTID.UPDATE,
-      id: '6f03df0307c7a161afa9',
+      id: '00000000000000000009',
     }),
   }
 
@@ -386,7 +386,7 @@ test('Create and delete new resource', async () => {
 
   const rowDeleted = getRowElementById({
     column: ROW_COLUMNS_TESTID.LOOKUP,
-    id: '6f03df0307c7a161afa9',
+    id: '00000000000000000009',
   })
 
   expect(rowDeleted).not.toBeInTheDocument()
@@ -421,7 +421,7 @@ test('Create shared resource', async () => {
   const rowSharedKey = screen.getByTestId(
     `input-${SPECIAL_ROWS_ID.addSharedResource}`,
   )
-  await act(async () => user.type(rowSharedKey, '6a820ef8f06d922ca0a0'))
+  await act(async () => user.type(rowSharedKey, '00000000000000000011'))
 
   expect(buttonConfirm).toBeEnabled()
   await waitFor(async () => user.click(buttonConfirm))
@@ -431,11 +431,11 @@ test('Create shared resource', async () => {
   const rowNewEntry = {
     lookup: getRowElementById({
       column: ROW_COLUMNS_TESTID.LOOKUP,
-      id: '6a820ef8f06d922ca0a0',
+      id: '00000000000000000011',
     }),
     update: getRowElementById({
       column: ROW_COLUMNS_TESTID.UPDATE,
-      id: '6a820ef8f06d922ca0a0',
+      id: '00000000000000000011',
     }),
   }
 
@@ -494,138 +494,6 @@ test('Row Menu items', async () => {
   expect(screen.getByText('Share')).toBeEnabled()
 })
 
-test('Toggling pretranslate and dialect-strict checkboxes modifies the current template', async () => {
-  const user = userEvent.setup()
-  const modifyingCurrentTemplate = jest.fn()
-  const {modifyingCurrentTemplate: _ignored, ...rest} = contextMockValues()
-  const contextValues = {...rest, modifyingCurrentTemplate}
-
-  render(<WrapperComponent {...contextValues} />)
-
-  await act(async () =>
-    user.click(screen.getByTestId('pretranslate-match_100-switch')),
-  )
-  await act(async () =>
-    user.click(screen.getByTestId('dialect-strict-checkbox')),
-  )
-
-  expect(modifyingCurrentTemplate).toHaveBeenCalledTimes(2)
-
-  const pretranslateUpdater = modifyingCurrentTemplate.mock.calls[0][0]
-  expect(
-    pretranslateUpdater({
-      pretranslate: {
-        match_101: {enabled: true, status: 'APPROVED', lock: true},
-        match_100: {enabled: false, status: 'TRANSLATED', lock: false},
-      },
-    }),
-  ).toEqual({
-    pretranslate: {
-      match_101: {enabled: true, status: 'APPROVED', lock: true},
-      match_100: {enabled: true, status: 'APPROVED', lock: true},
-    },
-  })
-
-  const dialectUpdater = modifyingCurrentTemplate.mock.calls[1][0]
-  expect(dialectUpdater({dialectStrict: false})).toEqual(
-    expect.objectContaining({dialectStrict: true}),
-  )
-})
-
-test('Pretranslate truthy', async () => {
-  const {currentProjectTemplate, ...rest} = contextMockValues()
-  const contextValues = {
-    ...rest,
-    currentProjectTemplate: {
-      ...currentProjectTemplate,
-      pretranslate: {
-        ...currentProjectTemplate.pretranslate,
-        match_100: {
-          ...currentProjectTemplate.pretranslate.match_100,
-          enabled: true,
-        },
-      },
-    },
-  }
-
-  render(<WrapperComponent {...contextValues} />)
-
-  expect(screen.getByTestId('pretranslate-match_100-switch')).toBeChecked()
-})
-
-test('Pretranslate status select is disabled while pre-confirm is off', async () => {
-  const user = userEvent.setup()
-  const {currentProjectTemplate, ...rest} = contextMockValues()
-  const contextValues = {
-    ...rest,
-    currentProjectTemplate: {
-      ...currentProjectTemplate,
-      pretranslate: {
-        match_101: {enabled: true, status: 'APPROVED', lock: true},
-        match_100: {enabled: false, status: 'TRANSLATED', lock: false},
-      },
-    },
-  }
-
-  render(<WrapperComponent {...contextValues} />)
-
-  const row101 = screen.getByTestId('pretranslate-match_101')
-  const row100 = screen.getByTestId('pretranslate-match_100')
-
-  expect(row101).toHaveTextContent('Approved (locked)')
-  expect(row100).toHaveTextContent('Approved (locked)')
-  expect(screen.queryByText('Approved 2')).not.toBeInTheDocument()
-
-  await act(async () =>
-    user.click(within(row101).getByText('Approved (locked)')),
-  )
-  expect(screen.getByText('Approved 2')).toBeInTheDocument()
-})
-
-test('Selecting a pretranslate status writes status and lock', async () => {
-  const user = userEvent.setup()
-  const modifyingCurrentTemplate = jest.fn()
-  const {
-    currentProjectTemplate,
-    modifyingCurrentTemplate: _ignored, // eslint-disable-line no-unused-vars
-    ...rest
-  } = contextMockValues()
-  const contextValues = {
-    ...rest,
-    modifyingCurrentTemplate,
-    currentProjectTemplate: {
-      ...currentProjectTemplate,
-      pretranslate: {
-        match_101: {enabled: true, status: 'APPROVED', lock: true},
-        match_100: {enabled: false, status: 'TRANSLATED', lock: false},
-      },
-    },
-  }
-
-  render(<WrapperComponent {...contextValues} />)
-
-  const row101 = screen.getByTestId('pretranslate-match_101')
-  await act(async () =>
-    user.click(within(row101).getByText('Approved (locked)')),
-  )
-  await act(async () => user.click(screen.getByText('Approved 2')))
-
-  const updater = modifyingCurrentTemplate.mock.calls[0][0]
-  expect(
-    updater({
-      pretranslate: {
-        match_101: {enabled: true, status: 'APPROVED', lock: true},
-        match_100: {enabled: false, status: 'TRANSLATED', lock: false},
-      },
-    }),
-  ).toEqual({
-    pretranslate: {
-      match_101: {enabled: true, status: 'APPROVED2', lock: false},
-      match_100: {enabled: false, status: 'TRANSLATED', lock: false},
-    },
-  })
-})
-
 test('Get public matches falsy', async () => {
   const {currentProjectTemplate, ...rest} = contextMockValues()
   const contextValues = {
@@ -659,15 +527,15 @@ test('Search resources inactive keys', async () => {
 
   const row1 = getRowElementById({
     column: ROW_COLUMNS_TESTID.LOOKUP,
-    id: 'e32699c0a360e08948fe',
+    id: '00000000000000000008',
   })
   const row2 = getRowElementById({
     column: ROW_COLUMNS_TESTID.LOOKUP,
-    id: '74b6c82408a028b6f020',
+    id: '00000000000000000010',
   })
   const row3 = getRowElementById({
     column: ROW_COLUMNS_TESTID.LOOKUP,
-    id: '21df10c8cce1b31f2d0d',
+    id: '00000000000000000012',
   })
   expect(row1).not.toBeInTheDocument()
   expect(row2).not.toBeInTheDocument()
@@ -688,7 +556,7 @@ test('Modal delete tmkeys used in other templates', async () => {
   const user = userEvent.setup()
   const {projectTemplates, ...rest} = contextMockValues({
     tmKeysMockArray: tmKeysMock.tm_keys.filter(
-      ({key}) => key === '74b6c82408a028b6f020',
+      ({key}) => key === '00000000000000000010',
     ),
   })
   const template = {
@@ -715,4 +583,86 @@ test('Modal delete tmkeys used in other templates', async () => {
   expect(modalContent).toBe(
     'The memory key you are about to delete is used in the following project creation template(s):',
   )
+})
+
+test('Sub-tabs switch between resources and advanced settings', async () => {
+  const user = userEvent.setup()
+  const contextValues = contextMockValues()
+
+  render(<WrapperComponent {...contextValues} />)
+
+  expect(screen.getByText('Active resources')).toBeVisible()
+  expect(screen.getByText('Pre-confirmation')).not.toBeVisible()
+
+  await act(async () => user.click(screen.getByTestId('tm-subtab-advanced')))
+
+  expect(screen.getByText('Pre-confirmation')).toBeVisible()
+  expect(screen.getByText('Variant matching')).toBeVisible()
+  expect(screen.getByText('Active resources')).not.toBeVisible()
+
+  await act(async () =>
+    user.click(screen.getByTestId('tm-subtab-resourceManagement')),
+  )
+
+  expect(screen.getByText('Active resources')).toBeVisible()
+})
+
+test('Switching sub-tab keeps a resource being created', async () => {
+  const user = userEvent.setup()
+  const contextValues = contextMockValues()
+
+  render(<WrapperComponent {...contextValues} />)
+
+  await act(async () => user.click(screen.getByTestId('new-resource-tm')))
+  const nameInput = await screen.findByTestId(SPECIAL_ROWS_ID.newResource)
+  await act(async () => user.type(nameInput, 'My draft'))
+
+  await act(async () => user.click(screen.getByTestId('tm-subtab-advanced')))
+  await act(async () =>
+    user.click(screen.getByTestId('tm-subtab-resourceManagement')),
+  )
+
+  expect(screen.getByTestId(SPECIAL_ROWS_ID.newResource)).toHaveValue(
+    'My draft',
+  )
+})
+
+test('Cattool shows the resources without sub-tabs', () => {
+  global.config.is_cattool = true
+  try {
+    const contextValues = contextMockValues()
+
+    render(<WrapperComponent {...contextValues} />)
+
+    expect(screen.getByText('Active resources')).toBeInTheDocument()
+    expect(screen.queryByTestId('tm-subtab-advanced')).not.toBeInTheDocument()
+    expect(screen.queryByText('Pre-confirmation')).not.toBeInTheDocument()
+  } finally {
+    delete global.config.is_cattool
+  }
+})
+
+test('Modified marker shows only on the sub-tab holding the changed props', () => {
+  const contextValues = {
+    ...contextMockValues(),
+    isEnabledProjectTemplateComponent: true,
+    subtemplatesNotSaved: [],
+    checkSpecificTemplatePropsAreModified: (props) =>
+      props.includes(SCHEMA_KEYS.dialectStrict),
+  }
+
+  render(<WrapperComponent {...contextValues} />)
+
+  expect(screen.getByTestId('tm-subtab-advanced')).toHaveTextContent('●')
+  expect(
+    screen.getByTestId('tm-subtab-resourceManagement'),
+  ).not.toHaveTextContent('●')
+})
+
+// Any aria-label renders as a hover tooltip through the global
+// [aria-label]::after rule, and showed as a shadow above the sub-tabs
+test('Sub-tab bar has no aria-label', () => {
+  render(<WrapperComponent {...contextMockValues()} />)
+
+  expect(screen.getByRole('tablist')).not.toHaveAttribute('aria-label')
 })

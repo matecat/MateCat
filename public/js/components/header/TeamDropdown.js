@@ -90,7 +90,8 @@ export const TeamDropdown = ({isManage = true, showModals = true}) => {
         <ul>
           {showModals && (
             <li className="create-new-team" onClick={openCreateTeams}>
-              Create new team <IconAdd size={22} />
+              <IconAdd size={22} />
+              Create new team
             </li>
           )}
           {teams.map((team) => (
@@ -99,13 +100,13 @@ export const TeamDropdown = ({isManage = true, showModals = true}) => {
               className={`${team.id === selectedTeam?.id ? 'active' : ''}`}
               onClick={() => onChangeTeam(team)}
             >
-              {team.name}
+              <span>{team.name}</span>
               {team.type !== 'personal' && (
                 <div
                   className="container-icon-settings"
                   onClick={(event) => openModifyTeam(event, team)}
                 >
-                  <IconSettings size={16} />
+                  <IconSettings size={18} />
                 </div>
               )}
             </li>

@@ -4,11 +4,7 @@
 namespace Matecat\Core\Workers\TMAnalysisV2;
 
 use Matecat\TestHelpers\AbstractTest;
-use Model\DataAccess\Database;
 use PHPUnit\Framework\Attributes\Test;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\EngineServiceInterface;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\DefaultEngineResolver;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\EngineService;
 
 class EngineServiceTest extends AbstractTest
 {
@@ -26,36 +22,6 @@ class EngineServiceTest extends AbstractTest
         $this->assertNotFalse($source, 'EngineService.php source must be readable.');
 
         return $source;
-    }
-
-    #[Test]
-    public function test_service_can_be_instantiated(): void
-    {
-        $service = new EngineService(new DefaultEngineResolver(obtainTestDatabase()), obtainTestDatabase());
-        $this->assertInstanceOf(EngineService::class, $service);
-        $this->assertInstanceOf(EngineServiceInterface::class, $service);
-    }
-
-    #[Test]
-    public function test_implements_engine_service_interface_in_source(): void
-    {
-        $source = $this->readSource($this->engineServicePath());
-        $this->assertStringContainsString(
-            'implements EngineServiceInterface',
-            $source,
-            'EngineService class declaration must implement EngineServiceInterface.'
-        );
-    }
-
-    #[Test]
-    public function test_getTMMatches_uses_engine_resolver_for_engine_creation(): void
-    {
-        $source = $this->readSource($this->engineServicePath());
-        $this->assertStringContainsString(
-            '$this->engineResolver->getInstance(',
-            $source,
-            'EngineService::getTMMatches must use injected EngineResolverInterface for engine creation.'
-        );
     }
 
     #[Test]
@@ -114,10 +80,10 @@ class EngineServiceTest extends AbstractTest
         $methodStart = strpos($source, 'function getMTTranslation(');
         $this->assertNotFalse($methodStart, 'getMTTranslation method must exist in EngineService.');
 
-        $logPos = strpos($source, 'LoggerFactory::doJsonLog(', $methodStart);
+        $logPos = strpos($source, "LoggerFactory::getLogger('engines')->error(", $methodStart);
         $this->assertNotFalse(
             $logPos,
-            'getMTTranslation must log exceptions via LoggerFactory::doJsonLog() in the catch block.'
+            "getMTTranslation must log exceptions on the 'engines' logger in the catch block."
         );
     }
 

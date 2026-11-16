@@ -130,7 +130,6 @@ class AIAssistantController extends KleinController
             'localized_target' => $localizedTarget,
             'text' => trim((string)$body['text']),
             'translation' => trim((string)$body['translation']),
-            'style' => trim((string)$body['style']),
             'id_segment' => $body['id_segment'],
         ];
 

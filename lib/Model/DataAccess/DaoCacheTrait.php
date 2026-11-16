@@ -4,7 +4,6 @@
  * @author hashashiyyin domenico@translated.net / ostico@gmail.com
  * Date: 08/08/24
  * Time: 14:35
- *
  */
 
 namespace Model\DataAccess;
@@ -12,7 +11,6 @@ namespace Model\DataAccess;
 use Exception;
 use PDOException;
 use Predis\Client;
-use Psr\Log\InvalidArgumentException;
 use Random\RandomException;
 use ReflectionException;
 use Utils\Logger\LoggerFactory;
@@ -59,6 +57,22 @@ trait DaoCacheTrait
      * (e.g., SessionTokenStoreHandler).
      */
     protected bool $xFetchEnabled = true;
+
+    /**
+     * Most fields one hash (one `$keyMap`) may hold before it is dropped.
+     *
+     * A healthy hash holds the few reads of one entity: on production the largest one had 15
+     * fields. A hash whose name does not carry the values its reads vary by gains one field per
+     * call and never expires, because every write renews its TTL. That is how
+     * `SegmentNoteDao::getBySegmentIds-` reached 18.9 GB and Redis evicted the login tokens.
+     * At about 50 KB a field, this cap keeps such a hash under about 500 MB.
+     *
+     * Final, and with no switch to turn it off: every hash written through this trait is bounded.
+     * The two write methods are final too, so no subclass can skip the check. PHP still lets a
+     * class that uses this trait directly declare its own write method; the PHPStan rule
+     * NoCacheMapWriteOverrideRule reports that.
+     */
+    final protected const int CACHE_MAP_FIELD_CAP = 10_000;
 
     /**
      * Last measured recomputation time (δ) in seconds.
@@ -110,9 +124,6 @@ trait DaoCacheTrait
 
 
     /** @noinspection PhpUnusedParameterInspection */
-    /**
-     * @throws InvalidArgumentException
-     */
     protected function _logCache(string $type, string $key, mixed $value, string $sqlQuery): void
     {
         LoggerFactory::getLogger('query_cache')->debug(
@@ -327,7 +338,7 @@ trait DaoCacheTrait
      * @return void|null
      * @throws Exception
      */
-    protected function _setInCacheMap(string $keyMap, string $query, array $value)
+    final protected function _setInCacheMap(string $keyMap, string $query, array $value)
     {
         if ($this->cacheTTL == 0) {
             return null;
@@ -347,8 +358,38 @@ trait DaoCacheTrait
             self::$cache_con->hset($keyMap, $key, $storable);
             self::$cache_con->expire($keyMap, $this->cacheTTL);
             self::$cache_con->setex($key, $this->cacheTTL, $keyMap);
+            $this->_capCacheMap($keyMap, (int)self::$cache_con->hlen($keyMap));
             $this->_logCache("SETMAP: " . $keyMap, $key, $value, $query);
         }
+    }
+
+    /**
+     * Drop a hash that holds more than CACHE_MAP_FIELD_CAP fields, and log it as an error.
+     *
+     * Only a hash that grows without limit gets that large, such as a cached read whose key map is
+     * not scoped by its values. Dropping it costs one cache miss per field; keeping it lets it grow
+     * until Redis evicts other keys. The error names the hash, so its writer can be found and fixed.
+     * See CACHE_MAP_FIELD_CAP for the case that led to it.
+     */
+    private function _capCacheMap(string $keyMap, int $fields): void
+    {
+        if ($fields <= self::CACHE_MAP_FIELD_CAP) {
+            return;
+        }
+
+        self::$cache_con?->unlink($keyMap);
+
+        // A derived key map ends with the bound values, which can be a job password or an email.
+        // Log the part before them, which names the writer, and a hash of the whole name.
+        LoggerFactory::getLogger('query_cache')->error(
+            "Redis hash dropped: it held more fields than one hash may hold.",
+            [
+                'writer' => strstr($keyMap, '-', true) ?: $keyMap,
+                'keyMapMd5' => md5($keyMap),
+                'fields' => $fields,
+                'cap' => self::CACHE_MAP_FIELD_CAP,
+            ]
+        );
     }
 
     /**
@@ -386,10 +427,9 @@ trait DaoCacheTrait
      * @param array<array-key, array{keyMap: string, query: string, value: list<mixed>}> $entries
      *
      * @throws PDOException
-     * @throws InvalidArgumentException
      * @throws Exception
      */
-    protected function _setManyInCacheMap(array $entries): void
+    final protected function _setManyInCacheMap(array $entries): void
     {
         if ($this->cacheTTL == 0 || $entries === []) {
             return;
@@ -418,13 +458,46 @@ trait DaoCacheTrait
 
         $ttl = $this->cacheTTL;
 
-        self::$cache_con->pipeline(static function ($pipe) use ($storables, $ttl): void {
+        // Check every hash this batch writes to, and drop the ones past CACHE_MAP_FIELD_CAP.
+        //
+        // A pipeline sends many commands to Redis in one round trip. Redis answers with one list:
+        // one reply per command, in the order the code queued them. The code below queues the
+        // writes first, then one HLEN (the command that counts the fields of a hash) for each
+        // distinct hash. The list therefore ends with the field counts:
+        //
+        //     [ hset, expire, setex,  hset, expire, setex,  ...,  hlen(map A), hlen(map B) ]
+        //       |---- entry 0 ----|   |---- entry 1 ----|        |-- one per hash, last --|
+        //
+        // The code reads the last count($keyMaps) replies, in the order of $keyMaps. Each HLEN runs
+        // after every write of the batch, so its count includes the fields the batch just added.
+        // The counts stay at the end of the list, so a write command added to the first loop does
+        // not move them.
+        //
+        // Example: a batch writes three entries, two to "Dao::read-1" and one to "Dao::read-2". It
+        // queues 9 writes and 2 HLENs. Replies 9 and 10 are the field counts of "Dao::read-1" and
+        // "Dao::read-2". If "Dao::read-1" now holds 10,001 fields, _capCacheMap() drops it.
+        //
+        // pipeline() returns an array whenever it gets a callback, as here. The is_array() check
+        // is there for static analysis.
+        $keyMaps = array_values(array_unique(array_column($storables, 'keyMap')));
+
+        $replies = self::$cache_con->pipeline(static function ($pipe) use ($storables, $keyMaps, $ttl): void {
             foreach ($storables as $storable) {
                 $pipe->hset($storable['keyMap'], $storable['key'], $storable['storable']);
                 $pipe->expire($storable['keyMap'], $ttl);
                 $pipe->setex($storable['key'], $ttl, $storable['keyMap']);
             }
+
+            foreach ($keyMaps as $keyMap) {
+                $pipe->hlen($keyMap);
+            }
         });
+
+        $fieldCounts = is_array($replies) ? array_slice($replies, -count($keyMaps)) : [];
+
+        foreach ($keyMaps as $i => $keyMap) {
+            $this->_capCacheMap($keyMap, (int)($fieldCounts[$i] ?? 0));
+        }
 
         // One line for the batch, for the same reason the batched reader logs once: see the comment
         // there.
@@ -564,7 +637,6 @@ trait DaoCacheTrait
      *
      * @throws ReflectionException
      * @throws Exception
-     *
      */
     protected function _deleteCacheByKey(string $key, ?bool $isReverseKeyMap = true): bool
     {

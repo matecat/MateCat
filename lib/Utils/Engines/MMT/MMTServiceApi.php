@@ -93,7 +93,6 @@ class MMTServiceApi
       * @return array<string, mixed>|null
       * @throws MMTServiceApiException
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
     public function getAvailableLanguages(): ?array
     {
@@ -110,7 +109,6 @@ class MMTServiceApi
       * @return array<string, mixed>|null
       * @throws MMTServiceApiException
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
     public function signup(string $name, string $email, string $stripeToken): ?array
     {
@@ -125,38 +123,11 @@ class MMTServiceApi
       * @return array<string, mixed>|null
       * @throws MMTServiceApiException
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
     public function me(): ?array
     {
         return $this->send('GET', "$this->baseUrl/users/me");
     }
-
-    /**
-      * Get the Quality Estimation of a translation
-      *
-      * @param string $source
-      * @param string $target
-      * @param string $sentence
-      * @param string $translation
-      * @param string $mt_qe_engine_id
-      *
-      * @return array<string, mixed>|null
-      * @throws MMTServiceApiException
-      * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
-      */
-    public function qualityEstimation(string $source, string $target, string $sentence, string $translation, string $mt_qe_engine_id): ?array
-    {
-        return $this->send('GET', "$this->baseUrl/translate/qe", [
-            "source" => $source,
-            "target" => $target,
-            "sentence" => $sentence,
-            "translation" => $translation,
-            'purfect_version' => $mt_qe_engine_id
-        ]);
-    }
-
 
     /* Memory ------------------------------------------------------------------------------------------------------- */
 
@@ -164,7 +135,6 @@ class MMTServiceApi
       * @return array<string, mixed>|null
       * @throws MMTServiceApiException
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
     public function getAllMemories(): ?array
     {
@@ -178,7 +148,6 @@ class MMTServiceApi
       * @throws MMTServiceApiException
       * @throws MMTServiceApiRequestException
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
     public function getMemoryById(string $id): ?array
     {
@@ -194,7 +163,6 @@ class MMTServiceApi
       * @throws MMTServiceApiException
       * @throws MMTServiceApiRequestException
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
     public function createMemory(string $name, ?string $description = null, ?string $externalId = null): ?array
     {
@@ -212,7 +180,6 @@ class MMTServiceApi
       * @throws MMTServiceApiException
       * @throws MMTServiceApiRequestException
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
     public function deleteMemory(string $id): ?array
     {
@@ -227,7 +194,6 @@ class MMTServiceApi
       * @throws MMTServiceApiException
       * @throws MMTServiceApiRequestException
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
     public function importGlossary(string $id, array $data): ?array
     {
@@ -242,7 +208,6 @@ class MMTServiceApi
       * @throws MMTServiceApiException
       * @throws MMTServiceApiRequestException
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
     public function updateGlossary(string $id, array $data): ?array
     {
@@ -256,7 +221,6 @@ class MMTServiceApi
       * @throws MMTServiceApiException
       * @throws MMTServiceApiRequestException
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
     public function importJobStatus(string $uuid): ?array
     {
@@ -270,7 +234,6 @@ class MMTServiceApi
       * @throws MMTServiceApiException
       * @throws MMTServiceApiRequestException
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
     public function getMemory(string $id): ?array
     {
@@ -286,7 +249,6 @@ class MMTServiceApi
       * @throws MMTServiceApiException
       * @throws MMTServiceApiRequestException
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
     public function updateMemory(string $id, string $name, ?string $description = null): ?array
     {
@@ -303,7 +265,6 @@ class MMTServiceApi
       * @throws MMTServiceApiException
       * @throws MMTServiceApiRequestException
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
     public function connectMemories(array $externalIds): ?array
     {
@@ -325,7 +286,6 @@ class MMTServiceApi
       * @throws MMTServiceApiException
       * @throws MMTServiceApiRequestException
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
     public function addToMemoryContent(array|string $id, string $source, string $target, string $sentence, string $translation, string $session): ?array
     {
@@ -355,7 +315,6 @@ class MMTServiceApi
       * @throws MMTServiceApiException
       * @throws MMTServiceApiRequestException
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
     public function jobStatus(string $uuid): void
     {
@@ -374,7 +333,6 @@ class MMTServiceApi
       * @throws MMTServiceApiException
       * @throws MMTServiceApiRequestException
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
     public function updateMemoryContent(string $tuid, array $memory_keys, string $source, string $target, string $sentence, string $translation, string $session): void
     {
@@ -399,7 +357,6 @@ class MMTServiceApi
       * @throws MMTServiceApiException
       * @throws MMTServiceApiRequestException
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
     public function importIntoMemoryContent(string $id, string $tmx, ?string $compression = null): ?array
     {
@@ -416,7 +373,6 @@ class MMTServiceApi
       * @throws MMTServiceApiException
       * @throws MMTServiceApiRequestException
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
     public function getImportJob(string $uuid): ?array
     {
@@ -436,7 +392,6 @@ class MMTServiceApi
       * @throws MMTServiceApiException
       * @throws MMTServiceApiRequestException
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
     public function getContextVectorFromText(string $source, array $targets, string $text, ?array $hints = null, ?int $limit = null): ?array
     {
@@ -461,7 +416,6 @@ class MMTServiceApi
       * @throws MMTServiceApiException
       * @throws MMTServiceApiRequestException
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
     public function getContextVectorFromFile(string $source, array $targets, string $file, ?string $compression = null, ?array $hints = null, ?int $limit = null): ?array
     {
@@ -494,7 +448,6 @@ class MMTServiceApi
       * @throws MMTServiceApiException
       * @throws MMTServiceApiRequestException
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
     public function translate(
         string $source,
@@ -574,8 +527,7 @@ class MMTServiceApi
      * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
-     * @throws \Psr\Log\InvalidArgumentException
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
     protected function send(string $method, string $url, ?array $params = null, ?bool $multipart = false, ?int $timeout = null): ?array
     {

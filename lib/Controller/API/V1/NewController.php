@@ -50,7 +50,6 @@ use Model\Xliff\DTO\XliffRulesModel;
 use Model\Xliff\XliffConfigTemplateDao;
 use Plugins\Features\ProjectCompletion;
 use ReflectionException;
-use RuntimeException;
 use TypeError;
 use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
 use Utils\Constants\Constants;
@@ -181,12 +180,6 @@ class NewController extends KleinController
         $projectStructure->from_api = true;
 
         ProjectQueue::sendProject($projectStructure);
-
-        $errors = $projectStructure->result['errors'];
-
-        if (!empty($errors)) {
-            throw new RuntimeException('Project creation failure');
-        }
 
         $this->response->json([
             'status' => 'OK',
@@ -559,6 +552,7 @@ class NewController extends KleinController
         $metadata[ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value] = $mt_quality_value_in_editor;
 
         if ($mt_evaluation) {
+            $this->validateMtEvaluationLicense($engineStruct);
             $metadata[ProjectsMetadataMarshaller::MT_EVALUATION->value] = true;
         }
 
@@ -734,6 +728,33 @@ class NewController extends KleinController
     }
 
     /**
+     * Refuses MT evaluation, which the QE workflow turns on too, when nothing can score the MT
+     * matches: the engine computes no score of its own and its owner has no active Lara engine.
+     * An active Lara MT engine scores with its own license.
+     *
+     * Example: $this->validateMtEvaluationLicense($engineStruct); // throws for a DeepL engine of a user without Lara
+     *
+     * @throws InvalidArgumentException
+     * @throws Exception
+     */
+    private function validateMtEvaluationLicense(?AbstractEngine $mtEngine): void
+    {
+        if ($mtEngine === null || $mtEngine->hasBuiltInQualityEstimation() || $mtEngine instanceof Lara) {
+            return;
+        }
+
+        $laraEngine = EnginesFactory::getActiveInstanceByUserAndClass(
+            $mtEngine->getEngineRecord()->uid,
+            $this->getDatabase(),
+            Lara::class
+        );
+
+        if ($laraEngine === null) {
+            throw new InvalidArgumentException('MT evaluation requires an active Lara license', -2);
+        }
+    }
+
+    /**
      * @param string|false|null $subject
      *
      * @return string
@@ -844,7 +865,7 @@ class NewController extends KleinController
      *
      * @return array<int, mixed>
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     protected function validateTmAndKeys(string $private_tm_key = "", string $private_tm_key_json = ""): array
     {
@@ -989,8 +1010,8 @@ class NewController extends KleinController
      * @param array<string, mixed> $elem
      *
      * @return array<string, mixed>
-     * @throws \DomainException
-     * @throws \TypeError
+     * @throws DomainException
+     * @throws TypeError
      */
     private static function sanitizeTmKeyArr(array $elem): array
     {

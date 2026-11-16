@@ -127,7 +127,7 @@ const SegmentQRLine = ({
         </div>
       ) : null}
 
-      {showSuggestionSource ? (
+      {showSuggestionSource && !isNaN(suggestionMatch) ? (
         <div className="segment-content qr-spec">
           <div className="tm-percent">
             <Badge type={suggestionMatchClass}>

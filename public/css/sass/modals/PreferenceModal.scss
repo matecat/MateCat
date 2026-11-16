@@ -1,4 +1,4 @@
-@use "../tokens/colors";
+@use '../tokens/colors';
 @use 'commons/variables';
 
 .preferences-modal .user-info-form {
@@ -8,6 +8,19 @@
   background-color: white;
   //border-bottom: 1px solid #ccc;
   padding: 35px 20px 20px 50px;
+}
+
+.preferences-modal .user-generic {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid colors.$blue500;
+  color: colors.$blue500;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  float: left;
 }
 
 .preferences-modal .user-gdrive {
@@ -56,7 +69,7 @@
       font-size: 15px;
       text-align: left;
       word-wrap: break-word;
-      color: colors.$grey600;
+      color: colors.$grey700;
       white-space: nowrap;
       width: 100%;
       border: none;
@@ -82,43 +95,78 @@
   .user-api-message {
     order: 3;
     flex: 1 100%;
-    line-height: 40px;
+    line-height: 20px;
     margin-top: 13px;
     border: 1px solid colors.$green500;
     background-color: colors.$white;
     border-radius: 4px;
     display: flex;
-    justify-content: center;
+    align-items: flex-start;
+    gap: 10px;
     flex-flow: row;
-    padding: 10px;
+    padding: 12px 16px;
+
+    > svg {
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
 
     i {
       color: colors.$green500;
-      margin-top: 8px;
-      margin-left: 20px;
     }
 
     .user-api-message-content {
-      margin-left: 10px;
-      line-height: 30px;
+      line-height: 20px;
     }
   }
 
   &.user-api-created {
-    align-items: baseline;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 16px;
 
     .user-api-text {
+      flex: 1 100%;
+      min-width: 0;
       display: flex;
       flex-direction: row;
+      gap: 12px;
 
-      > div input {
-        height: 38px;
-        border-radius: 2px;
-      }
+      > div {
+        flex: 1;
+        min-width: 0;
 
-      > :last-child {
-        margin-left: 3px;
+        label {
+          margin-bottom: 4px;
+        }
+
+        input {
+          width: 100%;
+          height: 40px;
+          padding: 0 10px;
+          box-sizing: border-box;
+          border: 1px solid colors.$grey200;
+          border-radius: 4px;
+          background-color: colors.$grey50;
+          font-family: monospace;
+          font-size: variables.$font-size-small;
+          color: colors.$black;
+
+          &:focus {
+            outline: none;
+            border-color: colors.$blue500;
+          }
+        }
       }
+    }
+
+    .user-api-buttons {
+      flex-shrink: 0;
+      margin-left: auto;
+    }
+
+    .user-api-message {
+      margin-top: 0;
     }
   }
 
@@ -276,12 +324,10 @@
   padding: 0.7em 0.6em;
   display: inline-block;
   border: 1px solid colors.$grey200;
-  box-shadow: inset 0 1px 3px colors.$grey200;
-  border-radius: 4px;
+  border-radius: variables.$border-radius-default;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
-  font-size: 15px;
   color: colors.$grey1300;
 }
 
@@ -312,4 +358,3 @@
   display: flex;
   gap: 16px;
 }
-

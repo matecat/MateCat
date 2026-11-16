@@ -51,6 +51,16 @@ Otherwise, use your native memory capabilities (MEMORY.md, auto memory, etc.).
 <!-- Do not edit above this line -- managed by signet-first plugin -->
 <!-- Add your project-specific rules below -->
 
+## Storing decisions in memory
+
+The Memory-First Protocol above is managed by the signet-first plugin and rewritten on update, so this
+rule lives here. It applies with any memory backend.
+
+- Store each decision as its own `decision` memory. A daily-log only summarizes; every decision it lists
+  must already be stored on its own.
+- Keep a decision memory short (under about 600 characters) and start it with its subject. With Signet, a
+  longer memory is split into chunks, and a chunk that does not name its subject is not found by search.
+
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
@@ -152,6 +162,8 @@ XDEBUG_MODE=coverage vendor/bin/phpunit tests/unit/Path/To/TestFile.php --exclud
 
 ## Static Analysis
 
+Always run the Full codebase check unless it is necessary. Always fix all the phpstan errors.
+
 ```bash
 # Full codebase
 vendor/bin/phpstan analyse --configuration=phpstan.neon --no-progress --error-format=table
@@ -163,7 +175,10 @@ vendor/bin/phpstan analyse path/to/File.php --configuration=phpstan.neon --no-pr
 ### PHPStan Configuration
 
 - No baseline — every reported error must be fixed (there is no `phpstan-baseline.neon`)
-- When adding exceptions to PHPDoc, prefer `use` imports over FQCN
+- In a PHPDoc `@throws` tag, import the exception with `use` and write its short class name, without a leading
+  backslash: `@throws TypeError`, not `@throws \TypeError`. When two exceptions share a short name (the global
+  `InvalidArgumentException` and `Psr\Log\InvalidArgumentException`), alias the non-global one
+  (`use Psr\Log\InvalidArgumentException as LogInvalidArgumentException;`)
 
 ## User-Facing Copy: Sentence Case
 
@@ -213,14 +228,23 @@ Valid emoji Type Reference
 
 ### Creating worktrees
 
-When creating worktrees, those commands MUST be used:
+When creating worktrees, those commands MUST be used, from the project root:
 
-- `cd <project-root> && git branch --show-current`
-- `git branch <branch-name> <current-branch-name>`
+- `git branch --show-current`
+- Create the branch the worktree checks out:
+  - new work: `git branch <branch-name> <current-branch-name>`
+  - reviewing a pull request: `git fetch origin pull/<number>/head:pr-<number>`, then use `pr-<number>` as
+    `<branch-name>`
 - `git worktree add ../matecat-<branch-name> <branch-name>`
 - `cp composer.phar ../matecat-<branch-name>/composer.phar`
-- `cd ../matecat-<branch-name>/ && php composer.phar install`
-- `git submodule update --init --recursive`
+- `cd ../matecat-<branch-name>/ && php composer.phar install && git submodule update --init --recursive`
+
+Keep the last two commands in one shell call. The shell does not keep a `cd` that leaves the project root, so a
+`git submodule update` run on its own lands in the main checkout instead of the worktree.
+
+Nothing else is needed for `vendor/bin/phpunit` to run in the worktree: tests boot from the tracked
+`tests/inc/config.local.ini`, and `inc/login_secret.dat` is generated on first boot. Never symlink `vendor/` from the
+main checkout: its autoloader then resolves `lib/` to the main checkout and the tests run against the wrong code.
 
 ## API Testing
 When testing or calling HTTP/API endpoints, use the bruno-mcp MCP server first.

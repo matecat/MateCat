@@ -154,13 +154,10 @@ jest.mock('lodash', () => {
     each: actual.each,
     forEach: actual.forEach,
     isUndefined: (v) => typeof v === 'undefined',
+    debounce: (fn) => fn,
   }
 })
-jest.mock('lodash/function', () => ({
-  debounce: (fn) => fn,
-}))
 jest.mock('immutable', () => ({fromJS: jest.fn()}))
-jest.mock('lodash/array', () => ({union: jest.fn()}))
 
 jest.mock('../utils/speech2text', () => ({
   __esModule: true,
@@ -188,6 +185,7 @@ jest.mock('../utils/segmentLocalStorage', () => ({
   setLastSegmentFromLocalStorage: jest.fn(),
 }))
 
+import React from 'react'
 import SegmentActions from './SegmentActions'
 import SegmentUtils from '../utils/segmentUtils'
 import ModalsActions from './ModalsActions'
@@ -289,11 +287,22 @@ describe('SegmentActions.handleClickOnReadOnly', () => {
 
     expect(ModalsActions.showModalComponent).toHaveBeenCalledWith(
       'Alert',
-      expect.objectContaining({
-        text: expect.stringContaining('Segment is locked'),
-      }),
+      expect.any(Object),
       'Locked segment',
     )
+
+    // `react` is mocked to a bare `createElement` stub in this file (see the
+    // jest.mock('react', ...) above), so the locked-segment alert's JSX `text`
+    // can't be rendered here — instead verify the message was built by
+    // inspecting the arguments passed to the mocked createElement.
+    const lockedTextCall = React.createElement.mock.calls.find((call) =>
+      call.some(
+        (arg) =>
+          typeof arg === 'string' &&
+          arg.includes("locked and shouldn't be edited"),
+      ),
+    )
+    expect(lockedTextCall).toBeDefined()
   })
 
   test('does not show disabled modal when translation_disabled is false', () => {
@@ -2013,5 +2022,16 @@ describe('SegmentActions.refreshTagMap', () => {
     expect(renderSpy).toHaveBeenCalledWith([{sid: '1'}], '1')
     expect(AppDispatcher.dispatch).toHaveBeenCalled()
     renderSpy.mockRestore()
+  })
+})
+
+describe('SegmentActions.setCurrentSegment', () => {
+  // MATECAT-5NX: called on mount with the sid of a segment that has none
+  test('does nothing when no segment id is given', () => {
+    jest.clearAllMocks()
+
+    expect(() => SegmentActions.setCurrentSegment(undefined)).not.toThrow()
+    expect(setLastSegmentFromLocalStorage).not.toHaveBeenCalled()
+    expect(setCurrentSegment).not.toHaveBeenCalled()
   })
 })

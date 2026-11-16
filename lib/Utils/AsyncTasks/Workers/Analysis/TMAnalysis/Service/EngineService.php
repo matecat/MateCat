@@ -10,22 +10,23 @@ use Model\FeaturesBase\Hook\Event\Filter\AnalysisBeforeMTGetContributionEvent;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use TypeError;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\EngineResolverInterface;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\EngineServiceInterface;
+use Utils\Engines\AbstractEngine;
+use Utils\Engines\EnginesFactory;
+use Utils\Engines\Lara\LaraQualityEstimator;
 use Utils\Logger\LoggerFactory;
 use Utils\TaskRunner\Commons\QueueElement;
 use Utils\TaskRunner\Exceptions\NotSupportedMTException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 
-class EngineService implements EngineServiceInterface
+class EngineService
 {
-    private EngineResolverInterface $engineResolver;
     private IDatabase $database;
+    private LaraQualityEstimator $qualityEstimator;
 
-    public function __construct(EngineResolverInterface $engineResolver, IDatabase $database)
+    public function __construct(IDatabase $database, LaraQualityEstimator $qualityEstimator)
     {
-        $this->engineResolver = $engineResolver;
         $this->database = $database;
+        $this->qualityEstimator = $qualityEstimator;
     }
 
     /**
@@ -41,7 +42,7 @@ class EngineService implements EngineServiceInterface
      */
     public function getTMMatches(array $config, FeatureSet $featureSet, ?int $mtPenalty): array
     {
-        $tmsEngine = $this->engineResolver->getInstance((int)$config['id_tms']);
+        $tmsEngine = $this->getEngine((int)$config['id_tms']);
         $tmsEngine->setFeatureSet($featureSet);
 
         $engineConfig = $tmsEngine->getConfigStruct();
@@ -84,7 +85,7 @@ class EngineService implements EngineServiceInterface
         $mt_result = [];
 
         try {
-            $mtEngine = $this->engineResolver->getInstance((int)$config['id_mt_engine']);
+            $mtEngine = $this->getEngine((int)$config['id_mt_engine']);
             $mtEngine->setFeatureSet($featureSet);
 
             $mtEngine->setAnalysis();
@@ -125,6 +126,7 @@ class EngineService implements EngineServiceInterface
             $engineConfig = $analysisEvent->getConfig();
 
             $engineResponse = $mtEngine->get($engineConfig);
+            $this->qualityEstimator->scoreIfRequested($mtEngine, $engineResponse, $engineConfig);
 
             if ($engineResponse->responseStatus >= 400) {
                 return [];
@@ -137,7 +139,7 @@ class EngineService implements EngineServiceInterface
                 return [];
             }
         } catch (Exception $e) {
-            LoggerFactory::doJsonLog($e->getMessage());
+            LoggerFactory::getLogger('engines')->error($e->getMessage());
         }
 
         return $mt_result;
@@ -182,5 +184,17 @@ class EngineService implements EngineServiceInterface
 
             return true;
         });
+    }
+
+    /**
+     * Builds the engine with this id, fresh for each call; tests override it.
+     *
+     * Example: $mtEngine = $this->getEngine((int)$config['id_mt_engine']);
+     *
+     * @throws Exception when the engine cannot be found or built
+     */
+    protected function getEngine(int $id): AbstractEngine
+    {
+        return EnginesFactory::getInstance($id, $this->database, AbstractEngine::class);
     }
 }
