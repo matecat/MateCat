@@ -1,5 +1,9 @@
-import React, {useEffect, useState} from 'react'
-import Joyride, {STATUS} from 'react-joyride'
+import React, {lazy, Suspense, useEffect, useState} from 'react'
+
+// react-joyride is only needed while a tour can run: users who dismissed it never download it.
+const Joyride = lazy(() => import('react-joyride'))
+// react-joyride's STATUS.FINISHED and STATUS.SKIPPED, inlined so the library stays out of the page.
+const TOUR_DONE_STATUSES = ['finished', 'skipped']
 export const ONBOARDING_PAGE = {
   HOME: 'home',
   CATTOOL: 'cattool',
@@ -63,9 +67,7 @@ export const OnboardingTooltips = ({show, page}) => {
   }
   const closeCallback = (data) => {
     const {status, type} = data
-    const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED]
-
-    if (finishedStatuses.includes(status)) {
+    if (TOUR_DONE_STATUSES.includes(status)) {
       setRun(false)
       localStorage.setItem(onBoardingLocalStorageName + page, 1)
     }
@@ -78,18 +80,20 @@ export const OnboardingTooltips = ({show, page}) => {
   }, [show])
 
   return !localStorageItem ? (
-    <Joyride
-      callback={closeCallback}
-      steps={steps[page]}
-      run={run}
-      styles={{
-        options: {
-          primaryColor: '#0099cc',
-        },
-        tooltipContainer: {
-          textAlign: 'left',
-        },
-      }}
-    ></Joyride>
+    <Suspense fallback={null}>
+      <Joyride
+        callback={closeCallback}
+        steps={steps[page]}
+        run={run}
+        styles={{
+          options: {
+            primaryColor: '#0099cc',
+          },
+          tooltipContainer: {
+            textAlign: 'left',
+          },
+        }}
+      ></Joyride>
+    </Suspense>
   ) : null
 }

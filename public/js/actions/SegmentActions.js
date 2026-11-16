@@ -1,6 +1,5 @@
 import React from 'react'
-import {each, forEach, isUndefined} from 'lodash'
-import {debounce} from 'lodash/function'
+import {each, forEach, isUndefined, debounce} from 'lodash'
 import $ from 'jquery'
 
 import AppDispatcher from '../stores/AppDispatcher'
@@ -934,6 +933,7 @@ const SegmentActions = {
       let segment = SegmentStore.getSegmentByIdToJS(request.sid)
       if (
         segment &&
+        request.text &&
         (typeof segment.glossary === 'undefined' || sid === request.sid)
       ) {
         const source = SegmentStringUtils.removePlaceholdersForGlossary(
@@ -1733,6 +1733,7 @@ const SegmentActions = {
     })
   },
   setCurrentSegment: function (id_segment) {
+    if (id_segment == null) return
     setLastSegmentFromLocalStorage(id_segment.toString())
     const requestData = {
       action: 'setCurrentSegment',

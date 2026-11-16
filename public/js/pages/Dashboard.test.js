@@ -9,6 +9,7 @@ import ManageConstants from '../constants/ManageConstants'
 import UserConstants from '../constants/UserConstants'
 import AppDispatcher from '../stores/AppDispatcher'
 import {fromJS} from 'immutable'
+import * as getProjectsModule from '../api/getProjects/getProjects'
 
 test('renders properly', async () => {
   mswServer.use(
@@ -163,3 +164,20 @@ test('renders properly', async () => {
     await Promise.resolve()
   })
 }, 10000)
+
+// MATECAT-5MP: searching before the user's teams are loaded
+test('a search before the team is loaded does not request projects', async () => {
+  // The user request never answers, so the team stays unset
+  mswServer.use(http.get('*api/app/user', () => new Promise(() => {})))
+  global.config = {isLoggedIn: true}
+  const getProjectsSpy = jest.spyOn(getProjectsModule, 'getProjects')
+
+  render(<Dashboard />)
+  await act(async () => {
+    ManageActions.filterProjects(undefined, 'my project')
+    await Promise.resolve()
+  })
+
+  expect(getProjectsSpy).not.toHaveBeenCalled()
+  getProjectsSpy.mockRestore()
+})

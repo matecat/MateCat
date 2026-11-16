@@ -22,6 +22,7 @@ import {cloneDeep, isEqual} from 'lodash'
 import {v4 as uuidV4} from 'uuid'
 import IconAdd from '../../../../../img/icons/IconAdd'
 import Switch from '../../../../../img/icons/Switch'
+import {SELECT_HEIGHT} from '../../../../constants/Constants'
 
 export const LanguagesExceptions = ({breakdowns, updateExceptions}) => {
   const {analysisTemplates} = useContext(SettingsPanelContext)
@@ -235,6 +236,7 @@ const LanguageException = ({
           dropdownClassName="select-dropdown__wrapper-portal"
           showSearchBar={true}
           options={languages}
+          maxHeightDroplist={SELECT_HEIGHT}
           onSelect={(option) => {
             setSource(option)
             setModified(true)
@@ -269,6 +271,7 @@ const LanguageException = ({
           dropdownClassName="select-dropdown__wrapper-portal"
           showSearchBar={true}
           options={languages}
+          maxHeightDroplist={SELECT_HEIGHT}
           onSelect={(option) => {
             setTarget(option)
             setModified(true)

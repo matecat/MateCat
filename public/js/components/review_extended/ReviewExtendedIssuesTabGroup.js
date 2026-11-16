@@ -1,13 +1,32 @@
-import React, {useState} from 'react'
+import React, {useEffect, useMemo, useState} from 'react'
 import PropTypes from 'prop-types'
 import classnames from 'classnames'
+import SegmentStore from '../../stores/SegmentStore'
+import SegmentConstants from '../../constants/SegmentConstants'
 
 const ReviewExtendedIssuesTabGroup = ({tabs, selectedTabId}) => {
   const [selectedTab, setSelectedTab] = useState(
     tabs.find(({id}) => id === selectedTabId) ?? tabs[0],
   )
 
-  const onChangeTab = (id) => setSelectedTab(tabs.find((tab) => tab.id === id))
+  const onChangeTab = useMemo(
+    () => (id) => setSelectedTab(tabs.find((tab) => tab.id === id)),
+    [tabs],
+  )
+
+  useEffect(() => {
+    const issueAdded = () =>
+      onChangeTab(
+        config.secondRevisionsCount && config.secondRevisionsCount > 0
+          ? 'r2'
+          : 'r1',
+      )
+    SegmentStore.addListener(SegmentConstants.ISSUE_ADDED, issueAdded)
+
+    return () => {
+      SegmentStore.removeListener(SegmentConstants.ISSUE_ADDED, issueAdded)
+    }
+  }, [onChangeTab])
 
   return (
     <div className="review-extended-issues-tab-group">
