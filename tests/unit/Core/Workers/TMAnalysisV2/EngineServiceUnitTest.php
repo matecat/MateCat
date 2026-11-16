@@ -6,9 +6,9 @@ use Exception;
 use Matecat\TestHelpers\AbstractTest;
 use Model\FeaturesBase\FeatureSet;
 use PHPUnit\Framework\Attributes\Test;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\DefaultEngineResolver;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\EngineService;
 use Utils\Engines\AbstractEngine;
+use Utils\Engines\Lara\LaraQualityEstimator;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\TaskRunner\Commons\Params;
 use Utils\TaskRunner\Commons\QueueElement;
@@ -17,18 +17,19 @@ use Utils\TaskRunner\Exceptions\ReQueueException;
 
 class EngineServiceUnitTest extends AbstractTest
 {
-    private function makeEngineService(AbstractEngine $tmEngine, ?AbstractEngine $mtEngine = null): EngineService
-    {
-        $resolver = $this->createStub(DefaultEngineResolver::class);
-        $resolver->method('getInstance')->willReturnCallback(function (int $id) use ($tmEngine, $mtEngine) {
-            if ($id === 900) {
-                return $tmEngine;
-            }
+    private function makeEngineService(
+        AbstractEngine $tmEngine,
+        ?AbstractEngine $mtEngine = null,
+        ?LaraQualityEstimator $qualityEstimator = null
+    ): EngineService {
+        $service = new TestableEngineService(
+            obtainTestDatabase(),
+            $qualityEstimator ?? $this->createStub(LaraQualityEstimator::class)
+        );
+        $service->engines = [900 => $tmEngine];
+        $service->defaultEngine = $mtEngine ?? $tmEngine;
 
-            return $mtEngine ?? $tmEngine;
-        });
-
-        return new EngineService($resolver, obtainTestDatabase());
+        return $service;
     }
 
     private function makeFeatureSet(): FeatureSet
@@ -205,6 +206,42 @@ class EngineServiceUnitTest extends AbstractTest
     }
 
     #[Test]
+    public function getMTTranslationScoresTheResponseWithLara(): void
+    {
+        $response = new GetMemoryResponse([
+            'matches'         => [[
+                'id'               => '1',
+                'segment'          => 'Hello',
+                'translation'      => 'Ciao mondo',
+                'match'            => 0.75,
+                'created-by'       => 'MT!',
+                'create-date'      => '2024-01-01 12:00:00',
+                'last-update-date' => '2024-01-01 12:00:00',
+                'tm_properties'    => null,
+            ]],
+            'responseStatus'  => 200,
+            'responseDetails' => 'OK',
+        ]);
+        $mtEngine = $this->makeEngineStub($response);
+
+        $estimator = $this->createMock(LaraQualityEstimator::class);
+        $estimator->expects($this->once())->method('scoreIfRequested')
+            ->with($mtEngine, $response, $this->callback(
+                static fn(array $config): bool => $config['segment'] === 'Hello' && $config['include_score'] === false
+            ))
+            ->willReturnCallback(static function (AbstractEngine $engine, GetMemoryResponse $mtResponse): void {
+                $mtResponse->matches[0]->score = 0.92;
+            });
+
+        $service = $this->makeEngineService($this->createStub(AbstractEngine::class), $mtEngine, $estimator);
+
+        $result = $service->getMTTranslation($this->makeMtConfig(), $this->makeFeatureSet(), null, $this->makeQueueElement());
+
+        $this->assertSame('Ciao mondo', $result['translation']);
+        $this->assertSame(0.92, $result['score']);
+    }
+
+    #[Test]
     public function getMTTranslation_response_with_status_400_returns_empty(): void
     {
         $response = new GetMemoryResponse([
@@ -288,5 +325,17 @@ class EngineServiceUnitTest extends AbstractTest
         $result = $service->getMTTranslation($this->makeMtConfig(), $this->makeFeatureSet(), null, $this->makeQueueElement());
 
         $this->assertSame([], $result);
+    }
+}
+
+class TestableEngineService extends EngineService
+{
+    /** @var array<int, AbstractEngine> */
+    public array $engines = [];
+    public AbstractEngine $defaultEngine;
+
+    protected function getEngine(int $id): AbstractEngine
+    {
+        return $this->engines[$id] ?? $this->defaultEngine;
     }
 }

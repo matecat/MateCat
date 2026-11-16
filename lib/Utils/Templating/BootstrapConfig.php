@@ -47,8 +47,11 @@ class BootstrapConfig implements Stringable
      * `config.flash_messages` (common.html), which is the name `commonUtils.js:570` reads. Carrying it
      * here too would put the same payload on the page twice under two names, one of which nothing
      * reads — and would put it on the three pages that render no footer macro at all.
+     *
+     * `x_plugin_csp` holds the Content-Security-Policy sources the loaded plugins add, which the CSP meta
+     * tag already carries. Nothing in the page's JavaScript reads them.
      */
-    private const array EXCLUDED = ['x_nonce_unique_id', 'vite_html', 'footer_js', 'config_js', 'flashMessages'];
+    private const array EXCLUDED = ['x_nonce_unique_id', 'vite_html', 'footer_js', 'config_js', 'flashMessages', 'x_plugin_csp'];
 
     private const int JSON_FLAGS = JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE;
 

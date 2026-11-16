@@ -591,6 +591,24 @@ class NewControllerValidationMethodsTest extends AbstractTest
         $this->assertInstanceOf(FiltersConfigTemplateStruct::class, $result);
     }
 
+    /**
+     * The inline payload is how the FedEx connector sends the frontmatter settings on /api/v1/new.
+     */
+    #[Test]
+    public function validateFiltersExtractionParameters_hydrates_markdown(): void
+    {
+        $result = $this->invokeMethod(
+            'validateFiltersExtractionParameters',
+            ['{"markdown":{"extract_frontmatter":true,"do_not_translate_frontmatter_keys":["slug"]}}', null]
+        );
+
+        $this->assertInstanceOf(FiltersConfigTemplateStruct::class, $result);
+        $this->assertSame(
+            ['extract_frontmatter' => true, 'do_not_translate_frontmatter_keys' => ['slug']],
+            $result->getMarkdown()->jsonSerialize()
+        );
+    }
+
     // ──────────────── validateMTQEParametersOrDefault() ────────────────
 
     #[Test]

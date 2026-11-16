@@ -437,6 +437,7 @@ export const VISIBLE_PLACEHOLDER_CTYPES = new Set([
   'x-percent-variable',
   'x-smart-count',
   'x-double-square-brackets',
+  'x-single-square-brackets',
   'x-dollar-curly-brackets',
 ])
 

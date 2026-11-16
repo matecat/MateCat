@@ -28,21 +28,13 @@ import {
   BUTTON_TYPE,
 } from '../common/Button/Button'
 import IconClose from '../../../img/icons/IconClose'
+import {SETTINGS_PANEL_TABS} from './SettingsPanelConstants'
 
 let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
   'openTab',
 )
 
-export const SETTINGS_PANEL_TABS = {
-  translationMemoryGlossary: 'tm',
-  machineTranslation: 'mt',
-  other: 'other',
-  analysis: 'analysis',
-  qualityFramework: 'qf',
-  fileImport: 'fileImport',
-  editorSettings: 'editorSettings',
-  editorOther: 'editorOther',
-}
+export {SETTINGS_PANEL_TABS}
 
 const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
   return [
@@ -120,7 +112,7 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
 export const SettingsPanel = ({
   onClose,
   isOpened,
-  tabOpen = SETTINGS_PANEL_TABS.translationMemoryGlossary,
+  tabOpen,
   user,
   tmKeys,
   setTmKeys,
@@ -138,6 +130,7 @@ export const SettingsPanel = ({
   fileImportFiltersParamsTemplates = {},
   fileImportXliffSettingsTemplates = {},
   subtemplatesNotSaved,
+  onTabOpened,
 }) => {
   const [isVisible, setIsVisible] = useState(false)
   const [tabs, setTabs] = useState(() => {
@@ -147,7 +140,8 @@ export const SettingsPanel = ({
         (value) => value === tabOpenFromQueryString,
       )
         ? tabOpenFromQueryString === tab.id
-        : tabOpen === tab.id,
+        : (tabOpen ?? SETTINGS_PANEL_TABS.translationMemoryGlossary) ===
+          tab.id,
     }))
 
     tabOpenFromQueryString = false
@@ -170,7 +164,27 @@ export const SettingsPanel = ({
     },
   })
 
+  const openedTabId = tabs.find((tab) => tab.isOpened)?.id
+
+  useEffect(() => {
+    if (isOpened && openedTabId) onTabOpened?.(openedTabId)
+  }, [isOpened, openedTabId, onTabOpened])
+
   const wrapperRef = useRef()
+
+  useEffect(() => {
+    if (!tabOpen) return
+
+    setTabs(() => {
+      const updatedState = DEFAULT_CONTENTS().map((tab) => ({
+        ...tab,
+        isOpened: tabOpen === tab.id,
+      }))
+
+      tabOpenFromQueryString = false
+      return updatedState
+    })
+  }, [tabOpen])
 
   useEffect(() => {
     setIsVisible(typeof isOpened !== 'undefined' ? isOpened : true)
@@ -355,6 +369,7 @@ export const SettingsPanel = ({
 SettingsPanel.propTypes = {
   onClose: PropTypes.func.isRequired,
   isOpened: PropTypes.bool,
+  onTabOpened: PropTypes.func,
   tabOpen: PropTypes.oneOf(Object.values(SETTINGS_PANEL_TABS)),
   user: PropTypes.object,
   tmKeys: PropTypes.array,

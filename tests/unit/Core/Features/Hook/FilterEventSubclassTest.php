@@ -12,6 +12,7 @@ use Model\FeaturesBase\Hook\Event\Filter\AppendInitialTemplateVarsEvent;
 use Model\FeaturesBase\Hook\Event\Filter\CharacterLengthCountEvent;
 use Model\FeaturesBase\Hook\Event\Filter\CheckTagMismatchEvent;
 use Model\FeaturesBase\Hook\Event\Filter\CheckTagPositionsEvent;
+use Model\FeaturesBase\Hook\Event\Filter\ContentSecurityPolicySourcesEvent;
 use Model\FeaturesBase\Hook\Event\Filter\CorrectTagErrorsEvent;
 use Model\FeaturesBase\Hook\Event\Filter\DecodeInstructionsEvent;
 use Model\FeaturesBase\Hook\Event\Filter\EncodeInstructionsEvent;
@@ -70,6 +71,7 @@ class FilterEventSubclassTest extends AbstractTest
             'CharacterLengthCount' => [CharacterLengthCountEvent::class, 'characterLengthCount'],
             'CheckTagMismatch' => [CheckTagMismatchEvent::class, 'checkTagMismatch'],
             'CheckTagPositions' => [CheckTagPositionsEvent::class, 'checkTagPositions'],
+            'ContentSecurityPolicySources' => [ContentSecurityPolicySourcesEvent::class, 'contentSecurityPolicySources'],
             'CorrectTagErrors' => [CorrectTagErrorsEvent::class, 'correctTagErrors'],
             'DecodeInstructions' => [DecodeInstructionsEvent::class, 'decodeInstructions'],
             'EncodeInstructions' => [EncodeInstructionsEvent::class, 'encodeInstructions'],

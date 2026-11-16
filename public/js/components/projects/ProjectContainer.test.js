@@ -1,4 +1,4 @@
-import {act, render, screen} from '@testing-library/react'
+import {act, fireEvent, render, screen} from '@testing-library/react'
 import React from 'react'
 import {createRoot} from 'react-dom/client'
 import {ProjectContainer} from './ProjectContainer'
@@ -60,7 +60,7 @@ const fakeProjectsData = {
           pee: 0,
           tte: 0,
           private_tm_key: [
-            {key: 'c52da4a03d6aea33f242', r: 1, w: 1, name: 'Test'},
+            {key: '00000000000000000007', r: 1, w: 1, name: 'Test'},
           ],
           warnings_count: 0,
           warning_segments: [],
@@ -132,7 +132,7 @@ const fakeProjectsData = {
           pee: 0,
           tte: 0,
           private_tm_key: [
-            {key: 'c52da4a03d6aea33f242', r: 1, w: 1, name: 'Test'},
+            {key: '00000000000000000007', r: 1, w: 1, name: 'Test'},
           ],
           warnings_count: 0,
           warning_segments: [],
@@ -204,7 +204,7 @@ const fakeProjectsData = {
           pee: 0,
           tte: 0,
           private_tm_key: [
-            {key: 'c52da4a03d6aea33f242', r: 1, w: 1, name: 'Test'},
+            {key: '00000000000000000007', r: 1, w: 1, name: 'Test'},
           ],
           warnings_count: 0,
           warning_segments: [],
@@ -276,7 +276,7 @@ const fakeProjectsData = {
           pee: 0,
           tte: 0,
           private_tm_key: [
-            {key: 'c52da4a03d6aea33f242', r: 1, w: 1, name: 'Test'},
+            {key: '00000000000000000007', r: 1, w: 1, name: 'Test'},
           ],
           warnings_count: 0,
           warning_segments: [],
@@ -714,4 +714,70 @@ test('keeps the zebra stripe correct for a row revealed inside the AnimatedColla
   expect(screen.getByTestId(502)).not.toHaveClass(
     'job-container-background--striped',
   )
+})
+
+test('counts language pairs per job, so a split job counts once', async () => {
+  window.ResizeObserver = ResizeObserver
+  executeMswServer()
+
+  const jobTemplate = fakeProjectsData.project.data.jobs[0]
+  const renderWithJobs = (jobs) => {
+    const {props} = getFakeProperties({
+      ...fakeProjectsData.project,
+      data: {...fakeProjectsData.project.data, jobs},
+    })
+    return render(
+      <ApplicationWrapperContext.Provider
+        value={{isUserLogged: true, userInfo: userMock}}
+      >
+        <ProjectsBulkActionsContext.Provider
+          value={{jobsBulk: [], onCheckedProject, onCheckedJob}}
+        >
+          <ProjectContainer {...props} />
+        </ProjectsBulkActionsContext.Provider>
+      </ApplicationWrapperContext.Provider>,
+    )
+  }
+
+  const {unmount} = renderWithJobs([{...jobTemplate, id: 400}])
+  expect(screen.getByTestId('project-language-pairs')).toHaveTextContent(
+    '1 language pair',
+  )
+  unmount()
+
+  renderWithJobs([
+    {
+      ...jobTemplate,
+      id: 401,
+      password: 'pwd401',
+      source: 'en-US',
+      target: 'it-IT',
+    },
+    {
+      ...jobTemplate,
+      id: 402,
+      password: 'pwd402-a',
+      source: 'en-US',
+      target: 'fr-FR',
+    },
+    {
+      ...jobTemplate,
+      id: 402,
+      password: 'pwd402-b',
+      source: 'en-US',
+      target: 'fr-FR',
+    },
+    {
+      ...jobTemplate,
+      id: 402,
+      password: 'pwd402-c',
+      source: 'en-US',
+      target: 'fr-FR',
+    },
+  ])
+  const pairs = screen.getByTestId('project-language-pairs')
+  expect(pairs).toHaveTextContent('2 language pairs')
+
+  fireEvent.pointerOver(pairs)
+  expect(await screen.findByText('en-US → it-IT, fr-FR')).toBeInTheDocument()
 })
