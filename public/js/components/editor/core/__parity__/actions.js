@@ -1,30 +1,14 @@
 // The edit harness shared by the parity tests (editParity.test.js, domParity.test.js): segments with named
-// positions, and each edit as Draft makes it (the pure calls Editarea makes, in the same order) and as CodeMirror makes
-// it (its real api, keymap and DOM handlers). Test support only: it imports Draft, and goes away with Draft at M5.
-import {
-  EditorState as DraftState,
-  Modifier,
-  SelectionState,
-  getDefaultKeyBinding,
-} from 'draft-js'
-import keyCommandPlainBackspace from 'draft-js/lib/keyCommandPlainBackspace'
-import keyCommandPlainDelete from 'draft-js/lib/keyCommandPlainDelete'
-import keyCommandInsertNewline from 'draft-js/lib/keyCommandInsertNewline'
+// positions, and each edit as the CodeMirror target makes it (its real api, keymap and DOM handlers). What Draft saved
+// and drew for the same edits is frozen in core/__golden__.
 import {runScopeHandlers} from '@codemirror/view'
-import {cloneDeep} from 'lodash'
-import DraftMatecatUtils from '../../../segments/utils/DraftMatecatUtils'
-import updateOffsetBasedOnEditorState from '../../../segments/utils/DraftMatecatUtils/updateOffsetBasedOnEditorState'
-import canDecorateRange from '../../../segments/utils/DraftMatecatUtils/canDecorateRange'
-import {LEXIQA_DECORATOR} from '../../../segments/utils/DraftMatecatUtils/editorConstants'
-import LexiqaUtils from '../../../../utils/lxq.main'
-import resolveEditorCommand from '../../../segments/utils/DraftMatecatUtils/resolveEditorCommand'
-import buildPastedEditorState from '../../../segments/utils/DraftMatecatUtils/buildPastedEditorState'
-import resolveDrop from '../../../segments/utils/DraftMatecatUtils/resolveDrop'
-import insertTag from '../../../segments/utils/DraftMatecatUtils/TagMenu/insertTag'
-import checkForMissingTags from '../../../segments/utils/DraftMatecatUtils/TagMenu/checkForMissingTag'
-import matchTypingSequence from '../../../../utils/matchTypingSequence/matchTypingSequence'
-import {tagSignatures} from '../../../../utils/segmentText/tagModel'
 import TextUtils from '../../../../utils/textUtils'
+import {formatText} from '../../../../utils/segmentText/textUtils'
+import checkForMissingTags from '../../../../utils/segmentText/checkForMissingTag'
+import {
+  sourceStoreData,
+  translationUpdate,
+} from '../../../../utils/segmentText/segmentStoreData'
 import {
   readSegmentClipboard,
   segmentClipboardHtml,
@@ -270,126 +254,12 @@ export const findMarkers = (text) => {
 }
 export const stripMarkers = (text) => text.replace(/[-]/g, '')
 
-// ---------- Draft ----------
-export const draftLoad = (raw) =>
-  DraftMatecatUtils.encodeContent(DraftState.createEmpty(), raw).editorState
-export const draftSave = (state) =>
-  DraftMatecatUtils.decodeSegment(state).decodedSegment
-export const blockTexts = (state) =>
-  state
-    .getCurrentContent()
-    .getBlocksAsArray()
-    .map((b) => b.getText())
-
-// {block, offset} of each marker; the marked segment must load as the clean one plus the markers.
-export const draftPoints = (markedRaw, cleanState) => {
-  const marked = blockTexts(draftLoad(markedRaw))
-  if (marked.map(stripMarkers).join('\n') !== blockTexts(cleanState).join('\n'))
-    throw new Error(`markers move the text of ${markedRaw}`)
-  const points = []
-  marked.forEach((text, block) => {
-    Object.entries(findMarkers(text)).forEach(([k, offset]) => {
-      points[k] = {block, offset}
-    })
-  })
-  return points
-}
-
-export const draftSelection = (state, anchor, head = anchor) => {
-  const blocks = state.getCurrentContent().getBlocksAsArray()
-  const anchorKey = blocks[anchor.block].getKey()
-  const focusKey = blocks[head.block].getKey()
-  return SelectionState.createEmpty(anchorKey).merge({
-    anchorKey,
-    anchorOffset: anchor.offset,
-    focusKey,
-    focusOffset: head.offset,
-    isBackward:
-      head.block < anchor.block ||
-      (head.block === anchor.block && head.offset < anchor.offset),
-    hasFocus: true,
-  })
-}
-
-export const typingWordJoiner = matchTypingSequence(
-  [
-    [50, 98],
-    [48, 96],
-    [54, 102],
-    [48, 96],
-  ],
-  2000,
-)
-
-// A key on the Draft target: Editarea myKeyBindingFn (Editarea.js:586-607) then handleKeyCommand
-// (Editarea.js:609-680), then Draft's own command when the handler says not-handled (draft-js editOnKeyDown).
-// `menu` is the tag menu part of the Editarea state (displayPopover, triggerText, focusedTagIndex, suggestions).
-export const draftKey = (state, e, menu = {open: false}) => {
-  const resolved = resolveEditorCommand(e, {
-    displayPopover: menu.open,
-    editorState: state,
-    isRTL: Boolean(config.isTargetRTL),
-    isChromeBook: false,
-    hasSpaceTag: tagSignatures.space,
-    selectionIsCaret: () => state.getSelection().isCollapsed(),
-    typingWordJoiner,
-  })
-  if (resolved.clearTriggerText) menu.trigger = null
-  // typeTextInEditor (Editarea.js:555-583)
-  if (resolved.typeText) {
-    state = DraftMatecatUtils.insertText(state, resolved.typeText)
-    menu.trigger = resolved.typeText
-  }
-  if (resolved.editorState) state = resolved.editorState
-  const command =
-    resolved.command === null ? getDefaultKeyBinding(e) : resolved.command
-  const struct = (name) => DraftMatecatUtils.structFromName(name)
-  switch (command) {
-    case 'toggle-tag-menu':
-      if (menu.sourceTags?.length) menu.open = true
-      return state
-    // acceptTagMenuSelection (Editarea.js:935-975)
-    case 'enter-press': {
-      const entries = [...menu.missingTags, ...menu.sourceTags]
-      menu.open = false
-      return insertTag(entries[menu.focused ?? 0], state, menu.trigger)
-    }
-    // insertTagAtSelection (Editarea.js:682-710)
-    case 'insert-tab-tag':
-      return insertTag(struct('tab'), state)
-    case 'insert-nbsp-tag':
-      return insertTag(struct('nbsp'), state)
-    case 'insert-word-joiner-tag':
-      return insertTag(struct('wordJoiner'), state)
-    // not-handled: Draft's own commands
-    case 'backspace':
-      return keyCommandPlainBackspace(state)
-    case 'delete':
-      return keyCommandPlainDelete(state)
-    case 'split-block':
-      return keyCommandInsertNewline(state)
-    default:
-      return state
-  }
-}
-
-// What the store holds for the tag menu: the source tag map (SegmentSource, encodeContent's tagRange) and the
-// missing tags Editarea computes after every change (updateTranslationInStore, Editarea.js:309-321).
-export const tagSuggestions = (fixture, targetState) => {
-  const sourceTagMap = DraftMatecatUtils.encodeContent(
-    DraftState.createEmpty(),
-    fixture.source,
-  ).tagRange
-  const {entitiesRange} = DraftMatecatUtils.decodeSegment(targetState)
-  const targetTagMap = DraftMatecatUtils.matchTagInEditor(
-    targetState,
-    entitiesRange,
-  )
-  const {missingTags, sourceTags} = checkForMissingTags(
-    sourceTagMap,
-    targetTagMap,
-  )
-  return {missingTags, sourceTags, sourceTagMap, targetTagMap}
+// What the store holds for the tag menu: the source tag map (sourceStoreData's tagRange) and the source tags missing
+// from the loaded target (translationUpdate, as TargetEditor updates the store).
+export const tagSuggestions = (fixture) => {
+  const sourceTagMap = sourceStoreData(fixture.source).tagRange
+  const {tagMap} = translationUpdate(clean(fixture.target), sourceTagMap)
+  return checkForMissingTags(sourceTagMap, tagMap)
 }
 
 export const cmPoints = (markedRaw, cleanRaw) => {
@@ -439,9 +309,8 @@ export const cmDrop = (editor, pos, props) => {
 }
 
 // ---------- actions ----------
-// Each action has a Draft side `draft(state, points, fixture) => state` and a CodeMirror side
-// `cm(editor, points, fixture)`; points are in each editor's own terms. A `clip` side returns the clipboard slice
-// instead. The harness has already put the selection on points[0]..points[1] (a caret on points[0]).
+// Each action is `cm(editor, points, fixture)`; a `clip` action returns the clipboard slice instead. The harness has
+// already put the selection on points[0]..points[1] (a caret on points[0]).
 
 export const KEYS = {
   Backspace: {key: 'Backspace', keyCode: 8},
@@ -469,21 +338,17 @@ export const KEYS = {
 }
 
 export const type = (text) => ({
-  // Draft types through editOnBeforeInput, which is DraftMatecatUtils.insertText (replaceText over a selection)
-  draft: (s) => DraftMatecatUtils.insertText(s, text),
   cm: (ed) => cmType(ed, text),
 })
 
 export const key = (name) => ({
-  draft: (s) => draftKey(s, KEYS[name]),
   cm: (ed) => {
     if (!press(ed, KEYS[name])) throw new Error(`${name} not handled`)
   },
 })
 
-// Paste: Editarea pasteFragment -> buildPastedEditorState (Editarea.js:1024-1034).
+// Paste: the paste handler of the CodeMirror target, with a clipboard holding `text` and `html`.
 export const paste = ({text = '', html = ''}) => ({
-  draft: (s) => buildPastedEditorState({text, html, editorState: s}) ?? s,
   cm: (ed) =>
     fire(ed.view.contentDOM, 'paste', {
       clipboardData: fakeTransfer({'text/plain': text, 'text/html': html}),
@@ -495,14 +360,8 @@ export const slice = (raw, text) => segmentClipboardHtml({raw, text})
 // The tag menu: `<` (or Alt+T), then Enter on the entry `pick` (0 = first missing tag). The CodeMirror host
 // (TargetEditor acceptMenuTag/onMenuKey) inserts entries[focused].data.encodedText with insertMenuTag.
 export const tagMenu = (opener, pick) => ({
-  draft: (s, p, fx) => {
-    const {missingTags, sourceTags} = tagSuggestions(fx, s)
-    const menu = {open: false, missingTags, sourceTags, focused: pick}
-    s = draftKey(s, KEYS[opener], menu)
-    return menu.open ? draftKey(s, KEYS.Enter, menu) : s
-  },
   cm: (ed, p, fx) => {
-    const {missingTags, sourceTags} = tagSuggestions(fx, draftLoad(fx.clean))
+    const {missingTags, sourceTags} = tagSuggestions(fx)
     // With no tag to offer the menu stays shut and the key types as usual (Alt+T types nothing).
     if (!press(ed, KEYS[opener]) && opener === 'lt') cmType(ed, '<')
     const entries = [...missingTags, ...sourceTags]
@@ -511,17 +370,8 @@ export const tagMenu = (opener, pick) => ({
 })
 
 export const format = (name) => ({
-  // Editarea formatSelection (Editarea.js:1132-1158)
-  draft: (s) => {
-    if (s.getSelection().isCollapsed()) return s
-    const selected = DraftMatecatUtils.getSelectedTextWithoutEntities(s).map(
-      (sel) => ({...sel, value: DraftMatecatUtils.formatText(sel.value, name)}),
-    )
-    return DraftMatecatUtils.replaceMultipleText(s, selected)
-  },
-  // TargetEditor formatSelection (TargetEditor.js:550-554), bridge.formatText = DraftMatecatUtils.formatText
-  cm: (ed) =>
-    ed.transformSelection((text) => DraftMatecatUtils.formatText(text, name)),
+  // TargetEditor formatSelection (TargetEditor.js:550-554)
+  cm: (ed) => ed.transformSelection((text) => formatText(text, name)),
 })
 
 export const CARET_ACTIONS = {
@@ -554,19 +404,11 @@ export const CARET_ACTIONS = {
   'tag menu: < then Enter (first entry)': tagMenu('lt', 0),
   'tag menu: Alt+T then Enter (first entry)': tagMenu('altT', 0),
   'copy glossary term at caret': {
-    // copyGlossaryToEditArea (Editarea.js:482-498); TargetEditor copyGlossary (TargetEditor.js:396-403)
-    draft: (s) => DraftMatecatUtils.insertText(s, 'R&D <i>'),
+    // TargetEditor copyGlossary (TargetEditor.js:396-403)
     cm: (ed) => ed.insertText('R&D <i>'),
   },
   'drop a slice from another segment': {
-    // handleDrop -> resolveDrop, not dragging from this editor (Editarea.js:1062-1082)
-    draft: (s) =>
-      resolveDrop({
-        editorState: s,
-        selection: s.getSelection(),
-        html: slice('<x id="7"/>Z', 'Z'),
-        draggingFromEditArea: false,
-      }).editorState ?? s,
+    // a slice dragged from another segment
     cm: (ed) =>
       cmDrop(ed, ed.view.state.selection.main.head, {
         dataTransfer: fakeTransfer({
@@ -577,15 +419,6 @@ export const CARET_ACTIONS = {
   },
 }
 
-// Draft's cut: copyFragment writes the slice (Editarea.js:1039-1051), then draft-js editOnCut removes the fragment
-// with Modifier.removeRange(..., 'forward') pushed as 'remove-range'.
-export const draftCut = (s) =>
-  DraftState.push(
-    s,
-    Modifier.removeRange(s.getCurrentContent(), s.getSelection(), 'forward'),
-    'remove-range',
-  )
-
 export const SELECTION_ACTIONS = {
   'delete selection (backspace)': key('Backspace'),
   'replace selection by typing': type('new'),
@@ -595,7 +428,6 @@ export const SELECTION_ACTIONS = {
     html: slice('<x id="5"/>X', 'X'),
   }),
   cut: {
-    draft: draftCut,
     cm: (ed) =>
       fire(ed.view.contentDOM, 'cut', {clipboardData: fakeTransfer()}),
   },
@@ -604,9 +436,8 @@ export const SELECTION_ACTIONS = {
   capitalize: format('capitalize'),
 }
 
-// The clipboard slice a copy (and a cut) writes: Draft getSegmentSlice, CodeMirror's copy handler.
+// The clipboard slice a copy (and a cut) writes: CodeMirror's copy handler.
 export const COPY = {
-  draft: (s) => DraftMatecatUtils.getSegmentSlice(s)?.raw ?? null,
   cm: (ed) => {
     const clipboardData = fakeTransfer()
     fire(ed.view.contentDOM, 'copy', {clipboardData})
@@ -614,20 +445,8 @@ export const COPY = {
   },
 }
 
-// Drag the selection points[0]..points[1] and drop it at points[2]: Editarea writes the slice on dragstart
-// (onDragEvent, Editarea.js:1053-1056) and handleDrop runs resolveDrop with draggingFromEditArea.
+// Drag the selection points[0]..points[1] and drop it at points[2].
 export const dragDrop = (modifiers = {}) => ({
-  draft: (s, p) => {
-    const html = segmentClipboardHtml(DraftMatecatUtils.getSegmentSlice(s))
-    return (
-      resolveDrop({
-        editorState: s,
-        selection: draftSelection(s, p[2]),
-        html,
-        draggingFromEditArea: true,
-      }).editorState ?? s
-    )
-  },
   cm: (ed, p) => {
     const dataTransfer = fakeTransfer()
     fire(ed.view.contentDOM, 'dragstart', {dataTransfer})
@@ -642,9 +461,9 @@ export const DROP_ACTIONS = {
 }
 
 // A Lexiqa suggestion clicked on a target warning. The store holds the Lexiqa text of the target
-// (lxqDecodedTranslation: prepareTextForLexiqa of the saved segment, Editarea.js:323-324) and Lexiqa's results on it:
-// one spelling warning on occurrence `index` of `word`, offering `suggestion`. Both sides read them through the real
-// LexiqaUtils.getRanges and buildTooltipMessages.
+// (lxqDecodedTranslation: prepareTextForLexiqa of the saved segment, translationUpdate) and Lexiqa's results on it:
+// one spelling warning on occurrence `index` of `word`, offering `suggestion`. The target reads them through its
+// lexiqa layer (targetLayers) and the layer tooltip.
 export const LEXIQA_SID = '1'
 export const LEXIQA_MODULES = [
   'numbers',
@@ -658,9 +477,9 @@ export const LEXIQA_MODULES = [
   'blacklist',
 ]
 export const lexiqaSegment = (fx, word, index, suggestion) => {
-  const lxqDecodedTranslation = DraftMatecatUtils.prepareTextForLexiqa(
-    draftSave(draftLoad(fx.clean)),
-  )
+  const lxqDecodedTranslation = translationUpdate(
+    fx.clean,
+  ).lxqDecodedTranslation
   let start = -1
   for (let i = 0; i <= index; i++)
     start = lxqDecodedTranslation.indexOf(word, start + 1)
@@ -688,39 +507,6 @@ export const lexiqaSegment = (fx, word, index, suggestion) => {
 }
 
 export const lexiqaReplace = (fx, word, index, suggestion) => ({
-  draft: (s) => {
-    const segment = lexiqaSegment(fx, word, index, suggestion)
-    // addLexiqaDecorator (Editarea.js:206-227): Lexiqa offsets made relative to each block, no tag correction
-    const ranges = LexiqaUtils.getRanges(
-      cloneDeep(segment.lexiqa.target),
-      segment.lxqDecodedTranslation,
-      false,
-    )
-    const warnings = updateOffsetBasedOnEditorState(s, ranges)
-    // activateLexiqa strategy (activateLexiqa.js:84-96): the warnings of each block that canDecorateRange allows
-    const content = s.getCurrentContent()
-    const warn = warnings.find((w) => {
-      const block = content.getBlockForKey(w.blockKey)
-      return canDecorateRange(w.start, w.end, block, content, LEXIQA_DECORATOR)
-    })
-    if (!warn) return s
-    // LexiqaHighlight getWarning + LexiqaTooltipInfo click (LexiqaHighlight.component.js:21-55,
-    // LexiqaTooltipInfo.component.js:37-46): the suggestion carries the warning's offsets and block
-    const {start, end, msg} = LexiqaUtils.buildTooltipMessages(
-      warn,
-      segment.sid,
-      false,
-    ).find((m) => m.type === 'suggestion')
-    // replaceWordAt (Editarea.js:531-551)
-    const selection = s.getSelection().merge({
-      anchorKey: warn.blockKey,
-      anchorOffset: start,
-      focusKey: warn.blockKey,
-      focusOffset: end,
-      isBackward: false,
-    })
-    return DraftState.push(s, Modifier.replaceText(content, selection, msg))
-  },
   cm: (ed) => {
     const {view} = ed
     const segment = lexiqaSegment(fx, word, index, suggestion)
@@ -754,9 +540,7 @@ export const lexiqaReplace = (fx, word, index, suggestion) => ({
 
 // The search replace of occurrence `index` of `term` by `text`.
 export const searchReplace = (term, index, text) => ({
-  // replaceCurrentSearch (Editarea.js:274-301); TargetEditor replaceSearchResult, which searches each tag as its text
-  // in the cattool's search text
-  draft: (s) => DraftMatecatUtils.replaceOccurrences(s, term, text, index),
+  // TargetEditor replaceSearchResult, which searches each tag as its text in the cattool's search text
   cm: (ed) =>
     ed.replaceOccurrence(
       new RegExp(TextUtils.escapeRegExp(term), 'gi'),
@@ -768,15 +552,9 @@ export const searchReplace = (term, index, text) => ({
 
 // Add all the source tags missing from the target.
 export const ADD_MISSING_TAGS = {
-  // addMissingSourceTagsToTarget (Editarea.js:1160-1183): addTagEntityToEditor per missing tag
-  draft: (s, p, fx) =>
-    tagSuggestions(fx, s).missingTags.reduce(
-      (state, tag) => DraftMatecatUtils.addTagEntityToEditor(state, tag),
-      s,
-    ),
   // TargetEditor addMissingSourceTagsToTarget (TargetEditor.js:518-529)
   cm: (ed, p, fx) => {
-    const {missingTags} = tagSuggestions(fx, draftLoad(fx.clean))
+    const {missingTags} = tagSuggestions(fx)
     const raw = missingTags.map((tag) => tag.data.encodedText).join('')
     const end = ed.view.state.doc.length
     ed.view.dispatch(insertRaw(ed.view.state, end, end, raw), {
@@ -787,18 +565,6 @@ export const ADD_MISSING_TAGS = {
 
 // The store's REPLACE_TRANSLATION (a TM match or a copy of the source taking the whole target).
 export const REPLACE_TRANSLATION = {
-  // setNewTranslation (Editarea.js:240-272)
-  draft: (s, p, fx) => {
-    const translation = 'Nuova <g id="1">traduzione</g>##$_A0$##ok'
-    const {editorState} = DraftMatecatUtils.encodeContent(
-      s,
-      translation,
-      tagSuggestions(fx, s).sourceTagMap,
-    )
-    return DraftState.moveSelectionToEnd(
-      DraftState.push(s, editorState.getCurrentContent(), 'insert-fragment'),
-    )
-  },
   // TargetEditor replaceTranslation (TargetEditor.js:370-376)
   cm: (ed) => ed.setValue('Nuova <g id="1">traduzione</g>##$_A0$##ok'),
 }

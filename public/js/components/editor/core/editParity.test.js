@@ -1,17 +1,13 @@
 // Edit parity: for the same segment and the same edit, the CodeMirror target saves what the Draft target (Editarea)
-// saves. docModel.test.js compares load -> save; this file compares load -> edit -> save, then undo and redo.
+// saved. docModel.test.js compares load -> save; this file compares load -> edit -> save, then undo and redo.
 //
-// Draft is driven the way Editarea drives it, through the same helpers and the same Draft key commands; where Editarea
-// only reacts to a DOM event, the pure calls it makes are run in the same order, with the Editarea lines cited.
-// CodeMirror is driven through its real api: the editor handle, its keymap (runScopeHandlers), and its DOM handlers
-// for paste, cut, copy and drop. Where the two save different strings, the case is listed in INTENTIONAL with the
-// reason, and the test checks it still differs.
+// Draft was driven the way Editarea drove it, and what it saved for every case is frozen in
+// __golden__/editParity.json, the expected value of each case. CodeMirror is driven through its real api: the editor
+// handle, its keymap (runScopeHandlers), and its DOM handlers for paste, cut, copy and drop. Where the two saved
+// different strings, the case is listed in INTENTIONAL with the reason, and the golden holds the value CodeMirror
+// saves there (checked to differ from Draft's when it was frozen), never Draft's.
 //
-// The segments and the edits on both sides live in __parity__/actions.js, shared with domParity.test.js.
-//
-// It imports Draft (only test files may), and goes away with Draft at M5.
-import {EditorState as DraftState} from 'draft-js'
-import DraftMatecatUtils from '../../segments/utils/DraftMatecatUtils'
+// The segments and the edits live in __parity__/actions.js, shared with domParity.test.js.
 import {initTagSignature} from '../../../utils/segmentText/tagModel'
 import {createSegmentEditor} from './createSegmentEditor'
 import {
@@ -24,10 +20,6 @@ import {
   SELECTION_ACTIONS,
   clean,
   cmPoints,
-  draftLoad,
-  draftPoints,
-  draftSave,
-  draftSelection,
   key,
   lexiqaReplace,
   markNames,
@@ -35,6 +27,7 @@ import {
   searchReplace,
   tagSuggestions,
 } from './__parity__/actions'
+import GOLDEN from './__golden__/editParity.json'
 
 beforeAll(() => {
   const rect = {left: 0, right: 0, top: 0, bottom: 0, width: 0, height: 0}
@@ -116,38 +109,10 @@ afterEach(() => {
   document.body.innerHTML = ''
 })
 
-const runDraft = (c) => {
-  const {fx} = c
-  let state = draftLoad(fx.clean)
-  const loaded = draftSave(state)
-  const p = c.at.length ? draftPoints(markedWith(fx.target, c.at), state) : []
-  // In Draft the selection can only cover the tag: it ends where the next entity ends.
-  if (c.intoTag) {
-    const blocks = state.getCurrentContent().getBlocksAsArray()
-    const key = blocks[p[1].block].getKey()
-    const entity = DraftMatecatUtils.getEntities(state).find(
-      (e) => e.blockKey === key && e.start >= p[1].offset,
-    )
-    p[1] = {...p[1], offset: entity.end}
-  }
-  if (p.length)
-    state = DraftState.acceptSelection(state, draftSelection(state, p[0], p[1]))
-  const result = c.impl.draft(state, p, fx)
-  const clip = c.clip ? result : null
-  if (!c.clip) state = result
-  const edit = draftSave(state)
-  const undo1 = draftSave(DraftState.undo(state))
-  let s = state
-  while (s.getUndoStack().size) s = DraftState.undo(s)
-  const undoAll = draftSave(s)
-  while (s.getRedoStack().size) s = DraftState.redo(s)
-  return {loaded, clip, edit, undo1, undoAll, redoAll: draftSave(s)}
-}
-
 const runCm = (c) => {
   const {fx} = c
   const parent = document.body.appendChild(document.createElement('div'))
-  const {sourceTags} = tagSuggestions(fx, draftLoad(fx.clean))
+  const {sourceTags} = tagSuggestions(fx)
   const editor = createSegmentEditor({
     parent,
     value: fx.clean,
@@ -180,7 +145,8 @@ const runCm = (c) => {
 }
 
 // Cases where CodeMirror deliberately saves something else than Draft: `id` matches case ids, `phase` is `edit`
-// (the saved string after the action), `undo1` (after one undo) or `clip` (the slice a copy writes).
+// (the saved string after the action), `undo1` (after one undo) or `clip` (the slice a copy writes). For these the
+// golden holds what CodeMirror saves, which was checked to differ from what Draft saved.
 const INTENTIONAL = [
   {
     id: /\| paste plain text with a degree sign @/,
@@ -244,9 +210,6 @@ const INTENTIONAL = [
   },
 ]
 
-const intentional = (id, phase) =>
-  INTENTIONAL.find((r) => r.phase === phase && r.id.test(id))
-
 const CASES = caseList.map((c) => [caseId(c), c])
 
 beforeAll(() => {
@@ -263,28 +226,20 @@ afterEach(() => {
 describe('an edit saves what Draft saves', () => {
   test.each(CASES)('%s', (id, c) => {
     global.config.isTargetRTL = Boolean(c.fx.rtl)
-    const draft = runDraft(c)
     const cm = runCm(c)
-    // Equal to Draft, or, for an intentional difference, still different.
-    const parity = (phase) =>
-      intentional(id, phase) ? {differs: cm[phase] !== draft[phase]} : cm[phase]
-    const expected = (phase) =>
-      intentional(id, phase) ? {differs: true} : draft[phase]
-    const phases = ['clip', 'edit', 'undo1']
-    expect(phases.map(parity)).toEqual(phases.map(expected))
-    // In each editor, undoing everything gives back what was loaded and redoing everything the edit; an edit marked
-    // `oneStep` is taken back by a single undo. An edit marked `changes` changed the segment: two no-ops agree too.
-    const history = (r) => ({
-      undoAll: r.undoAll === r.loaded,
-      redoAll: r.redoAll === r.edit,
-      oneStep: !c.oneStep || r.undo1 === r.loaded,
-      changed: !c.changes || r.edit !== r.loaded,
-    })
-    const whole = {undoAll: true, redoAll: true, oneStep: true, changed: true}
-    expect({cm: history(cm), draft: history(draft)}).toEqual({
-      cm: whole,
-      draft: whole,
-    })
+    // Draft's value, or, for an intentional difference, the value CodeMirror saved when the golden was frozen.
+    const phases = c.clip ? ['clip', 'edit', 'undo1'] : ['edit', 'undo1']
+    expect(Object.fromEntries(phases.map((p) => [p, cm[p]]))).toEqual(
+      GOLDEN[id],
+    )
+    // Undoing everything gives back what was loaded and redoing everything the edit; an edit marked `oneStep` is
+    // taken back by a single undo. An edit marked `changes` changed the segment.
+    expect({
+      undoAll: cm.undoAll === cm.loaded,
+      redoAll: cm.redoAll === cm.edit,
+      oneStep: !c.oneStep || cm.undo1 === cm.loaded,
+      changed: !c.changes || cm.edit !== cm.loaded,
+    }).toEqual({undoAll: true, redoAll: true, oneStep: true, changed: true})
   })
 
   test('every intentional difference still matches a case', () => {

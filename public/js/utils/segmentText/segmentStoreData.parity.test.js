@@ -1,16 +1,7 @@
 // Golden check: segmentStoreData must give the store exactly what the Draft bridges (sourceEditorBridge,
-// targetEditorBridge) gave it, for every segment string. It runs both on the round-trip corpus and on the edge cases
-// below. Deleted with Draft, once its expected values are frozen into segmentStoreData's own tests.
-import SegmentActions from '../../actions/SegmentActions'
-import {
-  publishSource,
-  tagIdentities as draftSourceTagIdentities,
-} from '../../components/segments/sourceEditorBridge'
-import {
-  charactersCounter as draftCharactersCounter,
-  tagIdentities as draftTargetTagIdentities,
-  translationUpdate as draftTranslationUpdate,
-} from '../../components/segments/targetEditorBridge'
+// targetEditorBridge) gave it, for every segment string: the round-trip corpus and the edge cases below. What the
+// bridges gave is frozen in __golden__/segmentStoreData.json, as JSON: compared after the same JSON round trip, so tag
+// structs are compared by their fields.
 import CORPUS from '../../components/editor/core/__fixtures__/roundTripCorpus.json'
 import {
   charactersCounter,
@@ -18,8 +9,7 @@ import {
   tagIdentities,
   translationUpdate,
 } from './segmentStoreData'
-
-jest.mock('../../actions/SegmentActions', () => ({updateSource: jest.fn()}))
+import GOLDEN from './__golden__/segmentStoreData.json'
 
 const b64 = (text) => Buffer.from(text, 'utf8').toString('base64')
 
@@ -56,14 +46,7 @@ const EDGE_CASES = [
 
 const SEGMENTS = [...CORPUS.map(({segment}) => segment), ...EDGE_CASES]
 
-const draftSource = (source) => {
-  SegmentActions.updateSource.mockClear()
-  publishSource('1', source)
-  const call = SegmentActions.updateSource.mock.calls[0]
-  if (!call) return undefined
-  const [, decodedSegment, plainText, tagRange, lxqText] = call
-  return {decodedSegment, plainText, tagRange, lxqText}
-}
+const json = (value) => JSON.parse(JSON.stringify(value))
 
 beforeEach(() => {
   Object.assign(global.config, {
@@ -76,16 +59,19 @@ beforeEach(() => {
 
 describe('as a source', () => {
   test('the empty source never reaches the store', () => {
-    expect(draftSource('')).toBeUndefined()
+    // The Draft bridge published nothing for it: it has no frozen value.
+    expect(GOLDEN.source).not.toHaveProperty([''])
   })
 
   test.each(SEGMENTS.filter((source) => source !== ''))(
     'publishes what Draft publishes: %j',
     (source) => {
-      expect(sourceStoreData(source)).toStrictEqual(draftSource(source))
-      expect(tagIdentities(source)).toStrictEqual(
-        draftSourceTagIdentities(source),
-      )
+      expect(
+        json({
+          store: sourceStoreData(source),
+          tagIdentities: tagIdentities(source),
+        }),
+      ).toStrictEqual(GOLDEN.source[source])
     },
   )
 })
@@ -103,19 +89,18 @@ describe('as a target', () => {
   test.each(SEGMENTS.map((segment, index) => [segment, index]))(
     'updates the store as Draft does: %j',
     (translation, index) => {
-      sourceTagMaps(index).forEach((sourceTagMap) => {
-        expect(translationUpdate(translation, sourceTagMap)).toStrictEqual(
-          draftTranslationUpdate(translation, sourceTagMap),
-        )
-        expect(tagIdentities(translation, sourceTagMap)).toStrictEqual(
-          draftTargetTagIdentities(translation, sourceTagMap),
-        )
-      })
-      ;[true, false].forEach((countTags) =>
-        expect(charactersCounter(translation, countTags)).toBe(
-          draftCharactersCounter(translation, countTags),
-        ),
-      )
+      expect(
+        json({
+          translation,
+          maps: sourceTagMaps(index).map((sourceTagMap) => ({
+            update: translationUpdate(translation, sourceTagMap),
+            tagIdentities: tagIdentities(translation, sourceTagMap),
+          })),
+          counter: [true, false].map((countTags) =>
+            charactersCounter(translation, countTags),
+          ),
+        }),
+      ).toStrictEqual(GOLDEN.target[index])
     },
   )
 })
