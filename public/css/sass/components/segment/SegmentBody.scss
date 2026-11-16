@@ -179,6 +179,7 @@ section.readonly .status-container a.status:hover {
   border-radius: variables.$border-radius-default;
   cursor: text;
   outline: 1px solid transparent;
+  background-color: colors.$white;
 
   &:hover {
     border-color: colors.$grey400;
