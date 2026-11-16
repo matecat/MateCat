@@ -349,6 +349,14 @@ class ProjectDao extends AbstractDao
     }
 
     /**
+     * Name the remote file service (for example Google Drive) each project imported files from.
+     *
+     * The ids are bound parameters, so the cache key names the projects: each project list gets
+     * its own Redis key and its own TTL.
+     *
+     * Example: with TTL 604800, `getRemoteFileServiceName([42])` is cached under
+     * `Model\Projects\ProjectDao::getRemoteFileServiceName-42` for 7 days.
+     *
      * @param array<int, int> $project_ids
      *
      * @return RemoteFileServiceNameStruct[]
@@ -358,21 +366,24 @@ class ProjectDao extends AbstractDao
      */
     public function getRemoteFileServiceName(array $project_ids): array
     {
-        $project_ids = implode(', ', array_map(function ($id) {
-            return (int)$id;
-        }, $project_ids));
+        if ($project_ids === []) {
+            return [];
+        }
+
+        $ids = array_map(fn($id): int => (int)$id, array_values($project_ids));
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
         $sql = "SELECT id_project, c.service
           FROM files
           JOIN remote_files on files.id = remote_files.id_file
           JOIN connected_services c on c.id = connected_service_id
-          WHERE id_project in ( $project_ids )
+          WHERE id_project in ( $placeholders )
           GROUP BY id_project, c.service ";
 
         $conn = $this->database->getConnection();
         $stmt = $conn->prepare($sql);
 
-        return $this->_fetchObjectMap($stmt, RemoteFileServiceNameStruct::class, []);
+        return $this->_fetchObjectMap($stmt, RemoteFileServiceNameStruct::class, $ids);
     }
 
     /**

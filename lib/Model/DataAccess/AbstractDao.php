@@ -479,10 +479,22 @@ abstract class AbstractDao
      * @return list<T>
      * @throws ReflectionException
      * @throws Exception
+     * @throws UnscopedCacheKeyMap when a cached query binds nothing and writes an IN list into its SQL
      */
     protected function _fetchObjectMap(PDOStatement $stmt, string $fetchClass, array $bindParams, ?string $keyMap = null): array
     {
         if (empty($keyMap)) {
+            // The derived key map is the method name plus the bound values. With nothing bound, an
+            // IN list written into the SQL puts every call in the same hash, which then grows forever.
+            // A heuristic: it does not see a scalar written into the SQL (`WHERE id = 42` with
+            // nothing bound), an IN list beside other bound values, or a constant explicit key map.
+            if ($bindParams === [] && $this->cacheTTL > 0 && preg_match('/\bIN\s*\(/i', $stmt->queryString) === 1) {
+                throw new UnscopedCacheKeyMap(
+                    'A cached query writes its IN list into the SQL, so every call shares one Redis key. ' .
+                    'Bind the values as parameters, or read without the cache.'
+                );
+            }
+
             $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
             $keyMap = ($trace[1]['class'] ?? '') . "::" . ($trace[1]['function'] ?? '') . "-" . implode(":", $bindParams);
         }

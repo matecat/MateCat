@@ -162,6 +162,7 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
         }`}
       >
         <input
+          type="text"
           className={inputNameClasses}
           placeholder="Please insert a name for the glossary"
           value={name}

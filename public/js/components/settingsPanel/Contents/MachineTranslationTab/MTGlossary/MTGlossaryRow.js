@@ -201,6 +201,7 @@ export const MTGlossaryRow = ({
         {setInputNameContainer(
           <input
             ref={inputNameRef}
+            type="text"
             className={`glossary-row-name-input${
               isEditingName ? ' active' : ''
             }`}

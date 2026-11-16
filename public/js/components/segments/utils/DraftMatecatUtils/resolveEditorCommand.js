@@ -79,13 +79,13 @@ export default function resolveEditorCommand(e, ctx) {
   ) {
     return done('insert-space-tag')
   } else if (
-    (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
+    (e.key === ' ' || e.key === 'Spacebar' || e.key === '\u00a0') &&
     ((isCtrlKeyCommand(e) && e.shiftKey) ||
       (isMacOS() && isOptionKeyCommand(e) && !e.ctrlKey))
   ) {
     return done('insert-nbsp-tag') // Windows && Mac
   } else if (
-    (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
+    (e.key === ' ' || e.key === 'Spacebar' || e.key === '\u00a0') &&
     !e.shiftKey &&
     e.altKey &&
     isChromeBook
@@ -119,7 +119,7 @@ export default function resolveEditorCommand(e, ctx) {
   } else if (e.ctrlKey && e.key === 'k') {
     return done('tm-search')
   } else if (
-    (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
+    (e.key === ' ' || e.key === 'Spacebar' || e.key === '\u00a0') &&
     ((e.ctrlKey && e.altKey) || (isMacOS() && e.shiftKey))
   ) {
     return done('insert-word-joiner-tag')

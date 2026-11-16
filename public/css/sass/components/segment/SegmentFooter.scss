@@ -25,9 +25,7 @@
         input {
           display: inline-block;
           width: 100%;
-          border: 1px solid colors.$grey200;
-          padding: 2px 0.4%;
-          border-radius: variables.$border-radius-default;
+          padding: 2px 8px;
           text-align: left;
           min-height: 20px;
         }

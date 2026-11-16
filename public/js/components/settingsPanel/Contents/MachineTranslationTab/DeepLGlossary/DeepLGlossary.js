@@ -17,7 +17,11 @@ import ModalsActions from '../../../../../actions/ModalsActions'
 import {ConfirmDeleteResourceProjectTemplates} from '../../../../modals/ConfirmDeleteResourceProjectTemplates'
 import {SCHEMA_KEYS} from '../../../../../hooks/useProjectTemplates'
 import {DeepLGlossaryNoneRow} from './DeepLGlossaryNoneRow'
-import {Button, BUTTON_TYPE} from '../../../../common/Button/Button'
+import {
+  Button,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../../../../common/Button/Button'
 import {DEEPL_GLOSSARY_CREATE_ROW_ID} from './DeepLGlossaryConstants'
 
 const COLUMNS_TABLE = [
@@ -334,10 +338,11 @@ export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
               {!shouldHideNewButton && (
                 <Button
                   type={BUTTON_TYPE.PRIMARY}
+                  size={BUTTON_SIZE.SMALL}
                   onClick={addGlossary}
                   title="Add glossary"
                 >
-                  <IconAdd size={22} />
+                  <IconAdd size={18} />
                   New glossary
                 </Button>
               )}

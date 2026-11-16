@@ -390,6 +390,30 @@ describe('Select', () => {
         expect(mockSetListMaxHeight).toHaveBeenCalledWith(128)
       })
 
+      test('without an explicit cap, measures against the space actually occupied (below) when checkSpaceToReverse is false', () => {
+        // Same cramped wrapper as the explicit-cap case above, but with no
+        // maxHeightDroplist: the dropdown never reverses (checkSpaceToReverse
+        // is false) and stays anchored below the trigger, so it must be
+        // sized against the real space below it — not against the space
+        // above, which it never occupies and which can be unrelated to how
+        // much room is actually left on screen underneath it.
+        elementRects['select-with-label__wrapper'] = {
+          top: 700,
+          bottom: 760,
+          y: 700,
+          height: 60,
+        }
+        const {container} = renderSelect({
+          isPortalDropdown: true,
+          checkSpaceToReverse: false,
+        })
+        clickTrigger(container)
+
+        // availableHeightBelow = |700 + 60 + 24 - window.innerHeight(768)| = 16
+        expect(isDropdownReversed(container)).toBe(false)
+        expect(mockSetListMaxHeight).toHaveBeenCalledWith(16)
+      })
+
       test("uses offsetParent's rect instead of the viewport when provided", () => {
         elementRects['select-with-label__wrapper'] = {
           top: 380,
@@ -427,8 +451,84 @@ describe('Select', () => {
         clickTrigger(container)
 
         // availableHeightAbove = wrapperRect.y(700) - (MARGIN_DROPDOWN(4) + 20) -
-        // labelHeight(0, unmocked) - referenceRect.top(0) = 676
+        // SEARCH_BAR_HEIGHT(56) - labelHeight(0, unmocked) - referenceRect.top(0) = 620
+        expect(mockSetListMaxHeight).toHaveBeenCalledWith(620)
+      })
+
+      test('uses the real available space below when maxHeightDroplist is not passed', () => {
+        elementRects['select-with-label__wrapper'] = {
+          top: 50,
+          bottom: 100,
+          y: 50,
+          height: 50,
+        }
+        const {container} = renderSelect({isPortalDropdown: true})
+        clickTrigger(container)
+
+        // availableHeightBelow = |wrapperRect.y(50) + wrapperRect.height(50) +
+        // (MARGIN_DROPDOWN(4) + 20) - referenceRect.bottom(window.innerHeight, 768)| = 644
+        // — well past the 420 flip threshold, and not clamped to it.
+        expect(mockSetListMaxHeight).toHaveBeenCalledWith(644)
+        expect(isDropdownReversed(container)).toBe(false)
+      })
+
+      test('reverses and uses the real available space above when maxHeightDroplist is not passed', () => {
+        elementRects['select-with-label__wrapper'] = {
+          top: 700,
+          bottom: 760,
+          y: 700,
+          height: 60,
+        }
+        const {container} = renderSelect({isPortalDropdown: true})
+        clickTrigger(container)
+
+        // availableHeightAbove = wrapperRect.y(700) - (MARGIN_DROPDOWN(4) + 20) -
+        // labelHeight(0, unmocked) - referenceRect.top(0) = 676 — not clamped to
+        // the 420 flip threshold used to decide to reverse in the first place.
+        expect(isDropdownReversed(container)).toBe(true)
         expect(mockSetListMaxHeight).toHaveBeenCalledWith(676)
+      })
+
+      test('recalculates max-height when the window is resized while the dropdown stays open', () => {
+        jest
+          .spyOn(window, 'requestAnimationFrame')
+          .mockImplementation((callback) => {
+            callback()
+            return 0
+          })
+
+        elementRects['select-with-label__wrapper'] = {
+          top: 50,
+          bottom: 100,
+          y: 50,
+          height: 50,
+        }
+        const {container} = renderSelect({isPortalDropdown: true})
+        clickTrigger(container)
+
+        // Same 644 as the "uses the real available space below" case above.
+        expect(mockSetListMaxHeight).toHaveBeenLastCalledWith(644)
+        expect(isDropdownReversed(container)).toBe(false)
+
+        const originalInnerHeight = window.innerHeight
+        Object.defineProperty(window, 'innerHeight', {
+          configurable: true,
+          value: 200,
+        })
+        fireEvent(window, new Event('resize'))
+
+        // availableHeightBelow = |124 - 200| = 76, under the 420 flip
+        // threshold — the shrunk window now forces a reverse, and the
+        // max-height applied is recomputed instead of staying stale at 644
+        // (which would have overflowed off the shorter screen).
+        // availableHeightAbove = wrapperRect.y(50) - (MARGIN_DROPDOWN(4) + 20) = 26
+        expect(isDropdownReversed(container)).toBe(true)
+        expect(mockSetListMaxHeight).toHaveBeenLastCalledWith(26)
+
+        Object.defineProperty(window, 'innerHeight', {
+          configurable: true,
+          value: originalInnerHeight,
+        })
       })
     })
 
