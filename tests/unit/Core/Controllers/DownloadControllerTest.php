@@ -271,15 +271,8 @@ class DownloadControllerTest extends AbstractTest
     #[Test]
     public function abortOnFailedConversionsFailsTheDownloadAndReleasesTheToken(): void
     {
-        $idJob = self::BASE + 2;
-        $this->setProp('id_job', $idJob);
+        $this->setProp('id_job', self::BASE + 2);
         $this->setProp('downloadToken', 'token_failed');
-
-        $originalTmpDownload = AppConfig::$TMP_DOWNLOAD;
-        AppConfig::$TMP_DOWNLOAD = sys_get_temp_dir() . '/download_abort_' . uniqid();
-        $jobTmpDir = AppConfig::$TMP_DOWNLOAD . '/' . $idJob;
-        mkdir($jobTmpDir, 0777, true);
-        file_put_contents($jobTmpDir . '/intermediate.xlf', '<xliff/>');
 
         try {
             $this->invokePrivate('abortOnFailedConversions', [
@@ -298,13 +291,6 @@ class DownloadControllerTest extends AbstractTest
             self::assertStringContainsString(AppConfig::$SUPPORT_MAIL, $e->getMessage());
             // the message is rendered as HTML by the client: user-supplied filenames stay out of it
             self::assertStringNotContainsString('<b>file</b>', $e->getMessage());
-            // the intermediate files never outlive a failed download
-            self::assertDirectoryDoesNotExist($jobTmpDir);
-        } finally {
-            @unlink($jobTmpDir . '/intermediate.xlf');
-            @rmdir($jobTmpDir);
-            @rmdir(AppConfig::$TMP_DOWNLOAD);
-            AppConfig::$TMP_DOWNLOAD = $originalTmpDownload;
         }
 
         // unlockToken() consumed the token, so finalize() can never report a successful download

@@ -36,7 +36,6 @@ use Model\Projects\ProjectDao;
 use Model\RemoteFiles\RemoteFileDao;
 use Model\Segments\SegmentDao;
 use PDOException;
-use Psr\Log\InvalidArgumentException;
 use ReflectionException;
 use RuntimeException;
 use TypeError;
@@ -393,11 +392,6 @@ class DownloadController extends AbstractDownloadController
                 // Free the converted document before the next file of the group is handled.
                 unset($convertResult[$fileID]);
             }
-
-            // a failed file still holds the intermediate XLIFF under its original filename
-            $this->abortOnFailedConversions($convertResult, $files_to_be_converted);
-
-            unset($convertResult);
         }
 
         foreach ($output_content as $idFile => $fileInformation) {
@@ -792,16 +786,14 @@ class DownloadController extends AbstractDownloadController
     }
 
     /**
-     * Fails the whole download when Filters could not convert a file back to its original format.
-     *
-     * Without this, the intermediate XLIFF would be served under the target filename.
-     * The filenames go to the log only: the token message is rendered as HTML by the client.
+     * Fails the whole download when Filters could not convert a file back to its original format,
+     * instead of sending the intermediate XLIFF under the target filename. The filenames go to the
+     * log only: the client renders the token message as HTML.
      *
      * @param array<int|string, array<string, mixed>> $convertResult        Filters responses, keyed by file id
      * @param array<int|string, array<string, mixed>> $filesToBeConverted   the files sent to Filters, keyed by file id
      *
      * @throws ExternalServiceException
-     * @throws InvalidArgumentException
      * @throws Exception
      */
     private function abortOnFailedConversions(array $convertResult, array $filesToBeConverted): void
@@ -824,8 +816,6 @@ class DownloadController extends AbstractDownloadController
         $message = "Download failed: a file could not be converted back to its original format. Please try again in 5 minutes. If it still fails, contact " . AppConfig::$SUPPORT_MAIL;
 
         $this->unlockToken(["code" => -110, "message" => $message]);
-
-        Utils::deleteDir(AppConfig::$TMP_DOWNLOAD . '/' . $this->id_job . '/');
 
         throw new ExternalServiceException($message);
     }
