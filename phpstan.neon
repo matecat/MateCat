@@ -106,6 +106,10 @@ parameters:
             # own. Like the above, catching it is never the right response: the allocation boundary
             # is drawn in the wrong place and the fix belongs at the call site, not in a catch block.
             - 'Model\DataAccess\SequenceAllocationInTransaction'
+            # Thrown by AbstractDao::_fetchObjectMap() when a cached query binds nothing and writes
+            # an IN list into its SQL, so every call would share one Redis hash. A mistake in the
+            # DAO, fixed at the call site; never something to catch.
+            - 'Model\DataAccess\UnscopedCacheKeyMap'
         check:
             # Report when code throws an exception that has no
             # matching @throws tag in the method's PHPDoc

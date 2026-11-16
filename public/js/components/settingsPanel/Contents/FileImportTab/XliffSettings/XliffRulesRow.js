@@ -15,6 +15,7 @@ import {
   getStatusName,
   toStatusLockId,
 } from '../../../../../utils/editorStatusLock'
+import {SELECT_HEIGHT} from '../../../../../constants/Constants'
 
 const getMatchCategoryShortId = (id) => id.replace(/_match_category/, '')
 const getMatchCategoryExtendedId = (id) => `${id}_match_category`
@@ -76,8 +77,6 @@ export const XliffRulesRow = ({
     if (value.analysis !== 'new' && typeof value.editor === 'undefined')
       setValue('editor', xliffOptions.editor[0])
   }, [value, setValue, xliffOptions.editor])
-
-  const MAX_HEIGHT_DROPLIST = 260
 
   const deleteRow = () => onDelete(value.id)
 
@@ -150,7 +149,7 @@ export const XliffRulesRow = ({
 
                 if (updatedOptions.length) onChange(updatedOptions)
               }}
-              maxHeightDroplist={MAX_HEIGHT_DROPLIST}
+              maxHeightDroplist={SELECT_HEIGHT}
             />
           )}
         />
@@ -171,7 +170,7 @@ export const XliffRulesRow = ({
                 if (option.id !== 'new')
                   setValue('match_category', getMatchCategoryShortId(option.id))
               }}
-              maxHeightDroplist={MAX_HEIGHT_DROPLIST}
+              maxHeightDroplist={SELECT_HEIGHT}
             />
           )}
         />
@@ -204,7 +203,6 @@ export const XliffRulesRow = ({
               isDisabled={
                 typeof value === 'undefined' || formData.analysis === 'new'
               }
-              maxHeightDroplist={MAX_HEIGHT_DROPLIST}
             />
           )}
         />

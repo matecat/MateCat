@@ -8,6 +8,7 @@ use Matecat\TestHelpers\Factory\User;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Model\Exceptions\ValidationError;
+use Model\Jobs\JobStruct;
 use Model\Projects\ProjectModel;
 use Model\Projects\ProjectStruct;
 use Model\Teams\TeamDao;
@@ -18,24 +19,27 @@ use PHPUnit\Framework\Attributes\Test;
 use ReflectionMethod;
 use ReflectionProperty;
 use Utils\Constants\Teams;
+use Utils\Email\AbstractEmail;
+use Utils\Email\ProjectAssignedEmail;
 use Utils\Tools\CatUtils;
 
-class FakeProjectAssignedEmail
+/**
+ * Stands in for ProjectAssignedEmail through {@see TestableProjectModel::assignedEmail()}, so the
+ * tests count the emails instead of queueing them.
+ */
+class FakeProjectAssignedEmail extends AbstractEmail
 {
     public static int $sent = 0;
-
-    public function __construct(...$args)
-    {
-    }
 
     public function send(): void
     {
         self::$sent++;
     }
-}
 
-if (!class_exists(\Utils\Email\ProjectAssignedEmail::class, false)) {
-    class_alias(FakeProjectAssignedEmail::class, \Utils\Email\ProjectAssignedEmail::class);
+    protected function _getTemplateVariables(): array
+    {
+        return [];
+    }
 }
 
 class ProjectModelTest extends AbstractTest
@@ -317,6 +321,36 @@ class ProjectModelTest extends AbstractTest
         $this->assertContains((int)$oldTeam->id, $cacheTeams);
     }
 
+    /**
+     * The other tests replace the email with a fake, so this one checks the real email the model
+     * builds: a ProjectAssignedEmail for the new assignee and the project's jobs. It is built, not
+     * sent.
+     */
+    #[Test]
+    public function theAssignmentEmailIsAProjectAssignedEmailForTheNewAssignee(): void
+    {
+        $owner = new UserStruct();
+        $owner->uid = 1;
+        $owner->email = 'owner@example.org';
+
+        $assignee = new UserStruct();
+        $assignee->uid = 2;
+        $assignee->email = 'assignee@example.org';
+
+        $job = new JobStruct();
+        $job->id = 10;
+
+        $model = new ProjectModel($this->db, new ProjectStruct());
+        $model->setUser($owner);
+
+        $email = (new ReflectionMethod($model, 'assignedEmail'))->invoke($model, $assignee, [$job]);
+
+        $this->assertInstanceOf(ProjectAssignedEmail::class, $email);
+        $this->assertSame($assignee, (new ReflectionProperty($email, 'assignee'))->getValue($email));
+        $this->assertSame($owner, (new ReflectionProperty($email, 'user'))->getValue($email));
+        $this->assertSame([$job], (new ReflectionProperty($email, 'jobs'))->getValue($email));
+    }
+
     #[Test]
     public function cleanAssigneeCachesSkipsUnknownTeamIds(): void
     {
@@ -461,7 +495,7 @@ class ProjectModelTest extends AbstractTest
         $team = $this->createGeneralTeamWithMembers($owner, [$assignee->email]);
         $project = $this->createProject((int)$team->id, null, 'Combined Update');
 
-        $model = new ProjectModel($this->db, $project);
+        $model = new TestableProjectModel($this->db, $project);
         $model->setUser($owner);
         $model->prepareUpdate('id_team', (int)$team->id);
         $model->prepareUpdate('id_assignee', (int)$assignee->uid);
@@ -589,6 +623,11 @@ class ProjectModelTest extends AbstractTest
 
 class TestableProjectModel extends ProjectModel
 {
+    protected function assignedEmail(UserStruct $assignee, array $jobs): AbstractEmail
+    {
+        return new FakeProjectAssignedEmail();
+    }
+
     public function invokeCheckName(): void
     {
         $this->invokePrivate('checkName');

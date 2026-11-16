@@ -255,8 +255,14 @@ let TranslationMatches = {
       }, 3000)
       return Promise.resolve()
     }
-    const {contextListBefore, contextListAfter} =
-      SegmentUtils.getSegmentContext(id_segment_original)
+    let contextListBefore = []
+    let contextListAfter = []
+    try {
+      ;({contextListBefore, contextListAfter} =
+        SegmentUtils.getSegmentContext(id_segment_original))
+    } catch {
+      // The original segment is not loaded in the store: fetch without context
+    }
 
     const isLaraEngine = config.active_engine?.engine_type === 'Lara'
 
