@@ -62,6 +62,8 @@ const SegmentWarnings = ({warnings}) => (
           <ul>
             <li className="icon-column">{icon}</li>
             <li className="content-column">
+              {/* `debug` is an HTML fragment: ErrorManager escapes its literal angle
+                  brackets and ICUChecker joins its parts with <br/>. */}
               <p dangerouslySetInnerHTML={{__html: el.debug}} />
               {el.tip !== '' ? (
                 <p className="error-solution">

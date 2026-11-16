@@ -58,7 +58,6 @@
 
       .container-icon-settings {
         display: flex;
-        width: 16px;
         align-items: center;
         visibility: hidden;
       }
@@ -91,10 +90,7 @@
     text-transform: uppercase;
     color: colors.$blue500;
     font-weight: bold;
-
-    > svg {
-      border: 1px solid colors.$blue500;
-      border-radius: 50%;
-    }
+    justify-content: start !important;
+    gap: 5px;
   }
 }

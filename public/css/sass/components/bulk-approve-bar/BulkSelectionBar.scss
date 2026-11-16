@@ -51,10 +51,6 @@
           box-shadow: inset 0 0 0 1px colors.$green800;
           background-color: rgba(colors.$green800, 0.1);
         }
-
-        > :first-child {
-          border: 2px colors.$green800 solid;
-        }
         &.approved-2nd-pass {
           box-shadow: inset 0 0 0 1px colors.$purple500;
           color: colors.$purple500;
@@ -63,10 +59,6 @@
             color: colors.$purple500 !important;
             box-shadow: inset 0 0 0 1px colors.$purple500;
             background-color: rgba(colors.$purple500, 0.1);
-          }
-
-          > :first-child {
-            border: 2px colors.$purple500 solid;
           }
         }
       }
@@ -79,14 +71,6 @@
           line-height: 1px;
         }
       }
-    }
-  }
-  .mark-button {
-    > :first-child {
-      display: flex;
-      border-radius: 50%;
-      border: 2px colors.$blue500 solid;
-      padding: 2px;
     }
   }
   .label-filters {

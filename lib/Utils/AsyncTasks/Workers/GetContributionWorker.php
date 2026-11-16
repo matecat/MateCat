@@ -27,6 +27,7 @@ use Utils\AsyncTasks\Workers\Service\MatchSorter;
 use Utils\Constants\EngineConstants;
 use Utils\Constants\TranslationStatus;
 use Utils\Contribution\GetContributionRequest;
+use Utils\Engines\Lara\LaraQualityEstimator;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Logger\MatecatLogger;
@@ -44,15 +45,18 @@ use Utils\Tools\Utils;
 class GetContributionWorker extends AbstractWorker
 {
     private MatchSorterInterface $matchSorter;
+    private LaraQualityEstimator $qualityEstimator;
 
     public function __construct(
         AMQHandler $queueHandler,
         IDatabase $database,
         ?MatchSorterInterface $matchSorter = null,
         ?MatecatLogger $logger = null,
+        ?LaraQualityEstimator $qualityEstimator = null,
     ) {
         parent::__construct($queueHandler, $database, $logger);
         $this->matchSorter = $matchSorter ?? new MatchSorter();
+        $this->qualityEstimator = $qualityEstimator ?? new LaraQualityEstimator($this->database, $this->logger);
     }
 
     /**
@@ -527,6 +531,7 @@ class GetContributionWorker extends AbstractWorker
 
                 try {
                     $mtResponse = $mt_engine->get($config);
+                    $this->qualityEstimator->scoreIfRequested($mt_engine, $mtResponse, $config);
                     if (!empty($mtResponse->matches)) {
                         $mt_result = $mtResponse->get_matches_as_array(1)[0] ?? [];
                     }

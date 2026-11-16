@@ -205,11 +205,7 @@ const CommonUtils = {
         return leave_message
       }
     }
-    if (
-      $('#action-download').hasClass('disabled') ||
-      $('tr td a.downloading').length ||
-      $('.popup-tm td.uploadfile.uploading').length
-    ) {
+    if ($('.popup-tm td.uploadfile.uploading').length) {
       return say_goodbye(
         'You have a pending operation. Are you sure you want to quit?',
       )
@@ -301,6 +297,7 @@ const CommonUtils = {
       case 'mif':
       case 'idml':
       case 'icml':
+      case 'epub':
       case 'tex':
         return <FileTypePub size={size} /> //TODO add specific icons for these file types
       case 'zip':

@@ -119,7 +119,7 @@ export const AddCategory = () => {
           disabled: !name || typeof error === 'string',
           children: (
             <>
-              <Checkmark size={14} />
+              <Checkmark size={18} />
               Confirm
             </>
           ),
@@ -139,6 +139,7 @@ export const AddCategory = () => {
           onKeyUp={confirmWithKeyboard}
         >
           <input
+            type="text"
             className={`quality-framework-input input${error ? ' quality-framework-input-error' : ''}`}
             placeholder="Name"
             value={name}
@@ -159,6 +160,7 @@ export const AddCategory = () => {
             </Button>
           ) : (
             <input
+              type="text"
               className="quality-framework-input input"
               placeholder="Description"
               value={description}

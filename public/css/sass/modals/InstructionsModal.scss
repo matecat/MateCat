@@ -7,7 +7,7 @@
   padding-bottom: 25px;
   .title {
     display: flex;
-    gap: 8px
+    gap: 8px;
   }
   h4 {
     margin: 20px 0;
@@ -70,15 +70,19 @@
   }
 
   &:first-child {
-    --accordion-title-br: #{variables.$border-radius-default} #{variables.$border-radius-default} 0 0;
-    --accordion-title-expanded-br: #{variables.$border-radius-default} #{variables.$border-radius-default} 0 0;
+    --accordion-title-br: #{variables.$border-radius-default}
+      #{variables.$border-radius-default} 0 0;
+    --accordion-title-expanded-br: #{variables.$border-radius-default}
+      #{variables.$border-radius-default} 0 0;
   }
 
   &:last-child {
-    --accordion-content-br: 0 0 #{variables.$border-radius-default} #{variables.$border-radius-default};
+    --accordion-content-br: 0 0 #{variables.$border-radius-default}
+      #{variables.$border-radius-default};
 
     &:not(:has([data-expanded])) {
-      --accordion-title-br: 0 0 #{variables.$border-radius-default} #{variables.$border-radius-default};
+      --accordion-title-br: 0 0 #{variables.$border-radius-default}
+        #{variables.$border-radius-default};
     }
   }
 
@@ -91,4 +95,9 @@
   [data-expanded] > :first-child {
     color: #{colors.$black};
   }
+}
+
+.file-instructions-accordion {
+  max-height: min(70dvh, 800px);
+  overflow-y: auto;
 }

@@ -75,7 +75,7 @@ class SetContributionTest extends AbstractTest
             '167', 
             '177', 
             'MyMemory_5cc4186a2fe329590980', 
-            '[{\\\"tm\\\":true,\\\"glos\\\":true,\\\"owner\\\":true,\\\"uid_transl\\\":null,\\\"uid_rev\\\":null,\\\"name\\\":\\\"en - us_it . tmx\\\",\\\"key\\\":\\\"7f6e65cde5907af8d75a\\\",\\\"r\\\":true,\\\"w\\\":true,\\\"r_transl\\\":null,\\\"w_transl\\\":null,\\\"r_rev\\\":null,\\\"w_rev\\\":null,\\\"source\\\":null,\\\"target\\\":null}]', 
+            '[{\\\"tm\\\":true,\\\"glos\\\":true,\\\"owner\\\":true,\\\"uid_transl\\\":null,\\\"uid_rev\\\":null,\\\"name\\\":\\\"en - us_it . tmx\\\",\\\"key\\\":\\\"00000000000000000005\\\",\\\"r\\\":true,\\\"w\\\":true,\\\"r_transl\\\":null,\\\"w_transl\\\":null,\\\"r_rev\\\":null,\\\"w_rev\\\":null,\\\"source\\\":null,\\\"target\\\":null}]', 
             NULL, 
             'en-US', 
             'it-IT', 
