@@ -74,7 +74,7 @@ const SegmentsCommentsIcon = () => {
       onClick={openComments}
     >
       <div className="comment-icon">
-        <CommentsIcon />
+        <CommentsIcon size={18} />
         {badge}
       </div>
     </div>

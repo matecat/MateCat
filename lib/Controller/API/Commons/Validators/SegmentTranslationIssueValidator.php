@@ -97,12 +97,12 @@ class SegmentTranslationIssueValidator extends Base
         $latestSegmentEvent = (new TranslationEventDao($this->controller->getDatabase()))->getLatestEventForSegment($this->chunkReview->id_job, $this->translation->id_segment);
 
         if (!$latestSegmentEvent) {
-            if ($this->translation->isICE() || $this->translation->isPreTranslated()) {
-                throw new ValidationError('Cannot set issues on unmodified ICE.', -2000);
+            if ($this->translation->isLocked() || $this->translation->isPreTranslated()) {
+                throw new ValidationError('Cannot set issues on unmodified locked or pre-translated segment.', -2000);
             }
 
             // Can latest event be missing here? Actually yes, for example in case we are setting an issue on
-            // a locked ice match, which never received a submit from the UI. How do we handle that case?
+            // a segment that never received a submit from the UI. How do we handle that case?
             // No reviewed words yet an issue. That's not possible, we need to ensure the reviewed words
             // are set, and reviewed words are set during setTranslation triggered callbacks.
             throw new Exception('Unable to find the current state of this segment. Please report this issue to support.');

@@ -149,7 +149,11 @@ class CattoolController extends BaseKleinViewController
         $jobOwnership = $this->findOwnerEmailAndTeam($chunkStruct->getProject(new ProjectDao($this->getDatabase())));
 
         if ($chunkStruct->isCanceled()) {
-            $this->cancelled($jobOwnership);
+            $this->cancelled(
+                $chunkId,
+                $isRevision ? ($chunkReviewStruct->review_password ?? $chunkPassword) : $chunkPassword,
+                $jobOwnership
+            );
         }
 
         if ($chunkStruct->isArchived()) {
@@ -269,14 +273,13 @@ class CattoolController extends BaseKleinViewController
         ]);
 
         // Set unconditionally. The template used to supply the unlicensed defaults itself
-        // (`${lexiqa_languages || string:[]}` and friends); now that the page is built from the
-        // variables the view holds, a variable left unset is a key the page never receives, and
-        // lxq.main.js reads lexiqa_languages before it consults the licence.
+        // (`${lxq_license || string:}` and friends); now that the page is built from the
+        // variables the view holds, a variable left unset is a key the page never receives.
+        // The accepted languages are not among them: lxq.main.js asks lexiqaServer for them.
         $licensed = (bool)AppConfig::$LXQ_LICENSE;
         $this->addParamsToView([
                 'lxq_license' => $licensed ? AppConfig::$LXQ_LICENSE : '',
                 'lxq_partnerid' => $licensed ? AppConfig::$LXQ_PARTNERID : '',
-                'lexiqa_languages' => new PHPTalMap($licensed ? LexiQaAndTagProjectionLanguages::$lexiQaAllowedLanguages : []),
                 'lexiqaServer' => $licensed ? AppConfig::$LXQ_SERVER : '',
             ]
         );
@@ -339,11 +342,14 @@ class CattoolController extends BaseKleinViewController
      *
      * @throws Exception
      */
-    private function cancelled(array $jobOwnership): void
+    private function cancelled(int $job_id, string $password, array $jobOwnership): void
     {
         $this->setView('job_cancelled.html', [
             "support_mail" => AppConfig::$SUPPORT_MAIL,
             "owner_email" => $jobOwnership['owner_email'],
+            "jid" => $job_id,
+            "password" => $password,
+            "jobOwnerIsMe" => $jobOwnership['jobOwnerIsMe']
         ]);
         $this->render();
     }

@@ -18,9 +18,4 @@ class TestFixtureWorker extends AbstractWorker
         $this->processCalled = true;
         $this->lastElement = $queueElement;
     }
-
-    public function getLogMsg(): array|string
-    {
-        return 'fixture worker log';
-    }
 }

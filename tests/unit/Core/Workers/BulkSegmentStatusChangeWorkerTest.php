@@ -82,7 +82,7 @@ class BulkSegmentStatusChangeWorkerTest extends AbstractTest
         $worker = $this->getMockBuilder(BulkSegmentStatusChangeWorker::class)
             ->setConstructorArgs([$amq, $dbMock, $userDao])
             ->onlyMethods([
-                '_checkDatabaseConnection', '_doLog', 'publishToNodeJsClients',
+                '_checkDatabaseConnection', 'publishToNodeJsClients',
                 'createJobStruct', 'createTranslationEventsHandler',
                 'createTranslationEvent'
             ])
@@ -129,15 +129,6 @@ class BulkSegmentStatusChangeWorkerTest extends AbstractTest
             [$metadataRow],    // loadForProject metadata query
             $segmentRows       // getAllSegmentsByIdListAndJobId
         );
-    }
-
-    #[Test]
-    public function getLoggerNameReturnsExpected(): void
-    {
-        $amq = $this->createStub(AMQHandler::class);
-        $worker = new BulkSegmentStatusChangeWorker($amq, obtainTestDatabase());
-
-        $this->assertSame('bulk_segment_status_change.log', $worker->getLoggerName());
     }
 
     #[Test]

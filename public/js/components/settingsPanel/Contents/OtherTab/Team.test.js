@@ -30,9 +30,7 @@ jest.mock('../../../common/Select', () => ({
 const renderTeam = (user, selectedTeam, setSelectedTeam = jest.fn()) =>
   render(
     <SettingsPanelContext.Provider value={{user}}>
-      <CreateProjectContext.Provider
-        value={{SELECT_HEIGHT: 200, selectedTeam, setSelectedTeam}}
-      >
+      <CreateProjectContext.Provider value={{selectedTeam, setSelectedTeam}}>
         <Team />
       </CreateProjectContext.Provider>
     </SettingsPanelContext.Provider>,
@@ -54,7 +52,12 @@ describe('Team', () => {
   })
 
   test('maps user.teams to id/name options, stringifying id', () => {
-    const user = {teams: [{id: 1, name: 'Team A'}, {id: 2, name: 'Team B'}]}
+    const user = {
+      teams: [
+        {id: 1, name: 'Team A'},
+        {id: 2, name: 'Team B'},
+      ],
+    }
     renderTeam(user, undefined)
     expect(screen.getByTestId('option-1')).toHaveTextContent('Team A')
     expect(screen.getByTestId('option-2')).toHaveTextContent('Team B')
@@ -67,7 +70,12 @@ describe('Team', () => {
   })
 
   test('enables select when the user has more than one team', () => {
-    const user = {teams: [{id: 1, name: 'Team A'}, {id: 2, name: 'Team B'}]}
+    const user = {
+      teams: [
+        {id: 1, name: 'Team A'},
+        {id: 2, name: 'Team B'},
+      ],
+    }
     renderTeam(user, undefined)
     expect(screen.getByTestId('is-disabled')).toHaveTextContent('false')
   })
@@ -79,7 +87,12 @@ describe('Team', () => {
   })
 
   test('selecting a team calls setSelectedTeam with the option', () => {
-    const user = {teams: [{id: 1, name: 'Team A'}, {id: 2, name: 'Team B'}]}
+    const user = {
+      teams: [
+        {id: 1, name: 'Team A'},
+        {id: 2, name: 'Team B'},
+      ],
+    }
     const setSelectedTeam = jest.fn()
     renderTeam(user, undefined, setSelectedTeam)
 
@@ -91,7 +104,12 @@ describe('Team', () => {
   })
 
   test('on mount with user.teams, calls setSelectedTeam with UserActions.getLastTeamSelected result', () => {
-    const user = {teams: [{id: 1, name: 'Team A'}, {id: 2, name: 'Team B'}]}
+    const user = {
+      teams: [
+        {id: 1, name: 'Team A'},
+        {id: 2, name: 'Team B'},
+      ],
+    }
     const setSelectedTeam = jest.fn()
     UserActions.getLastTeamSelected.mockReturnValue({id: '2', name: 'Team B'})
 

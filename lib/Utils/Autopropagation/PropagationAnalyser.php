@@ -18,10 +18,10 @@ class PropagationAnalyser
     {
         $propagation = new PropagationTotalStruct();
 
-        if ($parentSegmentTranslation->match_type !== 'ICE' || $parentSegmentTranslation->locked != 1) { // check IF the parent segment is ICE
+        if (!$parentSegmentTranslation->isLocked()) { // check IF the parent segment is locked
             foreach ($arrayOfSegmentTranslationToPropagate as $segmentTranslation) {
-                if ($this->detectIce($segmentTranslation)) {
-                    $propagation->addNotPropagatedIce($segmentTranslation); // IF the parent segment is NOT ICE, we can not propagate it to ICEs
+                if ($segmentTranslation->isLocked()) {
+                    $propagation->addNotPropagatedIce($segmentTranslation); // IF the parent segment is NOT locked, we can not propagate it to locked segments
                 } else {
                     $propagation->addPropagatedNotIce($segmentTranslation);
                     $propagation->addPropagatedId((string) $segmentTranslation->id_segment);
@@ -31,17 +31,17 @@ class PropagationAnalyser
                     }
                 }
             }
-        } else { // keep only ICE with the corresponding hash
+        } else { // keep only locked segments with the corresponding hash
             foreach ($arrayOfSegmentTranslationToPropagate as $segmentTranslation) {
-                //Propagate to other ICEs
-                if ($this->detectMatchingIce($parentSegmentTranslation, $segmentTranslation)) {
+                //Propagate to other locked segments
+                if ($this->detectMatchingLocked($parentSegmentTranslation, $segmentTranslation)) {
                     $propagation->addPropagatedIce($segmentTranslation);
                     $propagation->addPropagatedId((string) $segmentTranslation->id_segment);
 
                     if ($parentSegmentTranslation->translation != ($segmentTranslation->translation ?? '')) {
                         $propagation->addPropagatedIdToUpdateVersion((string) $segmentTranslation->id_segment);
                     }
-                } else { // ??? Why ICEs can not propagate to normal segments?
+                } else { // a locked translation reaches only the locked segments with the same hash
                     $propagation->addNotPropagatedNotIce($segmentTranslation);
                 }
             }
@@ -51,23 +51,13 @@ class PropagationAnalyser
     }
 
     /**
-     * @param SegmentTranslationStruct $segmentTranslation
-     *
-     * @return bool
-     */
-    private function detectIce(SegmentTranslationStruct $segmentTranslation): bool
-    {
-        return ($segmentTranslation->match_type === 'ICE' and $segmentTranslation->locked == 1);
-    }
-
-    /**
      * @param SegmentTranslationStruct $parentSegmentTranslation
      * @param SegmentTranslationStruct $segmentTranslation
      *
      * @return bool
      */
-    private function detectMatchingIce(SegmentTranslationStruct $parentSegmentTranslation, SegmentTranslationStruct $segmentTranslation): bool
+    private function detectMatchingLocked(SegmentTranslationStruct $parentSegmentTranslation, SegmentTranslationStruct $segmentTranslation): bool
     {
-        return ($segmentTranslation->match_type === 'ICE' and $segmentTranslation->locked == 1 and $segmentTranslation->segment_hash === $parentSegmentTranslation->segment_hash);
+        return ($segmentTranslation->isLocked() and $segmentTranslation->segment_hash === $parentSegmentTranslation->segment_hash);
     }
 }

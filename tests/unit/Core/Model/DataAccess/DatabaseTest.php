@@ -594,6 +594,93 @@ class DatabaseTest extends AbstractTest
     }
 
     /**
+     * A loop that writes the same row many times queues the same follow-up each time. Under one key
+     * only the last runs, at the place of the last call, so it runs after anything queued between.
+     */
+    #[Test]
+    public function onCommitRunsOnlyTheLastCallbackQueuedUnderAKeyAtItsPlace(): void
+    {
+        $ran = [];
+
+        $this->db->begin();
+        $this->db->onCommit(function () use (&$ran): void {
+            $ran[] = 'first';
+        }, callbackDedupeKey: 'row:42');
+        $this->db->onCommit(function () use (&$ran): void {
+            $ran[] = 'eviction';
+        });
+        $this->db->onCommit(function () use (&$ran): void {
+            $ran[] = 'last';
+        }, callbackDedupeKey: 'row:42');
+        $this->db->onCommit(function () use (&$ran): void {
+            $ran[] = 'other row';
+        }, callbackDedupeKey: 'row:43');
+        $this->db->commit();
+
+        $this->assertSame(['eviction', 'last', 'other row'], $ran);
+    }
+
+    /**
+     * PHP would turn a numeric string key into an int, the kind of key a plain callback gets, and the
+     * keyed callback would overwrite it.
+     */
+    #[Test]
+    public function onCommitDoesNotLetANumericKeyReplaceAPlainCallback(): void
+    {
+        $ran = [];
+
+        $this->db->begin();
+        $this->db->onCommit(function () use (&$ran): void {
+            $ran[] = 'plain';
+        });
+        $this->db->onCommit(function () use (&$ran): void {
+            $ran[] = 'keyed';
+        }, callbackDedupeKey: '0');
+        $this->db->commit();
+
+        $this->assertSame(['plain', 'keyed'], $ran);
+    }
+
+    #[Test]
+    public function onCommitRunsAKeyedCallbackImmediatelyWhenNoTransactionIsOpen(): void
+    {
+        $ran = 0;
+
+        $this->db->onCommit(function () use (&$ran): void {
+            $ran++;
+        }, callbackDedupeKey: 'row:42');
+        $this->db->onCommit(function () use (&$ran): void {
+            $ran++;
+        }, callbackDedupeKey: 'row:42');
+
+        $this->assertSame(2, $ran);
+    }
+
+    /**
+     * A key does not outlive its transaction: after a rollback nothing queued under it runs, and the
+     * next transaction queues it again from scratch.
+     */
+    #[Test]
+    public function onCommitDiscardsAKeyedCallbackOnRollback(): void
+    {
+        $ran = [];
+
+        $this->db->begin();
+        $this->db->onCommit(function () use (&$ran): void {
+            $ran[] = 'rolled back';
+        }, callbackDedupeKey: 'row:42');
+        $this->db->rollback();
+
+        $this->db->begin();
+        $this->db->onCommit(function () use (&$ran): void {
+            $ran[] = 'committed';
+        }, callbackDedupeKey: 'row:42');
+        $this->db->commit();
+
+        $this->assertSame(['committed'], $ran);
+    }
+
+    /**
      * A scope nested inside this transaction cannot roll it back — it does not own it — so it marks
      * it unable to commit instead. Whoever eventually calls commit() is refused, including a caller
      * that opened the transaction by hand and has never heard of this mechanism.

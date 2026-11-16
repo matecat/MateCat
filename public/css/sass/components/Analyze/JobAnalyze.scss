@@ -3,12 +3,30 @@
 .job-analyze-header {
   display: flex;
   height: 40px;
-  align-items: center;
+  // Same text baseline for the ID (14px) and the languages (18px); the 40px line
+  // height (after the font shorthand, which resets it) keeps them vertically centred
+  align-items: baseline;
   align-self: stretch;
   background: colors.$grey100;
   font: variables.$font-style-small;
+  line-height: 40px;
   padding: 0 24px;
   gap: 4px;
+  // Inside the card's 1px border
+  border-top-left-radius: calc(variables.$border-radius-default - 1px);
+  border-top-right-radius: calc(variables.$border-radius-default - 1px);
+  // Stays visible while a job with many chunks scrolls. Sticky offsets count from
+  // inside the scroller's 40px top padding (#analyze-container): an 8px gap
+  position: sticky;
+  top: calc(8px - 40px);
+  z-index: 4;
+  // The 1px shadows redraw the card border on the top and sides; the panel-coloured
+  // one fills the gap and the corners so rows scrolling under it stay hidden
+  box-shadow:
+    0 -1px 0 0 colors.$grey150,
+    -1px 0 0 0 colors.$grey150,
+    1px 0 0 0 colors.$grey150,
+    0 -8px 0 8px colors.$grey50;
   .job-analyze-header__id {
     color: colors.$grey700;
     font: variables.$font-style-xsmall;
@@ -19,6 +37,7 @@
     align-items: center;
     gap: 4px;
     font-weight: 700;
+    font-size: variables.$font-size-base;
   }
   .job-analyze-header__words {
     color: colors.$blue500;
@@ -34,20 +53,25 @@
 
 .job-table-header {
   display: grid;
-  grid-template-columns: minmax(100px, 150px) repeat(11, 1fr) minmax(
-      80px,
-      100px
-    );
+  grid-template-columns:
+    minmax(160px, 180px) repeat(11, minmax(80px, 1fr))
+    minmax(80px, 100px);
   grid-template-rows: 82px;
   background-color: colors.$grey50;
   font: variables.$font-style-small;
   &.mtqe {
-    grid-template-columns: minmax(100px, 150px) repeat(8, 1fr) minmax(80px, 100px);
+    grid-template-columns:
+      minmax(160px, 180px) repeat(8, minmax(80px, 1fr))
+      minmax(80px, 100px);
   }
   @media (max-width: 1100px) {
-    grid-template-columns: minmax(100px, 150px) repeat(11, 1fr) 60px;
+    grid-template-columns:
+      minmax(160px, 180px) repeat(11, minmax(80px, 1fr))
+      60px;
     &.mtqe {
-      grid-template-columns: minmax(100px, 150px) repeat(8, 1fr) 60px;
+      grid-template-columns:
+        minmax(160px, 180px) repeat(8, minmax(80px, 1fr))
+        60px;
     }
   }
   > div {
@@ -75,7 +99,7 @@
       align-items: flex-end;
       padding-bottom: 2px;
       padding-right: 6px;
-      white-space: pre-wrap
+      white-space: pre-wrap;
     }
   }
   .job-table-header-title {
@@ -86,10 +110,11 @@
     color: colors.$grey400;
     padding-right: 6px;
     border-right: 1px solid colors.$grey100;
-     :first-child {
+    // "Analysis bucket"; "Payable rate" below it stays grey
+    :first-child {
       height: 85px;
       font-weight: normal;
-       color: colors.$grey400;
+      color: colors.$black;
     }
     > div {
       height: 32px;
@@ -115,21 +140,30 @@
   width: 100%;
   padding: 0 !important;
   font: variables.$font-style-small;
+  // A line between chunks, as between the chunk rows of the summary card
+  & + & {
+    border-top: 1px solid colors.$grey100;
+  }
   .chunk-analyze-info {
     display: grid;
-    grid-template-columns: minmax(100px, 150px) repeat(11, 1fr) minmax(
-        80px,
-        100px
-      );
+    grid-template-columns:
+      minmax(160px, 180px) repeat(11, minmax(80px, 1fr))
+      minmax(80px, 100px);
     background-color: colors.$white;
     position: relative;
     &.mtqe {
-      grid-template-columns: minmax(100px, 150px) repeat(8, 1fr) minmax(80px, 100px);
+      grid-template-columns:
+        minmax(160px, 180px) repeat(8, minmax(80px, 1fr))
+        minmax(80px, 100px);
     }
     @media (max-width: 1100px) {
-      grid-template-columns: minmax(100px, 150px) repeat(11, 1fr) 60px;
+      grid-template-columns:
+        minmax(160px, 180px) repeat(11, minmax(80px, 1fr))
+        60px;
       &.mtqe {
-        grid-template-columns: minmax(100px, 150px) repeat(8, 1fr) 60px;
+        grid-template-columns:
+          minmax(160px, 180px) repeat(8, minmax(80px, 1fr))
+          60px;
       }
     }
     .chunk-analyze-info-background {
@@ -150,10 +184,14 @@
       margin: 0 6px;
       &.open {
         border-radius: 4px 4px 0 0;
+        .chunk-analyze-info-files svg {
+          transform: rotate(180deg);
+        }
       }
       .chunk-analyze-info-index {
         color: colors.$black !important;
         font-weight: 700 !important;
+        font-size: variables.$font-size-xsmall;
       }
       .chunk-analyze-info-files {
         color: colors.$blue500 !important;
@@ -163,9 +201,15 @@
         text-decoration: underline;
         cursor: pointer;
         font-size: variables.$font-size-xsmall;
+        // One line, kept apart from the row label beside it
+        white-space: nowrap;
+        margin-right: 8px;
       }
       .chunk-analyze-info-files svg {
         color: colors.$blue500 !important;
+        transition: transform 0.2s ease;
+        // The narrow column would otherwise squeeze the arrow to nothing
+        flex-shrink: 0;
       }
 
       :first-child {
@@ -195,34 +239,40 @@
         display: flex;
         padding-right: 6px;
         line-height: 24px;
-        font-weight: 700;
+        font-weight: 400;
         align-items: center;
       }
+      // Raw count; the weighted count follows it, and only the total weighted is bold
       :first-child {
         font-weight: 400 !important;
-        color: colors.$grey600;
+        color: colors.$grey400;
       }
     }
   }
 }
 
 .chunk-file-detail {
-  grid-template-columns: minmax(100px, 150px) repeat(11, 1fr) minmax(
-      80px,
-      100px
-    );
+  grid-template-columns:
+    minmax(160px, 180px) repeat(11, minmax(80px, 1fr))
+    minmax(80px, 100px);
   grid-template-rows: 32px;
   display: grid;
   padding: 0;
   color: colors.$grey600;
   position: relative;
   &.mtqe {
-    grid-template-columns: minmax(100px, 150px) repeat(8, 1fr) minmax(80px, 100px);
+    grid-template-columns:
+      minmax(160px, 180px) repeat(8, minmax(80px, 1fr))
+      minmax(80px, 100px);
   }
   @media (max-width: 1100px) {
-    grid-template-columns: minmax(100px, 150px) repeat(11, 1fr) 60px;
+    grid-template-columns:
+      minmax(160px, 180px) repeat(11, minmax(80px, 1fr))
+      60px;
     &.mtqe {
-      grid-template-columns: minmax(100px, 150px) repeat(8, 1fr) 60px;
+      grid-template-columns:
+        minmax(160px, 180px) repeat(8, minmax(80px, 1fr))
+        60px;
     }
   }
   .chunk-file-detail-background {
@@ -265,8 +315,58 @@
       cursor: default;
     }
   }
-
 }
 .analyze-page .more-columns {
-  grid-template-columns: minmax(100px, 150px) repeat(12, 1fr) minmax(80px,100px) !important;
+  grid-template-columns:
+    minmax(160px, 180px) repeat(12, minmax(80px, 1fr))
+    minmax(80px, 100px) !important;
+}
+
+// Below ~1150px the bucket columns (min 80px, so labels like "Repetitions" fit) no
+// longer fit the card: the table scrolls sideways inside it, header and rows together,
+// with the row-label column pinned on the left.
+.job-table-scroll {
+  overflow-x: auto;
+  // .job is a column flex that aligns its children to the start, so the wrapper would
+  // size to the table; stretching it to the card makes it scroll instead
+  align-self: stretch;
+  max-width: 100%;
+  min-width: 0;
+  // Bottom corners of the card, inside its 1px border
+  border-bottom-left-radius: calc(variables.$border-radius-default - 1px);
+  border-bottom-right-radius: calc(variables.$border-radius-default - 1px);
+
+  // Where the table fits (a 1216px card needs a ~1260px window) nothing has to
+  // scroll sideways: clip instead, which is not a scroll container, so the table
+  // header can stick under the job header while the chunks scroll
+  @media (min-width: 1280px) {
+    overflow: clip;
+
+    .job-table-header {
+      position: sticky;
+      // Right under the 40px job header (see .job-analyze-header)
+      top: calc(8px - 40px + 40px);
+      z-index: 3;
+    }
+  }
+
+  // Never narrower than the column minimums, so header and rows keep the same tracks
+  .job-table-header,
+  .chunk-analyze-info {
+    min-width: min-content;
+    column-gap: 8px;
+  }
+
+  .job-table-header > :first-child,
+  .chunk-analyze-info > :first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background-color: inherit;
+    // Cover the column gap too, or scrolled cells show through it
+    margin-right: -8px;
+    padding-right: 8px;
+    // Edge of the pinned column, so a cell scrolling under it reads as cut, not broken
+    box-shadow: inset -1px 0 0 colors.$grey100;
+  }
 }

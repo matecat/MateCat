@@ -29,7 +29,7 @@ class SegmentUIStruct extends AbstractDaoSilentStruct implements IDaoStruct, Arr
     public string $segment;
     public string $segment_hash;
     public ?string $translation = null;
-    public bool $ice_locked;
+    public bool $locked;
     public string $status;
     public int $time_to_edit;
     /** @var list<string|int> */

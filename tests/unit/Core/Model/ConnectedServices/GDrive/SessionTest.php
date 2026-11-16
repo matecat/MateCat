@@ -1094,7 +1094,7 @@ class SessionTest extends AbstractTest
         try {
             $sessionData = $this->createSessionData();
             $session = new TestableSession($this->dbStub, new ArraySessionStore($sessionData), null, null, $sessionData['user'] ?? null);
-            $session->setConversionParams('test-guid', 'en-US', 'it-IT');
+            $session->setConversionParams('3f2504e0-4f89-11d3-9a0c-0305e82c3301', 'en-US', 'it-IT');
             $session->lastConversionHash = ['cacheHash' => 'abc123', 'diskHash' => 'def456'];
 
             $fileMeta = new \Google_Service_Drive_DriveFile();
@@ -1134,7 +1134,7 @@ class SessionTest extends AbstractTest
     {
         $sessionData = $this->createSessionData();
         $session = new TestableSession($this->dbStub, new ArraySessionStore($sessionData), null, null, $sessionData['user'] ?? null);
-        $session->setConversionParams('test-guid', 'en-US', 'it-IT');
+        $session->setConversionParams('3f2504e0-4f89-11d3-9a0c-0305e82c3301', 'en-US', 'it-IT');
         $session->mockService = null;
         $session->forcedToken = null;
 
@@ -1147,7 +1147,7 @@ class SessionTest extends AbstractTest
     {
         $sessionData = $this->createSessionData();
         $session = new TestableSession($this->dbStub, new ArraySessionStore($sessionData), null, null, $sessionData['user'] ?? null);
-        $session->setConversionParams('test-guid', 'en-US', 'it-IT');
+        $session->setConversionParams('3f2504e0-4f89-11d3-9a0c-0305e82c3301', 'en-US', 'it-IT');
 
         $fileMeta = new \Google_Service_Drive_DriveFile();
         $fileMeta->setName('test.docx');
@@ -1244,7 +1244,7 @@ class SessionTest extends AbstractTest
         try {
             $sessionData = $this->createSessionData();
             $session = new TestableSession($this->dbStub, new ArraySessionStore($sessionData), null, null, $sessionData['user'] ?? null);
-            $session->setConversionParams('test-guid', 'en-US', 'it-IT');
+            $session->setConversionParams('3f2504e0-4f89-11d3-9a0c-0305e82c3301', 'en-US', 'it-IT');
             $session->lastConversionHash = [];
 
             $fileMeta = new \Google_Service_Drive_DriveFile();

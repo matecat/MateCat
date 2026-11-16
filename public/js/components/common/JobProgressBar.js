@@ -11,20 +11,24 @@ const JobProgressBar = ({stats = {}, showPercent = true}) => {
   const {total, draft, new: newRaw, translated, approved, approved2} = raw || {}
 
   const unconfirmedPerc = ((draft + newRaw) * 100) / total
-  const translatedPerc = (translated * 100) / total
-  const approvedPerc = (approved * 100) / total
+  const translatedPerc = ((translated + approved + approved2) * 100) / total
+  const approvedPerc = ((approved + approved2) * 100) / total
   const approved2Perc = (approved2 * 100) / total
 
-  const translatedPercBar = (translated * 100) / total
-  const approvedPercBar = ((translated + approved) * 100) / total
-  const approved2PercBar = ((translated + approved + approved2) * 100) / total
+  const translatedPercBar = translatedPerc
+  const approvedPercBar = approvedPerc
+  const approved2PercBar = approved2Perc
+
+  const isTranslatedView = !config.isReview
+  const isReviseView = config.isReview && config.revisionNumber === 1
+  const isRevise2View = config.isReview && config.revisionNumber === 2
 
   const totalPerc = Math.round(
-    !config.isReview
+    isTranslatedView
       ? ((translated + approved + approved2) * 100) / total
-      : config.isReview && config.revisionNumber === 1
+      : isReviseView
         ? ((approved + approved2) * 100) / total
-        : config.isReview && config.revisionNumber === 2
+        : isRevise2View
           ? (approved2 * 100) / total
           : 0,
   )
@@ -100,11 +104,15 @@ const JobProgressBar = ({stats = {}, showPercent = true}) => {
               />
               <span
                 className={`${styles.bar} ${styles['approved-bar']}`}
-                style={{width: approvedPercBar + '%'}}
+                style={{
+                  width: approvedPercBar + '%',
+                }}
               />
               <span
                 className={`${styles.bar} ${styles['approved-bar-2nd-pass']}`}
-                style={{width: approved2PercBar + '%'}}
+                style={{
+                  width: approved2PercBar + '%',
+                }}
               />
             </>
           )}

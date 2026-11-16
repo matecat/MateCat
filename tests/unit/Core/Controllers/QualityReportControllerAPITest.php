@@ -422,13 +422,12 @@ class QualityReportControllerAPITest extends AbstractTest
         $segment->comments = [['id' => 1]];
         $segment->dataRefMap = ['a' => 'b'];
         $segment->edit_distance = 12;
-        $segment->ice_locked = true;
         $segment->ice_modified = false;
         $segment->is_pre_translated = true;
         $segment->issues = [['severity' => 'major']];
         $segment->last_revisions = [['translation' => 'old']];
         $segment->last_translation = 'last';
-        $segment->locked = false;
+        $segment->locked = true;
         $segment->match_type = InternalMatchesConstants::TM_ICE;
         $segment->parsed_time_to_edit = [1, 2, 3];
         $segment->pee = 0.11;
@@ -471,6 +470,8 @@ class QualityReportControllerAPITest extends AbstractTest
         $first = $result[0];
         $this->assertSame(1, $first['id']);
         $this->assertSame('ice', $first['match_type']);
+        $this->assertTrue($first['locked']);
+        $this->assertTrue($first['ice_locked'], 'ice_locked is the deprecated alias of locked');
         $this->assertSame(['id' => 1, 'filename' => 'test.xliff'], $first['file']);
         $this->assertSame(5000, $first['time_to_edit']);
         $this->assertSame(5000, $first['time_to_edit_translation']);

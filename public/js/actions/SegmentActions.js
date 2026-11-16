@@ -281,7 +281,7 @@ const SegmentActions = {
       !segment.splitted &&
       segment.modified &&
       issues.length === 0 &&
-      !segment.ice_locked &&
+      !segment.locked &&
       isMandatoryRevisionIssues
     ) {
       SegmentActions.openIssuesPanel({sid: segment.sid}, true)
@@ -612,8 +612,8 @@ const SegmentActions = {
         position: 'tc',
         text: (
           <>
-            All segments are in <b>read-only mode</b> because this job is
-            under review.
+            All segments are in <b>read-only mode</b> because this job is under
+            review.
             {showUndo && (
               <p className="warning-call-to">
                 <a
@@ -632,18 +632,9 @@ const SegmentActions = {
     }
     if (TextUtils.justSelecting('readonly')) return
 
-    const locked = !segment.unlocked && SegmentUtils.isIceSegment(segment)
+    const locked = !segment.unlocked && SegmentUtils.isLockedSegment(segment)
     if (locked) {
-      ModalsActions.showModalComponent(
-        MODAL_KEY.ALERT,
-        {
-          text:
-            "Segment is locked (in-context exact match) and shouldn't be edited. " +
-            'If you must edit it, click on the padlock icon to the left of the segment. ' +
-            'The owner of the project will be notified of any edits.',
-        },
-        'Ice Matches',
-      )
+      SegmentActions.showLockedSegmentModal()
       return
     }
 
@@ -667,6 +658,24 @@ const SegmentActions = {
     ModalsActions.showModalComponent(MODAL_KEY.ALERT, {
       text: SegmentActions.messageForClickOnReadonly(),
     })
+  },
+
+  showLockedSegmentModal: function () {
+    ModalsActions.showModalComponent(
+      MODAL_KEY.ALERT,
+      {
+        text: (
+          <>
+            This segment is locked and shouldn&apos;t be edited. If you really
+            need to make a change, click the padlock icon to the left of the
+            segment to unlock it.
+            <br />
+            The project owner will be notified of any edits.
+          </>
+        ),
+      },
+      'Locked segment',
+    )
   },
 
   messageForClickOnReadonly: function () {
@@ -925,6 +934,7 @@ const SegmentActions = {
       let segment = SegmentStore.getSegmentByIdToJS(request.sid)
       if (
         segment &&
+        request.text &&
         (typeof segment.glossary === 'undefined' || sid === request.sid)
       ) {
         const source = DraftMatecatUtils.removePlaceholdersForGlossary(
@@ -1015,7 +1025,10 @@ const SegmentActions = {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
       sid: sid,
-      message: 'A termbase item has been deleted',
+      message: {
+        title: 'Termbase',
+        text: 'A termbase entry has been deleted',
+      },
     })
     AppDispatcher.dispatch({
       actionType: SegmentConstants.DELETE_FROM_GLOSSARY,
@@ -1027,7 +1040,11 @@ const SegmentActions = {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
       sid: sid,
-      message: error.message ? error.message : `Error code: ${error.code}`,
+      message: {
+        title: 'Termbase',
+        text: error.message ? error.message : `Error code: ${error.code}`,
+        type: 'error',
+      },
     })
     AppDispatcher.dispatch({
       actionType: SegmentConstants.ERROR_DELETE_FROM_GLOSSARY,
@@ -1043,14 +1060,14 @@ const SegmentActions = {
       .catch((errors) => {
         if (errors.status === 403) {
           const notification = {
-            title: 'Glossary edit failed',
+            title: 'Termbase edit failed',
             text: (
               <span>
-                This glossary is part of a resource that isn’t enabled for
+                This Termbase is part of a resource that isn’t enabled for
                 updates.
                 <br />
                 To edit it, open the <b>Settings</b> panel, go to the{' '}
-                <b>Translation memory & glossary</b> tab, and enable the{' '}
+                <b>Translation memory & Termbase</b> tab, and enable the{' '}
                 <b>“Update”</b> checkbox next to the resource name.
               </span>
             ),
@@ -1062,7 +1079,11 @@ const SegmentActions = {
           AppDispatcher.dispatch({
             actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
             sid: sid,
-            message: errors[0].message,
+            message: {
+              title: 'Termbase',
+              text: errors[0].message,
+              type: 'error',
+            },
           })
         } else {
           OfflineUtils.failedConnection()
@@ -1084,7 +1105,11 @@ const SegmentActions = {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
       sid: sid,
-      message: error.message ? error.message : `Error code: ${error.code}`,
+      message: {
+        title: 'Termbase',
+        text: error.message ? error.message : `Error code: ${error.code}`,
+        type: 'error',
+      },
     })
     AppDispatcher.dispatch({
       actionType: SegmentConstants.ERROR_ADD_GLOSSARY_ITEM,
@@ -1134,7 +1159,11 @@ const SegmentActions = {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
       sid: sid,
-      message: error.message ? error.message : `Error code: ${error.code}`,
+      message: {
+        title: 'Termbase',
+        text: error.message ? error.message : `Error code: ${error.code}`,
+        type: 'error',
+      },
     })
     AppDispatcher.dispatch({
       actionType: SegmentConstants.ERROR_CHANGE_GLOSSARY,
@@ -1487,7 +1516,7 @@ const SegmentActions = {
         ModalsActions.showModalComponent(
           MODAL_KEY.UNLOCK_ALL_SEGMENTS,
           {},
-          'Unlock all 101% segments',
+          'Unlock all locked segments',
         )
       }
     }
@@ -1712,6 +1741,7 @@ const SegmentActions = {
     })
   },
   setCurrentSegment: function (id_segment) {
+    if (id_segment == null) return
     setLastSegmentFromLocalStorage(id_segment.toString())
     const requestData = {
       action: 'setCurrentSegment',
@@ -1724,7 +1754,7 @@ const SegmentActions = {
         SegmentActions.setNextUntranslatedSegmentFromServer(data.nextSegmentId)
         const segment = SegmentStore.getSegmentByIdToJS(id_segment)
         if (!segment) return
-        if (config.alternativesEnabled && !segment.alternatives) {
+        if (config.alternativesEnabled) {
           SegmentActions.getTranslationMismatches(id_segment)
         }
       })

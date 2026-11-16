@@ -155,4 +155,76 @@ class XliffRulesModelTest extends AbstractTest
         $rulesModel->getRulesForVersion(3);
     }
 
+    #[Test]
+    public function shouldUseTheNoStateRuleForSegmentsWithoutState()
+    {
+        $rulesModel = new XliffRulesModel();
+        $noStateRule = new Xliff12Rule(['no-state'], 'pre-translated', 'translated', 'ice');
+        $rulesModel->addRule(new Xliff12Rule(['translated'], 'pre-translated', 'approved', 'ice'));
+        $rulesModel->addRule($noStateRule);
+
+        $this->assertSame($noStateRule, $rulesModel->getMatchingRule(1));
+    }
+
+    #[Test]
+    public function shouldUseTheNoStateRuleAsFallbackForUnmatchedStates()
+    {
+        $rulesModel = new XliffRulesModel();
+        $noStateRule = new Xliff20Rule(['no-state'], 'new');
+        $rulesModel->addRule(new Xliff20Rule(['final'], 'pre-translated', 'approved2', 'ice'));
+        $rulesModel->addRule($noStateRule);
+
+        $this->assertSame($noStateRule, $rulesModel->getMatchingRule(2, 'reviewed'));
+        $this->assertSame($noStateRule, $rulesModel->getMatchingRule(2, 'x-custom'));
+    }
+
+    #[Test]
+    public function shouldPreferAnExplicitStateOverTheNoStateRuleWhateverTheOrder()
+    {
+        $rulesModel = new XliffRulesModel();
+        $noStateRule = new Xliff12Rule(['no-state'], 'new');
+        $translatedRule = new Xliff12Rule(['translated', 'exact-match'], 'pre-translated', 'translated', 'ice');
+        $rulesModel->addRule($noStateRule);
+        $rulesModel->addRule($translatedRule);
+
+        $this->assertSame($translatedRule, $rulesModel->getMatchingRule(1, 'translated'));
+        $this->assertSame($translatedRule, $rulesModel->getMatchingRule(1, 'new', 'exact-match'));
+        $this->assertSame($noStateRule, $rulesModel->getMatchingRule(1, 'new'));
+    }
+
+    #[Test]
+    public function shouldKeepTheDefaultRuleWithoutANoStateRule()
+    {
+        $rulesModel = new XliffRulesModel();
+        $rulesModel->addRule(new Xliff12Rule(['translated'], 'pre-translated', 'translated', 'ice'));
+
+        $this->assertInstanceOf(DefaultRule::class, $rulesModel->getMatchingRule(1));
+        $this->assertInstanceOf(DefaultRule::class, $rulesModel->getMatchingRule(1, 'final'));
+    }
+
+    #[Test]
+    public function shouldNotAcceptNoStateInTwoRules()
+    {
+        $rulesModel = new XliffRulesModel();
+        $rulesModel->addRule(new Xliff12Rule(['no-state', 'translated'], 'pre-translated', 'translated', 'ice'));
+
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage("The same state/state-qualifier cannot be used in two different rules: no-state");
+        $this->expectExceptionCode(400);
+
+        $rulesModel->addRule(new Xliff12Rule(['final', 'no-state'], 'new'));
+    }
+
+    #[Test]
+    public function shouldAllowANoStateRulePerVersion()
+    {
+        $rulesModel = XliffRulesModel::fromArray([
+            'xliff12' => [['states' => ['no-state'], 'analysis' => 'new']],
+            'xliff20' => [['states' => ['no-state'], 'analysis' => 'pre-translated', 'editor' => 'draft', 'match_category' => 'ice']],
+        ]);
+
+        $this->assertTrue($rulesModel->getMatchingRule(1)->isNoStateRule());
+        $this->assertTrue($rulesModel->getMatchingRule(2)->isNoStateRule());
+    }
+
 }

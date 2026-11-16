@@ -70,7 +70,7 @@ class GetSearchControllerReplaceUndoIntegrationTest extends AbstractTest
         AppConfig::$REPLACE_HISTORY_DRIVER = 'mysql';
         AppConfig::$REPLACE_HISTORY_TTL = 300;
 
-        $this->createReplaceHistoryTables();
+        $this->dropReplaceHistoryRows();
         $this->seedTestData();
 
         // Enable translation_versions so replace-all runs the real TranslationVersionsHandler (not Dummy).
@@ -109,34 +109,6 @@ class GetSearchControllerReplaceUndoIntegrationTest extends AbstractTest
         AppConfig::$REPLACE_HISTORY_TTL = $this->originalTtl;
 
         parent::tearDown();
-    }
-
-    private function createReplaceHistoryTables(): void
-    {
-        $conn = obtainTestDatabase()->getConnection();
-        $conn->exec("CREATE TABLE IF NOT EXISTS `replace_events` (
-            `id` bigint(20) NOT NULL AUTO_INCREMENT,
-            `replace_version` bigint(20) NOT NULL,
-            `id_job` bigint(20) NOT NULL,
-            `job_password` varchar(45) NOT NULL,
-            `id_segment` int(11) NOT NULL,
-            `segment_version` int(11),
-            `translation_before_replacement` text,
-            `translation_after_replacement` text,
-            `source` text,
-            `target` text,
-            `status` varchar(45) NOT NULL,
-            `replacement` text,
-            `created_at` datetime NOT NULL,
-            PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
-        $conn->exec("CREATE TABLE IF NOT EXISTS `replace_events_current_version` (
-            `id` bigint(20) NOT NULL AUTO_INCREMENT,
-            `id_job` bigint(20) NOT NULL,
-            `version` bigint(20) NOT NULL,
-            PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
-        $this->dropReplaceHistoryRows();
     }
 
     private function dropReplaceHistoryRows(): void

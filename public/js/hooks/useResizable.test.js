@@ -38,8 +38,8 @@ describe('useResizable', () => {
 
     expect(preventDefault).toHaveBeenCalled()
     expect(result.current.isDragging).toBe(true)
-    expect(document.body).toHaveStyle({cursor:'row-resize'})
-    expect(document.body).toHaveStyle({userSelect:'none'})
+    expect(document.body).toHaveStyle({cursor: 'row-resize'})
+    expect(document.body).toHaveStyle({userSelect: 'none'})
   })
 
   test('dragging upward increases height, clamped to minHeight/maxHeight', () => {
@@ -89,8 +89,8 @@ describe('useResizable', () => {
       mouseUp()
     })
     expect(result.current.isDragging).toBe(false)
-    expect(document.body).toHaveStyle({cursor:''})
-    expect(document.body).toHaveStyle({userSelect:''})
+    expect(document.body).toHaveStyle({cursor: ''})
+    expect(document.body).toHaveStyle({userSelect: ''})
   })
 
   test('mouseup is a no-op when not dragging', () => {
@@ -134,14 +134,14 @@ describe('useResizable', () => {
     act(() => {
       result.current.handleMouseDown({clientY: 200, preventDefault: jest.fn()})
     })
-    expect(document.body).toHaveStyle({cursor:'row-resize'})
+    expect(document.body).toHaveStyle({cursor: 'row-resize'})
 
     unmount()
 
     expect(removeSpy).toHaveBeenCalledWith('mousemove', expect.any(Function))
     expect(removeSpy).toHaveBeenCalledWith('mouseup', expect.any(Function))
-    expect(document.body).toHaveStyle({cursor:''})
-    expect(document.body).toHaveStyle({userSelect:''})
+    expect(document.body).toHaveStyle({cursor: ''})
+    expect(document.body).toHaveStyle({userSelect: ''})
     removeSpy.mockRestore()
   })
 
@@ -155,5 +155,61 @@ describe('useResizable', () => {
     rerender({initialHeight: 300, minHeight: 150})
     expect(addSpy.mock.calls.length).toBeGreaterThan(callsBefore)
     addSpy.mockRestore()
+  })
+})
+
+describe('useResizable with initialRatio', () => {
+  const originalInnerHeight = window.innerHeight
+  const setWindowHeight = (value) => {
+    Object.defineProperty(window, 'innerHeight', {
+      configurable: true,
+      writable: true,
+      value,
+    })
+  }
+  const resizeWindow = (value) => {
+    setWindowHeight(value)
+    window.dispatchEvent(new Event('resize'))
+  }
+
+  beforeEach(() => setWindowHeight(1000))
+  afterEach(() => setWindowHeight(originalInnerHeight))
+
+  test('starts at the given share of the window height', () => {
+    const {result} = renderHook(() => useResizable({initialRatio: 0.4}))
+    expect(result.current.height).toBe(400)
+  })
+
+  test('follows the window when it is resized', () => {
+    const {result} = renderHook(() => useResizable({initialRatio: 0.4}))
+    act(() => resizeWindow(500))
+    expect(result.current.height).toBe(200)
+  })
+
+  test('keeps a dragged height proportional on resize', () => {
+    const {result} = renderHook(() => useResizable({initialRatio: 0.4}))
+    act(() => {
+      result.current.handleMouseDown({clientY: 600, preventDefault: () => {}})
+    })
+    act(() => {
+      mouseMove(500)
+      mouseUp()
+    })
+    expect(result.current.height).toBe(500)
+    act(() => resizeWindow(800))
+    expect(result.current.height).toBe(400)
+  })
+
+  test('never goes below minHeight on a short window', () => {
+    const {result} = renderHook(() =>
+      useResizable({initialRatio: 0.3, minHeight: 150}),
+    )
+    act(() => resizeWindow(400))
+    expect(result.current.height).toBe(150)
+  })
+
+  test('leaves 200px of the window free when the share is large', () => {
+    const {result} = renderHook(() => useResizable({initialRatio: 0.9}))
+    expect(result.current.height).toBe(800)
   })
 })

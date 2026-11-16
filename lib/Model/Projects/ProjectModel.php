@@ -3,10 +3,12 @@
 namespace Model\Projects;
 
 use Controller\API\Commons\Exceptions\AuthorizationError;
+use DomainException;
 use Exception;
 use Model\DataAccess\IDatabase;
 use Model\Exceptions\ValidationError;
 use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
 use Model\Teams\MembershipDao;
 use Model\Teams\MembershipStruct;
 use Model\Teams\TeamDao;
@@ -16,6 +18,7 @@ use Model\Users\UserStruct;
 use PDOException;
 use ReflectionException;
 use Utils\Constants\Teams;
+use Utils\Email\AbstractEmail;
 use Utils\Email\ProjectAssignedEmail;
 use Utils\Tools\CatUtils;
 use Utils\Validation\UserSuppliedName;
@@ -133,9 +136,21 @@ class ProjectModel
                 return;
             }
             $jobs = (new JobDao($this->database))->getNotDeletedByProjectId((int) $this->project_struct->id);
-            $email = new ProjectAssignedEmail($this->database, $this->user, $this->project_struct, $assignee, $jobs);
-            $email->send();
+            $this->assignedEmail($assignee, $jobs)->send();
         }
+    }
+
+    /**
+     * The email that tells the new assignee about the project. A method of its own so a test can
+     * replace it with one that does not reach the mail queue.
+     *
+     * @param JobStruct[] $jobs
+     *
+     * @throws DomainException
+     */
+    protected function assignedEmail(UserStruct $assignee, array $jobs): AbstractEmail
+    {
+        return new ProjectAssignedEmail($this->database, $this->user, $this->project_struct, $assignee, $jobs);
     }
 
     /**

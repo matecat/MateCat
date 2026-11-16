@@ -23,7 +23,7 @@ class MailWorkerTest extends AbstractTest
 
         $worker = $this->getMockBuilder(MailWorker::class)
             ->setConstructorArgs([$amq, obtainTestDatabase()])
-            ->onlyMethods(['createMailer', '_checkDatabaseConnection', '_doLog'])
+            ->onlyMethods(['createMailer', '_checkDatabaseConnection'])
             ->getMock();
 
         $worker->method('createMailer')->willReturn($mailer);

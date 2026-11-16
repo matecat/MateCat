@@ -2,16 +2,27 @@
 
 namespace Matecat\Core\Controllers;
 
+use Controller\API\Commons\Exceptions\ConflictError;
 use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\API\Commons\JobRestructureLock;
 use Controller\API\V2\JobsTranslatorsController;
+use Exception;
 use InvalidArgumentException;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
+use Matecat\TestHelpers\FakeLockRedisClient;
 use Model\DataAccess\Database;
+use Model\Exceptions\NotFoundException as ModelNotFoundException;
 use Model\Jobs\JobStruct;
 use Model\Outsource\ConfirmationDao;
+use PDOException;
+use PHPUnit\Event\NoPreviousThrowableException;
+use PHPUnit\Framework\InvalidArgumentException as PHPUnitInvalidArgumentException;
+use PHPUnit\Framework\MockObject\Exception as MockObjectException;
+use Throwable;
+use TypeError;
 use Utils\Constants\JobStatus;
 use Model\FeaturesBase\FeatureSet;
 use Model\Translators\JobsTranslatorsStruct;
@@ -47,8 +58,16 @@ class StubModelJobsTranslatorsController extends JobsTranslatorsController
 {
     public ?TranslatorsModel $stubModel = null;
 
+    public FakeLockRedisClient $redis;
+
     public function __construct()
     {
+        $this->redis = new FakeLockRedisClient();
+    }
+
+    protected function restructureLock(): JobRestructureLock
+    {
+        return new JobRestructureLock($this->redis);
     }
 
     protected function registerValidators(): void
@@ -76,12 +95,12 @@ class JobsTranslatorsControllerTest extends AbstractTest
 
     /**
      * @throws ReflectionException
-     * @throws \PDOException
-     * @throws \Exception
-     * @throws \TypeError
-     * @throws \PHPUnit\Framework\MockObject\Exception
-     * @throws \PHPUnit\Event\NoPreviousThrowableException
-     * @throws \PHPUnit\Framework\InvalidArgumentException
+     * @throws PDOException
+     * @throws Exception
+     * @throws TypeError
+     * @throws MockObjectException
+     * @throws NoPreviousThrowableException
+     * @throws PHPUnitInvalidArgumentException
      */
     protected function setUp(): void
     {
@@ -116,8 +135,8 @@ class JobsTranslatorsControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \PDOException
-     * @throws \Exception
+     * @throws PDOException
+     * @throws Exception
      */
     protected function tearDown(): void
     {
@@ -128,7 +147,7 @@ class JobsTranslatorsControllerTest extends AbstractTest
 
     /**
      * @throws ReflectionException
-     * @throws \PDOException
+     * @throws PDOException
      */
     private function seedConfirmation(JobStruct $jStruct): void
     {
@@ -143,7 +162,7 @@ class JobsTranslatorsControllerTest extends AbstractTest
     }
 
     /**
-     * @throws \PDOException
+     * @throws PDOException
      */
     private function seedTestData(): void
     {
@@ -201,10 +220,10 @@ class JobsTranslatorsControllerTest extends AbstractTest
 
     /**
      * @throws ReflectionException
-     * @throws \Model\Exceptions\NotFoundException
+     * @throws ModelNotFoundException
      * @throws NotFoundException
-     * @throws \Exception
-     * @throws \TypeError
+     * @throws Exception
+     * @throws TypeError
      */
     #[Test]
     public function get_returns_job_payload_with_null_translator_when_not_outsourced(): void
@@ -232,10 +251,10 @@ class JobsTranslatorsControllerTest extends AbstractTest
 
     /**
      * @throws ReflectionException
-     * @throws \Model\Exceptions\NotFoundException
+     * @throws ModelNotFoundException
      * @throws NotFoundException
-     * @throws \Exception
-     * @throws \TypeError
+     * @throws Exception
+     * @throws TypeError
      */
     #[Test]
     public function get_throws_invalid_argument_when_job_is_outsourced(): void
@@ -254,10 +273,10 @@ class JobsTranslatorsControllerTest extends AbstractTest
 
     /**
      * @throws ReflectionException
-     * @throws \Model\Exceptions\NotFoundException
+     * @throws ModelNotFoundException
      * @throws NotFoundException
-     * @throws \Exception
-     * @throws \TypeError
+     * @throws Exception
+     * @throws TypeError
      */
     #[Test]
     public function get_throws_not_found_when_job_is_deleted(): void
@@ -275,8 +294,8 @@ class JobsTranslatorsControllerTest extends AbstractTest
     /**
      * @throws ReflectionException
      * @throws NotFoundException
-     * @throws \Exception
-     * @throws \TypeError
+     * @throws Exception
+     * @throws TypeError
      */
     #[Test]
     public function add_throws_invalid_argument_when_email_is_empty(): void
@@ -299,8 +318,8 @@ class JobsTranslatorsControllerTest extends AbstractTest
     /**
      * @throws ReflectionException
      * @throws NotFoundException
-     * @throws \Exception
-     * @throws \TypeError
+     * @throws Exception
+     * @throws TypeError
      */
     #[Test]
     public function add_throws_not_found_when_job_is_deleted(): void
@@ -328,9 +347,9 @@ class JobsTranslatorsControllerTest extends AbstractTest
      *
      * @throws ReflectionException
      * @throws NotFoundException
-     * @throws \Exception
-     * @throws \TypeError
-     * @throws \PHPUnit\Framework\MockObject\Exception
+     * @throws Exception
+     * @throws TypeError
+     * @throws MockObjectException
      */
     #[Test]
     public function add_renders_translator_payload_from_seam_model(): void
@@ -347,34 +366,10 @@ class JobsTranslatorsControllerTest extends AbstractTest
         $tStruct->source                = 'en-US';
         $tStruct->target                = 'it-IT';
 
-        $model = $this->createMock(TranslatorsModel::class);
-        $model->method('setUserInvite')->willReturnSelf();
-        $model->method('setDeliveryDate')->willReturnSelf();
-        $model->method('setJobOwnerTimezone')->willReturnSelf();
-        $model->method('setEmail')->willReturnSelf();
+        $model = $this->makeFluentModelMock();
         $model->method('update')->willReturn($tStruct);
 
-        $controller             = new StubModelJobsTranslatorsController();
-        $controller->stubModel  = $model;
-
-        $this->setPropOn($controller, 'request', $this->requestStub);
-        $this->setPropOn($controller, 'response', $this->responseMock);
-        $this->setPropOn($controller, 'logger', $this->createMock(MatecatLogger::class));
-        $this->setPropOn($controller, 'database', obtainTestDatabase());
-        $user        = new UserStruct();
-        $user->uid   = 1;
-        $user->email = $this->ownerEmail(self::BASE);
-        $this->setPropOn($controller, 'user', $user);
-        $this->setPropOn($controller, 'jStruct', $jStruct);
-
-        $prop = $this->reflector->getProperty('params');
-        $prop->setValue($controller, [
-            'email'         => 'translator@example.org',
-            'delivery_date' => '0',
-            'timezone'      => '0',
-            'id_job'        => (string) $this->jobId(self::BASE),
-            'password'      => 'jobpw',
-        ]);
+        $controller = $this->makeStubModelController($model, $jStruct);
 
         $expectedId = $this->jobId(self::BASE);
         $this->responseMock->expects($this->once())
@@ -391,6 +386,140 @@ class JobsTranslatorsControllerTest extends AbstractTest
         $controller->add();
     }
 
+    // ─── add() and the per-job restructure lock ───
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
+     */
+    #[Test]
+    public function add_updates_the_translator_holding_the_job(): void
+    {
+        $jStruct = $this->loadJobStruct();
+        $key     = JobRestructureLock::KEY_PREFIX . $this->jobId(self::BASE);
+        $model   = $this->makeFluentModelMock();
+
+        $controller = $this->makeStubModelController($model, $jStruct);
+        $lockLogAtUpdate = null;
+        $model->expects($this->once())->method('update')->willReturnCallback(
+            function () use ($controller, &$lockLogAtUpdate): JobsTranslatorsStruct {
+                $lockLogAtUpdate = $controller->redis->log;
+
+                return $this->makeTranslatorStruct();
+            }
+        );
+
+        $controller->add();
+
+        self::assertSame(['set ' . $key], $lockLogAtUpdate, 'update() must run holding the job');
+        self::assertSame(['set ' . $key, 'del ' . $key], $controller->redis->log);
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
+     */
+    #[Test]
+    public function add_on_a_held_job_answers_conflict_and_never_updates(): void
+    {
+        $jStruct = $this->loadJobStruct();
+        $model   = $this->makeFluentModelMock();
+        $model->expects($this->never())->method('update');
+
+        $controller = $this->makeStubModelController($model, $jStruct);
+        (new JobRestructureLock($controller->redis))->acquire($this->jobId(self::BASE));
+
+        $this->expectException(ConflictError::class);
+
+        $controller->add();
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
+     */
+    #[Test]
+    public function add_releases_the_job_when_the_update_fails(): void
+    {
+        $jStruct = $this->loadJobStruct();
+        $model   = $this->makeFluentModelMock();
+        $model->method('update')->willThrowException(new InvalidArgumentException('The job is outsourced.', 400));
+
+        $controller = $this->makeStubModelController($model, $jStruct);
+
+        try {
+            $controller->add();
+            self::fail('the update failure must reach the caller');
+        } catch (InvalidArgumentException) {
+        }
+
+        self::assertSame([], $controller->redis->keys);
+    }
+
+    /**
+     * @return TranslatorsModel&MockObject
+     *
+     * @throws MockObjectException
+     */
+    private function makeFluentModelMock(): TranslatorsModel&MockObject
+    {
+        $model = $this->createMock(TranslatorsModel::class);
+        $model->method('setUserInvite')->willReturnSelf();
+        $model->method('setDeliveryDate')->willReturnSelf();
+        $model->method('setJobOwnerTimezone')->willReturnSelf();
+        $model->method('setEmail')->willReturnSelf();
+
+        return $model;
+    }
+
+    private function makeTranslatorStruct(): JobsTranslatorsStruct
+    {
+        $tStruct                        = new JobsTranslatorsStruct();
+        $tStruct->id_job                = $this->jobId(self::BASE);
+        $tStruct->job_password          = 'jobpw';
+        $tStruct->id_translator_profile = null;
+        $tStruct->email                 = 'translator@example.org';
+        $tStruct->added_by              = 1;
+        $tStruct->delivery_date         = '2026-01-01 00:00:00';
+        $tStruct->source                = 'en-US';
+        $tStruct->target                = 'it-IT';
+
+        return $tStruct;
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws MockObjectException
+     */
+    private function makeStubModelController(TranslatorsModel $model, JobStruct $jStruct): StubModelJobsTranslatorsController
+    {
+        $controller            = new StubModelJobsTranslatorsController();
+        $controller->stubModel = $model;
+
+        $this->setPropOn($controller, 'request', $this->requestStub);
+        $this->setPropOn($controller, 'response', $this->responseMock);
+        $this->setPropOn($controller, 'logger', $this->createMock(MatecatLogger::class));
+        $this->setPropOn($controller, 'database', obtainTestDatabase());
+        $user        = new UserStruct();
+        $user->uid   = 1;
+        $user->email = $this->ownerEmail(self::BASE);
+        $this->setPropOn($controller, 'user', $user);
+        $this->setPropOn($controller, 'jStruct', $jStruct);
+
+        $this->reflector->getProperty('params')->setValue($controller, [
+            'email'         => 'translator@example.org',
+            'delivery_date' => '0',
+            'timezone'      => '0',
+            'id_job'        => (string) $this->jobId(self::BASE),
+            'password'      => 'jobpw',
+        ]);
+
+        return $controller;
+    }
+
     // ─── registerValidators() ───
 
     /**
@@ -399,7 +528,7 @@ class JobsTranslatorsControllerTest extends AbstractTest
      * covering lines 130-136.
      *
      * @throws ReflectionException
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[Test]
     public function register_validators_wires_login_and_password_validators(): void

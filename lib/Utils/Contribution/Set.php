@@ -38,7 +38,7 @@ class Set
             $output = "**** SetContribution failed. AMQ Connection Error. ****\n\t";
             $output .= "{$e->getMessage()}";
             $output .= var_export($contribution, true);
-            LoggerFactory::doJsonLog($output);
+            LoggerFactory::getLogger('engines')->error($output);
             throw $e;
         }
     }
@@ -59,7 +59,7 @@ class Set
             $output = "**** SetContribution failed. AMQ Connection Error. ****\n\t";
             $output .= "{$e->getMessage()}";
             $output .= var_export($contribution, true);
-            LoggerFactory::doJsonLog($output);
+            LoggerFactory::getLogger('engines')->error($output);
             throw $e;
         }
     }

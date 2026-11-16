@@ -11,8 +11,8 @@ import React, {
 import PropTypes from 'prop-types'
 
 import Check from '../../../img/icons/Check'
-import Search from '../../../img/icons/Search'
 import TEXT_UTILS from '../../utils/textUtils'
+import IconSearch from '../../../img/icons/IconSearch'
 
 export const Dropdown = forwardRef(
   (
@@ -33,8 +33,8 @@ export const Dropdown = forwardRef(
       onSearchBarFocus = () => {},
       optionsSelectedCopySingular = () => {},
       optionsSelectedCopyPlural = () => {},
-      resetSelectedOptions = () => {},
       onClose = () => {},
+      isActiveOptionCheckmarkVisible = true,
       children,
     },
     ref,
@@ -48,17 +48,26 @@ export const Dropdown = forwardRef(
     const textInputRef = useRef()
     const queryFilterRef = useRef('')
     const itemsOnTopRef = useRef(activeOptions)
+    const setListMaxHeightDelayRef = useRef()
 
     useImperativeHandle(ref, () => ({
       getListRef: () => listRef?.current,
       setListMaxHeight: (value) => {
         if (listRef?.current) {
+          listRef.current.parentElement.parentElement.style.opacity = 1
           listRef.current.style.maxHeight = `${value}px`
-          listRef.current.parentElement.style.height = `${
-            listRef.current.offsetHeight
-              ? listRef.current.offsetHeight + 'px'
-              : 'auto'
-          }`
+
+          clearTimeout(setListMaxHeightDelayRef.current)
+          setListMaxHeightDelayRef.current = setTimeout(() => {
+            if (!listRef.current) return
+            listRef.current.parentElement.style.opacity = 1
+            listRef.current.parentElement.style.height = `${
+              listRef.current.offsetHeight
+                ? listRef.current.offsetHeight + 'px'
+                : 'auto'
+            }`
+          }, 40)
+
           listRef.current.parentElement.ontransitionend = () =>
             (listRef.current.parentElement.style.height = 'auto')
         }
@@ -171,6 +180,8 @@ export const Dropdown = forwardRef(
 
       return () => clearTimeout(timer)
     }, [showSearchBar])
+
+    useEffect(() => () => clearTimeout(setListMaxHeightDelayRef.current), [])
 
     // keyboard shortcuts
     useEffect(() => {
@@ -328,7 +339,8 @@ export const Dropdown = forwardRef(
           return activeOption.id === option.id
         }).length > 0
       const isNoResultsFound = option.id === 'noResultsFound'
-      const showActiveOptionIcon = isActiveOption || isActiveOptions
+      const showActiveOptionIcon =
+        isActiveOptionCheckmarkVisible && (isActiveOption || isActiveOptions)
       const {
         beforeRow,
         row,
@@ -387,7 +399,10 @@ export const Dropdown = forwardRef(
             onMouseLeave={() => setRowTooltip()}
           >
             {row && !isNoResultsFound ? (
-              row
+              <>
+                {row}
+                {showActiveOptionIcon && <Check size={16} />}
+              </>
             ) : (
               <>
                 <span>{option.name}</span>
@@ -435,6 +450,7 @@ export const Dropdown = forwardRef(
       >
         {(showSearchBar || multipleSelect === 'modal') && (
           <div data-testid="dropdown-search" className="dropdown__search-bar">
+            <IconSearch size={20} />
             <input
               className="dropdown__search-bar-input"
               placeholder={searchPlaceholder}
@@ -444,7 +460,6 @@ export const Dropdown = forwardRef(
               onChange={updateQueryFilter}
               onFocus={onSearchBarFocus}
             />
-            <Search size={20} />
           </div>
         )}
         {rowTooltip && (
@@ -514,7 +529,7 @@ Dropdown.propTypes = {
   onSearchBarFocus: PropTypes.func,
   optionsSelectedCopySingular: PropTypes.func,
   optionsSelectedCopyPlural: PropTypes.func,
-  resetSelectedOptions: PropTypes.func,
   onClose: PropTypes.func,
+  isActiveOptionCheckmarkVisible: PropTypes.bool,
   children: PropTypes.func,
 }

@@ -1,18 +1,19 @@
-jest.mock('../src/utils', () => ({
+import {describe, test, expect, beforeEach, afterEach, vi} from 'vitest';
+import {MessageHandler, notifyUpgrade} from '../src/amq/MessageHandler.js';
+
+vi.mock('../src/utils.js', () => ({
   logger: {
-    info: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
+    info: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
   },
 }));
 
-const {MessageHandler, notifyUpgrade} = require('../src/amq/MessageHandler');
-
 function mockApp() {
   return {
-    sendBroadcastServiceMessage: jest.fn(),
-    sendRoomNotifications: jest.fn(),
-    _socketIOServer: {disconnectSockets: jest.fn()},
+    sendBroadcastServiceMessage: vi.fn(),
+    sendRoomNotifications: vi.fn(),
+    _socketIOServer: {disconnectSockets: vi.fn()},
   };
 }
 
@@ -142,11 +143,11 @@ describe('MessageHandler.onReceive', () => {
 
 describe('notifyUpgrade', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   test('broadcasts RELOAD without scheduling exit when isRebooting=false', () => {
@@ -156,21 +157,21 @@ describe('notifyUpgrade', () => {
         'message',
         expect.objectContaining({_type: 'force_reload'}),
     );
-    jest.advanceTimersByTime(5000);
+    vi.advanceTimersByTime(5000);
     expect(app._socketIOServer.disconnectSockets).not.toHaveBeenCalled();
   });
 
   test('broadcasts UPGRADE and disconnects when isRebooting=true', () => {
-    const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {});
+    const mockExit = vi.spyOn(process, 'exit').mockImplementation(() => {});
     const app = mockApp();
     notifyUpgrade(app, true);
     expect(app.sendBroadcastServiceMessage).toHaveBeenCalledWith(
         'message',
         expect.objectContaining({_type: 'upgrade'}),
     );
-    jest.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(1000);
     expect(app._socketIOServer.disconnectSockets).toHaveBeenCalledWith(true);
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
     expect(mockExit).toHaveBeenCalledWith(0);
     mockExit.mockRestore();
   });

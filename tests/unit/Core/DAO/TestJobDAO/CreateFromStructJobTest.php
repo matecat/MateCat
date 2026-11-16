@@ -66,7 +66,7 @@ class CreateFromStructJobTest extends AbstractTest
                 'job_last_segment' => "182655236",
                 'source' => "nl-NL",
                 'target' => "de-DE",
-                'tm_keys' => '[{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"","key":"e1f9153f48c4c7e9328d","r":true,"w":true,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]',
+                'tm_keys' => '[{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"","key":"00000000000000000002","r":true,"w":true,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]',
                 'id_translator' => "",
                 'job_type' => null,
                 'total_time_to_edit' => "156255",
@@ -129,7 +129,7 @@ class CreateFromStructJobTest extends AbstractTest
         $this->assertEquals("182655236", $result->job_last_segment);
         $this->assertEquals("nl-NL", $result->source);
         $this->assertEquals("de-DE", $result->target);
-        $tm_keys = '[{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"","key":"e1f9153f48c4c7e9328d","r":true,"w":true,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]';
+        $tm_keys = '[{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"","key":"00000000000000000002","r":true,"w":true,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]';
         $this->assertEquals($tm_keys, $result->tm_keys);
         $this->assertEquals("", $result->id_translator);
         $this->assertNull($result->job_type);

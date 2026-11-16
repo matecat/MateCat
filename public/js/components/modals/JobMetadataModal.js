@@ -3,40 +3,51 @@ import CommonUtils from '../../utils/commonUtils'
 import {Accordion} from '../common/Accordion/Accordion'
 import {filterXSS} from 'xss'
 
+// Links the deployment does not allow are flattened to inert markdown text. Core allows none
+// (isAllowedLinkRedirect is `() => false`); plugins override it.
+const removeNotAllowedLinksFromHtml = (html) => {
+  const div = document.createElement('div')
+  div.innerHTML = html
+  const links = div.getElementsByTagName('a')
+  const linksArray = Array.from(links)
+  for (var i = 0; i < linksArray.length; i++) {
+    const linkElement = linksArray[i]
+    const link = linkElement.getAttribute('href')
+    if (!CommonUtils.isAllowedLinkRedirect(link)) {
+      const text = '[' + linkElement.textContent + '](' + link + ')'
+      // Replace the node we already hold: re-querying by href breaks on an anchor with no
+      // href and on any href containing a quote.
+      linkElement.parentNode &&
+        linkElement.parentNode.replaceChild(
+          document.createTextNode(text),
+          linkElement,
+        )
+    }
+  }
+  return div.innerHTML
+}
+
+// Plain-text instructions keep their line breaks. Text that already carries block markup (plugins
+// render markdown to paragraphs first) is left alone, or every newline between blocks doubles.
+const BLOCK_MARKUP = /<(p|br|div|ul|ol|li|h[1-6]|blockquote|pre|table)\b/i
+const preserveLineBreaks = (text) =>
+  BLOCK_MARKUP.test(text) ? text : text.replace(/\r\n|\r|\n/g, '<br/>')
+
 const JobMetadataModal = (props) => {
   const [currentFile, setCurrentFile] = useState(props.currentFile)
 
   const isMtcReferenceValued = ({metadata}) =>
     typeof metadata?.['mtc:references'] === 'string'
 
-  // Instructions are stored as plain text and injected with dangerouslySetInnerHTML, so the
-  // escaping has to happen here. Plugins override this method to add markdown rendering; they
-  // filter too, and filterXSS is idempotent.
-  const getHtml = (text) => (text ? filterXSS(text) : text)
+  // Instructions keep their anchors and are injected with dangerouslySetInnerHTML, so the
+  // escaping and the link decision happen here. Plugins render markdown over the same value
+  // first; filterXSS and the link check are both idempotent.
+  const getHtml = (text) =>
+    text
+      ? removeNotAllowedLinksFromHtml(filterXSS(preserveLineBreaks(text)))
+      : text
 
   const getMTCReferences = ({metadata}) => {
-    const removeNotAllowedLinksFromHtml = (html) => {
-      const div = document.createElement('div')
-      div.innerHTML = html
-      const links = div.getElementsByTagName('a')
-      const linksArray = Array.from(links)
-      for (var i = 0; i < linksArray.length; i++) {
-        const linkElement = linksArray[i]
-        const link = linkElement.getAttribute('href')
-        if (!CommonUtils.isAllowedLinkRedirect(link)) {
-          const text = '[' + linkElement.textContent + '](' + link + ')'
-          // Replace the node we already hold: re-querying by href breaks on an anchor with no
-          // href and on any href containing a quote.
-          linkElement.parentNode &&
-            linkElement.parentNode.replaceChild(
-              document.createTextNode(text),
-              linkElement,
-            )
-        }
-      }
-      return div.innerHTML
-    }
-
     return (
       isMtcReferenceValued({metadata}) && (
         <p
@@ -77,6 +88,7 @@ const JobMetadataModal = (props) => {
               <div className="transition">
                 {file.metadata.instructions && (
                   <div
+                    className="instructions-text"
                     dangerouslySetInnerHTML={{
                       __html: getHtml(file.metadata.instructions),
                     }}
@@ -98,10 +110,11 @@ const JobMetadataModal = (props) => {
     return (
       <div className="matecat-modal-text">
         <div className={'description'}>
-          <h3>Please read the following notes and references carefully:</h3>
+          <h4>Please read the following notes and references carefully:</h4>
         </div>
         <div className="instructions-container">
-          <p
+          <div
+            className="instructions-text"
             dangerouslySetInnerHTML={{
               __html: getHtml(file.metadata.instructions),
             }}
@@ -130,7 +143,8 @@ const JobMetadataModal = (props) => {
               <div>
                 <h4>Project instructions</h4>
                 <div className="instructions-container">
-                  <p
+                  <div
+                    className="instructions-text"
                     dangerouslySetInnerHTML={{
                       __html: getHtml(props.projectInfo),
                     }}

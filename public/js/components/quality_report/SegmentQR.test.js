@@ -49,7 +49,7 @@ const buildSegment = (overrides = {}) => {
     time_to_edit_translation: null,
     time_to_edit_revise: null,
     time_to_edit_revise_2: null,
-    ice_locked: '0',
+    locked: '0',
     ice_modified: false,
     is_pre_translated: false,
     issues: [],
@@ -295,6 +295,16 @@ describe('SegmentQR', () => {
     expect(window.open).toHaveBeenCalledWith(
       'https://example.com/revise1/job#100',
     )
+  })
+
+  test('shows Pre-Translated for a locked pre-translated segment', () => {
+    renderComponent({
+      last_translation: 'Tradotto',
+      match_type: 'ICE',
+      locked: '1',
+      is_pre_translated: true,
+    })
+    expect(screen.getByText('Pre-Translated')).toBeInTheDocument()
   })
 
   test('renders APPROVED2 status as approved', () => {

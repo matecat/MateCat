@@ -17,9 +17,8 @@ class FeatureSetTest extends AbstractTest
     public function getSortedFeatures(): void
     {
         // Real dependency chain here (verified against actual class declarations):
-        // translation_versions -> review_extended (AbstractRevisionFeature's own
-        // default, inherited by ReviewExtended) -> second_pass_review (its own
-        // override). translated/mmt/aligner/project_completion have no declared
+        // translation_versions -> second_pass_review (AbstractRevisionFeature's own
+        // default, inherited by SecondPassReview). translated/mmt/aligner/project_completion have no declared
         // dependency on anything, so their relative position is unconstrained —
         // asserting an exact full order over-specifies the contract (see report
         // §9.2). Assert the real invariant instead.
@@ -30,18 +29,13 @@ class FeatureSetTest extends AbstractTest
         $position = array_flip($codes);
 
         self::assertEqualsCanonicalizing(
-            ['translated', 'mmt', 'translation_versions', 'review_extended', 'second_pass_review', 'aligner', 'project_completion'],
+            ['translated', 'mmt', 'translation_versions', 'second_pass_review', 'aligner', 'project_completion'],
             $codes
         );
         self::assertLessThan(
-            $position['review_extended'],
-            $position['translation_versions'],
-            'translation_versions must load before review_extended, since review_extended depends on it'
-        );
-        self::assertLessThan(
             $position['second_pass_review'],
-            $position['review_extended'],
-            'review_extended must load before second_pass_review, since second_pass_review depends on it'
+            $position['translation_versions'],
+            'translation_versions must load before second_pass_review, since second_pass_review depends on it'
         );
     }
 

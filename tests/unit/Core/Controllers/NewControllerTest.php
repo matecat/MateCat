@@ -17,6 +17,7 @@ use Model\ProjectCreation\ProjectStructure;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
@@ -409,6 +410,118 @@ class NewControllerTest extends AbstractTest
     }
 
     /**
+     * @param array<int|string, mixed>|string $instructions
+     *
+     * @throws ReflectionException
+     * @throws Exception
+     *
+     * @return array<string, mixed>
+     */
+    private function validateRequestWithInstructions(array|string $instructions): array
+    {
+        $user = $this->createMock(UserStruct::class);
+        $user->expects($this->once())->method('getPersonalTeam')->willReturn(new TeamStruct());
+        $user->expects($this->once())->method('getEmail')->willReturn("test-email@translated.com");
+
+        $this->requestMock = new Request(
+            [],
+            [
+                'due_date' => '20251231',
+                'source_lang' => 'en',
+                'target_lang' => 'fr,de',
+                'mt_engine' => 1,
+                'tms_engine' => 1,
+                'instructions' => $instructions,
+            ],
+            [],
+            [],
+            [
+                'file[]' => [
+                    'name' => 'foo.docx',
+                    'tmp_name' => '/tmp/xdwlky',
+                ]
+            ]
+        );
+
+        $this->createMocks();
+
+        $reflector = new ReflectionProperty($this->controller, 'user');
+        $reflector->setValue($this->controller, $user);
+
+        return $this->method->invoke($this->controller);
+    }
+
+    /**
+     * Connectors such as TOS/Phrase deliver their anchors entity escaped: the sanitizer has to
+     * decode them, otherwise the raw markup reaches the translator verbatim.
+     *
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    #[Test]
+    public function testValidateTheRequestSanitizesEntityEscapedInstructions(): void
+    {
+        $validateParameters = $this->validateRequestWithInstructions([
+            '**Project number**: &lt;a href="https://cloud.memsource.com/web/project2/show/34962138" target="_blank"&gt;34962138&lt;/a&gt;',
+        ]);
+
+        $this->assertEquals(
+            '**Project number**: <a href="https://cloud.memsource.com/web/project2/show/34962138" target="_blank">34962138</a>',
+            $validateParameters['instructions'][0]
+        );
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    #[Test]
+    public function testValidateTheRequestSanitizesEveryInstructionsLeaf(): void
+    {
+        $validateParameters = $this->validateRequestWithInstructions([
+            '<script>alert(1)</script>first',
+            ['nested' => 'a <a href="http://t.co">l</a>'],
+        ]);
+
+        $this->assertEquals('first', $validateParameters['instructions'][0]);
+        $this->assertEquals(
+            'a <a href="http://t.co">l</a>',
+            $validateParameters['instructions'][1]['nested']
+        );
+    }
+
+    /**
+     * filter_var() stringifies the leaves before handing them to the callback, so a null or an
+     * integer must not blow up on the sanitizer's `string` parameter.
+     *
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    #[Test]
+    public function testValidateTheRequestAcceptsNonStringInstructionsLeaves(): void
+    {
+        $validateParameters = $this->validateRequestWithInstructions(['a' => null, 'b' => 5]);
+
+        $this->assertEquals('', $validateParameters['instructions']['a']);
+        $this->assertEquals('5', $validateParameters['instructions']['b']);
+    }
+
+    /**
+     * `instructions[]` is the documented contract: a scalar is rejected by FILTER_REQUIRE_ARRAY
+     * and ends up null. Pinned so the drop stays a deliberate choice.
+     *
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    #[Test]
+    public function testValidateTheRequestDropsScalarInstructions(): void
+    {
+        $validateParameters = $this->validateRequestWithInstructions('not an array');
+
+        $this->assertNull($validateParameters['instructions']);
+    }
+
+    /**
      * icu_enabled must stay `false` when the request explicitly disables it.
      *
      * @throws ReflectionException
@@ -558,11 +671,13 @@ class NewControllerTest extends AbstractTest
      * Build a validated request array via validateTheRequest() so that
      * buildProjectStructure() can be driven with realistic, fully-populated data.
      *
+     * @param array<string, string> $extraParams POST parameters added to the base request
+     *
      * @return array{0: array<string, mixed>, 1: TestableNewControllerForBuild, 2: UserStruct}
      * @throws ReflectionException
      * @throws Exception
      */
-    private function buildValidatedRequest(): array
+    private function buildValidatedRequest(array $extraParams = []): array
     {
         $user = $this->createMock(UserStruct::class);
         $user->method('getPersonalTeam')->willReturn(new TeamStruct());
@@ -585,7 +700,7 @@ class NewControllerTest extends AbstractTest
                 'pretranslate_100' => '1',
                 'public_tm_penalty' => '20',
                 'project_name' => 'My Build Project',
-            ],
+            ] + $extraParams,
             [],
             [],
             [
@@ -651,6 +766,180 @@ class NewControllerTest extends AbstractTest
         $this->assertSame(1, $projectStructure->mt_engine);
         $this->assertSame(1, $projectStructure->tms_engine);
         $this->assertSame(20, $projectStructure->public_tm_penalty);
+        $this->assertSame(1, $projectStructure->pretranslate_101_lock);
+        $this->assertSame(1, $projectStructure->pretranslate_100_lock);
+        $this->assertSame('APPROVED', $projectStructure->pretranslate_101_status);
+        $this->assertSame('APPROVED', $projectStructure->pretranslate_100_status);
+        // pretranslate_101 is not in the request: it defaults to on
+        $this->assertTrue($request['pretranslate_101']);
+        $this->assertSame(1, $projectStructure->pretranslate_101);
+    }
+
+    /**
+     * @return array<string, array{string, bool, int}>
+     */
+    public static function validPretranslate101Values(): array
+    {
+        return [
+            'string 1'     => ['1', true, 1],
+            'string true'  => ['true', true, 1],
+            'string 0'     => ['0', false, 0],
+            'string false' => ['false', false, 0],
+        ];
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    #[Test]
+    #[DataProvider('validPretranslate101Values')]
+    public function testBuildProjectStructureReadsPretranslate101(string $value, bool $validated, int $stored): void
+    {
+        [$request, $controller, $user] = $this->buildValidatedRequest(['pretranslate_101' => $value]);
+
+        $this->assertSame($validated, $request['pretranslate_101']);
+
+        $engine = (new ReflectionClass(MyMemory::class))->newInstanceWithoutConstructor();
+        $projectStructure = $controller->callBuildProjectStructure(
+            $request,
+            ['arrayFiles' => ['foo.docx'], 'arrayFilesMeta' => ['meta']],
+            'upload-token-xyz',
+            $user,
+            $engine
+        );
+
+        $this->assertSame($stored, $projectStructure->pretranslate_101);
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    #[Test]
+    public function testValidateTheRequestRejectsInvalidPretranslate101(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid pretranslate_101 value');
+        $this->expectExceptionCode(-6);
+
+        $this->buildValidatedRequest(['pretranslate_101' => 'maybe']);
+    }
+
+    /**
+     * The option is case-insensitive; it is stored as the upper-case TranslationStatus constant.
+     *
+     * @return array<string, array{string, string}>
+     */
+    public static function validPretranslateStatusValues(): array
+    {
+        return [
+            'TRANSLATED' => ['TRANSLATED', 'TRANSLATED'],
+            'APPROVED'   => ['APPROVED', 'APPROVED'],
+            'APPROVED2'  => ['APPROVED2', 'APPROVED2'],
+            'lower case' => ['approved2', 'APPROVED2'],
+            'mixed case' => ['Translated', 'TRANSLATED'],
+        ];
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    #[Test]
+    #[DataProvider('validPretranslateStatusValues')]
+    public function testBuildProjectStructureReadsPretranslateStatusOptions(string $status, string $expected): void
+    {
+        [$request, $controller, $user] = $this->buildValidatedRequest([
+            'pretranslate_101_status' => $status,
+            'pretranslate_100_status' => $status,
+        ]);
+
+        $this->assertSame($expected, $request['pretranslate_101_status']);
+        $this->assertSame($expected, $request['pretranslate_100_status']);
+
+        $engine = (new ReflectionClass(MyMemory::class))->newInstanceWithoutConstructor();
+        $projectStructure = $controller->callBuildProjectStructure(
+            $request,
+            ['arrayFiles' => ['foo.docx'], 'arrayFilesMeta' => ['meta']],
+            'upload-token-xyz',
+            $user,
+            $engine
+        );
+
+        $this->assertSame($expected, $projectStructure->pretranslate_101_status);
+        $this->assertSame($expected, $projectStructure->pretranslate_100_status);
+    }
+
+    /**
+     * @return array<string, array{string, string}>
+     */
+    public static function invalidPretranslateStatusValues(): array
+    {
+        return [
+            '101 unknown'    => ['pretranslate_101_status', 'rejected'],
+            '100 empty'      => ['pretranslate_100_status', ''],
+            '100 draft'      => ['pretranslate_100_status', 'draft'],
+        ];
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    #[Test]
+    #[DataProvider('invalidPretranslateStatusValues')]
+    public function testValidateTheRequestRejectsInvalidPretranslateStatus(string $name, string $value): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("Invalid $name value");
+        $this->expectExceptionCode(-6);
+
+        $this->buildValidatedRequest([$name => $value]);
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    #[Test]
+    public function testValidateTheRequestReadsPretranslateLockOptions(): void
+    {
+        [$request] = $this->buildValidatedRequest([
+            'pretranslate_101_lock' => '0',
+            'pretranslate_100_lock' => '1',
+        ]);
+
+        $this->assertSame(0, $request['pretranslate_101_lock']);
+        $this->assertSame(1, $request['pretranslate_100_lock']);
+    }
+
+    /**
+     * @return array<string, array{string, string}>
+     */
+    public static function invalidPretranslateLockValues(): array
+    {
+        return [
+            '101 out of range'  => ['pretranslate_101_lock', '2'],
+            '101 trailing junk' => ['pretranslate_101_lock', '1x'],
+            '100 word'          => ['pretranslate_100_lock', 'true'],
+            '100 empty'         => ['pretranslate_100_lock', ''],
+        ];
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    #[Test]
+    #[DataProvider('invalidPretranslateLockValues')]
+    public function testValidateTheRequestRejectsInvalidPretranslateLock(string $name, string $value): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("Invalid $name value");
+        $this->expectExceptionCode(-6);
+
+        $this->buildValidatedRequest([$name => $value]);
     }
 
     /**

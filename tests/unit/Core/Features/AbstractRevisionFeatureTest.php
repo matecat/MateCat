@@ -21,10 +21,10 @@ use Model\Jobs\JobStruct;
 use Model\JobSplitMerge\SplitMergeProjectData;
 use Model\ProjectCreation\ProjectStructure;
 use Model\Projects\ProjectStruct;
+use PDO;
 use PDOException;
 use PHPUnit\Framework\Attributes\Test;
 use Plugins\Features\AbstractRevisionFeature;
-use Plugins\Features\ReviewExtended;
 use Plugins\Features\SecondPassReview;
 use ReflectionMethod;
 use RuntimeException;
@@ -130,22 +130,8 @@ class AbstractRevisionFeatureTest extends AbstractTest
     }
 
     // ─────────────────────────────────────────────────────────────────
-    // postProjectCreate — returns early for ReviewExtended
+    // postProjectCreate
     // ─────────────────────────────────────────────────────────────────
-
-    #[Test]
-    public function postProjectCreate_returnsEarly_whenInstanceOfReviewExtended(): void
-    {
-        $reviewExtended = new ReviewExtended(
-            new BasicFeatureStruct(['feature_code' => 'review_extended'])
-        );
-
-        $projectStructure = new ProjectStructure();
-        $event = new PostProjectCreateEvent($projectStructure);
-
-        $reviewExtended->postProjectCreate($event);
-        $this->assertTrue(true);
-    }
 
     #[Test]
     public function postProjectCreate_callsSetQaModelAndCreateRecords_forSecondPassReview(): void
@@ -404,20 +390,8 @@ class AbstractRevisionFeatureTest extends AbstractTest
     }
 
     // ─────────────────────────────────────────────────────────────────
-    // loadAndValidateQualityFramework — instanceof logic fix
+    // loadAndValidateQualityFramework
     // ─────────────────────────────────────────────────────────────────
-
-    #[Test]
-    public function loadAndValidateQualityFramework_returnsEarly_whenCalledFromReviewExtended(): void
-    {
-        $projectStructure = new ProjectStructure();
-
-        // When called from ReviewExtended, should return early without modifying structure
-        ReviewExtended::loadAndValidateQualityFramework($projectStructure);
-
-        // features should remain empty — no quality_framework appended
-        $this->assertArrayNotHasKey('quality_framework', $projectStructure->features);
-    }
 
     #[Test]
     public function loadAndValidateQualityFramework_addsErrorWhenModelCannotBeDecoded(): void
@@ -604,6 +578,135 @@ class AbstractRevisionFeatureTest extends AbstractTest
             $this->expectException(RuntimeException::class);
             $this->expectExceptionMessage('Project not found');
             $this->feature->postJobSplitted($event);
+        } finally {
+            $db->rollback();
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // postJobSplitted — job already split
+    // ─────────────────────────────────────────────────────────────────
+
+    /** Reserved id block for the split and merge fixtures below. */
+    private const int RESPLIT_BASE = 9_936_000;
+
+    /**
+     * A feature that records each createQaChunkReviewRecords() call, then lets the real one write.
+     */
+    private function createQaChunkReviewRecordsSpy(): SecondPassReview
+    {
+        $feature = new class (new BasicFeatureStruct(['feature_code' => 'second_pass_review'])) extends SecondPassReview {
+            /** @var list<array{chunks: int, options: array<string, mixed>}> */
+            public array $calls = [];
+
+            public function createQaChunkReviewRecords(array $chunksArray, ProjectStruct $project, array $options = []): array
+            {
+                $this->calls[] = ['chunks' => count($chunksArray), 'options' => $options];
+
+                return parent::createQaChunkReviewRecords($chunksArray, $project, $options);
+            }
+        };
+        $feature->setDatabase(obtainTestDatabase());
+
+        return $feature;
+    }
+
+    /**
+     * @return list<array{password: string, source_page: int}>
+     */
+    private function chunkReviewKeys(int $idJob): array
+    {
+        $stmt = $this->seedConnection()->prepare(
+            "SELECT password, source_page FROM qa_chunk_reviews WHERE id_job = ? ORDER BY password, source_page"
+        );
+        $stmt->execute([$idJob]);
+
+        return array_map(
+            fn(array $row) => ['password' => (string)$row['password'], 'source_page' => (int)$row['source_page']],
+            $stmt->fetchAll(PDO::FETCH_ASSOC)
+        );
+    }
+
+    #[Test]
+    public function postJobSplitted_writesEachChunkOncePerRevision_whenJobIsAlreadySplit(): void
+    {
+        $base = self::RESPLIT_BASE;
+        $feature = $this->createQaChunkReviewRecordsSpy();
+
+        // Dispatched inside JobSplitMergeService::applySplit's transaction in production; the
+        // rollback also removes every row seeded here.
+        $db = obtainTestDatabase();
+        $db->begin();
+
+        try {
+            $owner = $this->ownerEmail($base);
+            $this->seedProject($base, $owner);
+            $this->seedJob($base, $owner, 'chunk1pw');
+            $this->seedJob($base, $owner, 'chunk2pw');
+            // The oldest record belongs to a chunk that no longer exists, so it must not give its
+            // review password to revision 2.
+            $this->seedChunkReview($base, 'gonepw', 'orphanpw', 2, $base + 20);
+            // 2 chunks x 2 revisions
+            $this->seedChunkReview($base, 'chunk1pw', 'r2first', 2, $base + 21);
+            $this->seedChunkReview($base, 'chunk2pw', 'r2second', 2, $base + 22);
+            $this->seedChunkReview($base, 'chunk1pw', 'r3first', 3, $base + 23);
+            $this->seedChunkReview($base, 'chunk2pw', 'r3second', 3, $base + 24);
+
+            $data = new SplitMergeProjectData($this->projectId($base));
+            $data->jobToSplit = $this->jobId($base);
+            $feature->postJobSplitted(new PostJobSplittedEvent($data, new UserStruct(['uid' => 987, 'email' => 'actor@example.org'])));
+
+            // One call per revision, each covering both chunks — not one call per old record.
+            $this->assertSame([
+                ['chunks' => 2, 'options' => ['first_record_password' => 'r2first', 'source_page' => 2]],
+                ['chunks' => 2, 'options' => ['first_record_password' => 'r3first', 'source_page' => 3]],
+            ], $feature->calls);
+
+            // The orphan record is gone and every live chunk has one record per revision.
+            $this->assertSame([
+                ['password' => 'chunk1pw', 'source_page' => 2],
+                ['password' => 'chunk1pw', 'source_page' => 3],
+                ['password' => 'chunk2pw', 'source_page' => 2],
+                ['password' => 'chunk2pw', 'source_page' => 3],
+            ], $this->chunkReviewKeys($this->jobId($base)));
+        } finally {
+            $db->rollback();
+        }
+    }
+
+    #[Test]
+    public function postJobMerged_keepsFirstReviewPasswordOfEachRevision_evenFromAMergedChunk(): void
+    {
+        $base = self::RESPLIT_BASE;
+        $feature = $this->createQaChunkReviewRecordsSpy();
+
+        // Dispatched inside JobSplitMergeService::mergeALL's transaction in production; the rollback
+        // also removes every row seeded here.
+        $db = obtainTestDatabase();
+        $db->begin();
+
+        try {
+            $owner = $this->ownerEmail($base);
+            $this->seedProject($base, $owner);
+            $this->seedJob($base, $owner, 'chunk1pw');
+            // Merge does not filter by live chunk: the oldest record of revision 2 belongs to a chunk
+            // the merge has just removed, and its review password is still the one kept.
+            $this->seedChunkReview($base, 'mergedpw', 'r2first', 2, $base + 20);
+            $this->seedChunkReview($base, 'chunk1pw', 'r2second', 2, $base + 21);
+            $this->seedChunkReview($base, 'chunk1pw', 'r3first', 3, $base + 22);
+
+            $data = new SplitMergeProjectData($this->projectId($base));
+            $data->jobToMerge = $this->jobId($base);
+            $feature->postJobMerged(new PostJobMergedEvent($data, new JobStruct(), new UserStruct(['uid' => 987, 'email' => 'actor@example.org'])));
+
+            $this->assertSame([
+                ['chunks' => 1, 'options' => ['first_record_password' => 'r2first', 'source_page' => 2]],
+                ['chunks' => 1, 'options' => ['first_record_password' => 'r3first', 'source_page' => 3]],
+            ], $feature->calls);
+            $this->assertSame([
+                ['password' => 'chunk1pw', 'source_page' => 2],
+                ['password' => 'chunk1pw', 'source_page' => 3],
+            ], $this->chunkReviewKeys($this->jobId($base)));
         } finally {
             $db->rollback();
         }

@@ -315,8 +315,8 @@ describe('EmailsBadge additional behaviors', () => {
     )
 
     // one dot per edge space, the internal space untouched
-    expect(screen.getByText('·')).toBeInTheDocument()
-    expect(screen.getByText('··')).toBeInTheDocument()
+    expect(screen.getByText('•')).toBeInTheDocument()
+    expect(screen.getByText('••')).toBeInTheDocument()
     expect(screen.getByText('my key')).toBeInTheDocument()
     // getByTitle normalizes whitespace, so assert on the raw attribute
     expect(document.querySelector('[title]')).toHaveAttribute(
@@ -330,7 +330,7 @@ describe('EmailsBadge additional behaviors', () => {
       <EmailsBadge name="invite" value={[' my key  ']} onChange={() => {}} />,
     )
 
-    expect(screen.queryByText('·')).not.toBeInTheDocument()
+    expect(screen.queryByText('•')).not.toBeInTheDocument()
     expect(document.querySelector('[title]')).toBeNull()
   })
 
