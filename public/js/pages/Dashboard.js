@@ -239,6 +239,9 @@ const Dashboard = () => {
         Search.current.currentPage = 1
       }
 
+      // The team is not loaded yet: getData fetches the projects with this filter
+      if (!selectedTeamRef.current) return
+
       getProjects({
         team: selectedTeamRef.current,
         searchFilter: Search.current,
