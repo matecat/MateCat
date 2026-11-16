@@ -280,7 +280,11 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
     segmentHistory.length > 0 ? (
       <div style={{alignSelf: 'center', marginRight: 24, marginLeft: 'auto'}}>
         {!showHistory ? (
-          <Button onClick={() => setShowHistory(true)} size={BUTTON_SIZE.SMALL}>
+          <Button
+            onClick={() => setShowHistory(true)}
+            size={BUTTON_SIZE.SMALL}
+            mode={BUTTON_MODE.OUTLINE}
+          >
             Open history
             <ChevronDown size={16} />
           </Button>
@@ -288,6 +292,7 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
           <Button
             onClick={() => setShowHistory(false)}
             size={BUTTON_SIZE.SMALL}
+            mode={BUTTON_MODE.OUTLINE}
           >
             Close history
             <ChevronUp size={16} />

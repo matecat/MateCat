@@ -46,10 +46,10 @@ test('files are hidden by default and toggle open/closed on click', async () => 
 
   expect(screen.queryByText('first.docx')).not.toBeInTheDocument()
 
-  await userEvent.click(screen.getByText('File (2)'))
+  await userEvent.click(screen.getByText('Files (2)'))
   expect(screen.getByText('first.docx')).toBeInTheDocument()
   expect(screen.getByText('second.docx')).toBeInTheDocument()
 
-  await userEvent.click(screen.getByText('File (2)'))
+  await userEvent.click(screen.getByText('Files (2)'))
   expect(screen.queryByText('first.docx')).not.toBeInTheDocument()
 })

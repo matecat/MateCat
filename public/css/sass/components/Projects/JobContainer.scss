@@ -75,7 +75,8 @@
     display: flex;
     justify-content: space-between;
     position: sticky;
-    top: 64px;
+    // Below the stuck project header: its 8px gap + 64px height
+    top: 72px;
     z-index: 1;
     background-color: colors.$white;
 

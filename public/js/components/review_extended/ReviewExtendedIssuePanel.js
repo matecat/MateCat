@@ -87,6 +87,16 @@ const ReviewExtendedIssuePanel = ({
     setCreationIssueLoader(true)
     setSubmitDisabled(true)
 
+    const fullSegmentRange = {
+      start_node: 0,
+      start_offset: 0,
+      send_node: 0,
+      end_offset: 0,
+    }
+    // An issue on a split part is stored on the whole segment, where offsets
+    // measured inside the part would point at the wrong text.
+    const isSplitPart = !!context.segment.splitted
+
     const issue = {
       id_category: category.id,
       severity: severity,
@@ -94,17 +104,16 @@ const ReviewExtendedIssuePanel = ({
       ...(selection
         ? {
             target_text: selection.selected_string,
-            start_node: selection.start_node,
-            start_offset: selection.start_offset,
-            send_node: selection.end_node,
-            end_offset: selection.end_offset,
+            ...(isSplitPart
+              ? fullSegmentRange
+              : {
+                  start_node: selection.start_node,
+                  start_offset: selection.start_offset,
+                  send_node: selection.end_node,
+                  end_offset: selection.end_offset,
+                }),
           }
-        : {
-            start_node: 0,
-            start_offset: 0,
-            send_node: 0,
-            end_offset: 0,
-          }),
+        : fullSegmentRange),
     }
 
     const deferredSubmit = () => {
@@ -113,7 +122,7 @@ const ReviewExtendedIssuePanel = ({
       const promise = issueEditing ? editSegmentIssue : sendSegmentVersionIssue
 
       promise({
-        idSegment: context.segment.sid,
+        idSegment: context.segment.original_sid ?? context.segment.sid,
         issueDetails: issue,
         issueId: issueEditing?.id,
       })

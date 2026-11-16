@@ -168,7 +168,7 @@ export const ProductionSummary = ({
                 <div className="qr-pass-score">Fail</div>
               </div>
             )}
-            <div className="qr-threshold">Threshold {limit}</div>
+            <div className="qr-threshold">Threshold: {limit}</div>
           </div>
         </div>
       ) : null}

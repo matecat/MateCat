@@ -60,7 +60,9 @@ class RevisionChangedNotificationEmail extends AbstractEmail
             'changeAuthor' => $this->changeAuthor?->toArray(),
             'recipientUser' => $this->data['recipient']->toArray(),
             'segmentUrl' => $this->segmentUrl,
-            'data' => $this->data,
+            // Only the flag the template reads: `data` also carries the recipient as a UserStruct,
+            // and an object cannot reach a template.
+            'data' => ['isPreviousChangeAuthor' => (bool)($this->data['isPreviousChangeAuthor'] ?? false)],
             'segmentInfo' => $this->_segmentInfo
         ];
     }

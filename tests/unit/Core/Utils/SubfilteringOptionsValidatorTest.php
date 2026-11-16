@@ -157,6 +157,38 @@ class SubfilteringOptionsValidatorTest extends AbstractTest
     }
 
     #[Test]
+    public function test_validate_accepts_single_square_on_top_of_the_defaults()
+    {
+        $defaultHandlers = InjectableFiltersTags::tagNamesForArrayClasses(
+            array_keys(HandlersSorter::getDefaultInjectedHandlers())
+        );
+
+        // single_square is opt-in: it is not part of the default configuration
+        $this->assertNotContains(InjectableFiltersTags::single_square->value, $defaultHandlers);
+
+        $customHandlers = $defaultHandlers;
+        $customHandlers[] = InjectableFiltersTags::single_square->value;
+
+        $result = SubfilteringOptionsValidator::validate(json_encode($customHandlers));
+
+        $this->assertEquals($customHandlers, $result);
+    }
+
+    /**
+     * The JSON schema keeps its own copy of the tag names; a handler added to the library
+     * must be added there too, or a project asking for it is rejected.
+     */
+    #[Test]
+    public function test_validate_accepts_every_tag_the_library_declares()
+    {
+        $allTags = InjectableFiltersTags::getTags();
+
+        $result = SubfilteringOptionsValidator::validate(json_encode($allTags));
+
+        $this->assertEquals($allTags, $result);
+    }
+
+    #[Test]
     public function test_validate_with_duplicate_handlers_returns_array()
     {
         $defaultHandlers = InjectableFiltersTags::tagNamesForArrayClasses(

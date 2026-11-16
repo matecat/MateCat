@@ -217,14 +217,16 @@ export const execSetTranslationTail = () => {
     status,
     propagate,
   )
+  // Move on as soon as the request is built: translators keep working while it is in flight
+  // and come back to any segment that failed. A refusal is reported through errorCallback.
+  if (callback) {
+    callback.call(this)
+  }
   setTranslation(translateRequest)
     .then((data) => {
       SegmentActions.setChoosenSuggestion(idSegment, null)
       SegmentActions.setSegmentSaving(idSegment, false)
       setTranslation_success(data, item)
-      if (callback) {
-        callback.call(this)
-      }
       //Review
       if (config.isReview) {
         SegmentActions.getSegmentVersionsIssues(idSegment)

@@ -26,14 +26,15 @@ const ChunkAnalyzeHeader = ({
         <div className={`chunk-analyze-info-header ${showFiles ? 'open' : ''}`}>
           <div>
             <span className={'chunk-analyze-info-index'}>
-              {chunksSize > 1 ? 'Chunk ' + index : ''}
+              {chunksSize > 1 ? index : ''}
             </span>
             <span>Raw</span>
           </div>
           <div>
             <div className={'chunk-analyze-info-files'} onClick={showFilesFn}>
               <ChevronDown size={10} />
-              File ({jobInfo.files.length})
+              {jobInfo.files.length === 1 ? 'File' : 'Files'} (
+              {jobInfo.files.length})
             </div>
             <span>Weighted</span>
           </div>
@@ -121,14 +122,15 @@ const ChunkAnalyzeHeader = ({
         <div className={`chunk-analyze-info-header ${showFiles ? 'open' : ''}`}>
           <div>
             <span className={'chunk-analyze-info-index'}>
-              {chunksSize > 1 ? 'Chunk ' + index : ''}
+              {chunksSize > 1 ? index : ''}
             </span>
             <span>Raw</span>
           </div>
           <div>
             <div className={'chunk-analyze-info-files'} onClick={showFilesFn}>
               <ChevronDown size={10} />
-              File ({jobInfo.files.length})
+              {jobInfo.files.length === 1 ? 'File' : 'Files'} (
+              {jobInfo.files.length})
             </div>
             <span>Weighted</span>
           </div>

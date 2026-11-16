@@ -2,9 +2,9 @@
 
 namespace Utils\TmKeyManagement;
 
-use Exception;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserStruct;
+use Throwable;
 use Utils\Email\AbstractEmail;
 
 /**
@@ -16,6 +16,7 @@ use Utils\Email\AbstractEmail;
  */
 class ShareKeyEmail extends AbstractEmail
 {
+    protected ?string $title = 'Matecat - Resource shared';
 
     /** @var array{0: string, 1: string} */
     protected array $userMail;
@@ -41,19 +42,11 @@ class ShareKeyEmail extends AbstractEmail
     }
 
     /**
-     * @throws Exception
+     * @throws Throwable
      */
     public function send(): void
     {
-        $mailConf = $this->_getDefaultMailConf();
-
-        $mailConf['address'] = [$this->userMail[0], $this->userMail[1]];
-        $mailConf['subject'] = $this->_getLayoutVariables()['title'];
-
-        $mailConf['htmlBody'] = $this->_buildHTMLMessage();
-        $mailConf['altBody'] = $this->_buildTxtMessage($this->_buildMessageContent());
-
-        $this->_enqueueEmailDelivery($mailConf);
+        $this->sendTo($this->userMail[0], $this->userMail[1]);
     }
 
     /**
@@ -75,11 +68,10 @@ class ShareKeyEmail extends AbstractEmail
     /**
      * @return array<string, mixed>
      */
-    protected function _getLayoutVariables($messageBody = null): array
+    protected function _getLayoutVariables(): array
     {
         $vars = parent::_getLayoutVariables();
         $vars['showTitle'] = true;
-        $vars['title'] = "Matecat - Resource shared";
 
         return $vars;
     }

@@ -31,8 +31,7 @@ class OpenAIClient implements TranslationEvaluatorClientInterface, ContextExplai
         string $sourceLanguage,
         string $targetLanguage,
         string $text,
-        string $translation,
-        string $style
+        string $translation
     ): bool|array
     {
         $promptTemplate = "You are Lara, the world's most trustworthy translation reviewer.
@@ -69,7 +68,6 @@ Return your classification and a brief explanation (2–3 lines) in JSON format.
             '{targetLanguage}' => $targetLanguage,
             '{text}'           => $text,
             '{translation}'    => $translation,
-            '{style}'          => $style
         ];
 
         $prompt = strtr($promptTemplate, $vars);
