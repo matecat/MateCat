@@ -123,6 +123,23 @@ export const Yaml = () => {
     <div className="filters-params-accordion-content">
       <div className="filters-params-option">
         <div>
+          <h3>Force double quotes on single-line strings</h3>
+          <p>
+            Choose whether to surround all single-line strings with double
+            quotes in the translated file, regardless of their source format.
+          </p>
+        </div>
+        <Controller
+          control={control}
+          name="force_double_quoting"
+          render={({field: {onChange, value, name}}) => (
+            <Switch name={name} active={value} onChange={onChange} />
+          )}
+        />
+      </div>
+
+      <div className="filters-params-option">
+        <div>
           <h3>Translatable keys </h3>
           <p>
             Choose which keys should be translated. If left empty, all keys in
@@ -130,11 +147,12 @@ export const Yaml = () => {
             <br />
             Key names are case sensitive.
             <br />
-            If the toggle is set to "Translatable", only the keys entered will
-            be extracted as translatable.
+            If the toggle is set to &quot;Translatable&quot;, only the keys
+            entered will be extracted as translatable.
             <br />
-            If the toggle is set to "Non-translatable", all the keys in the file{' '}
-            <b>except</b> those entered will be extracted as translatable.
+            If the toggle is set to &quot;Non-translatable&quot;, all the keys
+            in the file <b>except</b> those entered will be extracted as
+            translatable.
           </p>
         </div>
         <div className="container-segmented-control">
@@ -194,7 +212,7 @@ export const Yaml = () => {
             Character limits will be applied to translatable keys in the same
             object.
             <br />
-            Keys with a character limit won't be segmented.
+            Keys with a character limit won&apos;t be segmented.
           </p>
         </div>
         <Controller
@@ -226,12 +244,12 @@ export const Yaml = () => {
             <Select
               name={name}
               placeholder="Select inner content type"
+              isPortalDropdown={true}
               options={INNER_CONTENT_TYPE_OPTIONS}
               activeOption={INNER_CONTENT_TYPE_OPTIONS?.find(
                 ({id}) => id === value,
               )}
               onSelect={(option) => onChange(option.id)}
-              maxHeightDroplist={260}
             />
           )}
         />

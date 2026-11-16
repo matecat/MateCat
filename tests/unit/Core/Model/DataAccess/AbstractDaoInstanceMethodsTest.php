@@ -7,9 +7,9 @@ namespace Matecat\Core\Model\DataAccess;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\AbstractDaoObjectStruct;
-use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
 use Model\DataAccess\IDatabase;
+use Model\DataAccess\UnscopedCacheKeyMap;
 use PDO;
 use PDOStatement;
 use PHPUnit\Framework\Attributes\Test;
@@ -83,6 +83,16 @@ class TestableDao extends AbstractDao
     {
         return $this->_cacheTransactionScope();
     }
+
+    /**
+     * @param array<int|string, scalar|null> $bindParams
+     *
+     * @return list<TestStruct>
+     */
+    public function fetchMap(PDOStatement $stmt, array $bindParams, int $ttl, ?string $keyMap = null): array
+    {
+        return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, TestStruct::class, $bindParams, $keyMap);
+    }
 }
 
 class AnotherTestableDao extends AbstractDao
@@ -126,6 +136,12 @@ class FakeRedisClientForAbstractDaoTest extends Client
             'del' => $this->doDel($arguments[0]),
             default => null,
         };
+    }
+
+    /** @return list<string> The names of the hashes written so far. */
+    public function hashNames(): array
+    {
+        return array_keys($this->hashes);
     }
 
     private function doHset(string $key, string $field, string $value): int
@@ -322,6 +338,81 @@ class AbstractDaoInstanceMethodsTest extends AbstractTest
 
         $this->assertSame('from-dao-one', $first?->name);
         $this->assertSame('from-dao-two', $second?->name);
+    }
+
+    /**
+     * The production defect: an IN list written into the SQL with nothing bound put every call in
+     * one Redis hash, `SegmentNoteDao::getBySegmentIds-`, which reached 18.9 GB.
+     */
+    #[Test]
+    public function test_fetchObjectMap_refuses_a_cached_in_list_written_into_the_sql(): void
+    {
+        TestableDao::setCacheConnection(new FakeRedisClientForAbstractDaoTest());
+
+        $stmt = $this->createMock(PDOStatement::class);
+        $stmt->queryString = 'SELECT * FROM test_table WHERE id IN ( 1, 2 )';
+        $stmt->expects($this->never())->method('execute');
+
+        $this->expectException(UnscopedCacheKeyMap::class);
+
+        (new TestableDao($this->databaseReturning($stmt)))->fetchMap($stmt, [], 60);
+    }
+
+    #[Test]
+    public function test_fetchObjectMap_runs_an_in_list_written_into_the_sql_when_the_cache_is_off(): void
+    {
+        $stmt = $this->createMock(PDOStatement::class);
+        $stmt->queryString = 'SELECT * FROM test_table WHERE id IN ( 1, 2 )';
+        $stmt->expects($this->once())->method('execute')->with([]);
+        $stmt->method('fetchAll')->willReturn([new TestStruct(['id' => 1])]);
+
+        $result = (new TestableDao($this->databaseReturning($stmt)))->fetchMap($stmt, [], 0);
+
+        $this->assertCount(1, $result);
+    }
+
+    #[Test]
+    public function test_fetchObjectMap_names_the_hash_after_the_bound_in_list(): void
+    {
+        $redis = new FakeRedisClientForAbstractDaoTest();
+        TestableDao::setCacheConnection($redis);
+
+        $stmt = $this->createMock(PDOStatement::class);
+        $stmt->queryString = 'SELECT * FROM test_table WHERE id IN ( ?,? )';
+        $stmt->expects($this->once())->method('execute')->with([1, 2]);
+        $stmt->method('fetchAll')->willReturn([new TestStruct(['id' => 1])]);
+
+        (new TestableDao($this->databaseReturning($stmt)))->fetchMap($stmt, [1, 2], 60);
+
+        $this->assertSame([TestableDao::class . '::fetchMap-1:2'], $redis->hashNames());
+    }
+
+    /** An explicit key map is the caller's own choice of scope, so the guard leaves it alone. */
+    #[Test]
+    public function test_fetchObjectMap_accepts_an_in_list_written_into_the_sql_under_an_explicit_key_map(): void
+    {
+        $redis = new FakeRedisClientForAbstractDaoTest();
+        TestableDao::setCacheConnection($redis);
+
+        $stmt = $this->createMock(PDOStatement::class);
+        $stmt->queryString = 'SELECT * FROM test_table WHERE id IN ( 1, 2 )';
+        $stmt->expects($this->once())->method('execute')->with([]);
+        $stmt->method('fetchAll')->willReturn([]);
+
+        (new TestableDao($this->databaseReturning($stmt)))->fetchMap($stmt, [], 60, 'test_table:ids-1:2');
+
+        $this->assertSame(['test_table:ids-1:2'], $redis->hashNames());
+    }
+
+    private function databaseReturning(PDOStatement $stmt): IDatabase
+    {
+        $pdo = $this->createStub(PDO::class);
+        $pdo->method('prepare')->willReturn($stmt);
+
+        $database = $this->createStub(IDatabase::class);
+        $database->method('getConnection')->willReturn($pdo);
+
+        return $database;
     }
 
     #[Test]

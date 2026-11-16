@@ -12,7 +12,7 @@ export const ForcedActionModal = ({action = FORCE_ACTIONS.RELOAD}) => {
           <div>
             <h2>Please Sign in again</h2>
             <p>
-              You were signed out of your account. Please press 'Reload' to sign
+              You were signed out of your account. Please press &apos;Reload&apos; to sign
               in to Matecat again.
             </p>
             <Button
@@ -28,7 +28,7 @@ export const ForcedActionModal = ({action = FORCE_ACTIONS.RELOAD}) => {
           <div>
             <h2>Update required</h2>
             <p>
-              An important update has been released to improve the app's
+              An important update has been released to improve the app&apos;s
               performance and security. To continue using the app, please
               refresh the page.
             </p>

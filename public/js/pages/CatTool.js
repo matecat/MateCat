@@ -42,7 +42,7 @@ import {
   CHARS_SIZE_COUNTER_TYPES,
   charsSizeCounter,
 } from '../utils/charsSizeCounterUtil'
-import {CatToolInterface} from './CatToolInterface'
+import catToolInterface from './CatToolInterface'
 import CommentsActions from '../actions/CommentsActions'
 import ModalsActions from '../actions/ModalsActions'
 import FatalErrorModal from '../components/modals/FatalErrorModal'
@@ -56,11 +56,13 @@ import {
   BUTTON_MODE,
   BUTTON_SIZE,
 } from '../components/common/Button/Button'
+import UserStore from '../stores/UserStore'
+
+// Share of the window height the context preview panel takes when it opens.
+const CONTEXT_PREVIEW_HEIGHT_RATIO = 0.4
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
-
-const cattoolInterface = new CatToolInterface()
 
 function CatTool() {
   useHotkeys(
@@ -90,7 +92,7 @@ function CatTool() {
     height: contextPreviewHeight,
     isDragging: isResizing,
     handleMouseDown: onResizeMouseDown,
-  } = useResizable({initialHeight: 500, minHeight: 100})
+  } = useResizable({initialRatio: CONTEXT_PREVIEW_HEIGHT_RATIO, minHeight: 100})
 
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const [segmentHasPreview, setSegmentHasPreview] = useState(false)
@@ -99,8 +101,12 @@ function CatTool() {
   const popupWindowRef = useRef(null)
   const previewDesiredOpenRef = useRef(false)
   const isJobmetadataParsedOnInit = useRef(false)
+  // Open the panel by itself on the first segment that has a preview, once per page load.
+  // Any manual open, close or pop-out cancels it.
+  const autoOpenPendingRef = useRef(true)
 
   const togglePreview = useCallback(() => {
+    autoOpenPendingRef.current = false
     setIsPreviewOpen((prev) => {
       const next = !prev
       previewDesiredOpenRef.current = next
@@ -122,6 +128,7 @@ function CatTool() {
   )
 
   const openPreviewInNewWindow = useCallback(() => {
+    autoOpenPendingRef.current = false
     if (popupWindowRef.current && !popupWindowRef.current.closed) {
       popupWindowRef.current.focus()
     } else {
@@ -140,6 +147,7 @@ function CatTool() {
   }, [contextPreviewUrl])
 
   const closePopupAndOpenInline = useCallback(() => {
+    autoOpenPendingRef.current = false
     if (popupWindowRef.current && !popupWindowRef.current.closed) {
       popupWindowRef.current.close()
     }
@@ -365,6 +373,10 @@ function CatTool() {
       setSegmentHasPreview(hasContent)
       if (hasContent) {
         if (!popupWindowRef.current || popupWindowRef.current.closed) {
+          if (autoOpenPendingRef.current) {
+            autoOpenPendingRef.current = false
+            previewDesiredOpenRef.current = true
+          }
           setIsPreviewOpen(previewDesiredOpenRef.current)
         }
       } else {
@@ -394,10 +406,10 @@ function CatTool() {
           {
             text: (
               <span>
-                Access to the editor page is forbidden until the project's
+                Access to the editor page is forbidden until the project&apos;s
                 analysis is complete.
                 <br />
-                To follow the analysis' progress,{' '}
+                To follow the analysis&apos; progress,{' '}
                 <a
                   rel="noreferrer"
                   href={`/jobanalysis/${config.id_project}-${config.id_job}-${config.password}`}
@@ -596,7 +608,8 @@ function CatTool() {
     if (metadata) {
       if (Speech2Text.enabled(metadata)) Speech2Text.init()
       initTagSignature(metadata)
-      if (LXQ.enabled(metadata)) LXQ.init()
+
+      if (config.lxq_license) LXQ.retrieveSupportedLocales(metadata)
     }
   }, [userInfo?.metadata])
 
@@ -632,7 +645,8 @@ function CatTool() {
     ) {
       const isValidPresetCharacterMode = Object.values(
         CHARS_SIZE_COUNTER_TYPES,
-      ).some((value) => value === cattoolInterface.getCharacterCounterMode())
+      ).some((value) => value === catToolInterface.getCharacterCounterMode())
+
       modifyingCurrentTemplate((prevTemplate) => ({
         ...prevTemplate,
         tmPrioritization: jobMetadata?.tm_prioritization ?? false,
@@ -642,7 +656,7 @@ function CatTool() {
           typeof jobMetadata?.character_counter_mode === 'string'
             ? jobMetadata?.character_counter_mode
             : isValidPresetCharacterMode
-              ? cattoolInterface.getCharacterCounterMode()
+              ? catToolInterface.getCharacterCounterMode()
               : undefined,
         subfilteringHandlers: jobMetadata.subfiltering_handlers,
         mtQualityValueInEditor: jobMetadata.mt_quality_value_in_editor,

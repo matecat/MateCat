@@ -1,7 +1,7 @@
 import {highlightOnWarnings} from './TagEntity.component'
 
 jest.mock('../../../stores/CatToolStore', () => ({
-  isPhTagsCompressed: () => true,
+  isTagsCompressed: () => true,
   addListener: () => {},
   removeListener: () => {},
 }))

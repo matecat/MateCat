@@ -12,27 +12,22 @@ namespace Matecat\Core\Controllers;
  * ctrltest_9057000@example.org
  *
  * The controller has no afterConstruct() override, so no refactor is required.
- * The Database singleton is swapped via the mock seam (AbstractTest::createDatabaseMock /
- * setDatabaseInstance). The async-result source ProjectQueue::getPublishedResults() reads
- * Redis directly; this suite seeds/clears its own reserved Redis key so the branches of
+ * The controller reads only the payload ProjectQueue publishes in Redis and never the database;
+ * this suite seeds/clears its own reserved Redis key so the branches of
  * ProjectCreationStatusController::get() are deterministically exercised.
  */
 
-use Controller\API\Commons\Exceptions\AuthorizationError;
+use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\V2\ProjectCreationStatusController;
-use Model\DataAccess\Database;
 use Exception;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
-use Model\DataAccess\IDatabase;
-use Model\Projects\ProjectStruct;
-use PDO;
-use PDOStatement;
 use PHPUnit\Event\NoPreviousThrowableException;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\Exception as PHPUnitFrameworkException;
+use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\InvalidArgumentException as PHPUnitInvalidArgumentException;
 use PHPUnit\Framework\MockObject\Exception as MockObjectException;
 use ReflectionClass;
@@ -40,7 +35,6 @@ use ReflectionException;
 use Utils\Constants\ProjectStatus;
 use Utils\Logger\MatecatLogger;
 use Utils\Redis\RedisHandler;
-use Utils\Registry\AppConfig;
 
 class TestableProjectCreationStatusController extends ProjectCreationStatusController
 {
@@ -61,10 +55,14 @@ class TestableProjectCreationStatusController extends ProjectCreationStatusContr
 class ProjectCreationStatusControllerTest extends AbstractTest
 {
     private const int ID_PROJECT = 9057001;
+    private const string PASSWORD = 'pass9057001xxxx';
 
     /** @var ReflectionClass<ProjectCreationStatusController> */
     private ReflectionClass $reflector;
     private TestableProjectCreationStatusController $controller;
+
+    private ?int $responseCode = null;
+    private mixed $responseJson = null;
 
     /**
      * @throws ReflectionException
@@ -72,21 +70,18 @@ class ProjectCreationStatusControllerTest extends AbstractTest
      * @throws PHPUnitInvalidArgumentException
      * @throws NoPreviousThrowableException
      * @throws Exception
-     * @throws \TypeError
      */
     protected function setUp(): void
     {
         parent::setUp();
 
-        AppConfig::$SKIP_SQL_CACHE = true;
         $this->clearRedisKey();
-        $this->createDatabaseMock();
 
         $this->controller = new TestableProjectCreationStatusController();
         $this->reflector  = new ReflectionClass(ProjectCreationStatusController::class);
 
-        $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
         $this->reflector->getProperty('logger')->setValue($this->controller, $this->createStub(MatecatLogger::class));
+        $this->captureResponse();
     }
 
     /**
@@ -96,8 +91,6 @@ class ProjectCreationStatusControllerTest extends AbstractTest
     protected function tearDown(): void
     {
         $this->clearRedisKey();
-        $this->resetDatabaseMock();
-        AppConfig::$SKIP_SQL_CACHE = false;
         parent::tearDown();
     }
 
@@ -119,7 +112,29 @@ class ProjectCreationStatusControllerTest extends AbstractTest
     }
 
     /**
-     * Seeds the reserved Redis key with the async creation result the worker would publish.
+     * Installs a Response mock that records the status code and the JSON body it is given.
+     *
+     * @throws ReflectionException
+     * @throws MockObjectException
+     * @throws PHPUnitInvalidArgumentException
+     * @throws NoPreviousThrowableException
+     */
+    private function captureResponse(): void
+    {
+        $response = $this->createMock(Response::class);
+        $response->method('code')->willReturnCallback(function (int $c) use (&$response) {
+            $this->responseCode = $c;
+            return $response;
+        });
+        $response->method('json')->willReturnCallback(function ($data) use (&$response) {
+            $this->responseJson = $data;
+            return $response;
+        });
+        $this->reflector->getProperty('response')->setValue($this->controller, $response);
+    }
+
+    /**
+     * Seeds the reserved Redis key with the payload ProjectQueue would publish.
      *
      * @param array<string,mixed> $result
      *
@@ -147,6 +162,30 @@ class ProjectCreationStatusControllerTest extends AbstractTest
         $redis->disconnect();
     }
 
+    /**
+     * @return array<string, array{array<string,mixed>}>
+     */
+    public static function publishedPayloads(): array
+    {
+        return [
+            'pending' => [['ppassword' => self::PASSWORD, 'pending' => true]],
+            'failed'  => [['ppassword' => self::PASSWORD, 'errors' => [['message' => 'Boom failure', 'code' => 17]]]],
+            'created' => [['ppassword' => self::PASSWORD, 'id_project' => self::ID_PROJECT, 'project_name' => 'Reserved Project 9057001']],
+        ];
+    }
+
+    /**
+     * @return array<string, array{array<string,mixed>}>
+     */
+    public static function payloadsWithoutPassword(): array
+    {
+        return [
+            'no ppassword key' => [['id_project' => self::ID_PROJECT]],
+            'null ppassword'   => [['id_project' => self::ID_PROJECT, 'ppassword' => null]],
+            'empty payload'    => [[]],
+        ];
+    }
+
     // ── get(): validation failure ──────────────────────────────────────────
 
     /**
@@ -154,13 +193,12 @@ class ProjectCreationStatusControllerTest extends AbstractTest
      * @throws MockObjectException
      * @throws PHPUnitInvalidArgumentException
      * @throws NoPreviousThrowableException
-     * @throws \PHPUnit\Framework\ExpectationFailedException
+     * @throws ExpectationFailedException
      */
     #[Test]
     public function get_throws_when_id_project_is_not_numeric(): void
     {
         $this->setRequestParams(['id_project' => 'not-a-number']);
-        $this->reflector->getProperty('response')->setValue($this->controller, $this->createStub(Response::class));
 
         try {
             $this->controller->get();
@@ -171,9 +209,11 @@ class ProjectCreationStatusControllerTest extends AbstractTest
         }
     }
 
-    // ── get(): empty result → _letsWait() (202) ────────────────────────────
+    // ── get(): not found ───────────────────────────────────────────────────
 
     /**
+     * An unknown or expired id gets the same answer as a wrong password.
+     *
      * @throws ReflectionException
      * @throws MockObjectException
      * @throws PHPUnitInvalidArgumentException
@@ -181,34 +221,20 @@ class ProjectCreationStatusControllerTest extends AbstractTest
      * @throws Exception
      */
     #[Test]
-    public function get_returns_wait_payload_when_no_published_result(): void
+    public function get_throws_not_found_when_no_payload_is_published(): void
     {
-        // No Redis key seeded → getPublishedResults returns null → _letsWait().
-        $this->setRequestParams(['id_project' => (string)self::ID_PROJECT]);
+        $this->setRequestParams(['id_project' => (string)self::ID_PROJECT, 'password' => self::PASSWORD]);
 
-        $captured = null;
-        $code     = null;
-
-        $response = $this->createMock(Response::class);
-        $response->method('code')->willReturnCallback(function (int $c) use (&$code, &$response) {
-            $code = $c;
-            return $response;
-        });
-        $response->method('json')->willReturnCallback(function ($data) use (&$captured, &$response) {
-            $captured = $data;
-            return $response;
-        });
-        $this->reflector->getProperty('response')->setValue($this->controller, $response);
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionCode(404);
+        $this->expectExceptionMessage('Project not found.');
 
         $this->controller->get();
-
-        self::assertSame(202, $code);
-        self::assertIsArray($captured);
-        self::assertSame(202, $captured['status']);
-        self::assertSame('Project in queue. Wait.', $captured['message']);
     }
 
     /**
+     * @param array<string,mixed> $payload
+     *
      * @throws ReflectionException
      * @throws MockObjectException
      * @throws PHPUnitInvalidArgumentException
@@ -216,33 +242,83 @@ class ProjectCreationStatusControllerTest extends AbstractTest
      * @throws Exception
      */
     #[Test]
-    public function get_returns_wait_payload_when_result_has_empty_id_project(): void
+    #[DataProvider('publishedPayloads')]
+    public function get_throws_not_found_when_password_does_not_match(array $payload): void
     {
-        // Authorized branch but the published result has no id_project → _letsWait().
-        $this->seedRedisResult(['id_project' => 0, 'errors' => []]);
-        $this->setRequestParams(['id_project' => (string)self::ID_PROJECT, 'password' => 'pwd123456789012']);
+        $this->seedRedisResult($payload);
+        $this->setRequestParams(['id_project' => (string)self::ID_PROJECT, 'password' => 'wrongpassword12']);
 
-        $this->primeProjectLookup(found: true);
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage('Project not found.');
 
-        $captured = null;
-        $code     = null;
+        $this->controller->get();
+    }
 
-        $response = $this->createMock(Response::class);
-        $response->method('code')->willReturnCallback(function (int $c) use (&$code, &$response) {
-            $code = $c;
-            return $response;
-        });
-        $response->method('json')->willReturnCallback(function ($data) use (&$captured, &$response) {
-            $captured = $data;
-            return $response;
-        });
-        $this->reflector->getProperty('response')->setValue($this->controller, $response);
+    /**
+     * @param array<string,mixed> $payload
+     *
+     * @throws ReflectionException
+     * @throws MockObjectException
+     * @throws PHPUnitInvalidArgumentException
+     * @throws NoPreviousThrowableException
+     * @throws Exception
+     */
+    #[Test]
+    #[DataProvider('publishedPayloads')]
+    public function get_throws_not_found_when_password_is_missing(array $payload): void
+    {
+        $this->seedRedisResult($payload);
+        $this->setRequestParams(['id_project' => (string)self::ID_PROJECT]);
+
+        $this->expectException(NotFoundException::class);
+
+        $this->controller->get();
+    }
+
+    /**
+     * A payload published before the password was stored in it matches no password.
+     *
+     * @param array<string,mixed> $payload
+     *
+     * @throws ReflectionException
+     * @throws MockObjectException
+     * @throws PHPUnitInvalidArgumentException
+     * @throws NoPreviousThrowableException
+     * @throws Exception
+     */
+    #[Test]
+    #[DataProvider('payloadsWithoutPassword')]
+    public function get_throws_not_found_when_payload_has_no_password(array $payload): void
+    {
+        $this->seedRedisResult($payload);
+        $this->setRequestParams(['id_project' => (string)self::ID_PROJECT, 'password' => '']);
+
+        $this->expectException(NotFoundException::class);
+
+        $this->controller->get();
+    }
+
+    // ── get(): pending → _letsWait() (202) ─────────────────────────────────
+
+    /**
+     * @throws ReflectionException
+     * @throws MockObjectException
+     * @throws PHPUnitInvalidArgumentException
+     * @throws NoPreviousThrowableException
+     * @throws Exception
+     */
+    #[Test]
+    public function get_returns_wait_payload_while_creation_is_pending(): void
+    {
+        $this->seedRedisResult(['ppassword' => self::PASSWORD, 'pending' => true]);
+        $this->setRequestParams(['id_project' => (string)self::ID_PROJECT, 'password' => self::PASSWORD]);
 
         $this->controller->get();
 
-        self::assertSame(202, $code);
-        self::assertIsArray($captured);
-        self::assertSame('Project in queue. Wait.', $captured['message']);
+        self::assertSame(202, $this->responseCode);
+        self::assertIsArray($this->responseJson);
+        self::assertSame(202, $this->responseJson['status']);
+        self::assertSame('Project in queue. Wait.', $this->responseJson['message']);
     }
 
     // ── get(): result carries errors ───────────────────────────────────────
@@ -257,42 +333,17 @@ class ProjectCreationStatusControllerTest extends AbstractTest
     #[Test]
     public function get_throws_error_from_published_result(): void
     {
-        $this->seedRedisResult(['errors' => [['message' => 'Boom failure', 'code' => 17]]]);
-        $this->setRequestParams(['id_project' => (string)self::ID_PROJECT]);
-        $this->reflector->getProperty('response')->setValue($this->controller, $this->createStub(Response::class));
+        $this->seedRedisResult(['ppassword' => self::PASSWORD, 'errors' => [['message' => 'Boom failure', 'code' => 17]]]);
+        $this->setRequestParams(['id_project' => (string)self::ID_PROJECT, 'password' => self::PASSWORD]);
 
         try {
             $this->controller->get();
             self::fail('Expected Exception carrying the published error');
         } catch (Exception $e) {
+            self::assertNotInstanceOf(NotFoundException::class, $e);
             self::assertSame(17, $e->getCode());
             self::assertSame('Boom failure', $e->getMessage());
         }
-    }
-
-    // ── get(): authorization failure ───────────────────────────────────────
-
-    /**
-     * @throws ReflectionException
-     * @throws MockObjectException
-     * @throws PHPUnitInvalidArgumentException
-     * @throws NoPreviousThrowableException
-     * @throws Exception
-     */
-    #[Test]
-    public function get_throws_authorization_error_when_password_does_not_match(): void
-    {
-        $this->seedRedisResult(['id_project' => self::ID_PROJECT]);
-        $this->setRequestParams(['id_project' => (string)self::ID_PROJECT, 'password' => 'wrongpassword12']);
-        $this->reflector->getProperty('response')->setValue($this->controller, $this->createStub(Response::class));
-
-        // Empty fetch from the DB seam → ProjectDao throws NotFoundException internally.
-        $this->primeProjectLookup(found: false);
-
-        $this->expectException(AuthorizationError::class);
-        $this->expectExceptionMessage('Not authorized.');
-
-        $this->controller->get();
     }
 
     // ── get(): success → CreationStatus payload (200) ──────────────────────
@@ -309,66 +360,21 @@ class ProjectCreationStatusControllerTest extends AbstractTest
     {
         $this->seedRedisResult([
             'id_project'   => self::ID_PROJECT,
-            'ppassword'    => 'pass9057001xxxx',
+            'ppassword'    => self::PASSWORD,
             'project_name' => 'Reserved Project 9057001',
             'analyze_url'  => 'https://example.org/analyze/9057001',
         ]);
-        $this->setRequestParams(['id_project' => (string)self::ID_PROJECT, 'password' => 'pass9057001xxxx']);
-
-        $this->primeProjectLookup(found: true);
-
-        $captured = null;
-        $response = $this->createMock(Response::class);
-        $response->method('json')->willReturnCallback(function ($data) use (&$captured, &$response) {
-            $captured = $data;
-            return $response;
-        });
-        $this->reflector->getProperty('response')->setValue($this->controller, $response);
+        $this->setRequestParams(['id_project' => (string)self::ID_PROJECT, 'password' => self::PASSWORD]);
 
         $this->controller->get();
 
-        self::assertIsArray($captured);
-        self::assertSame(200, $captured['status']);
-        self::assertSame('Project created', $captured['message']);
-        self::assertSame(self::ID_PROJECT, $captured['id_project']);
-        self::assertSame('pass9057001xxxx', $captured['project_pass']);
-        self::assertSame('Reserved Project 9057001', $captured['project_name']);
-        self::assertSame('https://example.org/analyze/9057001', $captured['analyze_url']);
-    }
-
-    /**
-     * Installs a dedicated Database mock whose prepared statement returns either a populated
-     * ProjectStruct row (authorized) or an empty result (NotFoundException → AuthorizationError),
-     * driving ProjectDao::findByIdAndPassword without touching the real database.
-     *
-     * @throws ReflectionException
-     * @throws MockObjectException
-     * @throws PHPUnitInvalidArgumentException
-     * @throws NoPreviousThrowableException
-     */
-    private function primeProjectLookup(bool $found): void
-    {
-        $rows = [];
-        if ($found) {
-            $struct       = new ProjectStruct();
-            $struct->id   = self::ID_PROJECT;
-            $struct->name = 'Reserved Project 9057001';
-            $rows         = [$struct];
-        }
-
-        $stmt = $this->createStub(PDOStatement::class);
-        $stmt->queryString = '';
-        $stmt->method('fetchAll')->willReturn($rows);
-
-        $pdo = $this->createStub(PDO::class);
-        $pdo->method('prepare')->willReturn($stmt);
-
-        $db = $this->createStub(IDatabase::class);
-        $db->method('getConnection')->willReturn($pdo);
-
-        $this->setDatabaseInstance($db);
-        // Controller no longer falls back to the Database singleton via getDatabase();
-        // push the primed stub into its injected $database so ProjectDao uses it.
-        $this->reflector->getProperty('database')->setValue($this->controller, $db);
+        self::assertNull($this->responseCode);
+        self::assertIsArray($this->responseJson);
+        self::assertSame(200, $this->responseJson['status']);
+        self::assertSame('Project created', $this->responseJson['message']);
+        self::assertSame(self::ID_PROJECT, $this->responseJson['id_project']);
+        self::assertSame(self::PASSWORD, $this->responseJson['project_pass']);
+        self::assertSame('Reserved Project 9057001', $this->responseJson['project_name']);
+        self::assertSame('https://example.org/analyze/9057001', $this->responseJson['analyze_url']);
     }
 }

@@ -1,7 +1,18 @@
 import React from 'react'
-import {render, screen} from '@testing-library/react'
+import {act, render, screen} from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import {XliffRulesRow} from './XliffRulesRow'
 import xliffOptions from '../../defaultTemplates/xliffOptions.json'
+
+class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
+beforeAll(() => {
+  window.ResizeObserver = ResizeObserver
+})
 
 const preTranslatedRow = {
   id: 0,
@@ -45,8 +56,17 @@ describe('XliffRulesRow', () => {
     setup()
 
     expect(
-      screen.getByText('translated, needs-review-l10n'),
+      screen.getByText("'translated', 'needs-review-l10n'"),
     ).toBeInTheDocument()
+  })
+
+  test('offers no-state as the value and shows it unquoted as "No state"', () => {
+    const noStateRow = {id: 2, states: ['no-state'], analysis: 'new'}
+    setup({value: noStateRow, currentXliffData: [noStateRow]})
+
+    expect(xliffOptions.xliff12.states).toContain('no-state')
+    expect(xliffOptions.xliff12.states).not.toContain('No state')
+    expect(screen.getByText('No state')).toBeInTheDocument()
   })
 
   test('renders the match category name for a pre-translated analysis', () => {
@@ -67,10 +87,98 @@ describe('XliffRulesRow', () => {
     expect(screen.getByText('N/A (determined by TM)')).toBeInTheDocument()
   })
 
-  test('calls onDelete with the row id when the delete button is clicked', () => {
-    const {onDelete, container} = setup()
+  test('lists the editor states by name with their locked variants, draft without one', async () => {
+    const user = userEvent.setup()
+    setup()
 
-    const deleteButton = container.querySelector('button')
+    await act(async () => user.click(screen.getByText("'Translated'")))
+
+    expect(screen.getByText("'Draft'")).toBeInTheDocument()
+    expect(screen.queryByText("'Draft' (locked)")).not.toBeInTheDocument()
+    ;['Translated', 'Approved', 'Approved 2'].forEach((name) =>
+      expect(screen.getByText(`'${name}' (locked)`)).toBeInTheDocument(),
+    )
+  })
+
+  test('a locked editor value writes lock: true', async () => {
+    const user = userEvent.setup()
+    const {onChange} = setup()
+
+    await act(async () => user.click(screen.getByText("'Translated'")))
+    await act(async () => user.click(screen.getByText("'Approved' (locked)")))
+
+    expect(onChange).toHaveBeenLastCalledWith({
+      ...preTranslatedRow,
+      editor: 'approved',
+      lock: true,
+    })
+  })
+
+  test('shows a locked rule as its locked value', () => {
+    const lockedRow = {...preTranslatedRow, editor: 'approved', lock: true}
+    setup({value: lockedRow, currentXliffData: [lockedRow]})
+
+    expect(screen.getByText("'Approved' (locked)")).toBeInTheDocument()
+  })
+
+  test('an unlocked editor value removes lock', async () => {
+    const user = userEvent.setup()
+    const lockedRow = {...preTranslatedRow, editor: 'approved', lock: true}
+    const {onChange} = setup({
+      value: lockedRow,
+      currentXliffData: [lockedRow],
+    })
+
+    await act(async () => user.click(screen.getByText("'Approved' (locked)")))
+    await act(async () => user.click(screen.getByText("'Approved 2'")))
+
+    const lastValue = onChange.mock.calls.at(-1)[0]
+    expect(lastValue).toEqual({...preTranslatedRow, editor: 'approved2'})
+    expect(lastValue).not.toHaveProperty('lock')
+  })
+
+  test('draft writes no lock', async () => {
+    const user = userEvent.setup()
+    const lockedRow = {...preTranslatedRow, editor: 'approved', lock: true}
+    const {onChange} = setup({
+      value: lockedRow,
+      currentXliffData: [lockedRow],
+    })
+
+    await act(async () => user.click(screen.getByText("'Approved' (locked)")))
+    await act(async () => user.click(screen.getByText("'Draft'")))
+
+    const lastValue = onChange.mock.calls.at(-1)[0]
+    expect(lastValue).toEqual({...preTranslatedRow, editor: 'draft'})
+    expect(lastValue).not.toHaveProperty('lock')
+  })
+
+  test('switching a locked rule to new drops lock', async () => {
+    const user = userEvent.setup()
+    const lockedRow = {...preTranslatedRow, editor: 'approved', lock: true}
+    const {onChange} = setup({
+      value: lockedRow,
+      currentXliffData: [lockedRow],
+    })
+
+    await act(async () => user.click(screen.getByText("Map to 'TM 101%'")))
+    await act(async () =>
+      user.click(screen.getByText('Ignore target (run TM analysis)')),
+    )
+
+    const lastValue = onChange.mock.calls.at(-1)[0]
+    expect(lastValue).toEqual({
+      id: 0,
+      states: ['translated', 'needs-review-l10n'],
+      analysis: 'new',
+    })
+    expect(screen.getByText('N/A (determined by TM)')).toBeInTheDocument()
+  })
+
+  test('calls onDelete with the row id when the delete button is clicked', () => {
+    const {onDelete} = setup()
+
+    const deleteButton = screen.getByRole('button')
     deleteButton.click()
 
     expect(onDelete).toHaveBeenCalledWith(0)

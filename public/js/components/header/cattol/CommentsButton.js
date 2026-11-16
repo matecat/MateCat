@@ -3,7 +3,6 @@ import CommentsActions from '../../../actions/CommentsActions'
 import {getComments} from '../../../api/getComments'
 import CommentsStore from '../../../stores/CommentsStore'
 import CommentsConstants from '../../../constants/CommentsConstants'
-import CatToolActions from '../../../actions/CatToolActions'
 import CatToolStore from '../../../stores/CatToolStore'
 import CattolConstants from '../../../constants/CatToolConstants'
 import SegmentActions from '../../../actions/SegmentActions'
@@ -17,8 +16,7 @@ import {
   BUTTON_TYPE,
 } from '../../common/Button/Button'
 
-const commentsTypes = {sticky: 3, resolve: 2, comment: 1}
-export const CommentsButton = ({}) => {
+export const CommentsButton = () => {
   const [teamUsers, setTeamUsers] = useState([])
   const [comments, setComments] = useState([])
   const [counterOpenComments, setCounterOpenComments] = useState(0)
@@ -145,7 +143,7 @@ export const CommentsButton = ({}) => {
           toggleButtonProps={{
             children: (
               <>
-                <CommentsIcon size={24} />
+                <CommentsIcon />
                 {counterResolvedComments > 0 && (
                   <div
                     className={`button-badge button-badge-success ${counterOpenComments > 0 ? 'button-badge-left' : ''}`}

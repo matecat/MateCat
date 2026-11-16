@@ -75,9 +75,7 @@ describe('AnalyzePage', () => {
 
     renderPage()
 
-    await waitFor(() =>
-      expect(screen.getByTestId('analyze-main')).toBeInTheDocument(),
-    )
+    expect(await screen.findByTestId('analyze-main')).toBeInTheDocument()
     await waitFor(() => expect(call).toBeGreaterThan(2), {timeout: 15000})
   }, 20000)
 
@@ -97,9 +95,7 @@ describe('AnalyzePage', () => {
 
     renderPage()
 
-    await waitFor(() =>
-      expect(screen.getByTestId('analyze-main')).toBeInTheDocument(),
-    )
+    expect(await screen.findByTestId('analyze-main')).toBeInTheDocument()
     expect(screen.getByTestId('cookie-consent')).toBeInTheDocument()
   })
 })

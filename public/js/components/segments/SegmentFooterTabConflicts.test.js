@@ -81,7 +81,7 @@ describe('SegmentFooterTabConflicts', () => {
     })
 
     expect(container.querySelectorAll('ul.graysmall')).toHaveLength(1)
-    expect(container.querySelector('.goto a')).toHaveTextContent('Go to')
+    expect(container.querySelector('.goto button')).toHaveTextContent('Go to')
   })
 
   test('renders not_editable alternatives', () => {
@@ -137,7 +137,7 @@ describe('SegmentFooterTabConflicts', () => {
       },
     })
 
-    fireEvent.click(container.querySelector('.goto a'))
+    fireEvent.click(container.querySelector('.goto button'))
     expect(SegmentActions.openSegment).toHaveBeenCalledWith('99')
   })
 })

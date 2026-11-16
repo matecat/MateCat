@@ -30,7 +30,6 @@ use Utils\Registry\AppConfig;
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 25/02/15
  * Time: 11.59
- *
  */
 abstract class AbstractEngine implements EngineInterface
 {
@@ -76,9 +75,8 @@ abstract class AbstractEngine implements EngineInterface
 
     /**
      * @param EngineStruct $engineRecord
-     *
+     * @param IDatabase $database
      * @throws Exception
-     * @throws TypeError
      */
     public function __construct(EngineStruct $engineRecord, IDatabase $database)
     {
@@ -231,11 +229,10 @@ abstract class AbstractEngine implements EngineInterface
      *
      * @return string|bool|null
      * @throws RuntimeException
-     * @throws \Psr\Log\InvalidArgumentException
      */
     public function _call(string $url, array $curl_options = []): string|bool|null
     {
-        $mh = new MultiCurlHandler();
+        $mh = new MultiCurlHandler($this->logger);
         $uniq_uid = uniqid('', true);
 
         /*
@@ -273,7 +270,8 @@ abstract class AbstractEngine implements EngineInterface
         if ($this->logging) {
             $log = $mh->getSingleLog($resourceHash);
             if ($this->content_type == 'json' && !$mh->hasError($resourceHash) && is_string($rawValue)) {
-                $log['response'] = json_decode($rawValue, true);
+                // Keep the raw body when it is not valid JSON (e.g. a plain-text error), or the log shows only null
+                $log['response'] = json_decode($rawValue, true) ?? $rawValue;
             } else {
                 $log['response'] = $rawValue;
             }
@@ -291,7 +289,6 @@ abstract class AbstractEngine implements EngineInterface
      *
      * @return void
      * @throws RuntimeException
-     * @throws \Psr\Log\InvalidArgumentException
      */
     public function call(string $function, array $parameters = [], bool $isPostRequest = false, bool $isJsonRequest = false): void
     {

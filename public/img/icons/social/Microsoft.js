@@ -10,7 +10,7 @@ const Microsoft = ({size = 16}) => {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <g clip-path="url(#clip0_8282_8394)">
+      <g clipPath="url(#clip0_8282_8394)">
         <path d="M0 0H11.4286V11.4286H0V0Z" fill="#F35325" />
         <path d="M12.5713 0H23.9999V11.4286H12.5713V0Z" fill="#81BC06" />
         <path d="M0 12.5714H11.4286V24H0V12.5714Z" fill="#05A6F0" />

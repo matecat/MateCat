@@ -8,7 +8,9 @@ use Model\Comments\CommentDao;
 use Model\Comments\CommentStruct;
 use Model\Comments\OpenThreadsStruct;
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\Jobs\JobStruct;
+use PDO;
 use PDOException;
 use PDOStatement;
 use PHPUnit\Framework\Attributes\Test;
@@ -65,6 +67,35 @@ class CommentDaoTest extends AbstractTest
 
         $this->assertIsArray($results);
         $this->assertEmpty($results);
+    }
+
+    /**
+     * The project ids must be bound, so the derived cache key names the projects. Written into the
+     * SQL, every project shared one Redis hash that never expired.
+     */
+    #[Test]
+    public function getOpenThreadsForProjectsBindsTheProjectIds(): void
+    {
+        $stmt = $this->createMock(PDOStatement::class);
+        $stmt->queryString = '';
+        $stmt->expects($this->once())->method('execute')->with($this->identicalTo([1, 2]));
+        $stmt->method('fetchAll')->willReturn([]);
+
+        $pdo = $this->createMock(PDO::class);
+        $pdo->expects($this->once())->method('prepare')
+            ->with($this->stringContains('projects.id IN ( ?,? )'))
+            ->willReturn($stmt);
+
+        $database = $this->createStub(IDatabase::class);
+        $database->method('getConnection')->willReturn($pdo);
+
+        $this->assertSame([], (new CommentDao($database))->getOpenThreadsForProjects([1, 2]));
+    }
+
+    #[Test]
+    public function getOpenThreadsForProjectsReturnsEmptyArrayForNoProjects(): void
+    {
+        $this->assertSame([], (new CommentDao(obtainTestDatabase()))->getOpenThreadsForProjects([]));
     }
 
     // ─── deleteComment() ───

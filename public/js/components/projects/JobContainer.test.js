@@ -1,11 +1,9 @@
-import {render, screen, act, waitFor} from '@testing-library/react'
+import {render, screen, waitFor} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 import React from 'react'
 import {fromJS} from 'immutable'
 import {JobContainer} from './JobContainer'
-import ProjectsStore from '../../stores/ProjectsStore'
-import ManageConstants from '../../constants/ManageConstants'
 import ManageActions from '../../actions/ManageActions'
 import ModalsActions from '../../actions/ModalsActions'
 import CatToolActions from '../../actions/CatToolActions'
@@ -114,7 +112,7 @@ const fakeProjectsData = {
           pee: 0,
           tte: 0,
           private_tm_key: [
-            {key: 'c52da4a03d6aea33f242', r: 1, w: 1, name: 'Test'},
+            {key: '00000000000000000007', r: 1, w: 1, name: 'Test'},
           ],
           warnings_count: 0,
           warning_segments: [],
@@ -186,7 +184,7 @@ const fakeProjectsData = {
           pee: 0,
           tte: 0,
           private_tm_key: [
-            {key: 'c52da4a03d6aea33f242', r: 1, w: 1, name: 'Test'},
+            {key: '00000000000000000007', r: 1, w: 1, name: 'Test'},
           ],
           warnings_count: 0,
           warning_segments: [],
@@ -258,7 +256,7 @@ const fakeProjectsData = {
           pee: 0,
           tte: 0,
           private_tm_key: [
-            {key: 'c52da4a03d6aea33f242', r: 1, w: 1, name: 'Test'},
+            {key: '00000000000000000007', r: 1, w: 1, name: 'Test'},
           ],
           warnings_count: 0,
           warning_segments: [],
@@ -330,7 +328,7 @@ const fakeProjectsData = {
           pee: 0,
           tte: 0,
           private_tm_key: [
-            {key: 'c52da4a03d6aea33f242', r: 1, w: 1, name: 'Test'},
+            {key: '00000000000000000007', r: 1, w: 1, name: 'Test'},
           ],
           warnings_count: 0,
           warning_segments: [],
@@ -602,7 +600,7 @@ const fakeProjectsData = {
           pee: 0,
           tte: 0,
           private_tm_key: [
-            {key: 'c52da4a03d6aea33f242', r: 1, w: 1, name: 'Test'},
+            {key: '00000000000000000007', r: 1, w: 1, name: 'Test'},
           ],
           warnings_count: 0,
           warning_segments: [],
@@ -689,7 +687,7 @@ const fakeProjectsData = {
           pee: 0,
           tte: 0,
           private_tm_key: [
-            {key: 'c52da4a03d6aea33f242', r: 1, w: 1, name: 'Test'},
+            {key: '00000000000000000007', r: 1, w: 1, name: 'Test'},
           ],
           warnings_count: 0,
           warning_segments: [],
@@ -761,7 +759,7 @@ const fakeProjectsData = {
           pee: 0,
           tte: 0,
           private_tm_key: [
-            {key: 'c52da4a03d6aea33f242', r: 1, w: 1, name: 'Test'},
+            {key: '00000000000000000007', r: 1, w: 1, name: 'Test'},
           ],
           warnings_count: 0,
           warning_segments: [],
@@ -833,7 +831,7 @@ const fakeProjectsData = {
           pee: 0,
           tte: 0,
           private_tm_key: [
-            {key: 'c52da4a03d6aea33f242', r: 1, w: 1, name: 'Test'},
+            {key: '00000000000000000007', r: 1, w: 1, name: 'Test'},
           ],
           warnings_count: 0,
           warning_segments: [],
@@ -932,8 +930,6 @@ const getDeliveryEmailRow = (email) =>
       element?.className === 'job-delivery-email' && content.startsWith(email),
   )
 
-const getProjectAnalyzeUrl = (slug, id, password) =>
-  `/analyze/${slug}/${id}-${password}`
 const getTranslateUrl = (
   chunkId,
   projectSlug,

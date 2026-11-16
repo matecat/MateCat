@@ -30,9 +30,7 @@ jest.mock('../../../common/Select', () => ({
 const renderTeam = (user, selectedTeam, setSelectedTeam = jest.fn()) =>
   render(
     <SettingsPanelContext.Provider value={{user}}>
-      <CreateProjectContext.Provider
-        value={{SELECT_HEIGHT: 200, selectedTeam, setSelectedTeam}}
-      >
+      <CreateProjectContext.Provider value={{selectedTeam, setSelectedTeam}}>
         <Team />
       </CreateProjectContext.Provider>
     </SettingsPanelContext.Provider>,
@@ -49,12 +47,17 @@ describe('Team', () => {
 
   test('renders no team options and disables select when user is undefined', () => {
     renderTeam(undefined, undefined)
-    expect(screen.getByTestId('is-disabled').textContent).toBe('true')
+    expect(screen.getByTestId('is-disabled')).toHaveTextContent('true')
     expect(screen.queryByTestId('option-1')).not.toBeInTheDocument()
   })
 
   test('maps user.teams to id/name options, stringifying id', () => {
-    const user = {teams: [{id: 1, name: 'Team A'}, {id: 2, name: 'Team B'}]}
+    const user = {
+      teams: [
+        {id: 1, name: 'Team A'},
+        {id: 2, name: 'Team B'},
+      ],
+    }
     renderTeam(user, undefined)
     expect(screen.getByTestId('option-1')).toHaveTextContent('Team A')
     expect(screen.getByTestId('option-2')).toHaveTextContent('Team B')
@@ -63,23 +66,33 @@ describe('Team', () => {
   test('disables select when the user only has one team', () => {
     const user = {teams: [{id: 1, name: 'Team A'}]}
     renderTeam(user, undefined)
-    expect(screen.getByTestId('is-disabled').textContent).toBe('true')
+    expect(screen.getByTestId('is-disabled')).toHaveTextContent('true')
   })
 
   test('enables select when the user has more than one team', () => {
-    const user = {teams: [{id: 1, name: 'Team A'}, {id: 2, name: 'Team B'}]}
+    const user = {
+      teams: [
+        {id: 1, name: 'Team A'},
+        {id: 2, name: 'Team B'},
+      ],
+    }
     renderTeam(user, undefined)
-    expect(screen.getByTestId('is-disabled').textContent).toBe('false')
+    expect(screen.getByTestId('is-disabled')).toHaveTextContent('false')
   })
 
   test('shows selectedTeam as active option', () => {
     const user = {teams: [{id: 1, name: 'Team A'}]}
     renderTeam(user, {id: '1', name: 'Team A'})
-    expect(screen.getByTestId('active-option').textContent).toBe('Team A')
+    expect(screen.getByTestId('active-option')).toHaveTextContent('Team A')
   })
 
   test('selecting a team calls setSelectedTeam with the option', () => {
-    const user = {teams: [{id: 1, name: 'Team A'}, {id: 2, name: 'Team B'}]}
+    const user = {
+      teams: [
+        {id: 1, name: 'Team A'},
+        {id: 2, name: 'Team B'},
+      ],
+    }
     const setSelectedTeam = jest.fn()
     renderTeam(user, undefined, setSelectedTeam)
 
@@ -91,7 +104,12 @@ describe('Team', () => {
   })
 
   test('on mount with user.teams, calls setSelectedTeam with UserActions.getLastTeamSelected result', () => {
-    const user = {teams: [{id: 1, name: 'Team A'}, {id: 2, name: 'Team B'}]}
+    const user = {
+      teams: [
+        {id: 1, name: 'Team A'},
+        {id: 2, name: 'Team B'},
+      ],
+    }
     const setSelectedTeam = jest.fn()
     UserActions.getLastTeamSelected.mockReturnValue({id: '2', name: 'Team B'})
 

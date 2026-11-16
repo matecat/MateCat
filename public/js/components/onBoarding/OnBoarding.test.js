@@ -60,12 +60,12 @@ describe('OnBoarding', () => {
   test('renders the PasswordReset step when step="passwordReset"', () => {
     render(<OnBoarding step="passwordReset" />)
     expect(screen.getByText('Reset password')).toBeInTheDocument()
-    expect(screen.getByPlaceholderText('Current password')).toBeInTheDocument()
+    expect(screen.getByLabelText('Current password')).toBeInTheDocument()
   })
 
   test('renders PasswordReset in newPassword mode when step="setNewPassword"', () => {
     render(<OnBoarding step="setNewPassword" />)
-    expect(screen.queryByPlaceholderText('Current password')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Current password')).not.toBeInTheDocument()
   })
 
   test('does not render the back button outside the forgotPassword step', () => {
@@ -129,6 +129,27 @@ describe('OnBoarding', () => {
         message: expect.stringContaining('navigation'),
       }),
     )
+    consoleError.mockRestore()
+    jest.useRealTimers()
+  })
+
+  test('does not throw and does not schedule a reload when the social login popup is blocked', () => {
+    // A popup blocker (notably iOS Safari) makes window.open() return null.
+    // socialLogin must bail out before touching newWindow.focus or starting
+    // the closed-window polling interval.
+    jest.useFakeTimers()
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {})
+    window.open = jest.fn(() => null)
+    const {container} = render(<OnBoarding />)
+    // The social buttons are icon-only, with no accessible name to query by.
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+    const googleButton = container.querySelector('.login-social-buttons button')
+
+    expect(() => fireEvent.click(googleButton)).not.toThrow()
+
+    jest.advanceTimersByTime(600)
+    expect(consoleError).not.toHaveBeenCalled()
+
     consoleError.mockRestore()
     jest.useRealTimers()
   })

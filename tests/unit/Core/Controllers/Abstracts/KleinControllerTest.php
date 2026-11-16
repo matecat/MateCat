@@ -217,6 +217,21 @@ class KleinControllerTest extends AbstractTest
         $controller->getDatabase();
     }
 
+    #[Test]
+    public function isApiPathIsTrueForApiPrefixedPaths(): void
+    {
+        $this->assertTrue(KleinController::isApiPath('/api/v2/projects'));
+        $this->assertTrue(KleinController::isApiPath('/api/app/user'));
+    }
+
+    #[Test]
+    public function isApiPathIsFalseForPageAndUnmatchedPaths(): void
+    {
+        $this->assertFalse(KleinController::isApiPath('/'));
+        $this->assertFalse(KleinController::isApiPath('/translate/some-project/en-US/1-abc'));
+        $this->assertFalse(KleinController::isApiPath('/this-page-does-not-exist'));
+    }
+
     private function createController(): KleinController
     {
         $request = Request::createFromGlobals();

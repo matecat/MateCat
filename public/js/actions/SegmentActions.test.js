@@ -24,7 +24,7 @@ jest.mock('../stores/CatToolStore', () => ({
 }))
 
 jest.mock('../utils/segmentUtils', () => ({
-  isIceSegment: jest.fn(() => false),
+  isLockedSegment: jest.fn(() => false),
   isReadonlySegment: jest.fn(),
   removeUnlockedSegment: jest.fn(),
 }))
@@ -188,6 +188,7 @@ jest.mock('../utils/segmentLocalStorage', () => ({
   setLastSegmentFromLocalStorage: jest.fn(),
 }))
 
+import React from 'react'
 import SegmentActions from './SegmentActions'
 import SegmentUtils from '../utils/segmentUtils'
 import ModalsActions from './ModalsActions'
@@ -200,7 +201,6 @@ import TranslationMatches from '../components/segments/utils/translationMatches'
 import OfflineUtils from '../utils/offlineUtils'
 import {addNotification} from './notificationActions'
 import {getSegmentsQa, startSegmentQACheck} from './segmentQaActions'
-import {disableTPOnSegment} from './tagProjectionActions'
 import {setLastSegmentFromLocalStorage} from '../utils/segmentLocalStorage'
 import {splitSegment} from '../api/splitSegment'
 import {copyAllSourceToTarget} from '../api/copyAllSourceToTarget'
@@ -234,7 +234,7 @@ describe('SegmentActions.handleClickOnReadOnly', () => {
     }
 
     jest.clearAllMocks()
-    SegmentUtils.isIceSegment.mockReturnValue(false)
+    SegmentUtils.isLockedSegment.mockReturnValue(false)
   })
 
   test('shows "Segment disabled" AlertModal when metadata has translation_disabled=true', () => {
@@ -280,7 +280,7 @@ describe('SegmentActions.handleClickOnReadOnly', () => {
   })
 
   test('shows ICE match modal when segment is ICE-locked', () => {
-    SegmentUtils.isIceSegment.mockReturnValue(true)
+    SegmentUtils.isLockedSegment.mockReturnValue(true)
 
     const segment = {
       unlocked: false,
@@ -291,11 +291,22 @@ describe('SegmentActions.handleClickOnReadOnly', () => {
 
     expect(ModalsActions.showModalComponent).toHaveBeenCalledWith(
       'Alert',
-      expect.objectContaining({
-        text: expect.stringContaining('Segment is locked'),
-      }),
-      'Ice Matches',
+      expect.any(Object),
+      'Locked segment',
     )
+
+    // `react` is mocked to a bare `createElement` stub in this file (see the
+    // jest.mock('react', ...) above), so the locked-segment alert's JSX `text`
+    // can't be rendered here — instead verify the message was built by
+    // inspecting the arguments passed to the mocked createElement.
+    const lockedTextCall = React.createElement.mock.calls.find((call) =>
+      call.some(
+        (arg) =>
+          typeof arg === 'string' &&
+          arg.includes("locked and shouldn't be edited"),
+      ),
+    )
+    expect(lockedTextCall).toBeDefined()
   })
 
   test('does not show disabled modal when translation_disabled is false', () => {
@@ -350,7 +361,7 @@ describe('SegmentActions.clickOnApprovedButton — mandatory issues gate', () =>
     sid: '1-1',
     modified: true,
     splitted: false,
-    ice_locked: false,
+    locked: false,
     versions: [],
   })
 
@@ -1311,7 +1322,7 @@ describe('SegmentActions.handleClickOnReadOnly extra branches', () => {
   beforeEach(() => {
     global.config = baseConfig()
     jest.clearAllMocks()
-    SegmentUtils.isIceSegment.mockReturnValue(false)
+    SegmentUtils.isLockedSegment.mockReturnValue(false)
   })
 
   test('shows read-only warning notification during project completion review phase', () => {
@@ -1491,7 +1502,9 @@ describe('SegmentActions glossary flows', () => {
     SegmentActions.addGlossaryItem({id_segment: '1'})
     await flushDynamicImports()
     expect(AppDispatcher.dispatch).toHaveBeenCalledWith(
-      expect.objectContaining({message: 'bad'}),
+      expect.objectContaining({
+        message: expect.objectContaining({title: 'Termbase', text: 'bad'}),
+      }),
     )
   })
 
@@ -1770,7 +1783,7 @@ describe('SegmentActions lock/unlock', () => {
     expect(ModalsActions.showModalComponent).toHaveBeenCalledWith(
       'UnlockAllSegments',
       {},
-      'Unlock all 101% segments',
+      'Unlock all locked segments',
     )
   })
 
@@ -2008,5 +2021,16 @@ describe('SegmentActions.refreshTagMap', () => {
     expect(renderSpy).toHaveBeenCalledWith([{sid: '1'}], '1')
     expect(AppDispatcher.dispatch).toHaveBeenCalled()
     renderSpy.mockRestore()
+  })
+})
+
+describe('SegmentActions.setCurrentSegment', () => {
+  // MATECAT-5NX: called on mount with the sid of a segment that has none
+  test('does nothing when no segment id is given', () => {
+    jest.clearAllMocks()
+
+    expect(() => SegmentActions.setCurrentSegment(undefined)).not.toThrow()
+    expect(setLastSegmentFromLocalStorage).not.toHaveBeenCalled()
+    expect(setCurrentSegment).not.toHaveBeenCalled()
   })
 })

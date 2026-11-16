@@ -31,6 +31,30 @@ use Throwable;
 class ViewNoIndexHeaderTest extends AbstractTest
 {
 
+    private bool $allowSearchIndexing;
+    private ?string $httpHost;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->allowSearchIndexing = AppConfig::$ALLOW_SEARCH_INDEXING;
+        $this->httpHost            = $_SERVER['HTTP_HOST'] ?? null;
+
+        AppConfig::$ALLOW_SEARCH_INDEXING = true;
+        $_SERVER['HTTP_HOST']             = (string)parse_url(AppConfig::$HTTPHOST, PHP_URL_HOST);
+    }
+
+    protected function tearDown(): void
+    {
+        AppConfig::$ALLOW_SEARCH_INDEXING = $this->allowSearchIndexing;
+        if ($this->httpHost === null) {
+            unset($_SERVER['HTTP_HOST']);
+        } else {
+            $_SERVER['HTTP_HOST'] = $this->httpHost;
+        }
+        parent::tearDown();
+    }
+
     /**
      * @return array<string, array{class-string<BaseKleinViewController>}>
      */
@@ -216,6 +240,143 @@ class ViewNoIndexHeaderTest extends AbstractTest
         } catch (Throwable) {
             // render() is declared `never`; the mock expectations above are the assertion.
         }
+    }
+
+    /**
+     * Being meant to be found is not enough on its own: an installation that has not turned
+     * indexing on keeps every page out of the index, its entry page included.
+     *
+     * @param class-string<BaseKleinViewController> $controllerClass
+     */
+    #[DataProvider('indexableViewProvider')]
+    public function testIndexableViewSendsTheHeaderWhenTheInstallationDoesNotAllowIndexing(string $controllerClass): void
+    {
+        AppConfig::$ALLOW_SEARCH_INDEXING = false;
+
+        $response = $this->createMock(Response::class);
+        $response->expects($this->once())
+            ->method('header')
+            ->with('X-Robots-Tag', 'noindex, nofollow');
+
+        $this->renderWithoutView($controllerClass, $response);
+    }
+
+    /**
+     * The same refusal on the hop a crawler actually receives, which is where the header counts.
+     *
+     * @param class-string<BaseKleinViewController> $controllerClass
+     */
+    #[DataProvider('indexableViewProvider')]
+    public function testRedirectFromIndexableViewCarriesTheHeaderWhenTheInstallationDoesNotAllowIndexing(string $controllerClass): void
+    {
+        AppConfig::$ALLOW_SEARCH_INDEXING = false;
+
+        self::assertSame(['X-Robots-Tag: noindex, nofollow'], $this->headersOnRedirectFor($controllerClass));
+    }
+
+    /**
+     * Indexing is allowed for one host only. `1.ajax.dev.matecat.com` serves the page's own
+     * scripts but is a different site to a crawler, so the entry page there is not the page
+     * meant to be found.
+     *
+     * @param class-string<BaseKleinViewController> $controllerClass
+     */
+    #[DataProvider('indexableViewProvider')]
+    public function testIndexableViewSendsTheHeaderOnAnAliasHost(string $controllerClass): void
+    {
+        $_SERVER['HTTP_HOST'] = '1.ajax.' . (string)parse_url(AppConfig::$HTTPHOST, PHP_URL_HOST);
+
+        $response = $this->createMock(Response::class);
+        $response->expects($this->once())
+            ->method('header')
+            ->with('X-Robots-Tag', 'noindex, nofollow');
+
+        $this->renderWithoutView($controllerClass, $response);
+    }
+
+    /**
+     * The alias has to refuse on the redirect as well, since that is the response a crawler gets.
+     *
+     * @param class-string<BaseKleinViewController> $controllerClass
+     */
+    #[DataProvider('indexableViewProvider')]
+    public function testRedirectFromIndexableViewCarriesTheHeaderOnAnAliasHost(string $controllerClass): void
+    {
+        $_SERVER['HTTP_HOST'] = '1.ajax.' . (string)parse_url(AppConfig::$HTTPHOST, PHP_URL_HOST);
+
+        self::assertSame(['X-Robots-Tag: noindex, nofollow'], $this->headersOnRedirectFor($controllerClass));
+    }
+
+    /**
+     * Another installation's host is not this one's, even though the entry page would render the
+     * same there. A staging copy must not be listed under the same address's name.
+     */
+    public function testIndexableViewSendsTheHeaderOnAnotherInstallationHost(): void
+    {
+        $_SERVER['HTTP_HOST'] = 'freddy.matecat-staging.com';
+
+        $response = $this->createMock(Response::class);
+        $response->expects($this->once())
+            ->method('header')
+            ->with('X-Robots-Tag', 'noindex, nofollow');
+
+        $this->renderWithoutView(UploadPageController::class, $response);
+    }
+
+    /**
+     * A request with no Host header cannot be placed on any installation, so it is not the
+     * installation's own host and the page stays out of the index.
+     */
+    public function testIndexableViewSendsTheHeaderWithoutAHostHeader(): void
+    {
+        unset($_SERVER['HTTP_HOST']);
+
+        $response = $this->createMock(Response::class);
+        $response->expects($this->once())
+            ->method('header')
+            ->with('X-Robots-Tag', 'noindex, nofollow');
+
+        $this->renderWithoutView(UploadPageController::class, $response);
+    }
+
+    /**
+     * Hosts are compared on the name alone: a client sending the upper-case spelling with the
+     * TLS port is still addressing the installation it was told to.
+     */
+    public function testHostMatchIgnoresCaseAndPort(): void
+    {
+        $_SERVER['HTTP_HOST'] = strtoupper((string)parse_url(AppConfig::$HTTPHOST, PHP_URL_HOST)) . ':443';
+
+        $response = $this->createMock(Response::class);
+        $response->expects($this->never())->method('header');
+
+        $this->renderWithoutView(UploadPageController::class, $response);
+    }
+
+    /**
+     * The flag opens the entry page, sign-in and the converter; it says nothing about a job page,
+     * which has a password in its URL whatever the installation allows.
+     *
+     * @param class-string<BaseKleinViewController> $controllerClass
+     */
+    #[DataProvider('nonIndexableViewProvider')]
+    public function testNonIndexableViewSendsTheHeaderOnTheInstallationHost(string $controllerClass): void
+    {
+        $response = $this->createMock(Response::class);
+        $response->expects($this->once())
+            ->method('header')
+            ->with('X-Robots-Tag', 'noindex, nofollow');
+
+        $this->renderWithoutView($controllerClass, $response);
+    }
+
+    /**
+     * Turning indexing on is a decision per installation, so a checkout that writes nothing in
+     * the config keeps every page private.
+     */
+    public function testInstallationDoesNotAllowIndexingByDefault(): void
+    {
+        self::assertFalse((new ReflectionClass(AppConfig::class))->getDefaultProperties()['ALLOW_SEARCH_INDEXING']);
     }
 
 }

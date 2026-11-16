@@ -136,6 +136,12 @@ describe('getFileIcon', () => {
     expect(el).toBeTruthy()
     expect(el.type).toBeTruthy()
   })
+
+  it('gives epub the same icon as the other desktop publishing formats', () => {
+    expect(CommonUtils.getFileIcon('epub').type).toBe(
+      CommonUtils.getFileIcon('idml').type,
+    )
+  })
 })
 
 describe('local/session storage helpers', () => {

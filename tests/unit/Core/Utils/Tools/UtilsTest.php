@@ -5,13 +5,22 @@ namespace Matecat\Core\Utils\Tools;
 use Exception;
 use InvalidArgumentException;
 use Matecat\TestHelpers\AbstractTest;
+use Matecat\TestHelpers\CapturesNamedLogs;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use Stomp\Transport\Message;
+use Utils\ActiveMQ\AMQHandler;
+use Utils\ActiveMQ\WorkerClient;
+use Utils\AsyncTasks\Workers\ErrMailWorker;
+use Utils\Registry\AppConfig;
+use Utils\TaskRunner\Commons\Context;
 use Utils\Tools\Utils;
 
 class UtilsTest extends AbstractTest
 {
+    use CapturesNamedLogs;
+
     // =========================================================================
     // Tests for getBrowser()
     // =========================================================================
@@ -923,6 +932,12 @@ class UtilsTest extends AbstractTest
         $this->assertFalse(Utils::isTokenValid('a1b2c3d4-e5f6-7890-abcd'));
     }
 
+    #[Test]
+    public function testIsTokenValidReturnsFalseForTrailingNewline(): void
+    {
+        $this->assertFalse(Utils::isTokenValid("a1b2c3d4-e5f6-7890-abcd-ef1234567890\n"));
+    }
+
     // =========================================================================
     // Tests for fixFileName()
     // =========================================================================
@@ -1474,7 +1489,7 @@ class UtilsTest extends AbstractTest
     #[Test]
     public function testUploadDirFromSessionCookieReturnsCorrectPath(): void
     {
-        $guid = 'test-guid-123';
+        $guid = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890';
         $result = Utils::uploadDirFromSessionCookie($guid);
         $this->assertStringContainsString($guid, $result);
     }
@@ -1482,11 +1497,29 @@ class UtilsTest extends AbstractTest
     #[Test]
     public function testUploadDirFromSessionCookieIncludesFileName(): void
     {
-        $guid = 'test-guid-123';
+        $guid = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890';
         $fileName = 'test.txt';
         $result = Utils::uploadDirFromSessionCookie($guid, $fileName);
         $this->assertStringContainsString($fileName, $result);
         $this->assertStringContainsString($guid, $result);
+    }
+
+    #[Test]
+    #[DataProvider('invalidUploadGuidProvider')]
+    public function testUploadDirFromSessionCookieThrowsForAnInvalidGuid(string $guid): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        Utils::uploadDirFromSessionCookie($guid);
+    }
+
+    public static function invalidUploadGuidProvider(): array
+    {
+        return [
+            'traversal'        => ['../../inc'],
+            'empty'            => [''],
+            'trailing newline' => ["a1b2c3d4-e5f6-7890-abcd-ef1234567890\n"],
+        ];
     }
 
     // =========================================================================
@@ -2367,6 +2400,133 @@ class UtilsTest extends AbstractTest
         self::assertStringContainsString('&lt;b&gt;bold&lt;/b&gt;', $body);
         self::assertStringContainsString('a&amp;b', $body);
         self::assertStringContainsString("\n", $body, 'the <pre> renders the newlines');
+    }
+
+    // =========================================================================
+    // Tests for sendErrMailReport()
+    // =========================================================================
+
+    /**
+     * The report is queued for the mail worker, never sent from here, so a mocked AMQ handler
+     * is enough to reach the log line and no mail leaves the machine.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function sendErrMailReportQueuesTheMailAndLogsIt(): void
+    {
+        $originalFlag = AppConfig::$SEND_ERR_MAIL_REPORT;
+        $originalQueues = WorkerClient::$_QUEUES;
+        $originalHandler = WorkerClient::$_HANDLER;
+
+        $log = $this->captureLog('mail');
+
+        $amq = $this->getMockBuilder(AMQHandler::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['publishToQueues', 'close'])
+            ->getMock();
+        // The queued element names the mail worker and carries the subject, with the host name added.
+        $amq->expects(self::once())->method('publishToQueues')->with(
+            '/queue/test_mail',
+            self::callback(function (Message $message): bool {
+                $element = json_decode($message->getBody(), true);
+                self::assertSame(ErrMailWorker::class, $element['classLoad']);
+                self::assertSame('Test alert ' . php_uname('n'), $element['params']['subject']);
+
+                return true;
+            })
+        )->willReturn(true);
+
+        WorkerClient::$_HANDLER = $amq;
+        WorkerClient::$_QUEUES = ['MAIL' => Context::buildFromArray(['queue_name' => '/queue/test_mail', 'max_executors' => 1])];
+        AppConfig::$SEND_ERR_MAIL_REPORT = true;
+
+        try {
+            Utils::sendErrMailReport('something broke', 'Test alert');
+        } finally {
+            AppConfig::$SEND_ERR_MAIL_REPORT = $originalFlag;
+            WorkerClient::$_QUEUES = $originalQueues;
+            WorkerClient::$_HANDLER = $originalHandler;
+        }
+
+        self::assertTrue($log->hasInfoThatContains('Message has been sent'));
+    }
+
+    // =========================================================================
+    // Tests for deleteDir() when a file cannot be deleted
+    // =========================================================================
+
+    /**
+     * A file permission does not stop root (CI runs as root), so the failing delete comes from a
+     * small stream wrapper instead: it shows one directory holding one file, and refuses unlink().
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function deleteDirLogsAFileItFailsToDelete(): void
+    {
+        $wrapper = new class {
+            /** @var resource|null set by PHP for every stream wrapper */
+            public $context;
+
+            /** @var list<string> entries left to read from the fake directory */
+            private array $entries = [];
+
+            public function dir_opendir(string $path, int $options): bool
+            {
+                return $this->dir_rewinddir();
+            }
+
+            public function dir_readdir(): string|false
+            {
+                return array_shift($this->entries) ?? false;
+            }
+
+            public function dir_rewinddir(): bool
+            {
+                $this->entries = ['.', '..', 'locked.txt'];
+
+                return true;
+            }
+
+            public function dir_closedir(): bool
+            {
+                return true;
+            }
+
+            /**
+             * @return array<string, int>|false
+             */
+            public function url_stat(string $path, int $flags): array|false
+            {
+                return match ($path) {
+                    'faildelete://dir' => ['mode' => 0040755],
+                    'faildelete://dir/locked.txt' => ['mode' => 0100644],
+                    default => false,
+                };
+            }
+
+            public function unlink(string $path): bool
+            {
+                return false;
+            }
+
+            public function rmdir(string $path, int $options): bool
+            {
+                return true;
+            }
+        };
+
+        $log = $this->captureLog('files');
+        stream_wrapper_register('faildelete', $wrapper::class);
+
+        try {
+            Utils::deleteDir('faildelete://dir');
+        } finally {
+            stream_wrapper_unregister('faildelete');
+        }
+
+        self::assertTrue($log->hasWarningThatContains('fail deleting faildelete://dir/locked.txt'));
     }
 
 }

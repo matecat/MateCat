@@ -97,7 +97,9 @@ const useContextPreviewMessages = ({
               if (sourceSeg) {
                 replaceTextContent(
                   el,
-                  stripSegmentTags(sourceSeg.source).trim(),
+                  stripSegmentTags(sourceSeg.source, {
+                    keepPlaceholders: true,
+                  }).trim(),
                 )
               }
               if (targetDir) el.removeAttribute('dir')

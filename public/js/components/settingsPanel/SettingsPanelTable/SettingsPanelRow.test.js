@@ -109,7 +109,7 @@ describe('SettingsPanelRow', () => {
       row: {id: 'r1', node: <span />},
       wasDragged: true,
     })
-    expect(getByTestId('settings-panel-table-row-r1').className).toContain(
+    expect(getByTestId('settings-panel-table-row-r1')).toHaveClass(
       'settings-panel-row-dragend',
     )
   })
@@ -121,13 +121,13 @@ describe('SettingsPanelRow', () => {
     const handle = container.querySelector('.settings-panel-row-drag-handle')
     const outer = getByTestId('settings-panel-table-row-r1')
 
-    expect(outer.getAttribute('draggable')).toBe('false')
+    expect(outer).toHaveAttribute('draggable', 'false')
 
     fireEvent.mouseDown(handle)
-    expect(outer.getAttribute('draggable')).toBe('true')
+    expect(outer).toHaveAttribute('draggable', 'true')
 
     fireEvent.mouseUp(handle)
-    expect(outer.getAttribute('draggable')).toBe('false')
+    expect(outer).toHaveAttribute('draggable', 'false')
     expect(context.onDragEnd).toHaveBeenCalledWith({row})
   })
 
@@ -139,7 +139,7 @@ describe('SettingsPanelRow', () => {
 
     fireEvent.dragStart(outer)
 
-    expect(outer.className).toContain('settings-panel-row-dragging')
+    expect(outer).toHaveClass('settings-panel-row-dragging')
     expect(context.onDragStart).toHaveBeenCalledWith(3)
   })
 
@@ -172,7 +172,7 @@ describe('SettingsPanelRow', () => {
     expect(context.onDragOver).toHaveBeenCalledWith(
       expect.objectContaining({halfPoint: 'bottom', row}),
     )
-    expect(outer.className).toContain(
+    expect(outer).toHaveClass(
       'settings-panel-row-dragover-half-bottom',
     )
   })
@@ -192,7 +192,7 @@ describe('SettingsPanelRow', () => {
     expect(context.onDragOver).toHaveBeenCalledWith(
       expect.objectContaining({halfPoint: 'top', row}),
     )
-    expect(outer.className).toContain('settings-panel-row-dragover-half-top')
+    expect(outer).toHaveClass('settings-panel-row-dragover-half-top')
   })
 
   test('dragover with a zero relative offset defaults to the bottom half without updating state', () => {
@@ -224,6 +224,6 @@ describe('SettingsPanelRow', () => {
 
     fireEvent(outer, dragOverEvent({clientX: 10, clientY: 100}))
 
-    expect(outer.className).not.toContain('settings-panel-row-dragover')
+    expect(outer).not.toHaveClass('settings-panel-row-dragover')
   })
 })

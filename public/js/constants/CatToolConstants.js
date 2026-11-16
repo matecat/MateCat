@@ -25,7 +25,7 @@ const CatToolConstants = keyMirror({
   GET_JOB_METADATA: null,
   SEGMENT_FILTER_ERROR: null,
   SET_FIRST_LOAD: null,
-  TOGGLE_PH_TAGS_COMPRESSED: null,
+  TOGGLE_TAGS_COMPRESSED: null,
 })
 
 export default CatToolConstants

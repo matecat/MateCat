@@ -134,9 +134,7 @@ test('shows an API error message when sharing fails', async () => {
   fireEvent.change(input, {target: {value: 'valid@example.com'}})
   fireEvent.click(screen.getByText('Share'))
 
-  await waitFor(() =>
-    expect(screen.getByText('Sharing failed')).toBeInTheDocument(),
-  )
+  expect(await screen.findByText('Sharing failed')).toBeInTheDocument()
 })
 
 test('typing after an error clears the previous error state', () => {

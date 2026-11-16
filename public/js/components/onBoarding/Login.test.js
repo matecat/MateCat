@@ -29,24 +29,32 @@ const fillAndSubmit = async (
   email = 'user@example.com',
   password = 'secret123456!',
 ) => {
-  fireEvent.change(screen.getByPlaceholderText('Email'), {
+  fireEvent.change(screen.getByLabelText('Email'), {
     target: {value: email},
   })
-  fireEvent.change(screen.getByPlaceholderText('Password'), {
+  fireEvent.change(screen.getByLabelText('Password'), {
     target: {value: password},
   })
   fireEvent.click(screen.getByRole('button', {name: 'Sign in'}))
 }
 
 describe('Login', () => {
+  test('labels every field and leaves no placeholder inside the inputs', () => {
+    renderWithContext()
+    const labels = ['Email', 'Password']
+    labels.forEach((label) => {
+      expect(screen.getByLabelText(label)).not.toHaveAttribute('placeholder')
+    })
+  })
+
   beforeEach(() => {
     jest.clearAllMocks()
   })
 
   test('renders email and password fields', () => {
     renderWithContext()
-    expect(screen.getByPlaceholderText('Email')).toBeInTheDocument()
-    expect(screen.getByPlaceholderText('Password')).toBeInTheDocument()
+    expect(screen.getByLabelText('Email')).toBeInTheDocument()
+    expect(screen.getByLabelText('Password')).toBeInTheDocument()
   })
 
   test('shows a validation error when submitting an empty form', async () => {
@@ -64,7 +72,7 @@ describe('Login', () => {
     // <form> submit event before React ever sees it) while still failing
     // the app's own EMAIL_PATTERN (no dot + TLD in the domain part), so
     // this exercises the custom react-hook-form pattern validation.
-    fireEvent.change(screen.getByPlaceholderText('Email'), {
+    fireEvent.change(screen.getByLabelText('Email'), {
       target: {value: 'a@b'},
     })
     fireEvent.click(screen.getByRole('button', {name: 'Sign in'}))

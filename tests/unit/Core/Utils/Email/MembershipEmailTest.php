@@ -181,7 +181,7 @@ class MembershipEmailTest extends AbstractTest
             $this->makeUserDao(),
             $this->makeTeamDao()
         );
-        $vars = $email->_getLayoutVariables();
+        $vars = (new ReflectionMethod(MembershipCreatedEmail::class, '_getLayoutVariables'))->invoke($email);
 
         $this->assertArrayHasKey('title', $vars);
         $this->assertStringContainsString('Test Team', $vars['title']);
@@ -241,6 +241,33 @@ class MembershipEmailTest extends AbstractTest
 
         $this->assertArrayHasKey('title', $vars);
         $this->assertStringContainsString('Layout Team', $vars['title']);
+    }
+
+    /**
+     * The removal notice tells the reader who removed them and from where, and nothing else. The
+     * support address was dropped on purpose: there is no support action to take on a removal, so
+     * offering one invites a reply to a mailbox that cannot undo it.
+     *
+     * This is the first test to render `membership_deleted_content.html` at all — the two above
+     * hand `_buildHTMLMessage()` a ready-made body, which short-circuits the content template.
+     */
+    public function testMembershipDeletedEmailBodyNamesTheSenderAndTeamAndOffersNoSupportAddress(): void
+    {
+        $email = new MembershipDeletedEmail(
+            $this->makeSender(),
+            $this->makeUser(),
+            $this->makeTeam('Removed Team')
+        );
+
+        $method = new ReflectionMethod(MembershipDeletedEmail::class, '_buildMessageContent');
+        $body = (string)$method->invoke($email);
+
+        $this->assertStringContainsString('John', $body);
+        $this->assertStringContainsString('Admin User', $body);
+        $this->assertStringContainsString('Removed Team', $body);
+
+        $this->assertStringNotContainsString('support@matecat.com', $body);
+        $this->assertStringNotContainsString('mailto:', $body);
     }
 
     public function testMembershipCreatedEmailSendCallsDoSend(): void

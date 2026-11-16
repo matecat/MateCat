@@ -9,7 +9,7 @@ jest.mock('../../actions/SegmentActions', () => ({
 }))
 
 jest.mock('../../utils/segmentUtils', () => ({
-  isIceSegment: jest.fn(() => false),
+  isLockedSegment: jest.fn(() => false),
 }))
 
 jest.mock('../../utils/shortcuts', () => ({
@@ -34,7 +34,7 @@ const makeSegment = (overrides = {}) => ({
 describe('ReviewExtendedTranslationIssuesSideButton', () => {
   beforeEach(() => {
     global.config.isReview = true
-    SegmentUtils.isIceSegment.mockReturnValue(false)
+    SegmentUtils.isLockedSegment.mockReturnValue(false)
   })
 
   test('renders nothing when config.isReview is false', () => {
@@ -49,7 +49,7 @@ describe('ReviewExtendedTranslationIssuesSideButton', () => {
   })
 
   test('renders nothing when segment is ICE-locked and not unlocked', () => {
-    SegmentUtils.isIceSegment.mockReturnValue(true)
+    SegmentUtils.isLockedSegment.mockReturnValue(true)
     const {container} = render(
       <ReviewExtendedTranslationIssuesSideButton
         sid="1"
@@ -60,7 +60,7 @@ describe('ReviewExtendedTranslationIssuesSideButton', () => {
   })
 
   test('renders when segment is ICE-locked but unlocked', () => {
-    SegmentUtils.isIceSegment.mockReturnValue(true)
+    SegmentUtils.isLockedSegment.mockReturnValue(true)
     render(
       <ReviewExtendedTranslationIssuesSideButton
         sid="1"
@@ -92,9 +92,10 @@ describe('ReviewExtendedTranslationIssuesSideButton', () => {
     expect(container.querySelector('.revise-button')).not.toHaveClass(
       'no-object',
     )
-    expect(
-      container.querySelector('.revise-button').getAttribute('title'),
-    ).toEqual(expect.stringContaining('Show issues'))
+    expect(container.querySelector('.revise-button')).toHaveAttribute(
+      'title',
+      expect.stringContaining('Show issues'),
+    )
   })
 
   test('sums issue counts across multiple versions', () => {
@@ -121,5 +122,27 @@ describe('ReviewExtendedTranslationIssuesSideButton', () => {
       {sid: '42'},
       true,
     )
+  })
+
+  test('stays visible with no issues while its panel is open', () => {
+    render(
+      <ReviewExtendedTranslationIssuesSideButton
+        sid="1"
+        segment={makeSegment({opened: true})}
+        open
+      />,
+    )
+    expect(screen.getByTitle('Add issues')).not.toHaveClass('no-object')
+  })
+
+  test('is hidden with no issues when its panel is open on a closed segment', () => {
+    render(
+      <ReviewExtendedTranslationIssuesSideButton
+        sid="1"
+        segment={makeSegment({opened: false})}
+        open
+      />,
+    )
+    expect(screen.getByTitle('Add issues')).toHaveClass('no-object')
   })
 })

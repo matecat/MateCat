@@ -17,7 +17,11 @@ import ModalsActions from '../../../../../actions/ModalsActions'
 import {ConfirmDeleteResourceProjectTemplates} from '../../../../modals/ConfirmDeleteResourceProjectTemplates'
 import {SCHEMA_KEYS} from '../../../../../hooks/useProjectTemplates'
 import {DeepLGlossaryNoneRow} from './DeepLGlossaryNoneRow'
-import {Button, BUTTON_TYPE} from '../../../../common/Button/Button'
+import {
+  Button,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../../../../common/Button/Button'
 import {DEEPL_GLOSSARY_CREATE_ROW_ID} from './DeepLGlossaryConstants'
 
 const COLUMNS_TABLE = [
@@ -96,7 +100,6 @@ export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
           type: 'error',
           text: 'Error deleting glossary',
           position: 'br',
-          allowHtml: true,
           timer: 5000,
         })
       })
@@ -302,6 +305,7 @@ export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
               {!shouldHideNewButton && (
                 <Button
                   type={BUTTON_TYPE.PRIMARY}
+                  size={BUTTON_SIZE.SMALL}
                   onClick={addGlossary}
                   title="Add glossary"
                 >
@@ -312,12 +316,12 @@ export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
             </div>
           ) : Array.isArray(rows) ? (
             <div className="empty-list-mode">
-              <p>Start using DeepL's glossary feature</p>
+              <p>Start using DeepL&apos;s glossary feature</p>
               <Button
                 className="settings-panel-grey-button"
                 onClick={addGlossary}
               >
-                <IconAdd size={18} />
+                <IconAdd size={22} />
                 New glossary
               </Button>
             </div>

@@ -1639,6 +1639,45 @@ class CatUtilsTest extends AbstractTest
         $this->assertInstanceOf(Yaml::class, $result);
     }
 
+    /**
+     * The YAML extraction parameters must reach the converter with force_double_quoting intact,
+     * so the translated file can be written with every single-line string double quoted.
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function testGetRightExtractionParameterYamlCarriesForceDoubleQuoting(): void
+    {
+        $yaml = new Yaml();
+        $yaml->setForceDoubleQuoting(true);
+
+        $struct = new FiltersConfigTemplateStruct();
+        $struct->yaml = $yaml;
+
+        $result = $this->invokeGetRightExtractionParameter('file.yml', $struct);
+
+        $this->assertInstanceOf(Yaml::class, $result);
+        $this->assertTrue($result->jsonSerialize()['force_double_quoting']);
+    }
+
+    /**
+     * CatUtils::deleteSha() discriminates cached conversions by sha1(json_encode($extractionParams)),
+     * so toggling force_double_quoting must produce a different hash and force a re-conversion.
+     */
+    #[Test]
+    public function testYamlForceDoubleQuotingChangesExtractionParameterHash(): void
+    {
+        $sourceQuoting = new Yaml();
+
+        $doubleQuoted = new Yaml();
+        $doubleQuoted->setForceDoubleQuoting(true);
+
+        $this->assertNotSame(
+            sha1(json_encode($sourceQuoting)),
+            sha1(json_encode($doubleQuoted))
+        );
+    }
+
     #[Test]
     public function testGetRightExtractionParameterDocx(): void
     {

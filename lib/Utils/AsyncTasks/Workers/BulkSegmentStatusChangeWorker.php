@@ -22,6 +22,7 @@ use ReflectionException;
 use Throwable;
 use TypeError;
 use Utils\ActiveMQ\AMQHandler;
+use Utils\Logger\MatecatLogger;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\QueueElement;
@@ -36,15 +37,10 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
     /**
      * @throws ReflectionException
      */
-    public function __construct(AMQHandler $queueHandler, IDatabase $database, ?UserDao $userDao = null)
+    public function __construct(AMQHandler $queueHandler, IDatabase $database, ?UserDao $userDao = null, ?MatecatLogger $logger = null)
     {
-        parent::__construct($queueHandler, $database);
+        parent::__construct($queueHandler, $database, $logger);
         $this->userDao = $userDao ?? new UserDao($this->database);
-    }
-
-    public function getLoggerName(): string
-    {
-        return 'bulk_segment_status_change.log';
     }
 
     /**
@@ -66,7 +62,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
 
         $this->_checkForReQueueEnd($queueElement);
         $this->_checkDatabaseConnection();
-        $this->_doLog('data: ' . var_export($queueElement->params->toArray(), true));
+        $this->logger->debug('data: ' . var_export($queueElement->params->toArray(), true));
 
         $params = $queueElement->params->toArray();
 
@@ -133,7 +129,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
 
             $batchEventCreator->save(new BatchReviewProcessor(new ChunkReviewDao($this->database), $user));
 
-            $this->_doLog('completed');
+            $this->logger->debug('completed');
 
             return true;
         });

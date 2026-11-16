@@ -25,7 +25,7 @@ beforeEach(() => {
 test('renders nothing when search is disabled', () => {
   SearchUtils.searchEnabled = false
   const {container} = render(<SearchButton />)
-  expect(container.firstChild).toBeNull()
+  expect(container).toBeEmptyDOMElement()
 })
 
 test('toggles search when clicked', () => {

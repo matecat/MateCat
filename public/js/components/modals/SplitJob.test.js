@@ -1,5 +1,5 @@
 import React from 'react'
-import {render, screen, fireEvent, waitFor} from '@testing-library/react'
+import {render, screen, fireEvent, act, waitFor} from '@testing-library/react'
 import {fromJS} from 'immutable'
 import SplitJobModal from './SplitJob'
 import {checkSplitRequest} from '../../api/checkSplitRequest'
@@ -43,7 +43,7 @@ test('renders chunks and a Confirm button once the split is balanced', async () 
     <SplitJobModal job={baseJob} project={baseProject} callback={jest.fn()} />,
   )
 
-  await waitFor(() => expect(screen.getByText('Confirm')).toBeInTheDocument())
+  expect(await screen.findByText('Confirm')).toBeInTheDocument()
   expect(screen.getByText('Chunk 1')).toBeInTheDocument()
   expect(screen.getByText('Chunk 2')).toBeInTheDocument()
   expect(container.querySelector('.total-w')).toHaveTextContent('100')
@@ -67,7 +67,7 @@ test('confirming the split calls confirmSplitRequest and closes the modal on suc
 
 test('shows an error and disables further checks when confirmSplitRequest fails', async () => {
   checkSplitRequest.mockResolvedValue({data: successData})
-  confirmSplitRequest.mockRejectedValue([{message: 'confirm failed'}])
+  confirmSplitRequest.mockRejectedValue({errors: [{message: 'confirm failed'}]})
   render(
     <SplitJobModal job={baseJob} project={baseProject} callback={jest.fn()} />,
   )
@@ -75,9 +75,7 @@ test('shows an error and disables further checks when confirmSplitRequest fails'
   await waitFor(() => screen.getByText('Confirm'))
   fireEvent.click(screen.getByText('Confirm'))
 
-  await waitFor(() =>
-    expect(screen.getByText('confirm failed')).toBeInTheDocument(),
-  )
+  expect(await screen.findByText('confirm failed')).toBeInTheDocument()
   expect(screen.getByText('Check split')).toBeInTheDocument()
 })
 
@@ -87,11 +85,11 @@ test('shows the "too few segments" message and disables split when the API retur
     <SplitJobModal job={baseJob} project={baseProject} callback={jest.fn()} />,
   )
 
-  await waitFor(() =>
-    expect(
-      screen.getByText('Split unsuccessful: the job has too few segments.'),
-    ).toBeInTheDocument(),
-  )
+  expect(
+    await screen.findByText(
+      'Split unsuccessful: the job has too few segments.',
+    ),
+  ).toBeInTheDocument()
   expect(screen.getByText('Check split')).toBeDisabled()
 })
 
@@ -103,10 +101,8 @@ test('shows a generic error message for other API errors', async () => {
     <SplitJobModal job={baseJob} project={baseProject} callback={jest.fn()} />,
   )
 
-  await waitFor(() =>
-    expect(screen.getByText('generic failure')).toBeInTheDocument(),
-  )
-  expect(screen.getByText('Check split')).not.toBeDisabled()
+  expect(await screen.findByText('generic failure')).toBeInTheDocument()
+  expect(screen.getByText('Check split')).toBeEnabled()
 })
 
 test('editing a chunk word count shows the words-exceeding difference and re-enables Check split', async () => {
@@ -171,9 +167,7 @@ test('shows an error when "Check split" fails', async () => {
   checkSplitRequest.mockRejectedValue({errors: [{message: 'check failed'}]})
   fireEvent.click(screen.getByText('Check split'))
 
-  await waitFor(() =>
-    expect(screen.getByText('check failed')).toBeInTheDocument(),
-  )
+  expect(await screen.findByText('check failed')).toBeInTheDocument()
 })
 
 test('clicking Cancel closes the modal', async () => {
@@ -245,4 +239,101 @@ test('starts with raw-word split checked when the job has zero equivalent words'
     null,
     true,
   )
+})
+
+const job = fromJS({
+  id: 1,
+  password: 'job-pw',
+  stats: {equivalent: {total: 100}},
+})
+const project = fromJS({id: 10, password: 'project-pw'})
+
+const splitData = {
+  eq_word_count: 100,
+  raw_word_count: 100,
+  chunks: [
+    {eq_word_count: 50, raw_word_count: 50},
+    {eq_word_count: 50, raw_word_count: 50},
+  ],
+}
+
+const deferred = () => {
+  let resolve, reject
+  const promise = new Promise((res, rej) => {
+    resolve = res
+    reject = rej
+  })
+  return {promise, resolve, reject}
+}
+
+const renderUntilConfirm = async (callback = jest.fn()) => {
+  render(<SplitJobModal job={job} project={project} callback={callback} />)
+  return screen.findByRole('button', {name: 'Confirm'})
+}
+
+describe('SplitJobModal confirm', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    checkSplitRequest.mockResolvedValue({data: splitData})
+  })
+
+  test('a second click while the request is pending does not send a second split', async () => {
+    const pending = deferred()
+    confirmSplitRequest.mockReturnValue(pending.promise)
+
+    const confirm = await renderUntilConfirm()
+
+    fireEvent.click(confirm)
+    fireEvent.click(confirm)
+
+    expect(confirmSplitRequest).toHaveBeenCalledTimes(1)
+    expect(confirm).toBeDisabled()
+
+    await act(async () => {
+      pending.resolve({data: {chunks: []}})
+    })
+
+    expect(ModalsActions.onCloseModal).toHaveBeenCalled()
+  })
+
+  test('the button is enabled again when the response has no chunks', async () => {
+    confirmSplitRequest.mockResolvedValue({data: {}})
+
+    const confirm = await renderUntilConfirm()
+
+    await act(async () => {
+      fireEvent.click(confirm)
+    })
+
+    await waitFor(() => expect(confirm).toBeEnabled())
+    expect(ModalsActions.onCloseModal).not.toHaveBeenCalled()
+  })
+
+  test('an error list shows the message and goes back to the split check', async () => {
+    confirmSplitRequest.mockRejectedValue({errors: [{message: 'Split failed'}]})
+
+    const confirm = await renderUntilConfirm()
+
+    await act(async () => {
+      fireEvent.click(confirm)
+    })
+
+    expect(await screen.findByText('Split failed')).toBeInTheDocument()
+    expect(screen.queryByRole('button', {name: 'Confirm'})).toBeNull()
+    expect(screen.getByRole('button', {name: 'Check split'})).toBeEnabled()
+    expect(confirmSplitRequest).toHaveBeenCalledTimes(1)
+  })
+  test('the button is enabled again when the request fails without an error list', async () => {
+    // confirmSplitRequest rejects with the response alone when a non-ok status has no body.
+    confirmSplitRequest.mockRejectedValue({response: {ok: false, status: 500}})
+
+    const confirm = await renderUntilConfirm()
+
+    await act(async () => {
+      fireEvent.click(confirm)
+    })
+
+    await waitFor(() => expect(confirm).toBeEnabled())
+    expect(confirmSplitRequest).toHaveBeenCalledTimes(1)
+  })
 })

@@ -26,28 +26,36 @@ const renderWithContext = (props = {}, setStep = jest.fn()) =>
   )
 
 describe('PasswordReset - change password mode (newPassword=false)', () => {
+  test('labels every field and leaves no placeholder inside the inputs', () => {
+    renderWithContext()
+    const labels = ['Current password', 'New password', 'Confirm new password']
+    labels.forEach((label) => {
+      expect(screen.getByLabelText(label)).not.toHaveAttribute('placeholder')
+    })
+  })
+
   beforeEach(() => jest.clearAllMocks())
 
   test('renders current, new and confirm password fields', () => {
     renderWithContext()
     expect(
-      screen.getByPlaceholderText('Current password'),
+      screen.getByLabelText('Current password'),
     ).toBeInTheDocument()
-    expect(screen.getByPlaceholderText('New password')).toBeInTheDocument()
+    expect(screen.getByLabelText('New password')).toBeInTheDocument()
     expect(
-      screen.getByPlaceholderText('Confirm new password'),
+      screen.getByLabelText('Confirm new password'),
     ).toBeInTheDocument()
   })
 
   test('shows a mismatch error when confirm password does not match', async () => {
     renderWithContext()
-    fireEvent.change(screen.getByPlaceholderText('Current password'), {
+    fireEvent.change(screen.getByLabelText('Current password'), {
       target: {value: 'oldpass1234!'},
     })
-    fireEvent.change(screen.getByPlaceholderText('New password'), {
+    fireEvent.change(screen.getByLabelText('New password'), {
       target: {value: VALID_PASSWORD},
     })
-    fireEvent.change(screen.getByPlaceholderText('Confirm new password'), {
+    fireEvent.change(screen.getByLabelText('Confirm new password'), {
       target: {value: 'different1234!'},
     })
     fireEvent.click(screen.getByRole('button', {name: 'Reset'}))
@@ -59,13 +67,13 @@ describe('PasswordReset - change password mode (newPassword=false)', () => {
   test('calls resetPasswordUser and shows success on valid submit', async () => {
     resetPasswordUser.mockResolvedValue({})
     renderWithContext()
-    fireEvent.change(screen.getByPlaceholderText('Current password'), {
+    fireEvent.change(screen.getByLabelText('Current password'), {
       target: {value: 'oldpass1234!'},
     })
-    fireEvent.change(screen.getByPlaceholderText('New password'), {
+    fireEvent.change(screen.getByLabelText('New password'), {
       target: {value: VALID_PASSWORD},
     })
-    fireEvent.change(screen.getByPlaceholderText('Confirm new password'), {
+    fireEvent.change(screen.getByLabelText('Confirm new password'), {
       target: {value: VALID_PASSWORD},
     })
     fireEvent.click(screen.getByRole('button', {name: 'Reset'}))
@@ -84,13 +92,13 @@ describe('PasswordReset - change password mode (newPassword=false)', () => {
       {code: 0, message: 'Wrong current password'},
     ])
     renderWithContext()
-    fireEvent.change(screen.getByPlaceholderText('Current password'), {
+    fireEvent.change(screen.getByLabelText('Current password'), {
       target: {value: 'wrongpass123!'},
     })
-    fireEvent.change(screen.getByPlaceholderText('New password'), {
+    fireEvent.change(screen.getByLabelText('New password'), {
       target: {value: VALID_PASSWORD},
     })
-    fireEvent.change(screen.getByPlaceholderText('Confirm new password'), {
+    fireEvent.change(screen.getByLabelText('Confirm new password'), {
       target: {value: VALID_PASSWORD},
     })
     fireEvent.click(screen.getByRole('button', {name: 'Reset'}))
@@ -102,13 +110,13 @@ describe('PasswordReset - change password mode (newPassword=false)', () => {
   test('"Close" from the success view calls ModalsActions.onCloseModal', async () => {
     resetPasswordUser.mockResolvedValue({})
     renderWithContext()
-    fireEvent.change(screen.getByPlaceholderText('Current password'), {
+    fireEvent.change(screen.getByLabelText('Current password'), {
       target: {value: 'oldpass1234!'},
     })
-    fireEvent.change(screen.getByPlaceholderText('New password'), {
+    fireEvent.change(screen.getByLabelText('New password'), {
       target: {value: VALID_PASSWORD},
     })
-    fireEvent.change(screen.getByPlaceholderText('Confirm new password'), {
+    fireEvent.change(screen.getByLabelText('Confirm new password'), {
       target: {value: VALID_PASSWORD},
     })
     fireEvent.click(screen.getByRole('button', {name: 'Reset'}))
@@ -118,23 +126,31 @@ describe('PasswordReset - change password mode (newPassword=false)', () => {
 })
 
 describe('PasswordReset - set new password mode (newPassword=true)', () => {
+  test('labels every field and leaves no placeholder inside the inputs', () => {
+    renderWithContext({newPassword: true})
+    const labels = ['New password', 'Confirm new password']
+    labels.forEach((label) => {
+      expect(screen.getByLabelText(label)).not.toHaveAttribute('placeholder')
+    })
+  })
+
   beforeEach(() => jest.clearAllMocks())
 
   test('does not render the current password field', () => {
     renderWithContext({newPassword: true})
     expect(
-      screen.queryByPlaceholderText('Current password'),
+      screen.queryByLabelText('Current password'),
     ).not.toBeInTheDocument()
-    expect(screen.getByPlaceholderText('New password')).toBeInTheDocument()
+    expect(screen.getByLabelText('New password')).toBeInTheDocument()
   })
 
   test('calls setNewUserPassword (not resetPasswordUser) on valid submit', async () => {
     setNewUserPassword.mockResolvedValue({})
     renderWithContext({newPassword: true})
-    fireEvent.change(screen.getByPlaceholderText('New password'), {
+    fireEvent.change(screen.getByLabelText('New password'), {
       target: {value: VALID_PASSWORD},
     })
-    fireEvent.change(screen.getByPlaceholderText('Confirm new password'), {
+    fireEvent.change(screen.getByLabelText('Confirm new password'), {
       target: {value: VALID_PASSWORD},
     })
     fireEvent.click(screen.getByRole('button', {name: 'Reset'}))
@@ -152,10 +168,10 @@ describe('PasswordReset - set new password mode (newPassword=true)', () => {
     setNewUserPassword.mockResolvedValue({})
     const setStep = jest.fn()
     renderWithContext({newPassword: true}, setStep)
-    fireEvent.change(screen.getByPlaceholderText('New password'), {
+    fireEvent.change(screen.getByLabelText('New password'), {
       target: {value: VALID_PASSWORD},
     })
-    fireEvent.change(screen.getByPlaceholderText('Confirm new password'), {
+    fireEvent.change(screen.getByLabelText('Confirm new password'), {
       target: {value: VALID_PASSWORD},
     })
     fireEvent.click(screen.getByRole('button', {name: 'Reset'}))

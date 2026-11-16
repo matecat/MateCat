@@ -123,6 +123,7 @@ export function useGDriveFiles({
                     <a
                       href="https://guides.matecat.com/google-drive-files-upload-issues"
                       target="_blank"
+                      rel="noreferrer"
                     >
                       read this guide
                     </a>
@@ -194,17 +195,6 @@ export function useGDriveFiles({
   }, [files.length, sourceLang, segmentationRule, buildFilterParams])
   useEffect(() => {
     CreateProjectActions.enableAnalyzeButton(files.length > 0)
-    if (files.length >= config.maxNumberFiles) {
-      CreateProjectActions.showError(
-        'No more files can be loaded (the limit of ' +
-          config.maxNumberFiles +
-          ' has been exceeded).',
-      )
-    } else if (files.length > config.maxNumberFiles) {
-      CreateProjectActions.showError(
-        `Maximum ${config.maxNumberFiles} files allowed. Please remove all files with errors from the list below.`,
-      )
-    }
     if (files.length === 0) {
       setOpenGDrive(false)
     }

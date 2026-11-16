@@ -216,9 +216,7 @@ describe('SegmentFooterTabMatches', () => {
   })
 
   test('renders trash icon for an owned TM key match', () => {
-    CatToolStore.getJobTmKeys.mockReturnValue([
-      {key: 'memkey', w: 1},
-    ])
+    CatToolStore.getJobTmKeys.mockReturnValue([{key: 'memkey', w: 1}])
     renderComponent({
       segment: {
         ...baseSegment,
@@ -261,6 +259,21 @@ describe('SegmentFooterTabMatches', () => {
     expect(screen.getByText('Fewer')).toBeInTheDocument()
   })
 
+  test('labels only the matches that have a shortcut bound, once expanded', () => {
+    const matches = Array.from({length: 5}).map((_, i) =>
+      makeMatch({id: String(i)}),
+    )
+    renderComponent({
+      segment: {...baseSegment, contributions: {matches}},
+    })
+    fireEvent.click(screen.getByText('More'))
+
+    // All five matches are listed, but only copyContribution1..3 exist.
+    expect(screen.getAllByText(/^CTRL\+\d+$/)).toHaveLength(3)
+    expect(screen.getByText('CTRL+3')).toBeInTheDocument()
+    expect(screen.queryByText('CTRL+4')).not.toBeInTheDocument()
+  })
+
   test('renders engine error and warning messages', () => {
     renderComponent({
       segment: {
@@ -294,6 +307,29 @@ describe('SegmentFooterTabMatches', () => {
     expect(document.querySelector('.per-red-outline')).toBeInTheDocument()
     expect(screen.getByText('-5%')).toBeInTheDocument()
   })
+
+  test.each(['MT', 'ICE_MT'])(
+    'never shows the language variant penalty on a %s match',
+    (matchType) => {
+      renderComponent({
+        segment: {
+          ...baseSegment,
+          contributions: {
+            matches: [
+              makeMatch({
+                created_by: 'MT-DeepL',
+                match: matchType,
+                source: 'en',
+                target: 'it',
+              }),
+            ],
+          },
+        },
+      })
+      expect(screen.getByText('DeepL')).toBeInTheDocument()
+      expect(screen.queryByText(/\(-1%\)/)).not.toBeInTheDocument()
+    },
+  )
 
   test('CHOOSE_CONTRIBUTION event for matching sid triggers suggestion selection', () => {
     jest.useFakeTimers()
@@ -347,7 +383,10 @@ describe('SegmentFooterTabMatches', () => {
   })
 })
 
-describe('SegmentFooterTabMatches.prototype.copyText', () => {
+// Copying a suggestion strips the zero-width and middle-dot markers before it
+// reaches the clipboard. Driven through a real copy event rather than the
+// component's internals, so it survives however the component is written.
+describe('copying from the matches tab', () => {
   afterEach(() => {
     jest.restoreAllMocks()
   })
@@ -355,19 +394,20 @@ describe('SegmentFooterTabMatches.prototype.copyText', () => {
   test('does not reject when the browser denies clipboard permission', async () => {
     jest
       .spyOn(document, 'getSelection')
-      .mockReturnValue({toString: () => 'some matched text'})
+      .mockReturnValue({toString: () => 'some\u200B suggestion·text'})
     navigator.clipboard = {
       writeText: jest
         .fn()
         .mockRejectedValue(new DOMException('denied', 'NotAllowedError')),
     }
+    const {container} = renderComponent()
 
-    await expect(
-      SegmentFooterTabMatches.prototype.copyText({preventDefault: jest.fn()}),
-    ).resolves.not.toThrow()
+    fireEvent.copy(container.querySelector('.tab.sub-editor'))
+    await Promise.resolve()
 
+    // the zero-width marker is dropped and the middle dot becomes a space
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-      'some matched text',
+      'some suggestion text',
     )
   })
 })

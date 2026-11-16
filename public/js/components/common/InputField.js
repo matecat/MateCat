@@ -2,16 +2,9 @@ import React, {useState, useRef, useEffect, useCallback, useMemo} from 'react'
 import PropTypes from 'prop-types'
 import {debounce} from 'lodash/function'
 import IconClose from '../../../img/icons/IconClose'
+import {Input} from './Input/Input'
 
 const styleInput = {
-  fontFamily: 'calibri, Arial, Helvetica, sans-serif',
-  fontSize: '16px',
-  padding: '10px 20px',
-  borderRadius: '40px',
-  outlineColor: '#e5e9f1',
-  border: 'unset',
-  boxShadow: '0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset',
-  display: 'flex',
   maxWidth: '150px',
 }
 
@@ -29,6 +22,7 @@ const InputField = (props) => {
     type: propType,
     placeholder,
     name,
+    containerClassname,
     classes,
     tabindex,
     onKeyDown,
@@ -87,8 +81,8 @@ const InputField = (props) => {
   const type = propType ? propType : 'text'
 
   return (
-    <div className={'qr-filter-idSegment'}>
-      <input
+    <div className={containerClassname}>
+      <Input
         data-testid="input"
         style={styleInput}
         type={type}

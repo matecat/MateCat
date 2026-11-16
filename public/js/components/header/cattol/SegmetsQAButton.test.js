@@ -44,7 +44,7 @@ test('enables the button and shows the error badge when there are error warnings
     )
   })
   const button = screen.getByRole('button')
-  expect(button).not.toBeDisabled()
+  expect(button).toBeEnabled()
   expect(button).toHaveAttribute(
     'aria-label',
     'Click to see the segments with potential issues',

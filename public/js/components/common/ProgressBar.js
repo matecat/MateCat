@@ -48,7 +48,7 @@ export const ProgressBar = ({
       ref={progressBar}
       aria-label={tooltip || null}
       // eslint-disable-next-line react/no-unknown-property
-      tooltip-position="bottom"
+      data-tooltip-position="bottom"
       data-testid="progress-bar"
     >
       {label && (

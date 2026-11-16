@@ -64,9 +64,9 @@ section {
       position: relative;
       gap: 16px;
       justify-content: flex-end;
-      button {
-        text-transform: uppercase;
-      }
+      //button {
+      //  text-transform: uppercase;
+      //}
     }
   }
   .actions {
@@ -87,7 +87,8 @@ section {
   position: absolute;
   text-align: left;
   width: 31%;
-  left: 102%;
+  // Clear the side buttons (icon plus badge), which stay visible while a panel is open.
+  left: calc(100% + 50px);
   top: 0;
   display: flex;
   flex-direction: column;
@@ -181,6 +182,11 @@ section {
   //box-shadow: 0 0 0 #e0e0e0, 0 0 0px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
   //border: 1px solid $grey100;
 }
+// The comments balloon hangs below a closed segment's box; without its own
+// stacking level the segments after it paint over it and swallow its clicks.
+section.comments-open {
+  z-index: 3;
+}
 
 strong:first-child {
   margin-right: 0px !important;
@@ -201,6 +207,21 @@ section.editor .sid {
   color: black;
   left: -5%;
 }
+
+.editor.splitStart .sid {
+  background-position: 49% 43px;
+}
+.splitStart .sid {
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAL7CAYAAAA1aE+lAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyRpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoTWFjaW50b3NoKSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo1MTMxRTA1RUNFMDcxMUU0OUZGMkZFRTQzNTk2RTVCQiIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDo1MTMxRTA1RkNFMDcxMUU0OUZGMkZFRTQzNTk2RTVCQiI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkVBQkI3RDdGQ0Q5MzExRTQ5RkYyRkVFNDM1OTZFNUJCIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOkVBQkI3RDgwQ0Q5MzExRTQ5RkYyRkVFNDM1OTZFNUJCIi8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+GCDXvQAAAMFJREFUeNrs2zsOAiEQAFAxtl7A0srWziN5ATgEl/MUWlhYaGMsxMVIshpiYSzfJHzylhlge0KMsUw+Yla7nHNokFIq00knujhrKW9aSnm2YcNzm4/T519rQgghhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghhBBCCOG/sPTw3sNbDy89PPVwlVLa9I60rV2IMR6H8TC05evDtb7X3uec123pUGJX08NHiTAd36TdbFyzxSLU592//7qHAAMA0cc1fsOpET0AAAAASUVORK5CYII=) 48.5% 23px no-repeat;
+}
+
+.splitInner .sid {
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAL7CAYAAAA1aE+lAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyRpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoTWFjaW50b3NoKSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo1MTMxRTA1RUNFMDcxMUU0OUZGMkZFRTQzNTk2RTVCQiIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDo1MTMxRTA1RkNFMDcxMUU0OUZGMkZFRTQzNTk2RTVCQiI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkVBQkI3RDdGQ0Q5MzExRTQ5RkYyRkVFNDM1OTZFNUJCIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOkVBQkI3RDgwQ0Q5MzExRTQ5RkYyRkVFNDM1OTZFNUJCIi8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+GCDXvQAAAMFJREFUeNrs2zsOAiEQAFAxtl7A0srWziN5ATgEl/MUWlhYaGMsxMVIshpiYSzfJHzylhlge0KMsUw+Yla7nHNokFIq00knujhrKW9aSnm2YcNzm4/T519rQgghhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghhBBCCOG/sPTw3sNbDy89PPVwlVLa9I60rV2IMR6H8TC05evDtb7X3uec123pUGJX08NHiTAd36TdbFyzxSLU592//7qHAAMA0cc1fsOpET0AAAAASUVORK5CYII=) 48.5% 16px no-repeat;
+}
+.splitEnd .sid {
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAL7CAYAAAA1aE+lAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyRpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoTWFjaW50b3NoKSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo1MTMxRTA1RUNFMDcxMUU0OUZGMkZFRTQzNTk2RTVCQiIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDo1MTMxRTA1RkNFMDcxMUU0OUZGMkZFRTQzNTk2RTVCQiI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkVBQkI3RDdGQ0Q5MzExRTQ5RkYyRkVFNDM1OTZFNUJCIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOkVBQkI3RDgwQ0Q5MzExRTQ5RkYyRkVFNDM1OTZFNUJCIi8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+GCDXvQAAAMFJREFUeNrs2zsOAiEQAFAxtl7A0srWziN5ATgEl/MUWlhYaGMsxMVIshpiYSzfJHzylhlge0KMsUw+Yla7nHNokFIq00knujhrKW9aSnm2YcNzm4/T519rQgghhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghhBBCCOG/sPTw3sNbDy89PPVwlVLa9I60rV2IMR6H8TC05evDtb7X3uec123pUGJX08NHiTAd36TdbFyzxSLU592//7qHAAMA0cc1fsOpET0AAAAASUVORK5CYII=) 49% bottom no-repeat;
+}
+
 .slide-right .sid {
   left: -6%;
 }
@@ -359,15 +380,15 @@ body.cattool .pointer-first-segment {
     background-color: colors.$red400;
     color: colors.$white;
     display: flex;
-    padding: 3px;
+    padding: 4px;
     justify-content: center;
     align-items: center;
     gap: 6px;
     align-self: stretch;
     cursor: pointer;
     border-radius: variables.$border-radius-default;
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 24px;
     margin-left: 8px;
   }
   .badge-icon {

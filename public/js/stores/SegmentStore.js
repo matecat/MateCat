@@ -338,22 +338,34 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   setDisabledMetadata(sid, disabled) {
     const index = this.getSegmentIndex(sid)
     if (index === -1) return
-    const metaValue = disabled ? '1' : '0'
     const metadata = this._segments.getIn([index, 'metadata']) || fromJS([])
     const metaIndex = metadata.findIndex(
       (entry) => entry.get('meta_key') === 'translation_disabled',
     )
+
+    // Mirror the server shape: a disabled segment carries the entry with a boolean
+    // meta_value, an enabled one has no entry at all. Keeping the entry with a falsy
+    // value would not work, every consumer tests meta_value for truthiness.
+    if (!disabled) {
+      if (metaIndex === -1) return
+      this._segments = this._segments.setIn(
+        [index, 'metadata'],
+        metadata.delete(metaIndex),
+      )
+      return
+    }
+
     this._segments =
       metaIndex === -1
         ? this._segments.setIn(
             [index, 'metadata'],
             metadata.push(
-              fromJS({meta_key: 'translation_disabled', meta_value: metaValue}),
+              fromJS({meta_key: 'translation_disabled', meta_value: true}),
             ),
           )
         : this._segments.setIn(
             [index, 'metadata', metaIndex, 'meta_value'],
-            metaValue,
+            true,
           )
   },
 
@@ -524,8 +536,8 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     if (
       index > -1 &&
       this._segments.get(index).get('readonly') == 'false' && //not readonly
-      (!this._segments.get(index).get('ice_locked') || //not ice_locked
-        (this._segments.get(index).get('ice_locked') &&
+      (!this._segments.get(index).get('locked') || //not locked
+        (this._segments.get(index).get('locked') &&
           this._segments.get(index).get('unlocked'))) //unlocked
     ) {
       this._segments = this._segments.setIn([index, 'inBulk'], true)
@@ -541,7 +553,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     this.segmentsInBulk = segmentsArray
     this._segments = this._segments.map((segment) => {
       if (segmentsArray.indexOf(segment.get('sid')) > -1) {
-        if (segment.get('ice_locked') && !segment.get('unlocked')) {
+        if (segment.get('locked') && !segment.get('unlocked')) {
           let index = segmentsArray.indexOf(segment.get('sid'))
           this.segmentsInBulk.splice(index, 1) // if is a locked segment remove it from bulk
         } else {
@@ -1094,7 +1106,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
                 segment.get('autopropagated_from') != 0)) &&
             (alsoMutedSegment ||
               (!alsoMutedSegment && !segment.get('muted'))) &&
-            (lockedSegments || (!lockedSegments && !segment.get('ice_locked')))
+            (lockedSegments || (!lockedSegments && !segment.get('locked')))
           ) {
             result = segment.toJS()
             return false
@@ -1117,7 +1129,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             ((status && segmentStatus === status) || !status) &&
             (alsoMutedSegment ||
               (!alsoMutedSegment && !segment.get('muted'))) &&
-            (lockedSegments || (!lockedSegments && !segment.get('ice_locked')))
+            (lockedSegments || (!lockedSegments && !segment.get('locked')))
           ) {
             result = segment.toJS()
             return false

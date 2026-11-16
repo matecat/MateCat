@@ -1,6 +1,7 @@
 {
   "xliff12": {
     "states": [
+      "no-state",
       "final",
       "needs-adaptation",
       "needs-l10n",
@@ -43,7 +44,7 @@
     "editor": ["draft", "translated", "approved", "approved2"]
   },
   "xliff20": {
-    "states": ["initial", "translated", "reviewed", "final"],
+    "states": ["no-state", "initial", "translated", "reviewed", "final"],
     "analysis": ["new", "pre-translated"],
     "match_category": [
       {"id": "new", "name": "New"},

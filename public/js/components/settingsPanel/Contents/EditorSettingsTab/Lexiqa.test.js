@@ -10,14 +10,16 @@ jest.mock('../../../../stores/ApplicationStore', () => ({
   getLanguageNameFromLocale: jest.fn((code) => code),
 }))
 
+const mockAcceptedLanguages = ['en-US', 'it-IT']
+
 jest.mock('../../../../utils/lxq.main', () => ({
   enable: jest.fn(),
   disable: jest.fn(),
+  getSupportedLocales: jest.fn(() => mockAcceptedLanguages),
 }))
 
 const sourceLang = {code: 'en-US', name: 'English'}
 const targetLangs = [{code: 'it-IT', name: 'Italian'}]
-const acceptedLanguages = ['en-US', 'it-IT']
 
 const renderComponent = ({
   metadata = {},
@@ -28,7 +30,6 @@ const renderComponent = ({
 } = {}) => {
   global.config = {
     ...global.config,
-    lexiqa_languages: acceptedLanguages,
     lxq_license: license,
   }
   return render(
@@ -49,7 +50,7 @@ test('renders unchecked by default for a supported language pair', () => {
   renderComponent()
   const toggle = screen.getByTestId('switch-lexiqa')
   expect(toggle).not.toBeChecked()
-  expect(toggle).not.toBeDisabled()
+  expect(toggle).toBeEnabled()
 })
 
 test('renders checked when metadata flag is set', () => {

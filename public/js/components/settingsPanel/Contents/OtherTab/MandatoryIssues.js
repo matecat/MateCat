@@ -1,6 +1,5 @@
 import React, {useContext} from 'react'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
-import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
 import {Select} from '../../../common/Select'
 
 const OPTIONS = [
@@ -26,8 +25,6 @@ export const MandatoryIssues = () => {
   const {currentProjectTemplate, modifyingCurrentTemplate} =
     useContext(SettingsPanelContext)
 
-  const {SELECT_HEIGHT} = useContext(CreateProjectContext)
-
   const mandatoryIssue = currentProjectTemplate.mandatoryIssues ?? []
   const setMandatoryIssue = (value) =>
     modifyingCurrentTemplate((prevTemplate) => ({
@@ -50,7 +47,6 @@ export const MandatoryIssues = () => {
           name="mandatory-issue"
           isPortalDropdown={true}
           dropdownClassName="select-dropdown__wrapper-portal"
-          maxHeightDroplist={SELECT_HEIGHT}
           options={OPTIONS}
           activeOption={OPTIONS.find(
             ({id}) =>

@@ -1,5 +1,5 @@
 import React from 'react'
-import {render, screen} from '@testing-library/react'
+import {render, screen, within} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Immutable from 'immutable'
 
@@ -49,7 +49,7 @@ const buildSegment = (overrides = {}) => {
     time_to_edit_translation: null,
     time_to_edit_revise: null,
     time_to_edit_revise_2: null,
-    ice_locked: '0',
+    locked: '0',
     ice_modified: false,
     is_pre_translated: false,
     issues: [],
@@ -100,8 +100,9 @@ describe('SegmentQR', () => {
   })
 
   test('renders production stats', () => {
-    renderComponent()
-    expect(screen.getByText('Machine translation')).toBeInTheDocument()
+    const {container} = renderComponent()
+    const matchType = container.querySelector('.match-type')
+    expect(within(matchType).getByText('MT')).toBeInTheDocument()
     expect(screen.getByText("12''")).toBeInTheDocument()
     expect(screen.getByText('35%')).toBeInTheDocument()
   })
@@ -294,6 +295,16 @@ describe('SegmentQR', () => {
     expect(window.open).toHaveBeenCalledWith(
       'https://example.com/revise1/job#100',
     )
+  })
+
+  test('shows Pre-Translated for a locked pre-translated segment', () => {
+    renderComponent({
+      last_translation: 'Tradotto',
+      match_type: 'ICE',
+      locked: '1',
+      is_pre_translated: true,
+    })
+    expect(screen.getByText('Pre-Translated')).toBeInTheDocument()
   })
 
   test('renders APPROVED2 status as approved', () => {

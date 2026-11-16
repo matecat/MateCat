@@ -17,7 +17,7 @@ beforeEach(() => {
 
 test('renders nothing when there is no metadata to show', () => {
   const {container} = render(<JobMetadata metadata={undefined} />)
-  expect(container.firstChild).toBeNull()
+  expect(container).toBeEmptyDOMElement()
 })
 
 test('shows the button when metadata contains project info and opens the modal on click', () => {
@@ -48,12 +48,12 @@ test('shows the button when metadata contains project info and opens the modal o
 
 test('does not show the button when metadata has no project info', () => {
   const {container} = render(<JobMetadata metadata={{project: {}}} />)
-  expect(container.firstChild).toBeNull()
+  expect(container).toBeEmptyDOMElement()
 })
 
 test('shows the button when the store reports files with instructions', () => {
   render(<JobMetadata metadata={undefined} />)
-  expect(screen.queryByRole('button')).toBeNull()
+  expect(screen.queryByRole('button')).not.toBeInTheDocument()
 
   const files = [
     {metadata: {instructions: 'Please read this'}},
@@ -79,5 +79,5 @@ test('ignores files without instructions or references from the store', () => {
   act(() => {
     CatToolStore.emit(CattolConstants.STORE_FILES_INFO, files)
   })
-  expect(screen.queryByRole('button')).toBeNull()
+  expect(screen.queryByRole('button')).not.toBeInTheDocument()
 })

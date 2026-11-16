@@ -800,6 +800,28 @@ describe('translationMatches', () => {
       )
     })
 
+    // MATECAT-5NR: a prefetched segment whose original sid is not loaded
+    test('fetches contributions without context when the original segment is not in the store', async () => {
+      global.config.active_engine = {engine_type: 'DeepL'}
+      SegmentUtils.getSegmentContext.mockImplementation(() => {
+        throw new Error('Segment not found.')
+      })
+
+      await TranslationMatches.getContribution({
+        sid: 1,
+        crossLanguageSettings: null,
+        force: false,
+      })
+
+      expect(getContributions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          idSegment: 101,
+          contextListBefore: [],
+          contextListAfter: [],
+        }),
+      )
+    })
+
     test('skips the Lara flow on fast fetch even when Lara prosa is allowed', async () => {
       mockJobMetadata({lara_style_guideline_id: 'style-1'})
 

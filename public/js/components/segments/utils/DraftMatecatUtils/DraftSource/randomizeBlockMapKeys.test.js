@@ -1,6 +1,6 @@
-import {ContentBlock, genKey} from 'draft-js'
+import {ContentBlock} from 'draft-js'
 import {BlockMapBuilder} from 'draft-js'
-import {List, Map} from 'immutable'
+import {List} from 'immutable'
 import randomizeBlockMapKeys from './randomizeBlockMapKeys'
 import ContentBlockNode from './src/model/immutable/ContentBlockNode'
 

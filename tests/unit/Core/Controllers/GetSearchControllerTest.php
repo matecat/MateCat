@@ -893,6 +893,72 @@ class GetSearchControllerTest extends AbstractTest
     }
 
     #[Test]
+    public function updateSegments_skips_a_locked_segment_when_locked_are_excluded(): void
+    {
+        $queryParams = new SearchQueryParamsStruct([
+            'job' => self::TEST_JOB_ID,
+            'password' => self::TEST_JOB_PASSWORD,
+            'target' => 'mondo',
+            'replacement' => 'universo',
+            'isMatchCaseRequested' => false,
+            'isExactMatchRequested' => false,
+            'includeLocked' => false,
+        ]);
+
+        // Locked but not an ICE: the lock alone takes the segment out of scope.
+        $search_results = [
+            new SegmentTranslationStruct([
+                'id_segment' => self::TEST_SEGMENT_1,
+                'id_job' => self::TEST_JOB_ID,
+                'translation' => 'Ciao mondo',
+                'status' => 'TRANSLATED',
+                'match_type' => '100%',
+                'locked' => 1,
+            ]),
+        ];
+
+        $committed = $this->invokePrivate('updateSegments', [$search_results, self::TEST_JOB_ID, $queryParams]);
+
+        $this->assertSame([], $committed);
+        $untouched = (new \Model\Translations\SegmentTranslationDao(obtainTestDatabase()))->findBySegmentAndJob(self::TEST_SEGMENT_1, self::TEST_JOB_ID);
+        $this->assertNotNull($untouched);
+        $this->assertSame('Ciao mondo', $untouched->translation);
+    }
+
+    #[Test]
+    public function updateSegments_replaces_an_unlocked_ice_when_locked_are_excluded(): void
+    {
+        $queryParams = new SearchQueryParamsStruct([
+            'job' => self::TEST_JOB_ID,
+            'password' => self::TEST_JOB_PASSWORD,
+            'target' => 'mondo',
+            'replacement' => 'universo',
+            'isMatchCaseRequested' => false,
+            'isExactMatchRequested' => false,
+            'includeLocked' => false,
+        ]);
+
+        // An ICE nobody locked, such as an XLIFF pre-translation, is in scope.
+        $search_results = [
+            new SegmentTranslationStruct([
+                'id_segment' => self::TEST_SEGMENT_1,
+                'id_job' => self::TEST_JOB_ID,
+                'translation' => 'Ciao mondo',
+                'status' => 'TRANSLATED',
+                'match_type' => 'ICE',
+                'locked' => 0,
+            ]),
+        ];
+
+        $committed = $this->invokePrivate('updateSegments', [$search_results, self::TEST_JOB_ID, $queryParams]);
+
+        $this->assertCount(1, $committed);
+        $updated = (new \Model\Translations\SegmentTranslationDao(obtainTestDatabase()))->findBySegmentAndJob(self::TEST_SEGMENT_1, self::TEST_JOB_ID);
+        $this->assertNotNull($updated);
+        $this->assertStringContainsString('universo', $updated->translation);
+    }
+
+    #[Test]
     public function updateSegments_triggers_propagation_when_translation_changes(): void
     {
         $queryParams = new SearchQueryParamsStruct([
@@ -1424,6 +1490,126 @@ class GetSearchControllerTest extends AbstractTest
 
             $this->assertSame([self::TEST_SEGMENT_1, self::TEST_SEGMENT_2], $searched);
             $this->assertSame($searched, $committed, 'commit order follows the search result order');
+        });
+    }
+
+    /**
+     * Locks segments 1 and 3 and leaves segment 2 unlocked. Segment 1 is a locked 100% match and segment 2
+     * an unlocked ICE, so the result proves `locked` alone decides, whatever the match type.
+     */
+    private function seedLockedSegments(): void
+    {
+        $conn = obtainTestDatabase()->getConnection();
+        $conn->exec("UPDATE segment_translations SET match_type = '100%', locked = 1 WHERE id_job = " . self::TEST_JOB_ID . " AND id_segment = " . self::TEST_SEGMENT_1);
+        $conn->exec("UPDATE segment_translations SET match_type = 'ICE', locked = 0 WHERE id_job = " . self::TEST_JOB_ID . " AND id_segment = " . self::TEST_SEGMENT_2);
+        $conn->exec("UPDATE segment_translations SET match_type = 'ICE', locked = 1 WHERE id_job = " . self::TEST_JOB_ID . " AND id_segment = " . self::TEST_SEGMENT_3);
+    }
+
+    #[Test]
+    public function replaceAll_returns_the_locked_segments_it_replaced(): void
+    {
+        // The UI unlocks segments client-side only, so it needs to know which locked ones a
+        // replace-all rewrote. Segment 1 is a locked 100% hit: listed. Segment 2 is an unlocked ICE
+        // hit: replaced, not listed. Segment 3 is a locked segment with no "o": not a hit.
+        $this->seedLockedSegments();
+
+        $this->withFilesJob(function (): void {
+            $this->setRequestParams([
+                'id_job' => (string)self::TEST_JOB_ID,
+                'password' => self::TEST_JOB_PASSWORD,
+                'source' => '',
+                'target' => 'o',
+                'replace' => '0',
+                'token' => 'tok',
+                'status' => 'all',
+                'matchcase' => '0',
+                'exactmatch' => '0',
+                'inCurrentChunkOnly' => '0',
+                'includeLocked' => '1',
+            ]);
+
+            $this->responseMock->expects($this->once())
+                ->method('json')
+                ->with($this->callback(function (array $data): bool {
+                    $this->assertSame([self::TEST_SEGMENT_1], $data['replaced_locked_segments']);
+
+                    return true;
+                }));
+
+            $this->controller->replaceAll();
+
+            $after = $this->translationsBySegment();
+            $this->assertSame('Cia0 m0nd0', $after[self::TEST_SEGMENT_1]);
+            $this->assertSame('Bu0ngi0rn0 amic0', $after[self::TEST_SEGMENT_2]);
+        });
+    }
+
+    #[Test]
+    public function replaceAll_does_not_list_a_locked_hit_whose_text_did_not_change(): void
+    {
+        // Replacing "o" with "o" matches segment 1 but writes nothing, so nothing is listed as replaced.
+        $this->seedLockedSegments();
+
+        $this->withFilesJob(function (): void {
+            $this->setRequestParams([
+                'id_job' => (string)self::TEST_JOB_ID,
+                'password' => self::TEST_JOB_PASSWORD,
+                'source' => '',
+                'target' => 'o',
+                'replace' => 'o',
+                'token' => 'tok',
+                'status' => 'all',
+                'matchcase' => '0',
+                'exactmatch' => '0',
+                'inCurrentChunkOnly' => '0',
+                'includeLocked' => '1',
+            ]);
+
+            $this->responseMock->expects($this->once())
+                ->method('json')
+                ->with($this->callback(function (array $data): bool {
+                    $this->assertContains((string)self::TEST_SEGMENT_1, array_map('strval', $data['segments']));
+                    $this->assertSame([], $data['replaced_locked_segments']);
+
+                    return true;
+                }));
+
+            $this->controller->replaceAll();
+        });
+    }
+
+    #[Test]
+    public function replaceAll_lists_no_locked_segments_when_they_are_excluded(): void
+    {
+        $this->seedLockedSegments();
+
+        $this->withFilesJob(function (): void {
+            $this->setRequestParams([
+                'id_job' => (string)self::TEST_JOB_ID,
+                'password' => self::TEST_JOB_PASSWORD,
+                'source' => '',
+                'target' => 'o',
+                'replace' => '0',
+                'token' => 'tok',
+                'status' => 'all',
+                'matchcase' => '0',
+                'exactmatch' => '0',
+                'inCurrentChunkOnly' => '0',
+                'includeLocked' => '0',
+            ]);
+
+            $this->responseMock->expects($this->once())
+                ->method('json')
+                ->with($this->callback(function (array $data): bool {
+                    $this->assertSame([], $data['replaced_locked_segments']);
+
+                    return true;
+                }));
+
+            $this->controller->replaceAll();
+
+            $after = $this->translationsBySegment();
+            $this->assertSame('Ciao mondo', $after[self::TEST_SEGMENT_1], 'locked excluded => untouched');
         });
     }
 

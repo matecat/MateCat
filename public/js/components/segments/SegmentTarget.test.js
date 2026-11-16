@@ -7,10 +7,6 @@ import {SegmentContext} from './SegmentContext'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentActions from '../../actions/SegmentActions'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
-import {
-  removeTagsFromText,
-  textHasTags,
-} from './utils/DraftMatecatUtils/tagUtils'
 import OfflineUtils from '../../utils/offlineUtils'
 
 jest.mock('./Editarea', () => (props) => (

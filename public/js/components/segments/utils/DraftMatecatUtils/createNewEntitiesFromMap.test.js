@@ -64,8 +64,8 @@ describe('createNewEntitiesFromMap - pc numbering', () => {
 
   test('numbers a pc pair with a shared index and open/close roles', () => {
     const ph = phOf(pcOpen('mtc_1') + pcClose('mtc_2'))
-    expect(ph[0].data).toMatchObject({index: 0, pcRole: 'open'})
-    expect(ph[1].data).toMatchObject({index: 0, pcRole: 'close'})
+    expect(ph[0].data).toMatchObject({index: 0, tagRole: 'open'})
+    expect(ph[1].data).toMatchObject({index: 0, tagRole: 'close'})
   })
 
   test('two sequential pairs get indices 0,0,1,1', () => {
@@ -77,37 +77,37 @@ describe('createNewEntitiesFromMap - pc numbering', () => {
 
   test('dataRef pair is paired by base id', () => {
     const ph = phOf(dOpen('source1_1') + dClose('source1_2'))
-    expect(ph[0].data).toMatchObject({index: 0, pcRole: 'open'})
-    expect(ph[1].data).toMatchObject({index: 0, pcRole: 'close'})
+    expect(ph[0].data).toMatchObject({index: 0, tagRole: 'open'})
+    expect(ph[1].data).toMatchObject({index: 0, tagRole: 'close'})
   })
 
-  test('semantic (x-html) ph tags get no index or pcRole', () => {
+  test('semantic (x-html) ph tags get no index or tagRole', () => {
     const ph = phOf(semantic('mtc_1') + semantic('mtc_2'))
     expect(ph[0].data.index).toBeUndefined()
-    expect(ph[0].data.pcRole).toBeUndefined()
+    expect(ph[0].data.tagRole).toBeUndefined()
   })
 
   test('only pc tags are numbered when mixed with semantic ph', () => {
     const ph = phOf(semantic('mtc_1') + pcOpen('mtc_2') + pcClose('mtc_3'))
     expect(ph[0].data.index).toBeUndefined()
-    expect(ph[1].data).toMatchObject({index: 0, pcRole: 'open'})
-    expect(ph[2].data).toMatchObject({index: 0, pcRole: 'close'})
+    expect(ph[1].data).toMatchObject({index: 0, tagRole: 'open'})
+    expect(ph[2].data).toMatchObject({index: 0, tagRole: 'close'})
   })
 
-  test('inherits index and pcRole from sourceTagMap when ids match', () => {
+  test('inherits index and tagRole from sourceTagMap when ids match', () => {
     const sourceTagMap = [
-      {data: {id: 'mtc_1', name: 'ph', index: 3, pcRole: 'open'}},
-      {data: {id: 'mtc_2', name: 'ph', index: 3, pcRole: 'close'}},
+      {data: {id: 'mtc_1', name: 'ph', index: 3, tagRole: 'open'}},
+      {data: {id: 'mtc_2', name: 'ph', index: 3, tagRole: 'close'}},
     ]
     const ph = phOf(pcOpen('mtc_1') + pcClose('mtc_2'), sourceTagMap)
-    expect(ph[0].data).toMatchObject({index: 3, pcRole: 'open'})
-    expect(ph[1].data).toMatchObject({index: 3, pcRole: 'close'})
+    expect(ph[0].data).toMatchObject({index: 3, tagRole: 'open'})
+    expect(ph[1].data).toMatchObject({index: 3, tagRole: 'close'})
   })
 
   test('fresh pc pairs continue numbering after inherited indices', () => {
     const sourceTagMap = [
-      {data: {id: 'mtc_1', name: 'ph', index: 2, pcRole: 'open'}},
-      {data: {id: 'mtc_2', name: 'ph', index: 2, pcRole: 'close'}},
+      {data: {id: 'mtc_1', name: 'ph', index: 2, tagRole: 'open'}},
+      {data: {id: 'mtc_2', name: 'ph', index: 2, tagRole: 'close'}},
     ]
     const ph = phOf(
       pcOpen('mtc_1') + pcClose('mtc_2') + pcOpen('mtc_3') + pcClose('mtc_4'),

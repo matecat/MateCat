@@ -21,6 +21,8 @@ import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {cloneDeep, isEqual} from 'lodash'
 import {v4 as uuidV4} from 'uuid'
 import IconAdd from '../../../../../img/icons/IconAdd'
+import Switch from '../../../../../img/icons/Switch'
+import {SELECT_HEIGHT} from '../../../../constants/Constants'
 
 export const LanguagesExceptions = ({breakdowns, updateExceptions}) => {
   const {analysisTemplates} = useContext(SettingsPanelContext)
@@ -180,7 +182,7 @@ export const LanguagesExceptions = ({breakdowns, updateExceptions}) => {
           setPendingExceptionsId((prevState) => [...prevState, uuidV4()])
         }
       >
-        <IconAdd size={20} />
+        <IconAdd size={22} />
         Add exception
       </Button>
     </div>
@@ -224,6 +226,7 @@ const LanguageException = ({
 
   return (
     <div
+      data-testid="analysis-tab-exceptions-row"
       className={`analysis-tab-exceptionsRow ${exception && !isExceptionSaved(exception) ? 'analysis-value-not-saved' : ''}`}
     >
       <div className="analysis-tab-languages">
@@ -233,6 +236,7 @@ const LanguageException = ({
           dropdownClassName="select-dropdown__wrapper-portal"
           showSearchBar={true}
           options={languages}
+          maxHeightDroplist={SELECT_HEIGHT}
           onSelect={(option) => {
             setSource(option)
             setModified(true)
@@ -253,13 +257,21 @@ const LanguageException = ({
           })}
         </Select>
         {/*TODO swap lingue*/}
-        <div id="swaplang" title="Swap languages" onClick={swapLanguages} />
+        <Button
+          className="button-language-swap"
+          mode={BUTTON_MODE.GHOST}
+          type={BUTTON_TYPE.ICON}
+          onClick={swapLanguages}
+        >
+          <Switch />
+        </Button>
         <Select
           name={'lang'}
           isPortalDropdown={true}
           dropdownClassName="select-dropdown__wrapper-portal"
           showSearchBar={true}
           options={languages}
+          maxHeightDroplist={SELECT_HEIGHT}
           onSelect={(option) => {
             setTarget(option)
             setModified(true)
@@ -286,15 +298,16 @@ const LanguageException = ({
           setValue(value)
           setModified(true)
         }}
+        dataTestid="analysis-tab-exception-value"
       />
       {confirmed && !modified ? (
         <div className="analysis-tab-buttons">
           <Button
-            size={BUTTON_SIZE.SMALL}
-            mode={BUTTON_MODE.GHOST}
+            size={BUTTON_SIZE.ICON_STANDARD}
+            mode={BUTTON_MODE.OUTLINE}
             onClick={removeException}
           >
-            <IconClose />
+            <IconClose size={20} />
           </Button>
         </div>
       ) : (
@@ -307,15 +320,16 @@ const LanguageException = ({
               setModified(false)
             }}
           >
-            <Checkmark size={12} />
+            <Checkmark size={18} />
             Confirm
           </Button>
           <Button
             type={BUTTON_TYPE.WARNING}
+            size={BUTTON_SIZE.ICON_STANDARD}
             className="close-button"
             onClick={removeException}
           >
-            <IconClose />
+            <IconClose size={18} />
           </Button>
         </div>
       )}

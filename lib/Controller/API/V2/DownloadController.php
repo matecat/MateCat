@@ -4,9 +4,12 @@ namespace Controller\API\V2;
 
 use Controller\Abstracts\AbstractDownloadController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\ExternalServiceException;
 use Controller\Views\TemplateDecorator\DownloadOmegaTOutputDecorator;
 use Exception;
+use Google_Client;
 use Google_Service_Drive_DriveFile;
+use InvalidArgumentException;
 use Matecat\XliffParser\Exception\NotSupportedVersionException;
 use Matecat\XliffParser\Exception\NotValidFileException;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
@@ -25,9 +28,7 @@ use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
 use Model\FilesStorage\AbstractFilesStorage;
-use Model\FilesStorage\FilesStorageFactory;
 use Model\FilesStorage\FsFilesStorage;
-use Model\FilesStorage\S3FilesStorage;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
@@ -36,6 +37,7 @@ use Model\RemoteFiles\RemoteFileDao;
 use Model\Segments\SegmentDao;
 use PDOException;
 use ReflectionException;
+use RuntimeException;
 use TypeError;
 use Utils\Logger\LoggerFactory;
 use Utils\Redis\RedisHandler;
@@ -47,8 +49,6 @@ use Utils\Tools\Utils;
 use Utils\XliffReplacer\SilentXliffReplacerCallback;
 use Utils\XliffReplacer\XliffReplacerCallback;
 use View\API\Commons\ZipContentObject;
-
-set_time_limit(180);
 
 class DownloadController extends AbstractDownloadController
 {
@@ -133,6 +133,8 @@ class DownloadController extends AbstractDownloadController
      */
     private function downloadFile(bool $forceXliff = false): void
     {
+        set_time_limit(180);
+
         $__postInput = filter_var_array($this->request->params(), [
             'filename' => [
                 'filter' => FILTER_SANITIZE_SPECIAL_CHARS,
@@ -175,8 +177,13 @@ class DownloadController extends AbstractDownloadController
         }
 
         $this->featureSet = new FeatureSet($this->getDatabase());
-        $this->processDownload();
-        $this->finalize($forceXliff);
+
+        try {
+            $this->processDownload();
+            $this->finalize($forceXliff);
+        } finally {
+            $this->deleteWorkDir();
+        }
     }
 
     /**
@@ -215,7 +222,7 @@ class DownloadController extends AbstractDownloadController
         $this->featureSet->loadForProject($this->project);
 
         //get storage object
-        $fs = FilesStorageFactory::create();
+        $fs = $this->getFilesStorage();
         $files_job = $fs->getFilesForJob($this->getDatabase(), $this->id_job);
 
         $output_content = [];
@@ -243,14 +250,16 @@ class DownloadController extends AbstractDownloadController
                 $xliffFilePath = $file['xliffFilePath'];
 
                 $_fileName = explode(DIRECTORY_SEPARATOR, $xliffFilePath);
-                $outputPath = AppConfig::$TMP_DOWNLOAD . DIRECTORY_SEPARATOR . $this->id_job . DIRECTORY_SEPARATOR . $fileID . DIRECTORY_SEPARATOR . uniqid('', true) . "_.out." . array_pop(
-                        $_fileName
-                    );
+                $outputPath = $this->getWorkDir() .
+                    DIRECTORY_SEPARATOR .
+                    $fileID .
+                    DIRECTORY_SEPARATOR .
+                    uniqid('', true) . "_.out." . array_pop($_fileName);
 
                 //make dir if it doesn't exist
                 if (!file_exists(dirname($outputPath))) {
                     $this->logger->debug('Create Directory ' . escapeshellarg(dirname($outputPath)));
-                    mkdir(dirname($outputPath), 0775, true);
+                    mkdir(dirname($outputPath), 0700, true);
                 }
 
                 /** @var array<int|string, array<string, mixed>> $data */
@@ -270,13 +279,11 @@ class DownloadController extends AbstractDownloadController
 
                 // if FileStorage is on S3, download the file on a temp dir
                 if (AbstractFilesStorage::isOnS3()) {
-                    $s3Client = S3FilesStorage::getStaticS3Client();
-                    $params['bucket'] = AppConfig::$AWS_STORAGE_BASE_BUCKET;
-                    $params['key'] = $xliffFilePath;
                     $basename = $this->pathinfoString($xliffFilePath, PATHINFO_BASENAME);
-                    $params['save_as'] = "/tmp/" . $basename;
-                    $s3Client->downloadItem($params);
-                    $xliffFilePath = $params['save_as'];
+                    // The prefix keeps a name that starts with a dot out of the dotfiles deleteDir() skips.
+                    $localXliff = dirname($outputPath) . DIRECTORY_SEPARATOR . 'source_' . $basename;
+                    $this->downloadFromS3($xliffFilePath, $localXliff);
+                    $xliffFilePath = $localXliff;
                 }
 
                 $fileType = (new XliffProprietaryDetect())->getInfo($xliffFilePath);
@@ -306,11 +313,10 @@ class DownloadController extends AbstractDownloadController
                     unset($data);
                 }
 
-                $fileContent = file_get_contents($outputPath);
-                if ($fileContent === false) {
-                    throw new \RuntimeException("Failed to read output file: $outputPath");
-                }
-                $output_content[$fileID]['document_content'] = $fileContent;
+                // The xliff stays on disk: Filters and the zip read it from there, so a large file
+                // is never held in memory.
+                $output_content[$fileID]['document_content'] = null;
+                $output_content[$fileID]['input_filename'] = $outputPath;
                 $output_content[$fileID]['output_filename'] = $current_filename;
 
                 if ($this->forceXliff) {
@@ -327,10 +333,9 @@ class DownloadController extends AbstractDownloadController
                         // We quickly fixed the behavior from the user standpoint
                         // using the following line of code, that changes the XLIFF's
                         // extension just a moment before it is downloaded by the user.
-                        $output_content[$fileID]['output_filename'] = preg_replace("|\\.sdlxliff$|i", ".xlf", $output_content[$fileID]['output_filename'])
-                            ?? $output_content[$fileID]['output_filename'];
-                        $output_content[$fileID]['output_filename'] = preg_replace("#(\\.xlf)+#i", ".xlf", $output_content[$fileID]['output_filename'])
-                            ?? $output_content[$fileID]['output_filename'];
+                        $name = $output_content[$fileID]['output_filename'];
+                        $name = preg_replace("|\\.sdlxliff$|i", ".xlf", $name) ?? $name;
+                        $output_content[$fileID]['output_filename'] = preg_replace("#(\\.xlf)+#i", ".xlf", $name) ?? $name;
                     }
                 }
 
@@ -338,18 +343,6 @@ class DownloadController extends AbstractDownloadController
                  * Conversion Enforce
                  */
                 $convertBackToOriginal = true;
-
-                //if it is a not converted file (sdlxliff), we have originalFile equals to xliffFile (it has just been copied)
-                if (AbstractFilesStorage::isOnS3()) {
-                    $originalFilePath = $file['originalFilePath'];
-                    $s3Client = S3FilesStorage::getStaticS3Client();
-                    $file['original_file'] = $s3Client->openItem([
-                        'bucket' => S3FilesStorage::getFilesStorageBucket(),
-                        'key' => $originalFilePath
-                    ]);
-                } else {
-                    $file['original_file'] = file_get_contents($file['originalFilePath']);
-                }
 
                 // When the 'proprietary' flag is set to false, the xliff
                 // is not passed to any converter, because is handled
@@ -372,7 +365,7 @@ class DownloadController extends AbstractDownloadController
                 }
             }
 
-            $filters = new Filters();
+            $filters = $this->createFilters();
             $convertResult = $filters->xliffToTarget($files_to_be_converted);
 
             // check for errors and log them on fatal_errors.txt
@@ -384,37 +377,21 @@ class DownloadController extends AbstractDownloadController
 
             foreach (array_keys($files_to_be_converted) as $pos => $fileID) {
                 $filters->logConversionToTarget($convertResult[$fileID], $files_to_be_converted[$fileID]['out_xliff_name'], $jobData, $chunk[$pos]);
-
-                if (empty($convertResult[$fileID] ['document_content'])) {
-                    continue;
-                }
-
-                $output_content[$fileID]['document_content'] = $this->ifGlobalSightXliffRemoveTargetMarks(
-                    $convertResult[$fileID] ['document_content'],
-                    $files_to_be_converted[$fileID]['output_filename'] ?? ''
-                );
-
-                //in the case of .strings, they are required to be in UTF-16
-                //get extension to perform file detection
-                $extension = $this->pathinfoString($output_content[$fileID]['output_filename'] ?? '', PATHINFO_EXTENSION);
-                if (strtoupper($extension) == 'STRINGS') {
-                    //use this function to convert stuff
-                    $encodingConvertedFile = CatUtils::convertEncoding('UTF-16', $output_content[$fileID]['document_content']);
-
-                    $converted = $encodingConvertedFile[1];
-                    if ($converted === false) {
-                        throw new \RuntimeException("Failed to convert encoding for .strings file");
-                    }
-
-                    //strip previously added BOM and store new content
-                    $output_content[$fileID]['document_content'] = Utils::stripFileBOM($converted, 16);
-
-                    //trash temporary data
-                    unset($encodingConvertedFile);
-                }
             }
 
-            unset($convertResult);
+            // a failed file would ship the intermediate XLIFF in place of the document
+            $this->abortOnFailedConversions($convertResult, $files_to_be_converted);
+
+            foreach (array_keys($files_to_be_converted) as $fileID) {
+                $output_content[$fileID]['input_filename'] = $this->storeConvertedDocument(
+                    $convertResult[$fileID]['document_content'],
+                    $files_to_be_converted[$fileID]['output_filename'] ?? '',
+                    $files_to_be_converted[$fileID]['out_xliff_name']
+                );
+
+                // Free the converted document before the next file of the group is handled.
+                unset($convertResult[$fileID]);
+            }
         }
 
         foreach ($output_content as $idFile => $fileInformation) {
@@ -463,7 +440,11 @@ class DownloadController extends AbstractDownloadController
 
                         $nFinfo = AbstractFilesStorage::pathinfo_fix($_fName);
                         $this->setFilename((($nFinfo['extension'] ?? '') === 'zip') ? $_fName : $_fName . ".zip");
-                        $this->outputContent = self::composeZip($output_content); //add zip archive content here;
+
+                        $this->setOutputContent(new ZipContentObject([
+                            'output_filename' => $this->_filename,
+                            'input_filename' => self::composeZip($output_content, $this->getWorkDir() . DIRECTORY_SEPARATOR . 'download.zip'),
+                        ]));
 
                     } else {
                         // always an array with 1 element, pop it, Ex: array( array() )
@@ -498,12 +479,6 @@ class DownloadController extends AbstractDownloadController
                 );
 
                 throw $e; // avoid sent Headers and empty file content with finalize method
-            } finally {
-                try {
-                    Utils::deleteDir(AppConfig::$TMP_DOWNLOAD . '/' . $this->id_job . '/');
-                } catch (Exception) {
-                    LoggerFactory::getLogger('conversion')->debug('Failed to delete temporary directory ' . AppConfig::$TMP_DOWNLOAD . '/' . $this->id_job . '/');
-                }
             }
         }
 
@@ -580,10 +555,10 @@ class DownloadController extends AbstractDownloadController
 
             foreach ($trans_units as $pos => $trans_unit) {
                 // The First element in the XLIFF split is the header, not the first file
-                 if ($pos > 0) {
-                     //remove seg-source tags
+                if ($pos > 0) {
+                    //remove seg-source tags
                     $trans_unit = preg_replace('|<seg-source.*?</seg-source>|si', '', $trans_unit) ?? $trans_unit;
-                     //take the target content
+                    //take the target content
                     $trans_unit = preg_replace('#<mrk[^>]+>|</mrk>#i', '', $trans_unit) ?? $trans_unit;
 
                     $trans_units[$pos] = $trans_unit;
@@ -599,6 +574,41 @@ class DownloadController extends AbstractDownloadController
         }
 
         return $documentContent;
+    }
+
+    /**
+     * Writes a document converted back by Filters next to its xliff and returns the new path, so
+     * the converted documents of a job are not all kept in memory until the zip is built. Each file
+     * has its own folder, so a short fixed name is enough: a suffix on the xliff name could exceed
+     * the 255 bytes a file name can have.
+     * Example: `<work dir>/7/x_.out.a.docx.sdlxliff` gives `<work dir>/7/converted`.
+     *
+     * A `.strings` file is written as UTF-16 with no BOM, as iOS expects it.
+     *
+     * @throws Exception
+     * @throws NotSupportedVersionException
+     * @throws NotValidFileException
+     */
+    private function storeConvertedDocument(string $documentContent, string $outputFilename, string $xliffPath): string
+    {
+        $documentContent = $this->ifGlobalSightXliffRemoveTargetMarks($documentContent, $outputFilename);
+
+        if (strtoupper($this->pathinfoString($outputFilename, PATHINFO_EXTENSION)) === 'STRINGS') {
+            $converted = CatUtils::convertEncoding('UTF-16', $documentContent)[1];
+            if ($converted === false) {
+                throw new RuntimeException("Failed to convert encoding for .strings file");
+            }
+
+            //strip the BOM added by the conversion
+            $documentContent = Utils::stripFileBOM($converted, 16);
+        }
+
+        $path = dirname($xliffPath) . DIRECTORY_SEPARATOR . 'converted';
+        if (file_put_contents($path, $documentContent) === false) {
+            throw new RuntimeException("Failed to write the converted file: $path");
+        }
+
+        return $path;
     }
 
     /**
@@ -685,8 +695,6 @@ class DownloadController extends AbstractDownloadController
      *
      * @throws Exception
      * @throws TypeError
-     *
-     * @codeCoverageIgnore integration-only: builds a live Google OAuth client and refreshes GDrive tokens.
      */
     private function startRemoteFileService(array $output_content): void
     {
@@ -712,7 +720,7 @@ class DownloadController extends AbstractDownloadController
         $client = (new GoogleProvider())->getClient(AppConfig::$HTTPHOST . "/gdrive/oauth/response");
 
         if ($verifier->validOrRefreshed($client)) {
-            $this->remoteFileService = new RemoteFileService($raw_token ?? throw new Exception('Token not available'), $client);
+            $this->remoteFileService = $this->createRemoteFileService($raw_token ?? throw new Exception('Token not available'), $client);
         } else {
             throw new Exception('Unable to refresh token for service');
         }
@@ -720,8 +728,6 @@ class DownloadController extends AbstractDownloadController
 
     /**
      * @throws Exception
-     *
-     * @codeCoverageIgnore integration-only: streams JSON built from live GDrive getFileLink() calls.
      */
     private function outputResultForOriginalFiles(): void
     {
@@ -767,8 +773,6 @@ class DownloadController extends AbstractDownloadController
      *
      * @throws Exception
      * @throws TypeError
-     *
-     * @codeCoverageIgnore integration-only: pushes converted content to GDrive via RemoteFileService::updateFile().
      */
     private function updateRemoteFiles(array $output_content): void
     {
@@ -779,6 +783,41 @@ class DownloadController extends AbstractDownloadController
             }
             $this->remoteFiles[$remoteFile->id] = $this->remoteFileService->updateFile($remoteFile, $output_file->getContent() ?? '');
         }
+    }
+
+    /**
+     * Fails the whole download when Filters could not convert a file back to its original format,
+     * instead of sending the intermediate XLIFF under the target filename. The filenames go to the
+     * log only: the client renders the token message as HTML.
+     *
+     * @param array<int|string, array<string, mixed>> $convertResult        Filters responses, keyed by file id
+     * @param array<int|string, array<string, mixed>> $filesToBeConverted   the files sent to Filters, keyed by file id
+     *
+     * @throws ExternalServiceException
+     * @throws Exception
+     */
+    private function abortOnFailedConversions(array $convertResult, array $filesToBeConverted): void
+    {
+        $failedConversions = [];
+        foreach ($filesToBeConverted as $fileID => $file) {
+            if (empty($convertResult[$fileID]['document_content'])) {
+                $failedConversions[] = $file['output_filename'] ?? (string)$fileID;
+            }
+        }
+
+        if (empty($failedConversions)) {
+            return;
+        }
+
+        LoggerFactory::getLogger('conversion')->debug(
+            "Conversion to target failed for job {$this->id_job}: " . implode(', ', $failedConversions)
+        );
+
+        $message = "Download failed: a file could not be converted back to its original format. Please try again in 5 minutes. If it still fails, contact " . AppConfig::$SUPPORT_MAIL;
+
+        $this->unlockToken(["code" => -110, "message" => $message]);
+
+        throw new ExternalServiceException($message);
     }
 
     /**
@@ -847,9 +886,7 @@ class DownloadController extends AbstractDownloadController
         foreach ($output_content as $idFile => $content) {
             //this is true only for files that are not inside a zip (normal uploaded files)
             if (isset($content['out_xliff_name'])) {
-                //rename the key to make this compatible with ZipContentObject
-                $output_content[$idFile]['input_filename'] = $content['out_xliff_name'];
-                //remove the other invalid keys
+                //remove the keys ZipContentObject does not have
                 unset($output_content[$idFile]['out_xliff_name']);
                 unset($output_content[$idFile]['source']);
                 unset($output_content[$idFile]['target']);
@@ -869,8 +906,6 @@ class DownloadController extends AbstractDownloadController
      * @throws ReflectionException
      * @throws Exception
      * @throws TypeError
-     *
-     * @codeCoverageIgnore integration-only: rebuilds a ZipArchive on disk (tempnam/copy/S3 fetch) from real zip files.
      */
     public function reBuildZipContent(string $zipFileName, array $newInternalZipFiles): string
     {
@@ -878,114 +913,121 @@ class DownloadController extends AbstractDownloadController
 
         // this is the filesystem path
         $zipFile = (new FsFilesStorage())->getOriginalZipPath($project->create_date, $this->job['id_project'], $zipFileName);
-        $tmpFName = tempnam(AppConfig::$TMP_DOWNLOAD . '/' . $this->id_job . '/', "ZIP");
+        $tmpFName = tempnam($this->getWorkDir(), "ZIP");
+        if ($tmpFName === false) {
+            throw new Exception('Unable to create a temporary file for the zip archive');
+        }
 
         $isFsOnS3 = AbstractFilesStorage::isOnS3();
         if ($isFsOnS3 and false === file_exists($zipFile)) {
             // transfer the zip file to tmp path
-            $fs = FilesStorageFactory::create();
+            $fs = $this->getFilesStorage();
             $zipPath = $fs->getOriginalZipPath($project->create_date, $this->job['id_project'], $zipFileName);
-            $this->transferZipFromS3ToTmpDir($zipPath, $tmpFName);
+            $this->downloadFromS3($zipPath, $tmpFName);
         } else {
             copy($zipFile, $tmpFName);
         }
 
         $zip = new ZipArchiveHandler();
-        if ($zip->open($tmpFName)) {
-            $zip->createTree();
+        $opened = $zip->open($tmpFName);
+        if ($opened !== true) {
+            throw new Exception('Unable to open the zip file ' . $zipFileName . ': error ' . $opened);
+        }
 
-            //rebuild the real name of files in the zip archive
-            foreach ($zip->treeList as $filePath) {
-                $realZipFilePath = str_replace(
-                    [
-                        ZipArchiveHandler::INTERNAL_SEPARATOR,
-                        $this->pathinfoString($tmpFName, PATHINFO_BASENAME)
-                    ],
-                    [DIRECTORY_SEPARATOR, ""],
-                    $filePath
-                );
-                $realZipFilePath = ltrim($realZipFilePath, "/");
-                $newRealZipFilePath = $this->generateFilename($realZipFilePath);
+        $zip->createTree();
 
-                //remove the tmx from the original zip (we want not to be exported as preview)
-                if ($this->pathinfoString($newRealZipFilePath, PATHINFO_EXTENSION) == 'tmx') {
-                    $zip->deleteName($newRealZipFilePath);
-                    $zip->deleteName($realZipFilePath);
-                    continue;
-                }
+        //rebuild the real name of files in the zip archive
+        foreach ($zip->treeList as $filePath) {
+            $realZipFilePath = str_replace(
+                [
+                    ZipArchiveHandler::INTERNAL_SEPARATOR,
+                    $this->pathinfoString($tmpFName, PATHINFO_BASENAME)
+                ],
+                [DIRECTORY_SEPARATOR, ""],
+                $filePath
+            );
+            $realZipFilePath = ltrim($realZipFilePath, "/");
+            $newRealZipFilePath = $this->generateFilename($realZipFilePath);
 
-                // fix the file names inside the zip file, so we compare with our files,
-                // and if matches we can substitute them with the converted ones
-                foreach ($newInternalZipFiles as $newInternalZipFile) {
-                    if ($this->forceXliff) {
-                        //
-                        // ---------------------------------------------
-                        // NOTE 2021-06-11
-                        // ---------------------------------------------
-                        //
-                        // If we are downloading intermediate xlf files at this point we have files in this format:
-                        //
-                        // xxxx.xlf
-                        //
-                        // If the zip contains xliff files we have for example:
-                        //
-                        // test.sdlxliff.xlf
-                        //
-                        // And we can't use the regex /\.xlf|\.xliff|\.sdlxliff$/, because in this case we obtain:
-                        //
-                        // test
-                        //
-                        // (the regex trimmed out .sdlxliff.xlf)
-                        //
-                        // Much better using AbstractFilesStorage::pathinfo_fix function to get the real filename (with no xlf extension)
-                        //
-                        $declaredOutputFileName = $this->pathinfoString($newInternalZipFile->output_filename, PATHINFO_FILENAME);
-                        $newRealZipFilePathBaseName = $this->pathinfoString($newRealZipFilePath, PATHINFO_BASENAME);
-                        $isTheSameFile = ($declaredOutputFileName == $newRealZipFilePathBaseName);
-                    } else {
-                        $isTheSameFile = ($newInternalZipFile->output_filename == $newRealZipFilePath);
-                    }
-
-                    if ($isTheSameFile) {
-                        $zip->deleteName($realZipFilePath);
-                        $zip->deleteName($newRealZipFilePath);
-
-                        if ($this->pathinfoString($newRealZipFilePath, PATHINFO_EXTENSION) == 'pdf') {
-                            $newRealZipFilePath .= '.docx';
-                        } elseif ($this->forceXliff) {
-                            $newRealZipFilePath = $newInternalZipFile->output_filename; //xlf
-                        }
-
-                        $zip->addFromString($newRealZipFilePath, $newInternalZipFile->getContent() ?? '');
-                    }
-                }
+            //remove the tmx from the original zip (we want not to be exported as preview)
+            if ($this->pathinfoString($newRealZipFilePath, PATHINFO_EXTENSION) == 'tmx') {
+                $zip->deleteName($newRealZipFilePath);
+                $zip->deleteName($realZipFilePath);
+                continue;
             }
 
-            $zip->close();
+            // fix the file names inside the zip file, so we compare with our files,
+            // and if matches we can substitute them with the converted ones
+            foreach ($newInternalZipFiles as $newInternalZipFile) {
+                if ($this->forceXliff) {
+                    //
+                    // ---------------------------------------------
+                    // NOTE 2021-06-11
+                    // ---------------------------------------------
+                    //
+                    // If we are downloading intermediate xlf files at this point we have files in this format:
+                    //
+                    // xxxx.xlf
+                    //
+                    // If the zip contains xliff files we have for example:
+                    //
+                    // test.sdlxliff.xlf
+                    //
+                    // And we can't use the regex /\.xlf|\.xliff|\.sdlxliff$/, because in this case we obtain:
+                    //
+                    // test
+                    //
+                    // (the regex trimmed out .sdlxliff.xlf)
+                    //
+                    // Much better using AbstractFilesStorage::pathinfo_fix function to get the real filename (with no xlf extension)
+                    //
+                    $declaredOutputFileName = $this->pathinfoString($newInternalZipFile->output_filename, PATHINFO_FILENAME);
+                    $newRealZipFilePathBaseName = $this->pathinfoString($newRealZipFilePath, PATHINFO_BASENAME);
+                    $isTheSameFile = ($declaredOutputFileName == $newRealZipFilePathBaseName);
+                } else {
+                    $isTheSameFile = ($newInternalZipFile->output_filename == $newRealZipFilePath);
+                }
+
+                if ($isTheSameFile) {
+                    $zip->deleteName($realZipFilePath);
+                    $zip->deleteName($newRealZipFilePath);
+
+                    if ($this->pathinfoString($newRealZipFilePath, PATHINFO_EXTENSION) == 'pdf') {
+                        $newRealZipFilePath .= '.docx';
+                    } elseif ($this->forceXliff) {
+                        $newRealZipFilePath = $newInternalZipFile->output_filename; //xlf
+                    }
+
+                    $newInternalZipFile->addToZip($zip, $newRealZipFilePath);
+                }
+            }
         }
+
+        self::closeZip($zip, $zipFileName);
 
         return $tmpFName;
     }
 
     /**
-     * @param string $zipPath
-     * @param string $tmpDir
+     * The client that converts the xliffs back to their original format. A method so a test
+     * can answer for the converter.
+     */
+    protected function createFilters(): Filters
+    {
+        return new Filters();
+    }
+
+    /**
+     * The client that reads and writes the files on Google Drive. A method so a test can answer
+     * for Google. Example: `createRemoteFileService('{"access_token":"..."}', $client)`.
      *
      * @throws Exception
-     * @throws \Psr\Log\InvalidArgumentException
-     * @throws ReflectionException
-     *
-     * @codeCoverageIgnore integration-only: downloads an object from S3 to a tmp path.
+     * @throws TypeError
+     * @throws InvalidArgumentException
      */
-    public function transferZipFromS3ToTmpDir(string $zipPath, string $tmpDir): void
+    protected function createRemoteFileService(string $token, Google_Client $client): RemoteFileService
     {
-        $this->logger->debug("Downloading original zip " . $zipPath . " from S3 to tmp dir " . $tmpDir);
-
-        $s3Client = S3FilesStorage::getStaticS3Client();
-        $params['bucket'] = AppConfig::$AWS_STORAGE_BASE_BUCKET;
-        $params['key'] = $zipPath;
-        $params['save_as'] = $tmpDir;
-        $s3Client->downloadItem($params);
+        return new RemoteFileService($token, $client);
     }
 
     /**

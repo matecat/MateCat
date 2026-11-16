@@ -42,7 +42,7 @@ describe('ScreenshotContextPanel', () => {
     expect(screen.queryByRole('img')).not.toBeInTheDocument()
 
     resolvePromise('https://example.com/resolved.png')
-    await waitFor(() => expect(screen.getByRole('img')).toBeInTheDocument())
+    expect(await screen.findByRole('img')).toBeInTheDocument()
   })
 
   test('renders the resolved screenshot scaled and offset when zoomed in beyond 100%', async () => {

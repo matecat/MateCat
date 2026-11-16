@@ -20,7 +20,7 @@ beforeEach(() => {
 test('renders nothing when the segment filter feature is disabled', () => {
   global.config.segmentFilterEnabled = false
   const {container} = render(<SegmentsFilterButton />)
-  expect(container.firstChild).toBeNull()
+  expect(container).toBeEmptyDOMElement()
 })
 
 test('opens the filter when clicked while closed', () => {

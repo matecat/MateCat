@@ -14,8 +14,9 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   qr: null,
   firstLoad: true,
   languages: [],
-  // pc-carrying ph tags are collapsed by default; only an explicit opt-out persists
-  phTagsCompressed: (() => {
+  // compressible tags are collapsed by default; only an explicit opt-out persists.
+  // The storage key keeps its old `phTagsCompressed-` name so saved choices survive.
+  tagsCompressed: (() => {
     try {
       return (
         localStorage.getItem('phTagsCompressed-' + config.userMail) !== 'false'
@@ -150,16 +151,16 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   getJobMetadata: function () {
     return this.jobMetadata
   },
-  isPhTagsCompressed: function () {
-    return this.phTagsCompressed
+  isTagsCompressed: function () {
+    return this.tagsCompressed
   },
   emitChange: function () {
     this.emit.apply(this, arguments)
   },
 })
 
-if (CatToolStore.phTagsCompressed) {
-  document.body.classList.add('ph-tags-compressed')
+if (CatToolStore.tagsCompressed) {
+  document.body.classList.add('tags-compressed')
 }
 
 // Register callback to handle all updates
@@ -312,23 +313,26 @@ AppDispatcher.register(function (action) {
         ...action,
       })
       break
-    case CatToolConstants.TOGGLE_PH_TAGS_COMPRESSED:
-      CatToolStore.phTagsCompressed = !CatToolStore.phTagsCompressed
+    case CatToolConstants.TOGGLE_TAGS_COMPRESSED:
+      CatToolStore.tagsCompressed = !CatToolStore.tagsCompressed
       try {
         localStorage.setItem(
           'phTagsCompressed-' + config.userMail,
-          CatToolStore.phTagsCompressed,
+          CatToolStore.tagsCompressed,
         )
-      } catch (e) {}
+      } catch {
+        // localStorage throws when it is unavailable or full. The value is only
+        // remembered between visits, so the toggle above still holds for this one.
+      }
       if (document?.body) {
         document.body.classList.toggle(
-          'ph-tags-compressed',
-          CatToolStore.phTagsCompressed,
+          'tags-compressed',
+          CatToolStore.tagsCompressed,
         )
       }
       CatToolStore.emitChange(
-        CatToolConstants.TOGGLE_PH_TAGS_COMPRESSED,
-        CatToolStore.phTagsCompressed,
+        CatToolConstants.TOGGLE_TAGS_COMPRESSED,
+        CatToolStore.tagsCompressed,
       )
       break
   }

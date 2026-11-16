@@ -1,5 +1,5 @@
 import React from 'react'
-import {render, screen, fireEvent} from '@testing-library/react'
+import {render, fireEvent} from '@testing-library/react'
 
 // `socialUrls` in OnBoardingContext.js is computed at module-evaluation time
 // from `config.*`. Since setupFiles.jest.js only sets `global.config = {id_job: 2}`,

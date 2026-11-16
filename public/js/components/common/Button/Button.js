@@ -93,7 +93,7 @@ export const Button = React.forwardRef(
         tabIndex={tabIndex}
         aria-label={tooltip}
         // eslint-disable-next-line react/no-unknown-property
-        tooltip-position={tooltipPosition}
+        data-tooltip-position={tooltipPosition}
         onClick={onClick}
         data-testid={testId}
         {...props}

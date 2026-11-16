@@ -4,6 +4,8 @@ namespace Controller\API\V2;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthorizationError;
+use Controller\API\Commons\Exceptions\ConflictError;
+use Controller\API\Commons\JobRestructureLock;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\ProjectAccessValidator;
 use Exception;
@@ -71,8 +73,11 @@ class SplitJobController extends KleinController
      * — through ProjectPasswordValidator instead of getProjectData(). Its response shape is kept below
      * so retiring it changed nothing for the api-key callers.
      *
+     * The chunks are read holding the job, so they are the ones the previous holder committed.
+     *
+     * @throws ConflictError when another split, merge or password change holds the job
      * @throws Throwable
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function merge(): void
     {
@@ -87,9 +92,13 @@ class SplitJobController extends KleinController
         $pManager = $projectStructure['pManager'];
         $project = $projectStructure['project'];
 
-        $jobStructs = $this->filterJobsById($request['job_id'], $this->getProjectJobs($project));
-        $data->jobToMerge = $request['job_id'];
-        $pManager->mergeALL($data, $jobStructs);
+        $this->filterJobsById($request['job_id'], $this->findJobInProject($request['job_id'], $project));
+
+        $this->restructureLock()->run($request['job_id'], function () use ($request, $data, $pManager, $project): void {
+            $jobStructs = $this->filterJobsById($request['job_id'], $this->getProjectJobs($project));
+            $data->jobToMerge = $request['job_id'];
+            $pManager->mergeALL($data, $jobStructs);
+        });
 
         // Not ['data' => $data->splitResult] like check() and apply(): splitResult is only ever
         // populated by getSplitData(), which the merge path never calls, so that key was always null.
@@ -109,7 +118,9 @@ class SplitJobController extends KleinController
             throw new InvalidArgumentException("No job password provided", -4);
         }
 
-        [, $data] = $this->checkSplit($request);
+        // Read-only, so it does not take the job: a check racing an apply answers for one state or the
+        // other, and the apply validates again holding the job.
+        [, $data] = $this->checkSplit($request, $this->loadProjectForRestructureRequest($request));
 
         $this->response->json([
             "data" => $data->splitResult
@@ -117,6 +128,12 @@ class SplitJobController extends KleinController
     }
 
     /**
+     * The job is taken after the authorization and before any read of its chunks or segments, so that
+     * the validation and the split both see what the previous holder committed. A second apply on the
+     * same job is refused with a 409 while the first one runs, and with a 400 by checkSplitAccess() once
+     * it has committed.
+     *
+     * @throws ConflictError when another split, merge or password change holds the job
      * @throws Throwable
      * @throws TypeError
      */
@@ -128,8 +145,16 @@ class SplitJobController extends KleinController
             throw new InvalidArgumentException("No job password provided", -4);
         }
 
-        [$pManager, $data] = $this->checkSplit($request);
-        $pManager->applySplit($data);
+        $projectStructure = $this->loadProjectForRestructureRequest($request);
+
+        $this->filterJobsById($request['job_id'], $this->findJobInProject($request['job_id'], $projectStructure['project']));
+
+        $data = $this->restructureLock()->run($request['job_id'], function () use ($request, $projectStructure): SplitMergeProjectData {
+            [$pManager, $data] = $this->checkSplit($request, $projectStructure);
+            $pManager->applySplit($data);
+
+            return $data;
+        });
 
         $this->response->json([
             "data" => $data->splitResult
@@ -137,20 +162,41 @@ class SplitJobController extends KleinController
     }
 
     /**
+     * The per-job lock split, merge and change-password share. A seam, so tests run without Redis.
+     *
+     * @throws Exception
+     */
+    protected function restructureLock(): JobRestructureLock
+    {
+        return JobRestructureLock::forDefaultConnection();
+    }
+
+    /**
      * @param array{project_id: int, project_pass: string, job_id: int, job_pass: string, split_raw_words: bool, num_split: int, split_values: list<int>} $request
+     *
+     * @return array{data: SplitMergeProjectData, pManager: JobSplitMergeManager, count_type: string, project: ProjectStruct}
+     *
+     * @throws Throwable
+     */
+    private function loadProjectForRestructureRequest(array $request): array
+    {
+        return $this->loadProjectForRestructure(
+            $request['project_id'],
+            $request['project_pass'],
+            $request['split_raw_words']
+        );
+    }
+
+    /**
+     * @param array{project_id: int, project_pass: string, job_id: int, job_pass: string, split_raw_words: bool, num_split: int, split_values: list<int>} $request
+     * @param array{data: SplitMergeProjectData, pManager: JobSplitMergeManager, count_type: string, project: ProjectStruct} $projectStructure
      *
      * @return array{0: JobSplitMergeManager, 1: SplitMergeProjectData}
      *
      * @throws Throwable
      */
-    private function checkSplit(array $request): array
+    private function checkSplit(array $request, array $projectStructure): array
     {
-        $projectStructure = $this->loadProjectForRestructure(
-            $request['project_id'],
-            $request['project_pass'],
-            $request['split_raw_words']
-        );
-
         $data = $projectStructure['data'];
         $pManager = $projectStructure['pManager'];
         $project = $projectStructure['project'];
@@ -223,6 +269,28 @@ class SplitJobController extends KleinController
     protected function getProjectJobs(ProjectStruct $project): array
     {
         return (new JobDao($this->getDatabase()))->getNotDeletedByProjectId((int)$project->id);
+    }
+
+    /**
+     * The chunks of one job, only if it belongs to $project. A seam, so tests run without the database.
+     *
+     * merge() and apply() pass it through filterJobsById() before the job is taken. The lock is keyed
+     * by the job id alone, and by that point the caller has proved standing over the project only.
+     * Taken first, it let any user with a project of their own hold any other job: its owner's split,
+     * merge and password change answered 409 for as long as the requests kept coming, and the 409 told
+     * the caller the job was being changed at that moment.
+     *
+     * The chunks are still read holding the job: this only says the id is one of the project's, and a
+     * merge committing in between is caught by the read under the lock.
+     *
+     * @return JobStruct[]
+     *
+     * @throws Exception
+     * @throws ReflectionException
+     */
+    protected function findJobInProject(int $jid, ProjectStruct $project): array
+    {
+        return (new JobDao($this->getDatabase()))->getByIdProjectAndIdJob((int)$project->id, $jid);
     }
 
     /**
@@ -323,6 +391,13 @@ class SplitJobController extends KleinController
         // password cannot be unlocked by presenting one, which `null != ''` used to allow.
         if ($knownPassword === null || !hash_equals($knownPassword, $job_pass)) {
             throw new InvalidArgumentException("Access denied", -10);
+        }
+
+        // Only a job in one piece can be split. A job already split has to be merged first: splitting
+        // it again from its first chunk rewrote the chunks the earlier split had created. Read after
+        // the password check, so the answer tells nothing to a caller who does not hold the job.
+        if (count($jobToSplit) > 1) {
+            throw new InvalidArgumentException("This job is already split, merge it before splitting it again", -11);
         }
     }
 

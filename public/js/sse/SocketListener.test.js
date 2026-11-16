@@ -5,6 +5,7 @@ import useSocketLayer, {ConnectionStates} from '../hooks/useSocketLayer'
 import CatToolActions from '../actions/CatToolActions'
 import SegmentActions from '../actions/SegmentActions'
 import UserActions from '../actions/UserActions'
+import Cookies from 'js-cookie'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
 
 jest.mock('../hooks/useSocketLayer', () => ({
@@ -99,6 +100,84 @@ describe('SocketListener', () => {
     eventHandlers.logout({reason: 'session_expired'})
 
     expect(forceLogout).toHaveBeenCalledTimes(1)
+  })
+
+  describe('segment enable/disable notifications', () => {
+    // The two copies are specified together and must stay in step: the pair was
+    // agreed on the task and only the disabled half was applied.
+    test('segment_disabled marks the segment read-only and announces it', () => {
+      eventHandlers.segment_disabled({id_segment: 7387})
+
+      expect(SegmentActions.updateSegmentDisabledState).toHaveBeenCalledWith(
+        7387,
+        true,
+      )
+      expect(CatToolActions.addNotification).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Segment translation disabled',
+          text: 'The project owner has disabled editing for one or more segments. They are now read-only, grayed out, and cannot be edited.',
+          uid: 'translation_disabled',
+        }),
+      )
+    })
+
+    test('segment_enabled clears the read-only state and announces it', () => {
+      eventHandlers.segment_enabled({id_segment: 7387})
+
+      expect(SegmentActions.updateSegmentDisabledState).toHaveBeenCalledWith(
+        7387,
+        false,
+      )
+      expect(CatToolActions.addNotification).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Segment translation enabled',
+          text: 'The project owner has re-enabled editing for one or more segments. They are no longer read-only and can be edited again.',
+          uid: 'translation_enabled',
+        }),
+      )
+    })
+  })
+
+  describe('global_messages', () => {
+    const message = (fields = {}) => ({
+      message: {
+        token: 'release-1',
+        expire: '2999-01-01T00:00:00Z',
+        title: 'Welcome to the new <b>Matecat</b>!',
+        message:
+          'Write to <a href="mailto:info@matecat.com">info@matecat.com</a><script>window.hacked = true</script>',
+        ...fields,
+      },
+    })
+    const shown = () => CatToolActions.addNotification.mock.calls[0][0]
+
+    afterEach(() => jest.restoreAllMocks())
+
+    test('passes the server title and text on as HTML to render', () => {
+      eventHandlers.global_messages(message())
+
+      expect(shown()).toMatchObject({
+        title: 'Welcome to the new <b>Matecat</b>!',
+        text: expect.stringContaining('<a href="mailto:info@matecat.com">'),
+        allowHtml: true,
+        autoDismiss: false,
+      })
+    })
+
+    test('only closing it with the X hides it for good', () => {
+      const setCookie = jest.spyOn(Cookies, 'set').mockImplementation(() => {})
+      eventHandlers.global_messages(message())
+
+      shown().closeCallback(false)
+      expect(setCookie).not.toHaveBeenCalled()
+
+      shown().closeCallback(true)
+      expect(setCookie).toHaveBeenCalledWith(
+        'msg-release-1',
+        '',
+        expect.objectContaining({secure: true}),
+      )
+    })
   })
 
   describe('ack', () => {

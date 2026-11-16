@@ -53,10 +53,10 @@ export const IntentoOptions = ({id, isCattoolPage}) => {
 
     return {
       ...(isFirstRouting && {
-        beforeRow: <h4>Routings</h4>,
+        beforeRow: <h5>Routings</h5>,
       }),
       ...(isFirstProvider && {
-        beforeRow: <h4>Providers</h4>,
+        beforeRow: <h5>Providers</h5>,
       }),
     }
   }
@@ -111,7 +111,7 @@ export const IntentoOptions = ({id, isCattoolPage}) => {
               }}
               isPortalDropdown={true}
               isActiveOptionOnTop={false}
-              dropdownClassName="select-intento-routing-providers"
+              dropdownClassName="select-dropdown__wrapper-portal select-intento-routing-providers"
               maxHeightDroplist={260}
               isDisabled={disabled}
             >

@@ -113,7 +113,6 @@ describe('callbackForSegmentNotInSample', () => {
       text: 'Sample is trying to focus on segment #123, but segment is no longer in the sample',
       title: 'Segment not in sample',
       type: 'warning',
-      allowHtml: true,
     })
   })
 })
@@ -277,56 +276,23 @@ describe('tryToFocusLastSegment', () => {
   })
 })
 
-describe('initEvents', () => {
-  test('does not register a segmentsAdded listener when the filter is disabled', () => {
-    config.segmentFilterEnabled = false
-    const addSpy = jest
-      .spyOn(document, 'addEventListener')
-      .mockImplementation(() => {})
-
-    SegmentFilterUtils.initEvents()
-
-    expect(addSpy).not.toHaveBeenCalled()
-    addSpy.mockRestore()
-  })
-
-  test('focuses the last segment on segmentsAdded when actively filtering', () => {
-    config.segmentFilterEnabled = true
-    const addSpy = jest
-      .spyOn(document, 'addEventListener')
-      .mockImplementation(() => {})
-    const focusSpy = jest
-      .spyOn(SegmentFilterUtils, 'tryToFocusLastSegment')
-      .mockImplementation(() => {})
-
-    SegmentFilterUtils.initEvents()
-    const [, handler] = addSpy.mock.calls[0]
+describe('loading more segments while filtering', () => {
+  // Each infinite-scroll page dispatches segmentsAdded. The view must stay
+  // where the user scrolled, not jump back to the first filtered segment.
+  test('does not scroll back to the last focused segment', () => {
     SegmentFilterUtils.filteringSegments = true
     SegmentFilterUtils.open = true
-    handler()
+    SegmentFilterUtils.setStoredState({lastSegmentId: '10'})
+    SegmentStore.getSegmentByIdToJS.mockReturnValue({
+      sid: '10',
+      original_sid: '10',
+      opened: true,
+    })
 
-    expect(focusSpy).toHaveBeenCalled()
-    addSpy.mockRestore()
-    focusSpy.mockRestore()
-  })
+    document.dispatchEvent(new CustomEvent('segmentsAdded'))
 
-  test('does not focus when not actively filtering', () => {
-    config.segmentFilterEnabled = true
-    const addSpy = jest
-      .spyOn(document, 'addEventListener')
-      .mockImplementation(() => {})
-    const focusSpy = jest
-      .spyOn(SegmentFilterUtils, 'tryToFocusLastSegment')
-      .mockImplementation(() => {})
-
-    SegmentFilterUtils.initEvents()
-    const [, handler] = addSpy.mock.calls[0]
-    SegmentFilterUtils.filteringSegments = false
-    handler()
-
-    expect(focusSpy).not.toHaveBeenCalled()
-    addSpy.mockRestore()
-    focusSpy.mockRestore()
+    expect(SegmentActions.scrollToSegment).not.toHaveBeenCalled()
+    expect(SegmentActions.openSegment).not.toHaveBeenCalled()
   })
 })
 
@@ -651,6 +617,32 @@ describe('gotoNextTranslatedSegment', () => {
 
     expect(SegmentActions.openSegment).not.toHaveBeenCalled()
   })
+
+  test('never opens a segment and does not overflow the stack when every segment is draft or new', () => {
+    SegmentFilterUtils.setStoredState({
+      serverData: {segment_ids: ['1', '2', '3']},
+    })
+    SegmentStore.getSegmentByIdToJS.mockReturnValue({status: 'DRAFT'})
+
+    expect(() => SegmentFilterUtils.gotoNextTranslatedSegment(1)).not.toThrow()
+    expect(SegmentActions.openSegment).not.toHaveBeenCalled()
+  })
+
+  test('wraps around the end of the filtered list while skipping drafts', () => {
+    SegmentFilterUtils.setStoredState({
+      serverData: {segment_ids: ['1', '2', '3']},
+    })
+    // Starting from the last id ('3'), the walk first wraps to '1' (draft,
+    // skipped) before landing on '2'.
+    SegmentStore.getSegmentByIdToJS
+      .mockReturnValueOnce({status: 'DRAFT'})
+      .mockReturnValueOnce({status: 'TRANSLATED'})
+
+    SegmentFilterUtils.gotoNextTranslatedSegment(3)
+
+    expect(SegmentActions.openSegment).toHaveBeenCalledWith('2')
+    expect(SegmentActions.openSegment).toHaveBeenCalledTimes(1)
+  })
 })
 
 describe('gotoNextSegment', () => {
@@ -713,4 +705,19 @@ describe('SegmentFilterUtils.goToNextRepetitionGroup', () => {
 
     expect(SegmentActions.openSegment).toHaveBeenCalledWith(2)
   })
+})
+
+describe('repetition navigation after the segment was closed', () => {
+  test.each(['goToNextRepetition', 'goToNextRepetitionGroup'])(
+    '%s does nothing when there is no current segment',
+    (method) => {
+      SegmentStore.getCurrentSegment.mockReturnValue(undefined)
+      SegmentFilterUtils.setStoredState({
+        serverData: {grouping: {'hash-1': [1, 2]}},
+      })
+
+      expect(() => SegmentFilterUtils[method]('TRANSLATED')).not.toThrow()
+      expect(SegmentActions.openSegment).not.toHaveBeenCalled()
+    },
+  )
 })

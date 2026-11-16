@@ -13,19 +13,17 @@ use Model\Jobs\JobsMetadataMarshaller;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use TypeError;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\EngineResolverInterface;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\EngineServiceInterface;
 use Utils\Logger\LoggerFactory;
 use Utils\TaskRunner\Commons\QueueElement;
 use Utils\TaskRunner\Exceptions\NotSupportedMTException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 
-class EngineService implements EngineServiceInterface
+class EngineService
 {
-    private EngineResolverInterface $engineResolver;
+    private DefaultEngineResolver $engineResolver;
     private IDatabase $database;
 
-    public function __construct(EngineResolverInterface $engineResolver, IDatabase $database)
+    public function __construct(DefaultEngineResolver $engineResolver, IDatabase $database)
     {
         $this->engineResolver = $engineResolver;
         $this->database = $database;
@@ -153,7 +151,7 @@ class EngineService implements EngineServiceInterface
                 return [];
             }
         } catch (Exception $e) {
-            LoggerFactory::doJsonLog($e->getMessage());
+            LoggerFactory::getLogger('engines')->error($e->getMessage());
         }
 
         return $mt_result;

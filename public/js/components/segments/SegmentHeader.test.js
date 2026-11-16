@@ -62,12 +62,12 @@ describe('SegmentHeader', () => {
 
   test('renders a closed header with the autopropagated marker', () => {
     const {container} = renderHeader({autopropagated: true, splitted: false})
-    expect(container.textContent).toContain('Autopropagated')
+    expect(container).toHaveTextContent(/Autopropagated/)
   })
 
   test('renders a closed header with the repetition marker', () => {
     const {container} = renderHeader({repetition: true})
-    expect(container.textContent).toContain('Repetition')
+    expect(container).toHaveTextContent(/Repetition/)
   })
 
   test('does not show repetition/autopropagated markers when splitted', () => {
@@ -76,13 +76,13 @@ describe('SegmentHeader', () => {
       autopropagated: true,
       splitted: true,
     })
-    expect(container.textContent).not.toContain('Repetition')
-    expect(container.textContent).not.toContain('Autopropagated')
+    expect(container).not.toHaveTextContent(/Repetition/)
+    expect(container).not.toHaveTextContent(/Autopropagated/)
   })
 
   test('renders the saving indicator in the closed header when saving', () => {
     const {container} = renderHeader({saving: true})
-    expect(container.textContent).toContain('Saving')
+    expect(container).toHaveTextContent(/Saving/)
   })
 
   test('renders an open header when segmentOpened is true', () => {
@@ -92,7 +92,7 @@ describe('SegmentHeader', () => {
 
   test('shows saving indicator inside the open header', () => {
     const {container} = renderHeader({segmentOpened: true, saving: true})
-    expect(container.textContent).toContain('Saving')
+    expect(container).toHaveTextContent(/Saving/)
   })
 
   test('registers and unregisters SegmentStore listeners on mount/unmount', () => {
@@ -133,7 +133,7 @@ describe('SegmentHeader', () => {
       const cb = getListenerCallback('CHARACTER_COUNTER')
       cb({sid: '10-1', counter: 2, limit: 10, segmentCharacters: 2})
     })
-    expect(container.textContent).toContain('Unit characters')
+    expect(container).toHaveTextContent(/Unit characters/)
   })
 
   test('changePercentuage sets percentage/visible state and renders the h2', () => {
@@ -145,7 +145,7 @@ describe('SegmentHeader', () => {
     const heading = container.querySelector('h2')
     expect(heading).toBeInTheDocument()
     expect(heading).toHaveAttribute('title', 'Created by Jest User')
-    expect(heading.textContent).toBe('100%')
+    expect(heading).toHaveTextContent('100%')
   })
 
   test('changePercentuage ignores updates for a different segment id', () => {
@@ -188,7 +188,7 @@ describe('SegmentHeader', () => {
     expect(
       container.querySelector('.segment-counter-limit-error'),
     ).toBeInTheDocument()
-    expect(container.querySelector('.segment-counter-limit').textContent).toBe(
+    expect(container.querySelector('.segment-counter-limit')).toHaveTextContent(
       '10',
     )
   })

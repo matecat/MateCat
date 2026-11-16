@@ -6,16 +6,15 @@ import QualityReportConstants from '../../constants/QualityReportConstants'
 import FilterProjects from './manage/FilterProjects'
 import {ActionMenu} from './ActionMenu'
 import {UserMenu} from './UserMenu'
-import {ComponentExtendInterface} from '../../utils/ComponentExtendInterface'
 import {fromJS} from 'immutable'
 import {TeamDropdown} from './TeamDropdown'
 import MembersFilter from './manage/MembersFilter'
+import headerInterface from './headerInterface'
 
-export class HeaderInterface extends ComponentExtendInterface {
-  getMoreLinks() {}
-}
-
-const headerInterface = new HeaderInterface()
+// Re-exported so plugins still pinned to the prototype form keep working; the
+// interface itself now lives in its own module so plugins can import it without
+// pulling in the Header component.
+export {HeaderInterface} from './headerInterface'
 
 const Header = ({
   isQualityReport,

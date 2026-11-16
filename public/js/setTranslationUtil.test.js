@@ -301,6 +301,17 @@ describe('setTranslationUtil', () => {
       expect(setTranslationApi).not.toHaveBeenCalled()
     })
 
+    test('moves on to the next segment while the save is still in flight', () => {
+      setTranslationApi.mockReturnValue(new Promise(() => {}))
+      const segment = buildSegment()
+      const callback = jest.fn()
+
+      SetTranslationUtil.segmentTranslation(segment, 'TRANSLATED', callback, false)
+
+      expect(setTranslationApi).toHaveBeenCalledTimes(1)
+      expect(callback).toHaveBeenCalledTimes(1)
+    })
+
     test('processes the online success path, sets status/progress, and empties the tail', async () => {
       setTranslationApi.mockResolvedValue({data: 'OK', propagation: null})
       const segment = buildSegment()
@@ -308,8 +319,8 @@ describe('setTranslationUtil', () => {
       const callback = jest.fn()
 
       SetTranslationUtil.segmentTranslation(segment, 'DRAFT', callback, false)
-      // The callback runs on the response, not before the request leaves.
-      expect(callback).not.toHaveBeenCalled()
+      // The callback runs as the request leaves, without waiting for the response.
+      expect(callback).toHaveBeenCalledTimes(1)
       await Promise.resolve()
       await Promise.resolve()
       await Promise.resolve()
@@ -411,10 +422,10 @@ describe('setTranslationUtil', () => {
       const {container} = render(
         CatToolActions.addNotification.mock.calls[0][0].text,
       )
-      expect(container.textContent).toMatch(
+      expect(container).toHaveTextContent(
         /locked segments have been excluded/,
       )
-      expect(container.textContent).not.toMatch(
+      expect(container).not.toHaveTextContent(
         /non-locked segments have been excluded/,
       )
     })
@@ -447,7 +458,7 @@ describe('setTranslationUtil', () => {
       const {container} = render(
         CatToolActions.addNotification.mock.calls[0][0].text,
       )
-      expect(container.textContent).toMatch(
+      expect(container).toHaveTextContent(
         /non-locked segments have been excluded/,
       )
     })

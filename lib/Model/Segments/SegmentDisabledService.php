@@ -26,18 +26,24 @@ class SegmentDisabledService
     /**
      * Check whether a segment is disabled for translation.
      *
+     * $ttl overrides the DAO's default (7-day) cache TTL for this read. A concurrent read that
+     * started before a disable/enable write commits can still cache a stale result after that
+     * write's eviction runs, silently re-poisoning the cache for up to 7 days. Callers where that
+     * matters (save-enforcement, idempotency checks guarding a unique-key insert) should pass 0;
+     * callers where an occasional stale read is harmless can leave it at the cached default.
+     *
      * @param int $id_segment
+     * @param int|null $ttl
      *
      * @return bool
      * @throws ReflectionException
      * @throws Exception
      */
-    public function isDisabled(int $id_segment): bool
+    public function isDisabled(int $id_segment, ?int $ttl = null): bool
     {
-        $metadata = $this->segmentMetadataDao->get(
-            $id_segment,
-            'translation_disabled'
-        );
+        $metadata = $ttl === null
+            ? $this->segmentMetadataDao->get($id_segment, 'translation_disabled')
+            : $this->segmentMetadataDao->get($id_segment, 'translation_disabled', $ttl);
 
         return $metadata !== null && $metadata->meta_value === '1';
     }
@@ -57,7 +63,11 @@ class SegmentDisabledService
      */
     public function disable(int $id_segment): void
     {
-        if ($this->isDisabled($id_segment)) {
+        // ttl=0: segment_metadata has a UNIQUE KEY on (id_segment, meta_key) and save() below is
+        // a plain INSERT, not an upsert. A stale cached "not disabled" here would let this proceed
+        // to save() on an already-disabled segment and crash on the duplicate key instead of
+        // returning early as the docblock promises.
+        if ($this->isDisabled($id_segment, 0)) {
             return;
         }
 

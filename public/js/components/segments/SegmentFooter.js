@@ -17,12 +17,12 @@ import {SegmentFooterTabGlossary} from './SegmentFooterTabGlossary'
 import SegmentTabConflicts from './SegmentFooterTabConflicts'
 import SegmentFooterTabMatches from './SegmentFooterTabMatches'
 import SegmentFooterTabMessages from './SegmentFooterTabMessages'
+import segmentNotes from './segmentNotes'
 import {SegmentContext} from './SegmentContext'
 import SegmentUtils from '../../utils/segmentUtils'
 import {SegmentFooterTabAiAssistant} from './SegmentFooterTabAiAssistant'
 import IconCloseCircle from '../../../img/icons/IconCloseCircle'
 import IconWarning from '../../../img/icons/IconWarning'
-import CatToolActions from '../../actions/CatToolActions'
 import {isMacOS} from '../../utils/Utils'
 import {SegmentFooterTabLaraStyles} from './SegmentFooterTabLaraStyles'
 import {SegmentFooterTabAiAlternatives} from './SegmentFooterTabAiAlternatives'
@@ -30,6 +30,7 @@ import {SegmentFooterTabAiFeedback} from './SegmentFooterTabAiFeedback'
 import SegmentFooterTabIcu from './SegmentFooterTabIcu'
 
 import {TAB} from '../../constants/SegmentTabConstants'
+import CatToolActions from '../../actions/CatToolActions'
 
 const TAB_ITEMS = {
   [TAB.MATCHES]: {
@@ -63,7 +64,7 @@ const TAB_ITEMS = {
     isLoading: false,
   },
   [TAB.MULTIMATCHES]: {
-    label: 'Cross-language matches',
+    label: 'Reference languages',
     code: 'cl',
     tabClass: 'cross-matches',
     isLoading: false,
@@ -198,25 +199,17 @@ function SegmentFooter() {
   // Check tab messages has notes
   const hasNotes = useMemo(() => {
     if (!SegmentUtils.segmentHasNote(segment)) return false
-    const tabMessagesContext = {
-      props: {
-        active_class: 'open',
-        tab_class: 'segment-notes',
-        id_segment: segment.sid,
-        notes: segment.notes,
-        metadata: segment.metadata,
-        context_groups: segment.context_groups,
-        segmentSource: segment.segment,
-        segment: segment,
-      },
-      getMetadataNoteTemplate: () =>
-        segment.metadata?.length > 0 ? segment.metadata : null,
-      allowHTML: () => '',
-      getNoteContentStructure: (note) => note,
-      getNoteStructure: SegmentFooterTabMessages.prototype.getNoteStructure,
-    }
-    const notes =
-      SegmentFooterTabMessages.prototype.getNotes.call(tabMessagesContext)
+    // Ask the seam what it would render, so a plugin that adds or hides notes
+    // decides whether the tab appears, exactly as it decides its contents. This
+    // used to reach through SegmentFooterTabMessages.prototype with a synthetic
+    // `this`, which broke as soon as those methods moved onto the seam.
+    const notes = segmentNotes.getNotes({
+      notes: segment.notes,
+      metadata: segment.metadata,
+      segment,
+      segmentSource: segment.segment,
+      contextGroups: segment.context_groups,
+    })
     return Array.isArray(notes) && notes.length > 0
   }, [segment])
 
@@ -252,8 +245,18 @@ function SegmentFooter() {
     const addTabIndex = (sidProp, name, index) =>
       segment.sid === sidProp && setTabStateChanges({name, index})
     const closeAllTabs = () => setTabStateChanges({visible: false})
-    const showMessage = (sidProp, message) =>
-      segment.sid === sidProp && setMessage(message)
+    const showMessage = (sidProp, message) => {
+      const {title, text, type} = message
+      const notification = {
+        title,
+        text,
+        type: type ?? 'success',
+        position: 'bl',
+        allowHtml: true,
+        timer: 3000,
+      }
+      CatToolActions.addNotification(notification)
+    }
     const hideAIAssistant = () =>
       setTabStateChanges({
         name: TAB.AI_ASSISTANT,
@@ -318,7 +321,9 @@ function SegmentFooter() {
     const hasAlternatives = Boolean(
       segment.alternatives && size(segment.alternatives) > 0,
     )
-    const hasMultiMatches = Boolean(multiMatchLangs && multiMatchLangs.primary)
+    const hasMultiMatches = Boolean(
+      multiMatchLangs && (multiMatchLangs.primary || multiMatchLangs.secondary),
+    )
 
     setTabItems((prevState) =>
       prevState.map((item) => ({

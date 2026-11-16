@@ -1,5 +1,5 @@
 import React from 'react'
-import {render, screen, act, waitFor} from '@testing-library/react'
+import {render, screen, act} from '@testing-library/react'
 import {ApplicationWrapper} from './ApplicationWrapper'
 import useAuth from '../../../hooks/useAuth'
 import {onModalWindowMounted} from '../../modals/ModalWindow'

@@ -196,7 +196,7 @@ describe('ContextPreview', () => {
 
     fireEvent.click(zoomIn)
     expect(screen.getByText('125%')).toBeInTheDocument()
-    expect(reset).not.toBeDisabled()
+    expect(reset).toBeEnabled()
 
     // ramp up to the 200% ceiling
     fireEvent.click(zoomIn)
@@ -225,7 +225,7 @@ describe('ContextPreview', () => {
 
     fireEvent.click(screen.getByTestId('seg-context-preview-view-mode-source'))
     expect(screen.getByTestId('live-panel-Source')).toBeInTheDocument()
-    expect(screen.queryByTestId('live-panel-Translation')).toBeNull()
+    expect(screen.queryByTestId('live-panel-Translation')).not.toBeInTheDocument()
   })
 
   test('renders the content-view control and switches to screenshot', () => {
@@ -286,7 +286,7 @@ describe('ContextPreview', () => {
     act(() => {
       rerender(<ContextPreview />)
     })
-    expect(screen.queryByTestId('screenshot-panel-Source')).toBeNull()
+    expect(screen.queryByTestId('screenshot-panel-Source')).not.toBeInTheDocument()
     // switching to screenshot forced SOURCE view, so the source panel returns
     expect(screen.getByTestId('live-panel-Source')).toBeInTheDocument()
   })

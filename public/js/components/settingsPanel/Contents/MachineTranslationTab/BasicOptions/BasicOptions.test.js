@@ -57,7 +57,7 @@ describe('BasicOptions', () => {
   test('enables the switch when not on cattool page', () => {
     render(<BasicOptions isCattoolPage={false} />)
 
-    expect(screen.getByTestId('switch-enable_mt_analysis')).not.toBeDisabled()
+    expect(screen.getByTestId('switch-enable_mt_analysis')).toBeEnabled()
   })
 
   test('forwards onChange interaction to the switch', () => {

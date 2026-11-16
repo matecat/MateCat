@@ -4,7 +4,6 @@ import encodeContent from './encodeContent'
 import decodeSegment from './decodeSegment'
 import duplicateFragment from './duplicateFragment'
 import applyEntityToContentBlock from './applyEntityToContentBlock'
-import insertFragment from './insertFragment'
 import getEntitiesInFragment from './getEntitiesInFragment'
 import createNewEntitiesFromMap from './createNewEntitiesFromMap'
 import linkEntities from './linkEntities'
@@ -78,7 +77,6 @@ const DraftMatecatUtils = {
   manageCaretPositionNearEntity,
   insertEntityAtSelection,
   // Fragment Utils
-  insertFragment,
   duplicateFragment,
   getEntitiesInFragment,
   buildFragmentFromJson,

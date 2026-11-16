@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from 'react'
+import React, {useState} from 'react'
 
 import * as RadixDropdownMenu from '@radix-ui/react-dropdown-menu'
 import * as Popover from '@radix-ui/react-popover'
@@ -133,7 +133,7 @@ export const DropdownMenu = ({
               e.preventDefault()
               e.stopPropagation()
             } else {
-              item.onClick(e)
+              item.onClick?.(e)
             }
             setOpen(false)
           }}

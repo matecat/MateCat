@@ -15,11 +15,20 @@ class YamlTest extends AbstractTest
         $dto = new Yaml();
         $result = $dto->jsonSerialize();
 
+        $this->assertFalse($result['force_double_quoting']);
         $this->assertSame([], $result['translate_keys']);
         $this->assertNull($result['inner_content_type']);
         $this->assertSame([], $result['context_keys']);
         $this->assertSame([], $result['character_limit']);
         $this->assertArrayNotHasKey('do_not_translate_keys', $result);
+    }
+
+    #[Test]
+    public function setForceDoubleQuotingSetsValue(): void
+    {
+        $dto = new Yaml();
+        $dto->setForceDoubleQuoting(true);
+        $this->assertTrue($dto->jsonSerialize()['force_double_quoting']);
     }
 
     #[Test]
@@ -79,6 +88,7 @@ class YamlTest extends AbstractTest
     {
         $dto = new Yaml();
         $dto->fromArray([
+            'force_double_quoting'  => true,
             'translate_keys'        => ['name'],
             'do_not_translate_keys' => ['id'],
             'inner_content_type'    => 'application/json',
@@ -87,6 +97,7 @@ class YamlTest extends AbstractTest
         ]);
 
         $result = $dto->jsonSerialize();
+        $this->assertTrue($result['force_double_quoting']);
         $this->assertSame(['id'], $result['do_not_translate_keys']);
         $this->assertSame('application/json', $result['inner_content_type']);
         $this->assertSame(['ctx'], $result['context_keys']);
@@ -99,6 +110,31 @@ class YamlTest extends AbstractTest
         $this->expectException(DomainException::class);
         $dto = new Yaml();
         $dto->fromArray(['inner_content_type' => 'invalid/type']);
+    }
+
+    /**
+     * The parameter is optional: a payload that omits it keeps the source quoting style.
+     */
+    #[Test]
+    public function fromArrayLeavesForceDoubleQuotingOffWhenOmitted(): void
+    {
+        $dto = new Yaml();
+        $dto->fromArray(['translate_keys' => ['name']]);
+
+        $this->assertFalse($dto->jsonSerialize()['force_double_quoting']);
+    }
+
+    /**
+     * An explicit null is allowed by the JSON schema and is skipped by the isset() guard in
+     * Yaml::fromArray(), leaving the default in place.
+     */
+    #[Test]
+    public function fromArrayAcceptsExplicitNullForceDoubleQuoting(): void
+    {
+        $dto = new Yaml();
+        $dto->fromArray(['force_double_quoting' => null]);
+
+        $this->assertFalse($dto->jsonSerialize()['force_double_quoting']);
     }
 
     #[Test]

@@ -36,7 +36,7 @@ describe('EditorLite', () => {
       <EditorLite content="Hello world" highlightSnippet={{}} />,
     )
 
-    expect(container.textContent).toContain('Hello world')
+    expect(container).toHaveTextContent(/Hello world/)
   })
 
   test('renders content when config.isTargetRTL is true', () => {
@@ -46,19 +46,19 @@ describe('EditorLite', () => {
       <EditorLite content="Ciao mondo" highlightSnippet={{}} />,
     )
 
-    expect(container.textContent).toContain('Ciao mondo')
+    expect(container).toHaveTextContent(/Ciao mondo/)
   })
 
   test('updates rendered content when the content prop changes', () => {
     const {container, rerender} = render(
       <EditorLite content="First version" highlightSnippet={{}} />,
     )
-    expect(container.textContent).toContain('First version')
+    expect(container).toHaveTextContent(/First version/)
 
     rerender(<EditorLite content="Second version" highlightSnippet={{}} />)
 
-    expect(container.textContent).toContain('Second version')
-    expect(container.textContent).not.toContain('First version')
+    expect(container).toHaveTextContent(/Second version/)
+    expect(container).not.toHaveTextContent(/First version/)
   })
 
   describe('imperative handle', () => {

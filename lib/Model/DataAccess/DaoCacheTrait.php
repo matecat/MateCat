@@ -4,7 +4,6 @@
  * @author hashashiyyin domenico@translated.net / ostico@gmail.com
  * Date: 08/08/24
  * Time: 14:35
- *
  */
 
 namespace Model\DataAccess;
@@ -12,7 +11,6 @@ namespace Model\DataAccess;
 use Exception;
 use PDOException;
 use Predis\Client;
-use Psr\Log\InvalidArgumentException;
 use Random\RandomException;
 use ReflectionException;
 use Utils\Logger\LoggerFactory;
@@ -110,9 +108,6 @@ trait DaoCacheTrait
 
 
     /** @noinspection PhpUnusedParameterInspection */
-    /**
-     * @throws InvalidArgumentException
-     */
     protected function _logCache(string $type, string $key, mixed $value, string $sqlQuery): void
     {
         LoggerFactory::getLogger('query_cache')->debug(
@@ -386,7 +381,6 @@ trait DaoCacheTrait
      * @param array<array-key, array{keyMap: string, query: string, value: list<mixed>}> $entries
      *
      * @throws PDOException
-     * @throws InvalidArgumentException
      * @throws Exception
      */
     protected function _setManyInCacheMap(array $entries): void
@@ -564,7 +558,6 @@ trait DaoCacheTrait
      *
      * @throws ReflectionException
      * @throws Exception
-     *
      */
     protected function _deleteCacheByKey(string $key, ?bool $isReverseKeyMap = true): bool
     {

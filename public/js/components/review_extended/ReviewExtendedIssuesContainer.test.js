@@ -1,5 +1,5 @@
 import React from 'react'
-import {act, render, screen, within} from '@testing-library/react'
+import {act, render, screen} from '@testing-library/react'
 import ReviewExtendedIssuesContainer from './ReviewExtendedIssuesContainer'
 import {SegmentContext} from '../segments/SegmentContext'
 import SegmentStore from '../../stores/SegmentStore'
@@ -38,7 +38,7 @@ jest.mock('../../actions/CatToolActions', () => ({
 }))
 
 jest.mock('../../utils/segmentUtils', () => ({
-  isIceSegment: jest.fn(() => false),
+  isLockedSegment: jest.fn(() => false),
 }))
 
 jest.mock('../../constants/SegmentConstants', () => ({
@@ -85,7 +85,7 @@ describe('ReviewExtendedIssuesContainer', () => {
     global.config.lqa_nested_categories = {categories: nestedCategoriesFlatOnly}
     global.config.secondRevisionsCount = 0
     global.config.revisionNumber = 1
-    SegmentUtils.isIceSegment.mockReturnValue(false)
+    SegmentUtils.isLockedSegment.mockReturnValue(false)
   })
 
   afterEach(() => {
@@ -122,7 +122,7 @@ describe('ReviewExtendedIssuesContainer', () => {
   })
 
   test('passes actions=false to issues when the segment is ICE-locked and not unlocked', () => {
-    SegmentUtils.isIceSegment.mockReturnValue(true)
+    SegmentUtils.isLockedSegment.mockReturnValue(true)
     renderContainer(
       {issues: [makeIssue()]},
       {segment: {sid: 'seg-1', unlocked: false}},
@@ -134,7 +134,7 @@ describe('ReviewExtendedIssuesContainer', () => {
   })
 
   test('passes actions=true to issues when the segment is ICE-locked but unlocked', () => {
-    SegmentUtils.isIceSegment.mockReturnValue(true)
+    SegmentUtils.isLockedSegment.mockReturnValue(true)
     renderContainer(
       {issues: [makeIssue()]},
       {segment: {sid: 'seg-1', unlocked: true}},
