@@ -139,13 +139,11 @@ describe('transformTagsToHtml - g and x tags with equiv-text', () => {
     expect(result).not.toContain('<b>')
   })
 
-  test('an x tag is numbered with its equiv-text and no paired class', () => {
+  test('an x-original_x ph is NOT numbered and renders plain, like any ph', () => {
     const result = transformTagsToHtml(xEquiv)
     expect(result).toBe(
-      '<span contenteditable="false" class="tag small tag-selfclosed tag-ph tag-numbered">' +
-        '<span class="index-counter">1</span>' +
-        '<span data-text="true">[#$dp4]</span>' +
-        '</span>',
+      '<span contenteditable="false" class="tag small tag-selfclosed tag-ph">' +
+        '[#$dp4]</span>',
     )
   })
 
@@ -153,7 +151,7 @@ describe('transformTagsToHtml - g and x tags with equiv-text', () => {
     // a ph is replaced before any g, so numbering per replace would give the
     // later pc tag 1 and the earlier g 2
     const result = transformTagsToHtml(
-      gEquivOpen + 'a</g>' + pcOpen + 'b' + pcClose + xEquiv,
+      gEquivOpen + 'a</g>' + xEquiv + pcOpen + 'b' + pcClose,
     )
     const counters = result.match(/index-counter">(\d+)</g)
     expect(counters).toEqual([
@@ -161,7 +159,6 @@ describe('transformTagsToHtml - g and x tags with equiv-text', () => {
       'index-counter">1<',
       'index-counter">2<',
       'index-counter">2<',
-      'index-counter">3<',
     ])
     expect(result.indexOf('[#$dp4]')).toBeLessThan(result.indexOf('&lt;p&gt;'))
   })

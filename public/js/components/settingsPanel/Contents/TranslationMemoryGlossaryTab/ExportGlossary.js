@@ -3,7 +3,6 @@ import PropTypes from 'prop-types'
 import useExport, {EXPORT_TYPE} from './hooks/useExport'
 
 import Checkmark from '../../../../../img/icons/Checkmark'
-import Close from '../../../../../img/icons/Close'
 import CatToolActions from '../../../../actions/CatToolActions'
 import {
   Button,
@@ -11,6 +10,7 @@ import {
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../../../common/Button/Button'
+import IconClose from '../../../../../img/icons/IconClose'
 
 export const ExportGlossary = ({row, onClose}) => {
   const {email, status, onSubmit, onReset} = useExport({
@@ -31,7 +31,6 @@ export const ExportGlossary = ({row, onClose}) => {
         text: `You will receive the link at ${email}`,
         type: 'success',
         position: 'br',
-        allowHtml: true,
         timer: 5000,
       }
       CatToolActions.addNotification(notification)
@@ -58,7 +57,7 @@ export const ExportGlossary = ({row, onClose}) => {
             htmlType={BUTTON_HTML_TYPE.SUBMIT}
             disabled={isFormDisabled || isErrorExport}
           >
-            <Checkmark size={12} />
+            <Checkmark size={16} />
             Confirm
           </Button>
 
@@ -68,7 +67,7 @@ export const ExportGlossary = ({row, onClose}) => {
             htmlType={BUTTON_HTML_TYPE.RESET}
             disabled={isFormDisabled}
           >
-            <Close size={18} />
+            <IconClose size={16} />
           </Button>
         </div>
       </form>

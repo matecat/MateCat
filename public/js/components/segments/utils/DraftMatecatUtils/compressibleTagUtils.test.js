@@ -145,11 +145,8 @@ describe('classifyCompressibleTag - g and x tags', () => {
     })
   })
 
-  test('an x-original_x ph with equiv-text is a single x tag', () => {
-    expect(classifyCompressibleTag(xEquiv)).toMatchObject({
-      kind: 'x',
-      role: 'single',
-    })
+  test('an x-original_x ph is not compressible, even with equiv-text', () => {
+    expect(classifyCompressibleTag(xEquiv)).toBeNull()
   })
 
   test('pc tags report the pc kind', () => {
@@ -165,9 +162,12 @@ describe('classifyCompressibleTag - g and x tags', () => {
 })
 
 describe('hasCompressibleTags - g and x tags', () => {
-  test('true for a g or an x carrying equiv-text', () => {
+  test('true for a g carrying equiv-text', () => {
     expect(hasCompressibleTags(`a ${gEquiv}b${gClose}`)).toBe(true)
-    expect(hasCompressibleTags(`a ${xEquiv} b`)).toBe(true)
+  })
+
+  test('false for an x-original_x ph, even with equiv-text', () => {
+    expect(hasCompressibleTags(`a ${xEquiv} b`)).toBe(false)
   })
 
   test('false for g/x tags without equiv-text', () => {
@@ -184,10 +184,10 @@ describe('createTagNumberer - g and x tags', () => {
     expect(n(gClose)).toEqual({index: 0, role: 'close'})
   })
 
-  test('an x tag takes a number of its own with no partner', () => {
+  test('an x-original_x ph is not numbered and does not consume a number', () => {
     const n = createTagNumberer()
-    expect(n(xEquiv)).toEqual({index: 0, role: 'single'})
-    expect(n(xEquiv)).toEqual({index: 1, role: 'single'})
+    expect(n(xEquiv)).toBeNull()
+    expect(n(gEquiv)).toEqual({index: 0, role: 'open'})
   })
 
   test('a plain g nested in an equiv-text g does not steal its </g>', () => {
@@ -206,14 +206,13 @@ describe('createTagNumberer - g and x tags', () => {
     expect(n(gClose)).toBeNull()
   })
 
-  test('pc, g and x share one counter in document order', () => {
+  test('pc and g share one counter in document order', () => {
     const n = createTagNumberer()
     expect(n(gEquiv).index).toBe(0)
     expect(n(open1).index).toBe(1)
     expect(n(close1).index).toBe(1)
     expect(n(gClose).index).toBe(0)
-    expect(n(xEquiv).index).toBe(2)
-    expect(n(gEquiv2).index).toBe(3)
+    expect(n(gEquiv2).index).toBe(2)
   })
 
   test('an orphan </g> is not numbered', () => {
@@ -224,6 +223,6 @@ describe('createTagNumberer - g and x tags', () => {
     const n = createTagNumberer()
     expect(n(gEquiv, 4)).toEqual({index: 4, role: 'open'})
     expect(n(gClose)).toEqual({index: 4, role: 'close'})
-    expect(n(xEquiv).index).toBe(5)
+    expect(n(gEquiv2).index).toBe(5)
   })
 })

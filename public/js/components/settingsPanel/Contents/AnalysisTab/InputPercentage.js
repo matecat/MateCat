@@ -42,6 +42,7 @@ export const InputPercentage = ({value = '', setFn, className, dataTestid}) => {
   }, [value])
   return (
     <input
+      type="text"
       className={'input-percentage ' + className}
       ref={inputRef}
       value={inputValue}

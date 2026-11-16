@@ -94,7 +94,8 @@ describe('genericErrorAlertMessage', () => {
 
 describe('goodbye', () => {
   it('warns about pending operations', () => {
-    document.body.innerHTML = '<a id="action-download" class="disabled"></a>'
+    document.body.innerHTML =
+      '<table class="popup-tm"><tr><td class="uploadfile uploading"></td></tr></table>'
     const message = CommonUtils.goodbye({})
     expect(message).toContain('pending operation')
   })
@@ -135,6 +136,12 @@ describe('getFileIcon', () => {
     const el = CommonUtils.getFileIcon(ext)
     expect(el).toBeTruthy()
     expect(el.type).toBeTruthy()
+  })
+
+  it('gives epub the same icon as the other desktop publishing formats', () => {
+    expect(CommonUtils.getFileIcon('epub').type).toBe(
+      CommonUtils.getFileIcon('idml').type,
+    )
   })
 })
 

@@ -154,13 +154,10 @@ jest.mock('lodash', () => {
     each: actual.each,
     forEach: actual.forEach,
     isUndefined: (v) => typeof v === 'undefined',
+    debounce: (fn) => fn,
   }
 })
-jest.mock('lodash/function', () => ({
-  debounce: (fn) => fn,
-}))
 jest.mock('immutable', () => ({fromJS: jest.fn()}))
-jest.mock('lodash/array', () => ({union: jest.fn()}))
 
 jest.mock('../utils/speech2text', () => ({
   __esModule: true,
@@ -2025,5 +2022,16 @@ describe('SegmentActions.refreshTagMap', () => {
     expect(renderSpy).toHaveBeenCalledWith([{sid: '1'}], '1')
     expect(AppDispatcher.dispatch).toHaveBeenCalled()
     renderSpy.mockRestore()
+  })
+})
+
+describe('SegmentActions.setCurrentSegment', () => {
+  // MATECAT-5NX: called on mount with the sid of a segment that has none
+  test('does nothing when no segment id is given', () => {
+    jest.clearAllMocks()
+
+    expect(() => SegmentActions.setCurrentSegment(undefined)).not.toThrow()
+    expect(setLastSegmentFromLocalStorage).not.toHaveBeenCalled()
+    expect(setCurrentSegment).not.toHaveBeenCalled()
   })
 })

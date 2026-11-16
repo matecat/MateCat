@@ -5,7 +5,7 @@ export default {
       glos: true,
       owner: true,
       name: 'key3',
-      key: 'e32699c0a360e08948fe',
+      key: '00000000000000000008',
       is_shared: false,
     },
     {
@@ -13,7 +13,7 @@ export default {
       glos: true,
       owner: true,
       name: 'abc',
-      key: '74b6c82408a028b6f020',
+      key: '00000000000000000010',
       is_shared: false,
     },
     {
@@ -21,7 +21,7 @@ export default {
       glos: true,
       owner: true,
       name: 'myKey',
-      key: '21df10c8cce1b31f2d0d',
+      key: '00000000000000000012',
       is_shared: false,
     },
   ],

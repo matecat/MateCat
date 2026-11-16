@@ -308,6 +308,29 @@ describe('SegmentFooterTabMatches', () => {
     expect(screen.getByText('-5%')).toBeInTheDocument()
   })
 
+  test.each(['MT', 'ICE_MT'])(
+    'never shows the language variant penalty on a %s match',
+    (matchType) => {
+      renderComponent({
+        segment: {
+          ...baseSegment,
+          contributions: {
+            matches: [
+              makeMatch({
+                created_by: 'MT-DeepL',
+                match: matchType,
+                source: 'en',
+                target: 'it',
+              }),
+            ],
+          },
+        },
+      })
+      expect(screen.getByText('DeepL')).toBeInTheDocument()
+      expect(screen.queryByText(/\(-1%\)/)).not.toBeInTheDocument()
+    },
+  )
+
   test('CHOOSE_CONTRIBUTION event for matching sid triggers suggestion selection', () => {
     jest.useFakeTimers()
     const TranslationMatches = require('./utils/translationMatches').default

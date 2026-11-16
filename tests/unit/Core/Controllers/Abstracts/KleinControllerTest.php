@@ -35,9 +35,7 @@ class KleinControllerTest extends AbstractTest
     public function parseIdSegmentReturnsIdAndSplitNum(): void
     {
         $controller = $this->createController();
-        $method = new ReflectionMethod($controller, 'parseIdSegment');
-
-        $result = $method->invoke($controller, '123-2');
+        $result = $controller->parseIdSegment('123-2');
 
         $this->assertSame('123', $result['id_segment']);
         $this->assertSame('2', $result['split_num']);
@@ -47,9 +45,7 @@ class KleinControllerTest extends AbstractTest
     public function parseIdSegmentReturnsNullSplitNumWhenNoDelimiter(): void
     {
         $controller = $this->createController();
-        $method = new ReflectionMethod($controller, 'parseIdSegment');
-
-        $result = $method->invoke($controller, '456');
+        $result = $controller->parseIdSegment('456');
 
         $this->assertSame('456', $result['id_segment']);
         $this->assertNull($result['split_num']);
@@ -59,9 +55,7 @@ class KleinControllerTest extends AbstractTest
     public function parseIdSegmentHandlesMultipleDelimiters(): void
     {
         $controller = $this->createController();
-        $method = new ReflectionMethod($controller, 'parseIdSegment');
-
-        $result = $method->invoke($controller, '789-3-extra');
+        $result = $controller->parseIdSegment('789-3-extra');
 
         $this->assertSame('789', $result['id_segment']);
         $this->assertSame('3', $result['split_num']);

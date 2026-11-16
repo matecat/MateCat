@@ -11,11 +11,9 @@ import {Base64} from 'js-base64'
  *      close `id="x_2"` share the base id (`x`), so pairing is by base id.
  *  - `g`: an XLIFF 1.2 `<g>` opening tag with an `equiv-text` attribute. Its `</g>`
  *    carries no attribute at all, so it is paired by the numberer (see below).
- *  - `x`: an XLIFF 1.2 `<x>` with an `equiv-text` attribute, which the backend sends
- *    as a `ph` with `ctype="x-original_x"`. It stands alone and has no partner.
  *
- * Any other tag (semantic placeholders, line breaks, x-html, a `<g>` without
- * equiv-text, …) is NOT compactable and is ignored by every helper here.
+ * Any other tag (semantic placeholders, line breaks, x-html, an `x-original_x` ph,
+ * a `<g>` without equiv-text, …) is NOT compactable and is ignored by every helper here.
  */
 
 // ctype -> {role, hasDataRef}. Anything not listed is a non-pc ph tag.
@@ -25,8 +23,6 @@ export const PC_CTYPES = {
   'x-pc_open_data_ref': {role: 'open', hasDataRef: true},
   'x-pc_close_data_ref': {role: 'close', hasDataRef: true},
 }
-
-export const X_CTYPE = 'x-original_x'
 
 const CTYPE_RE = /\bctype="([^"]+)"/
 const ID_RE = /\bid="([^"]*)"/
@@ -50,7 +46,7 @@ export const getGEquivText = (encodedText) => {
 /**
  * Classify a tag from its raw encoded text.
  * @param {string} encodedText e.g. `<ph id="source1_1" ctype="x-pc_open_data_ref" .../>`
- * @returns {{kind:'pc'|'g'|'x', role:'open'|'close'|'single', hasDataRef:boolean, ctype:string, id:string, baseId:string}|null}
+ * @returns {{kind:'pc'|'g', role:'open'|'close', hasDataRef:boolean, ctype:string, id:string, baseId:string}|null}
  *          null when the tag is not compressible. A `</g>` is null too: whether it
  *          closes a compressible `<g>` depends on its opener, which only
  *          `createTagNumberer` tracks.
@@ -70,9 +66,6 @@ export const classifyCompressibleTag = (encodedText) => {
   }
   if (!encodedText.startsWith('<ph')) return null
   const ctype = encodedText.match(CTYPE_RE)?.[1]
-  if (ctype === X_CTYPE && EQUIV_TEXT_RE.test(encodedText)) {
-    return {kind: 'x', role: 'single', hasDataRef: false, ctype, id, baseId: id}
-  }
   const info = ctype && PC_CTYPES[ctype]
   if (!info) return null
   const baseId = id.replace(/_\d+$/, '') // source1_1 -> source1
@@ -82,7 +75,6 @@ export const classifyCompressibleTag = (encodedText) => {
 const COMPRESSIBLE_TEST_RE = new RegExp(
   [
     `<ph\\b[^>]*\\bctype="(${Object.keys(PC_CTYPES).join('|')})"[^>]*\\/>`,
-    `<ph\\b[^>]*\\bctype="${X_CTYPE}"[^>]*\\bequiv-text="base64:[^"]+"[^>]*\\/>`,
     `<g\\b[^>]*\\bequiv-text="base64:[^"]+"(?![^>]*\\/>)[^>]*>`,
   ].join('|'),
 )
@@ -97,8 +89,7 @@ export const hasCompressibleTags = (segmentString) =>
 /**
  * Stateful numberer. Feed each tag's encoded text in document order; returns
  * `{index, role}` for compressible tags (open and close of a pair share the same
- * 0-based `index`, rendered as `index + 1`; an `x` tag gets its own index with
- * role `single`) or `null` for any other tag.
+ * 0-based `index`, rendered as `index + 1`) or `null` for any other tag.
  *
  * Every `<g>` and `</g>` must be fed, compressible or not: a `</g>` carries no
  * attribute, so it closes whichever `<g>` is innermost. A `<g>` without
@@ -143,8 +134,6 @@ export const createTagNumberer = () => {
     } else if (c.kind === 'g') {
       index = next++
       gStack.push(index)
-    } else if (c.kind === 'x') {
-      index = next++
     } else if (c.hasDataRef && byBaseId.has(c.baseId)) {
       index = byBaseId.get(c.baseId)
     } else if (c.hasDataRef) {

@@ -44,16 +44,16 @@ describe('createNewEntitiesFromMap - g and x tags with equiv-text', () => {
     expect(close.data.index).toBeUndefined()
   })
 
-  test('g, pc and x tags are numbered together in document order', () => {
+  test('an x-original_x ph is not numbered and does not shift the g numbers', () => {
     const tags = tagsOf(
       `${xTag('mtc_1')} ${gOpen('1', 'WyMkZHA0XQ==')}a</g> ${xTag('mtc_2')}`,
     )
     expect(tags.map(({data}) => [data.name, data.index, data.tagRole])).toEqual(
       [
-        ['ph', 0, 'single'],
-        ['g', 1, 'open'],
-        ['gCl', 1, 'close'],
-        ['ph', 2, 'single'],
+        ['ph', undefined, undefined],
+        ['g', 0, 'open'],
+        ['gCl', 0, 'close'],
+        ['ph', undefined, undefined],
       ],
     )
   })

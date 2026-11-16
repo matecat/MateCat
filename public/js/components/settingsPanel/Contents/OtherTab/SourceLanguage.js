@@ -9,10 +9,7 @@ export const SourceLanguage = () => {
         <p>Select the source language for your project.</p>
       </div>
       <div className="options-select-container">
-        <SourceLanguageSelect
-          isRenderedInsideTab={true}
-          dropdownClassName="select-dropdown__wrapper-portal"
-        />
+        <SourceLanguageSelect isRenderedInsideTab={true} />
       </div>
     </div>
   )

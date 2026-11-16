@@ -238,7 +238,9 @@ a.button-component-container {
   --btnTextColorDisabled: #{colors.$grey200};
   --btnAltTextColor: #{colors.$black};
   --btnAltTextColorHover: #{colors.$grey600};
-  --btnAltTextColorDisabled: #{rgba(colors.$grey700, 0.12)};
+  // Disabled ghost/outline/link text: muted but still readable (at 12% opacity it
+  // nearly vanished, e.g. "Buy translation" on the analysis page)
+  --btnAltTextColorDisabled: #{colors.$grey400};
 
   --btnBorderColor: #{colors.$grey200};
   --btnBorderColorHover: #{colors.$grey700};
@@ -256,7 +258,7 @@ a.button-component-container {
   --btnTextColorDisabled: #{colors.$grey200};
   --btnAltTextColor: #{colors.$black};
   --btnAltTextColorHover: #{colors.$grey600};
-  --btnAltTextColorDisabled: #{rgba(colors.$grey700, 0.12)};
+  --btnAltTextColorDisabled: #{colors.$grey400};
 
   --btnBorderColor: #{colors.$grey200};
   --btnBorderColorHover: #{colors.$grey700};

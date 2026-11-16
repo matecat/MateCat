@@ -1097,6 +1097,11 @@ class CatUtils
                     $params = $filters_extraction_parameters->dita;
                 }
                 break;
+            case "md":
+                if (isset($filters_extraction_parameters->markdown)) {
+                    $params = $filters_extraction_parameters->markdown;
+                }
+                break;
         }
 
         return $params;

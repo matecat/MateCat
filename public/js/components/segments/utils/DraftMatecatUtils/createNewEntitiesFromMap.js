@@ -165,7 +165,7 @@ const createNewEntitiesFromMap = (
 
 // Numbers ONLY the compressible tags (see compressibleTagUtils). Open and close of
 // a pair get the same 0-based index (rendered as index + 1); a `tagRole` of
-// 'open'/'close'/'single' drives the CSS. Any other tag is left untouched (no
+// 'open'/'close' drives the CSS. Any other tag is left untouched (no
 // index => not compactable). Every <g> and </g> reaches the numberer, since a
 // </g> is paired with its opener by position.
 // Any `index`/`tagRole` already present (inherited from the source tag map) is honoured.

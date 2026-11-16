@@ -376,7 +376,7 @@
           {
             "name": "mt_evaluation",
             "in": "formData",
-            "description": "Activate MT evaluation",
+            "description": "Activate MT evaluation. Requires an active Lara license",
             "required": false,
             "type": "boolean"
           },
@@ -446,7 +446,7 @@
           {
             "name": "subfiltering_handlers",
             "in": "formData",
-            "description": "An array string to choose which syntaxes to detect and lock in tags during translation. Allowed values are: \"markup\", \"percent_double_curly\", \"twig\", \"ruby_on_rails\", \"double_snail\", \"double_square\", \"dollar_curly\", \"single_curly\", \"objective_c_ns\", \"double_percent\", \"square_sprintf\", \"sprintf\"",
+            "description": "An array string to choose which syntaxes to detect and lock in tags during translation. Allowed values are: \"markup\", \"percent_double_curly\", \"twig\", \"ruby_on_rails\", \"double_snail\", \"double_square\", \"dollar_curly\", \"single_curly\", \"objective_c_ns\", \"double_percent\", \"square_sprintf\", \"single_square\", \"sprintf\"",
             "required": false,
             "type": "string",
             "default": "[]",
@@ -2491,7 +2491,12 @@
           "200": {
             "description": "Translation issues",
             "schema": {
-              "$ref": "#/definitions/TranslationIssues"
+              "type": "object",
+              "properties": {
+                "issues": {
+                  "$ref": "#/definitions/TranslationIssues"
+                }
+              }
             }
           },
           "default": {
@@ -2905,57 +2910,57 @@
           {
             "name": "name",
             "in": "formData",
-            "description": "The glossary's name",
+            "description": "The glossary's name. Optional, only echoed back in the response.",
             "type": "string",
             "required": false
           },
           {
             "name": "tm_key",
             "in": "formData",
-            "description": "The tm key.",
+            "description": "The TM key the glossary is meant for. Required, but only echoed back in the response: it is not checked here.",
             "required": true,
             "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "Upload and check a glossary file",
+            "description": "Glossary file is valid",
             "schema": {
               "type": "object",
               "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "uuids": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "uuid": {
-                            "type": "string",
-                            "example": "1234-5678-90ab-cdef"
-                          },
-                          "name": {
-                            "type": "string",
-                            "example": "This is a glossary name"
-                          },
-                          "numberOfLanguages": {
-                            "type": "integer",
-                            "example": 3
-                          }
-                        }
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "x-nullable": true,
+                        "description": "The glossary name sent in the request, or null",
+                        "example": "This is a glossary name"
+                      },
+                      "tmKey": {
+                        "type": "string",
+                        "example": "a1b2c3d4e5f6a7b8c9d0"
+                      },
+                      "numberOfLanguages": {
+                        "type": "integer",
+                        "example": 3
                       }
                     }
                   }
-                },
-                "success": {
-                  "type": "boolean"
                 }
               }
             }
           },
           "400": {
-            "description": "Unexpected error",
+            "description": "Missing `tm_key`, or the file is not a valid glossary",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "description": "Authentication required",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -3123,8 +3128,8 @@
         "tags": [
           "TM keys"
         ],
-        "summary": "Create (or update) a TM key.",
-        "description": "Create a new TM key or update its name. If the 'key' parameter is not provided, a new key will be created; if a valid key is provided, the key's name will be updated.",
+        "summary": "Create a new TM key, rename an existing one or add to your portfolio a key shared by a different user.",
+        "description": "If the 'key' parameter is not provided, a new key will be created. If a valid key is provided and the key is already in your list, its name will be updated; if it is not in your list yet (i.e. it was shared with you by a different user), the key will be added to your list with your chosen name.",
         "consumes": [
           "application/json"
         ],
@@ -3137,7 +3142,7 @@
                 "key": {
                   "type": "string",
                   "example": "1234_xxxx",
-                  "description": "In case of already existent TM key, it will be updated."
+                  "description": "The TM key to rename or to add to your list. Omit it to create a new key. If the key is already in your list, its name will be updated; if it was shared with you by a different user, it will be added to your list with your chosen name."
                 },
                 "name": {
                   "type": "string",
@@ -5843,6 +5848,51 @@
             "do_not_translate_elements"
           ],
           "additionalProperties": false
+        },
+        "markdown": {
+          "type": "object",
+          "description": "Applies to .md files. Controls the frontmatter block at the beginning of the file.",
+          "properties": {
+            "extract_frontmatter": {
+              "type": "boolean",
+              "description": "Extract the frontmatter block for translation. With no key list, every frontmatter key is translatable.",
+              "x-nullable": true,
+              "default": false
+            },
+            "translate_frontmatter_keys": {
+              "type": "array",
+              "description": "Only these frontmatter keys are translatable. Key names are case sensitive. Applies only when extract_frontmatter is true; cannot be sent together with do_not_translate_frontmatter_keys.",
+              "items": {
+                "type": "string"
+              },
+              "x-nullable": true
+            },
+            "do_not_translate_frontmatter_keys": {
+              "type": "array",
+              "description": "Every frontmatter key except these is translatable. Key names are case sensitive. Applies only when extract_frontmatter is true; cannot be sent together with translate_frontmatter_keys.",
+              "items": {
+                "type": "string"
+              },
+              "x-nullable": true
+            }
+          },
+          "dependencies": {
+            "translate_frontmatter_keys": {
+              "not": {
+                "required": [
+                  "do_not_translate_frontmatter_keys"
+                ]
+              }
+            },
+            "do_not_translate_frontmatter_keys": {
+              "not": {
+                "required": [
+                  "translate_frontmatter_keys"
+                ]
+              }
+            }
+          },
+          "additionalProperties": false
         }
       }
     },
@@ -7008,6 +7058,10 @@
     "Issue": {
       "type": "object",
       "properties": {
+        "uid": {
+          "type": "integer",
+          "x-nullable": true
+        },
         "comment": {
           "type": "string"
         },
@@ -7026,22 +7080,7 @@
         "id_segment": {
           "type": "string"
         },
-        "is_full_segment": {
-          "type": "string"
-        },
         "severity": {
-          "type": "string"
-        },
-        "start_node": {
-          "type": "string"
-        },
-        "start_offset": {
-          "type": "string"
-        },
-        "end_node": {
-          "type": "string"
-        },
-        "end_offset": {
           "type": "string"
         },
         "translation_version": {
@@ -7050,11 +7089,47 @@
         "target_text": {
           "type": "string"
         },
-        "rebutted_at": {
-          "type": "string"
-        },
         "penalty_points": {
           "type": "string"
+        },
+        "diff": {
+          "type": "object",
+          "x-nullable": true
+        },
+        "comments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/IssueComment"
+          }
+        },
+        "revision_number": {
+          "type": "integer",
+          "description": "The revision phase the issue was raised in (1 or 2), null for issues raised in translation",
+          "x-nullable": true
+        }
+      }
+    },
+    "IssueComment": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "uid": {
+          "type": "integer"
+        },
+        "id_qa_entry": {
+          "type": "integer",
+          "description": "The id of the issue the comment belongs to"
+        },
+        "create_date": {
+          "type": "string"
+        },
+        "comment": {
+          "type": "string"
+        },
+        "source_page": {
+          "type": "integer"
         }
       }
     },

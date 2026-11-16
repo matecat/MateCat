@@ -45,6 +45,7 @@ export const LaraGlossaryRow = ({row, setRows, isReadOnly}) => {
       <div className="glossary-row-name">
         {setInputNameContainer(
           <input
+            type="text"
             className="glossary-row-name-input"
             value={row.name}
             disabled={true}

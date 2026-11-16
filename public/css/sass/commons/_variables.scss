@@ -12,22 +12,30 @@ $font-size-base: 18px;
 $font-size-small: 16px;
 $font-size-xsmall: 14px;
 
+// Top-level page titles (Projects, Volume analysis, Quality report, Activity log)
+$font-size-page-title: 30px;
+
 $line-height-big: 26px;
 $line-height-base: 24px;
 $line-height-small: 20px;
 $line-height-xsmall: 16px;
 
-$font-style-big: $font-weight-regular list.slash($font-size-big, $line-height-big) $font-family; //500 20/26 Calibri, Arial, Helvetica, sans-serif
-$font-style-base: $font-weight-regular list.slash($font-size-base, $line-height-base) $font-family; //500 18/24 Calibri, Arial, Helvetica, sans-serif
-$font-style-small: $font-weight-regular list.slash($font-size-small, $line-height-small) $font-family; //400 16/20 Calibri, Arial, Helvetica, sans-serif
-$font-style-xsmall: $font-weight-regular list.slash($font-size-xsmall, $line-height-xsmall) $font-family; //400 14/16 Calibri, Arial, Helvetica, sans-serif
+$font-style-big: $font-weight-regular
+  list.slash($font-size-big, $line-height-big) $font-family; //500 20/26 Calibri, Arial, Helvetica, sans-serif
+$font-style-base: $font-weight-regular
+  list.slash($font-size-base, $line-height-base) $font-family; //500 18/24 Calibri, Arial, Helvetica, sans-serif
+$font-style-small: $font-weight-regular
+  list.slash($font-size-small, $line-height-small) $font-family; //400 16/20 Calibri, Arial, Helvetica, sans-serif
+$font-style-xsmall: $font-weight-regular
+  list.slash($font-size-xsmall, $line-height-xsmall) $font-family; //400 14/16 Calibri, Arial, Helvetica, sans-serif
 
 $font-style-heading1: $font-weight-bold 68px/80px $font-family;
 $font-style-heading2: $font-weight-bold 48px/56px $font-family;
 $font-style-heading3: $font-weight-bold 34px/40px $font-family;
 $font-style-heading4: $font-weight-bold 24px/28px $font-family;
 $font-style-heading5: $font-weight-bold 20px/24px $font-family;
-$font-style-heading6: $font-weight-bold list.slash($font-size-base, $line-height-base) $font-family;
+$font-style-heading6: $font-weight-bold
+  list.slash($font-size-base, $line-height-base) $font-family;
 
 $border-radius-default: 8px;
 $border-radius-big: 16px;
@@ -38,10 +46,10 @@ $notifications-width: 400px;
 
 $notificationShadowOpacity: 0.9;
 
-$notification-success: #11C38F;
-$notification-error: #ED655C ;
-$notification-warning: #D9943E;
-$notification-info: #60A9F6;
+$notification-success: #11c38f;
+$notification-error: #ed655c;
+$notification-warning: #d9943e;
+$notification-info: #60a9f6;
 
 @mixin box-sizing($boxsizing) {
   -webkit-box-sizing: $boxsizing;

@@ -8,12 +8,12 @@
 
 .outsource-container {
   display: flex;
-  padding: 8px 24px 24px 24px;
+  padding: 24px;
   flex-direction: column;
   align-items: flex-end;
   gap: 8px;
   align-self: stretch;
-  border-bottom: 1px solid colors.$grey100;
+  border: 1px solid colors.$grey100;
   background: colors.$grey50;
 
   &.transitionOutsource-enter {
@@ -56,29 +56,6 @@
     }
   }
 
-  .select {
-    padding: 5px 46px 9px 12px;
-    border-radius: variables.$border-radius-default;
-    color: colors.$black;
-    background: colors.$black100
-  }
-
-  .dropdown__list {
-    padding: 0;
-
-    li.dropdown__option {
-      height: 40px;
-    }
-  }
-
-  .select-with-icon__wrapper {
-    height: 32px;
-  }
-
-  .select__dropdown-wrapper {
-    width: 190%;
-  }
-
   .gmt {
     .gmt-outsourced {
       display: inline-block;
@@ -103,7 +80,7 @@
     font-weight: 700;
     font-size: variables.$font-size-big;
     line-height: 28px;
-    margin-bottom: 8px ;
+    margin-bottom: 8px;
   }
   .delivery-order,
   .container-reduced {
@@ -198,7 +175,7 @@
               flex-direction: column;
               display: flex;
               position: relative;
-              gap: 8px;
+              gap: 4px;
               width: 160px;
               &.translator-email {
                 display: flex;
@@ -206,37 +183,43 @@
                 align-items: flex-start;
                 flex: 1 0 0;
               }
-              &.translator-delivery h2{
+              &.translator-delivery h2 {
                 line-height: normal;
-              }
-              .select-with-label__wrapper {
-                gap: 8px;
-                label {
-                  margin-bottom: 0;
-                }
               }
               label {
                 font-size: variables.$font-size-xsmall;
-                line-height: 20px;
-                font-weight: 400;
+                color: colors.$grey700;
+                text-align: left;
               }
 
               input[type='text'],
-              input[type='email'],
-              span.select {
-                box-shadow: inset 0 1px 3px colors.$grey200;
+              input[type='email'] {
+                box-sizing: border-box;
+                width: 100%;
+                height: 40px;
+                color: colors.$black;
                 border: 1px solid colors.$grey200;
-                font-family: Calibri, Arial, Helvetica, sans-serif;
-                border-radius: variables.$border-radius-default;
-                height: 32px;
-                background-color: colors.$black100;
-                padding: 6px 12px;
-                &:focus {
-                  border-color: colors.$blue300;
-                }
+                font-size: 16px;
+                line-height: 24px;
+                font-weight: 400;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                border-radius: 8px;
+                padding: 8px 12px;
 
+                &::placeholder {
+                  color: colors.$grey400;
+                  opacity: 1;
+                }
+                &:hover {
+                  border-color: colors.$grey400;
+                }
+                &:focus,
                 &:active {
-                  border-color: colors.$blue300;
+                  border-color: colors.$grey400;
+                  box-shadow: 0 0 0 1px colors.$grey400;
+                  outline: none;
                 }
               }
 
@@ -247,18 +230,6 @@
 
               &.translator-time {
                 width: 202px;
-
-                .selection.dropdown {
-                  width: 100%;
-                  min-width: 91px !important;
-                  border: 1px solid colors.$grey200;
-                  box-shadow: inset 0 1px 3px colors.$grey200;
-                  font-size: variables.$font-size-xsmall;
-
-                  .menu {
-                    height: 205px;
-                  }
-                }
               }
 
               &.gmt {
@@ -373,7 +344,8 @@
     align-self: stretch;
     justify-content: space-between;
 
-    .fiducial-logo, svg {
+    .fiducial-logo,
+    svg {
       color: colors.$grey400;
     }
 
@@ -425,7 +397,6 @@
         width: 60%;
         align-items: center;
         border-right: 1px solid colors.$grey100;
-
       }
 
       .translator-avatar {
@@ -452,10 +423,10 @@
         color: colors.$blue500;
       }
 
-      .translator-words, .translator-feedback {
+      .translator-words,
+      .translator-feedback {
         font: variables.$font-size-xsmall;
       }
-
 
       .source-target-outsource {
         display: flex;
@@ -463,7 +434,6 @@
         font: variables.$font-style-base;
         font-weight: 700;
       }
-
 
       .job-payment {
         text-align: right;
@@ -536,7 +506,7 @@
 
         label {
           font: variables.$font-style-xsmall;
-          color: colors.$grey400;
+          color: colors.$grey700;
         }
 
         .delivery-date {
@@ -678,7 +648,6 @@
           }
         }
       }
-
     }
 
     .delivery-order-not-available {
@@ -749,7 +718,6 @@
           }
         }
       }
-
     }
   }
 
@@ -917,7 +885,6 @@
         align-items: center;
         gap: 16px;
 
-
         .item {
           display: flex;
           align-items: center;
@@ -941,8 +908,14 @@
             }
           }
         }
-
       }
     }
+  }
+}
+
+.gmt-select-portal-dropdown {
+  .custom-dropdown {
+    width: max-content;
+    max-width: 350px;
   }
 }
