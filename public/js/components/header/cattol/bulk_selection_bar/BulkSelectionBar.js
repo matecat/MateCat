@@ -13,7 +13,7 @@ import {
   BUTTON_TYPE,
 } from '../../../common/Button/Button'
 import IconChevronLeft from '../../../../../img/icons/IconChevronLeft'
-import Checkmark from '../../../../../img/icons/Checkmark'
+import CircleCheckmark from '../../../../../img/icons/CircleCheckmark'
 
 // The bulk endpoints reject with {response, errors}; a plain Error can also reach us if the request
 // never left the browser.
@@ -226,7 +226,7 @@ const BulkSelectionBar = ({isReview, active, onActiveChange = () => {}}) => {
             onClick={onClickBulk}
           >
             <div>
-              <Checkmark size={16} />
+              <CircleCheckmark />
             </div>
             {isReview ? 'MARK AS APPROVED' : 'MARK AS TRANSLATED'}
           </Button>

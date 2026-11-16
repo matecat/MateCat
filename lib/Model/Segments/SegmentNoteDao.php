@@ -2,8 +2,11 @@
 
 namespace Model\Segments;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use PDO;
+use PDOException;
+use ReflectionException;
 
 class SegmentNoteDao extends AbstractDao
 {
@@ -13,9 +16,9 @@ class SegmentNoteDao extends AbstractDao
      * @param int $ttl
      *
      * @return SegmentNoteStruct[]
-     * @throws \ReflectionException
-     * @throws \PDOException
-     * @throws \Exception
+     * @throws ReflectionException
+     * @throws PDOException
+     * @throws Exception
      */
     public function getBySegmentId(int $id_segment, int $ttl = 86400): array
     {
@@ -29,23 +32,39 @@ class SegmentNoteDao extends AbstractDao
     }
 
     /**
+     * Read the notes of a set of segments, such as one page of the segment analysis API.
+     *
+     * Not cached. Each call asks for a different list of ids, so a cached result was almost never
+     * read again, and every list landed in the same Redis hash: on production that hash reached
+     * 18.9 GB and pushed the login tokens out of Redis. The query uses the `id_segment` index.
+     *
+     * Example: `getBySegmentIds([10, 11])` returns every note of segments 10 and 11.
+     *
      * @param list<int> $ids
-     * @param int $ttl
      *
      * @return list<SegmentNoteStruct>
-     * @throws \ReflectionException
-     * @throws \PDOException
-     * @throws \Exception
+     * @throws PDOException
      */
-    public function getBySegmentIds(array $ids = [], int $ttl = 86400): array
+    public function getBySegmentIds(array $ids): array
     {
-        $stmt = $this->database->getConnection()->prepare("SELECT * FROM segment_notes WHERE id_segment IN ( " . implode(', ', $ids) . " ) ");
+        if ($ids === []) {
+            return [];
+        }
 
-        return array_values($this->setCacheTTL($ttl)->_fetchObjectMap(
-            $stmt,
-            SegmentNoteStruct::class,
-            []
-        ));
+        $stmt = $this->_getStatementForQuery(
+            "SELECT * FROM segment_notes WHERE id_segment IN ( " . implode(',', array_fill(0, count($ids), '?')) . " ) "
+        );
+        $stmt->setFetchMode(PDO::FETCH_CLASS, SegmentNoteStruct::class);
+        $stmt->execute(array_values($ids));
+
+        $notes = [];
+        foreach ($stmt->fetchAll() as $note) {
+            if ($note instanceof SegmentNoteStruct) {
+                $notes[] = $note;
+            }
+        }
+
+        return $notes;
     }
 
     /**
@@ -53,7 +72,7 @@ class SegmentNoteDao extends AbstractDao
      * @param int $stop
      *
      * @return array<int, list<array{id_segment: int, id: int, note: string}>>
-     * @throws \PDOException
+     * @throws PDOException
      */
     public function getAggregatedBySegmentIdInInterval(int $start, int $stop): array
     {
@@ -76,7 +95,7 @@ class SegmentNoteDao extends AbstractDao
      * @param int $stop
      *
      * @return array<int, list<array{id_segment: int, id: int, note: string|null, json: string|null}>>
-     * @throws \PDOException
+     * @throws PDOException
      */
     public function getAllAggregatedBySegmentIdInInterval(int $start, int $stop): array
     {
@@ -100,9 +119,9 @@ class SegmentNoteDao extends AbstractDao
      * @param int $ttl
      *
      * @return SegmentNoteStruct[]
-     * @throws \ReflectionException
-     * @throws \PDOException
-     * @throws \Exception
+     * @throws ReflectionException
+     * @throws PDOException
+     * @throws Exception
      */
     public function getJsonNotesByRange(int $id_segment_start, int $id_segment_stop, int $ttl = 0): array
     {

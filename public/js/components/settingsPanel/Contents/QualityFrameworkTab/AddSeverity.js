@@ -115,7 +115,7 @@ export const AddSeverity = ({numbersOfColumns}) => {
           disabled: !name || typeof error === 'string',
           children: (
             <>
-              <Checkmark size={14} />
+              <Checkmark size={18} />
               Confirm
             </>
           ),
@@ -136,6 +136,7 @@ export const AddSeverity = ({numbersOfColumns}) => {
         >
           <input
             className={`quality-framework-input input${error ? ' quality-framework-input-error' : ''}`}
+            type="text"
             placeholder="Name"
             value={name}
             onChange={(e) => {

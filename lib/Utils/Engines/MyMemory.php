@@ -762,15 +762,19 @@ class MyMemory extends AbstractEngine
       * @param string $filePath
       * @param string $memoryKey
       * @param UserStruct $user * Not used
+      * @param bool $mtImport true asks MyMemory to also import the TMX into Lara with its own license.
+      *                       Example: `true` → `mt_import=true`.
       *
       * @return FileImportAndStatusResponse
       * @throws RuntimeException
       */
-     public function importMemory(string $filePath, string $memoryKey, UserStruct $user): FileImportAndStatusResponse
+     public function importMemory(string $filePath, string $memoryKey, UserStruct $user, bool $mtImport = false): FileImportAndStatusResponse
      {
         $postFields = [
-            'tmx' => $this->getCurlFile($filePath),
-            'key' => trim($memoryKey)
+            'tmx'       => $this->getCurlFile($filePath),
+            'key'       => trim($memoryKey),
+            // MyMemory expects the literal strings: a bool in multipart becomes "1" or "".
+            'mt_import' => $mtImport ? 'true' : 'false',
         ];
 
         $this->call("tmx_import_relative_url", $postFields, true);
@@ -872,8 +876,9 @@ class MyMemory extends AbstractEngine
 
         $this->call('api_key_check_auth_url', $postFields);
 
-        if (!$this->result->responseStatus == 200) {
-            $this->logger->debug("Error: The check for MyMemory private key correctness failed: " . $this->result['error']['message'] . " ErrNum: " . $this->result['error']['code']);
+        if ($this->result->responseStatus != 200) {
+            $error = is_array($this->result->responseData) ? ($this->result->responseData['error'] ?? []) : [];
+            $this->logger->debug("Error: The check for MyMemory private key correctness failed: " . ($error['message'] ?? '') . " ErrNum: " . ($error['code'] ?? ''));
             throw new Exception("Error: The private TM key you entered ($apiKey) appears to be invalid. Please check that the key is correct.", -2);
         }
 

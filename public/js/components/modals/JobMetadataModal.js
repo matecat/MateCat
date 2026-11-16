@@ -27,6 +27,12 @@ const removeNotAllowedLinksFromHtml = (html) => {
   return div.innerHTML
 }
 
+// Plain-text instructions keep their line breaks. Text that already carries block markup (plugins
+// render markdown to paragraphs first) is left alone, or every newline between blocks doubles.
+const BLOCK_MARKUP = /<(p|br|div|ul|ol|li|h[1-6]|blockquote|pre|table)\b/i
+const preserveLineBreaks = (text) =>
+  BLOCK_MARKUP.test(text) ? text : text.replace(/\r\n|\r|\n/g, '<br/>')
+
 const JobMetadataModal = (props) => {
   const [currentFile, setCurrentFile] = useState(props.currentFile)
 
@@ -37,7 +43,9 @@ const JobMetadataModal = (props) => {
   // escaping and the link decision happen here. Plugins render markdown over the same value
   // first; filterXSS and the link check are both idempotent.
   const getHtml = (text) =>
-    text ? removeNotAllowedLinksFromHtml(filterXSS(text)) : text
+    text
+      ? removeNotAllowedLinksFromHtml(filterXSS(preserveLineBreaks(text)))
+      : text
 
   const getMTCReferences = ({metadata}) => {
     return (
@@ -80,6 +88,7 @@ const JobMetadataModal = (props) => {
               <div className="transition">
                 {file.metadata.instructions && (
                   <div
+                    className="instructions-text"
                     dangerouslySetInnerHTML={{
                       __html: getHtml(file.metadata.instructions),
                     }}
@@ -101,10 +110,11 @@ const JobMetadataModal = (props) => {
     return (
       <div className="matecat-modal-text">
         <div className={'description'}>
-          <h3>Please read the following notes and references carefully:</h3>
+          <h4>Please read the following notes and references carefully:</h4>
         </div>
         <div className="instructions-container">
-          <p
+          <div
+            className="instructions-text"
             dangerouslySetInnerHTML={{
               __html: getHtml(file.metadata.instructions),
             }}
@@ -133,7 +143,8 @@ const JobMetadataModal = (props) => {
               <div>
                 <h4>Project instructions</h4>
                 <div className="instructions-container">
-                  <p
+                  <div
+                    className="instructions-text"
                     dangerouslySetInnerHTML={{
                       __html: getHtml(props.projectInfo),
                     }}

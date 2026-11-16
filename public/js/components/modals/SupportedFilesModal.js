@@ -28,7 +28,9 @@ const SupportedFilesModal = ({supportedFiles: preloaded}) => {
   const formats = keys
     .map((name) => ({
       name,
-      items: supportedFiles[name].filter((item) => !isZip(item)),
+      items: supportedFiles[name]
+        .filter((item) => !isZip(item))
+        .sort((a, b) => a[0].ext.localeCompare(b[0].ext)),
     }))
     .filter(({items}) => items.length > 0)
     .sort((a, b) => b.items.length - a.items.length)

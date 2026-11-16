@@ -113,7 +113,6 @@ describe('callbackForSegmentNotInSample', () => {
       text: 'Sample is trying to focus on segment #123, but segment is no longer in the sample',
       title: 'Segment not in sample',
       type: 'warning',
-      allowHtml: true,
     })
   })
 })

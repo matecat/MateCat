@@ -203,25 +203,7 @@
     position: relative;
   }
   .button-notes {
-    color: colors.$white !important;
-    font-weight: bold;
-    text-decoration: none;
-    padding: 6px 12px;
-    border-radius: 2px;
-    font-size: variables.$font-size-small;
-    background: colors.$blue500;
-    user-select: none;
-    cursor: pointer;
-    min-width: 95px;
     margin-left: 15px;
-    &:hover {
-      background-color: colors.$blue600;
-    }
-    svg {
-      display: block;
-      margin-top: 1px;
-      float: left;
-    }
   }
   .projectbar-wordcounter {
     min-width: 140px;
