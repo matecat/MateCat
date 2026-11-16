@@ -85,8 +85,8 @@ let CommentsStore = assign({}, EventEmitter.prototype, {
       )
       CommentsStore.db.refreshHistory()
     },
-    getCommentsBySegment: function (s) {
-      var s = Number(s)
+    getCommentsBySegment: function (segmentId) {
+      const s = Number(segmentId)
 
       if (typeof this.segments[s] === 'undefined') {
         return []

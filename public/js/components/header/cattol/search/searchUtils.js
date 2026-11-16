@@ -1,6 +1,4 @@
-import {isUndefined, clone} from 'lodash'
-import {find} from 'lodash/collection'
-import {findIndex} from 'lodash/array'
+import {isUndefined, clone, find, findIndex} from 'lodash'
 
 import {
   addSearchResultToSegments,
@@ -231,11 +229,11 @@ let SearchUtils = {
       searchResultsDictionary = {}
     let searchParams = {}
     searchParams.source = this.searchParams.source
-      ? this.searchParams.source.replace(/ /g, tagSignatures.nbsp.placeholder)
+      ? this.searchParams.source.replace(/\u00A0/g, tagSignatures.nbsp.placeholder)
       : null
 
     searchParams.target = this.searchParams.target
-      ? this.searchParams.target.replace(/ /g, tagSignatures.nbsp.placeholder)
+      ? this.searchParams.target.replace(/\u00A0/g, tagSignatures.nbsp.placeholder)
       : null
 
     if (tagSignatures.space) {

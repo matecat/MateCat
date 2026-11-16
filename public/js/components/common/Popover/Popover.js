@@ -116,7 +116,7 @@ export const Popover = ({
           onClick={togglePopover}
           aria-label={defaultToggleButtonProps.tooltip}
           // eslint-disable-next-line react/no-unknown-property
-          tooltip-position={defaultToggleButtonProps.tooltipPosition}
+          data-tooltip-position={defaultToggleButtonProps.tooltipPosition}
         >
           {defaultToggleButtonProps.children}
         </button>

@@ -41,6 +41,8 @@ const OnBoarding = ({
     }
     CommonUtils.dispatchAnalyticsEvents(data)
     const newWindow = window.open(url, 'name', 'height=600,width=900')
+    // A popup blocker (notably iOS Safari) makes window.open() return null.
+    if (!newWindow) return
     if (newWindow.focus) {
       newWindow.focus()
     }

@@ -1,9 +1,10 @@
 import React, {useContext, useMemo} from 'react'
 import {Select} from '../../../common/Select'
 import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
+import {SELECT_HEIGHT} from '../../../../constants/Constants'
 
 export const Subject = () => {
-  const {SELECT_HEIGHT, subject, setSubject} = useContext(CreateProjectContext)
+  const {subject, setSubject} = useContext(CreateProjectContext)
 
   const subjectsArray = useMemo(
     () =>
@@ -17,7 +18,7 @@ export const Subject = () => {
     <div className="options-box">
       <div className="option-description">
         <h3>Subject</h3>
-        <p>Select your project's subject.</p>
+        <p>Select your project&apos;s subject.</p>
       </div>
       <div className="options-select-container">
         <Select

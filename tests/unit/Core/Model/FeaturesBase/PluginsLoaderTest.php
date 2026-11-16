@@ -74,8 +74,8 @@ class PluginsLoaderTest extends AbstractTest
 
         self::assertContains(FeatureCodes::PROJECT_COMPLETION, $codes);
         self::assertContains(FeatureCodes::TRANSLATION_VERSIONS, $codes);
-        self::assertContains(FeatureCodes::REVIEW_EXTENDED, $codes);
         self::assertContains(FeatureCodes::SECOND_PASS_REVIEW, $codes);
+        self::assertNotContains('review_extended', $codes);
     }
 
     #[Test]

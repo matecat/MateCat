@@ -4,6 +4,7 @@ namespace Matecat\Core\Controllers;
 
 use Controller\Abstracts\Authentication\CookieManager;
 use Controller\API\App\CreateProjectController;
+use DomainException;
 use Exception;
 use InvalidArgumentException;
 use Klein\Request;
@@ -16,6 +17,7 @@ use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
@@ -461,6 +463,173 @@ class CreateProjectControllerTest extends AbstractTest
      * @throws Throwable
      */
     #[Test]
+    public function validateTheRequest_defaults_pretranslate_lock_options_when_absent(): void
+    {
+        $_COOKIE['upload_token'] = '77777777-7777-7777-7777-777777777777';
+        $this->setRequestParams($this->validRequestParams());
+
+        /** @var array<string, mixed> $data */
+        $data = $this->invokePrivate('validateTheRequest');
+
+        $this->assertSame(1, $data['pretranslate_101_lock']);
+        $this->assertSame(1, $data['pretranslate_100_lock']);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateTheRequest_reads_pretranslate_lock_options(): void
+    {
+        $_COOKIE['upload_token'] = '88888888-8888-8888-8888-888888888888';
+        $params = $this->validRequestParams();
+        $params['pretranslate_101_lock'] = '0';
+        $params['pretranslate_100_lock'] = '1';
+        $this->setRequestParams($params);
+
+        /** @var array<string, mixed> $data */
+        $data = $this->invokePrivate('validateTheRequest');
+
+        $this->assertSame(0, $data['pretranslate_101_lock']);
+        $this->assertSame(1, $data['pretranslate_100_lock']);
+    }
+
+    /**
+     * @return array<string, array{string, string}>
+     */
+    public static function invalidPretranslateLockValues(): array
+    {
+        return [
+            '101 out of range'   => ['pretranslate_101_lock', '2'],
+            '101 trailing junk'  => ['pretranslate_101_lock', '1x'],
+            '100 word'           => ['pretranslate_100_lock', 'true'],
+            '100 empty'          => ['pretranslate_100_lock', ''],
+        ];
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    #[DataProvider('invalidPretranslateLockValues')]
+    public function validateTheRequest_throws_on_invalid_pretranslate_lock(string $name, string $value): void
+    {
+        $_COOKIE['upload_token'] = '99999999-9999-9999-9999-999999999999';
+        $params = $this->validRequestParams();
+        $params[$name] = $value;
+        $this->setRequestParams($params);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("Invalid $name value");
+        $this->expectExceptionCode(-6);
+
+        $this->invokePrivate('validateTheRequest');
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateTheRequest_defaults_pretranslate_status_options_when_absent(): void
+    {
+        $_COOKIE['upload_token'] = '77777777-7777-7777-7777-777777777777';
+        $this->setRequestParams($this->validRequestParams());
+
+        /** @var array<string, mixed> $data */
+        $data = $this->invokePrivate('validateTheRequest');
+
+        $this->assertSame('APPROVED', $data['pretranslate_101_status']);
+        $this->assertSame('APPROVED', $data['pretranslate_100_status']);
+    }
+
+    /**
+     * The option is case-insensitive; it is stored as the upper-case TranslationStatus constant.
+     *
+     * @return array<string, array{string, string}>
+     */
+    public static function validPretranslateStatusValues(): array
+    {
+        return [
+            'TRANSLATED' => ['TRANSLATED', 'TRANSLATED'],
+            'APPROVED'   => ['APPROVED', 'APPROVED'],
+            'APPROVED2'  => ['APPROVED2', 'APPROVED2'],
+            'lower case' => ['approved2', 'APPROVED2'],
+            'mixed case' => ['Translated', 'TRANSLATED'],
+        ];
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    #[DataProvider('validPretranslateStatusValues')]
+    public function validateTheRequest_reads_pretranslate_status_options(string $status, string $expected): void
+    {
+        $_COOKIE['upload_token'] = '88888888-8888-8888-8888-888888888888';
+        $params = $this->validRequestParams();
+        $params['pretranslate_101_status'] = $status;
+        $params['pretranslate_100_status'] = $status;
+        $this->setRequestParams($params);
+
+        /** @var array<string, mixed> $data */
+        $data = $this->invokePrivate('validateTheRequest');
+
+        $this->assertSame($expected, $data['pretranslate_101_status']);
+        $this->assertSame($expected, $data['pretranslate_100_status']);
+    }
+
+    /**
+     * @return array<string, array{string, string}>
+     */
+    public static function invalidPretranslateStatusValues(): array
+    {
+        return [
+            '101 unknown'    => ['pretranslate_101_status', 'rejected'],
+            '100 empty'      => ['pretranslate_100_status', ''],
+            '100 draft'      => ['pretranslate_100_status', 'draft'],
+        ];
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    #[DataProvider('invalidPretranslateStatusValues')]
+    public function validateTheRequest_throws_on_invalid_pretranslate_status(string $name, string $value): void
+    {
+        $_COOKIE['upload_token'] = '99999999-9999-9999-9999-999999999999';
+        $params = $this->validRequestParams();
+        $params[$name] = $value;
+        $this->setRequestParams($params);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("Invalid $name value");
+        $this->expectExceptionCode(-6);
+
+        $this->invokePrivate('validateTheRequest');
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateTheRequest_defaults_pretranslate_101_to_1_when_absent(): void
+    {
+        $_COOKIE['upload_token'] = '77777777-7777-7777-7777-777777777777';
+        $params = $this->validRequestParams();
+        unset($params['pretranslate_101']);
+        $this->setRequestParams($params);
+
+        /** @var array<string, mixed> $data */
+        $data = $this->invokePrivate('validateTheRequest');
+
+        $this->assertSame('1', $data['pretranslate_101']);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
     public function validateTheRequest_throws_on_invalid_pretranslate_101(): void
     {
         $_COOKIE['upload_token'] = '66666666-6666-6666-6666-666666666666';
@@ -813,6 +982,27 @@ class CreateProjectControllerTest extends AbstractTest
 
         $this->assertIsArray($result);
         $this->assertNotEmpty($result);
+    }
+
+    /**
+     * Inline xliff_parameters with a locked draft rule: the hydration refuses it with a 400.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateXliffParameters_throws_400_for_a_locked_draft_rule(): void
+    {
+        $xliff = [
+            'name'  => 'locked draft',
+            'uid'   => $this->user->uid,
+            'rules' => ['xliff12' => [['states' => ['translated'], 'analysis' => 'pre-translated', 'editor' => 'draft', 'lock' => true]]],
+        ];
+
+        $this->expectException(DomainException::class);
+        $this->expectExceptionCode(400);
+        $this->expectExceptionMessage('A rule with editor status DRAFT can not be locked.');
+
+        $this->invokePrivate('validateXliffParameters', [json_encode($xliff), null]);
     }
 
     // ─── setMetadataFromPostInput ───

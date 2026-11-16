@@ -47,7 +47,7 @@ export const EMAIL_PATTERN =
 export const METADATA_KEY = 'cross_language_matches'
 
 export const ANALYSIS_BUCKETS_LABELS = {
-  MT: 'Machine translation',
+  MT: 'MT',
   new: 'New',
   repetitions: 'Repetitions',
   internal: 'Internal     75-99%',
@@ -77,3 +77,5 @@ export const DASHBOARD_REQUEST_PROJECTS_STATUS = {
   MORE_IN_PROGRESS: 'more_in_progress',
   COMPLETED: 'completed',
 }
+
+export const SELECT_HEIGHT = 325

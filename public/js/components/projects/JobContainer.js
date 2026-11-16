@@ -25,8 +25,8 @@ import CommentsIcon from '../../../img/icons/CommentsIcon'
 import ProjectsStore from '../../stores/ProjectsStore'
 import ManageConstants from '../../constants/ManageConstants'
 import OutsourceContainer from '../outsource/OutsourceContainer'
-import {fromJS} from 'immutable'
-import Close from '../../../img/icons/Close'
+import IconRedirect from '../../../img/icons/IconRedirect'
+import IconClose from '../../../img/icons/IconClose'
 
 export const JobContainer = ({
   job,
@@ -37,6 +37,7 @@ export const JobContainer = ({
   onCheckedJob,
   downloadTranslationFn,
   index,
+  striped = false,
 }) => {
   const [showDownloadProgress, setShowDownloadProgress] = useState(false)
   const [showingOutsource, setShowingOutsource] = useState()
@@ -46,7 +47,8 @@ export const JobContainer = ({
   const commentsIconRef = useRef()
   const sourceTargetTextRef = useRef()
   const deliveryEmailRef = useRef()
-  const deliveryDateRef = useRef()
+  const wordsButtonRef = useRef()
+  const buyTranslationRef = useRef()
 
   useEffect(() => {
     const disableDownloadMenu = (idJob) => {
@@ -201,16 +203,11 @@ export const JobContainer = ({
         break
       }
     }
-    changeJobPassword(job.toJS(), oldPassword).then(
-      function (data) {
-        const onClickUndo = () => {
-          CatToolActions.removeNotification(notification)
-          changeJobPassword(
-            job.toJS(),
-            data.new_pwd,
-            1,
-            oldPassword,
-          ).then(function (data) {
+    changeJobPassword(job.toJS(), oldPassword).then(function (data) {
+      const onClickUndo = () => {
+        CatToolActions.removeNotification(notification)
+        changeJobPassword(job.toJS(), data.new_pwd, 1, oldPassword).then(
+          function (data) {
             const restoreNotification = {
               title: 'Change job password',
               text: 'The previous password has been restored.',
@@ -227,45 +224,45 @@ export const JobContainer = ({
               revision_number,
               translator,
             )
-          })
-        }
-
-        const notification = {
-          uid: 'change-password',
-          title: revision_number
-            ? `${revision_number === 1 ? 'Revise' : 'Revise 2'} password changed`
-            : 'Translate password changed',
-          text: revision_number ? (
-            <>
-              The {revision_number === 1 ? 'Revise' : 'Revise 2'} password has
-              been changed.{' '}
-              <a style={{cursor: 'pointer'}} onClick={onClickUndo}>
-                Undo
-              </a>
-            </>
-          ) : (
-            <>
-              The Translate password has been changed.{' '}
-              <a style={{cursor: 'pointer'}} onClick={onClickUndo}>
-                Undo
-              </a>
-            </>
-          ),
-          type: 'warning',
-          position: 'bl',
-          timer: 10000,
-        }
-        CatToolActions.addNotification(notification)
-        let translator = job.get('translator')
-        ManageActions.changeJobPassword(
-          project,
-          job,
-          data.new_pwd,
-          data.old_pwd,
-          revision_number,
+          },
         )
-      },
-    )
+      }
+
+      const notification = {
+        uid: 'change-password',
+        title: revision_number
+          ? `${revision_number === 1 ? 'Revise' : 'Revise 2'} password changed`
+          : 'Translate password changed',
+        text: revision_number ? (
+          <>
+            The {revision_number === 1 ? 'Revise' : 'Revise 2'} password has
+            been changed.{' '}
+            <a style={{cursor: 'pointer'}} onClick={onClickUndo}>
+              Undo
+            </a>
+          </>
+        ) : (
+          <>
+            The Translate password has been changed.{' '}
+            <a style={{cursor: 'pointer'}} onClick={onClickUndo}>
+              Undo
+            </a>
+          </>
+        ),
+        type: 'warning',
+        position: 'bl',
+        timer: 10000,
+      }
+      CatToolActions.addNotification(notification)
+      let translator = job.get('translator')
+      ManageActions.changeJobPassword(
+        project,
+        job,
+        data.new_pwd,
+        data.old_pwd,
+        revision_number,
+      )
+    })
   }
 
   const archiveJob = () => {
@@ -493,11 +490,11 @@ export const JobContainer = ({
           <Button
             ref={qrIconRef}
             type={BUTTON_TYPE.ICON}
-            size={BUTTON_SIZE.ICON_XSMALL}
+            size={BUTTON_SIZE.ICON_SMALL}
             onClick={() => window.open(url, '_blank')}
             style={{...(classQuality && {color: classQuality})}}
           >
-            <QR size={18}/>
+            <QR size={20} />
           </Button>
         </Tooltip>
       )
@@ -514,11 +511,11 @@ export const JobContainer = ({
           <Button
             ref={warningsIconRef}
             type={BUTTON_TYPE.ICON}
-            size={BUTTON_SIZE.ICON_XSMALL}
+            size={BUTTON_SIZE.ICON_SMALL}
             onClick={() => window.open(url, '_blank')}
             style={{color: 'red'}}
           >
-            <AlertIcon />
+            <AlertIcon size={20} />
           </Button>
         </Tooltip>
       )
@@ -539,10 +536,10 @@ export const JobContainer = ({
           <Button
             ref={commentsIconRef}
             type={BUTTON_TYPE.ICON}
-            size={BUTTON_SIZE.ICON_XSMALL}
+            size={BUTTON_SIZE.ICON_SMALL}
             onClick={() => window.open(translatedUrl, '_blank')}
           >
-            <CommentsIcon />
+            <CommentsIcon size={20} />
           </Button>
         </Tooltip>
       )
@@ -590,6 +587,8 @@ export const JobContainer = ({
       outsourceJobElement = (
         <Button
           className="job-container-button-weight-normal"
+          mode={BUTTON_MODE.OUTLINE}
+          size={BUTTON_SIZE.SMALL}
           onClick={() => openOutsourceModal(true, false)}
         >
           Assign
@@ -632,10 +631,11 @@ export const JobContainer = ({
               <Button
                 className="job-delivery-date-button-close"
                 size={BUTTON_SIZE.ICON_XSMALL}
+                mode={BUTTON_MODE.OUTLINE}
                 onClick={removeTranslator}
                 testId="remove-translator-button"
               >
-                <Close size={18} />
+                <IconClose size={16} />
               </Button>
             )}
           </div>
@@ -653,24 +653,36 @@ export const JobContainer = ({
     let label =
       !job.get('outsource_available') && outsourceInfo?.custom_payable_rate ? (
         <div>
-          <Button
-            size={BUTTON_SIZE.SMALL}
-            className="job-container-button-weight-normal"
-            id="open-quote-request"
-            data-testid="buy-translation-button"
-            disabled={true}
-            tooltip={
-              "Jobs created with custom billing models cannot be outsourced to Translated.<br />In order to outsource this job to Translated, please recreate it using Matecat's standard billing model"
+          <Tooltip
+            content={
+              <div>
+                Jobs created with custom billing models cannot be outsourced to
+                Translated.
+                <br />
+                In order to outsource this job to Translated, please recreate it
+                using Matecat&apos;s standard billing model
+              </div>
             }
           >
-            Buy Translation from
-            <TranslatedIconSmall size={20} />
-          </Button>
+            <Button
+              ref={buyTranslationRef}
+              size={BUTTON_SIZE.SMALL}
+              mode={BUTTON_MODE.OUTLINE}
+              className="job-container-button-weight-normal"
+              id="open-quote-request"
+              data-testid="buy-translation-button"
+              disabled={true}
+            >
+              Buy translation from
+              <TranslatedIconSmall size={20} />
+            </Button>
+          </Tooltip>
         </div>
       ) : (
         <div>
           <Button
             size={BUTTON_SIZE.SMALL}
+            mode={BUTTON_MODE.OUTLINE}
             className="job-container-button-weight-normal"
             id="open-quote-request"
             onClick={() => openOutsourceModal(false, true)}
@@ -680,7 +692,7 @@ export const JobContainer = ({
               job.get('outsource_info')?.toJS()?.custom_payable_rate
             }
           >
-            Buy Translation from
+            Buy translation from
             <TranslatedIconSmall size={20} />
           </Button>
         </div>
@@ -706,7 +718,16 @@ export const JobContainer = ({
   const stats = job.get('stats').toJS()
 
   return (
-    <div data-testid={job.get('id')} className="job-container">
+    <div
+      data-testid={job.get('id')}
+      className={[
+        'job-container',
+        !isChunk && 'job-container-background',
+        !isChunk && striped && 'job-container-background--striped',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <div
         className={`job-container-grid ${isChunk ? 'chunk-job-container' : ''}`}
       >
@@ -743,15 +764,21 @@ export const JobContainer = ({
           <JobProgressBar stats={stats} />
         </div>
         <div>
-          <Button
-            tooltip={`Total: ${Math.round(stats.raw.total)} / Weighted: ${Math.round(stats.equivalent.total)}`}
-            className="job-container-button-weight-normal job-container-words-button"
-            onClick={() => window.open(getProjectAnalyzeUrl(), '_blank')}
-            testId="words-button"
+          <Tooltip
+            content={`Weighted: ${Math.round(stats.equivalent.total)} / Total: ${Math.round(stats.raw.total)}`}
           >
-            Words: {Math.round(stats.raw.total)}{' '}
-            <span>({Math.round(stats.equivalent.total)})</span>
-          </Button>
+            <Button
+              ref={wordsButtonRef}
+              size={BUTTON_SIZE.XSMALL}
+              className="job-container-button-weight-normal job-container-words-button"
+              onClick={() => window.open(getProjectAnalyzeUrl(), '_blank')}
+              testId="words-button"
+            >
+              <IconRedirect size={14} />
+              Words: {Math.round(stats.equivalent.total)}{' '}
+              <span>({Math.round(stats.raw.total)})</span>
+            </Button>
+          </Tooltip>
         </div>
         <div>{getWarningsGroup()}</div>
         <div className="job-container-outsource">
@@ -795,4 +822,5 @@ JobContainer.propTypes = {
   isChecked: PropTypes.bool.isRequired,
   onCheckedJob: PropTypes.func.isRequired,
   index: PropTypes.number,
+  striped: PropTypes.bool,
 }

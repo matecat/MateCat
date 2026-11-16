@@ -30,7 +30,6 @@ use Utils\Registry\AppConfig;
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 25/02/15
  * Time: 11.59
- *
  */
 abstract class AbstractEngine implements EngineInterface
 {
@@ -76,9 +75,8 @@ abstract class AbstractEngine implements EngineInterface
 
     /**
      * @param EngineStruct $engineRecord
-     *
+     * @param IDatabase $database
      * @throws Exception
-     * @throws TypeError
      */
     public function __construct(EngineStruct $engineRecord, IDatabase $database)
     {
@@ -231,11 +229,10 @@ abstract class AbstractEngine implements EngineInterface
      *
      * @return string|bool|null
      * @throws RuntimeException
-     * @throws \Psr\Log\InvalidArgumentException
      */
     public function _call(string $url, array $curl_options = []): string|bool|null
     {
-        $mh = new MultiCurlHandler();
+        $mh = new MultiCurlHandler($this->logger);
         $uniq_uid = uniqid('', true);
 
         /*
@@ -273,7 +270,8 @@ abstract class AbstractEngine implements EngineInterface
         if ($this->logging) {
             $log = $mh->getSingleLog($resourceHash);
             if ($this->content_type == 'json' && !$mh->hasError($resourceHash) && is_string($rawValue)) {
-                $log['response'] = json_decode($rawValue, true);
+                // Keep the raw body when it is not valid JSON (e.g. a plain-text error), or the log shows only null
+                $log['response'] = json_decode($rawValue, true) ?? $rawValue;
             } else {
                 $log['response'] = $rawValue;
             }
@@ -291,7 +289,6 @@ abstract class AbstractEngine implements EngineInterface
      *
      * @return void
      * @throws RuntimeException
-     * @throws \Psr\Log\InvalidArgumentException
      */
     public function call(string $function, array $parameters = [], bool $isPostRequest = false, bool $isJsonRequest = false): void
     {
@@ -433,21 +430,7 @@ abstract class AbstractEngine implements EngineInterface
     protected function GoogleTranslateFallback(array $_config): GetMemoryResponse
     {
         try {
-            /**
-             * Create a record of type GoogleTranslate
-             */
-            $newEngineStruct = GoogleTranslateStruct::getStruct();
-
-            $newEngineStruct->name = "Generic";
-             $newEngineStruct->uid = 0;
-             $newEngineStruct->type = EngineConstants::MT;
-             if (!is_array($newEngineStruct->extra_parameters)) {
-                 $newEngineStruct->extra_parameters = [];
-             }
-             $newEngineStruct->extra_parameters['client_secret'] = $_config['secret_key'] ?? null;
-             $newEngineStruct->others = [];
-
-            $gtEngine = EnginesFactory::createTempInstance($newEngineStruct, $this->database);
+            $gtEngine = EnginesFactory::createTempInstance($this->googleTranslateFallbackStruct($_config), $this->database);
 
             /** @var GoogleTranslate $gtEngine */
             return $gtEngine->get($_config);
@@ -455,6 +438,53 @@ abstract class AbstractEngine implements EngineInterface
             $this->logger->error($e);
             return new GetMemoryResponse(null);
         }
+    }
+
+    /**
+     * Builds the temporary Google Translate engine record the fallback translates with.
+     * The key is the one in the config, or the one in inc/mmt_fallback_key.ini when the config has none.
+     *
+     * Example: $this->googleTranslateFallbackStruct(['segment' => 'Hello'])->extra_parameters['client_secret']
+     * is the key read from the ini file.
+     *
+     * @param array<string, mixed> $_config
+     */
+    protected function googleTranslateFallbackStruct(array $_config): GoogleTranslateStruct
+    {
+        $newEngineStruct = GoogleTranslateStruct::getStruct();
+
+        $newEngineStruct->name = "Generic";
+        $newEngineStruct->uid = 0;
+        $newEngineStruct->type = EngineConstants::MT;
+        if (!is_array($newEngineStruct->extra_parameters)) {
+            $newEngineStruct->extra_parameters = [];
+        }
+        $newEngineStruct->extra_parameters['client_secret'] = !empty($_config['secret_key'])
+            ? $_config['secret_key']
+            : self::getG2FallbackSecretKey();
+        $newEngineStruct->others = [];
+
+        return $newEngineStruct;
+    }
+
+    /**
+     * Reads the Google Translate key of the fallback from inc/mmt_fallback_key.ini.
+     *
+     * Example: a file with `secret_key = "abc"` gives "abc"; no file gives null.
+     */
+    public static function getG2FallbackSecretKey(): ?string
+    {
+        $configFilePath = realpath(AppConfig::$ROOT . '/inc/mmt_fallback_key.ini');
+        if ($configFilePath === false || !file_exists($configFilePath)) {
+            return null;
+        }
+
+        $secret_key = parse_ini_file($configFilePath);
+        if ($secret_key === false) {
+            return null;
+        }
+
+        return $secret_key['secret_key'] ?? null;
     }
 
     /**
@@ -509,17 +539,11 @@ abstract class AbstractEngine implements EngineInterface
     }
 
     /**
-     * @param string $source
-     * @param string $target
-     * @param string $sentence
-     * @param string $translation
-     * @param string $mt_qe_engine_id
-     *
-     * @return float|null
+     * Engines compute no quality estimation score of their own unless they override this.
      */
-    public function getQualityEstimation(string $source, string $target, string $sentence, string $translation, string $mt_qe_engine_id = 'default'): ?float
+    public function hasBuiltInQualityEstimation(): bool
     {
-        return null;
+        return false;
     }
 
     /**

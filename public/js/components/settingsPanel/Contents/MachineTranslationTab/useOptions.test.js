@@ -62,8 +62,8 @@ describe('useOptions', () => {
 
     await waitFor(() => {
       expect(setValueMock).toHaveBeenCalledWith('lara_style', 'faithful')
-      expect(setValueMock).toHaveBeenCalledWith('enable_mt_analysis', true)
     })
+    expect(setValueMock).toHaveBeenCalledWith('enable_mt_analysis', true)
   })
 
   test('excludes fields listed in excludedFields from template update', async () => {

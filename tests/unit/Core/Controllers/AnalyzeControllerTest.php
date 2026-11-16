@@ -29,6 +29,7 @@ use Utils\Registry\AppConfig;
  *
  * Reserved ID block base = 9_062_000 (Wave 9 task N=62).
  *   base+1 project, base+2 job, base+3 segment, base+4 file.
+ *   base+11 foreign project (FOREIGN_BASE block).
  * Owner email: ctrltest_9062000@example.org (per-suite unique, §4).
  * Clean ONLY by reserved id.
  */
@@ -84,6 +85,8 @@ class AnalyzeControllerTest extends AbstractTest
     use ControllerSeedFragments;
 
     private const int BASE = 9_062_000;
+    /** Second project, used as the foreign `pid` in the project-binding test. */
+    private const int FOREIGN_BASE = 9_062_010;
     private const string JOB_PASSWORD = 'jobpw';
     private const string PROJECT_PASSWORD = 'projpw';
 
@@ -99,6 +102,7 @@ class AnalyzeControllerTest extends AbstractTest
         parent::setUp();
 
         $this->cleanFragments(self::BASE);
+        $this->cleanFragments(self::FOREIGN_BASE);
         $this->seedFixtures();
 
         $this->reflector = new ReflectionClass(TestableAnalyzeViewController::class);
@@ -124,6 +128,7 @@ class AnalyzeControllerTest extends AbstractTest
 
     protected function tearDown(): void
     {
+        $this->cleanFragments(self::FOREIGN_BASE);
         $this->cleanFragments(self::BASE);
         parent::tearDown();
     }
@@ -238,6 +243,28 @@ class AnalyzeControllerTest extends AbstractTest
         } catch (RenderTerminatedException) {
             $this->assertSame('job_not_found.html', $this->controller->lastTemplate);
             $this->assertSame(404, $this->controller->lastViewCode);
+        }
+    }
+
+    /** @throws ReflectionException */
+    #[Test]
+    public function renderViewSetsJobNotFound404WhenJobBelongsToAnotherProject(): void
+    {
+        $this->seedProject(self::FOREIGN_BASE, $this->ownerEmail(self::FOREIGN_BASE), 'foreignpw');
+
+        $this->setNamedParams([
+            'pid' => (string)$this->projectId(self::FOREIGN_BASE),
+            'jid' => (string)$this->jobId(self::BASE),
+            'password' => self::JOB_PASSWORD,
+        ]);
+
+        try {
+            $this->controller->renderView();
+            $this->fail('Expected RenderTerminatedException');
+        } catch (RenderTerminatedException) {
+            $this->assertSame('job_not_found.html', $this->controller->lastTemplate);
+            $this->assertSame(404, $this->controller->lastViewCode);
+            $this->assertArrayNotHasKey('project_access_token', $this->controller->lastViewData);
         }
     }
 

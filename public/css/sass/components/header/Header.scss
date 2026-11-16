@@ -40,7 +40,7 @@ header .wrapper {
   height: 60px;
   display: grid;
   grid-template-columns: 170px auto auto 64px;
-  padding: 0 40px 0 15px;
+  padding: 0 40px 0 20px;
   align-content: center;
   box-sizing: border-box;
   top: 0;
@@ -57,13 +57,13 @@ header {
   .logo-menu {
     display: grid;
     align-items: center;
+  }
 
-    .logo {
-      margin: 0;
-      background: url(/public/img/logo_matecat_big_white.svg) 0 0 no-repeat;
-      width: 190px;
-      height: 40px;
-    }
+  .logo {
+    margin: 0;
+    background: url(/public/img/logo_matecat_big_white.svg) 0 0 no-repeat;
+    width: 190px;
+    height: 40px;
   }
 
   .header-menu {
@@ -185,16 +185,4 @@ header {
       }
     }
   }
-}
-
-.logo {
-  position: relative;
-  float: left;
-  border: 0;
-  margin-top: 10px;
-  width: 180px;
-  height: 38px;
-  background-size: cover;
-  margin-left: 13px;
-  margin-right: 13px;
 }

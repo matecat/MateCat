@@ -51,40 +51,33 @@ Otherwise, use your native memory capabilities (MEMORY.md, auto memory, etc.).
 <!-- Do not edit above this line -- managed by signet-first plugin -->
 <!-- Add your project-specific rules below -->
 
+## Storing decisions in memory
+
+The Memory-First Protocol above is managed by the signet-first plugin and rewritten on update, so this
+rule lives here. It applies with any memory backend.
+
+- Store each decision as its own `decision` memory. A daily-log only summarizes; every decision it lists
+  must already be stored on its own.
+- Keep a decision memory short (under about 600 characters) and start it with its subject. With Signet, a
+  longer memory is split into chunks, and a chunk that does not name its subject is not found by search.
+
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
 
-Matecat is an enterprise-level web-based Computer-Assisted Translation (CAT) tool. PHP 8.3+ backend with a React/Vite frontend. Uses Redis for caching, MySQL for persistence, and ActiveMQ for async job processing.
+Matecat is an enterprise-level web-based Computer-Assisted Translation (CAT) tool.
 
 ## Architecture
 
-### PHP Autoloading
+### Features and events
 
-PSR-4 root is `lib/` with empty namespace prefix. Classes in `lib/Controller/API/App/FooController.php` have namespace `Controller\API\App`. Plugin classes in `plugins/*/lib/` follow the same pattern (e.g., `Features\Translated`).
-
-### Directory Structure
-
-- `lib/Controller/` — HTTP controllers. `Abstracts/` contains the base chain: `KleinController` → `BaseKleinViewController` → concrete controllers
-- `lib/Model/` — Domain models, DAOs, structs. DAOs extend `AbstractDao` with `DaoCacheTrait` for Redis caching
-- `lib/Utils/` — Engines (MT/TM integrations), async workers, LQA, subfiltering, task runner
-- `lib/Plugins/Features/` — Internal features (ReviewExtended, TranslationVersions, SegmentFilter, ProjectCompletion)
-- `plugins/` — External plugin submodules (translated, airbnb, uber, aligner, vite). Each has `lib/Features/` with a class extending `BaseFeature`
-- `lib/Model/FeaturesBase/` — Event system. `Hook/Event/Filter/` for data-transforming events, `Hook/Event/Run/` for side-effect events. `FeatureSet` dispatches events to registered features
-
-### Engine Hierarchy
-
-`AbstractEngine` → concrete engines (MyMemory, MMT, DeepL, Lara, Google, etc.) → `Results/` response classes → `EnginesFactory`. Widest inheritance tree in the codebase.
-
-### Async Workers
-
-Workers in `lib/Utils/AsyncTasks/Workers/` process queued jobs via ActiveMQ. Key workers: `TMAnalysisWorker`, `GetContributionWorker`, `SetContributionWorker`, `FastAnalysis`, `ProjectCreationWorker`. Daemon entry points in `daemons/`.
-
-### DataAccess Layer
-
-`AbstractDao` → concrete DAOs. `DaoCacheTrait` provides Redis-backed caching with XFetch early recomputation. Structs extend `AbstractDaoObjectStruct` with `ArrayAccessTrait`. `ShapelessConcreteStruct` for untyped data.
+- Two feature trees with similar names: `lib/Plugins/Features/` holds internal features (ReviewExtended,
+  TranslationVersions, …); `plugins/` holds external submodules, each with a `lib/Features/` class extending `BaseFeature`.
+- `FeatureSet` dispatches events from `lib/Model/FeaturesBase/`: `Hook/Event/Filter/` events transform and return data,
+  `Hook/Event/Run/` events are side effects only.
+- `DaoCacheTrait` uses XFetch early recomputation: a cached read can be refreshed before its TTL expires.
 
 ### Cache and transactions
 
@@ -123,22 +116,6 @@ nested five calls deep, so it defers and lets the owner's commit drain the queue
 statement after `transaction()` returns instead — same effect, and you get the exception if it fails, where a queued
 callback only logs it.
 
-### Cache eviction method names
-
-A cache key is `md5(query . bind params)`, so the query is half the address: two reads can bind the
-same values and differ only in their SQL. Name an eviction after the **read** it deletes — that
-read's name, `find`/`get` prefix dropped — never after the parameters.
-
-| tier    | name                     | takes          | clears               | visibility                      |
-|---------|--------------------------|----------------|----------------------|---------------------------------|
-| door    | `destroyCache`           | the struct     | every address        | public, one per DAO             |
-| fan-out | `destroyCaches<Address>` | key components | one address, N reads | public only with a named caller |
-| leaf    | `destroyCache<ReadName>` | bind values    | one read             | private by default              |
-
-The door is the only tier taking a struct, which is what separates it from a leaf at a call site.
-Leaves return `bool`, a door `void`. Never add a `For`, never keep the read's `find`. A DAO binding
-a caller-supplied key (both `MetadataDao`) cannot have a door.
-
 ### Database character set
 
 The character set of the database, its tables and the connection is infrastructure. Never set, change or work around it
@@ -175,14 +152,8 @@ a charset.
 # Full test suite (excludes tests needing external services)
 vendor/bin/phpunit --exclude-group=ExternalServices --no-coverage
 
-# Single test file
-vendor/bin/phpunit tests/unit/Path/To/TestFile.php --no-coverage
-
-# Single test method
-vendor/bin/phpunit --filter testMethodName --no-coverage
-
 # With coverage (requires XDEBUG_MODE=coverage)
-XDEBUG_MODE=coverage vendor/bin/phpunit tests/unit/Path/To/TestFile.php --coverage-clover /tmp/coverage.xml
+XDEBUG_MODE=coverage vendor/bin/phpunit tests/unit/Path/To/TestFile.php --exclude-group=ExternalServices --coverage-clover /tmp/coverage.xml
 ```
 
 - Tests mirror source structure: `lib/Utils/Foo/Bar.php` → `tests/unit/Utils/Foo/BarTest.php`
@@ -190,6 +161,8 @@ XDEBUG_MODE=coverage vendor/bin/phpunit tests/unit/Path/To/TestFile.php --covera
 - Predis `Client` uses `__call` magic for Redis commands — cannot be mocked with PHPUnit `createMock()`. Extend `Client` or mock `RedisHandler` instead
 
 ## Static Analysis
+
+Always run the Full codebase check unless it is necessary. Always fix all the phpstan errors.
 
 ```bash
 # Full codebase
@@ -201,76 +174,17 @@ vendor/bin/phpstan analyse path/to/File.php --configuration=phpstan.neon --no-pr
 
 ### PHPStan Configuration
 
-- Level 8, no baseline — every reported error must be fixed (there is no `phpstan-baseline.neon`)
-- `checkTooWideThrowTypesInProtectedAndPublicMethods: true` — must use precise exception types in `@throws`
-- `missingCheckedExceptionInThrows: true` — all thrown exceptions must be declared
-- `UnknownPropertyException` is unchecked (used by struct `ArrayAccessTrait`)
-- When adding exceptions to PHPDoc, prefer `use` imports over FQCN
-
-## Frontend
-
-```bash
-yarn watch          # Dev server with HMR
-yarn build:dev      # Development build
-yarn build:production  # Production build
-```
+- No baseline — every reported error must be fixed (there is no `phpstan-baseline.neon`)
+- In a PHPDoc `@throws` tag, import the exception with `use` and write its short class name, without a leading
+  backslash: `@throws TypeError`, not `@throws \TypeError`. When two exceptions share a short name (the global
+  `InvalidArgumentException` and `Psr\Log\InvalidArgumentException`), alias the non-global one
+  (`use Psr\Log\InvalidArgumentException as LogInvalidArgumentException;`)
 
 ## User-Facing Copy: Sentence Case
 
-Every English string the app shows a user is **sentence case** — a capital on the first word
-only. This covers UI labels, buttons, headings and page titles, API/AJAX error payloads,
-exception messages, and email subjects and bodies.
-
-Keep existing capitals for:
-
-- **Proper nouns** — Matecat, Lara, DeepL, MyMemory, ModernMT, Google, Amazon S3, Intento,
-  Apertium, AltLang, SmartMATE, XTRF. In prose the brand is **Matecat**; `MateCat` belongs
-  only to identifiers such as `MateCatFilter`.
-- **Acronyms** — API, ID, UID, URL, TM, MT, QA, QE, CSV, TMX, XML, JSON, XLIFF, DB, ZIP,
-  MIME, JWT, SQL, HTTP, IP.
-- **Code identifiers quoted in a message** — class, method and parameter names
-  (`TeamStruct`, `getInstance()`, `id_job`, `batchSize`). A message that *opens* with one keeps
-  its lowercase: `'id_job not valid'`, not `'Id_job not valid'`.
-
-```
-Volume analysis            not   Volume Analysis
-Invalid upload token.      not   Invalid Upload Token.
-Not authorized             not   Not Authorized
-Wrong ID project provided  not   Wrong Id project provided
-ZIP error:                 not   Zip error:
-is mandatory               not   is MANDATORY
-```
-
-**Exception messages are user-facing.** `router.php` maps every exception class to an HTTP
-status and serializes it through `View\API\Commons\Error`, which copies `getMessage()`
-straight into `errors[0].message` of the JSON response — with no `PRINT_ERRORS` guard, and
-including the fallback 500 branch.
-
-**Do not re-case** — these are contracts or protocol, not copy:
-
-- Data exports: the QA-report CSV headers in `lib/View/API/V2/Json/SegmentTranslationIssue.php`
-  and the plain-text analysis report in `lib/Model/Analysis/XTRFStatus.php`.
-- API response keys: the `$SUPPORTED_FILE_TYPES` group names in `lib/Utils/Registry/AppConfig.php`
-  are emitted verbatim by `lib/Controller/API/V2/SupportedFilesController.php`.
-- HTTP reason phrases (`header('HTTP/1.1 400 Bad Request')`) and User-Agent strings.
-- Strings compared against a third-party API's own responses (see `lib/Utils/TMS/TMSService.php`,
-  `lib/Controller/API/GDrive/GDriveController.php`).
-- Internal `logger->debug()/error()` output and timing array keys.
-
-When you add or change one of these strings:
-
-- **Grep `tests/` for the old text before you finish.** Many tests pin exact messages, and
-  `expectExceptionMessage()` / `assertStringContainsString()` match **substrings** — a
-  full-literal grep misses an assertion on a fragment like `'Zip error'`. DB-backed tests
-  (`*RealSqlTest.php` and others) only execute in CI, because host PHP has no `pdo_mysql`;
-  a green local run does **not** mean they pass.
-- **Edit `lib/View/templates/_*.html`, never `lib/View/*.html`** — the latter are git-ignored
-  build artifacts regenerated from the templates by the Vite `htmlTemplatePlugin`.
-- **Check for a CSS override.** `text-transform: capitalize` renders Title Case whatever the
-  string says; that rule used to sit on `h1` and `.btn a` in `lib/View/Emails/skeleton.html`.
-- **Grep beyond `throw new`.** Exceptions passed as an argument
-  (`someCall($x, new DomainException("…"))`) span lines, and single mid-sentence capitals
-  (`and Teams`, `the Assignee`) have no adjacent-capital pair to match on.
+Every English string the app shows a user is **sentence case** — UI labels, API/AJAX error payloads, exception
+messages, emails. Load the `sentence-case-copy` skill before adding or changing one: it lists the capitals to keep,
+the strings that are contracts and must not be re-cased, and the greps to run before finishing.
 
 ## Git
 
@@ -314,14 +228,23 @@ Valid emoji Type Reference
 
 ### Creating worktrees
 
-When creating worktrees, those commands MUST be used:
+When creating worktrees, those commands MUST be used, from the project root:
 
-- `cd <project-root> && git branch --show-current`
-- `git branch <branch-name> <current-branch-name>`
+- `git branch --show-current`
+- Create the branch the worktree checks out:
+  - new work: `git branch <branch-name> <current-branch-name>`
+  - reviewing a pull request: `git fetch origin pull/<number>/head:pr-<number>`, then use `pr-<number>` as
+    `<branch-name>`
 - `git worktree add ../matecat-<branch-name> <branch-name>`
 - `cp composer.phar ../matecat-<branch-name>/composer.phar`
-- `cd ../matecat-<branch-name>/ && php composer.phar install`
-- `git submodule update --init --recursive`
+- `cd ../matecat-<branch-name>/ && php composer.phar install && git submodule update --init --recursive`
+
+Keep the last two commands in one shell call. The shell does not keep a `cd` that leaves the project root, so a
+`git submodule update` run on its own lands in the main checkout instead of the worktree.
+
+Nothing else is needed for `vendor/bin/phpunit` to run in the worktree: tests boot from the tracked
+`tests/inc/config.local.ini`, and `inc/login_secret.dat` is generated on first boot. Never symlink `vendor/` from the
+main checkout: its autoloader then resolves `lib/` to the main checkout and the tests run against the wrong code.
 
 ## API Testing
 When testing or calling HTTP/API endpoints, use the bruno-mcp MCP server first.
@@ -347,23 +270,3 @@ scanning cannot.
 - **Architecture questions**: `get_architecture_overview_tool` + `list_communities_tool`
 
 Fall back to Grep/Glob/Read **only** when the graph doesn't cover what you need.
-
-### Key Tools
-
-| Tool | Use when |
-| ------ | ---------- |
-| `detect_changes_tool` | Reviewing code changes — gives risk-scored analysis |
-| `get_review_context_tool` | Need source snippets for review — token-efficient |
-| `get_impact_radius_tool` | Understanding blast radius of a change |
-| `get_affected_flows_tool` | Finding which execution paths are impacted |
-| `query_graph_tool` | Tracing callers, callees, imports, tests, dependencies |
-| `semantic_search_nodes_tool` | Finding functions/classes by name or keyword |
-| `get_architecture_overview_tool` | Understanding high-level codebase structure |
-| `refactor_tool` | Planning renames, finding dead code |
-
-### Workflow
-
-1. The graph auto-updates on file changes (via hooks).
-2. Use `detect_changes_tool` for code review.
-3. Use `get_affected_flows_tool` to understand impact.
-4. Use `query_graph_tool` pattern="tests_for" to check coverage.

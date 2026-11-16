@@ -111,8 +111,8 @@ class MTQEPayableRateStruct extends AbstractDaoSilentStruct implements JsonSeria
         $this->breakdowns = new MTQEPayableRateBreakdowns();
 
         // rules
-        if (isset($params['breakdowns'])) {
-            $this->breakdowns = new MTQEPayableRateBreakdowns($params['breakdowns']);
+        if (!empty($params)) {
+            $this->breakdowns = new MTQEPayableRateBreakdowns($params);
         }
 
         return $this;

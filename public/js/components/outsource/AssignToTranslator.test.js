@@ -326,7 +326,7 @@ describe('AssignToTranslator', () => {
     )
     const call = CatToolActions.addNotification.mock.calls[0][0]
     const {container: titleContainer} = render(call.title)
-    expect(titleContainer.textContent).toContain('new password')
+    expect(titleContainer).toHaveTextContent(/new password/)
   })
 
   test('sends a plain notification when neither the date nor the email changed', async () => {

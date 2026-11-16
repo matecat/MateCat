@@ -1,7 +1,6 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 
-const FileUploadIconBig = ({}) => {
+const FileUploadIconBig = () => {
   return (
     <svg
       version="1.1"

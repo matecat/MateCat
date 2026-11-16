@@ -51,8 +51,9 @@ export default function buildPastedEditorState({
     .replace(/°/gi, tagSignatures['nbsp'].encodedPlaceholder)
     .replace(/\t/gi, tagSignatures['tab'].encodedPlaceholder)
 
-  return DraftMatecatUtils.duplicateFragment(
-    DraftMatecatUtils.buildFragmentFromText(cleanText),
-    editorState,
-  )
+  // Text made only of tags cleans to '', whose fragment is null: nothing to insert.
+  const fragment = DraftMatecatUtils.buildFragmentFromText(cleanText)
+  if (!fragment) return editorState
+
+  return DraftMatecatUtils.duplicateFragment(fragment, editorState)
 }

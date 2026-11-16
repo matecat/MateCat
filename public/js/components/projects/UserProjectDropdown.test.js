@@ -25,7 +25,7 @@ describe('UserProjectDropdown', () => {
   test('does not disable assignment when the project team is not in the user teams list', () => {
     renderWithContext({id_team: 999999999})
 
-    expect(screen.getByTestId('project-teams')).not.toBeDisabled()
+    expect(screen.getByTestId('project-teams')).toBeEnabled()
   })
 
   test('disables assignment when the project belongs to the personal team', () => {

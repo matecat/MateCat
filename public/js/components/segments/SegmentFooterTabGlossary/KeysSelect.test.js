@@ -70,7 +70,7 @@ describe('KeysSelect', () => {
   test('when there are no keys, shows a create-termbase-key option', () => {
     render(<Harness keys={[]} />)
     openDropdown()
-    const createButton = screen.getByText('+ Create termbase key')
+    const createButton = screen.getByText('Create termbase key')
     expect(createButton).toBeInTheDocument()
 
     fireEvent.click(createButton)

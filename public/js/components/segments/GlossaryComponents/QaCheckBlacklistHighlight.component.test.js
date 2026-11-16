@@ -115,7 +115,7 @@ describe('QaCheckBlacklistHighlight render', () => {
       </QaCheckBlacklistHighlight>,
     )
 
-    expect(screen.getByTestId('tooltip-content').textContent).toBe(
+    expect(screen.getByTestId('tooltip-content')).toHaveTextContent(
       'hello is flagged as a forbidden translation for ciao',
     )
   })
@@ -138,7 +138,7 @@ describe('QaCheckBlacklistHighlight render', () => {
       </QaCheckBlacklistHighlight>,
     )
 
-    expect(screen.getByTestId('tooltip-content').textContent).toBe(
+    expect(screen.getByTestId('tooltip-content')).toHaveTextContent(
       'hello is flagged as a forbidden word',
     )
   })

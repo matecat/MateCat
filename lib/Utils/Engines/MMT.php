@@ -13,7 +13,6 @@ use Model\Projects\ProjectDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
-use Psr\Log\InvalidArgumentException;
 use ReflectionException;
 use RuntimeException;
 use SplFileObject;
@@ -100,7 +99,6 @@ class MMT extends AbstractEngine
      *
      * @return array<string, mixed>|null
      * @throws MMTServiceApiException
-     * @throws InvalidArgumentException
      * @throws RuntimeException
      */
     public function getAvailableLanguages(): ?array
@@ -219,7 +217,6 @@ class MMT extends AbstractEngine
     /**
      * @param array<string, mixed> $_config
      * @return bool
-     * @throws \Psr\Log\InvalidArgumentException
      */
     public function set($_config): bool
     {
@@ -286,7 +283,6 @@ class MMT extends AbstractEngine
 
     /**
      * @throws MMTServiceApiException
-     * @throws InvalidArgumentException
      * @throws RuntimeException
      */
     public function memoryExists(MemoryKeyStruct $memoryKey): ?array
@@ -603,7 +599,6 @@ class MMT extends AbstractEngine
      *
      * @return array<string, mixed>|null
      * @throws MMTServiceApiException
-     * @throws InvalidArgumentException
      * @throws RuntimeException
      */
     public function getAllMemories(): ?array
@@ -638,7 +633,6 @@ class MMT extends AbstractEngine
      * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
-     * @throws InvalidArgumentException
      * @throws RuntimeException
      */
     public function updateMemory(string $id, string $name): ?array
@@ -655,7 +649,6 @@ class MMT extends AbstractEngine
      * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
-     * @throws InvalidArgumentException
      * @throws RuntimeException
      */
     public function importGlossary(string $id, array $data): ?array
@@ -672,7 +665,6 @@ class MMT extends AbstractEngine
      * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
-     * @throws InvalidArgumentException
      * @throws RuntimeException
      */
     public function updateGlossary(string $id, array $data): ?array
@@ -688,7 +680,6 @@ class MMT extends AbstractEngine
      * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
-     * @throws InvalidArgumentException
      * @throws RuntimeException
      */
     public function importJobStatus(string $uuid): ?array
@@ -719,31 +710,11 @@ class MMT extends AbstractEngine
     }
 
     /**
-     * @param string $source
-     * @param string $target
-     * @param string $sentence
-     * @param string $translation
-     * @param string $mt_qe_engine_id
-     *
-     * @return float|null
-     * @throws MMTServiceApiException
-     * @throws InvalidArgumentException
-     * @throws RuntimeException
+     * ModernMT computes the quality estimation score itself inside its translate call.
      */
-    public function getQualityEstimation(
-        string $source,
-        string $target,
-        string $sentence,
-        string $translation,
-        string $mt_qe_engine_id = '2'
-    ): ?float {
-        $client = $this->_getClient();
-        $qualityEstimation = $client->qualityEstimation($source, $target, $sentence, $translation, $mt_qe_engine_id);
-        if ($qualityEstimation === null || !isset($qualityEstimation['score'])) {
-            return null;
-        }
-
-        return $qualityEstimation['score'];
+    public function hasBuiltInQualityEstimation(): bool
+    {
+        return true;
     }
 
     /**
@@ -769,9 +740,6 @@ class MMT extends AbstractEngine
             }
         }
 
-        // Common config values
-        $config['secret_key'] = self::getG2FallbackSecretKey();
-
         // Branch-specific values
         if ($id_job && $this->_isAnalysis) {
             $idUsers = $config['id_user'] ?? [];
@@ -787,25 +755,6 @@ class MMT extends AbstractEngine
 
         return $config;
     }
-
-    /**
-     * @return string|null
-     */
-    public static function getG2FallbackSecretKey(): ?string
-    {
-        $configFilePath = realpath(AppConfig::$ROOT . '/inc/mmt_fallback_key.ini');
-        if ($configFilePath === false || !file_exists($configFilePath)) {
-            return null;
-        }
-
-        $secret_key = parse_ini_file($configFilePath);
-        if ($secret_key === false) {
-            return null;
-        }
-
-        return $secret_key['secret_key'] ?? null;
-    }
-
 
     /**
      * @inheritDoc

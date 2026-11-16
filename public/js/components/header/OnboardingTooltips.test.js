@@ -31,10 +31,10 @@ beforeEach(() => {
   localStorage.clear()
 })
 
-test('Renders the tour when it has not been dismissed yet', () => {
+test('Renders the tour when it has not been dismissed yet', async () => {
   render(<OnboardingTooltips show page={ONBOARDING_PAGE.HOME} />)
 
-  expect(screen.getByTestId('joyride-mock')).toBeInTheDocument()
+  expect(await screen.findByTestId('joyride-mock')).toBeInTheDocument()
 })
 
 test('Does not render the tour when it was already dismissed', () => {
@@ -45,12 +45,12 @@ test('Does not render the tour when it was already dismissed', () => {
   expect(screen.queryByTestId('joyride-mock')).not.toBeInTheDocument()
 })
 
-test('Does not run the tour until show becomes true', () => {
+test('Does not run the tour until show becomes true', async () => {
   const {rerender} = render(
     <OnboardingTooltips show={false} page={ONBOARDING_PAGE.HOME} />,
   )
 
-  expect(screen.getByTestId('joyride-mock')).toHaveAttribute(
+  expect(await screen.findByTestId('joyride-mock')).toHaveAttribute(
     'data-run',
     'false',
   )
@@ -63,14 +63,14 @@ test('Does not run the tour until show becomes true', () => {
 test('Finishing the tour stores the dismissal and hides the tour', async () => {
   render(<OnboardingTooltips show page={ONBOARDING_PAGE.HOME} />)
 
-  await userEvent.click(screen.getByTestId('joyride-finish'))
+  await userEvent.click(await screen.findByTestId('joyride-finish'))
 
   expect(localStorage.getItem('onBoarding-tooltip-home')).toBe('1')
   expect(screen.queryByTestId('joyride-mock')).not.toBeInTheDocument()
 })
 
-test('Renders the cattool tour page', () => {
+test('Renders the cattool tour page', async () => {
   render(<OnboardingTooltips show page={ONBOARDING_PAGE.CATTOOL} />)
 
-  expect(screen.getByTestId('joyride-mock')).toBeInTheDocument()
+  expect(await screen.findByTestId('joyride-mock')).toBeInTheDocument()
 })

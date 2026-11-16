@@ -252,7 +252,7 @@ final class MTQEWorkflowTemplateDao extends AbstractDao
             !isset($data['id']) or
             !isset($data['uid']) or
             !isset($data['name']) or
-            !isset($data['params'])
+            !isset($data['rules'])
         ) {
             return null;
         }
@@ -265,7 +265,7 @@ final class MTQEWorkflowTemplateDao extends AbstractDao
         $struct->created_at = $data['created_at'];
         $struct->modified_at = $data['modified_at'];
         $struct->deleted_at = $data['deleted_at'];
-        $struct->hydrateParamsFromJson($data['params']);
+        $struct->hydrateParamsFromJson($data['rules']);
 
         return $struct;
     }

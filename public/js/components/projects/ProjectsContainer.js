@@ -10,7 +10,6 @@ import {DASHBOARD_REQUEST_PROJECTS_STATUS} from '../../constants/Constants'
 import {SPINNER_LOADER_SIZE, SpinnerLoader} from '../common/SpinnerLoader'
 import {Button, BUTTON_TYPE, BUTTON_SIZE} from '../common/Button/Button'
 import ManageActions from '../../actions/ManageActions'
-import CatToolActions from '../../actions/CatToolActions'
 
 export const ProjectsContainer = ({
   team,
@@ -97,7 +96,7 @@ export const ProjectsContainer = ({
                 }
               >
                 Create project
-</Button>
+              </Button>
               {!thereAreMembers && (
                 <Button
                   size={BUTTON_SIZE.MEDIUM}
@@ -127,7 +126,7 @@ export const ProjectsContainer = ({
                   }
                 >
                   Create project
-  </Button>
+                </Button>
                 {!thereAreMembers && (
                   <Button
                     size={BUTTON_SIZE.MEDIUM}
@@ -153,7 +152,7 @@ export const ProjectsContainer = ({
     >
       {projects?.size > 0 && (
         <div className="projects-container-title">
-          <h4>Projects</h4>
+          <h3>Projects</h3>
           <div>
             <span>Legend:</span>
             <span>

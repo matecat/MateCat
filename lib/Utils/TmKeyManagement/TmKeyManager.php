@@ -4,6 +4,7 @@ namespace Utils\TmKeyManagement;
 
 use DomainException;
 use Exception;
+use JsonException;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Model\TmKeyManagement\MemoryKeyDao;
@@ -11,6 +12,7 @@ use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PDOException;
+use TypeError;
 use Utils\Logger\LoggerFactory;
 use Utils\Validation\UserSuppliedName;
 
@@ -70,6 +72,49 @@ class TmKeyManager
     }
 
     /**
+     * Tells which keys sent by the client are not in the job yet, so they can be checked before
+     * they are added.
+     *
+     * A key already in the job is left out whether the client sends it in full or masked. A masked
+     * key (with `*`) is always left out: it can only be the form of a key someone else owns, and it
+     * must never reach a key check. Empty keys are left out too.
+     *
+     * Example: client keys `aaa1` and `bbb2`, job key `aaa1` → `['bbb2']`.
+     *
+     * @param string $Json_clientKeys A json_encoded array of client keys, as for mergeJsonKeys()
+     * @param string $Json_jobKeys    A json_encoded array of the job's TmKeyStruct objects
+     *
+     * @return list<string> The new keys, in the client's order
+     *
+     * @throws JsonException
+     * @throws DomainException
+     */
+    public static function getNewKeys(string $Json_clientKeys, string $Json_jobKeys): array
+    {
+        $clientKeys = array_map(self::getTmKeyStructure(...), json_decode($Json_clientKeys, true, 512, JSON_THROW_ON_ERROR));
+        $jobKeys    = array_map(self::getTmKeyStructure(...), json_decode($Json_jobKeys, true, 512, JSON_THROW_ON_ERROR));
+
+        // A masked client key is skipped below, so only the job's full keys need to be known.
+        $known = [];
+        foreach ($jobKeys as $jobKey) {
+            $known[(string)$jobKey->key] = true;
+        }
+
+        $newKeys = [];
+        foreach ($clientKeys as $clientKey) {
+            $key = (string)$clientKey->key;
+
+            if ($key === '' || $clientKey->isEncryptedKey() || isset($known[$key])) {
+                continue;
+            }
+
+            $newKeys[] = $key;
+        }
+
+        return $newKeys;
+    }
+
+    /**
      * Converts a string representing a json_encoded array of TmKeyStruct into an array
      * and filters the elements according to the grants passed.
      *
@@ -106,6 +151,34 @@ class TmKeyManager
         $tmKeys = array_values($tmKeys);
 
         return array_map([TmKeyManager::class, 'getTmKeyStructure'], $tmKeys);
+    }
+
+    /**
+     * Returns the keys the job owner linked to a job, with the owner's grants.
+     * Unlike getJobTmKeys(), it never includes a translator's or revisor's own keys.
+     *
+     * @param string $jsonTmKeys A json string representing an array of TmKeyStruct objects
+     * @param string $grant_level One of "r", "w", "rw"
+     * @param string $type One of "tm", "glos", "tm,glos"
+     *
+     * @return list<string>
+     * @throws Exception
+     */
+    public static function getOwnerJobTmKeys(string $jsonTmKeys, string $grant_level = 'rw', string $type = "tm"): array
+    {
+        $tmKeys = json_decode($jsonTmKeys, true, 512, JSON_THROW_ON_ERROR);
+        $filter = new Filter();
+        $filter->setGrants($grant_level)
+            ->setTmType($type);
+
+        $keys = [];
+        foreach (array_filter($tmKeys, [$filter, 'byOwner']) as $tmKey) {
+            if (!empty($tmKey['key'])) {
+                $keys[] = (string)$tmKey['key'];
+            }
+        }
+
+        return $keys;
     }
 
     /**
@@ -154,8 +227,7 @@ class TmKeyManager
             $tmKey = json_decode($tmKey, true);
 
             if (is_null($tmKey)) {
-                LoggerFactory::doJsonLog(__METHOD__ . " -> Invalid JSON.");
-                LoggerFactory::doJsonLog(var_export($tmKey, true));
+                LoggerFactory::getLogger('engines')->error(__METHOD__ . " -> Invalid JSON.");
                 throw new Exception ("Invalid JSON: " . var_export($jsonTmKeys_array, true), -2);
             }
 
@@ -211,7 +283,7 @@ class TmKeyManager
      *
      * @return TmKeyStruct
      *
-     * @throws \TypeError
+     * @throws TypeError
      * @throws DomainException
      */
     public static function sanitize(TmKeyStruct $obj): TmKeyStruct
@@ -316,7 +388,7 @@ class TmKeyManager
      * @return TmKeyStruct[] TmKeyStruct[]
      *
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      * @see TmKeyStruct
      *
      */
@@ -459,10 +531,11 @@ class TmKeyManager
          * There are some new keys from client? Add them
          */
         if (!empty($reverse_lookup_client_json['pos'])) {
-            $justCreatedKey = new TmKeyStruct();
-
             foreach ($reverse_lookup_client_json['elements'] as $_pos => $newClientKey) {
                 /** @var TmKeyStruct $newClientKey */
+
+                // A new struct for each key: they all end up in $server_reorder_position.
+                $justCreatedKey = new TmKeyStruct();
 
                 //set the key value
                 $justCreatedKey->key = $newClientKey->key;
@@ -523,7 +596,7 @@ class TmKeyManager
                             $_keyDao->create($dh);
                         }
                     } catch (Exception $e) {
-                        LoggerFactory::doJsonLog($e->getMessage());
+                        LoggerFactory::getLogger('engines')->error($e->getMessage());
                     }
                 }
             }
@@ -602,7 +675,7 @@ class TmKeyManager
      * @param IDatabase $database
      *
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function shareKey(array $emailList, MemoryKeyStruct $memoryKeyToUpdate, UserStruct $user, IDatabase $database): void
     {

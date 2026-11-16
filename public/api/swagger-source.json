@@ -178,7 +178,43 @@
             "description": "Pre-translate 101% matches from TM",
             "required": false,
             "type": "integer",
-            "default": 0
+            "default": 1
+          },
+          {
+            "name": "pretranslate_101_status",
+            "in": "formData",
+            "description": "Status given to pre-translated 101% matches: TRANSLATED, APPROVED or APPROVED2, in any letter case",
+            "required": false,
+            "type": "string",
+            "default": "APPROVED",
+            "enum": ["TRANSLATED", "APPROVED", "APPROVED2"]
+          },
+          {
+            "name": "pretranslate_101_lock",
+            "in": "formData",
+            "description": "1 locks pre-translated 101% matches, which takes them out of scope; 0 leaves them editable",
+            "required": false,
+            "type": "integer",
+            "default": 1,
+            "enum": [0, 1]
+          },
+          {
+            "name": "pretranslate_100_status",
+            "in": "formData",
+            "description": "Status given to pre-translated 100% matches: TRANSLATED, APPROVED or APPROVED2, in any letter case",
+            "required": false,
+            "type": "string",
+            "default": "APPROVED",
+            "enum": ["TRANSLATED", "APPROVED", "APPROVED2"]
+          },
+          {
+            "name": "pretranslate_100_lock",
+            "in": "formData",
+            "description": "1 locks pre-translated 100% matches, which takes them out of scope; 0 leaves them editable",
+            "required": false,
+            "type": "integer",
+            "default": 1,
+            "enum": [0, 1]
           },
           {
             "name": "dialect_strict",
@@ -340,7 +376,7 @@
           {
             "name": "mt_evaluation",
             "in": "formData",
-            "description": "Activate MT evaluation",
+            "description": "Activate MT evaluation. Requires an active Lara license",
             "required": false,
             "type": "boolean"
           },
@@ -410,7 +446,7 @@
           {
             "name": "subfiltering_handlers",
             "in": "formData",
-            "description": "An array string to choose which syntaxes to detect and lock in tags during translation. Allowed values are: \"markup\", \"percent_double_curly\", \"twig\", \"ruby_on_rails\", \"double_snail\", \"double_square\", \"dollar_curly\", \"single_curly\", \"objective_c_ns\", \"double_percent\", \"square_sprintf\", \"sprintf\"",
+            "description": "An array string to choose which syntaxes to detect and lock in tags during translation. Allowed values are: \"markup\", \"percent_double_curly\", \"twig\", \"ruby_on_rails\", \"double_snail\", \"double_square\", \"dollar_curly\", \"single_curly\", \"objective_c_ns\", \"double_percent\", \"square_sprintf\", \"single_square\", \"sprintf\"",
             "required": false,
             "type": "string",
             "default": "[]",
@@ -642,6 +678,26 @@
             "description": "urls",
             "schema": {
               "$ref": "#/definitions/ProjectCreationStatus"
+            }
+          },
+          "202": {
+            "description": "The project is still in the creation queue. Poll again later.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "integer"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No project matches the supplied id and password, or its creation status has expired.",
+            "schema": {
+              "$ref": "#/definitions/Error"
             }
           },
           "default": {
@@ -5785,6 +5841,7 @@
       "properties": {
         "states": {
           "type": "array",
+          "description": "The XLIFF states and state-qualifiers the rule matches. The special value `no-state` matches segments without a state or state-qualifier attribute whose target differs from the source, and acts as the fallback for any state no other rule matches. It can be used in only one rule per XLIFF version.",
           "example": [
             "translated"
           ],
@@ -5799,6 +5856,11 @@
         "editor": {
           "type": "string",
           "example": "translated"
+        },
+        "lock": {
+          "type": "boolean",
+          "default": false,
+          "description": "Lock the segments the rule matches, which takes them out of scope. Refused for the new and draft editor states"
         },
         "matchCategory": {
           "type": "string"
@@ -5828,11 +5890,8 @@
         "tm_prioritization": {
           "type": "boolean"
         },
-        "pretranslate_100": {
-          "type": "boolean"
-        },
-        "pretranslate_101": {
-          "type": "boolean"
+        "pretranslate": {
+          "$ref": "#/definitions/ProjectTemplateSchemaPretranslate"
         },
         "get_public_matches": {
           "type": "boolean"
@@ -5883,8 +5942,61 @@
       "required": [
         "name",
         "id_team",
-        "pretranslate_100",
+        "pretranslate",
         "get_public_matches"
+      ]
+    },
+    "ProjectTemplateSchemaPretranslate": {
+      "type": "object",
+      "description": "Pre-confirm options for 101% (in-context) and 100% TM matches.",
+      "properties": {
+        "match_101": {
+          "$ref": "#/definitions/ProjectTemplateSchemaPretranslateMatch"
+        },
+        "match_100": {
+          "$ref": "#/definitions/ProjectTemplateSchemaPretranslateMatch"
+        }
+      },
+      "required": [
+        "match_101",
+        "match_100"
+      ],
+      "example": {
+        "match_101": {
+          "enabled": true,
+          "status": "APPROVED",
+          "lock": true
+        },
+        "match_100": {
+          "enabled": false,
+          "status": "TRANSLATED",
+          "lock": false
+        }
+      }
+    },
+    "ProjectTemplateSchemaPretranslateMatch": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Pre-confirm the segments with a match of this kind."
+        },
+        "status": {
+          "type": "string",
+          "description": "Status given to a pre-confirmed segment. Defaults to APPROVED for 101% matches and TRANSLATED for 100% matches.",
+          "enum": [
+            "TRANSLATED",
+            "APPROVED",
+            "APPROVED2"
+          ]
+        },
+        "lock": {
+          "type": "boolean",
+          "description": "Lock a pre-confirmed segment. Defaults to true for 101% matches and false for 100% matches."
+        }
+      },
+      "required": [
+        "enabled"
       ]
     },
     "ProjectTemplateSchemaTM": {
@@ -7060,10 +7172,13 @@
           "$ref": "#/definitions/QualityReportFile"
         },
         "ice_locked": {
-          "type": "integer"
+          "type": "boolean",
+          "deprecated": true,
+          "description": "Deprecated alias of locked, kept for existing consumers. Use locked."
         },
         "ice_modified": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "The segment is an ICE match and its translation has been edited."
         },
         "id": {
           "type": "integer",
@@ -7089,7 +7204,7 @@
           "type": "string"
         },
         "locked": {
-          "type": "integer"
+          "type": "boolean"
         },
         "match_type": {
           "type": "string"

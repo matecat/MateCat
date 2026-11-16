@@ -7,25 +7,12 @@
 }
 
 .search-form .find-wrapper .find-element input:not(.input--invisible) {
-  border-radius: 2px !important;
-  border: 1px solid rgba(34, 36, 38, 0.15) !important;
-  box-shadow: inset 0 1px 3px colors.$grey200 !important;
-  font-size: 1.2em !important;
+  border-radius: variables.$border-radius-default;
+  font-size: 16px;
   padding: 8px 16px 7px !important;
 
   &::-webkit-input-placeholder {
     color: colors.$grey400;
-  }
-
-  &:hover {
-    border-color: rgba(34, 36, 38, 0.35) !important;
-  }
-
-  &:focus {
-    border-color: colors.$blue300 !important;
-    background: colors.$white !important;
-    color: rgba(0, 0, 0, 0.8) !important;
-    /*outline: none;*/
   }
 }
 
@@ -33,7 +20,6 @@
   background-color: colors.$white;
   padding: 10px 0 0;
   margin-bottom: 0;
-  box-shadow: 0 1px 3px colors.$grey700;
   border-radius: 0 0 0 0;
   display: block;
   color: colors.$grey700;
@@ -81,21 +67,7 @@
   display: flex;
   align-items: center;
   font-weight: normal;
-  height: 37px;
-}
-
-.search-form
-  .find-wrapper
-  .find-container
-  .find-container-inside
-  .find-element.find-dropdown-status
-  .find-dropdown
-  .select {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 5px;
-  padding: 9px 46px 9px 12px;
+  height: 40px;
 }
 
 .search-form
@@ -210,6 +182,7 @@
 
   input {
     width: 100%;
+    height: 40px;
   }
 }
 
@@ -290,7 +263,9 @@
   .find-container
   .find-container-inside
   .find-element-container {
-  display: inline-block;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
   width: 29%;
   margin-left: 15px;
   margin-right: 10px;
@@ -370,24 +345,13 @@
   margin-bottom: 0;
 }
 
-.search-form .select-with-icon__wrapper {
-  height: 37px;
-}
-
-.search-form .select__dropdown-wrapper {
-  min-width: 180px;
-  margin-top: 1px;
-  box-shadow: 0 2px 3px 0 rgba(34, 36, 38, 0.15);
-  border: 1px solid rgba(34, 36, 38, 0.15);
-}
-
 .search-form .custom-dropdown.select__dropdown {
-  background-color: colors.$white;
+  min-width: 120px;
+  width: max-content;
 }
 
 .search-form ul.dropdown__list {
   min-height: 165px;
-  max-height: unset !important;
 }
 
 .search-form li.dropdown__option {

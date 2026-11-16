@@ -151,7 +151,7 @@ describe('Yaml', () => {
     const updated = updater(currentTemplate)
     // the space bar must not split a YAML key
     expect(updated.yaml.context_keys).toEqual([' my key '])
-    expect(screen.getAllByText('·')).toHaveLength(2)
+    expect(screen.getAllByText('•')).toHaveLength(2)
   })
 
   test('does not call modifyingCurrentTemplate when nothing changed', () => {

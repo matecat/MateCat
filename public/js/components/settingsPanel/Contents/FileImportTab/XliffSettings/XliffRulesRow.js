@@ -9,9 +9,19 @@ import Trash from '../../../../../../img/icons/Trash'
 import {Select} from '../../../../common/Select'
 import {Controller, useForm} from 'react-hook-form'
 import {isEqual} from 'lodash'
+import {
+  fromStatusLockId,
+  getStatusLockOptions,
+  getStatusName,
+  toStatusLockId,
+} from '../../../../../utils/editorStatusLock'
+import {SELECT_HEIGHT} from '../../../../../constants/Constants'
 
 const getMatchCategoryShortId = (id) => id.replace(/_match_category/, '')
 const getMatchCategoryExtendedId = (id) => `${id}_match_category`
+const getStateName = (value) =>
+  value === 'no-state' ? 'No state' : `'${value}'`
+const getEditorName = (value) => `'${getStatusName(value)}'`
 
 export const XliffRulesRow = ({
   value,
@@ -39,11 +49,16 @@ export const XliffRulesRow = ({
   useEffect(() => {
     if (typeof formData === 'undefined') return
 
-    const {editor, match_category, ...restProps} = formData
+    const {editor, match_category, lock, ...restProps} = formData
 
+    // `lock` is written only when true, so a rule without it stays unchanged
     const propsValue = {
       ...restProps,
-      ...(formData.analysis !== 'new' && {editor, match_category}),
+      ...(formData.analysis !== 'new' && {
+        editor,
+        match_category,
+        ...(lock && {lock: true}),
+      }),
     }
 
     if (
@@ -57,12 +72,11 @@ export const XliffRulesRow = ({
   // set default values for current template
   useEffect(() => {
     Object.entries(value).forEach(([key, value]) => setValue(key, value))
+    setValue('lock', value.lock === true)
 
     if (value.analysis !== 'new' && typeof value.editor === 'undefined')
       setValue('editor', xliffOptions.editor[0])
   }, [value, setValue, xliffOptions.editor])
-
-  const MAX_HEIGHT_DROPLIST = 260
 
   const deleteRow = () => onDelete(value.id)
 
@@ -77,7 +91,7 @@ export const XliffRulesRow = ({
               value.states.every((v) => v !== stateCompare),
           ),
     )
-    .map((value) => ({id: value, name: value}))
+    .map((value) => ({id: value, name: getStateName(value)}))
 
   const optionsAnalysis = xliffOptions.analysis.reduce(
     (acc, value) =>
@@ -100,6 +114,8 @@ export const XliffRulesRow = ({
     [],
   )
 
+  const editorOptions = getStatusLockOptions(xliffOptions.editor, getEditorName)
+
   const getAnalysisActiveOption = (id) =>
     optionsAnalysis.find(
       (option) =>
@@ -118,11 +134,14 @@ export const XliffRulesRow = ({
           name="states"
           render={({field: {onChange, value, name}}) => (
             <Select
+              isPortalDropdown={true}
               name={name}
               placeholder="Select state"
               options={statesOptions}
               multipleSelect="dropdown"
-              activeOptions={value && value?.map((v) => ({id: v, name: v}))}
+              activeOptions={
+                value && value?.map((v) => ({id: v, name: getStateName(v)}))
+              }
               onToggleOption={(option) => {
                 const updatedOptions = value.some((id) => id === option.id)
                   ? value.filter((id) => id !== option.id)
@@ -130,7 +149,7 @@ export const XliffRulesRow = ({
 
                 if (updatedOptions.length) onChange(updatedOptions)
               }}
-              maxHeightDroplist={MAX_HEIGHT_DROPLIST}
+              maxHeightDroplist={SELECT_HEIGHT}
             />
           )}
         />
@@ -141,6 +160,7 @@ export const XliffRulesRow = ({
           name="analysis"
           render={({field: {onChange, value, name}}) => (
             <Select
+              isPortalDropdown={true}
               name={name}
               placeholder="Select analysis"
               options={optionsAnalysis}
@@ -150,7 +170,7 @@ export const XliffRulesRow = ({
                 if (option.id !== 'new')
                   setValue('match_category', getMatchCategoryShortId(option.id))
               }}
-              maxHeightDroplist={MAX_HEIGHT_DROPLIST}
+              maxHeightDroplist={SELECT_HEIGHT}
             />
           )}
         />
@@ -161,22 +181,28 @@ export const XliffRulesRow = ({
           name="editor"
           render={({field: {onChange, value, name}}) => (
             <Select
+              isPortalDropdown={true}
               name={name}
               placeholder="Select editor"
-              options={xliffOptions.editor.map((value) => ({
-                id: value,
-                name: value,
-              }))}
+              options={editorOptions}
               activeOption={
                 formData?.analysis === 'new'
                   ? {id: 'na', name: 'N/A (determined by TM)'}
-                  : value && {id: value, name: value}
+                  : value &&
+                    editorOptions.find(
+                      ({id}) =>
+                        id ===
+                        toStatusLockId({status: value, lock: formData?.lock}),
+                    )
               }
-              onSelect={(option) => onChange(option.id)}
+              onSelect={(option) => {
+                const {status, lock} = fromStatusLockId(option.id)
+                onChange(status)
+                setValue('lock', lock)
+              }}
               isDisabled={
                 typeof value === 'undefined' || formData.analysis === 'new'
               }
-              maxHeightDroplist={MAX_HEIGHT_DROPLIST}
             />
           )}
         />
@@ -184,7 +210,7 @@ export const XliffRulesRow = ({
       <Button
         className="xliff-settings-column-content"
         mode={BUTTON_MODE.GHOST}
-        size={BUTTON_SIZE.SMALL}
+        size={BUTTON_SIZE.ICON_SMALL}
         onClick={deleteRow}
       >
         <Trash size={20} />

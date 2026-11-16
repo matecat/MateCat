@@ -26,7 +26,11 @@ export const TmPrioritization = () => {
         <h4>TM prioritization</h4>
         <span>
           Activate to prioritize translation memories based on their order.{' '}
-          <a href="https://guides.matecat.com/activ" target="_blank">
+          <a
+            href="https://guides.matecat.com/activ"
+            target="_blank"
+            rel="noreferrer"
+          >
             More details
           </a>
         </span>

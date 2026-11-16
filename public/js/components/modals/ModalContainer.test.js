@@ -121,7 +121,7 @@ describe('ModalContainer', () => {
 
     fireEvent.keyDown(last, {key: 'Tab', shiftKey: false})
 
-    expect(document.activeElement).toBe(first)
+    expect(first).toHaveFocus()
   })
 
   test('Shift+Tab on the first focusable element wraps focus to the last', () => {
@@ -138,7 +138,7 @@ describe('ModalContainer', () => {
 
     fireEvent.keyDown(first, {key: 'Tab', shiftKey: true})
 
-    expect(document.activeElement).toBe(last)
+    expect(last).toHaveFocus()
   })
 
   test('Tab in the middle of the dialog does not steal focus', () => {
@@ -155,7 +155,7 @@ describe('ModalContainer', () => {
 
     fireEvent.keyDown(middle, {key: 'Tab', shiftKey: false})
 
-    expect(document.activeElement).toBe(middle)
+    expect(middle).toHaveFocus()
   })
 
   test('non-Tab keydown is ignored', () => {

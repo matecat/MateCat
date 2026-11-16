@@ -139,9 +139,9 @@ test('renders the cattool header content and wires props to its children when lo
 test('hides the cattool-only content but keeps the user menu and subheader when not logged in', () => {
   renderHeader({}, {isUserLogged: false})
 
-  expect(screen.queryByTestId('files-menu')).toBeNull()
-  expect(screen.queryByTestId('mark-as-complete')).toBeNull()
-  expect(screen.queryByTestId('action-menu')).toBeNull()
+  expect(screen.queryByTestId('files-menu')).not.toBeInTheDocument()
+  expect(screen.queryByTestId('mark-as-complete')).not.toBeInTheDocument()
+  expect(screen.queryByTestId('action-menu')).not.toBeInTheDocument()
   expect(screen.getByTestId('user-menu')).toBeInTheDocument()
   expect(screen.getByTestId('sub-header-container')).toBeInTheDocument()
 })
@@ -157,12 +157,12 @@ test('shows the revision mark only when a revision is active', () => {
       <Header {...props} revisionNumber={0} />
     </ApplicationWrapperContext.Provider>,
   )
-  expect(screen.queryByText(/^R\d/)).toBeNull()
+  expect(screen.queryByText(/^R\d/)).not.toBeInTheDocument()
 })
 
 test('does not render the mark-as-complete button when the feature is disabled', () => {
   renderHeader({projectCompletionEnabled: false})
-  expect(screen.queryByTestId('mark-as-complete')).toBeNull()
+  expect(screen.queryByTestId('mark-as-complete')).not.toBeInTheDocument()
 })
 
 test('calls openTmPanel when the settings icon is clicked', () => {

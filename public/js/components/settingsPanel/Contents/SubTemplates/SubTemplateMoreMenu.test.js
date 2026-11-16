@@ -82,8 +82,8 @@ describe('SubTemplateMoreMenu', () => {
 
   test('does not disable the menu items when no request is in progress', () => {
     renderMenu({subTemplates: {isRequestInProgress: false}})
-    expect(screen.getByText('Rename')).not.toBeDisabled()
-    expect(screen.getByTestId('delete-template')).not.toBeDisabled()
+    expect(screen.getByText('Rename')).toBeEnabled()
+    expect(screen.getByTestId('delete-template')).toBeEnabled()
   })
 
   test('clicking Rename switches to update mode and preloads the current name', () => {

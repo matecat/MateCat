@@ -20,7 +20,13 @@ jest.mock('../../../../stores/SegmentStore', () => ({
 }))
 
 jest.mock('../../../common/Select', () => ({
-  Select: ({options, activeOptions, onToggleOption, onCloseSelect, children}) => (
+  Select: ({
+    options,
+    activeOptions,
+    onToggleOption,
+    onCloseSelect,
+    children,
+  }) => (
     <div>
       <div data-testid="active-options">
         {(activeOptions ?? []).map((option) => option?.id).join(',')}
@@ -48,7 +54,7 @@ const renderTagging = ({
   modifyingCurrentTemplate = jest.fn(),
 } = {}) =>
   render(
-    <CreateProjectContext.Provider value={{SELECT_HEIGHT: 200}}>
+    <CreateProjectContext.Provider value={{}}>
       <SettingsPanelContext.Provider
         value={{currentProjectTemplate, modifyingCurrentTemplate}}
       >
@@ -79,14 +85,14 @@ describe('Tagging', () => {
 
   test('activeOptions is empty when subfilteringHandlers is undefined', () => {
     renderTagging({currentProjectTemplate: {}})
-    expect(screen.getByTestId('active-options').textContent).toBe('')
+    expect(screen.getByTestId('active-options')).toHaveTextContent('')
   })
 
   test('activeOptions falls back to default tagging types when subfilteringHandlers is an empty array', () => {
     renderTagging({
       currentProjectTemplate: {subfilteringHandlers: []},
     })
-    expect(screen.getByTestId('active-options').textContent).toBe(
+    expect(screen.getByTestId('active-options')).toHaveTextContent(
       defaultTaggingIds.join(','),
     )
   })
@@ -95,7 +101,7 @@ describe('Tagging', () => {
     renderTagging({
       currentProjectTemplate: {subfilteringHandlers: ['twig']},
     })
-    expect(screen.getByTestId('active-options').textContent).toBe('twig')
+    expect(screen.getByTestId('active-options')).toHaveTextContent('twig')
   })
 
   test('renders code badges for non-html tagging types', () => {

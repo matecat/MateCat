@@ -1,6 +1,5 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import Close from '../../../../img/icons/Close'
 import IconClose from '../../../../img/icons/IconClose'
 import styles from './EmailsBadge.module.scss'
 
@@ -22,10 +21,17 @@ export const Tag = ({
   }
 
   return (
-    <div className={[styles['email-badge-tag'], styles[status]].filter(Boolean).join(' ')}>
+    <div
+      className={[styles['email-badge-tag'], styles[status]]
+        .filter(Boolean)
+        .join(' ')}
+    >
       {children}
-      <div className={styles['email-badge-tag-button-close']} onClick={handleCLick}>
-        <IconClose size={8} />
+      <div
+        className={styles['email-badge-tag-button-close']}
+        onClick={handleCLick}
+      >
+        <IconClose size={14} />
       </div>
     </div>
   )

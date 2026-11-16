@@ -1,5 +1,5 @@
 import React from 'react'
-import {render} from '@testing-library/react'
+import {render, screen} from '@testing-library/react'
 import '@testing-library/jest-dom'
 
 import SegmentWarnings from './SegmentWarnings'
@@ -46,9 +46,9 @@ describe('SegmentWarnings', () => {
     expect(container.querySelector('.warning-alert')).toBeInTheDocument()
     expect(container.querySelector('.info-alert')).toBeInTheDocument()
     expect(container.querySelectorAll('.alert-block')).toHaveLength(3)
-    expect(container.textContent).toContain('error debug')
-    expect(container.textContent).toContain('fix it')
-    expect(container.textContent).toContain('info tip')
+    expect(container).toHaveTextContent(/error debug/)
+    expect(container).toHaveTextContent(/fix it/)
+    expect(container).toHaveTextContent(/info tip/)
   })
 
   test('does not render a tip paragraph when tip is an empty string', () => {
@@ -76,7 +76,7 @@ describe('SegmentWarnings', () => {
     }
     const {container} = render(<SegmentWarnings warnings={warnings} />)
     expect(container.querySelectorAll('.alert-block')).toHaveLength(1)
-    expect(container.textContent).toContain('first')
+    expect(container).toHaveTextContent(/first/)
   })
 
   test('renders escaped tag names in debug as visible text', () => {
@@ -87,9 +87,8 @@ describe('SegmentWarnings', () => {
         Categories: {
           cat1: [
             {
-              outcome: 1302,
-              debug:
-                '&lt;ex&gt;, &lt;bx&gt; and/or &lt;g&gt; total count mismatch',
+              outcome: 1301,
+              debug: 'Wrong &lt;ex&gt; and/or &lt;bx&gt; placement',
               tip: '',
             },
           ],
@@ -98,9 +97,7 @@ describe('SegmentWarnings', () => {
     }
     const {container} = render(<SegmentWarnings warnings={warnings} />)
 
-    expect(container.textContent).toContain(
-      '<ex>, <bx> and/or <g> total count mismatch',
-    )
+    expect(container).toHaveTextContent('Wrong <ex> and/or <bx> placement')
   })
 
   test('keeps intentional markup in debug, such as the ICU line breaks', () => {
@@ -113,11 +110,11 @@ describe('SegmentWarnings', () => {
         },
       },
     }
-    const {container} = render(<SegmentWarnings warnings={warnings} />)
+    render(<SegmentWarnings warnings={warnings} />)
 
-    expect(container.querySelectorAll('br')).toHaveLength(2)
-    expect(container.textContent).toContain('first line')
-    expect(container.textContent).toContain('second line')
+    const debug = screen.getByText(/first line/)
+    expect(debug).toContainHTML('first line<br><br>second line')
+    expect(debug).not.toHaveTextContent('<br')
   })
 
   test('renders a tip as plain text, so raw tag names survive', () => {
@@ -134,11 +131,9 @@ describe('SegmentWarnings', () => {
         },
       },
     }
-    const {container} = render(<SegmentWarnings warnings={warnings} />)
+    render(<SegmentWarnings warnings={warnings} />)
 
-    expect(container.querySelector('.error-solution')).toHaveTextContent(
-      'Should be <g>...</g>',
-    )
+    expect(screen.getByText('Should be <g>...</g>')).toBeInTheDocument()
   })
 
   test('shouldComponentUpdate re-renders when warnings prop changes', () => {
@@ -149,9 +144,9 @@ describe('SegmentWarnings', () => {
       ERROR: {Categories: {cat1: [{outcome: 'e2', debug: 'second', tip: ''}]}},
     }
     const {container, rerender} = render(<SegmentWarnings warnings={initial} />)
-    expect(container.textContent).toContain('first')
+    expect(container).toHaveTextContent(/first/)
 
     rerender(<SegmentWarnings warnings={updated} />)
-    expect(container.textContent).toContain('second')
+    expect(container).toHaveTextContent(/second/)
   })
 })

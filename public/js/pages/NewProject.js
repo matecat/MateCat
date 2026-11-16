@@ -42,9 +42,11 @@ import {TemplateSelect} from '../components/settingsPanel/ProjectTemplate/Templa
 import {getMMTKeys} from '../api/getMMTKeys'
 import {AlertDeleteResourceProjectTemplates} from '../components/modals/AlertDeleteResourceProjectTemplates'
 import {handleCreationStatus} from '../utils/newProjectUtils'
+import {getPretranslateParams} from '../utils/editorStatusLock'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
 import {mountPage} from './mountPage'
 import {HomePageSection} from '../components/createProject/HomePageSection'
+import {announceSettingsTab} from '../components/releaseAnnouncements/releaseAnnouncements'
 import UserActions from '../actions/UserActions'
 import {getDeepLGlosssaries} from '../api/getDeepLGlosssaries'
 import SocketListener from '../sse/SocketListener'
@@ -68,8 +70,7 @@ import {ANALYSIS_SCHEMA_KEYS} from '../components/settingsPanel/Contents/Analysi
 import {FILTERS_PARAMS_SCHEMA_KEYS} from '../components/settingsPanel/Contents/FileImportTab/FiltersParams/FiltersParams'
 import {XLIFF_SETTINGS_SCHEMA_KEYS} from '../components/settingsPanel/Contents/FileImportTab/XliffSettings/XliffSettings'
 import {DEEPL_GLOSSARY_ROW_NONE} from '../components/settingsPanel/Contents/MachineTranslationTab/DeepLGlossary'
-
-const SELECT_HEIGHT = 324
+import {SELECT_HEIGHT} from '../constants/Constants'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -466,8 +467,7 @@ const NewProject = () => {
     const {
       mt,
       tm,
-      pretranslate100,
-      pretranslate101,
+      pretranslate,
       segmentationRule,
       idTeam,
       getPublicMatches,
@@ -545,8 +545,7 @@ const NewProject = () => {
         anonymous: [],
       }),
       lang_detect_files: '',
-      pretranslate_100: pretranslate100 ? 1 : 0,
-      pretranslate_101: pretranslate101 ? 1 : 0,
+      ...getPretranslateParams(pretranslate),
       segmentation_rule: segmentationRule.id === '1' ? '' : segmentationRule.id,
       id_team: idTeam,
       ...(typeof qaModelTemplate !== 'undefined'
@@ -777,7 +776,7 @@ const NewProject = () => {
           <span>
             The TMX file(s) you have uploaded will be imported into the newly
             created key <i>{filename}</i>. If you wish to import them into an
-            existing key, please use the 'Import TMX' button in the
+            existing key, please use the &apos;Import TMX&apos; button in the
             <a href="#" onClick={() => setOpenSettings({isOpen: true})}>
               {' '}
               Settings panel
@@ -908,7 +907,6 @@ const NewProject = () => {
   return isDeviceCompatible ? (
     <CreateProjectContext.Provider
       value={{
-        SELECT_HEIGHT,
         tmKeys,
         setTmKeys,
         languages: supportedLanguages,
@@ -975,11 +973,11 @@ const NewProject = () => {
               <TemplateSelect
                 {...{
                   label: 'Project template',
-                  maxHeightDroplist: SELECT_HEIGHT,
                   projectTemplates,
                   setProjectTemplates,
                   currentProjectTemplate,
                   subtemplatesNotSaved,
+                  dropdownClassName: 'new-project-form-select-portal',
                 }}
               />
             </div>
@@ -989,6 +987,8 @@ const NewProject = () => {
                 label="Team"
                 id="project-team"
                 name={'project-team'}
+                dropdownClassName="new-project-form-select-portal"
+                isPortalDropdown={true}
                 maxHeightDroplist={SELECT_HEIGHT}
                 showSearchBar={true}
                 options={
@@ -1034,6 +1034,8 @@ const NewProject = () => {
                 label="Subject"
                 id="project-subject"
                 name={'project-subject'}
+                dropdownClassName="new-project-form-select-portal"
+                isPortalDropdown={true}
                 maxHeightDroplist={SELECT_HEIGHT}
                 showSearchBar={true}
                 options={subjectsArray}
@@ -1087,7 +1089,7 @@ const NewProject = () => {
                     SupportedFilesModal,
                     {supportedFiles: supportedFiles},
                     'Supported file formats',
-                    {minWidth: '80%', height: '80%'},
+                    {width: '80%', maxWidth: '1400px'},
                   )
                 }}
               >
@@ -1136,7 +1138,7 @@ const NewProject = () => {
             ) : (
               <>
                 <Button
-                  size={BUTTON_SIZE.BIG}
+                  size={BUTTON_SIZE.MEDIUM}
                   type={BUTTON_TYPE.PRIMARY}
                   className={'uploadbtn disabled'}
                   disabled={true}
@@ -1169,6 +1171,7 @@ const NewProject = () => {
         <SettingsPanel
           {...{
             onClose: closeSettings,
+            onTabOpened: announceSettingsTab,
             isOpened: openSettings.isOpen,
             tabOpen: openSettings.tab,
             user: userInfo,

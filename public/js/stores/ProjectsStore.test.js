@@ -565,3 +565,84 @@ describe('ProjectsStore.removeJob', () => {
     expect(remainingJobs.get(0).get('id')).toBe(20)
   })
 })
+
+describe('ProjectsStore.removeJob with a stale project from the action', () => {
+  afterEach(() => {
+    ProjectsStore.projects = fromJS([])
+  })
+
+  test('removes the project once, without reading a missing one', () => {
+    ProjectsStore.projects = fromJS([
+      {id: 1, jobs: [{id: 10, password: 'a'}]},
+      {
+        id: 2,
+        jobs: [
+          {id: 30, password: 'c'},
+          {id: 40, password: 'd'},
+        ],
+      },
+    ])
+    const project = fromJS({
+      id: 1,
+      jobs: [
+        {id: 10, password: 'a'},
+        {id: 10, password: 'b'},
+      ],
+    })
+
+    expect(() =>
+      ProjectsStore.removeJob(project, fromJS({id: 10})),
+    ).not.toThrow()
+
+    expect(ProjectsStore.projects.size).toBe(1)
+    expect(ProjectsStore.projects.getIn([0, 'jobs']).size).toBe(2)
+  })
+
+  test('keeps the project while another job is left', () => {
+    ProjectsStore.projects = fromJS([
+      {
+        id: 1,
+        jobs: [
+          {id: 10, password: 'a'},
+          {id: 20, password: 'z'},
+        ],
+      },
+    ])
+    const project = fromJS({
+      id: 1,
+      jobs: [
+        {id: 10, password: 'a'},
+        {id: 10, password: 'b'},
+      ],
+    })
+
+    ProjectsStore.removeJob(project, fromJS({id: 10}))
+
+    expect(ProjectsStore.projects.size).toBe(1)
+    const jobs = ProjectsStore.projects.getIn([0, 'jobs'])
+    expect(jobs.size).toBe(1)
+    expect(jobs.getIn([0, 'id'])).toBe(20)
+  })
+
+  test('removes a chunk whose other fields changed since the action was built', () => {
+    ProjectsStore.projects = fromJS([
+      {
+        id: 1,
+        jobs: [
+          {id: 10, password: 'a', stats: {translated: 5}},
+          {id: 20, password: 'z'},
+        ],
+      },
+    ])
+    const project = fromJS({
+      id: 1,
+      jobs: [{id: 10, password: 'a', stats: {translated: 0}}],
+    })
+
+    ProjectsStore.removeJob(project, fromJS({id: 10}))
+
+    const jobs = ProjectsStore.projects.getIn([0, 'jobs'])
+    expect(jobs.size).toBe(1)
+    expect(jobs.getIn([0, 'id'])).toBe(20)
+  })
+})

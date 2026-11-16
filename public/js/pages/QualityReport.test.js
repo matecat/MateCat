@@ -1,4 +1,3 @@
-import {createRoot} from 'react-dom/client'
 import {act, render, screen, waitFor} from '@testing-library/react'
 import {http, HttpResponse} from 'msw'
 
@@ -9,8 +8,12 @@ import React from 'react'
 import {QualityReport} from './QualityReport'
 import AppDispatcher from '../stores/AppDispatcher'
 import QualityReportConstants from '../constants/QualityReportConstants'
+import {showReleaseAnnouncement} from '../components/releaseAnnouncements/releaseAnnouncements'
 
 jest.mock('../sse/SocketListener', () => () => null)
+jest.mock('../components/releaseAnnouncements/releaseAnnouncements', () => ({
+  showReleaseAnnouncement: jest.fn(),
+}))
 
 jest.setTimeout(30000)
 global.config = {
@@ -1320,6 +1323,9 @@ test('renders properly', async () => {
   await waitFor(() => {
     expect(screen.getByText('Quality report')).toBeVisible()
   })
+
+  expect(showReleaseAnnouncement).toHaveBeenCalledTimes(1)
+  expect(showReleaseAnnouncement.mock.calls[0][0]).toBe('qualityReport')
 
   act(() => {
     AppDispatcher.dispatch({

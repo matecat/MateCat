@@ -80,6 +80,40 @@ describe('NumericStepper', () => {
     expect(onChange).toHaveBeenCalledWith(0)
   })
 
+  it('calls onChangeCommitted with the stepped value when the increase button is clicked', () => {
+    const onChangeCommitted = jest.fn()
+    render(
+      <NumericStepper
+        {...defaultProps}
+        onChangeCommitted={onChangeCommitted}
+        stepValue={2}
+      />,
+    )
+    const buttons = screen.getAllByRole('button')
+    fireEvent.click(buttons[0])
+    expect(onChangeCommitted).toHaveBeenCalledWith(7)
+  })
+
+  it('calls onChangeCommitted with the stepped value when the decrease button is clicked', () => {
+    const onChangeCommitted = jest.fn()
+    render(
+      <NumericStepper
+        {...defaultProps}
+        onChangeCommitted={onChangeCommitted}
+        stepValue={2}
+      />,
+    )
+    const buttons = screen.getAllByRole('button')
+    fireEvent.click(buttons[1])
+    expect(onChangeCommitted).toHaveBeenCalledWith(3)
+  })
+
+  it('does not require onChangeCommitted to be passed', () => {
+    render(<NumericStepper {...defaultProps} />)
+    const buttons = screen.getAllByRole('button')
+    expect(() => fireEvent.click(buttons[0])).not.toThrow()
+  })
+
   it('calls onChange with the parsed integer when typing digits', () => {
     const onChange = jest.fn()
     render(<NumericStepper {...defaultProps} onChange={onChange} />)
@@ -132,6 +166,21 @@ describe('NumericStepper', () => {
     fireEvent.focus(input)
     fireEvent.blur(input)
     expect(onChange).toHaveBeenCalledWith(5)
+  })
+
+  it('calls onChangeCommitted with the clamped value on blur', () => {
+    const onChangeCommitted = jest.fn()
+    render(
+      <NumericStepper
+        {...defaultProps}
+        value={99}
+        onChangeCommitted={onChangeCommitted}
+      />,
+    )
+    const input = screen.getByRole('textbox')
+    fireEvent.focus(input)
+    fireEvent.blur(input)
+    expect(onChangeCommitted).toHaveBeenCalledWith(10)
   })
 
   it('blurs the input when Enter is pressed', () => {

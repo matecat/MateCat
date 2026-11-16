@@ -21,6 +21,9 @@ use Model\LQA\ModelDao;
 use Model\LQA\ModelStruct;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
+use PDOException;
+use Throwable;
+use Utils\Logger\LoggerFactory;
 
 class ChunkReviewModel implements IChunkReviewModel
 {
@@ -161,13 +164,9 @@ class ChunkReviewModel implements IChunkReviewModel
         // Deferred to the commit inside DaoCacheTrait; the caller does not schedule it.
         $chunkReviewDao->destroyCache($chunkReview);
 
-        FeatureSet::forProject($project, $this->database)->dispatch(new ChunkReviewUpdatedEvent(
-            $this->chunk_review,
-            1,
-            $this,
-            $project,
-            $actingUser
-        ));
+        // Published after the commit, once per row however many deltas this transaction applies,
+        // and from the committed row: $this->chunk_review still holds the counters before the delta.
+        $this->publishUpdatedOnCommit($project, $actingUser);
     }
 
     /**
@@ -264,7 +263,7 @@ class ChunkReviewModel implements IChunkReviewModel
         $this->chunk_review->is_pass = $lqaModel !== null ? ($this->getScore() <= $this->getQALimit($lqaModel)) : null;
 
         $chunkReviewDao = new ChunkReviewDao($this->database);
-        $update_result = $chunkReviewDao->updateStruct($this->chunk_review, [
+        $chunkReviewDao->updateStruct($this->chunk_review, [
                 'fields' => [
                     'reviewed_words_count',
                     'is_pass',
@@ -277,17 +276,63 @@ class ChunkReviewModel implements IChunkReviewModel
         // Deferred to the commit inside DaoCacheTrait; the caller does not schedule it.
         $chunkReviewDao->destroyCache($chunkReview);
 
-        // Dispatched inside the transaction on purpose, unlike the cache bust above: a plugin
-        // listener may write rows that have to be atomic with this counter update, so deferring the
-        // dispatch past the commit would quietly break that guarantee.
-        // External call by Plugins
-        FeatureSet::forProject($project, $this->database)->dispatch(new ChunkReviewUpdatedEvent(
-            $this->chunk_review,
-            $update_result,
-            $this,
-            $project,
-            $actingUser
-        ));
+        // Published after the commit, like the cache bust above, so a rolled-back score is never
+        // reported. A split recounts every chunk review of the job, so this also keeps that
+        // publishing out of the split transaction.
+        $this->publishUpdatedOnCommit($project, $actingUser);
+    }
+
+    /**
+     * Queues ChunkReviewUpdatedEvent for the commit. A transaction that updates the row several times,
+     * such as a bulk status change, publishes it once, with the last actor.
+     *
+     * @throws PDOException
+     */
+    private function publishUpdatedOnCommit(ProjectStruct $project, UserStruct $actingUser): void
+    {
+        $id = (int)$this->chunk_review->id;
+
+        $this->database->onCommit(
+            fn() => $this->publishUpdated($id, $project, $actingUser),
+            callbackDedupeKey: 'chunk_review_updated:' . $id
+        );
+    }
+
+    /**
+     * Publishes the committed row. A failure is logged rather than thrown: the score is committed, and
+     * a broker outage on one chunk must not stop the work queued after it.
+     *
+     * Logged on 'feature_set', which in a worker the Executor aliases to the queue's log.
+     */
+    private function publishUpdated(int $id, ProjectStruct $project, UserStruct $actingUser): void
+    {
+        try {
+            // Read inside a transaction so the row comes from the primary: an autocommit read can be
+            // routed to a replica that has not seen the commit yet. Uncached, because the cached copy
+            // may predate the write that queued this publish.
+            $chunkReview = $this->database->transaction(
+                fn() => (new ChunkReviewDao($this->database))->fetchById($id, ChunkReviewStruct::class, 0)
+            );
+
+            if (!$chunkReview instanceof ChunkReviewStruct) {
+                return;
+            }
+
+            FeatureSet::forProject($project, $this->database)->dispatch(new ChunkReviewUpdatedEvent(
+                $chunkReview,
+                1,
+                new ChunkReviewModel($chunkReview, $this->database),
+                $project,
+                $actingUser
+            ));
+        } catch (Throwable $e) {
+            LoggerFactory::getLogger('feature_set')->error('chunk review updated event failed', [
+                'id_chunk_review' => $id,
+                'id_project' => $project->id,
+                'exception' => $e::class,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
 

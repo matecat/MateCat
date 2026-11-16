@@ -1,10 +1,7 @@
-import React, {useEffect, useState} from 'react'
-import {debounce} from 'lodash/function'
-import $ from 'jquery'
+import React, {useState} from 'react'
 import AnalyzeHeader from './AnalyzeHeader'
 import AnalyzeChunksResume from './AnalyzeChunksResume'
 import ProjectAnalyze from './ProjectAnalyze'
-import {Button} from '../common/Button/Button'
 import {SpinnerLoader} from '../common/SpinnerLoader'
 
 const AnalyzeMain = ({volumeAnalysis, project}) => {
@@ -59,7 +56,7 @@ const AnalyzeMain = ({volumeAnalysis, project}) => {
     <div className="layout__container">
       {volumeAnalysis && project ? (
         <div className="project">
-          <h4>Volume analysis</h4>
+          <h3>Volume analysis</h3>
           <AnalyzeHeader
             data={volumeAnalysis.get('summary')}
             project={project}

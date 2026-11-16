@@ -3,6 +3,7 @@ import {
   isOwnerOfKey,
   orderTmKeys,
   getTmDataStructureToSendServer,
+  toTemplateTmEntry,
 } from './TranslationMemoryGlossaryTabUtils'
 
 describe('TranslationMemoryGlossaryTabUtils', () => {
@@ -111,6 +112,49 @@ describe('TranslationMemoryGlossaryTabUtils', () => {
         getTmDataStructureToSendServer({keysOrdered: []}),
       )
       expect(result).toEqual({ownergroup: [], anonymous: [], mine: []})
+    })
+  })
+})
+
+describe('toTemplateTmEntry', () => {
+  const row = {
+    id: 'abc',
+    isActive: true,
+    key: 'abc',
+    name: 'My key',
+    r: true,
+    w: true,
+    penalty: 0,
+  }
+
+  test('undoing a change gives back a saved entry that has no penalty', () => {
+    const saved = {key: 'abc', name: 'My key', r: true, w: true}
+
+    expect(toTemplateTmEntry(row, [saved])).toEqual(saved)
+  })
+
+  test('keeps a zero penalty the saved entry already has', () => {
+    const saved = {key: 'abc', name: 'My key', r: true, w: true, penalty: 0}
+
+    expect(toTemplateTmEntry(row, [saved])).toEqual(saved)
+  })
+
+  test('keeps a penalty the user set', () => {
+    const saved = {key: 'abc', name: 'My key', r: true, w: true}
+
+    expect(toTemplateTmEntry({...row, penalty: 5}, [saved])).toEqual({
+      ...saved,
+      penalty: 5,
+    })
+  })
+
+  test('keeps the penalty of a key the template did not have', () => {
+    expect(toTemplateTmEntry(row, [])).toEqual({
+      key: 'abc',
+      name: 'My key',
+      r: true,
+      w: true,
+      penalty: 0,
     })
   })
 })

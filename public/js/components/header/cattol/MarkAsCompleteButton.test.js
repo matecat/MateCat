@@ -40,7 +40,7 @@ test('renders nothing when the feature is disabled', () => {
   const {container} = render(
     <MarkAsCompleteButton featureEnabled={false} isReview={false} />,
   )
-  expect(container.firstChild).toBeNull()
+  expect(container).toBeEmptyDOMElement()
 })
 
 test('shows the confirm modal on click when there are no unresolved errors', () => {

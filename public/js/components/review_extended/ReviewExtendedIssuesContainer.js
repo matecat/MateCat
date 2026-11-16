@@ -12,10 +12,7 @@ import SegmentStore from '../../stores/SegmentStore'
 import SegmentUtils from '../../utils/segmentUtils'
 import {SegmentContext} from '../segments/SegmentContext'
 import CatToolActions from '../../actions/CatToolActions'
-import {forEach, filter, isUndefined} from 'lodash'
-import {isNull} from 'lodash/lang'
-import {each} from 'lodash/collection'
-import {findIndex} from 'lodash/array'
+import {forEach, filter, isUndefined, isNull, each, findIndex} from 'lodash'
 import classnames from 'classnames'
 import ReviewExtendedIssuesTabGroup from './ReviewExtendedIssuesTabGroup'
 import {ReviewExtendedIssue} from './ReviewExtendedIssue'
@@ -116,8 +113,8 @@ const ReviewExtendedIssuesContainer = (props) => {
             key={item.id}
             changeVisibility={changeVisibility}
             actions={
-              !SegmentUtils.isIceSegment(context.segment) ||
-              (SegmentUtils.isIceSegment(context.segment) &&
+              !SegmentUtils.isLockedSegment(context.segment) ||
+              (SegmentUtils.isLockedSegment(context.segment) &&
                 context.segment.unlocked)
             }
             issueEditing={props.issueEditing}
@@ -137,8 +134,8 @@ const ReviewExtendedIssuesContainer = (props) => {
             key={item.id}
             changeVisibility={changeVisibility}
             actions={
-              !SegmentUtils.isIceSegment(context.segment) ||
-              (SegmentUtils.isIceSegment(context.segment) &&
+              !SegmentUtils.isLockedSegment(context.segment) ||
+              (SegmentUtils.isLockedSegment(context.segment) &&
                 context.segment.unlocked)
             }
             issueEditing={props.issueEditing}

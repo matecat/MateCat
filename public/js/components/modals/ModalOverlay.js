@@ -1,12 +1,11 @@
 import React from 'react'
-import $ from 'jquery'
 import {
   Button,
   BUTTON_MODE,
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../common/Button/Button'
-import Close from '../../../img/icons/Close'
+import IconClose from '../../../img/icons/IconClose'
 
 export const ModalOverlay = ({title, styleContainer, children, onClose}) => {
   const handleClose = (e) => {
@@ -37,7 +36,7 @@ export const ModalOverlay = ({title, styleContainer, children, onClose}) => {
             onClick={handleClose}
             data-testid="close-button"
           >
-            <Close size={20} />
+            <IconClose size={20} />
           </Button>
         </div>
 

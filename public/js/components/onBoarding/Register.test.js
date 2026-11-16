@@ -36,32 +36,40 @@ const renderWithContext = (overrides = {}) => {
 }
 
 const fillValidForm = () => {
-  fireEvent.change(screen.getByPlaceholderText('Name'), {target: {value: 'Ada'}})
-  fireEvent.change(screen.getByPlaceholderText('Surname'), {
+  fireEvent.change(screen.getByLabelText('Name'), {target: {value: 'Ada'}})
+  fireEvent.change(screen.getByLabelText('Surname'), {
     target: {value: 'Lovelace'},
   })
-  fireEvent.change(screen.getByPlaceholderText('Email'), {
+  fireEvent.change(screen.getByLabelText('Email'), {
     target: {value: 'ada@example.com'},
   })
-  fireEvent.change(screen.getByPlaceholderText('Password'), {
+  fireEvent.change(screen.getByLabelText('Password'), {
     target: {value: VALID_PASSWORD},
   })
-  fireEvent.change(screen.getByPlaceholderText('Confirm password'), {
+  fireEvent.change(screen.getByLabelText('Confirm password'), {
     target: {value: VALID_PASSWORD},
   })
   fireEvent.click(screen.getByRole('checkbox'))
 }
 
 describe('Register', () => {
+  test('labels every field and leaves no placeholder inside the inputs', () => {
+    renderWithContext()
+    const labels = ['Name', 'Surname', 'Email', 'Password', 'Confirm password']
+    labels.forEach((label) => {
+      expect(screen.getByLabelText(label)).not.toHaveAttribute('placeholder')
+    })
+  })
+
   beforeEach(() => jest.clearAllMocks())
 
   test('renders the signup form fields', () => {
     renderWithContext()
-    expect(screen.getByPlaceholderText('Name')).toBeInTheDocument()
-    expect(screen.getByPlaceholderText('Surname')).toBeInTheDocument()
-    expect(screen.getByPlaceholderText('Email')).toBeInTheDocument()
-    expect(screen.getByPlaceholderText('Password')).toBeInTheDocument()
-    expect(screen.getByPlaceholderText('Confirm password')).toBeInTheDocument()
+    expect(screen.getByLabelText('Name')).toBeInTheDocument()
+    expect(screen.getByLabelText('Surname')).toBeInTheDocument()
+    expect(screen.getByLabelText('Email')).toBeInTheDocument()
+    expect(screen.getByLabelText('Password')).toBeInTheDocument()
+    expect(screen.getByLabelText('Confirm password')).toBeInTheDocument()
   })
 
   test('shows validation errors on empty submit, including unaccepted terms', async () => {
@@ -76,10 +84,10 @@ describe('Register', () => {
   test('shows a validation error when password is too short', async () => {
     renderWithContext()
     fillValidForm()
-    fireEvent.change(screen.getByPlaceholderText('Password'), {
+    fireEvent.change(screen.getByLabelText('Password'), {
       target: {value: 'short1!'},
     })
-    fireEvent.change(screen.getByPlaceholderText('Confirm password'), {
+    fireEvent.change(screen.getByLabelText('Confirm password'), {
       target: {value: 'short1!'},
     })
     fireEvent.click(screen.getByRole('button', {name: 'Create account'}))
@@ -91,7 +99,7 @@ describe('Register', () => {
   test('shows a validation error when passwords do not match', async () => {
     renderWithContext()
     fillValidForm()
-    fireEvent.change(screen.getByPlaceholderText('Confirm password'), {
+    fireEvent.change(screen.getByLabelText('Confirm password'), {
       target: {value: 'DifferentPass1!'},
     })
     fireEvent.click(screen.getByRole('button', {name: 'Create account'}))

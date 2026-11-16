@@ -1,4 +1,4 @@
-import React, {createContext, useEffect, useRef, useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {SubTemplateSelect} from './SubTemplateSelect'
 import {SubTemplateNameInput} from './SubTemplateNameInput'
@@ -6,12 +6,16 @@ import {SubTemplateMoreMenu} from './SubTemplateMoreMenu'
 import {SubTemplateCreateUpdateControl} from './SubTemplateCreateUpdateControl'
 import {IconSaveChanges} from '../../../../../img/icons/IconSaveChanges'
 import {IconSave} from '../../../../../img/icons/IconSave'
-import {BUTTON_MODE, BUTTON_SIZE, Button} from '../../../common/Button/Button'
+import {BUTTON_MODE, Button} from '../../../common/Button/Button'
 import {flushSync} from 'react-dom'
 import CatToolActions from '../../../../actions/CatToolActions'
 import {isEqual} from 'lodash'
 
-import {SUBTEMPLATE_MODIFIERS, isStandardSubTemplate, SubTemplatesContext} from './SubTemplateContext'
+import {
+  SUBTEMPLATE_MODIFIERS,
+  isStandardSubTemplate,
+  SubTemplatesContext,
+} from './SubTemplateContext'
 
 export const SubTemplates = ({
   templates,
@@ -61,22 +65,28 @@ export const SubTemplates = ({
     updateApi({
       id: originalTemplate.id,
       template: modifiedTemplate,
-    }).then(() => {
-      flushSync(() =>
-        setTemplates((prevState) =>
-          prevState.map((templateItem) =>
-            templateItem.id === originalTemplate.id
-              ? {...templateItem, [schema.name]: templateName}
-              : templateItem,
-          ),
-        ),
-      )
-
-      modifyingCurrentTemplate((prevTemplate) => ({
-        ...prevTemplate,
-        name: templateName,
-      }))
     })
+      .then(() => {
+        flushSync(() =>
+          setTemplates((prevState) =>
+            prevState.map((templateItem) =>
+              templateItem.id === originalTemplate.id
+                ? {...templateItem, [schema.name]: templateName}
+                : templateItem,
+            ),
+          ),
+        )
+
+        modifyingCurrentTemplate((prevTemplate) => ({
+          ...prevTemplate,
+          name: templateName,
+        }))
+      })
+      .catch((error) => {
+        if (saveErrorCallback) {
+          saveErrorCallback(error)
+        }
+      })
   }
   updateNameBehaviour.current.cancel = () => {
     setTemplateModifier()
@@ -257,7 +267,6 @@ export const SubTemplates = ({
                   className="template-button button-save-changes"
                   testId="save-as-changes"
                   mode={BUTTON_MODE.OUTLINE}
-                  size={BUTTON_SIZE.MEDIUM}
                   disabled={isRequestInProgress}
                   onClick={() => updateTemplate()}
                 >
@@ -270,7 +279,6 @@ export const SubTemplates = ({
                   className="template-button"
                   testId="save-as-new-template"
                   mode={BUTTON_MODE.OUTLINE}
-                  size={BUTTON_SIZE.MEDIUM}
                   disabled={isRequestInProgress}
                   onClick={() =>
                     setTemplateModifier(SUBTEMPLATE_MODIFIERS.CREATE)

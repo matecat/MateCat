@@ -57,8 +57,8 @@ test('exports the component as both a named and a default export', () => {
 test('renders the source and target wrappers plus the copy control', () => {
   const {container} = renderBody()
 
-  expect(screen.getByTestId('wrapper-source')).toBeTruthy()
-  expect(screen.getByTestId('wrapper-target')).toBeTruthy()
+  expect(screen.getByTestId('wrapper-source')).toBeInTheDocument()
+  expect(screen.getByTestId('wrapper-target')).toBeInTheDocument()
   expect(container.querySelector('.text.segment-body-content')).not.toBeNull()
   expect(container.querySelector('.outersource')).not.toBeNull()
   expect(container.querySelector('.status-container .status')).not.toBeNull()
@@ -69,19 +69,19 @@ test('renders the copy control as an inline chevron icon, not a background image
 
   const icon = screen.getByTitle('Copy source to target').querySelector('svg')
   expect(icon).toBeInTheDocument()
-  expect(icon.getAttribute('width')).toBe('40')
-  expect(icon.getAttribute('height')).toBe('40')
+  expect(icon).toHaveAttribute('width', '40')
+  expect(icon).toHaveAttribute('height', '40')
 })
 
 test('shows the standard copy-source shortcut on non-Mac platforms', () => {
   const {container} = renderBody()
-  expect(container.querySelector('.copy p').textContent).toBe('CTRL+I')
+  expect(container.querySelector('.copy p')).toHaveTextContent('CTRL+I')
 })
 
 test('shows the Mac copy-source shortcut on macOS', () => {
   mockIsMacOS.mockReturnValue(true)
   const {container} = renderBody()
-  expect(container.querySelector('.copy p').textContent).toBe('CMD+I')
+  expect(container.querySelector('.copy p')).toHaveTextContent('CMD+I')
 })
 
 test('copying the source dispatches copySourceToTarget and stops the anchor', () => {

@@ -14,6 +14,7 @@ use Matecat\TestHelpers\ControllerSeedFragments;
 use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\LQA\ChunkReviewStruct;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
 
@@ -103,20 +104,19 @@ class SegmentTranslationIssueValidatorTest extends AbstractTest
 
     /**
      * Insert the segment_translations row the SegmentTranslation validator requires.
-     * $iceLocked seeds a locked ICE (match_type=ICE, locked=1, tm_analysis_status not SKIPPED)
-     * so SegmentTranslationStruct::isICE() returns true.
+     * $locked and $tmAnalysisStatus drive the out-of-scope guard: a locked row, or one with
+     * tm_analysis_status SKIPPED (pre-translated), cannot receive an issue while unmodified.
      */
-    private function seedTranslation(bool $iceLocked = false): void
+    private function seedTranslation(string $match = 'TM', bool $locked = false, string $tmAnalysisStatus = 'DONE'): void
     {
         $segmentId = $this->segmentId(self::BASE);
         $jobId     = $this->jobId(self::BASE);
         $hash      = 'ctrltest_hash_' . self::BASE;
-        $match     = $iceLocked ? 'ICE' : 'TM';
-        $locked    = $iceLocked ? 1 : 0;
+        $lockedInt = $locked ? 1 : 0;
         $this->seedConnection()->exec(
             'INSERT IGNORE INTO segment_translations '
-            . '(id_segment, id_job, segment_hash, translation, status, version_number, match_type, locked, translation_date) '
-            . "VALUES ($segmentId, $jobId, '$hash', 'Ciao mondo', 'TRANSLATED', 0, '$match', $locked, NOW())"
+            . '(id_segment, id_job, segment_hash, translation, status, version_number, match_type, locked, tm_analysis_status, translation_date) '
+            . "VALUES ($segmentId, $jobId, '$hash', 'Ciao mondo', 'TRANSLATED', 0, '$match', $lockedInt, '$tmAnalysisStatus', NOW())"
         );
     }
 
@@ -280,10 +280,26 @@ class SegmentTranslationIssueValidatorTest extends AbstractTest
 
     // ─── __ensureSegmentRevisionIsCompatibleWithIssueRevisionNumber (POST) ───
 
-    #[Test]
-    public function throws_validation_error_minus_2000_on_unmodified_ice(): void
+    /**
+     * @return array<string, array{string, bool, string}>
+     */
+    public static function outOfScopeUnmodifiedSegments(): array
     {
-        $this->seedTranslation(true); // locked ICE, no segment event
+        return [
+            'locked ICE'                   => ['ICE', true, 'DONE'],
+            'locked non-ICE (100%)'        => ['100%', true, 'DONE'],
+            'unlocked pre-translated'      => ['ICE', false, 'SKIPPED'],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('outOfScopeUnmodifiedSegments')]
+    public function throws_validation_error_minus_2000_on_unmodified_out_of_scope_segment(
+        string $match,
+        bool $locked,
+        string $tmAnalysisStatus
+    ): void {
+        $this->seedTranslation($match, $locked, $tmAnalysisStatus); // no segment event
         $this->setRequest($this->baseParams(), 'POST');
 
         $validator = $this->makeValidator();
@@ -295,7 +311,27 @@ class SegmentTranslationIssueValidatorTest extends AbstractTest
             $this->fail('Expected ValidationError');
         } catch (ValidationError $e) {
             $this->assertSame(-2000, $e->getCode());
-            $this->assertStringContainsString('unmodified ICE', $e->getMessage());
+            $this->assertSame('Cannot set issues on unmodified locked or pre-translated segment.', $e->getMessage());
+        }
+    }
+
+    #[Test]
+    public function unlocked_ice_is_not_blocked_by_the_out_of_scope_guard(): void
+    {
+        $this->seedTranslation('ICE', false, 'DONE'); // unlocked ICE, no segment event
+        $this->setRequest($this->baseParams(), 'POST');
+
+        $validator = $this->makeValidator();
+        $validator->setChunkReview($this->makeChunkReview(2));
+        $validator->_validate();
+
+        try {
+            $validator->ensureSegmentRevisionMatchesCredentialPhase();
+            $this->fail('Expected Exception');
+        } catch (ValidationError $e) {
+            $this->fail('Unlocked ICE must not hit the out-of-scope guard: ' . $e->getMessage());
+        } catch (Exception $e) {
+            $this->assertStringContainsString('Unable to find the current state of this segment', $e->getMessage());
         }
     }
 

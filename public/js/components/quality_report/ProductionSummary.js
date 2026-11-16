@@ -34,6 +34,7 @@ export const ProductionSummary = ({
         style={{textDecoration: 'underline'}}
         href="https://guides.matecat.com/quality-report-in-matecat"
         target="_blank"
+        rel="noreferrer"
       >
         Learn more
       </a>
@@ -83,10 +84,10 @@ export const ProductionSummary = ({
           <JobProgressBar stats={stats} showPercent={false} />
           <div className="percent">
             {Math.round(
-              ((stats.equivalent.approved +
-                stats.equivalent.approved2 +
-                stats.equivalent.translated) /
-                stats.equivalent.total) *
+              ((qualitySummary.get('revision_number') === 1
+                ? stats.raw.approved + stats.raw.approved2
+                : stats.raw.approved2) /
+                stats.raw.total) *
                 100,
             )}
             %
@@ -167,7 +168,7 @@ export const ProductionSummary = ({
                 <div className="qr-pass-score">Fail</div>
               </div>
             )}
-            <div className="qr-threshold">Threshold {limit}</div>
+            <div className="qr-threshold">Threshold: {limit}</div>
           </div>
         </div>
       ) : null}

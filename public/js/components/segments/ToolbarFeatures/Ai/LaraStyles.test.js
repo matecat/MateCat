@@ -82,7 +82,7 @@ describe('LaraStyles', () => {
   test('is enabled for a DRAFT segment with contributions and opens the styles tab on click', () => {
     renderComponent({status: 'DRAFT', contributions: {}})
     const button = screen.getByRole('button')
-    expect(button).not.toBeDisabled()
+    expect(button).toBeEnabled()
     expect(button).toHaveAttribute(
       'title',
       'Lara styles - Click to see translations in different styles',
@@ -110,7 +110,7 @@ describe('LaraStyles', () => {
 
   test('is enabled for a NEW segment with contributions', () => {
     renderComponent({status: 'NEW', contributions: {}})
-    expect(screen.getByRole('button')).not.toBeDisabled()
+    expect(screen.getByRole('button')).toBeEnabled()
   })
 
   test('renders bundled label when isIconsBundled is true', () => {

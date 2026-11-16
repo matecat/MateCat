@@ -34,7 +34,7 @@ const languages = [
 const renderTargetLanguages = (targetLangs, setTargetLangs = jest.fn()) =>
   render(
     <CreateProjectContext.Provider
-      value={{SELECT_HEIGHT: 200, languages, targetLangs, setTargetLangs}}
+      value={{languages, targetLangs, setTargetLangs}}
     >
       <TargetLanguages />
     </CreateProjectContext.Provider>,
@@ -45,9 +45,7 @@ describe('TargetLanguages', () => {
     renderTargetLanguages([])
     expect(screen.getByText('Target language(s)')).toBeInTheDocument()
     expect(
-      screen.getByText(
-        'Select one or more target languages for your project.',
-      ),
+      screen.getByText('Select one or more target languages for your project.'),
     ).toBeInTheDocument()
   })
 
@@ -59,7 +57,7 @@ describe('TargetLanguages', () => {
 
   test('shows currently selected target languages as active options', () => {
     renderTargetLanguages([languages[0]])
-    expect(screen.getByTestId('active-options').textContent).toBe('it-IT')
+    expect(screen.getByTestId('active-options')).toHaveTextContent('it-IT')
   })
 
   test('toggling an unselected option adds it to targetLangs', () => {

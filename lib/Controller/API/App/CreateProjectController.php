@@ -7,6 +7,7 @@ use Controller\Abstracts\Authentication\CookieManager;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ScanDirectoryForConvertedFiles;
 use Controller\Traits\ValidatesDialectStrictTrait;
+use Controller\Traits\ValidatesPretranslateMatchTrait;
 use DomainException;
 use Exception;
 use InvalidArgumentException;
@@ -35,6 +36,7 @@ use TypeError;
 use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
 use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
+use Utils\Constants\TranslationStatus;
 use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\Lara;
@@ -57,6 +59,7 @@ class CreateProjectController extends AbstractStatefulKleinController
 
     use ScanDirectoryForConvertedFiles;
     use ValidatesDialectStrictTrait;
+    use ValidatesPretranslateMatchTrait;
 
     /** @var array<string, mixed> */
     private array $data = [];
@@ -193,7 +196,17 @@ class CreateProjectController extends AbstractStatefulKleinController
         ]);
         $disable_tms_engine_flag = filter_var($this->request->param('disable_tms_engine'), FILTER_VALIDATE_BOOLEAN);
         $pretranslate_100 = filter_var($this->request->param('pretranslate_100'), FILTER_SANITIZE_NUMBER_INT);
-        $pretranslate_101 = filter_var($this->request->param('pretranslate_101'), FILTER_SANITIZE_NUMBER_INT);
+        $pretranslate_101 = filter_var($this->request->param('pretranslate_101') ?? 1, FILTER_SANITIZE_NUMBER_INT);
+        ['lock' => $pretranslate_101_lock, 'status' => $pretranslate_101_status] = $this->validatePretranslateMatchParams(
+            '101',
+            $this->request->param('pretranslate_101_lock'),
+            $this->request->param('pretranslate_101_status')
+        );
+        ['lock' => $pretranslate_100_lock, 'status' => $pretranslate_100_status] = $this->validatePretranslateMatchParams(
+            '100',
+            $this->request->param('pretranslate_100_lock'),
+            $this->request->param('pretranslate_100_status')
+        );
         $tm_prioritization = filter_var($this->request->param('tm_prioritization'), FILTER_SANITIZE_NUMBER_INT);
         $id_team = filter_var($this->request->param('id_team'), FILTER_SANITIZE_NUMBER_INT, ['flags' => FILTER_REQUIRE_SCALAR]);
         $get_public_matches = filter_var($this->request->param('get_public_matches'), FILTER_VALIDATE_BOOLEAN);
@@ -341,6 +354,10 @@ class CreateProjectController extends AbstractStatefulKleinController
             'job_subject' => $job_subject,
             'pretranslate_100' => $pretranslate_100,
             'pretranslate_101' => $pretranslate_101,
+            'pretranslate_101_lock' => $pretranslate_101_lock,
+            'pretranslate_100_lock' => $pretranslate_100_lock,
+            'pretranslate_101_status' => $pretranslate_101_status,
+            'pretranslate_100_status' => $pretranslate_100_status,
             'tm_prioritization' => $tm_prioritization ?? null,
             'id_team' => $id_team,
             'enable_mt_analysis' => $enable_mt_analysis ?? null,
@@ -901,6 +918,10 @@ class CreateProjectController extends AbstractStatefulKleinController
         $projectStructure->public_tm_penalty = $data['public_tm_penalty'];
         $projectStructure->pretranslate_100 = $data['pretranslate_100'];
         $projectStructure->pretranslate_101 = $data['pretranslate_101'];
+        $projectStructure->pretranslate_101_lock = $data['pretranslate_101_lock'];
+        $projectStructure->pretranslate_100_lock = $data['pretranslate_100_lock'];
+        $projectStructure->pretranslate_101_status = $data['pretranslate_101_status'];
+        $projectStructure->pretranslate_100_status = $data['pretranslate_100_status'];
         $projectStructure->dialect_strict = $data['dialect_strict'];
         $projectStructure->only_private = $data['only_private'];
         $projectStructure->due_date = $data['due_date'];

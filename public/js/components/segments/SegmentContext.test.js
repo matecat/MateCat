@@ -10,7 +10,7 @@ const Probe = () => {
 
 test('defaults to an empty object with no provider', () => {
   render(<Probe />)
-  expect(screen.getByTestId('probe').textContent).toBe('{}')
+  expect(screen.getByTestId('probe')).toHaveTextContent('{}')
 })
 
 test('exposes the value supplied by a provider', () => {
@@ -19,5 +19,5 @@ test('exposes the value supplied by a provider', () => {
       <Probe />
     </SegmentContext.Provider>,
   )
-  expect(screen.getByTestId('probe').textContent).toBe('{"segment":{"sid":"7"}}')
+  expect(screen.getByTestId('probe')).toHaveTextContent('{"segment":{"sid":"7"}}')
 })

@@ -8,12 +8,7 @@ import CatToolStore from '../../stores/CatToolStore'
 import SegmentFilter from '../header/cattol/segment_filter/segment_filter'
 import SegmentUtils from '../../utils/segmentUtils'
 import SegmentActions from '../../actions/SegmentActions'
-import UserStore from '../../stores/UserStore'
 import CommonUtils from '../../utils/commonUtils'
-import {
-  decodePlaceholdersToPlainText,
-  removeTagsFromText,
-} from './utils/DraftMatecatUtils/tagUtils'
 import {useHotkeys} from 'react-hotkeys-hook'
 
 jest.mock('../../stores/SegmentStore', () => ({
@@ -36,7 +31,7 @@ jest.mock('../header/cattol/segment_filter/segment_filter', () => ({
 
 jest.mock('../../utils/segmentUtils', () => ({
   checkCurrentSegmentTPEnabled: jest.fn(() => false),
-  isIceSegment: jest.fn(() => false),
+  isLockedSegment: jest.fn(() => false),
 }))
 
 jest.mock('../../constants/CatToolConstants', () => ({
@@ -91,7 +86,7 @@ describe('SegmentButtons', () => {
     }
     SegmentStore.getNextSegment.mockReturnValue(undefined)
     SegmentUtils.checkCurrentSegmentTPEnabled.mockReturnValue(false)
-    SegmentUtils.isIceSegment.mockReturnValue(false)
+    SegmentUtils.isLockedSegment.mockReturnValue(false)
     SegmentFilter.enabled.mockReturnValue(false)
     SegmentFilter.filtering.mockReturnValue(false)
     SegmentFilter.open = false
@@ -108,7 +103,7 @@ describe('SegmentButtons', () => {
     expect(
       container.querySelector('#segment-1-buttons'),
     ).toBeInTheDocument()
-    expect(container.textContent).toContain('Translate')
+    expect(container).toHaveTextContent(/Translate/)
     expect(
       container.querySelector('[title="Translate and go to next untranslated"]'),
     ).not.toBeInTheDocument()
@@ -182,7 +177,7 @@ describe('SegmentButtons', () => {
 
   test('renders the approve confirm button in review mode', () => {
     const {container} = renderButton({isReview: true})
-    expect(container.textContent).toContain('Approve')
+    expect(container).toHaveTextContent(/Approve/)
   })
 
   test('shows "go to next translated" button in review mode and confirms approval on click', async () => {

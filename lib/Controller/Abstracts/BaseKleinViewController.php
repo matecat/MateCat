@@ -2,6 +2,8 @@
 
 namespace Controller\Abstracts;
 
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\ValidationError as ControllerValidationError;
 use Controller\API\Commons\ViewValidators\MandatoryKeysValidator;
 use Controller\Exceptions\RenderTerminatedException;
 use Exception;
@@ -18,11 +20,16 @@ use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\ConnectedServices\Oauth\LinkedIn\LinkedInProvider;
 use Model\ConnectedServices\Oauth\Microsoft\MicrosoftProvider;
 use Model\ConnectedServices\Oauth\OauthClient;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
+use Model\FeaturesBase\Hook\Event\Filter\ContentSecurityPolicySourcesEvent;
 use Model\FeaturesBase\Hook\Event\Filter\IsAnInternalUserEvent;
 use Model\FeaturesBase\Hook\Event\Run\DecorateViewEvent;
 use PHPTAL;
 use TypeError;
 use Utils\Registry\AppConfig;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\Templating\BootstrapConfig;
 use Utils\Templating\PHPTalBoolean;
 use Utils\Templating\PHPTalMap;
@@ -52,6 +59,9 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
      *
      * Opting in is a deliberate choice for a page that exists to be found: the entry page, sign-in
      * and the public converter. A new view is not indexable by omission.
+     *
+     * Opting in is not enough on its own: the installation has to allow indexing too, see
+     * mayBeIndexed().
      */
     protected bool $isIndexable = false;
 
@@ -213,21 +223,31 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
      *
      * @throws LockedResponseException
      * @throws RenderTerminatedException
+     * @throws AuthenticationError
+     * @throws ControllerValidationError
+     * @throws EndQueueException
+     * @throws NotFoundException
+     * @throws ReQueueException
+     * @throws ValidationError
      * @throws ResponseAlreadySentException
-     * @throws \Psr\Log\InvalidArgumentException
      * @throws InvalidArgumentException
      */
     public function render(?int $code = null): never
     {
         $this->response->noCache();
 
-        if (!$this->isIndexable) {
+        if (!$this->mayBeIndexed()) {
             $this->response->header('X-Robots-Tag', 'noindex, nofollow');
         }
 
         $this->response->code($code ?? $this->httpCode);
 
         if (isset($this->view)) {
+            // Dispatched here, not in setView(): the cattool and the context preview load the project's
+            // features after setView(), and the hosts a page needs belong to the project's plugins.
+            $this->view->{'x_plugin_csp'} = $this->getFeatureSet()
+                ->dispatch(new ContentSecurityPolicySourcesEvent())
+                ->getSources();
             $this->response->body($this->view->execute());
         }
 
@@ -261,9 +281,30 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
      */
     protected function sendNoIndexHeaderOnRedirect(): void
     {
-        if (!$this->isIndexable) {
+        if (!$this->mayBeIndexed()) {
             $this->emitRawHeader('X-Robots-Tag: noindex, nofollow');
         }
+    }
+
+    /**
+     * Whether a search engine may list this response. Three conditions, all required:
+     * the view opts in ($isIndexable), the installation allows indexing
+     * (AppConfig::$ALLOW_SEARCH_INDEXING), and the request reached the installation's own host.
+     *
+     * The host check keeps an alias out of the index. Example: with HTTPHOST
+     * `https://www.matecat.com`, a request to `1.ajax.www.matecat.com` gets noindex, while
+     * `WWW.MATECAT.COM:443` does not (case and port are ignored).
+     */
+    private function mayBeIndexed(): bool
+    {
+        if (!$this->isIndexable || !AppConfig::$ALLOW_SEARCH_INDEXING) {
+            return false;
+        }
+
+        $ownHost     = parse_url(AppConfig::$HTTPHOST, PHP_URL_HOST);
+        $requestHost = parse_url('//' . ($_SERVER['HTTP_HOST'] ?? ''), PHP_URL_HOST);
+
+        return is_string($ownHost) && is_string($requestHost) && strcasecmp($ownHost, $requestHost) === 0;
     }
 
     /**

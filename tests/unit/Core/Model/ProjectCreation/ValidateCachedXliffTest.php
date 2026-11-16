@@ -16,8 +16,8 @@ use Utils\Registry\AppConfig;
  * Verifies:
  * - Exception when original file names array is empty
  * - Exception on S3 when cachedXliffFilePathName is null/empty
- * - Exception on local filesystem when file does not exist
- * - Exception when extension is not xliff/sdlxliff/xlf
+ * - Exception on local filesystem when file does not exist, without the internal path in the message
+ * - Exception with XLIFF_CONVERSION_NOT_FOUND when extension is not xliff/sdlxliff/xlf
  * - Success path for valid xliff/sdlxliff/xlf extensions
  */
 class ValidateCachedXliffTest extends AbstractTest
@@ -116,12 +116,32 @@ class ValidateCachedXliffTest extends AbstractTest
     {
         AppConfig::$FILE_STORAGE_METHOD = 'fs';
 
+        try {
+            $this->service->callValidateCachedXliff(
+                '/nonexistent/path/file.xliff',
+                ['test.docx'],
+                ['conversionHashes' => []]
+            );
+            $this->fail('Expected exception');
+        } catch (Exception $e) {
+            $this->assertSame(-6, $e->getCode());
+            $this->assertSame('File not found on the server after upload.', $e->getMessage());
+            // The cached path is internal: it is logged, never shown to the user.
+            $this->assertStringNotContainsString('/nonexistent/path', $e->getMessage());
+        }
+    }
+
+    #[Test]
+    public function throwsOnLocalFsWhenCachedPathIsNull(): void
+    {
+        AppConfig::$FILE_STORAGE_METHOD = 'fs';
+
         $this->expectException(Exception::class);
         $this->expectExceptionCode(-6);
-        $this->expectExceptionMessage('not found on server after upload');
+        $this->expectExceptionMessage('File not found on the server after upload.');
 
         $this->service->callValidateCachedXliff(
-            '/nonexistent/path/file.xliff',
+            null,
             ['test.docx'],
             ['conversionHashes' => []]
         );
@@ -138,8 +158,8 @@ class ValidateCachedXliffTest extends AbstractTest
 
         try {
             $this->expectException(Exception::class);
-            $this->expectExceptionCode(-3);
-            $this->expectExceptionMessage('Failed to find converted XLIFF');
+            $this->expectExceptionCode(-16);
+            $this->expectExceptionMessage('File not found. Failed to save XLIFF conversion on disk.');
 
             $this->service->callValidateCachedXliff(
                 $tmpFile,
@@ -231,7 +251,8 @@ class ValidateCachedXliffTest extends AbstractTest
 
         try {
             $this->expectException(Exception::class);
-            $this->expectExceptionCode(-3);
+            $this->expectExceptionCode(-16);
+            $this->expectExceptionMessage('File not found. Failed to save XLIFF conversion on disk.');
 
             $this->service->callValidateCachedXliff(
                 $docxFile,

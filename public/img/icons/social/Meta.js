@@ -31,10 +31,10 @@ const Meta = ({size = 16}) => {
           y2="14.6326"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#0064E1" />
-          <stop offset="0.4" stop-color="#0064E1" />
-          <stop offset="0.83" stop-color="#0073EE" />
-          <stop offset="1" stop-color="#0082FB" />
+          <stop stopColor="#0064E1" />
+          <stop offset="0.4" stopColor="#0064E1" />
+          <stop offset="0.83" stopColor="#0073EE" />
+          <stop offset="1" stopColor="#0082FB" />
         </linearGradient>
         <linearGradient
           id="paint1_linear_8282_8308"
@@ -44,8 +44,8 @@ const Meta = ({size = 16}) => {
           y2="9.5288"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#0082FB" />
-          <stop offset="1" stop-color="#0064E0" />
+          <stop stopColor="#0082FB" />
+          <stop offset="1" stopColor="#0064E0" />
         </linearGradient>
       </defs>
     </svg>

@@ -1,28 +1,19 @@
-import React, {useContext, useEffect, useRef} from 'react'
+import React, {useContext, useRef, useState} from 'react'
 import {Select} from '../../common/Select'
 import {TabGlossaryContext} from './TabGlossaryContext'
+import IconAdd from '../../../../img/icons/IconAdd'
+import TEXT_UTILS from '../../../utils/textUtils'
+import Tooltip, {TOOLTIP_POSITION} from '../../common/Tooltip'
 
 export const SubdomainSelect = ({disabled = false}) => {
   const {subdomains, setSubdomains, selectsActive, setSelectsActive} =
     useContext(TabGlossaryContext)
 
+  const [isCreateItemTooltipVisible, setIsCreateItemTooltipVisible] =
+    useState(false)
+
   const ref = useRef()
-  const createSubdomainFnRef = useRef()
-
-  useEffect(() => {
-    const {current} = ref
-
-    const onKeyDown = (e) => {
-      if (e.key === 'Enter') {
-        createSubdomainFnRef?.current?.()
-        e.stopPropagation()
-      }
-    }
-
-    current.addEventListener('keydown', onKeyDown)
-
-    return () => current.removeEventListener('keydown', onKeyDown)
-  }, [])
+  const createButtonRef = useRef()
 
   const updateSelectActive = (key, value) =>
     setSelectsActive((prevState) => ({...prevState, [key]: value}))
@@ -31,11 +22,14 @@ export const SubdomainSelect = ({disabled = false}) => {
     <div ref={ref}>
       <Select
         className="glossary-select domain-select"
+        dropdownClassName="glossary-domain-subdomain-dropdown"
+        isPortalDropdown={true}
         name="glossary-term-subdomain"
         label="Subdomain"
         placeholder="No subdomain"
         showSearchBar
         searchPlaceholder="Find a subdomain"
+
         options={subdomains}
         activeOption={selectsActive.subdomain}
         checkSpaceToReverse={false}
@@ -45,8 +39,10 @@ export const SubdomainSelect = ({disabled = false}) => {
             updateSelectActive('subdomain', option)
           }
         }}
+        showResetButton={true}
+        resetFunction={() => updateSelectActive('subdomain', undefined)}
       >
-        {({name, index, queryFilter, resetQueryFilter, onClose}) => {
+        {({index, queryFilter, resetQueryFilter, onClose}) => {
           const createSubdomainFn =
             queryFilter.trim() &&
             !subdomains.find(({name}) => name === queryFilter)
@@ -65,37 +61,56 @@ export const SubdomainSelect = ({disabled = false}) => {
                   onClose()
                 }
               : () => false
-          createSubdomainFnRef.current = createSubdomainFn
+
+          const createButtonElement = (
+            <div ref={createButtonRef} className="button-create-option-content">
+              <IconAdd size={18} />
+              <span>
+                Create subdomain &quot;<b>{queryFilter}</b>&quot;
+              </span>
+            </div>
+          )
 
           return {
             ...(index === 0 && {
               beforeRow: (
                 <>
+                  {!queryFilter && !subdomains.length && (
+                    <span className="glossary-domain-subdomain-no-records">
+                      No subdomain available.
+                      <br />
+                      Start typing to create one.
+                    </span>
+                  )}
+
                   {queryFilter.trim() &&
                     !subdomains.find(({name}) => name === queryFilter) && (
-                      <button
-                        className="button-create-option"
+                      <li
+                        className="dropdown__option button-create-option"
                         onClick={createSubdomainFn}
+                        onMouseEnter={() =>
+                          setIsCreateItemTooltipVisible(
+                            TEXT_UTILS.isContentTextEllipsis(
+                              createButtonRef.current.children[1],
+                            ),
+                          )
+                        }
                       >
-                        + Create subdomain <b>{queryFilter}</b>
-                      </button>
+                        {isCreateItemTooltipVisible ? (
+                          <Tooltip
+                            content={queryFilter}
+                            position={TOOLTIP_POSITION.LEFT}
+                          >
+                            {createButtonElement}
+                          </Tooltip>
+                        ) : (
+                          createButtonElement
+                        )}
+                      </li>
                     )}
-                  {!queryFilter && selectsActive.subdomain && (
-                    <button
-                      className="button-create-option"
-                      onClick={() => {
-                        updateSelectActive('subdomain', undefined)
-                        onClose()
-                      }}
-                    >
-                      Deselect subdomain
-                    </button>
-                  )}
                 </>
               ),
             }),
-            // override row content
-            row: <div className="domain-option">{name}</div>,
           }
         }}
       </Select>

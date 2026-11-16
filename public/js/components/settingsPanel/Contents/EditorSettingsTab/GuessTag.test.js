@@ -39,7 +39,7 @@ test('renders unchecked by default for a supported language pair', () => {
   renderComponent()
   const toggle = screen.getByTestId('switch-guesstag')
   expect(toggle).not.toBeChecked()
-  expect(toggle).not.toBeDisabled()
+  expect(toggle).toBeEnabled()
 })
 
 test('renders checked when metadata flag is set', () => {

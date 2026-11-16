@@ -1,4 +1,4 @@
-import {render, screen, waitFor} from '@testing-library/react'
+import {render, screen} from '@testing-library/react'
 import {http, HttpResponse} from 'msw'
 import React from 'react'
 
@@ -50,9 +50,7 @@ describe('ActivityLog', () => {
 
     renderPage()
 
-    await waitFor(() =>
-      expect(screen.getByText(/Activity Log project: 10/)).toBeInTheDocument(),
-    )
+    expect(await screen.findByText(/Activity Log project: 10/)).toBeInTheDocument()
   })
 
   test('renders for a non-logged user', async () => {
@@ -67,8 +65,6 @@ describe('ActivityLog', () => {
 
     renderPage({isUserLogged: false, userInfo: undefined})
 
-    await waitFor(() =>
-      expect(screen.getByText(/Activity Log project: 11/)).toBeInTheDocument(),
-    )
+    expect(await screen.findByText(/Activity Log project: 11/)).toBeInTheDocument()
   })
 })
