@@ -14,11 +14,14 @@ use Model\Jobs\JobStruct;
 use Model\Users\UserStruct;
 use PDO;
 use PDOStatement;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\Stub;
 use ReflectionClass;
 use RuntimeException;
 use Utils\Engines\EngineInterface;
+use Utils\Engines\Lara;
+use Utils\Engines\MMT;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\CreateUserResponse;
 use Utils\Engines\Results\MyMemory\ExportResponse;
@@ -46,6 +49,7 @@ class AdaptiveEnginesTMSService extends TMSService
 class TMSServiceTest extends AbstractTest
 {
     private TMSService $service;
+    private string $defaultTmKeyBackup;
     private MyMemory&Stub $myMemoryStub;
     private MatecatLogger&Stub $loggerStub;
     private IDatabase&Stub $dbStub;
@@ -62,6 +66,9 @@ class TMSServiceTest extends AbstractTest
 
         $this->myMemoryStub = $this->createStub(MyMemory::class);
         $this->loggerStub = $this->createStub(MatecatLogger::class);
+
+        $this->defaultTmKeyBackup = AppConfig::$DEFAULT_TM_KEY;
+        AppConfig::$DEFAULT_TM_KEY = 'default-mm-key';
 
         $ref = new ReflectionClass(TMSService::class);
         $this->service = $ref->newInstanceWithoutConstructor();
@@ -87,6 +94,7 @@ class TMSServiceTest extends AbstractTest
 
     protected function tearDown(): void
     {
+        AppConfig::$DEFAULT_TM_KEY = $this->defaultTmKeyBackup;
         $this->resetDatabaseMock();
         parent::tearDown();
     }
@@ -725,10 +733,10 @@ class TMSServiceTest extends AbstractTest
         self::assertStringContainsString('</tmx>', $content);
     }
 
-    // ── addTmxInMyMemory: adaptive MT engines ───────────────────────────
+    // ── addTmxInMyMemory: adaptive MT engines and mt_import ─────────────
 
     /**
-     * A service whose adaptive engines are the given ones, built like the one of setUp().
+     * The service of setUp(), with the given adaptive engines.
      *
      * @param EngineInterface[] $engines
      */
@@ -746,14 +754,13 @@ class TMSServiceTest extends AbstractTest
         return $service;
     }
 
-    private function stubSuccessfulMyMemoryImport(): void
+    private function okImportResponse(): FileImportAndStatusResponse
     {
-        $this->myMemoryStub->method('checkCorrectKey')->willReturn(true);
-        $this->myMemoryStub->method('importMemory')->willReturn(new FileImportAndStatusResponse([
+        return new FileImportAndStatusResponse([
             'responseStatus'  => 200,
             'responseData'    => ['uuid' => 'abc-123', 'status' => 0],
             'responseDetails' => '',
-        ]));
+        ]);
     }
 
     /**
@@ -762,26 +769,20 @@ class TMSServiceTest extends AbstractTest
     #[Test]
     public function addTmxInMyMemorySendsAPrivateKeyTmxToTheAdaptiveEngines(): void
     {
-        $defaultKey = AppConfig::$DEFAULT_TM_KEY;
-        AppConfig::$DEFAULT_TM_KEY = 'default-mm-key';
+        $this->myMemoryStub->method('checkCorrectKey')->willReturn(true);
+        $this->myMemoryStub->method('importMemory')->willReturn($this->okImportResponse());
+        $user = new UserStruct();
 
-        try {
-            $this->stubSuccessfulMyMemoryImport();
-            $user = new UserStruct();
+        $engine = $this->createMock(EngineInterface::class);
+        $engine->expects($this->once())
+            ->method('importMemory')
+            ->with('/tmp/test.tmx', 'tm-key-123', $user);
 
-            $engine = $this->createMock(EngineInterface::class);
-            $engine->expects($this->once())
-                ->method('importMemory')
-                ->with('/tmp/test.tmx', 'tm-key-123', $user);
+        touch('/tmp/test.tmx');
+        $file = new TMSFile('/tmp/test.tmx', 'tm-key-123', 'test.tmx', 0);
 
-            touch('/tmp/test.tmx');
-            $file = new TMSFile('/tmp/test.tmx', 'tm-key-123', 'test.tmx', 0);
-
-            self::assertSame([], $this->serviceWithAdaptiveEngines([$engine])->addTmxInMyMemory($file, $user));
-            self::assertSame('abc-123', $file->getUuid());
-        } finally {
-            AppConfig::$DEFAULT_TM_KEY = $defaultKey;
-        }
+        self::assertSame([], $this->serviceWithAdaptiveEngines([$engine])->addTmxInMyMemory($file, $user));
+        self::assertSame('abc-123', $file->getUuid());
     }
 
     /**
@@ -793,22 +794,57 @@ class TMSServiceTest extends AbstractTest
     #[Test]
     public function addTmxInMyMemoryNeverSendsADefaultKeyTmxToTheAdaptiveEngines(): void
     {
-        $defaultKey = AppConfig::$DEFAULT_TM_KEY;
-        AppConfig::$DEFAULT_TM_KEY = 'default-mm-key';
+        $this->myMemoryStub->method('checkCorrectKey')->willReturn(true);
+        $this->myMemoryStub->method('importMemory')->willReturn($this->okImportResponse());
 
-        try {
-            $this->stubSuccessfulMyMemoryImport();
+        $engine = $this->createMock(EngineInterface::class);
+        $engine->expects($this->never())->method('importMemory');
 
-            $engine = $this->createMock(EngineInterface::class);
-            $engine->expects($this->never())->method('importMemory');
+        touch('/tmp/test.tmx');
+        $file = new TMSFile('/tmp/test.tmx', 'default-mm-key', 'test.tmx', 0);
 
-            touch('/tmp/test.tmx');
-            $file = new TMSFile('/tmp/test.tmx', 'default-mm-key', 'test.tmx', 0);
+        self::assertSame([], $this->serviceWithAdaptiveEngines([$engine])->addTmxInMyMemory($file, new UserStruct()));
+        self::assertSame('abc-123', $file->getUuid());
+    }
 
-            self::assertSame([], $this->serviceWithAdaptiveEngines([$engine])->addTmxInMyMemory($file, new UserStruct()));
-            self::assertSame('abc-123', $file->getUuid());
-        } finally {
-            AppConfig::$DEFAULT_TM_KEY = $defaultKey;
-        }
+    /**
+     * The checks run in this order: default key → false; any adaptive engine → false; none → true.
+     *
+     * @return array<string, array{string, list<class-string<EngineInterface>>, bool}> key, engines, mt_import
+     */
+    public static function mtImportCases(): array
+    {
+        return [
+            'the default key'                     => ['default-mm-key', [], false],
+            'the default key, even with Lara'     => ['default-mm-key', [Lara::class], false],
+            'a user with Lara'                    => ['tm-key-123', [Lara::class], false],
+            'a user with ModernMT only'           => ['tm-key-123', [MMT::class], false],
+            'a user with Lara and ModernMT'       => ['tm-key-123', [Lara::class, MMT::class], false],
+            'a user without adaptive engines'     => ['tm-key-123', [], true],
+        ];
+    }
+
+    /**
+     * The flag is computed from the engines, so they are read before the MyMemory import.
+     *
+     * @param list<class-string<EngineInterface>> $engineClasses
+     *
+     * @throws Exception
+     */
+    #[Test]
+    #[DataProvider('mtImportCases')]
+    public function addTmxInMyMemoryTellsMyMemoryWhetherToImportIntoLara(string $tmKey, array $engineClasses, bool $expected): void
+    {
+        $myMemory = $this->createMock(MyMemory::class);
+        $myMemory->method('checkCorrectKey')->willReturn(true);
+        $myMemory->expects($this->once())
+            ->method('importMemory')
+            ->with('/tmp/test.tmx', $tmKey, $this->isInstanceOf(UserStruct::class), $expected)
+            ->willReturn($this->okImportResponse());
+        (new ReflectionClass(TMSService::class))->getProperty('mymemory_engine')->setValue($this->service, $myMemory);
+        $service = $this->serviceWithAdaptiveEngines(array_map(fn(string $class) => $this->createStub($class), $engineClasses));
+
+        touch('/tmp/test.tmx');
+        $service->addTmxInMyMemory(new TMSFile('/tmp/test.tmx', $tmKey, 'test.tmx', 0), new UserStruct());
     }
 }

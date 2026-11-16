@@ -84,7 +84,7 @@ class TmKeyManager
      * @param string $Json_clientKeys A json_encoded array of client keys, as for mergeJsonKeys()
      * @param string $Json_jobKeys    A json_encoded array of the job's TmKeyStruct objects
      *
-     * @return list<string> The new keys, each once, in the client's order
+     * @return list<string> The new keys, in the client's order
      *
      * @throws JsonException
      * @throws DomainException
@@ -108,8 +108,7 @@ class TmKeyManager
                 continue;
             }
 
-            $known[$key] = true;
-            $newKeys[]   = $key;
+            $newKeys[] = $key;
         }
 
         return $newKeys;
