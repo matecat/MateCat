@@ -29,21 +29,13 @@ import {
 } from '../common/Button/Button'
 import IconClose from '../../../img/icons/IconClose'
 import {EditorMachineTranslationTab} from '../segments/EditorMachineTranslationTab'
+import {SETTINGS_PANEL_TABS} from './SettingsPanelConstants'
 
 let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
   'openTab',
 )
 
-export const SETTINGS_PANEL_TABS = {
-  translationMemoryGlossary: 'tm',
-  machineTranslation: 'mt',
-  other: 'other',
-  analysis: 'analysis',
-  qualityFramework: 'qf',
-  fileImport: 'fileImport',
-  editorSettings: 'editorSettings',
-  editorOther: 'editorOther',
-}
+export {SETTINGS_PANEL_TABS}
 
 const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
   return [

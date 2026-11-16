@@ -129,31 +129,6 @@ class MMTServiceApi
         return $this->send('GET', "$this->baseUrl/users/me");
     }
 
-    /**
-      * Get the Quality Estimation of a translation
-      *
-      * @param string $source
-      * @param string $target
-      * @param string $sentence
-      * @param string $translation
-      * @param string $mt_qe_engine_id
-      *
-      * @return array<string, mixed>|null
-      * @throws MMTServiceApiException
-      * @throws RuntimeException
-      */
-    public function qualityEstimation(string $source, string $target, string $sentence, string $translation, string $mt_qe_engine_id): ?array
-    {
-        return $this->send('GET', "$this->baseUrl/translate/qe", [
-            "source" => $source,
-            "target" => $target,
-            "sentence" => $sentence,
-            "translation" => $translation,
-            'purfect_version' => $mt_qe_engine_id
-        ]);
-    }
-
-
     /* Memory ------------------------------------------------------------------------------------------------------- */
 
     /**

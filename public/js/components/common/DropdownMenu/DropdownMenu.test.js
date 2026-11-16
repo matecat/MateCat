@@ -84,6 +84,38 @@ describe('DropdownMenu', () => {
   })
 
   describe('hover trigger', () => {
+    const renderHoverMenu = (items) =>
+      render(
+        <DropdownMenu
+          triggerMode={DROPDOWN_MENU_TRIGGER_MODE.HOVER}
+          items={items}
+        />,
+      )
+
+    test('does not mark an item disabled when disabled is false', async () => {
+      const user = userEvent.setup()
+      renderHoverMenu([
+        {label: 'Download draft', onClick: jest.fn(), disabled: false},
+      ])
+
+      await user.hover(screen.getByRole('button'))
+      const item = await screen.findByText('Download draft')
+
+      expect(item).not.toHaveAttribute('data-disabled')
+    })
+
+    test('marks a disabled item', async () => {
+      const user = userEvent.setup()
+      renderHoverMenu([
+        {label: 'Download draft', onClick: jest.fn(), disabled: true},
+      ])
+
+      await user.hover(screen.getByRole('button'))
+      const item = await screen.findByText('Download draft')
+
+      expect(item).toHaveAttribute('data-disabled')
+    })
+
     // MATECAT-5NN: the bundled segment toolbar passes items that are only a
     // label (the button inside handles its own click)
     test('clicking an item with no onClick closes the menu without throwing', async () => {

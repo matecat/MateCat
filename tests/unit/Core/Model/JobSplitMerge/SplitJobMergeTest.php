@@ -24,11 +24,13 @@ use PDOStatement;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use RuntimeException;
 use Utils\Logger\MatecatLogger;
 use Utils\Shop\Cart;
 use Model\Translators\JobsTranslatorsStruct;
 use Model\Users\UserStruct;
+use Model\Translations\WarningDao;
 use Throwable;
 use Utils\AsyncTasks\Workers\JobsWorker;
 
@@ -48,9 +50,13 @@ class SplitJobMergeTest extends AbstractTest
     private Cart&MockObject $cartMock;
     private CounterModel&MockObject $counterModelMock;
     private JobsMetadataDao&MockObject $jobsMetadataDaoMock;
+    private MatecatLogger&Stub $logger;
 
     /** @var string[] The order in which the cart and the transaction scope were reached */
     private array $callOrder = [];
+
+    /** @var list<int> */
+    private array $evictedWarningsJobIds = [];
 
     /** How many workers were queued when the transaction scope returned, null if no scope ran. */
     private ?int $enqueuedWhenScopeClosed = null;
@@ -64,7 +70,7 @@ class SplitJobMergeTest extends AbstractTest
 
         $this->dbHandler = $this->createMock(IDatabase::class);
         $this->features  = $this->createMock(FeatureSet::class);
-        $logger          = $this->createStub(MatecatLogger::class);
+        $this->logger    = $this->createStub(MatecatLogger::class);
 
         // Allow JobsTranslatorsDao (used inline in mergeALL) to prepare+execute without a real DB.
         $pdoStmt = $this->createStub(\PDOStatement::class);
@@ -94,10 +100,16 @@ class SplitJobMergeTest extends AbstractTest
         // scope, so an unconfigured onCommit() would swallow the sweep entirely.
         $this->dbHandler->method('onCommit')->willReturnCallback(static fn(callable $callback) => $callback());
 
-        $this->service = new TestableJobSplitMergeService($this->dbHandler, $this->features, $logger);
+        $this->service = new TestableJobSplitMergeService($this->dbHandler, $this->features, $this->logger);
 
         $this->jobDaoMock = $this->createMock(JobDao::class);
         $this->service->setJobDao($this->jobDaoMock);
+
+        $warningDao = $this->createStub(WarningDao::class);
+        $warningDao->method('destroyCachesByJobId')->willReturnCallback(function (int $jobId): void {
+            $this->evictedWarningsJobIds[] = $jobId;
+        });
+        $this->service->setWarningDao($warningDao);
 
         $this->cartMock = $this->createMock(Cart::class);
         $this->service->setCart($this->cartMock);
@@ -495,6 +507,8 @@ class SplitJobMergeTest extends AbstractTest
 
         $this->assertTrue($this->service->wasDestroyAnalysisCacheCalled());
         $this->assertEquals(999, $this->service->getDestroyAnalysisCacheProjectId());
+        // The chunks own new segment ranges: their cached warnings_count must go.
+        $this->assertSame([(int)$ps->jobToSplit], $this->evictedWarningsJobIds);
     }
 
     /**
@@ -847,6 +861,7 @@ class SplitJobMergeTest extends AbstractTest
 
         $this->assertTrue($this->service->wasDestroyAnalysisCacheCalled());
         $this->assertEquals(999, $this->service->getDestroyAnalysisCacheProjectId());
+        $this->assertSame([(int)$chunks[0]->id], $this->evictedWarningsJobIds);
 
         // Both chunk passwords are swept: the first one's row was rewritten, and the second one's row
         // was deleted, so neither answers what the cache still holds for it.
@@ -970,7 +985,7 @@ class SplitJobMergeTest extends AbstractTest
         $sourceMetadata = [
             JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value => '1',
             JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value       => 'google_ads',
-            JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value        => '["html"]',
+            JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value        => '["markup"]',
             JobsMetadataMarshaller::DIALECT_STRICT->value               => '1',
             JobsMetadataMarshaller::MANDATORY_ISSUES->value             => '["r1","r2"]',
             JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value            => '25',
@@ -992,6 +1007,82 @@ class SplitJobMergeTest extends AbstractTest
         $this->assertSame(100, $bulkSetCalls[0][0], 'wrong job id');
         $this->assertSame('pass_chunk2', $bulkSetCalls[0][1], 'wrong chunk password');
         $this->assertSame($sourceMetadata, $bulkSetCalls[0][2], 'every key must reach the chunk, values verbatim');
+    }
+
+    /**
+     * The chunks inherit what JobsMetadataMarshaller vouches for, not whatever the table holds. A
+     * key it does not know and a value the write path would refuse today stay on the job being
+     * split rather than being multiplied across every chunk, and the log names them.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function splitJobDoesNotCopyARowThatIsNotValidJobMetadata(): void
+    {
+        $this->setupSplitJobStubs();
+        $chunks = $this->makeTwoChunks();
+        $ps = $this->makeSplitProjectStructure($chunks);
+
+        $this->jobsMetadataDaoMock->method('getRawMapByJobIdAndPassword')->willReturn([
+            JobsMetadataMarshaller::DIALECT_STRICT->value         => '1',
+            'retired_setting'                                     => 'x',
+            JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value      => '150',
+            JobsMetadataMarshaller::CHARACTER_COUNTER_MODE->value => 'foo',
+            JobsMetadataMarshaller::MANDATORY_ISSUES->value       => '["r1"]',
+        ]);
+
+        $bulkSetCalls = [];
+        $this->jobsMetadataDaoMock->method('bulkSet')
+            ->willReturnCallback(function (int $jobId, string $password, array $metadata) use (&$bulkSetCalls) {
+                $bulkSetCalls[$password] = $metadata;
+            });
+
+        $logged = [];
+        $this->logger->method('debug')->willReturnCallback(function (mixed $message) use (&$logged) {
+            $logged[] = (string)$message;
+        });
+
+        $this->service->splitJob($ps, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
+
+        $this->assertSame(
+            [
+                JobsMetadataMarshaller::DIALECT_STRICT->value   => '1',
+                JobsMetadataMarshaller::MANDATORY_ISSUES->value => '["r1"]',
+            ],
+            $bulkSetCalls['pass_chunk2']
+        );
+
+        $dropLines = array_values(array_filter($logged, fn(string $line) => str_contains($line, 'not valid job metadata')));
+        $this->assertCount(1, $dropLines, 'the dropped keys are logged once per split, not once per chunk');
+        $this->assertStringContainsString('retired_setting, public_tm_penalty, character_counter_mode', $dropLines[0]);
+        $this->assertStringNotContainsString('150', $dropLines[0], 'the log names keys, never values');
+    }
+
+    /**
+     * A row that passes is written in its canonical form: a boolean the editor stored as '' reaches
+     * the chunk as '0', the way creation writes it.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function splitJobCopiesAValidRowInItsCanonicalForm(): void
+    {
+        $this->setupSplitJobStubs();
+        $chunks = $this->makeTwoChunks();
+        $ps = $this->makeSplitProjectStructure($chunks);
+
+        $this->jobsMetadataDaoMock->method('getRawMapByJobIdAndPassword')
+            ->willReturn([JobsMetadataMarshaller::TM_PRIORITIZATION->value => '']);
+
+        $bulkSetCalls = [];
+        $this->jobsMetadataDaoMock->method('bulkSet')
+            ->willReturnCallback(function (int $jobId, string $password, array $metadata) use (&$bulkSetCalls) {
+                $bulkSetCalls[$password] = $metadata;
+            });
+
+        $this->service->splitJob($ps, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
+
+        $this->assertSame([JobsMetadataMarshaller::TM_PRIORITIZATION->value => '0'], $bulkSetCalls['pass_chunk2']);
     }
 
     /**

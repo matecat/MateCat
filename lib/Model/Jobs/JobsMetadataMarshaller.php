@@ -9,6 +9,8 @@
 
 namespace Model\Jobs;
 
+use Matecat\SubFiltering\Enum\InjectableFiltersTags;
+
 enum JobsMetadataMarshaller: string
 {
     /**
@@ -48,6 +50,17 @@ enum JobsMetadataMarshaller: string
     case MMT_IGNORE_GLOSSARY_CASE     = 'mmt_ignore_glossary_case';
     case INTENTO_ROUTING              = 'intento_routing';
     case INTENTO_PROVIDER             = 'intento_provider';
+
+    /** The modes the character counter knows, as NewController and job_metadata.json accept them. */
+    private const array CHARACTER_COUNTER_MODES = ['google_ads', 'exclude_cjk', 'all_one'];
+
+    /** The revision phases an issue can be made mandatory for. */
+    private const array MANDATORY_ISSUES_PHASES = ['r1', 'r2'];
+
+    /** The MT option values job_metadata.json accepts. */
+    private const array DEEPL_FORMALITIES  = ['default', 'prefer_less', 'prefer_more'];
+    private const array DEEPL_ENGINE_TYPES = ['prefer_quality_optimized', 'latency_optimized'];
+    private const array LARA_STYLES        = ['faithful', 'fluid', 'creative'];
 
     public static function unMarshall(MetadataStruct $struct): mixed
     {
@@ -104,4 +117,122 @@ enum JobsMetadataMarshaller: string
             self::INTENTO_PROVIDER->value,
         ];
     }
+
+    /**
+     * The opposite of unMarshall(): the string a typed value is stored as, or null when the value is
+     * not one this key accepts.
+     *
+     * The rules are the ones the write paths enforce — job_metadata.json for the editor, the range
+     * check in UpdateJobKeysController, the options NewController accepts at creation — so a value
+     * that passes here is one that could have been written in the first place.
+     */
+    public function marshall(mixed $value): ?string
+    {
+        return match ($this) {
+            self::CHARACTER_COUNTER_COUNT_TAGS,
+            self::DIALECT_STRICT,
+            self::MMT_IGNORE_GLOSSARY_CASE,
+            self::TM_PRIORITIZATION => is_bool($value) ? ($value ? '1' : '0') : null,
+            self::PUBLIC_TM_PENALTY,
+            self::MT_QUALITY_VALUE_IN_EDITOR => is_int($value) && $value >= 0 && $value <= 100 ? (string)$value : null,
+            self::CHARACTER_COUNTER_MODE => is_string($value) && in_array($value, self::CHARACTER_COUNTER_MODES, true) ? $value : null,
+            self::DEEPL_FORMALITY => is_string($value) && in_array($value, self::DEEPL_FORMALITIES, true) ? $value : null,
+            self::DEEPL_ENGINE_TYPE => is_string($value) && in_array($value, self::DEEPL_ENGINE_TYPES, true) ? $value : null,
+            self::LARA_STYLE => is_string($value) && in_array($value, self::LARA_STYLES, true) ? $value : null,
+            self::LARA_STYLE_GUIDELINE_ID => is_string($value) && $value !== '' && mb_strlen($value) <= 255 ? $value : null,
+            // The empty string is the job scope's stored "explicitly none" for these three, so a copy
+            // has to carry it: dropping it would re-inherit the project's value on the new chunk.
+            self::DEEPL_ID_GLOSSARY,
+            self::INTENTO_ROUTING,
+            self::INTENTO_PROVIDER => is_string($value) && mb_strlen($value) <= 255 ? $value : null,
+            // An empty list is an answer too: "no glossary here" over a project that has one.
+            self::LARA_GLOSSARIES => self::marshallList($value, fn(mixed $id): bool => is_string($id) && $id !== ''),
+            self::MMT_GLOSSARIES => self::marshallList($value, fn(mixed $id): bool => is_int($id) && $id >= 1),
+            self::MANDATORY_ISSUES => self::marshallList($value, fn(mixed $phase): bool => in_array($phase, self::MANDATORY_ISSUES_PHASES, true)),
+            // A JSON null stores "every handler disabled", and '' and 'none' are the two spellings
+            // subfiltering_handlers.json lets the editor send for the same thing. They are kept as
+            // they are: a reader decodes each of them to null.
+            self::SUBFILTERING_HANDLERS => match (true) {
+                $value === null => 'null',
+                $value === '', $value === 'none' => $value,
+                default => self::marshallList($value, fn(mixed $tag): bool => is_string($tag) && InjectableFiltersTags::tryFrom($tag) !== null),
+            },
+        };
+    }
+
+    /**
+     * Keep only the rows of a raw `key => value` map that are job metadata, each re-written in its
+     * canonical form. This is what a copy goes through, so it carries what the marshaller vouches for
+     * and not merely whatever the table holds.
+     *
+     * Two checks per row. The key has to be a case of this enum: anything else — MMT's mt_context, a
+     * key a feature has since stopped reading — is not job configuration and stays where it is. The
+     * value has to survive unMarshall() and marshall() back. unMarshall() alone is too lenient for
+     * that: its casts turn any string into a boolean or an integer, so the scalar keys are checked on
+     * the raw string first.
+     *
+     * @param array<string, string> $raw
+     *
+     * @return array<string, string>
+     */
+    public static function sanitizeRawMap(array $raw): array
+    {
+        $sanitized = [];
+
+        foreach ($raw as $key => $rawValue) {
+            $case = self::tryFrom($key);
+
+            if ($case === null || !$case->acceptsRaw($rawValue)) {
+                continue;
+            }
+
+            $value = $case->marshall(self::unMarshall(new MetadataStruct(['key' => $key, 'value' => $rawValue])));
+
+            if ($value !== null) {
+                $sanitized[$key] = $value;
+            }
+        }
+
+        return $sanitized;
+    }
+
+    /**
+     * Whether the stored string is one unMarshall() reads without guessing. A boolean is stored as
+     * '1' or '0', or as '' when the editor sent false through a string parameter; a penalty is a
+     * plain non-negative integer. The other keys are JSON or a plain word, which marshall() checks
+     * once decoded.
+     */
+    private function acceptsRaw(string $raw): bool
+    {
+        return match ($this) {
+            self::CHARACTER_COUNTER_COUNT_TAGS,
+            self::DIALECT_STRICT,
+            self::MMT_IGNORE_GLOSSARY_CASE,
+            self::TM_PRIORITIZATION => in_array($raw, ['1', '0', ''], true),
+            self::PUBLIC_TM_PENALTY,
+            self::MT_QUALITY_VALUE_IN_EDITOR => preg_match('/^\d{1,3}$/', $raw) === 1,
+            default => true,
+        };
+    }
+
+    /**
+     * @param callable(mixed): bool $isValidItem
+     */
+    private static function marshallList(mixed $value, callable $isValidItem): ?string
+    {
+        if (!is_array($value) || !array_is_list($value)) {
+            return null;
+        }
+
+        foreach ($value as $item) {
+            if (!$isValidItem($item)) {
+                return null;
+            }
+        }
+
+        $encoded = json_encode($value);
+
+        return $encoded === false ? null : $encoded;
+    }
+
 }

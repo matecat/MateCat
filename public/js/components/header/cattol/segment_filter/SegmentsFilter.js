@@ -28,6 +28,9 @@ const MORE_FILTERS = [
   {value: 'todo', label: 'To do'},
 ]
 
+// Issues are only flagged in revision, so this filter is offered on the R1/R2 pages alone
+const REVISION_MORE_FILTERS = [{value: 'with_issues', label: 'With issues'}]
+
 const DEFAULT_STATE = {
   selectedStatus: undefined,
   samplingType: undefined,
@@ -324,7 +327,10 @@ const SegmentsFilter = ({active}) => {
     })
   }
 
-  const moreOptions = MORE_FILTERS.map((item) => ({
+  const moreOptions = [
+    ...MORE_FILTERS,
+    ...(config.isReview ? REVISION_MORE_FILTERS : []),
+  ].map((item) => ({
     name: item.label,
     id: item.value,
   }))

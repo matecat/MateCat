@@ -13,6 +13,9 @@ use Model\Jobs\JobsMetadataMarshaller;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use TypeError;
+use Utils\Engines\AbstractEngine;
+use Utils\Engines\EnginesFactory;
+use Utils\Engines\Lara\LaraQualityEstimator;
 use Utils\Logger\LoggerFactory;
 use Utils\TaskRunner\Commons\QueueElement;
 use Utils\TaskRunner\Exceptions\NotSupportedMTException;
@@ -20,13 +23,13 @@ use Utils\TaskRunner\Exceptions\ReQueueException;
 
 class EngineService
 {
-    private DefaultEngineResolver $engineResolver;
     private IDatabase $database;
+    private LaraQualityEstimator $qualityEstimator;
 
-    public function __construct(DefaultEngineResolver $engineResolver, IDatabase $database)
+    public function __construct(IDatabase $database, LaraQualityEstimator $qualityEstimator)
     {
-        $this->engineResolver = $engineResolver;
         $this->database = $database;
+        $this->qualityEstimator = $qualityEstimator;
     }
 
     /**
@@ -42,7 +45,7 @@ class EngineService
      */
     public function getTMMatches(array $config, FeatureSet $featureSet, ?int $mtPenalty): array
     {
-        $tmsEngine = $this->engineResolver->getInstance((int)$config['id_tms']);
+        $tmsEngine = $this->getEngine((int)$config['id_tms']);
         $tmsEngine->setFeatureSet($featureSet);
 
         $engineConfig = $tmsEngine->getConfigStruct();
@@ -85,7 +88,7 @@ class EngineService
         $mt_result = [];
 
         try {
-            $mtEngine = $this->engineResolver->getInstance((int)$config['id_mt_engine']);
+            $mtEngine = $this->getEngine((int)$config['id_mt_engine']);
             $mtEngine->setFeatureSet($featureSet);
 
             $mtEngine->setAnalysis();
@@ -139,6 +142,7 @@ class EngineService
             $engineConfig = $analysisEvent->getConfig();
 
             $engineResponse = $mtEngine->get($engineConfig);
+            $this->qualityEstimator->scoreIfRequested($mtEngine, $engineResponse, $engineConfig);
 
             if ($engineResponse->responseStatus >= 400) {
                 return [];
@@ -196,5 +200,17 @@ class EngineService
 
             return true;
         });
+    }
+
+    /**
+     * Builds the engine with this id, fresh for each call; tests override it.
+     *
+     * Example: $mtEngine = $this->getEngine((int)$config['id_mt_engine']);
+     *
+     * @throws Exception when the engine cannot be found or built
+     */
+    protected function getEngine(int $id): AbstractEngine
+    {
+        return EnginesFactory::getInstance($id, $this->database, AbstractEngine::class);
     }
 }

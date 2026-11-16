@@ -69,7 +69,7 @@ export const EditorMachineTranslationTab = (props) => {
     })
 
     wasCheckIntentoDoubleKey.current = true
-  }, [currentProjectTemplate])
+  }, [currentProjectTemplate, modifyingCurrentTemplate])
 
   useEffect(() => {
     const propsExtra = [
