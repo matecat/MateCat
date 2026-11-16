@@ -311,7 +311,7 @@ class CancelRequestControllerTest extends AbstractTest
     {
         $service = $this->createMock(SegmentDisabledService::class);
         $service->method('isDisabled')->willReturn(true);
-        $service->expects($this->once())->method('enable')->with(42, 999);
+        $service->expects($this->once())->method('enable')->with(42);
 
         [$queueHandler] = $this->fakeAmqHandler();
         $controller = $this->createActionController(
@@ -459,7 +459,7 @@ class CancelRequestControllerTest extends AbstractTest
     {
         $service = $this->createMock(SegmentDisabledService::class);
         $service->method('isDisabled')->willReturn(false);
-        $service->expects($this->once())->method('disable')->with(42, 999);
+        $service->expects($this->once())->method('disable')->with(42);
 
         [$queueHandler] = $this->fakeAmqHandler();
         $controller = $this->createActionController(
@@ -984,7 +984,7 @@ class CancelRequestControllerTest extends AbstractTest
     {
         $service = $this->createMock(SegmentDisabledService::class);
         $service->method('isDisabled')->willReturn(false);
-        $service->expects($this->once())->method('disable')->with(42, 999);
+        $service->expects($this->once())->method('disable')->with(42);
 
         $logger = $this->createMock(MatecatLogger::class);
         $logger->expects($this->once())->method('error');
@@ -1016,7 +1016,7 @@ class CancelRequestControllerTest extends AbstractTest
     {
         $service = $this->createMock(SegmentDisabledService::class);
         $service->method('isDisabled')->willReturn(true);
-        $service->expects($this->once())->method('enable')->with(42, 999);
+        $service->expects($this->once())->method('enable')->with(42);
 
         $logger = $this->createMock(MatecatLogger::class);
         $logger->expects($this->once())->method('error');

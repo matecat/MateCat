@@ -25,11 +25,18 @@
   min-height: 90px;
   max-height: 200px;
   padding: 12px;
-  outline: none;
   cursor: text;
   overflow-y: auto;
-  border: 1px solid rgba(34, 36, 38, 0.15);
+  border: 1px solid colors.$grey200;
   background-color: white;
+
+  &:hover {
+    border-color: colors.$grey400;
+  }
+  &:focus-within {
+    border-color: colors.$grey400;
+    outline: 1px solid colors.$grey400;
+  }
 }
 
 .email-badge-wrapper {
@@ -101,7 +108,6 @@
 }
 
 .email-badge-tag-whitespace {
-  opacity: 0.55;
 }
 
 .email-badge-tag-remove {

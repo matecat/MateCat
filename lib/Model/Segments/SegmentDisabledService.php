@@ -46,7 +46,6 @@ class SegmentDisabledService
      * already disabled cannot fail on the unique key, and the write evicts every address it is read at.
      *
      * @param int $id_segment
-     * @param int $id_project
      *
      * @return void
      * @throws ReflectionException
@@ -54,9 +53,9 @@ class SegmentDisabledService
      * @throws TypeError
      * @throws Exception
      */
-    public function disable(int $id_segment, int $id_project): void
+    public function disable(int $id_segment): void
     {
-        $this->segmentMetadataDao->upsert($id_segment, SegmentMetadataMarshaller::TRANSLATION_DISABLED->value, '1', $id_project);
+        $this->segmentMetadataDao->upsert($id_segment, SegmentMetadataMarshaller::TRANSLATION_DISABLED->value, '1');
     }
 
     /**
@@ -66,7 +65,6 @@ class SegmentDisabledService
      * Safe to call even if the segment is not currently disabled.
      *
      * @param int $id_segment
-     * @param int $id_project
      *
      * @return void
      * @throws ReflectionException
@@ -74,8 +72,8 @@ class SegmentDisabledService
      * @throws TypeError
      * @throws Exception
      */
-    public function enable(int $id_segment, int $id_project): void
+    public function enable(int $id_segment): void
     {
-        $this->segmentMetadataDao->delete($id_segment, SegmentMetadataMarshaller::TRANSLATION_DISABLED->value, $id_project);
+        $this->segmentMetadataDao->delete($id_segment, SegmentMetadataMarshaller::TRANSLATION_DISABLED->value);
     }
 }

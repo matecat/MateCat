@@ -178,7 +178,6 @@ export const XliffSettings = () => {
                 >
                   More details
                 </a>
-                .
               </p>
               <SubTemplates
                 {...{

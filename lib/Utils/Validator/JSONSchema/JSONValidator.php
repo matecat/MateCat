@@ -7,7 +7,6 @@ use RuntimeException;
 use stdClass;
 use Swaggest\JsonSchema\Context;
 use Swaggest\JsonSchema\InvalidValue;
-use Swaggest\JsonSchema\RemoteRefProvider;
 use Swaggest\JsonSchema\Schema;
 use Swaggest\JsonSchema\SchemaContract;
 use Utils\Registry\AppConfig;
@@ -47,27 +46,7 @@ class JSONValidator extends AbstractValidator
 
         $this->schemaContract = Schema::import(
             static::getValidJSONSchema($jsonSchema),
-            new Context(
-                new class implements RemoteRefProvider {
-                    /**
-                     * @param string $url
-                     *
-                     * @return object
-                     * @throws RuntimeException
-                     */
-                    public function getSchemaData($url): object
-                    {
-                        if (is_file($url)) {
-                            $url = file_get_contents($url) ?: $url;
-                        } elseif (is_file(AppConfig::$ROOT . '/inc/validation/schema/' . $url)) {
-                            $url = file_get_contents(AppConfig::$ROOT . '/inc/validation/schema/' . $url) ?: $url;
-                        }
-
-                        return JSONValidator::getValidJSONSchema($url);
-                    }
-
-                }
-            )
+            new Context(new SchemaFileRefProvider())
         );
         $this->throwExceptions = $throwExceptions;
     }

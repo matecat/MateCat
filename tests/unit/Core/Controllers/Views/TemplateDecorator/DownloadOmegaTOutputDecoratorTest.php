@@ -29,6 +29,18 @@ class TestableDownloadOmegaTOutputDecorator extends DownloadOmegaTOutputDecorato
 
 class DownloadOmegaTOutputDecoratorTest extends AbstractTest
 {
+    private ?string $workDir = null;
+
+    protected function tearDown(): void
+    {
+        if ($this->workDir !== null) {
+            array_map('unlink', glob($this->workDir . '/*') ?: []);
+            @rmdir($this->workDir);
+            $this->workDir = null;
+        }
+
+        parent::tearDown();
+    }
     private function makeTmx(string $content): SplTempFileObject
     {
         $file = new SplTempFileObject();
@@ -59,6 +71,10 @@ class DownloadOmegaTOutputDecoratorTest extends AbstractTest
         $controller->method('getJob')->willReturn($job);
         $controller->method('getUser')->willReturn($user);
         $controller->method('getDatabase')->willReturn($this->createStub(IDatabase::class));
+
+        $this->workDir = sys_get_temp_dir() . '/omegat-test-' . uniqid();
+        mkdir($this->workDir);
+        $controller->method('getWorkDir')->willReturn($this->workDir);
 
         $controller->id_job   = 4242;
         $controller->password = 'abcpassword';
@@ -127,7 +143,10 @@ class DownloadOmegaTOutputDecoratorTest extends AbstractTest
             'file2' => ['document_content' => 'short-body', 'output_filename' => 'ab'],
             // missing output_filename -> null coalesce branch
             'file3' => ['document_content' => 'noname-body'],
+            // a job file kept on disk -> added from its path
+            'file4' => ['document_content' => null, 'input_filename' => $this->workDir . '/job.xlf', 'output_filename' => 'job.xlf'],
         ];
+        file_put_contents($this->workDir . '/job.xlf', 'disk-body');
 
         $decorator->createOmegaTZip($output_content);
 
@@ -141,9 +160,10 @@ class DownloadOmegaTOutputDecoratorTest extends AbstractTest
         $this->assertNotFalse($zip->locateName('4242/omegat.project'));
         $projectContent = $zip->getFromName('4242/omegat.project');
         $this->assertStringContainsString('<source_lang>EN-US</source_lang>', $projectContent);
+        $this->assertSame('disk-body', $zip->getFromName('4242/inbox/job.xlf'));
         $zip->close();
 
-        @unlink($captured->input_filename);
+        $this->assertSame($this->workDir . '/omegat.zip', $captured->input_filename);
     }
 
     public function testGetOmegatProjectFileMapsKnownAndDefaultTokenizers(): void
@@ -164,5 +184,30 @@ class DownloadOmegaTOutputDecoratorTest extends AbstractTest
         $unknown = $method->invoke($decorator, 'xx-XX', 'zz-ZZ');
         $this->assertStringContainsString('<source_lang>XX-XX</source_lang>', $unknown);
         $this->assertStringContainsString('org.omegat.tokenizer.LuceneEnglishTokenizer', $unknown);
+    }
+
+    public function testCreateOmegaTZipFailsWhenTheZipCannotBeCreated(): void
+    {
+        $controller = $this->makeController();
+        // A folder where the zip should go: ZipArchive cannot open it as an archive.
+        mkdir($this->workDir . '/omegat.zip');
+
+        try {
+            $this->expectException(\Exception::class);
+            $this->expectExceptionMessage('Unable to create the zip file ' . $this->workDir . '/omegat.zip');
+
+            $this->makeDecorator($controller)->createOmegaTZip([]);
+        } finally {
+            rmdir($this->workDir . '/omegat.zip');
+        }
+    }
+
+    public function testGetTMSServiceBuildsTheExportServiceOnTheDatabase(): void
+    {
+        $decorator = new DownloadOmegaTOutputDecorator($this->makeController());
+
+        $service = (new ReflectionMethod(DownloadOmegaTOutputDecorator::class, 'getTMSService'))->invoke($decorator, obtainTestDatabase());
+
+        $this->assertInstanceOf(TMSService::class, $service);
     }
 }

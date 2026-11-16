@@ -169,10 +169,8 @@ input {
   .comments-view
   .re-add-comment
   .re-comment-input {
-  border-radius: 20px !important;
   height: 40px;
   width: 100%;
-  border: 1px solid colors.$grey200;
   padding: 8px 12px 8px 12px;
   border-radius: variables.$border-radius-default;
   font-size: variables.$font-size-small;
@@ -564,7 +562,8 @@ article {
 }
 .re-close-balloon {
   position: absolute !important;
-  right: 0;
+  right: 4px;
+  top: 5px;
 }
 .re-open-view.re-issues {
   top: 0px;
@@ -650,8 +649,8 @@ section .revise-button {
   align-self: stretch;
   cursor: pointer;
   border-radius: variables.$border-radius-default;
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
   margin-left: 8px;
   color: colors.$black;
 }

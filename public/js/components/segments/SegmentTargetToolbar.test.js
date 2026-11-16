@@ -46,16 +46,16 @@ jest.mock('../common/DropdownMenu/DropdownMenu', () => ({
   DROPDOWN_SEPARATOR: 'separator',
 }))
 
-jest.mock('./utils/DraftMatecatUtils/pcTagUtils', () => ({
-  hasCompressiblePhTags: () => mockHasCompressiblePhTags,
+jest.mock('./utils/DraftMatecatUtils/compressibleTagUtils', () => ({
+  hasCompressibleTags: () => mockHasCompressiblePhTags,
 }))
 
 jest.mock('../../actions/CatToolActions', () => ({
-  togglePhTagsCompressed: () => mockToggleCompression(),
+  toggleTagsCompressed: () => mockToggleCompression(),
 }))
 
 jest.mock('../../stores/CatToolStore', () => ({
-  isPhTagsCompressed: () => mockCompressed,
+  isTagsCompressed: () => mockCompressed,
   addListener: jest.fn((event, handler) => {
     mockStoreListeners[event] = handler
   }),
@@ -65,7 +65,7 @@ jest.mock('../../stores/CatToolStore', () => ({
 }))
 
 jest.mock('../../constants/CatToolConstants', () => ({
-  TOGGLE_PH_TAGS_COMPRESSED: 'TOGGLE_PH_TAGS_COMPRESSED',
+  TOGGLE_TAGS_COMPRESSED: 'TOGGLE_TAGS_COMPRESSED',
 }))
 
 jest.mock('./ToolbarFeatures/Ai/LaraStyles', () => ({LaraStyles: () => null}))
@@ -227,7 +227,7 @@ describe('SegmentTargetToolbar', () => {
 
       mockCompressed = true
       act(() => {
-        mockStoreListeners.TOGGLE_PH_TAGS_COMPRESSED()
+        mockStoreListeners.TOGGLE_TAGS_COMPRESSED()
       })
 
       expect(tagMenuItem('tags-menu-toggle-compression').selected).toBe(false)
@@ -235,11 +235,11 @@ describe('SegmentTargetToolbar', () => {
 
     test('stops listening to the store on unmount', () => {
       const {unmount} = renderToolbar()
-      expect(mockStoreListeners.TOGGLE_PH_TAGS_COMPRESSED).toBeDefined()
+      expect(mockStoreListeners.TOGGLE_TAGS_COMPRESSED).toBeDefined()
 
       unmount()
 
-      expect(mockStoreListeners.TOGGLE_PH_TAGS_COMPRESSED).toBeUndefined()
+      expect(mockStoreListeners.TOGGLE_TAGS_COMPRESSED).toBeUndefined()
     })
 
     describe('disabled entries', () => {

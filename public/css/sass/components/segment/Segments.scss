@@ -380,15 +380,15 @@ body.cattool .pointer-first-segment {
     background-color: colors.$red400;
     color: colors.$white;
     display: flex;
-    padding: 3px;
+    padding: 4px;
     justify-content: center;
     align-items: center;
     gap: 6px;
     align-self: stretch;
     cursor: pointer;
     border-radius: variables.$border-radius-default;
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 24px;
     margin-left: 8px;
   }
   .badge-icon {

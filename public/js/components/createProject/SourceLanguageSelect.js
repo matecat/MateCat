@@ -3,27 +3,22 @@ import PropTypes from 'prop-types'
 import {Select} from '../common/Select'
 import {CreateProjectContext} from './CreateProjectContext'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
+import {SELECT_HEIGHT} from '../../constants/Constants'
 
-export const SourceLanguageSelect = ({
-  isRenderedInsideTab = false,
-  dropdownClassName,
-}) => {
-  const {
-    SELECT_HEIGHT,
-    languages,
-    sourceLang,
-    changeSourceLanguage,
-    projectTemplates,
-  } = useContext(CreateProjectContext)
+export const SourceLanguageSelect = ({isRenderedInsideTab = false}) => {
+  const {languages, sourceLang, changeSourceLanguage, projectTemplates} =
+    useContext(CreateProjectContext)
   const {isUserLogged} = useContext(ApplicationWrapperContext)
 
   return (
     <Select
-      {...(!isRenderedInsideTab
-        ? {label: 'From'}
-        : {isPortalDropdown: true, dropdownClassName})}
+      {...(!isRenderedInsideTab && {label: 'From'})}
       id="source-lang"
       name="source-lang"
+      dropdownClassName={
+        !isRenderedInsideTab ? 'new-project-form-select-portal' : ''
+      }
+      isPortalDropdown={true}
       maxHeightDroplist={SELECT_HEIGHT}
       showSearchBar={true}
       options={languages}
@@ -49,5 +44,4 @@ export const SourceLanguageSelect = ({
 
 SourceLanguageSelect.propTypes = {
   isRenderedInsideTab: PropTypes.bool,
-  dropdownClassName: PropTypes.string,
 }

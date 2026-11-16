@@ -62,6 +62,7 @@ const Dashboard = () => {
           null,
           job.id,
           job.password,
+          true,
           callback,
         )
       }
@@ -238,6 +239,9 @@ const Dashboard = () => {
       if (!isEmpty(Search.current.filter)) {
         Search.current.currentPage = 1
       }
+
+      // The team is not loaded yet: getData fetches the projects with this filter
+      if (!selectedTeamRef.current) return
 
       getProjects({
         team: selectedTeamRef.current,

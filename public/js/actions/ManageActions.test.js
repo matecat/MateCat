@@ -668,6 +668,19 @@ describe('ManageActions', () => {
     })
   })
 
+  test('getSecondPassReview notifies on failure', async () => {
+    getSecondPassReview.mockRejectedValueOnce(new Error('fail'))
+
+    await ManageActions.getSecondPassReview(1, 'pp', 2, 'pj')
+
+    expect(CatToolActions.addNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'error',
+        text: expect.stringContaining('Revise 2 link could not be generated'),
+      }),
+    )
+  })
+
   test('openModifyTeamModal fetches members and dispatches modal action', async () => {
     getTeamMembers.mockResolvedValueOnce({
       members: ['m1'],
@@ -760,6 +773,41 @@ describe('ManageActions', () => {
     await flushPromises()
 
     expect(addUserTeam).toHaveBeenCalledWith({id: 1}, 'user@test.com')
+    expect(AppDispatcher.dispatch).toHaveBeenCalledWith({
+      actionType: 'UPDATE_TEAM_MEMBERS',
+      team,
+      members: ['m1'],
+      pending_invitations: [],
+    })
+  })
+
+  test('addUserToTeam rejects with the API error and dispatches nothing', async () => {
+    const rejection = {
+      errors: [
+        {
+          code: 400,
+          message: 'Wrong parameter: a member email address is not valid',
+        },
+      ],
+    }
+    addUserTeam.mockRejectedValueOnce(rejection)
+
+    await expect(
+      ManageActions.addUserToTeam(fromJS({id: 1}), 'a?b@example.org'),
+    ).rejects.toEqual(rejection)
+    expect(AppDispatcher.dispatch).not.toHaveBeenCalled()
+  })
+
+  test('addUserToTeam resolves after dispatching UPDATE_TEAM_MEMBERS', async () => {
+    addUserTeam.mockResolvedValueOnce({
+      members: ['m1'],
+      pending_invitations: [],
+    })
+    const team = fromJS({id: 1})
+
+    await expect(
+      ManageActions.addUserToTeam(team, 'user@test.com'),
+    ).resolves.toBeUndefined()
     expect(AppDispatcher.dispatch).toHaveBeenCalledWith({
       actionType: 'UPDATE_TEAM_MEMBERS',
       team,

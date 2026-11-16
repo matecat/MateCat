@@ -33,14 +33,14 @@ export const DeepL = ({
           <strong>DeepL Translator</strong> is a neural machine translation
           engine available in 31 languages that can be used to retrieve machine
           translation suggestions for post editing. <br />
-          The engine&apos;s output can be customized by choosing a formality level
-          for the target language and uploading a glossary to make sure that the
-          MT output reflects your preferred terminology.
+          The engine&apos;s output can be customized by choosing a formality
+          level for the target language and uploading a glossary to make sure
+          that the MT output reflects your preferred terminology.
         </p>
         <p>
-          <strong>Note: </strong>as per DeepL&apos;s policy, Matecat&apos;s integration
-          with DeepL is only available for subscribers of DeepL&apos;s &quot;Advanced&quot; and
-          &quot;Ultimate&quot; plans.
+          <strong>Note: </strong>as per DeepL&apos;s policy, Matecat&apos;s
+          integration with DeepL is only available for subscribers of
+          DeepL&apos;s &quot;Advanced&quot; and &quot;Ultimate&quot; plans.
         </p>
         <Button
           className="green-button"
@@ -77,9 +77,10 @@ export const DeepL = ({
           <div className="provider-field container-actions">
             <Button
               type={BUTTON_TYPE.WARNING}
+              size={BUTTON_SIZE.ICON_STANDARD}
               onClick={() => setAddMTVisible(false)}
             >
-              <IconClose size={11} />
+              <IconClose size={18} />
             </Button>
             <Button
               type={BUTTON_TYPE.PRIMARY}
@@ -87,7 +88,7 @@ export const DeepL = ({
               disabled={isRequestInProgress}
               onClick={handleSubmit(onSubmit)}
             >
-              <Checkmark size={12} />
+              <Checkmark size={18} />
               Confirm
             </Button>
           </div>

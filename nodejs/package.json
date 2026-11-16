@@ -1,6 +1,7 @@
 {
     "name": "matecat-socket-server",
     "version": "3.0.0",
+    "type": "module",
     "engines": {
         "node": ">=22"
     },
@@ -17,16 +18,17 @@
         "@socket.io/sticky": "^1.0.4",
         "ioredis": "^5.4.2",
         "@socket.io/redis-adapter": "^8.3.0",
-        "@stomp/stompjs": "^7.3.0",
+        "@stomp/stompjs": "^7.4.0",
         "winston": "^3",
         "winston-daily-rotate-file": "^5.0.0"
     },
     "devDependencies": {
-        "jest": "^30.4.2"
+        "@vitest/coverage-v8": "^5.0.4",
+        "vitest": "^5.0.4"
     },
     "scripts": {
         "start": "node --max-semi-space-size=256 server.js",
-        "test": "jest",
-        "coverage": "jest --collect-coverage"
+        "test": "vitest run",
+        "coverage": "vitest run --coverage"
     }
 }

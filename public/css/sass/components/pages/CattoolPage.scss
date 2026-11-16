@@ -43,14 +43,6 @@
 @use '../SettingsPanel';
 @use '../settingsPanel/TemplateSelect';
 
-
-
-
-
-
-
-
-
 body #outer {
   //overflow: hidden;
   position: relative;
@@ -99,6 +91,9 @@ body.cattool {
   overflow-y: hidden !important;
   padding: unset;
   background-color: colors.$grey50;
+  // No min-width override: the editor is not laid out below 1024px, so it keeps the global body
+  // minimum from _reset.scss on every device. Narrower windows scroll sideways and phones zoom out,
+  // instead of clipping the target column and the header
 }
 
 body.cattool .page-content {
@@ -116,7 +111,6 @@ body.cattool header {
   transition: margin-top 200ms ease-out;
   -webkit-transition: margin-top 200ms ease-out;
   box-sizing: content-box;
-  min-width: 1024px;
 }
 
 body.cattool .main-container {
@@ -136,7 +130,8 @@ body.cattool .main-container {
 }
 body.cattool .context-preview-wrapper--collapsed {
   position: fixed;
-  bottom: 88px;
+  // Footer height (50px) plus the tab's own offset, so the tab sits on the footer
+  bottom: 74px;
   left: 0;
   right: 0;
   display: flex;

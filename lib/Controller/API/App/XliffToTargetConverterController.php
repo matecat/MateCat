@@ -4,7 +4,6 @@
  * @author Domenico Lupinetti (hashashiyyin) domenico@translated.net / ostico@gmail.com
  * Date: 16/05/25
  * Time: 19:18
- *
  */
 
 namespace Controller\API\App;
@@ -16,7 +15,6 @@ use Klein\Exceptions\ResponseAlreadySentException;
 use LogicException;
 use Model\Conversion\Filters;
 use Model\Conversion\MimeTypes\MimeTypes;
-use Psr\Log\InvalidArgumentException;
 use RuntimeException;
 
 set_time_limit(180);
@@ -25,7 +23,6 @@ class XliffToTargetConverterController extends KleinController
 {
 
     /**
-     * @throws InvalidArgumentException
      * @throws RuntimeException
      * @throws LogicException
      * @throws JsonException

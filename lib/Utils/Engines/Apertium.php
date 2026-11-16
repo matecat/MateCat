@@ -4,6 +4,7 @@ namespace Utils\Engines;
 
 use Exception;
 use Model\DataAccess\IDatabase;
+use RuntimeException;
 use TypeError;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
@@ -14,7 +15,6 @@ use Utils\Engines\Results\MyMemory\GetMemoryResponse;
  * @author egomez-prompsit egomez@prompsit.com
  * Date: 29/07/15
  * Time: 12.17
- *
  */
 class Apertium extends AbstractEngine
 {
@@ -82,8 +82,7 @@ class Apertium extends AbstractEngine
     /**
      * @param array<string, mixed> $_config
      * @throws TypeError
-     * @throws \Psr\Log\InvalidArgumentException
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
     public function get(array $_config): GetMemoryResponse
     {

@@ -96,18 +96,18 @@ class ReviewedWordCountModelTest extends AbstractTest
     }
 
     // ─────────────────────────────────────────────────────────────────
-    // evaluateChunkReviewEventTransitions — ICE unmodified (no flag)
+    // evaluateChunkReviewEventTransitions — locked unmodified (no flag)
     // ─────────────────────────────────────────────────────────────────
 
     #[Test]
-    public function evaluateChunkReviewEventTransitions_unmodifiedIceOnSameChunkDisallowsRevisionFlag(): void
+    public function evaluateChunkReviewEventTransitions_unmodifiedLockedOnSameChunkDisallowsRevisionFlag(): void
     {
         $event = $this->createMock(TranslationEvent::class);
         $event->expects($this->once())->method('setRevisionFlagAllowed')->with(false);
 
         $model = $this->buildModel(
-            isIce: true,
-            isUnModifiedIce: true,
+            isLocked: true,
+            isUnModifiedLocked: true,
             currentEventOnChunk: true,
             event: $event
         );
@@ -132,7 +132,7 @@ class ReviewedWordCountModelTest extends AbstractTest
 
         $model = $this->buildModel(
             isChangingStatus: false,
-            isIce: false,
+            isLocked: false,
             currentEventOnChunk: false,
             event: $event,
             wantedTranslation: $wantedTranslation
@@ -284,7 +284,7 @@ class ReviewedWordCountModelTest extends AbstractTest
 
         $model = $this->buildModel(
             isChangingStatus: false,
-            isIce: false,
+            isLocked: false,
             currentEventOnChunk: true,
             event: $event
         );
@@ -293,14 +293,14 @@ class ReviewedWordCountModelTest extends AbstractTest
     }
 
     #[Test]
-    public function evaluateChunkReviewEventTransitions_modifiedIceOnSameChunkIncreasesWordCount(): void
+    public function evaluateChunkReviewEventTransitions_modifiedLockedOnSameChunkIncreasesWordCount(): void
     {
         $event = $this->createMock(TranslationEvent::class);
         $event->expects($this->once())->method('setChunkReviewForPassFailUpdate');
 
         $model = $this->buildModel(
-            isIce: true,
-            isUnModifiedIce: false,
+            isLocked: true,
+            isUnModifiedLocked: false,
             currentEventOnChunk: true,
             event: $event
         );
@@ -483,14 +483,14 @@ class ReviewedWordCountModelTest extends AbstractTest
 
     /**
      * increaseCountersButCheckForFinalRevision() has three call sites — the changing-status branch covered
-     * above, the ICE branch, and the no-status-change fallthrough. The guard lives inside the method rather
+     * above, the locked branch, and the no-status-change fallthrough. The guard lives inside the method rather
      * than at one call site so that all three are covered; these two tests are what pin that placement.
      *
-     * A replace-all rewrites the text, so an ICE segment stops being unmodified and reaches the increase
+     * A replace-all rewrites the text, so a locked segment stops being unmodified and reaches the increase
      * branch whenever the substitution does not also change the status.
      */
     #[Test]
-    public function evaluateChunkReviewEventTransitions_aReplaceAllOnAModifiedIceAddsNothing(): void
+    public function evaluateChunkReviewEventTransitions_aReplaceAllOnAModifiedLockedAddsNothing(): void
     {
         $partial = null;
 
@@ -505,8 +505,8 @@ class ReviewedWordCountModelTest extends AbstractTest
             });
 
         $model = $this->buildModel(
-            isIce: true,
-            isUnModifiedIce: false,
+            isLocked: true,
+            isUnModifiedLocked: false,
             currentEventOnChunk: true,
             event: $event,
             sourcePagesWithFinalRevisions: [],
@@ -630,8 +630,8 @@ class ReviewedWordCountModelTest extends AbstractTest
         bool $isDraft = false,
         bool $isChangingStatus = false,
         bool $isLowerTransition = false,
-        bool $isIce = false,
-        bool $isUnModifiedIce = false,
+        bool $isLocked = false,
+        bool $isUnModifiedLocked = false,
         bool $currentEventOnChunk = false,
         bool $shouldIncreaseTte = false,
         bool $isAPropagatedEvent = false,
@@ -686,8 +686,8 @@ class ReviewedWordCountModelTest extends AbstractTest
         $event->method('isADraftChange')->willReturn($isDraft);
         $event->method('isChangingStatus')->willReturn($isChangingStatus);
         $event->method('isLowerTransition')->willReturn($isLowerTransition);
-        $event->method('isIce')->willReturn($isIce);
-        $event->method('isUnModifiedIce')->willReturn($isUnModifiedIce);
+        $event->method('isLocked')->willReturn($isLocked);
+        $event->method('isUnModifiedLocked')->willReturn($isUnModifiedLocked);
         $event->method('currentEventIsOnThisChunk')->willReturn($currentEventOnChunk);
         $event->method('shouldIncreaseTte')->willReturn($shouldIncreaseTte);
         $event->method('isAPropagatedEvent')->willReturn($isAPropagatedEvent);

@@ -4,6 +4,7 @@ namespace Model\Segments;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
+use PDO;
 use PDOException;
 use ReflectionException;
 use TypeError;
@@ -13,8 +14,6 @@ class SegmentMetadataDao extends AbstractDao
     const string TABLE = 'segment_metadata';
     const string _query_get_all = "SELECT * FROM " . self::TABLE . " WHERE id_segment = ? ";
     const string _query_get = "SELECT * FROM " . self::TABLE . " WHERE id_segment = ? and meta_key = ? ";
-    const string _keymap_get_by_segment_ids = "Model\\Segments\\SegmentMetadataDao::getBySegmentIds-";
-    const string _keymap_get_all_in_range = "Model\\Segments\\SegmentMetadataDao::getAllInRange-";
 
 /**
      * @throws ReflectionException
@@ -34,28 +33,39 @@ class SegmentMetadataDao extends AbstractDao
     }
 
     /**
-     * Cached under one hash per key and project, so a write evicts only its own project's reads.
+     * Read one metadata key for a set of segments, such as one page of the segment analysis API.
+     *
+     * Not cached. Each call asks for a different list of ids, so a cached result was almost never
+     * read again, and every list landed in the same Redis hash for that key, which grew to 896 MB
+     * on production. The query uses the `(id_segment, meta_key)` index.
+     *
+     * Example: `getBySegmentIds([10, 11], 'id_request')` returns the `id_request` rows of segments
+     * 10 and 11.
      *
      * @param int[] $ids
-     * @return SegmentMetadataStruct[]
-     * @throws ReflectionException
-     * @throws Exception
+     *
+     * @return list<SegmentMetadataStruct>
+     * @throws PDOException
      */
-    public function getBySegmentIds(int $id_project, array $ids, string $key, int $ttl = 86400): array
+    public function getBySegmentIds(array $ids, string $key): array
     {
         if (empty($ids)) {
             return [];
         }
 
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
-        $stmt = $this->database->getConnection()->prepare("SELECT * FROM segment_metadata WHERE id_segment IN ($placeholders) and meta_key = ? ");
+        $stmt = $this->_getStatementForQuery("SELECT * FROM segment_metadata WHERE id_segment IN ($placeholders) and meta_key = ? ");
+        $stmt->setFetchMode(PDO::FETCH_CLASS, SegmentMetadataStruct::class);
+        $stmt->execute([...array_values($ids), $key]);
 
-        return $this->setCacheTTL($ttl)->_fetchObjectMap(
-            $stmt,
-            SegmentMetadataStruct::class,
-            [...array_values($ids), $key],
-            self::_keymap_get_by_segment_ids . $key . '-' . $id_project
-        );
+        $rows = [];
+        foreach ($stmt->fetchAll() as $row) {
+            if ($row instanceof SegmentMetadataStruct) {
+                $rows[] = $row;
+            }
+        }
+
+        return $rows;
     }
 
     /**
@@ -81,12 +91,12 @@ class SegmentMetadataDao extends AbstractDao
      * @throws TypeError
      * @throws Exception
      */
-    public function delete(int $id_segment, string $key, int $id_project): void
+    public function delete(int $id_segment, string $key): void
     {
         $stmt = $this->database->getConnection()->prepare("DELETE FROM segment_metadata WHERE id_segment = ? AND meta_key = ?");
         $stmt->execute([$id_segment, $key]);
 
-        $this->destroyCache($this->addressOf($id_segment, $key), $id_project);
+        $this->destroyCache($this->addressOf($id_segment, $key));
     }
 
     /**
@@ -95,7 +105,7 @@ class SegmentMetadataDao extends AbstractDao
      * @throws TypeError
      * @throws Exception
      */
-    public function save(SegmentMetadataStruct $metadataStruct, int $id_project): void
+    public function save(SegmentMetadataStruct $metadataStruct): void
     {
         $stmt = $this->database->getConnection()->prepare(
             "INSERT INTO segment_metadata " .
@@ -109,7 +119,7 @@ class SegmentMetadataDao extends AbstractDao
             'value' => $metadataStruct->meta_value,
         ]);
 
-        $this->destroyCache($metadataStruct, $id_project);
+        $this->destroyCache($metadataStruct);
     }
 
     /**
@@ -118,7 +128,7 @@ class SegmentMetadataDao extends AbstractDao
      * @throws TypeError
      * @throws Exception
      */
-    public function upsert(int $id_segment, string $key, string $value, int $id_project): void
+    public function upsert(int $id_segment, string $key, string $value): void
     {
         $stmt = $this->database->getConnection()->prepare(
             "INSERT INTO segment_metadata " .
@@ -133,26 +143,22 @@ class SegmentMetadataDao extends AbstractDao
             'value' => $value,
         ]);
 
-        $this->destroyCache($this->addressOf($id_segment, $key), $id_project);
+        $this->destroyCache($this->addressOf($id_segment, $key));
     }
 
     /**
-     * Evict every address one metadata row is read at: by segment, by segment and key, by that key
-     * across a set of segments, and across a segment range.
+     * Evict every cached address one metadata row is read at: by segment, and by segment and key.
+     * `getBySegmentIds()` and `getAllInRange()` are not cached, so they have nothing to evict.
      *
      * The struct has to name the segment and the key. Every write in this DAO goes through here, so
      * a caller never holds a list of evictions it can be one short of.
-     *
-     * Unlike other doors, this one also takes the project: the set and range reads are cached per
-     * project, and a metadata row carries no project column to derive it from. Looking it up here
-     * would cost a join on every write, and every writer already holds the project.
      *
      * @throws ReflectionException
      * @throws PDOException
      * @throws TypeError when the struct names no segment or no key
      * @throws Exception
      */
-    public function destroyCache(SegmentMetadataStruct $metadata, int $id_project): void
+    public function destroyCache(SegmentMetadataStruct $metadata): void
     {
         if (!isset($metadata->id_segment)) {
             throw new TypeError('A segment metadata cache eviction needs the id of the segment.');
@@ -164,8 +170,6 @@ class SegmentMetadataDao extends AbstractDao
 
         $this->destroyCacheAll((int)$metadata->id_segment);
         $this->destroyCacheKey((int)$metadata->id_segment, $metadata->meta_key);
-        $this->destroyCacheBySegmentIds($metadata->meta_key, $id_project);
-        $this->destroyCacheAllInRange($id_project);
     }
 
     /** The struct a write holds only as a pair of values. */
@@ -201,50 +205,33 @@ class SegmentMetadataDao extends AbstractDao
     }
 
     /**
-     * @throws ReflectionException
-     * @throws Exception
-     */
-    private function destroyCacheBySegmentIds(string $key, int $id_project): bool
-    {
-        $keyMap = self::_keymap_get_by_segment_ids . $key . '-' . $id_project;
-
-        return $this->_deleteCacheByKey($keyMap, false);
-    }
-
-    /**
-     * @throws ReflectionException
-     * @throws Exception
-     */
-    private function destroyCacheAllInRange(int $id_project): bool
-    {
-        return $this->_deleteCacheByKey(self::_keymap_get_all_in_range . $id_project, false);
-    }
-
-    /**
-     * Cached under one hash per project, which every write in that project deletes.
+     * Read every metadata row of a range of segments, grouped by segment, such as one page of the
+     * editor in `GetSegmentsController`.
      *
-     * The query does not filter by project: segment ids are reserved file by file, so a range can
-     * hold another project's segments. Those rows are not evicted by their own project's writes and
-     * may be stale; a caller uses only the ids of its own segments.
+     * Not cached. The rows decide whether a segment can be edited, and a cached copy can go stale:
+     * a read that started before a disable/enable write commits can store the old rows after that
+     * write's eviction. The query uses the `(id_segment, meta_key)` index.
+     *
+     * Example: `getAllInRange(5000, 5200)` returns `[5003 => SegmentMetadataCollection, ...]`, one
+     * entry per segment that has metadata.
      *
      * @return array<int, SegmentMetadataCollection>
-     * @throws ReflectionException
-     * @throws Exception
+     * @throws PDOException
      */
-    public function getAllInRange(int $id_project, int $startSid, int $stopSid, int $ttl = 86400): array
+    public function getAllInRange(int $startSid, int $stopSid): array
     {
-        $conn = $this->getDatabaseHandler();
-        $stmt = $conn->getConnection()->prepare(
+        $stmt = $this->_getStatementForQuery(
             "SELECT * FROM " . self::TABLE . " WHERE id_segment BETWEEN ? AND ? ORDER BY id_segment"
         );
+        $stmt->setFetchMode(PDO::FETCH_CLASS, SegmentMetadataStruct::class);
+        $stmt->execute([$startSid, $stopSid]);
 
-        /** @var SegmentMetadataStruct[] $results */
-        $results = $this->setCacheTTL($ttl)->_fetchObjectMap(
-            $stmt,
-            SegmentMetadataStruct::class,
-            [$startSid, $stopSid],
-            self::_keymap_get_all_in_range . $id_project
-        );
+        $results = [];
+        foreach ($stmt->fetchAll() as $row) {
+            if ($row instanceof SegmentMetadataStruct) {
+                $results[] = $row;
+            }
+        }
 
         $grouped = [];
         foreach ($results as $struct) {

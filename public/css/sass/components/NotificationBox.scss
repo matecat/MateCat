@@ -70,19 +70,22 @@
   margin: 0 auto;
   left: 50%;
 }
+// Below the 60px header, on the side of the toolbar the user acted on
 .notifications-position-tr {
-  top: 60px;
+  top: 72px;
   bottom: auto;
   left: auto;
+  right: 20px;
 }
 
 .notification-item-icon {
   display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
 }
 
 .notification-type-success {
@@ -119,7 +122,6 @@
       transform: rotate(180deg);
     }
   }
-
 }
 
 .notification-type-info {

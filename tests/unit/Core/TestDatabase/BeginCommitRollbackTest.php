@@ -37,11 +37,12 @@ class BeginCommitRollbackTest extends AbstractTest
      * @var PDO
      */
     protected $raw_client_instance;
-    protected $sql_create;
+    private const int PROBE_SEGMENT_ID = 1886428399;
+
     protected $sql_read;
     protected $sql_insert_first_value;
     protected $sql_insert_second_value;
-    protected $sql_drop;
+    protected $sql_cleanup;
 
     public function setUp(): void
     {
@@ -58,19 +59,20 @@ class BeginCommitRollbackTest extends AbstractTest
 
         $this->client_1_instance = obtainTestDatabase(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
 
-        $this->sql_create = "CREATE TABLE Persons( PersonID INT)";
-        $this->sql_drop = "DROP TABLE Persons";
-        $this->sql_read = "SELECT * FROM Persons";
+        // Both connections must see the same table, so this cannot be a temporary one: the rows go
+        // into an existing table under a segment id no fixture uses, and are deleted afterwards.
+        $this->sql_cleanup = "DELETE FROM segment_metadata WHERE id_segment = " . self::PROBE_SEGMENT_ID;
+        $this->sql_read = "SELECT meta_key, meta_value FROM segment_metadata WHERE id_segment = " . self::PROBE_SEGMENT_ID . " ORDER BY meta_key";
 
-        $this->sql_insert_first_value = "INSERT INTO Persons VALUES (475144)";
-        $this->sql_insert_second_value = "INSERT INTO Persons VALUES (900341)";
+        $this->sql_insert_first_value = "INSERT INTO segment_metadata (id_segment, meta_key, meta_value) VALUES (" . self::PROBE_SEGMENT_ID . ", 'tx_probe_1', '475144')";
+        $this->sql_insert_second_value = "INSERT INTO segment_metadata (id_segment, meta_key, meta_value) VALUES (" . self::PROBE_SEGMENT_ID . ", 'tx_probe_2', '900341')";
 
-        $this->raw_client_instance->query($this->sql_create);
+        $this->raw_client_instance->query($this->sql_cleanup);
     }
 
     public function tearDown(): void
     {
-        $this->raw_client_instance->query($this->sql_drop);
+        $this->raw_client_instance->query($this->sql_cleanup);
         parent::tearDown();
     }
 

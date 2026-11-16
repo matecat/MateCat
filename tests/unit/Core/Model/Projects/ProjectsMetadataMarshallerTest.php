@@ -26,7 +26,7 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
     #[Test]
     public function enumHasExactlyThirtyCases(): void
     {
-        $this->assertCount(32, ProjectsMetadataMarshaller::cases());
+        $this->assertCount(36, ProjectsMetadataMarshaller::cases());
     }
 
     #[Test]
@@ -45,6 +45,10 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
             'ICU_ENABLED'                   => [ProjectsMetadataMarshaller::ICU_ENABLED, 'icu_enabled'],
             'ENABLE_MT_ANALYSIS'            => [ProjectsMetadataMarshaller::ENABLE_MT_ANALYSIS, 'enable_mt_analysis'],
             'PRE_TRANSLATE_101'             => [ProjectsMetadataMarshaller::PRE_TRANSLATE_101, 'pretranslate_101'],
+            'PRE_TRANSLATE_101_LOCK'        => [ProjectsMetadataMarshaller::PRE_TRANSLATE_101_LOCK, 'pretranslate_101_lock'],
+            'PRE_TRANSLATE_100_LOCK'        => [ProjectsMetadataMarshaller::PRE_TRANSLATE_100_LOCK, 'pretranslate_100_lock'],
+            'PRE_TRANSLATE_101_STATUS'      => [ProjectsMetadataMarshaller::PRE_TRANSLATE_101_STATUS, 'pretranslate_101_status'],
+            'PRE_TRANSLATE_100_STATUS'      => [ProjectsMetadataMarshaller::PRE_TRANSLATE_100_STATUS, 'pretranslate_100_status'],
             'PROJECT_COMPLETION'            => [ProjectsMetadataMarshaller::PROJECT_COMPLETION, 'project_completion'],
             'MMT_ACTIVATE_CONTEXT_ANALYZER' => [ProjectsMetadataMarshaller::MMT_ACTIVATE_CONTEXT_ANALYZER, 'mmt_activate_context_analyzer'],
             'MMT_IGNORE_GLOSSARY_CASE'      => [ProjectsMetadataMarshaller::MMT_IGNORE_GLOSSARY_CASE, 'mmt_ignore_glossary_case'],
@@ -114,6 +118,8 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
             'mt_evaluation',
             'enable_mt_analysis',
             'pretranslate_101',
+            'pretranslate_101_lock',
+            'pretranslate_100_lock',
             'project_completion',
             'mmt_activate_context_analyzer',
             'mmt_ignore_glossary_case',
@@ -146,6 +152,8 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
             'mt_evaluation',
             'enable_mt_analysis',
             'pretranslate_101',
+            'pretranslate_101_lock',
+            'pretranslate_100_lock',
             'project_completion',
             'mmt_activate_context_analyzer',
             'mmt_ignore_glossary_case',
@@ -210,7 +218,6 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
             'analysis_ignore_101'           => true,
             'confirm_best_quality_mt'       => false,
             'lock_best_quality_mt'          => true,
-            'best_quality_mt_analysis_status' => 'TRANSLATED',
             'qe_model_version'              => 2,
         ];
         $json   = json_encode($params);
@@ -221,7 +228,6 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
         $this->assertTrue($result->analysis_ignore_101);
         $this->assertFalse($result->confirm_best_quality_mt);
         $this->assertTrue($result->lock_best_quality_mt);
-        $this->assertSame('TRANSLATED', $result->best_quality_mt_analysis_status);
         $this->assertSame(2, $result->qe_model_version);
     }
 
@@ -236,7 +242,6 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
         $this->assertFalse($result->analysis_ignore_101);
         $this->assertTrue($result->confirm_best_quality_mt);
         $this->assertFalse($result->lock_best_quality_mt);
-        $this->assertSame('APPROVED', $result->best_quality_mt_analysis_status);
         $this->assertSame(3, $result->qe_model_version);
     }
 
@@ -358,7 +363,7 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
     }
 
     // =========================================================================
-    // unMarshall -- string-cast branch (9 keys)
+    // unMarshall -- string-cast branch (11 keys)
     // =========================================================================
 
     #[Test]
@@ -424,6 +429,8 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
             'deepl_formality'   => ['deepl_formality'],
             'deepl_id_glossary' => ['deepl_id_glossary'],
             'deepl_engine_type' => ['deepl_engine_type'],
+            'pretranslate_101_status' => ['pretranslate_101_status'],
+            'pretranslate_100_status' => ['pretranslate_100_status'],
             'segmentation_rule' => ['segmentation_rule'],
             'context-url'       => ['context-url'],
         ];

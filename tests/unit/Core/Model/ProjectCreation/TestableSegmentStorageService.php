@@ -19,9 +19,6 @@ class TestableSegmentStorageService extends SegmentStorageService
     /** @var SegmentMetadataStruct[] Captured persist calls */
     private array $persistedSegmentMetadata = [];
 
-    /** @var int[] Project id passed with each captured persist call */
-    private array $persistedSegmentMetadataProjectIds = [];
-
     /** @var array<array{id_segment: int, map: array}> Captured original data inserts */
     private array $insertedOriginalDataRecords = [];
 
@@ -40,10 +37,9 @@ class TestableSegmentStorageService extends SegmentStorageService
     /**
      * Override to capture calls instead of hitting the DB.
      */
-    protected function persistSegmentMetadata(SegmentMetadataStruct $metadataStruct, int $id_project): void
+    protected function persistSegmentMetadata(SegmentMetadataStruct $metadataStruct): void
     {
         $this->persistedSegmentMetadata[] = $metadataStruct;
-        $this->persistedSegmentMetadataProjectIds[] = $id_project;
     }
 
     /**
@@ -53,15 +49,6 @@ class TestableSegmentStorageService extends SegmentStorageService
     public function getPersistedSegmentMetadata(): array
     {
         return $this->persistedSegmentMetadata;
-    }
-
-    /**
-     * Get the project id passed with each captured segment metadata persist call.
-     * @return int[]
-     */
-    public function getPersistedSegmentMetadataProjectIds(): array
-    {
-        return $this->persistedSegmentMetadataProjectIds;
     }
 
     /**
@@ -84,9 +71,9 @@ class TestableSegmentStorageService extends SegmentStorageService
     /**
      * Public wrapper to invoke the protected saveSegmentMetadata().
      */
-    public function callSaveSegmentMetadata(int $id_segment, ?SegmentMetadataStruct $metadataStruct = null, int $id_project = 1): void
+    public function callSaveSegmentMetadata(int $id_segment, ?SegmentMetadataStruct $metadataStruct = null): void
     {
-        $this->saveSegmentMetadata($id_segment, $id_project, $metadataStruct);
+        $this->saveSegmentMetadata($id_segment, $metadataStruct);
     }
 
     /**

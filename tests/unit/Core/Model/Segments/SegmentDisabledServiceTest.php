@@ -20,7 +20,6 @@ class SegmentDisabledServiceTest extends AbstractTest
 {
     private const int TEST_SEGMENT_ID   = 999888;
     private const int TEST_SEGMENT_ID_2 = 999887;
-    private const int TEST_PROJECT_ID   = 999777;
 
     private Database $database;
     private SegmentDisabledService $service;
@@ -125,7 +124,7 @@ class SegmentDisabledServiceTest extends AbstractTest
     #[Test]
     public function disableCreatesTranslationDisabledRow(): void
     {
-        $this->service->disable(self::TEST_SEGMENT_ID, self::TEST_PROJECT_ID);
+        $this->service->disable(self::TEST_SEGMENT_ID);
 
         $rows = $this->fetchDisabledRows(self::TEST_SEGMENT_ID);
         $this->assertCount(1, $rows);
@@ -142,7 +141,7 @@ class SegmentDisabledServiceTest extends AbstractTest
         // on (id_segment, meta_key): a plain INSERT would crash here on the duplicate key.
         $this->insertDisabledFlag(self::TEST_SEGMENT_ID);
 
-        $this->service->disable(self::TEST_SEGMENT_ID, self::TEST_PROJECT_ID);
+        $this->service->disable(self::TEST_SEGMENT_ID);
 
         $this->assertCount(1, $this->fetchDisabledRows(self::TEST_SEGMENT_ID));
         $this->assertTrue($this->service->isDisabled(self::TEST_SEGMENT_ID));
@@ -151,7 +150,7 @@ class SegmentDisabledServiceTest extends AbstractTest
     #[Test]
     public function disableDoesNotAffectOtherSegments(): void
     {
-        $this->service->disable(self::TEST_SEGMENT_ID, self::TEST_PROJECT_ID);
+        $this->service->disable(self::TEST_SEGMENT_ID);
 
         $this->assertCount(0, $this->fetchDisabledRows(self::TEST_SEGMENT_ID_2));
     }
@@ -163,7 +162,7 @@ class SegmentDisabledServiceTest extends AbstractTest
     {
         $this->insertDisabledFlag(self::TEST_SEGMENT_ID);
 
-        $this->service->enable(self::TEST_SEGMENT_ID, self::TEST_PROJECT_ID);
+        $this->service->enable(self::TEST_SEGMENT_ID);
 
         $this->assertCount(0, $this->fetchDisabledRows(self::TEST_SEGMENT_ID));
     }
@@ -171,7 +170,7 @@ class SegmentDisabledServiceTest extends AbstractTest
     #[Test]
     public function enableOnNonDisabledSegmentDoesNotThrow(): void
     {
-        $this->service->enable(self::TEST_SEGMENT_ID, self::TEST_PROJECT_ID);
+        $this->service->enable(self::TEST_SEGMENT_ID);
         $this->assertFalse($this->service->isDisabled(self::TEST_SEGMENT_ID));
     }
 
@@ -180,7 +179,7 @@ class SegmentDisabledServiceTest extends AbstractTest
     #[Test]
     public function disableThenIsDisabledReturnsTrue(): void
     {
-        $this->service->disable(self::TEST_SEGMENT_ID, self::TEST_PROJECT_ID);
+        $this->service->disable(self::TEST_SEGMENT_ID);
 
         $this->assertTrue($this->service->isDisabled(self::TEST_SEGMENT_ID));
     }
@@ -188,8 +187,8 @@ class SegmentDisabledServiceTest extends AbstractTest
     #[Test]
     public function disableThenEnableThenIsDisabledReturnsFalse(): void
     {
-        $this->service->disable(self::TEST_SEGMENT_ID, self::TEST_PROJECT_ID);
-        $this->service->enable(self::TEST_SEGMENT_ID, self::TEST_PROJECT_ID);
+        $this->service->disable(self::TEST_SEGMENT_ID);
+        $this->service->enable(self::TEST_SEGMENT_ID);
 
         $this->assertFalse($this->service->isDisabled(self::TEST_SEGMENT_ID));
     }
@@ -197,33 +196,32 @@ class SegmentDisabledServiceTest extends AbstractTest
     #[Test]
     public function enableDoesNotAffectOtherDisabledSegments(): void
     {
-        $this->service->disable(self::TEST_SEGMENT_ID, self::TEST_PROJECT_ID);
-        $this->service->disable(self::TEST_SEGMENT_ID_2, self::TEST_PROJECT_ID);
+        $this->service->disable(self::TEST_SEGMENT_ID);
+        $this->service->disable(self::TEST_SEGMENT_ID_2);
 
-        $this->service->enable(self::TEST_SEGMENT_ID, self::TEST_PROJECT_ID);
+        $this->service->enable(self::TEST_SEGMENT_ID);
 
         $this->assertFalse($this->service->isDisabled(self::TEST_SEGMENT_ID));
         $this->assertTrue($this->service->isDisabled(self::TEST_SEGMENT_ID_2));
     }
 
-    // --- getAllInRange cache invalidation (regression) ---
+    // --- getAllInRange reads the current state (regression) ---
 
     #[Test]
     public function disableBustsStaleGetAllInRangeCacheSoFreshCallReflectsDisabledState(): void
     {
         $dao = new SegmentMetadataDao($this->database);
-        $ttl = 60;
 
-        // Warm getAllInRange's cache for the range while the segment is not yet disabled,
-        // simulating an earlier get-segments page load / editor scroll.
-        $before = $dao->getAllInRange(self::TEST_PROJECT_ID, self::TEST_SEGMENT_ID, self::TEST_SEGMENT_ID, $ttl);
+        // Read the range while the segment is not yet disabled, as an earlier get-segments
+        // page load or editor scroll would.
+        $before = $dao->getAllInRange(self::TEST_SEGMENT_ID, self::TEST_SEGMENT_ID);
         $this->assertArrayNotHasKey(self::TEST_SEGMENT_ID, $before);
 
-        $this->service->disable(self::TEST_SEGMENT_ID, self::TEST_PROJECT_ID);
+        $this->service->disable(self::TEST_SEGMENT_ID);
 
-        // A fresh getAllInRange call, as get-segments would make on refresh, must see the
-        // disabled flag instead of the stale pre-disable cached (empty) result.
-        $after = $dao->getAllInRange(self::TEST_PROJECT_ID, self::TEST_SEGMENT_ID, self::TEST_SEGMENT_ID, $ttl);
+        // A later getAllInRange call, as get-segments would make on refresh, must see the
+        // disabled flag.
+        $after = $dao->getAllInRange(self::TEST_SEGMENT_ID, self::TEST_SEGMENT_ID);
 
         $this->assertArrayHasKey(self::TEST_SEGMENT_ID, $after);
         $this->assertSame(
@@ -236,20 +234,19 @@ class SegmentDisabledServiceTest extends AbstractTest
     public function enableBustsStaleGetAllInRangeCacheSoFreshCallNoLongerShowsDisabled(): void
     {
         $dao = new SegmentMetadataDao($this->database);
-        $ttl = 60;
 
         $this->insertDisabledFlag(self::TEST_SEGMENT_ID);
 
-        // Warm getAllInRange's cache while the segment IS disabled.
-        $before = $dao->getAllInRange(self::TEST_PROJECT_ID, self::TEST_SEGMENT_ID, self::TEST_SEGMENT_ID, $ttl);
+        // Read the range while the segment IS disabled.
+        $before = $dao->getAllInRange(self::TEST_SEGMENT_ID, self::TEST_SEGMENT_ID);
         $this->assertSame(
             '1',
             $before[self::TEST_SEGMENT_ID]->find(SegmentMetadataMarshaller::TRANSLATION_DISABLED)
         );
 
-        $this->service->enable(self::TEST_SEGMENT_ID, self::TEST_PROJECT_ID);
+        $this->service->enable(self::TEST_SEGMENT_ID);
 
-        $after = $dao->getAllInRange(self::TEST_PROJECT_ID, self::TEST_SEGMENT_ID, self::TEST_SEGMENT_ID, $ttl);
+        $after = $dao->getAllInRange(self::TEST_SEGMENT_ID, self::TEST_SEGMENT_ID);
         $this->assertArrayNotHasKey(self::TEST_SEGMENT_ID, $after);
     }
 }

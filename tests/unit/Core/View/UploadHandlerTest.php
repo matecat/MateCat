@@ -3,10 +3,12 @@
 namespace Matecat\Core\View;
 
 use Controller\Exceptions\RenderTerminatedException;
+use LogicException;
 use Matecat\TestHelpers\AbstractTest;
 use Model\Conversion\ZipArchiveHandler;
 use Model\DataAccess\IDatabase;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
 use ReflectionException;
@@ -837,6 +839,46 @@ class UploadHandlerTest extends AbstractTest
         $this->assertSame(3, $decoded['size']);
     }
 
+    #[Test]
+    public function get_rejects_a_token_that_leaves_the_upload_repository(): void
+    {
+        // A directory the traversal could reach, holding a file that must never be listed.
+        $outside = '/tmp/opencode/upload_test_outside/';
+        if (!is_dir($outside)) {
+            mkdir($outside, 0777, true);
+        }
+        file_put_contents($outside . 'secret.ini', 'x');
+
+        $this->handler->initForTest([
+            'upload_token' => '../upload_test_outside',
+            'upload_dir' => $outside,
+        ]);
+
+        try {
+            [$output] = $this->callAndCapture(function (): void {
+                $this->expectException(\Exception::class);
+                $this->handler->get();
+            });
+        } finally {
+            unlink($outside . 'secret.ini');
+            rmdir($outside);
+        }
+
+        $this->assertStringNotContainsString('secret.ini', (string)$output);
+    }
+
+    #[Test]
+    public function get_rejects_a_malformed_token(): void
+    {
+        file_put_contents('/tmp/opencode/upload_test/one.xliff', 'a');
+        $this->handler->initForTest(['upload_token' => 'A1B2C3D4-E5F6-7890-ABCD-EF1234567890']);
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Invalid upload token.');
+
+        $this->handler->get();
+    }
+
     // ─── delete ───
 
     /**
@@ -971,9 +1013,11 @@ class UploadHandlerTest extends AbstractTest
     // ─── post ───
 
     #[Test]
-    public function post_reports_an_invalid_upload_token_cookie(): void
+    public function post_reports_an_invalid_upload_token(): void
     {
-        $_COOKIE['upload_token'] = 'not-a-uuid';
+        // The token the constructor read is the one checked, not a cookie set afterwards.
+        $this->handler->initForTest(['upload_token' => 'not-a-uuid']);
+        $_COOKIE['upload_token'] = self::VALID_TOKEN;
 
         [, $flushed] = $this->callAndCapture(fn() => $this->handler->post());
 
@@ -1105,7 +1149,8 @@ class UploadHandlerTest extends AbstractTest
     /**
      * The real constructor, which every other test skips: it derives the whole option map from the
      * upload-token cookie and the request URI. Nothing here touches the filesystem —
-     * Utils::uploadDirFromSessionCookie() only concatenates and Monolog opens its stream lazily.
+     * Utils::uploadDirFromSessionCookie() only validates and concatenates, and Monolog opens its
+     * stream lazily.
      */
     #[Test]
     public function constructor_derives_the_option_map_from_the_cookie_and_the_request_uri(): void
@@ -1131,6 +1176,91 @@ class UploadHandlerTest extends AbstractTest
         $this->assertSame(1, $options['min_file_size']);
         $this->assertSame(AppConfig::$MAX_NUM_FILES, $options['max_number_of_files']);
         $this->assertTrue($options['discard_aborted_uploads']);
+    }
+
+    #[Test]
+    public function constructor_builds_no_upload_dir_from_an_invalid_token(): void
+    {
+        $_COOKIE['upload_token'] = '../../inc';
+        $_SERVER['REQUEST_URI'] = '/fileupload/';
+
+        $handler = new UploadHandler($this->createStub(IDatabase::class));
+        $options = (new ReflectionProperty(UploadHandler::class, 'options'))->getValue($handler);
+
+        $this->assertSame('../../inc', $options['upload_token']);
+        $this->assertNull($options['upload_dir']);
+    }
+
+    #[Test]
+    public function constructor_tolerates_a_missing_cookie(): void
+    {
+        unset($_COOKIE['upload_token']);
+        $_SERVER['REQUEST_URI'] = '/fileupload/';
+
+        $handler = new UploadHandler($this->createStub(IDatabase::class));
+        $options = (new ReflectionProperty(UploadHandler::class, 'options'))->getValue($handler);
+
+        $this->assertSame('', $options['upload_token']);
+        $this->assertNull($options['upload_dir']);
+    }
+
+    /**
+     * A request without the cookie is refused like any other invalid token, without reading the
+     * missing key a second time.
+     */
+    #[Test]
+    public function post_refuses_a_missing_cookie_without_a_warning(): void
+    {
+        unset($_COOKIE['upload_token']);
+        $_SERVER['REQUEST_URI'] = '/fileupload/';
+
+        $handler = new UploadHandler($this->createStub(IDatabase::class));
+
+        $warnings = [];
+        set_error_handler(static function (int $errno, string $errstr) use (&$warnings): bool {
+            $warnings[] = $errstr;
+
+            return true;
+        }, E_WARNING);
+        ob_start();
+        $terminated = false;
+        try {
+            $handler->post();
+        } catch (RenderTerminatedException) {
+            $terminated = true;
+        } finally {
+            $output = ob_get_clean();
+            restore_error_handler();
+        }
+
+        $this->assertTrue($terminated, 'post() must flush and stop without a token');
+        $this->assertStringContainsString('Invalid upload token.', $output);
+        $this->assertSame([], preg_grep('/upload_token/', $warnings));
+    }
+
+    /**
+     * The entry points reject an invalid token before any of these runs. If one ever does not,
+     * the helper must fail instead of resolving a file name against the working directory.
+     */
+    #[Test]
+    #[DataProvider('filesystemHelperProvider')]
+    public function filesystem_helpers_refuse_to_run_without_an_upload_dir(string $method, array $args): void
+    {
+        $this->handler->initForTest(['upload_dir' => null]);
+
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('No upload directory without a valid upload token.');
+
+        $this->invokePrivate($method, $args);
+    }
+
+    public static function filesystemHelperProvider(): array
+    {
+        return [
+            'listing' => ['get_file_objects', []],
+            'single file' => ['get_file_object', ['one.xliff']],
+            'upload name' => ['trim_file_name', ['one.xliff']],
+        ];
     }
 
     /**

@@ -167,6 +167,7 @@ jest.mock('../utils/offlineUtils', () => ({
 jest.mock('../utils/lxq.main', () => ({
   enabled: jest.fn(() => false),
   init: jest.fn(),
+  retrieveSupportedLocales: jest.fn(),
 }))
 jest.mock('../utils/speech2text', () => ({
   __esModule: true,
@@ -632,16 +633,28 @@ describe('CatTool', () => {
   })
 
   describe('metadata dependent init', () => {
-    test('initializes Speech2Text and LXQ when enabled', async () => {
+    test('initializes Speech2Text and fetches lexiQA supported locales when licensed', async () => {
       Speech2Text.enabled.mockReturnValueOnce(true)
-      LXQ.enabled.mockReturnValueOnce(true)
-      await act(async () =>
-        renderCatTool({
-          userInfo: {user: {uid: 1}, metadata: {some: 'meta'}},
-        }),
-      )
+      config.lxq_license = 'license-key'
+      const metadata = {some: 'meta'}
+      try {
+        await act(async () =>
+          renderCatTool({
+            userInfo: {user: {uid: 1}, metadata},
+          }),
+        )
+      } finally {
+        delete config.lxq_license
+      }
       expect(Speech2Text.init).toHaveBeenCalled()
-      expect(LXQ.init).toHaveBeenCalled()
+      expect(LXQ.retrieveSupportedLocales).toHaveBeenCalledWith(metadata)
+    })
+
+    test('does not fetch lexiQA supported locales without a license', () => {
+      renderCatTool({
+        userInfo: {user: {uid: 1}, metadata: {some: 'meta', lexiqa: 1}},
+      })
+      expect(LXQ.retrieveSupportedLocales).not.toHaveBeenCalled()
     })
   })
 
@@ -832,6 +845,56 @@ describe('CatTool', () => {
       })
       openSpy.mockRestore()
       jest.useRealTimers()
+    })
+  })
+
+  describe('context preview auto-open', () => {
+    const toggleHotkey = () => useHotkeys.mock.calls[1][1]()
+    const isCollapsed = () => screen.queryByTitle('Close preview') === null
+
+    const openSegment = async (sid, contextFields) => {
+      SegmentStore.getCurrentSegment.mockReturnValue({sid})
+      SegmentStore.getSegmentById.mockReturnValueOnce({toJS: () => ({sid})})
+      extractSegmentContextFields.mockReturnValueOnce(contextFields)
+      await act(async () => {
+        SegmentStore.emit(SegmentConstants.RENDER_SEGMENTS)
+      })
+    }
+
+    afterEach(() => {
+      SegmentStore.getCurrentSegment.mockReturnValue(null)
+    })
+
+    test('opens the panel on the first segment that has a preview', async () => {
+      renderCatTool()
+      expect(isCollapsed()).toBe(true)
+      await openSegment(8, {context_url: 'http://x'})
+      expect(isCollapsed()).toBe(false)
+    })
+
+    test('waits for a segment with a preview before opening', async () => {
+      renderCatTool()
+      await openSegment(5, {})
+      expect(isCollapsed()).toBe(true)
+      await openSegment(6, {screenshot: 'http://x/shot.png'})
+      expect(isCollapsed()).toBe(false)
+    })
+
+    test('stays closed on later segments once the user closes it', async () => {
+      renderCatTool()
+      await openSegment(8, {context_url: 'http://x'})
+      act(() => toggleHotkey())
+      expect(isCollapsed()).toBe(true)
+      await openSegment(9, {context_url: 'http://y'})
+      expect(isCollapsed()).toBe(true)
+    })
+
+    test('does not open once the user has toggled the panel by hand', async () => {
+      renderCatTool()
+      act(() => toggleHotkey())
+      act(() => toggleHotkey())
+      await openSegment(8, {context_url: 'http://x'})
+      expect(isCollapsed()).toBe(true)
     })
   })
 

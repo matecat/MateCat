@@ -119,7 +119,7 @@ export const AddCategory = () => {
           disabled: !name || typeof error === 'string',
           children: (
             <>
-              <Checkmark size={14} />
+              <Checkmark size={18} />
               Confirm
             </>
           ),
@@ -139,6 +139,7 @@ export const AddCategory = () => {
           onKeyUp={confirmWithKeyboard}
         >
           <input
+            type="text"
             className={`quality-framework-input input${error ? ' quality-framework-input-error' : ''}`}
             placeholder="Name"
             value={name}
@@ -155,10 +156,11 @@ export const AddCategory = () => {
               size={BUTTON_SIZE.SMALL}
               onClick={() => setIsVisibleDescriptionInput(true)}
             >
-              <IconAdd size={20} /> Add description
+              <IconAdd size={22} /> Add description
             </Button>
           ) : (
             <input
+              type="text"
               className="quality-framework-input input"
               placeholder="Description"
               value={description}

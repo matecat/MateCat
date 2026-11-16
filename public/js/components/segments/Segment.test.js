@@ -85,7 +85,7 @@ jest.mock('../../utils/segmentUtils', () => ({
     isReadonlySegment: (...args) => mockIsReadonlySegment(...args),
     isSecondPassLockedSegment: jest.fn(() => false),
     isUnlockedSegment: jest.fn(() => false),
-    isIceSegment: jest.fn(() => false),
+    isLockedSegment: jest.fn(() => false),
   },
 }))
 
@@ -192,7 +192,7 @@ function makeSegment(overrides = {}) {
     opened: false,
     unlocked: false,
     readonly: false,
-    ice_locked: false,
+    locked: false,
     tagged: false,
     ...overrides,
   }

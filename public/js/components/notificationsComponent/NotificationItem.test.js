@@ -78,6 +78,54 @@ describe('NotificationItem', () => {
     expect(closeCallback).toHaveBeenCalledTimes(1)
   })
 
+  test('with allowHtml renders the HTML of the title and text, keeping only safe tags', () => {
+    renderItem({
+      allowHtml: true,
+      title: 'Welcome to the <b>new</b> Matecat',
+      text: 'Write to <a href="mailto:info@matecat.com">us</a><img src=x onerror="window.hacked = true">',
+    })
+
+    expect(screen.getByText('new').tagName).toBe('B')
+    expect(screen.getByRole('link', {name: 'us'})).toHaveAttribute(
+      'href',
+      'mailto:info@matecat.com',
+    )
+    expect(screen.queryByRole('img')).not.toBeInTheDocument()
+    expect(window.hacked).toBeUndefined()
+  })
+
+  test('without allowHtml shows markup as plain text', () => {
+    renderItem({text: 'Team <b>Alpha</b>'})
+
+    expect(screen.getByText('Team <b>Alpha</b>')).toBeInTheDocument()
+  })
+
+  test('tells closeCallback the user closed it with the X', async () => {
+    jest.useFakeTimers()
+    const user = userEvent.setup({advanceTimers: jest.advanceTimersByTime})
+    const closeCallback = jest.fn()
+    renderItem({closeCallback, autoDismiss: false})
+
+    await user.click(screen.getByRole('button'))
+
+    expect(closeCallback).toHaveBeenCalledWith(true)
+  })
+
+  test('tells closeCallback the notification timed out', () => {
+    jest.useFakeTimers()
+    const closeCallback = jest.fn()
+    renderItem({closeCallback, autoDismiss: true, timer: 700})
+
+    act(() => {
+      jest.advanceTimersByTime(50)
+    })
+    act(() => {
+      jest.advanceTimersByTime(700)
+    })
+
+    expect(closeCallback).toHaveBeenCalledWith(false)
+  })
+
   test('calls openCallback on mount', () => {
     const openCallback = jest.fn()
     renderItem({openCallback})

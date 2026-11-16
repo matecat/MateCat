@@ -17,6 +17,7 @@ use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\TMSService\TMSServiceDao;
 use Model\Users\MetadataDao;
 use Model\Users\UserStruct;
+use PDOException;
 use ReflectionException;
 use RuntimeException;
 use SplTempFileObject;
@@ -120,7 +121,6 @@ class TMSService
         try {
             $newUser = $this->mymemory_engine->createMyMemoryKey();
         } catch (Exception $e) {
-            //            Log::doJsonLog( $e->getMessage() );
             throw new Exception($e->getMessage(), -7);
         }
 
@@ -140,10 +140,18 @@ class TMSService
 
             $this->logger->debug($file);
 
+            // The default key is the TM everyone shares: its TMX stays on MyMemory and reaches no
+            // adaptive engine. The engines are read before the import because they decide mt_import,
+            // checked in this order: default key → false; any adaptive engine (Lara, ModernMT) →
+            // false, Matecat imports on them itself; no engine → true, MyMemory imports into Lara.
+            $isSharedTmKey = $file->getTmKey() === AppConfig::$DEFAULT_TM_KEY;
+            $userAdaptiveEngines = $isSharedTmKey ? [] : $this->getUserAdaptiveMTEngines($user);
+
             $importStatus = $this->mymemory_engine->importMemory(
                 $file->getFilePath(),
                 $file->getTmKey(),
-                $user
+                $user,
+                !$isSharedTmKey && $userAdaptiveEngines === []
             );
 
             //check for errors during the import
@@ -162,7 +170,6 @@ class TMSService
             $file->setUuid($importStatus->id);
 
             $warnings = [];
-            $userAdaptiveEngines = $this->getUserAdaptiveMTEngines($user);
             foreach ($userAdaptiveEngines as $engine) {
                 try {
                     $engine->importMemory($file->getFilePath(), $file->getTmKey(), $user);
@@ -184,7 +191,6 @@ class TMSService
     /**
      * @param UserStruct $user
      * @return EngineInterface[]
-     * @throws \Psr\Log\InvalidArgumentException
      */
     protected function getUserAdaptiveMTEngines(UserStruct $user): array
     {
@@ -334,7 +340,6 @@ class TMSService
      * @param string $userName
      *
      * @return ExportResponse
-     * @throws \Psr\Log\InvalidArgumentException
      * @throws RuntimeException
      */
     public function glossaryExport(string $key, string $keyName, string $userEmail, string $userName): ExportResponse
@@ -421,7 +426,7 @@ class TMSService
      *
      * @throws ReflectionException
      * @throws Exception
-     * @throws \PDOException
+     * @throws PDOException
      */
     public function exportJobAsTMX(int $jid, string $jPassword, string $sourceLang, string $targetLang, ?int $uid = null): SplTempFileObject
     {
@@ -593,7 +598,7 @@ class TMSService
      * @return SplTempFileObject
      *
      * @throws RuntimeException
-     * @throws \PDOException
+     * @throws PDOException
      */
     public function exportJobAsCSV(int $jid, string $jPassword, string $sourceLang, string $targetLang): SplTempFileObject
     {

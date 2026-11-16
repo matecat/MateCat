@@ -276,8 +276,7 @@ class ContextUrlController extends KleinController
         $this->segmentMetadataDao->upsert(
             $idSegment,
             SegmentMetadataMarshaller::CONTEXT_URL->value,
-            $marshalled,
-            (int)$project->id
+            $marshalled
         );
 
         $this->response->json([

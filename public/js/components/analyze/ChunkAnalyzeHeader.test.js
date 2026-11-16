@@ -30,6 +30,26 @@ const buildTotal = (overrides = {}) => {
 const jobInfo = {files: [{}, {}], total_raw: 50, total_equivalent: 30}
 
 describe('ChunkAnalyzeHeader - STANDARD workflow', () => {
+  test('says File for a single file and Files for more', () => {
+    const props = {
+      total: buildTotal(),
+      index: 1,
+      showFilesFn: jest.fn(),
+      showFiles: false,
+      chunksSize: 1,
+      rates: {},
+      workflowType: ANALYSIS_WORKFLOW_TYPES.STANDARD,
+    }
+    const {unmount} = render(
+      <ChunkAnalyzeHeader {...props} jobInfo={{...jobInfo, files: [{}]}} />,
+    )
+    expect(screen.getByText('File (1)')).toBeInTheDocument()
+    unmount()
+
+    render(<ChunkAnalyzeHeader {...props} jobInfo={jobInfo} />)
+    expect(screen.getByText('Files (2)')).toBeInTheDocument()
+  })
+
   test('shows chunk index when chunksSize > 1 and toggles files on click', async () => {
     const showFilesFn = jest.fn()
     render(
@@ -44,10 +64,14 @@ describe('ChunkAnalyzeHeader - STANDARD workflow', () => {
         workflowType={ANALYSIS_WORKFLOW_TYPES.STANDARD}
       />,
     )
-    expect(screen.getByText('Chunk 2')).toBeInTheDocument()
-    expect(screen.getByText('File (2)')).toBeInTheDocument()
+    expect(
+      screen
+        .getAllByText('2')
+        .some((el) => el.classList.contains('chunk-analyze-info-index')),
+    ).toBe(true)
+    expect(screen.getByText('Files (2)')).toBeInTheDocument()
 
-    await userEvent.click(screen.getByText('File (2)'))
+    await userEvent.click(screen.getByText('Files (2)'))
     expect(showFilesFn).toHaveBeenCalledTimes(1)
   })
 
@@ -154,7 +178,7 @@ describe('ChunkAnalyzeHeader - MTQE workflow', () => {
       />,
     )
     expect(container.querySelector('.chunk-analyze-info.mtqe')).not.toBeNull()
-    expect(screen.getByText('File (2)')).toBeInTheDocument()
+    expect(screen.getByText('Files (2)')).toBeInTheDocument()
   })
 })
 

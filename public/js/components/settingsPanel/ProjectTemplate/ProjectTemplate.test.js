@@ -136,7 +136,10 @@ test('Create, update and delete template', async () => {
           },
           tm: [],
           get_public_matches: true,
-          pretranslate_100: true,
+          pretranslate: {
+            match_101: {enabled: true, status: 'APPROVED', lock: true},
+            match_100: {enabled: true, status: 'TRANSLATED', lock: false},
+          },
         })
       }),
       http.put(`${config.basepath}api/v3/project-template/:id`, () => {
@@ -155,7 +158,10 @@ test('Create, update and delete template', async () => {
           },
           tm: [],
           get_public_matches: true,
-          pretranslate_100: false,
+          pretranslate: {
+            match_101: {enabled: true, status: 'APPROVED', lock: true},
+            match_100: {enabled: false, status: 'TRANSLATED', lock: false},
+          },
         })
       }),
       http.delete(`${config.basepath}api/v3/project-template/:id`, () => {
@@ -188,7 +194,10 @@ test('Create, update and delete template', async () => {
   act(() => {
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,
-      pretranslate100: true,
+      pretranslate: {
+        ...prevTemplate.pretranslate,
+        match_100: {...prevTemplate.pretranslate.match_100, enabled: true},
+      },
     }))
   })
 
@@ -236,7 +245,10 @@ test('Create, update and delete template', async () => {
   act(() => {
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,
-      pretranslate100: false,
+      pretranslate: {
+        ...prevTemplate.pretranslate,
+        match_100: {...prevTemplate.pretranslate.match_100, enabled: false},
+      },
     }))
   })
 

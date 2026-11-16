@@ -12,6 +12,7 @@ import {
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../../common/Button/Button'
+import {Input} from '../../common/Input/Input'
 
 const TermForm = () => {
   const {
@@ -147,9 +148,9 @@ const TermForm = () => {
     <div className="glossary_add-container">
       <div className="glossary-form-line">
         <div className="input-with-label__wrapper">
-          <label>Definition</label>
-          <input
+          <Input
             name="glossary-term-definition"
+            label="Definition"
             disabled={isLoading}
             value={termForm[DEFINITION]}
             onChange={(event) => updateTermForm(DEFINITION, event.target.value)}
@@ -180,14 +181,14 @@ const TermForm = () => {
             config.isSourceRTL ? ' rtl' : ''
           }`}
         >
-          <label>Original term*</label>
-          <input
+          <Input
             className={`${
               highlightMandatoryOnSubmit.originalTerm
                 ? 'highlight_mandatory'
                 : ''
             } glossary-term-original`}
             name="glossary-term-original"
+            label="Original term*"
             value={termForm[ORIGINAL_TERM]}
             disabled={isLoading}
             onChange={(event) =>
@@ -200,14 +201,14 @@ const TermForm = () => {
             config.isTargetRTL ? ' rtl' : ''
           }`}
         >
-          <label>Translated term*</label>
-          <input
+          <Input
             className={`${
               highlightMandatoryOnSubmit.translatedTerm
                 ? 'highlight_mandatory'
                 : ''
             } glossary-term-translated`}
             name="glossary-term-translated"
+            label="Translated term*"
             value={termForm[TRANSLATED_TERM]}
             disabled={isLoading}
             onChange={(event) =>
@@ -224,7 +225,7 @@ const TermForm = () => {
                 config.isTargetRTL ? ' rtl' : ''
               }`}
             >
-              <label>Notes</label>
+              <span>Notes</span>
               <textarea
                 className="input-large"
                 disabled={isLoading}
@@ -240,7 +241,7 @@ const TermForm = () => {
                 config.isSourceRTL ? ' rtl' : ''
               }`}
             >
-              <label>Example of use</label>
+              <span>Example of use</span>
               <textarea
                 disabled={isLoading}
                 className="input-large"
@@ -258,7 +259,7 @@ const TermForm = () => {
                 config.isTargetRTL ? ' rtl' : ''
               }`}
             >
-              <label>Notes</label>
+              <span>Notes</span>
               <textarea
                 className="input-large"
                 name="glossary-term-description-target"
@@ -274,7 +275,7 @@ const TermForm = () => {
                 config.isTargetRTL ? ' rtl' : ''
               }`}
             >
-              <label>Example of use</label>
+              <span>Example of use</span>
               <textarea
                 className="input-large"
                 name="glossary-term-example-target"

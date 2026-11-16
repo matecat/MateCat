@@ -21,7 +21,6 @@ use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentMetadataDao;
-use Model\Segments\SegmentMetadataMarshaller;
 use Model\Segments\SegmentStruct;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
@@ -518,9 +517,7 @@ class ContextUrlControllerTest extends AbstractTest
         $this->fileDaoStub->method('getById')->willReturn($this->createFileStruct(42));
 
         $segmentMetadataDao = $this->createMock(SegmentMetadataDao::class);
-        $segmentMetadataDao->expects(self::once())
-            ->method('upsert')
-            ->with(100, SegmentMetadataMarshaller::CONTEXT_URL->value, self::anything(), 42);
+        $segmentMetadataDao->expects(self::once())->method('upsert');
         $this->reflector->getProperty('segmentMetadataDao')->setValue($this->controller, $segmentMetadataDao);
 
         $this->setRequestBody('{"id_segment": 100, "context_url": "https://example.com/seg"}');

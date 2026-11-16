@@ -20,7 +20,7 @@ use Model\Segments\SegmentMetadataDao;
 use Model\Segments\SegmentMetadataStruct;
 use Model\Segments\SegmentOriginalDataDao;
 use Model\Segments\SegmentOriginalDataStruct;
-use Utils\Constants\XliffTranslationStatus;
+use Utils\Constants\TranslationStatus;
 use Utils\Logger\MatecatLogger;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
@@ -181,11 +181,7 @@ class SegmentStorageService
         $metadataCollection = $projectStructure->segments_meta_data[$fid][$position] ?? new SegmentMetadataCollection();
 
         foreach ($metadataCollection as $segmentMetadataStruct) {
-            $this->saveSegmentMetadata(
-                (int)$id_segment,
-                $projectStructure->id_project ?? throw new TypeError('Segment metadata cannot be stored before the project has an id.'),
-                $segmentMetadataStruct
-            );
+            $this->saveSegmentMetadata((int)$id_segment, $segmentMetadataStruct);
         }
 
         if (!isset($projectStructure->file_segments_count[$fid])) {
@@ -264,7 +260,7 @@ class SegmentStorageService
             foreach ($struct as $translationTuple) {
                 $rule = $translationTuple->rule;
 
-                if (XliffTranslationStatus::isFinalState($translationTuple->state)) {
+                if ($rule->asEditorStatus() === TranslationStatus::STATUS_APPROVED2) {
                     $createSecondPassReview = true;
                 }
 
@@ -276,7 +272,7 @@ class SegmentStorageService
                     'status'                 => $rule->asEditorStatus(),
                     'translation'            => $translationTuple->translationLayer0,
                     'suggestion'             => $translationTuple->suggestionLayer0,
-                    'locked'                 => 0,
+                    'locked'                 => (int)$rule->isLocked(),
                     'match_type'             => $rule->asMatchType(),
                     'eq_word_count'          => $rule->asEquivalentWordCount($translationTuple->rawWordCount, $payable_rates),
                     'serialized_errors_list' => $translationTuple->serializedErrors,
@@ -329,9 +325,9 @@ class SegmentStorageService
      * @throws Exception
      * @throws TypeError
      */
-    protected function persistSegmentMetadata(SegmentMetadataStruct $metadataStruct, int $id_project): void
+    protected function persistSegmentMetadata(SegmentMetadataStruct $metadataStruct): void
     {
-        (new SegmentMetadataDao($this->dbHandler))->save($metadataStruct, $id_project);
+        (new SegmentMetadataDao($this->dbHandler))->save($metadataStruct);
     }
 
     // ── Private helpers ─────────────────────────────────────────────
@@ -409,14 +405,14 @@ class SegmentStorageService
      * @throws Exception
      * @throws TypeError
      */
-    protected function saveSegmentMetadata(int $id_segment, int $id_project, ?SegmentMetadataStruct $metadataStruct = null): void
+    protected function saveSegmentMetadata(int $id_segment, ?SegmentMetadataStruct $metadataStruct = null): void
     {
         if ($metadataStruct !== null &&
             isset($metadataStruct->meta_key) && $metadataStruct->meta_key !== '' &&
             isset($metadataStruct->meta_value) && $metadataStruct->meta_value !== ''
         ) {
             $metadataStruct->id_segment = $id_segment;
-            $this->persistSegmentMetadata($metadataStruct, $id_project);
+            $this->persistSegmentMetadata($metadataStruct);
         }
     }
 

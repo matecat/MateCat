@@ -22,7 +22,6 @@ use Model\Segments\SegmentMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Teams\TeamDao;
 use Model\Translations\SegmentTranslationDao;
-use Psr\Log\InvalidArgumentException as LogInvalidArgumentException;
 use Stomp\Exception\ConnectionException;
 use Stomp\Exception\StompException;
 use Stomp\Transport\Message;
@@ -81,7 +80,7 @@ class CancelRequestController extends KleinController
         $job = $this->performChecks($id_job, $password, $id_segment);
 
         if ($this->segmentDisabledService->isDisabled($id_segment)) {
-            $this->segmentDisabledService->enable($id_segment, $job->id_project);
+            $this->segmentDisabledService->enable($id_segment);
             $this->publishSegmentStateChange($job, $id_job, $id_segment, false);
         }
 
@@ -115,7 +114,7 @@ class CancelRequestController extends KleinController
         $job = $this->performChecks($id_job, $password, $id_segment);
 
         if (!$this->segmentDisabledService->isDisabled($id_segment)) {
-            $this->segmentDisabledService->disable($id_segment, $job->id_project);
+            $this->segmentDisabledService->disable($id_segment);
             $this->publishSegmentStateChange($job, $id_job, $id_segment, true);
         }
 
@@ -200,8 +199,6 @@ class CancelRequestController extends KleinController
      * The state is already persisted when this runs, so a broker failure must not fail the
      * request: the notification is a best-effort live patch and a tab that misses it reads
      * the correct state on its next page load.
-     *
-     * @throws LogInvalidArgumentException
      */
     private function publishSegmentStateChange(JobStruct $job, int $id_job, int $id_segment, bool $disabled): void
     {
