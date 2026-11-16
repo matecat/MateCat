@@ -3922,8 +3922,8 @@
     },
     "A line break inside a tag: <ph id=\"1\" equiv-text=\"base64:YSMjJF8wQSQjI2I=\"/> end": {
       "store": {
-        "decodedSegment": "A line break inside a tag: ##$_0A$## end",
-        "plainText": "A·line·break·inside·a·tag:·\n·end",
+        "decodedSegment": "A line break inside a tag: <ph id=\"1\" equiv-text=\"base64:YSMjJF8wQSQjI2I=\"/> end",
+        "plainText": "A·line·break·inside·a·tag:·a##$_0A$##b·end",
         "tagRange": [
           {
             "offset": 27,
@@ -3944,7 +3944,7 @@
             }
           }
         ],
-        "lxqText": "A< >line< >break< >inside< >a< >tag:< >\n< >end"
+        "lxqText": "A< >line< >break< >inside< >a< >tag:< ><a##$_0A$##b>< >end"
       },
       "tagIdentities": [
         {
@@ -3956,8 +3956,8 @@
     },
     "Two: <ph id=\"1\" equiv-text=\"base64:IyMkXzBEJCMjIyMkXzBBJCMj\"/><ph id=\"2\" equiv-text=\"base64:eCMjJF8wQSQjIw==\"/>": {
       "store": {
-        "decodedSegment": "Two: ##$_0A$####$_0A$##",
-        "plainText": "Two:·\n\n",
+        "decodedSegment": "Two: <ph id=\"1\" equiv-text=\"base64:IyMkXzBEJCMjIyMkXzBBJCMj\"/><ph id=\"2\" equiv-text=\"base64:eCMjJF8wQSQjIw==\"/>",
+        "plainText": "Two:·##$_0D$####$_0A$##x##$_0A$##",
         "tagRange": [
           {
             "offset": 5,
@@ -3996,7 +3996,7 @@
             }
           }
         ],
-        "lxqText": "Two:< >\n\n"
+        "lxqText": "Two:< ><##$_0D$####$_0A$##><x##$_0A$##>"
       },
       "tagIdentities": [
         {
@@ -43907,7 +43907,7 @@
       "maps": [
         {
           "update": {
-            "plainText": "A·line·break·inside·a·tag:·\n·end",
+            "plainText": "A·line·break·inside·a·tag:·a##$_0A$##b·end",
             "tagMap": [
               {
                 "offset": 1,
@@ -44017,310 +44017,6 @@
                   "originalOffset": -1
                 }
               },
-              {
-                "offset": 76,
-                "length": 1,
-                "type": "space",
-                "mutability": "IMMUTABLE",
-                "data": {
-                  "id": "",
-                  "name": "space",
-                  "encodedText": " ",
-                  "decodedText": "·",
-                  "openTagId": null,
-                  "closeTagId": null,
-                  "openTagKey": null,
-                  "closeTagKey": null,
-                  "placeholder": "·",
-                  "originalOffset": -1
-                }
-              }
-            ],
-            "missingTags": [],
-            "lxqDecodedTranslation": "A< >line< >break< >inside< >a< >tag:< >\n< >end"
-          },
-          "tagIdentities": [
-            {
-              "raw": "<ph id=\"1\" equiv-text=\"base64:YSMjJF8wQSQjI2I=\"/>",
-              "id": "1",
-              "placeholder": "a##$_0A$##b"
-            }
-          ]
-        },
-        {
-          "update": {
-            "plainText": "A·line·break·inside·a·tag:·\n·end",
-            "tagMap": [
-              {
-                "offset": 1,
-                "length": 1,
-                "type": "space",
-                "mutability": "IMMUTABLE",
-                "data": {
-                  "id": "",
-                  "name": "space",
-                  "encodedText": " ",
-                  "decodedText": "·",
-                  "openTagId": null,
-                  "closeTagId": null,
-                  "openTagKey": null,
-                  "closeTagKey": null,
-                  "placeholder": "·",
-                  "originalOffset": -1
-                }
-              },
-              {
-                "offset": 6,
-                "length": 1,
-                "type": "space",
-                "mutability": "IMMUTABLE",
-                "data": {
-                  "id": "",
-                  "name": "space",
-                  "encodedText": " ",
-                  "decodedText": "·",
-                  "openTagId": null,
-                  "closeTagId": null,
-                  "openTagKey": null,
-                  "closeTagKey": null,
-                  "placeholder": "·",
-                  "originalOffset": -1
-                }
-              },
-              {
-                "offset": 12,
-                "length": 1,
-                "type": "space",
-                "mutability": "IMMUTABLE",
-                "data": {
-                  "id": "",
-                  "name": "space",
-                  "encodedText": " ",
-                  "decodedText": "·",
-                  "openTagId": null,
-                  "closeTagId": null,
-                  "openTagKey": null,
-                  "closeTagKey": null,
-                  "placeholder": "·",
-                  "originalOffset": -1
-                }
-              },
-              {
-                "offset": 19,
-                "length": 1,
-                "type": "space",
-                "mutability": "IMMUTABLE",
-                "data": {
-                  "id": "",
-                  "name": "space",
-                  "encodedText": " ",
-                  "decodedText": "·",
-                  "openTagId": null,
-                  "closeTagId": null,
-                  "openTagKey": null,
-                  "closeTagKey": null,
-                  "placeholder": "·",
-                  "originalOffset": -1
-                }
-              },
-              {
-                "offset": 21,
-                "length": 1,
-                "type": "space",
-                "mutability": "IMMUTABLE",
-                "data": {
-                  "id": "",
-                  "name": "space",
-                  "encodedText": " ",
-                  "decodedText": "·",
-                  "openTagId": null,
-                  "closeTagId": null,
-                  "openTagKey": null,
-                  "closeTagKey": null,
-                  "placeholder": "·",
-                  "originalOffset": -1
-                }
-              },
-              {
-                "offset": 26,
-                "length": 1,
-                "type": "space",
-                "mutability": "IMMUTABLE",
-                "data": {
-                  "id": "",
-                  "name": "space",
-                  "encodedText": " ",
-                  "decodedText": "·",
-                  "openTagId": null,
-                  "closeTagId": null,
-                  "openTagKey": null,
-                  "closeTagKey": null,
-                  "placeholder": "·",
-                  "originalOffset": -1
-                }
-              },
-              {
-                "offset": 76,
-                "length": 1,
-                "type": "space",
-                "mutability": "IMMUTABLE",
-                "data": {
-                  "id": "",
-                  "name": "space",
-                  "encodedText": " ",
-                  "decodedText": "·",
-                  "openTagId": null,
-                  "closeTagId": null,
-                  "openTagKey": null,
-                  "closeTagKey": null,
-                  "placeholder": "·",
-                  "originalOffset": -1
-                }
-              }
-            ],
-            "missingTags": [],
-            "lxqDecodedTranslation": "A< >line< >break< >inside< >a< >tag:< >\n< >end"
-          },
-          "tagIdentities": [
-            {
-              "raw": "<ph id=\"1\" equiv-text=\"base64:YSMjJF8wQSQjI2I=\"/>",
-              "id": "1",
-              "placeholder": "a##$_0A$##b"
-            }
-          ]
-        },
-        {
-          "update": {
-            "plainText": "A·line·break·inside·a·tag:·\n·end",
-            "tagMap": [
-              {
-                "offset": 1,
-                "length": 1,
-                "type": "space",
-                "mutability": "IMMUTABLE",
-                "data": {
-                  "id": "",
-                  "name": "space",
-                  "encodedText": " ",
-                  "decodedText": "·",
-                  "openTagId": null,
-                  "closeTagId": null,
-                  "openTagKey": null,
-                  "closeTagKey": null,
-                  "placeholder": "·",
-                  "originalOffset": -1
-                }
-              },
-              {
-                "offset": 6,
-                "length": 1,
-                "type": "space",
-                "mutability": "IMMUTABLE",
-                "data": {
-                  "id": "",
-                  "name": "space",
-                  "encodedText": " ",
-                  "decodedText": "·",
-                  "openTagId": null,
-                  "closeTagId": null,
-                  "openTagKey": null,
-                  "closeTagKey": null,
-                  "placeholder": "·",
-                  "originalOffset": -1
-                }
-              },
-              {
-                "offset": 12,
-                "length": 1,
-                "type": "space",
-                "mutability": "IMMUTABLE",
-                "data": {
-                  "id": "",
-                  "name": "space",
-                  "encodedText": " ",
-                  "decodedText": "·",
-                  "openTagId": null,
-                  "closeTagId": null,
-                  "openTagKey": null,
-                  "closeTagKey": null,
-                  "placeholder": "·",
-                  "originalOffset": -1
-                }
-              },
-              {
-                "offset": 19,
-                "length": 1,
-                "type": "space",
-                "mutability": "IMMUTABLE",
-                "data": {
-                  "id": "",
-                  "name": "space",
-                  "encodedText": " ",
-                  "decodedText": "·",
-                  "openTagId": null,
-                  "closeTagId": null,
-                  "openTagKey": null,
-                  "closeTagKey": null,
-                  "placeholder": "·",
-                  "originalOffset": -1
-                }
-              },
-              {
-                "offset": 21,
-                "length": 1,
-                "type": "space",
-                "mutability": "IMMUTABLE",
-                "data": {
-                  "id": "",
-                  "name": "space",
-                  "encodedText": " ",
-                  "decodedText": "·",
-                  "openTagId": null,
-                  "closeTagId": null,
-                  "openTagKey": null,
-                  "closeTagKey": null,
-                  "placeholder": "·",
-                  "originalOffset": -1
-                }
-              },
-              {
-                "offset": 26,
-                "length": 1,
-                "type": "space",
-                "mutability": "IMMUTABLE",
-                "data": {
-                  "id": "",
-                  "name": "space",
-                  "encodedText": " ",
-                  "decodedText": "·",
-                  "openTagId": null,
-                  "closeTagId": null,
-                  "openTagKey": null,
-                  "closeTagKey": null,
-                  "placeholder": "·",
-                  "originalOffset": -1
-                }
-              },
-              {
-                "offset": 76,
-                "length": 1,
-                "type": "space",
-                "mutability": "IMMUTABLE",
-                "data": {
-                  "id": "",
-                  "name": "space",
-                  "encodedText": " ",
-                  "decodedText": "·",
-                  "openTagId": null,
-                  "closeTagId": null,
-                  "openTagKey": null,
-                  "closeTagKey": null,
-                  "placeholder": "·",
-                  "originalOffset": -1
-                }
-              }
-            ],
-            "missingTags": [
               {
                 "offset": 27,
                 "length": 49,
@@ -44336,11 +44032,30 @@
                   "openTagKey": null,
                   "closeTagKey": null,
                   "placeholder": "a##$_0A$##b",
-                  "originalOffset": 27
+                  "originalOffset": -1
+                }
+              },
+              {
+                "offset": 76,
+                "length": 1,
+                "type": "space",
+                "mutability": "IMMUTABLE",
+                "data": {
+                  "id": "",
+                  "name": "space",
+                  "encodedText": " ",
+                  "decodedText": "·",
+                  "openTagId": null,
+                  "closeTagId": null,
+                  "openTagKey": null,
+                  "closeTagKey": null,
+                  "placeholder": "·",
+                  "originalOffset": -1
                 }
               }
             ],
-            "lxqDecodedTranslation": "A< >line< >break< >inside< >a< >tag:< >\n< >end"
+            "missingTags": [],
+            "lxqDecodedTranslation": "A< >line< >break< >inside< >a< >tag:< ><a##$_0A$##b>< >end"
           },
           "tagIdentities": [
             {
@@ -44352,7 +44067,7 @@
         },
         {
           "update": {
-            "plainText": "A·line·break·inside·a·tag:·\n·end",
+            "plainText": "A·line·break·inside·a·tag:·a##$_0A$##b·end",
             "tagMap": [
               {
                 "offset": 1,
@@ -44463,6 +44178,344 @@
                 }
               },
               {
+                "offset": 27,
+                "length": 49,
+                "type": "ph",
+                "mutability": "IMMUTABLE",
+                "data": {
+                  "id": "1",
+                  "name": "ph",
+                  "encodedText": "<ph id=\"1\" equiv-text=\"base64:YSMjJF8wQSQjI2I=\"/>",
+                  "decodedText": "a##$_0A$##b",
+                  "openTagId": null,
+                  "closeTagId": null,
+                  "openTagKey": null,
+                  "closeTagKey": null,
+                  "placeholder": "a##$_0A$##b",
+                  "originalOffset": -1
+                }
+              },
+              {
+                "offset": 76,
+                "length": 1,
+                "type": "space",
+                "mutability": "IMMUTABLE",
+                "data": {
+                  "id": "",
+                  "name": "space",
+                  "encodedText": " ",
+                  "decodedText": "·",
+                  "openTagId": null,
+                  "closeTagId": null,
+                  "openTagKey": null,
+                  "closeTagKey": null,
+                  "placeholder": "·",
+                  "originalOffset": -1
+                }
+              }
+            ],
+            "missingTags": [],
+            "lxqDecodedTranslation": "A< >line< >break< >inside< >a< >tag:< ><a##$_0A$##b>< >end"
+          },
+          "tagIdentities": [
+            {
+              "raw": "<ph id=\"1\" equiv-text=\"base64:YSMjJF8wQSQjI2I=\"/>",
+              "id": "1",
+              "placeholder": "a##$_0A$##b"
+            }
+          ]
+        },
+        {
+          "update": {
+            "plainText": "A·line·break·inside·a·tag:·a##$_0A$##b·end",
+            "tagMap": [
+              {
+                "offset": 1,
+                "length": 1,
+                "type": "space",
+                "mutability": "IMMUTABLE",
+                "data": {
+                  "id": "",
+                  "name": "space",
+                  "encodedText": " ",
+                  "decodedText": "·",
+                  "openTagId": null,
+                  "closeTagId": null,
+                  "openTagKey": null,
+                  "closeTagKey": null,
+                  "placeholder": "·",
+                  "originalOffset": -1
+                }
+              },
+              {
+                "offset": 6,
+                "length": 1,
+                "type": "space",
+                "mutability": "IMMUTABLE",
+                "data": {
+                  "id": "",
+                  "name": "space",
+                  "encodedText": " ",
+                  "decodedText": "·",
+                  "openTagId": null,
+                  "closeTagId": null,
+                  "openTagKey": null,
+                  "closeTagKey": null,
+                  "placeholder": "·",
+                  "originalOffset": -1
+                }
+              },
+              {
+                "offset": 12,
+                "length": 1,
+                "type": "space",
+                "mutability": "IMMUTABLE",
+                "data": {
+                  "id": "",
+                  "name": "space",
+                  "encodedText": " ",
+                  "decodedText": "·",
+                  "openTagId": null,
+                  "closeTagId": null,
+                  "openTagKey": null,
+                  "closeTagKey": null,
+                  "placeholder": "·",
+                  "originalOffset": -1
+                }
+              },
+              {
+                "offset": 19,
+                "length": 1,
+                "type": "space",
+                "mutability": "IMMUTABLE",
+                "data": {
+                  "id": "",
+                  "name": "space",
+                  "encodedText": " ",
+                  "decodedText": "·",
+                  "openTagId": null,
+                  "closeTagId": null,
+                  "openTagKey": null,
+                  "closeTagKey": null,
+                  "placeholder": "·",
+                  "originalOffset": -1
+                }
+              },
+              {
+                "offset": 21,
+                "length": 1,
+                "type": "space",
+                "mutability": "IMMUTABLE",
+                "data": {
+                  "id": "",
+                  "name": "space",
+                  "encodedText": " ",
+                  "decodedText": "·",
+                  "openTagId": null,
+                  "closeTagId": null,
+                  "openTagKey": null,
+                  "closeTagKey": null,
+                  "placeholder": "·",
+                  "originalOffset": -1
+                }
+              },
+              {
+                "offset": 26,
+                "length": 1,
+                "type": "space",
+                "mutability": "IMMUTABLE",
+                "data": {
+                  "id": "",
+                  "name": "space",
+                  "encodedText": " ",
+                  "decodedText": "·",
+                  "openTagId": null,
+                  "closeTagId": null,
+                  "openTagKey": null,
+                  "closeTagKey": null,
+                  "placeholder": "·",
+                  "originalOffset": -1
+                }
+              },
+              {
+                "offset": 27,
+                "length": 49,
+                "type": "ph",
+                "mutability": "IMMUTABLE",
+                "data": {
+                  "id": "1",
+                  "name": "ph",
+                  "encodedText": "<ph id=\"1\" equiv-text=\"base64:YSMjJF8wQSQjI2I=\"/>",
+                  "decodedText": "a##$_0A$##b",
+                  "openTagId": null,
+                  "closeTagId": null,
+                  "openTagKey": null,
+                  "closeTagKey": null,
+                  "placeholder": "a##$_0A$##b",
+                  "originalOffset": -1
+                }
+              },
+              {
+                "offset": 76,
+                "length": 1,
+                "type": "space",
+                "mutability": "IMMUTABLE",
+                "data": {
+                  "id": "",
+                  "name": "space",
+                  "encodedText": " ",
+                  "decodedText": "·",
+                  "openTagId": null,
+                  "closeTagId": null,
+                  "openTagKey": null,
+                  "closeTagKey": null,
+                  "placeholder": "·",
+                  "originalOffset": -1
+                }
+              }
+            ],
+            "missingTags": [],
+            "lxqDecodedTranslation": "A< >line< >break< >inside< >a< >tag:< ><a##$_0A$##b>< >end"
+          },
+          "tagIdentities": [
+            {
+              "raw": "<ph id=\"1\" equiv-text=\"base64:YSMjJF8wQSQjI2I=\"/>",
+              "id": "1",
+              "placeholder": "a##$_0A$##b"
+            }
+          ]
+        },
+        {
+          "update": {
+            "plainText": "A·line·break·inside·a·tag:·a##$_0A$##b·end",
+            "tagMap": [
+              {
+                "offset": 1,
+                "length": 1,
+                "type": "space",
+                "mutability": "IMMUTABLE",
+                "data": {
+                  "id": "",
+                  "name": "space",
+                  "encodedText": " ",
+                  "decodedText": "·",
+                  "openTagId": null,
+                  "closeTagId": null,
+                  "openTagKey": null,
+                  "closeTagKey": null,
+                  "placeholder": "·",
+                  "originalOffset": -1
+                }
+              },
+              {
+                "offset": 6,
+                "length": 1,
+                "type": "space",
+                "mutability": "IMMUTABLE",
+                "data": {
+                  "id": "",
+                  "name": "space",
+                  "encodedText": " ",
+                  "decodedText": "·",
+                  "openTagId": null,
+                  "closeTagId": null,
+                  "openTagKey": null,
+                  "closeTagKey": null,
+                  "placeholder": "·",
+                  "originalOffset": -1
+                }
+              },
+              {
+                "offset": 12,
+                "length": 1,
+                "type": "space",
+                "mutability": "IMMUTABLE",
+                "data": {
+                  "id": "",
+                  "name": "space",
+                  "encodedText": " ",
+                  "decodedText": "·",
+                  "openTagId": null,
+                  "closeTagId": null,
+                  "openTagKey": null,
+                  "closeTagKey": null,
+                  "placeholder": "·",
+                  "originalOffset": -1
+                }
+              },
+              {
+                "offset": 19,
+                "length": 1,
+                "type": "space",
+                "mutability": "IMMUTABLE",
+                "data": {
+                  "id": "",
+                  "name": "space",
+                  "encodedText": " ",
+                  "decodedText": "·",
+                  "openTagId": null,
+                  "closeTagId": null,
+                  "openTagKey": null,
+                  "closeTagKey": null,
+                  "placeholder": "·",
+                  "originalOffset": -1
+                }
+              },
+              {
+                "offset": 21,
+                "length": 1,
+                "type": "space",
+                "mutability": "IMMUTABLE",
+                "data": {
+                  "id": "",
+                  "name": "space",
+                  "encodedText": " ",
+                  "decodedText": "·",
+                  "openTagId": null,
+                  "closeTagId": null,
+                  "openTagKey": null,
+                  "closeTagKey": null,
+                  "placeholder": "·",
+                  "originalOffset": -1
+                }
+              },
+              {
+                "offset": 26,
+                "length": 1,
+                "type": "space",
+                "mutability": "IMMUTABLE",
+                "data": {
+                  "id": "",
+                  "name": "space",
+                  "encodedText": " ",
+                  "decodedText": "·",
+                  "openTagId": null,
+                  "closeTagId": null,
+                  "openTagKey": null,
+                  "closeTagKey": null,
+                  "placeholder": "·",
+                  "originalOffset": -1
+                }
+              },
+              {
+                "offset": 27,
+                "length": 49,
+                "type": "ph",
+                "mutability": "IMMUTABLE",
+                "data": {
+                  "id": "1",
+                  "name": "ph",
+                  "encodedText": "<ph id=\"1\" equiv-text=\"base64:YSMjJF8wQSQjI2I=\"/>",
+                  "decodedText": "a##$_0A$##b",
+                  "openTagId": null,
+                  "closeTagId": null,
+                  "openTagKey": null,
+                  "closeTagKey": null,
+                  "placeholder": "a##$_0A$##b",
+                  "originalOffset": -1
+                }
+              },
+              {
                 "offset": 76,
                 "length": 1,
                 "type": "space",
@@ -44482,24 +44535,6 @@
               }
             ],
             "missingTags": [
-              {
-                "offset": 5,
-                "length": 57,
-                "type": "ph",
-                "mutability": "IMMUTABLE",
-                "data": {
-                  "id": "1",
-                  "name": "ph",
-                  "encodedText": "<ph id=\"1\" equiv-text=\"base64:IyMkXzBEJCMjIyMkXzBBJCMj\"/>",
-                  "decodedText": "##$_0D$####$_0A$##",
-                  "openTagId": null,
-                  "closeTagId": null,
-                  "openTagKey": null,
-                  "closeTagKey": null,
-                  "placeholder": "##$_0D$####$_0A$##",
-                  "originalOffset": 5
-                }
-              },
               {
                 "offset": 62,
                 "length": 49,
@@ -44519,7 +44554,7 @@
                 }
               }
             ],
-            "lxqDecodedTranslation": "A< >line< >break< >inside< >a< >tag:< >\n< >end"
+            "lxqDecodedTranslation": "A< >line< >break< >inside< >a< >tag:< ><a##$_0A$##b>< >end"
           },
           "tagIdentities": [
             {
@@ -44537,7 +44572,7 @@
       "maps": [
         {
           "update": {
-            "plainText": "Two:·\n\n",
+            "plainText": "Two:·##$_0D$####$_0A$##x##$_0A$##",
             "tagMap": [
               {
                 "offset": 4,
@@ -44556,87 +44591,7 @@
                   "placeholder": "·",
                   "originalOffset": -1
                 }
-              }
-            ],
-            "missingTags": [],
-            "lxqDecodedTranslation": "Two:< >\n\n"
-          },
-          "tagIdentities": [
-            {
-              "raw": "<ph id=\"1\" equiv-text=\"base64:IyMkXzBEJCMjIyMkXzBBJCMj\"/>",
-              "id": "1",
-              "placeholder": "##$_0D$####$_0A$##"
-            },
-            {
-              "raw": "<ph id=\"2\" equiv-text=\"base64:eCMjJF8wQSQjIw==\"/>",
-              "id": "2",
-              "placeholder": "x##$_0A$##"
-            }
-          ]
-        },
-        {
-          "update": {
-            "plainText": "Two:·\n\n",
-            "tagMap": [
-              {
-                "offset": 4,
-                "length": 1,
-                "type": "space",
-                "mutability": "IMMUTABLE",
-                "data": {
-                  "id": "",
-                  "name": "space",
-                  "encodedText": " ",
-                  "decodedText": "·",
-                  "openTagId": null,
-                  "closeTagId": null,
-                  "openTagKey": null,
-                  "closeTagKey": null,
-                  "placeholder": "·",
-                  "originalOffset": -1
-                }
-              }
-            ],
-            "missingTags": [],
-            "lxqDecodedTranslation": "Two:< >\n\n"
-          },
-          "tagIdentities": [
-            {
-              "raw": "<ph id=\"1\" equiv-text=\"base64:IyMkXzBEJCMjIyMkXzBBJCMj\"/>",
-              "id": "1",
-              "placeholder": "##$_0D$####$_0A$##"
-            },
-            {
-              "raw": "<ph id=\"2\" equiv-text=\"base64:eCMjJF8wQSQjIw==\"/>",
-              "id": "2",
-              "placeholder": "x##$_0A$##"
-            }
-          ]
-        },
-        {
-          "update": {
-            "plainText": "Two:·\n\n",
-            "tagMap": [
-              {
-                "offset": 4,
-                "length": 1,
-                "type": "space",
-                "mutability": "IMMUTABLE",
-                "data": {
-                  "id": "",
-                  "name": "space",
-                  "encodedText": " ",
-                  "decodedText": "·",
-                  "openTagId": null,
-                  "closeTagId": null,
-                  "openTagKey": null,
-                  "closeTagKey": null,
-                  "placeholder": "·",
-                  "originalOffset": -1
-                }
-              }
-            ],
-            "missingTags": [
+              },
               {
                 "offset": 5,
                 "length": 57,
@@ -44652,7 +44607,7 @@
                   "openTagKey": null,
                   "closeTagKey": null,
                   "placeholder": "##$_0D$####$_0A$##",
-                  "originalOffset": 5
+                  "originalOffset": -1
                 }
               },
               {
@@ -44670,11 +44625,12 @@
                   "openTagKey": null,
                   "closeTagKey": null,
                   "placeholder": "x##$_0A$##",
-                  "originalOffset": 62
+                  "originalOffset": -1
                 }
               }
             ],
-            "lxqDecodedTranslation": "Two:< >\n\n"
+            "missingTags": [],
+            "lxqDecodedTranslation": "Two:< ><##$_0D$####$_0A$##><x##$_0A$##>"
           },
           "tagIdentities": [
             {
@@ -44691,7 +44647,7 @@
         },
         {
           "update": {
-            "plainText": "Two:·\n\n",
+            "plainText": "Two:·##$_0D$####$_0A$##x##$_0A$##",
             "tagMap": [
               {
                 "offset": 4,
@@ -44710,10 +44666,196 @@
                   "placeholder": "·",
                   "originalOffset": -1
                 }
+              },
+              {
+                "offset": 5,
+                "length": 57,
+                "type": "ph",
+                "mutability": "IMMUTABLE",
+                "data": {
+                  "id": "1",
+                  "name": "ph",
+                  "encodedText": "<ph id=\"1\" equiv-text=\"base64:IyMkXzBEJCMjIyMkXzBBJCMj\"/>",
+                  "decodedText": "##$_0D$####$_0A$##",
+                  "openTagId": null,
+                  "closeTagId": null,
+                  "openTagKey": null,
+                  "closeTagKey": null,
+                  "placeholder": "##$_0D$####$_0A$##",
+                  "originalOffset": -1
+                }
+              },
+              {
+                "offset": 62,
+                "length": 49,
+                "type": "ph",
+                "mutability": "IMMUTABLE",
+                "data": {
+                  "id": "2",
+                  "name": "ph",
+                  "encodedText": "<ph id=\"2\" equiv-text=\"base64:eCMjJF8wQSQjIw==\"/>",
+                  "decodedText": "x##$_0A$##",
+                  "openTagId": null,
+                  "closeTagId": null,
+                  "openTagKey": null,
+                  "closeTagKey": null,
+                  "placeholder": "x##$_0A$##",
+                  "originalOffset": -1
+                }
               }
             ],
             "missingTags": [],
-            "lxqDecodedTranslation": "Two:< >\n\n"
+            "lxqDecodedTranslation": "Two:< ><##$_0D$####$_0A$##><x##$_0A$##>"
+          },
+          "tagIdentities": [
+            {
+              "raw": "<ph id=\"1\" equiv-text=\"base64:IyMkXzBEJCMjIyMkXzBBJCMj\"/>",
+              "id": "1",
+              "placeholder": "##$_0D$####$_0A$##"
+            },
+            {
+              "raw": "<ph id=\"2\" equiv-text=\"base64:eCMjJF8wQSQjIw==\"/>",
+              "id": "2",
+              "placeholder": "x##$_0A$##"
+            }
+          ]
+        },
+        {
+          "update": {
+            "plainText": "Two:·##$_0D$####$_0A$##x##$_0A$##",
+            "tagMap": [
+              {
+                "offset": 4,
+                "length": 1,
+                "type": "space",
+                "mutability": "IMMUTABLE",
+                "data": {
+                  "id": "",
+                  "name": "space",
+                  "encodedText": " ",
+                  "decodedText": "·",
+                  "openTagId": null,
+                  "closeTagId": null,
+                  "openTagKey": null,
+                  "closeTagKey": null,
+                  "placeholder": "·",
+                  "originalOffset": -1
+                }
+              },
+              {
+                "offset": 5,
+                "length": 57,
+                "type": "ph",
+                "mutability": "IMMUTABLE",
+                "data": {
+                  "id": "1",
+                  "name": "ph",
+                  "encodedText": "<ph id=\"1\" equiv-text=\"base64:IyMkXzBEJCMjIyMkXzBBJCMj\"/>",
+                  "decodedText": "##$_0D$####$_0A$##",
+                  "openTagId": null,
+                  "closeTagId": null,
+                  "openTagKey": null,
+                  "closeTagKey": null,
+                  "placeholder": "##$_0D$####$_0A$##",
+                  "originalOffset": -1
+                }
+              },
+              {
+                "offset": 62,
+                "length": 49,
+                "type": "ph",
+                "mutability": "IMMUTABLE",
+                "data": {
+                  "id": "2",
+                  "name": "ph",
+                  "encodedText": "<ph id=\"2\" equiv-text=\"base64:eCMjJF8wQSQjIw==\"/>",
+                  "decodedText": "x##$_0A$##",
+                  "openTagId": null,
+                  "closeTagId": null,
+                  "openTagKey": null,
+                  "closeTagKey": null,
+                  "placeholder": "x##$_0A$##",
+                  "originalOffset": -1
+                }
+              }
+            ],
+            "missingTags": [],
+            "lxqDecodedTranslation": "Two:< ><##$_0D$####$_0A$##><x##$_0A$##>"
+          },
+          "tagIdentities": [
+            {
+              "raw": "<ph id=\"1\" equiv-text=\"base64:IyMkXzBEJCMjIyMkXzBBJCMj\"/>",
+              "id": "1",
+              "placeholder": "##$_0D$####$_0A$##"
+            },
+            {
+              "raw": "<ph id=\"2\" equiv-text=\"base64:eCMjJF8wQSQjIw==\"/>",
+              "id": "2",
+              "placeholder": "x##$_0A$##"
+            }
+          ]
+        },
+        {
+          "update": {
+            "plainText": "Two:·##$_0D$####$_0A$##x##$_0A$##",
+            "tagMap": [
+              {
+                "offset": 4,
+                "length": 1,
+                "type": "space",
+                "mutability": "IMMUTABLE",
+                "data": {
+                  "id": "",
+                  "name": "space",
+                  "encodedText": " ",
+                  "decodedText": "·",
+                  "openTagId": null,
+                  "closeTagId": null,
+                  "openTagKey": null,
+                  "closeTagKey": null,
+                  "placeholder": "·",
+                  "originalOffset": -1
+                }
+              },
+              {
+                "offset": 5,
+                "length": 57,
+                "type": "ph",
+                "mutability": "IMMUTABLE",
+                "data": {
+                  "id": "1",
+                  "name": "ph",
+                  "encodedText": "<ph id=\"1\" equiv-text=\"base64:IyMkXzBEJCMjIyMkXzBBJCMj\"/>",
+                  "decodedText": "##$_0D$####$_0A$##",
+                  "openTagId": null,
+                  "closeTagId": null,
+                  "openTagKey": null,
+                  "closeTagKey": null,
+                  "placeholder": "##$_0D$####$_0A$##",
+                  "originalOffset": -1
+                }
+              },
+              {
+                "offset": 62,
+                "length": 49,
+                "type": "ph",
+                "mutability": "IMMUTABLE",
+                "data": {
+                  "id": "2",
+                  "name": "ph",
+                  "encodedText": "<ph id=\"2\" equiv-text=\"base64:eCMjJF8wQSQjIw==\"/>",
+                  "decodedText": "x##$_0A$##",
+                  "openTagId": null,
+                  "closeTagId": null,
+                  "openTagKey": null,
+                  "closeTagKey": null,
+                  "placeholder": "x##$_0A$##",
+                  "originalOffset": -1
+                }
+              }
+            ],
+            "missingTags": [],
+            "lxqDecodedTranslation": "Two:< ><##$_0D$####$_0A$##><x##$_0A$##>"
           },
           "tagIdentities": [
             {

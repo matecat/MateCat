@@ -145,12 +145,16 @@ const splitOnLineBreaks = (block) => {
   while ((match = carriageReturn.exec(text)) !== null)
     splitPoints.push({offset: match.index, length: CR_PLACEHOLDER.length})
   splitPoints.sort((a, b) => b.offset - a.offset)
+  // A line break in a tag's placeholder is part of the tag, not a break of the segment
+  const segmentBreaks = splitPoints.filter(
+    ({offset}) => block.ents[offset] === null,
+  )
 
   const breaks = []
-  while (splitPoints.length > 0) {
-    const point = splitPoints.pop()
+  while (segmentBreaks.length > 0) {
+    const point = segmentBreaks.pop()
     breaks.push(removeRange(block, point.offset, point.offset + point.length))
-    splitPoints.forEach((other) => (other.offset -= point.length))
+    segmentBreaks.forEach((other) => (other.offset -= point.length))
   }
   breaks.sort((a, b) => a - b)
 
@@ -202,10 +206,25 @@ const toEditorText = (segment = '', sourceTagMap) => {
     slicedLength += end - start - (placeholder.length + 2)
   })
 
-  // Real line breaks split blocks too. Offsets keep counting one character per break, also for a CR LF.
-  const blocks = plainText
-    .split(/\r\n?|\n/g)
-    .map((line) => makeBlock(line.replace(/\r/g, '')))
+  // Real line breaks split blocks too. Offsets keep counting one character per break, also for a CR LF. A line break
+  // in a tag's placeholder is kept as is, as the editor's tag chip shows it (its label is the placeholder text): it
+  // belongs to the tag, which stays whole on one line.
+  const inPlaceholder = (offset) =>
+    placed.some(
+      ({start, tag}) =>
+        offset > start && offset <= start + tag.data.placeholder.length,
+    )
+  const lines = ['']
+  for (let i = 0; i < plainText.length; i++) {
+    const char = plainText[i]
+    if ((char !== '\r' && char !== '\n') || inPlaceholder(i)) {
+      lines[lines.length - 1] += char
+    } else {
+      if (char === '\r' && plainText[i + 1] === '\n') i++
+      lines.push('')
+    }
+  }
+  const blocks = lines.map(makeBlock)
   const entities = []
   let maxCharsInBlocks = 0
   blocks.forEach((block, blockIndex) => {

@@ -1,7 +1,7 @@
 // Golden check: segmentStoreData must give the store exactly what the Draft bridges (sourceEditorBridge,
 // targetEditorBridge) gave it, for every segment string: the round-trip corpus and the edge cases below. What the
 // bridges gave is frozen in __golden__/segmentStoreData.json, as JSON: compared after the same JSON round trip, so tag
-// structs are compared by their fields.
+// structs are compared by their fields. The edge cases marked below are the exceptions: there Draft was wrong.
 import CORPUS from '../../components/editor/core/__fixtures__/roundTripCorpus.json'
 import {
   charactersCounter,
@@ -36,6 +36,9 @@ const EDGE_CASES = [
   '<g id="1" equiv-text="base64:Ym9sZA==">equiv</g>',
   'Line<g id="1">##$_0A$##inside</g>',
   `<ph id="1" equiv-text="base64:${b64('a\nb')}"/>`,
+  // This case and the next are not Draft's values, on purpose: Draft split its blocks at the line break inside the
+  // tag text, dropping the tag from the decoded segment and the tag map (and so reporting it missing). Frozen with
+  // the tag kept whole.
   `A line break inside a tag: <ph id="1" equiv-text="base64:${b64('a##$_0A$##b')}"/> end`,
   `Two: <ph id="1" equiv-text="base64:${b64('##$_0D$####$_0A$##')}"/><ph id="2" equiv-text="base64:${b64('x##$_0A$##')}"/>`,
   'Split##$_SPLIT$##point',
