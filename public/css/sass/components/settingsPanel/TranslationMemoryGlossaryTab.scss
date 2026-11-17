@@ -185,7 +185,7 @@
 }
 
 .translation-memory-glossary-tab-input-text {
-  padding: 6px !important;
+  padding: 6px 12px !important;
   width: 350px;
   font-size: variables.$font-size-xsmall;
 }
@@ -301,6 +301,10 @@
   &:focus,
   &:hover {
     background-color: white;
+  }
+
+  &:disabled {
+    background-color: transparent !important;
   }
 }
 
@@ -620,4 +624,8 @@
     display: flex;
     gap: 5px;
   }
+}
+
+.tm-key-row-last-column-empty {
+  width: 140px;
 }

@@ -63,7 +63,7 @@ export const KeysSelect = ({
               >
                 <div className="button-create-option-content">
                   <IconAdd size={18} />
-                  <span>Create termbase key</span>
+                  <span>Add termbase key</span>
                 </div>
               </li>
             ),

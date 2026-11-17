@@ -12,6 +12,7 @@ const SEGMENTED_CONTROL_OPTIONS = [
 ]
 
 const INNER_CONTENT_TYPE_OPTIONS = [
+  {id: 'text/plain', name: 'Plain text'},
   {id: 'text/html', name: 'HTML'},
   {id: 'text/xml', name: 'XML'},
   {id: 'text/csv', name: 'CSV'},

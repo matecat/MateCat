@@ -122,7 +122,7 @@ export const ModifySeverity = ({
           </span>
         </div>
         <div
-          className={`${stylesPopover['popover-component-body']}`}
+          className={`${stylesPopover['popover-component-body']} quality-framework-add-popover`}
           onKeyDown={(event) => {
             if (event.key === 'Escape') {
               cancel()

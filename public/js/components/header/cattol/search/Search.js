@@ -620,8 +620,10 @@ const Search = (props) => {
     statusOptions.push({
       name: (
         <>
-          <div className={'status-dot approved-2ndpass-color'} />
-          APPROVED 2
+          <span className="status-dropdown-option">
+            <span className={'status-dot approved-2ndpass-color'} />
+            APPROVED 2
+          </span>
         </>
       ),
       id: SEGMENTS_STATUS.APPROVED2,
