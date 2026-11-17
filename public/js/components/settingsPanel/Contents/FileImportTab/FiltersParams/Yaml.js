@@ -1,9 +1,8 @@
-import React, {useContext, useEffect, useRef, useState} from 'react'
-import {SegmentedControl} from '../../../../common/SegmentedControl'
+import React from 'react'
 import {KeysBadge} from '../../../../common/KeysBadge/KeysBadge'
-import {FiltersParamsContext} from './FiltersParamsContext'
-import {Controller, useForm} from 'react-hook-form'
-import {isEqual} from 'lodash'
+import {Controller} from 'react-hook-form'
+import {TranslatableKeysField} from './TranslatableKeysField'
+import {useTranslatableKeysSection} from './useTranslatableKeysSection'
 import {Select} from '../../../../common/Select'
 import Switch from '../../../../common/Switch'
 
@@ -21,102 +20,9 @@ const INNER_CONTENT_TYPE_OPTIONS = [
 ]
 
 export const Yaml = () => {
-  const {
-    currentTemplate,
-    currentProjectTemplateChanged,
-    modifyingCurrentTemplate,
-  } = useContext(FiltersParamsContext)
-
-  const {control, watch, setValue} = useForm()
-
-  const [formData, setFormData] = useState()
-
-  const yaml = useRef()
-  yaml.current = currentTemplate.yaml
-
-  const temporaryFormData = watch()
-  const previousData = useRef()
-
-  useEffect(() => {
-    if (!isEqual(temporaryFormData, previousData.current))
-      setFormData(temporaryFormData)
-
-    previousData.current = temporaryFormData
-  }, [temporaryFormData])
-
-  useEffect(() => {
-    if (typeof formData === 'undefined') return
-
-    const {segmentedControl, ...propsValue} = formData
-
-    const restPropsValue = Object.entries(propsValue).reduce(
-      (acc, [key, value]) => ({
-        ...acc,
-        ...(SEGMENTED_CONTROL_OPTIONS.every(
-          ({id}) => id !== key || id === segmentedControl,
-        ) && {[key]: value}),
-      }),
-      {},
-    )
-
-    if (
-      !isEqual(yaml.current, restPropsValue) &&
-      Object.keys(restPropsValue).length
-    ) {
-      modifyingCurrentTemplate((prevTemplate) => ({
-        ...prevTemplate,
-        yaml: restPropsValue,
-      }))
-    }
-  }, [formData, modifyingCurrentTemplate, setValue])
-
-  // set default values for current template
-  useEffect(() => {
-    SEGMENTED_CONTROL_OPTIONS.forEach(({id}) => setValue(id, undefined))
-
-    Object.entries(yaml.current).forEach(([key, value]) => setValue(key, value))
-
-    setValue(
-      'segmentedControl',
-      SEGMENTED_CONTROL_OPTIONS.find(
-        ({id}) => typeof yaml.current[id] !== 'undefined',
-      )?.id,
-    )
-  }, [currentTemplate.id, currentProjectTemplateChanged, setValue])
-
-  const {segmentedControl} = formData ?? {}
-
-  useEffect(() => {
-    if (formData?.segmentedControl) {
-      setValue(
-        SEGMENTED_CONTROL_OPTIONS.find(
-          ({id}) => id !== formData.segmentedControl,
-        ).id,
-        formData[formData.segmentedControl],
-      )
-    }
-  }, [formData, setValue])
-
-  const renderActiveSegmentedController = (
-    <>
-      {SEGMENTED_CONTROL_OPTIONS.filter(({id}) => id === segmentedControl).map(
-        ({id}) => (
-          <Controller
-            key={id}
-            control={control}
-            name={id}
-            render={({field: {onChange, value, name}}) => (
-              <KeysBadge
-                name={name}
-                value={value}
-                onChange={onChange}
-                placeholder={''}
-              />
-            )}
-          />
-        ),
-      )}
-    </>
+  const {control, formData} = useTranslatableKeysSection(
+    'yaml',
+    SEGMENTED_CONTROL_OPTIONS,
   )
 
   return (
@@ -138,10 +44,13 @@ export const Yaml = () => {
         />
       </div>
 
-      <div className="filters-params-option">
-        <div>
-          <h3>Translatable keys </h3>
-          <p>
+      <TranslatableKeysField
+        control={control}
+        formData={formData}
+        options={SEGMENTED_CONTROL_OPTIONS}
+        title="Translatable keys"
+        description={
+          <>
             Choose which keys should be translated. If left empty, all keys in
             the file will be extracted as translatable.
             <br />
@@ -153,25 +62,9 @@ export const Yaml = () => {
             If the toggle is set to &quot;Non-translatable&quot;, all the keys
             in the file <b>except</b> those entered will be extracted as
             translatable.
-          </p>
-        </div>
-        <div className="container-segmented-control">
-          <Controller
-            control={control}
-            name="segmentedControl"
-            render={({field: {onChange, value, name}}) => (
-              <SegmentedControl
-                name={name}
-                className="custom-segmented-control"
-                options={SEGMENTED_CONTROL_OPTIONS}
-                selectedId={value}
-                onChange={onChange}
-              />
-            )}
-          />
-          {renderActiveSegmentedController}
-        </div>
-      </div>
+          </>
+        }
+      />
 
       <div className="filters-params-option">
         <div>
