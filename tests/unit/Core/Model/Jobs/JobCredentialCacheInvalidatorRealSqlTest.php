@@ -4,8 +4,13 @@ namespace Matecat\Core\Model\Jobs;
 
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\RealSqlDaoTestTrait;
+use Model\FeaturesBase\FeatureSet;
+use Model\JobSplitMerge\JobSplitMergeService;
 use Model\Jobs\JobCredentialCacheInvalidator;
+use Model\Jobs\JobSettingsResolver;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\JobDao;
+use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
@@ -13,6 +18,7 @@ use Model\Projects\ProjectDao;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Utils\Constants\SourcePages;
+use Utils\Logger\MatecatLogger;
 
 #[Group('DaoRealSql')]
 #[Group('PersistenceNeeded')]
@@ -71,7 +77,8 @@ class JobCredentialCacheInvalidatorRealSqlTest extends AbstractTest
         $this->invalidator = new JobCredentialCacheInvalidator(
             $this->jobDao,
             $this->chunkReviewDao,
-            new ProjectDao($this->realSqlDb())
+            new ProjectDao($this->realSqlDb()),
+            new JobsMetadataDao($this->realSqlDb())
         );
     }
 
@@ -247,5 +254,141 @@ class JobCredentialCacheInvalidatorRealSqlTest extends AbstractTest
         $this->assertCount(2, $allLinks);
         $this->assertSame('jcci_r1_rotated', $allLinks[0]->review_password);
         $this->assertSame(self::R2_PASSWORD, $allLinks[1]->review_password);
+    }
+
+    /**
+     * The regression this pins. JobDao::changePassword() moves the job_metadata rows onto the new
+     * password, and the eviction used to name only the bulk read — getByJobIdAndPassword(), bound to
+     * (id_job, password). But every MT setting is read one key at a time through
+     * JobSettingsResolver::resolve() → MetadataDao::get(), a different statement bound to
+     * (id_job, password, key). Different SQL and a different bind set means a different hash, so the
+     * per-key entries survived for the whole 86400s TTL, keyed on the retired password: any flow that
+     * returned a job to a previously used password read its pre-rotation settings.
+     *
+     * MetadataDao::movePassword() now names both ends per key as part of the move, so the retired
+     * credential is cold before the sweep runs. The sweep is asserted after it all the same: it
+     * covers the other credential-keyed tables, and this must keep holding whichever of the two
+     * cleared the entry.
+     */
+    #[Test]
+    public function jobPasswordRotation_evicts_the_per_key_settings_reads_and_not_only_the_bulk_one(): void
+    {
+        $key = JobsMetadataMarshaller::LARA_STYLE->value;
+        $metadataDao = new JobsMetadataDao($this->realSqlDb());
+        $resolver = new JobSettingsResolver($this->realSqlDb());
+
+        $metadataDao->set($this->idJob, $this->jobPassword, $key, 'faithful');
+
+        // warm the per-key read the engines actually use, at the TTL they actually ask for
+        $this->assertSame(
+            'faithful',
+            $resolver->resolve($this->idJob, $this->jobPassword, null, $key, JobSettingsResolver::DEFAULT_TTL)
+        );
+
+        $jStruct = $this->jobDao->getByIdAndPassword($this->idJob, $this->jobPassword, 86400);
+        $this->assertNotNull($jStruct);
+
+        $rotated = 'jcci_meta_rotated_pwd';
+        $this->jobDao->changePassword($jStruct, $rotated);
+
+        // the row has moved, so the old credential addresses nothing — and the warm per-key entry
+        // must not keep answering with the value that used to live there
+        $this->assertNull(
+            $resolver->resolve($this->idJob, $this->jobPassword, null, $key, JobSettingsResolver::DEFAULT_TTL),
+            'the move must take the per-key entry of the retired password with it'
+        );
+
+        $this->invalidator->sweepAfterJobPasswordRotation($jStruct, $this->jobPassword, $rotated);
+
+        $this->assertNull(
+            $resolver->resolve($this->idJob, $this->jobPassword, null, $key, JobSettingsResolver::DEFAULT_TTL),
+            'the retired password must resolve to nothing once the sweep has run'
+        );
+        $this->assertSame(
+            'faithful',
+            $resolver->resolve($this->idJob, $rotated, null, $key, JobSettingsResolver::DEFAULT_TTL),
+            'the setting followed the rotation onto the new password'
+        );
+    }
+
+    /**
+     * The eviction is driven off the marshaller's own case list, so a key added later cannot be
+     * forgotten. This walks every key rather than trusting that.
+     */
+    #[Test]
+    public function jobPasswordRotation_evicts_every_key_the_marshaller_declares(): void
+    {
+        $metadataDao = new JobsMetadataDao($this->realSqlDb());
+        $resolver = new JobSettingsResolver($this->realSqlDb());
+
+        foreach (JobsMetadataMarshaller::cases() as $case) {
+            $metadataDao->set($this->idJob, $this->jobPassword, $case->value, '1');
+            $resolver->resolve($this->idJob, $this->jobPassword, null, $case->value, JobSettingsResolver::DEFAULT_TTL);
+        }
+
+        $jStruct = $this->jobDao->getByIdAndPassword($this->idJob, $this->jobPassword, 86400);
+        $this->assertNotNull($jStruct);
+
+        $rotated = 'jcci_meta_all_rotated';
+        $this->jobDao->changePassword($jStruct, $rotated);
+        $this->invalidator->sweepAfterJobPasswordRotation($jStruct, $this->jobPassword, $rotated);
+
+        foreach (JobsMetadataMarshaller::cases() as $case) {
+            $this->assertNull(
+                $resolver->resolve($this->idJob, $this->jobPassword, null, $case->value, JobSettingsResolver::DEFAULT_TTL),
+                "'{$case->value}' still answers for the retired password"
+            );
+        }
+    }
+
+    /**
+     * A merge rotates the password of every chunk it folds in and sweeps the credential caches
+     * through JobSplitMergeService::sweepCredentialCaches(). That call site used to build the
+     * invalidator without the job metadata DAO, so a merge evicted no metadata at all.
+     *
+     * movePassword() already clears what the move itself touches, so to see the sweep's own effect
+     * the cached entry has to outlive its row some other way: the row is deleted behind the DAO's
+     * back, which leaves the per-key read answering from the cache until something evicts it.
+     */
+    #[Test]
+    public function mergeSweep_evicts_the_job_metadata_cached_for_the_retired_password(): void
+    {
+        $key = JobsMetadataMarshaller::DEEPL_FORMALITY->value;
+        $resolver = new JobSettingsResolver($this->realSqlDb());
+
+        (new JobsMetadataDao($this->realSqlDb()))->set($this->idJob, $this->jobPassword, $key, 'prefer_more');
+        $this->assertSame(
+            'prefer_more',
+            $resolver->resolve($this->idJob, $this->jobPassword, null, $key, JobSettingsResolver::DEFAULT_TTL)
+        );
+
+        $this->realSqlDb()->getConnection()
+            ->prepare('DELETE FROM job_metadata WHERE id_job = :id_job AND password = :password')
+            ->execute(['id_job' => $this->idJob, 'password' => $this->jobPassword]);
+
+        $this->assertSame(
+            'prefer_more',
+            $resolver->resolve($this->idJob, $this->jobPassword, null, $key, JobSettingsResolver::DEFAULT_TTL),
+            'precondition: the deleted row still answers from the cache'
+        );
+
+        $service = new class (
+            $this->realSqlDb(),
+            $this->createStub(FeatureSet::class),
+            $this->createStub(MatecatLogger::class),
+            null,
+        ) extends JobSplitMergeService {
+            public function sweep(JobStruct $chunk, string $oldPassword, string $newPassword): void
+            {
+                $this->sweepCredentialCaches($chunk, $oldPassword, $newPassword);
+            }
+        };
+
+        $service->sweep($this->chunk(), $this->jobPassword, 'jcci_merged_pwd');
+
+        $this->assertNull(
+            $resolver->resolve($this->idJob, $this->jobPassword, null, $key, JobSettingsResolver::DEFAULT_TTL),
+            'the merge sweep must evict the job metadata cached for the retired password'
+        );
     }
 }
