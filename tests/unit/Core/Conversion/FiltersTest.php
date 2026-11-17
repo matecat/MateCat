@@ -7,10 +7,13 @@ use Exception;
 use Matecat\TestHelpers\AbstractTest;
 use Model\Conversion\Filters;
 use Model\Filters\DTO\IDto;
+use Model\Filters\DTO\Markdown;
 use Model\Jobs\JobStruct;
 use PDO;
 use PDOStatement;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
+use Utils\Network\MultiCurlHandler;
 use Utils\Registry\AppConfig;
 
 /**
@@ -71,6 +74,63 @@ class TestableFilters extends Filters
     public function testFormatErrorMessage(string $error): string
     {
         return $this->formatErrorMessage($error);
+    }
+}
+
+/**
+ * Runs the real sendToFilters() against a canned curl result instead of the network.
+ */
+class FakeCurlFilters extends Filters
+{
+    /** @var array<string, string|false> */
+    public array $contents = [];
+
+    /** @var array<string, array<string, mixed>> */
+    public array $infos = [];
+
+    protected function createMultiCurlHandler(): MultiCurlHandler
+    {
+        $handler = new class extends MultiCurlHandler {
+            /** @var array<string, string|false> */
+            public array $contents = [];
+
+            /** @var array<string, array<string, mixed>> */
+            public array $infos = [];
+
+            public function createResource(string $url, ?array $options = [], ?string $tokenHash = null): string
+            {
+                return (string)$tokenHash;
+            }
+
+            public function setRequestHeader(string $tokenHash): MultiCurlHandler
+            {
+                return $this;
+            }
+
+            public function multiExec(): void
+            {
+            }
+
+            public function getAllContents(?callable $function = null): mixed
+            {
+                return $this->contents;
+            }
+
+            public function getAllInfo(): array
+            {
+                return $this->infos;
+            }
+
+            public function getAllHeaders(): array
+            {
+                return [];
+            }
+        };
+
+        $handler->contents = $this->contents;
+        $handler->infos = $this->infos;
+
+        return $handler;
     }
 }
 
@@ -264,6 +324,57 @@ class FiltersTest extends AbstractTest
             $params = json_decode($data['extractionParams'], true);
             self::assertSame('custom_value', $params['custom_key']);
             self::assertTrue($params['segment_icu']);
+        } finally {
+            @unlink($tmpFile);
+        }
+    }
+
+    /**
+     * The markdown DTO reaches the Filters service unchanged, next to the ICU flag. The key list
+     * is sent even while extraction is off: Filters ignores it then, and keeping it on the wire
+     * is what lets a template round-trip.
+     *
+     * @return array<string, array{array<string, mixed>, array<string, mixed>}>
+     */
+    public static function markdownExtractionParamsProvider(): array
+    {
+        return [
+            'extraction on, translatable keys' => [
+                ['extract_frontmatter' => true, 'translate_frontmatter_keys' => ['title', 'description']],
+                ['extract_frontmatter' => true, 'translate_frontmatter_keys' => ['title', 'description'], 'segment_icu' => true],
+            ],
+            'extraction on, non-translatable keys win' => [
+                ['extract_frontmatter' => true, 'translate_frontmatter_keys' => ['title'], 'do_not_translate_frontmatter_keys' => ['slug']],
+                ['extract_frontmatter' => true, 'do_not_translate_frontmatter_keys' => ['slug'], 'segment_icu' => true],
+            ],
+            'extraction off, keys kept' => [
+                ['extract_frontmatter' => false, 'translate_frontmatter_keys' => ['title']],
+                ['extract_frontmatter' => false, 'translate_frontmatter_keys' => ['title'], 'segment_icu' => true],
+            ],
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $markdown
+     * @param array<string, mixed> $expected
+     */
+    #[Test]
+    #[DataProvider('markdownExtractionParamsProvider')]
+    public function sourceToXliffSendsMarkdownExtractionParams(array $markdown, array $expected): void
+    {
+        $tmpFile = tempnam(sys_get_temp_dir(), 'test-filter-') . '.md';
+        file_put_contents($tmpFile, "---\ntitle: Hello\nslug: hello\n---\n# Body\n");
+
+        try {
+            $dto = new Markdown();
+            $dto->fromArray($markdown);
+
+            $this->filters->stubbedResponse = [['successful' => true]];
+
+            $this->filters->sourceToXliff($tmpFile, 'en-US', 'it-IT', null, $dto);
+
+            $data = $this->filters->sendToFiltersCalls[0]['dataGroups'][0];
+            self::assertSame($expected, json_decode($data['extractionParams'], true));
         } finally {
             @unlink($tmpFile);
         }
@@ -504,6 +615,23 @@ class FiltersTest extends AbstractTest
         } finally {
             @unlink($tmpFile);
         }
+    }
+
+    // ── sendToFilters error path ───────────────────────────────────────
+
+    #[Test]
+    public function xliffToTargetFlagsAFailedConversionAsNotSuccessful(): void
+    {
+        $filters = new FakeCurlFilters();
+        $filters->contents = ['file1' => '{"errorMessage":"conversion exploded"}'];
+        $filters->infos = ['file1' => ['http_code' => 500, 'errno' => 0, 'error' => '', 'curlinfo_total_time' => 0.25]];
+
+        $result = $filters->xliffToTarget(['file1' => ['document_content' => '<xliff/>']]);
+
+        self::assertFalse($result['file1']['successful']);
+        self::assertSame('conversion exploded', $result['file1']['errorMessage']);
+        self::assertArrayNotHasKey('document_content', $result['file1']);
+        self::assertEquals(250, $result['file1']['time']);
     }
 
     // ── constants ──────────────────────────────────────────────────────

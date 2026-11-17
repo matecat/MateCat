@@ -4,14 +4,18 @@ namespace Matecat\Core\Controllers\Authentication;
 
 use Controller\Abstracts\Authentication\SessionTokenStoreHandler;
 use Matecat\TestHelpers\AbstractTest;
+use Matecat\TestHelpers\CapturesNamedLogs;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use Predis\Client;
 use ReflectionProperty;
+use Utils\Registry\AppConfig;
 
 #[CoversClass(SessionTokenStoreHandler::class)]
 class SessionTokenStoreHandlerTest extends AbstractTest
 {
+    use CapturesNamedLogs;
+
     #[Test]
     public function constructorSetsCacheTtlTo7Days(): void
     {
@@ -320,6 +324,148 @@ class SessionTokenStoreHandlerTest extends AbstractTest
         // argument list that Redis rejects is unreachable by construction rather than by a guard,
         // because the map's DEL sits outside the loop.
         $this->assertSame(['active_user_login_tokens:123'], $deleted);
+    }
+
+    #[Test]
+    public function setCookieLoginTokenActiveStoresTheIssueTimeAndNeverTheCookie(): void
+    {
+        $stored = null;
+        $redis = $this->createStub(Client::class);
+        $redis->method('__call')
+            ->willReturnCallback(function (string $method, array $args) use (&$stored) {
+                if ($method === 'hset') {
+                    $stored = $args[2];
+                }
+
+                return 1;
+            });
+
+        SessionTokenStoreHandler::setCacheConnection($redis);
+        $handler = new SessionTokenStoreHandler();
+
+        $before = time();
+        $handler->setCookieLoginTokenActive(123, 'token-value');
+        $after = time();
+
+        $this->assertIsString($stored);
+        $this->assertStringNotContainsString('token-value', $stored);
+
+        $value = unserialize($stored);
+        $this->assertIsArray($value);
+        $this->assertCount(1, $value);
+        $this->assertIsInt($value[0]);
+        $this->assertGreaterThanOrEqual($before, $value[0]);
+        $this->assertLessThanOrEqual($after, $value[0]);
+    }
+
+    #[Test]
+    public function isLoginCookieStillActiveReturnsTrueForAStoredIssueTime(): void
+    {
+        $redis = $this->createStub(Client::class);
+        $redis->method('__call')
+            ->willReturnCallback(function (string $method) {
+                if ($method === 'hget') {
+                    return serialize([1700000000]);
+                }
+
+                return null;
+            });
+
+        SessionTokenStoreHandler::setCacheConnection($redis);
+        $handler = new SessionTokenStoreHandler();
+
+        $this->assertTrue($handler->isLoginCookieStillActive(123, 'token-value'));
+    }
+
+    #[Test]
+    public function pruneDropsAFieldOlderThanTheCookieLifetimeWithoutAskingTheCallback(): void
+    {
+        $oldField = md5('old-cookie');
+        $freshField = md5('fresh-cookie');
+
+        $touched = [];
+        $asked = [];
+
+        $redis = $this->createStub(Client::class);
+        $redis->method('__call')
+            ->willReturnCallback(
+                function (string $method, array $args) use (&$touched, $oldField, $freshField) {
+                    if ($method === 'hgetall') {
+                        return [
+                            $oldField => serialize([time() - AppConfig::$AUTHCOOKIEDURATION - 60]),
+                            $freshField => serialize([time() - 60]),
+                        ];
+                    }
+
+                    $touched[] = [$method, $args[1] ?? $args[0]];
+
+                    return 1;
+                }
+            );
+
+        SessionTokenStoreHandler::setCacheConnection($redis);
+
+        $callback = function (string $token) use (&$asked): bool {
+            $asked[] = $token;
+
+            return true;
+        };
+
+        (new SessionTokenStoreHandler())->pruneExpiredLoginTokens(36, $callback);
+
+        $this->assertSame([['hdel', [$oldField]], ['del', $oldField]], $touched);
+        $this->assertSame([], $asked);
+    }
+
+    #[Test]
+    public function theLoginCookieLogNeverHoldsTheCookieOnAWrite(): void
+    {
+        $log = $this->captureLog('login_cookie_cache');
+
+        $redis = $this->createStub(Client::class);
+        $redis->method('__call')->willReturn(1);
+
+        SessionTokenStoreHandler::setCacheConnection($redis);
+        $handler = new SessionTokenStoreHandler();
+        $handler->setCookieLoginTokenActive(123, 'token-value');
+
+        $records = $log->getRecords();
+        $this->assertNotEmpty($records);
+        foreach ($records as $record) {
+            $this->assertStringNotContainsString(
+                'token-value',
+                (string)json_encode([$record->message, $record->context])
+            );
+        }
+    }
+
+    #[Test]
+    public function theLoginCookieLogNeverHoldsTheCookieOnARead(): void
+    {
+        $log = $this->captureLog('login_cookie_cache');
+
+        $redis = $this->createStub(Client::class);
+        $redis->method('__call')
+            ->willReturnCallback(function (string $method) {
+                if ($method === 'hget') {
+                    return serialize([1700000000]);
+                }
+
+                return null;
+            });
+
+        SessionTokenStoreHandler::setCacheConnection($redis);
+        $handler = new SessionTokenStoreHandler();
+        $handler->isLoginCookieStillActive(123, 'token-value');
+
+        $records = $log->getRecords();
+        $this->assertNotEmpty($records);
+        foreach ($records as $record) {
+            $this->assertStringNotContainsString(
+                'token-value',
+                (string)json_encode([$record->message, $record->context])
+            );
+        }
     }
 
     protected function tearDown(): void
