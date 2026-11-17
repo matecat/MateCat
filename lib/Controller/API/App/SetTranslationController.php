@@ -27,6 +27,8 @@ use Model\FeaturesBase\Hook\Event\Run\PostAddSegmentTranslationEvent;
 use Model\FeaturesBase\Hook\Event\Run\SetTranslationCommittedEvent;
 use Model\Files\FilesPartsDao;
 use Model\Jobs\JobDao;
+use Model\Jobs\JobSettingsResolver;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectDao;
@@ -313,7 +315,17 @@ class SetTranslationController extends AbstractStatefulKleinController
                 /** @var ProjectStruct $project */
                 $project = $this->data['project'];
                 // case 1. is MT
-                $new_translation->suggestion_match = (string)((new ProjectMetadataDao($this->getDatabase()))->setCacheTTL(3600)->getValue((int)$project->id, ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value) ?? 85);
+                // The MT application threshold is overridable per job so the project owner can
+                // change it after creation. A job row exists only where it was overridden; every
+                // other job answers from the project's creation-time value.
+                // @see JobSettingsResolver
+                $new_translation->suggestion_match = (string)((new JobSettingsResolver($this->getDatabase()))->resolve(
+                    $this->id_job,
+                    $this->password,
+                    (int)$project->id,
+                    JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value,
+                    3600
+                ) ?? 85);
                 $new_translation->suggestion_source = EngineConstants::MT;
             } elseif ($client_chosen_suggestion->match == InternalMatchesConstants::NO_MATCH) {
                 // case 2. no match

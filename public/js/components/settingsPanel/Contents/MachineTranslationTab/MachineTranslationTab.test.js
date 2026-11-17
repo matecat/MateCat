@@ -243,6 +243,7 @@ test('Modern MT and glossary', async () => {
   const user = userEvent.setup()
 
   global.config.isLoggedIn = true
+  global.config.ownerIsMe = true
   config.is_cattool = false
 
   const projectTemplates = [
@@ -343,6 +344,7 @@ test('DeepL and glossary', async () => {
   const user = userEvent.setup()
 
   global.config.isLoggedIn = true
+  global.config.ownerIsMe = true
   config.is_cattool = false
 
   const projectTemplates = [

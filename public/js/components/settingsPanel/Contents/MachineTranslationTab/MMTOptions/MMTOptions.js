@@ -79,7 +79,6 @@ export const MMTOptions = ({isCattoolPage}) => {
         <Controller
           control={control}
           name="mmt_ignore_glossary_case"
-          disabled={isCattoolPage}
           render={({field: {onChange, value, name, disabled}}) => (
             <Switch
               name={name}

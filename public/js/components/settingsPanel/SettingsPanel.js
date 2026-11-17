@@ -28,6 +28,7 @@ import {
   BUTTON_TYPE,
 } from '../common/Button/Button'
 import IconClose from '../../../img/icons/IconClose'
+import {EditorMachineTranslationTab} from '../segments/EditorMachineTranslationTab'
 import {SETTINGS_PANEL_TABS} from './SettingsPanelConstants'
 
 let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
@@ -50,7 +51,11 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
       label: 'Machine translation',
       description:
         'Manage your machine translation engines and select which should be used on your new project. <a href="https://guides.matecat.com/machine-translation-engines" target="_blank">More details</a>',
-      component: <MachineTranslationTab />,
+      component: isCattool ? (
+        <EditorMachineTranslationTab />
+      ) : (
+        <MachineTranslationTab />
+      ),
     },
     ...(!isCattool
       ? [
