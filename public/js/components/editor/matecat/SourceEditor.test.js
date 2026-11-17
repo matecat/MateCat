@@ -45,7 +45,6 @@ jest.mock('../../../actions/SegmentActions', () => ({
   __esModule: true,
   default: {
     closeSplitSegment: jest.fn(),
-    focusTags: jest.fn(),
     helpAiAssistant: jest.fn(),
     highlightTags: jest.fn(),
     openConcordance: jest.fn(),
@@ -475,7 +474,7 @@ describe('SourceEditor tags', () => {
     expect([from, to]).toEqual([0, view.state.doc.length])
   })
 
-  test('blurring the source clears the tag highlight and focus everywhere and hides the toolbar', async () => {
+  test('blurring the source clears the tag highlight everywhere and hides the toolbar', async () => {
     const {container} = renderSource(makeSegment())
     selectText(viewOf(container), 'Hello')
     fireEvent.mouseUp(sourceEl(container))
@@ -485,7 +484,6 @@ describe('SourceEditor tags', () => {
     fireEvent.blur(sourceEl(container))
     await flush()
     expect(SegmentActions.highlightTags).toHaveBeenCalledWith()
-    expect(SegmentActions.focusTags).toHaveBeenCalledWith([])
     expect(container.querySelector('.optionsToolbar')).not.toBeInTheDocument()
   })
 })

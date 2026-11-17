@@ -11,10 +11,10 @@ import {Decoration, EditorView, WidgetType} from '@codemirror/view'
 import {addTags, locateTags, serializeWithOffsets, tagRanges} from './docModel'
 
 /** Receives chip events: `(name, payload)`. */
-export const tagEventSink = Facet.define({combine: (values) => values[0]})
+const tagEventSink = Facet.define({combine: (values) => values[0]})
 
 /** Text direction of the editor, for the open/close chip shapes. */
-export const tagDirection = Facet.define({
+const tagDirection = Facet.define({
   combine: (values) => values[0] ?? 'ltr',
 })
 
@@ -135,7 +135,7 @@ class TagWidget extends WidgetType {
 }
 
 /** Selects the tag at from..to and reports `tagClick`. */
-export const selectTag = (view, from, to, token) => {
+const selectTag = (view, from, to, token) => {
   view.focus()
   view.dispatch({
     selection: {anchor: from, head: to},
@@ -202,7 +202,7 @@ export const chips = StateField.define({
  * Drops user edits that start or end inside a tag. Programmatic changes (no user event) and IME composition pass:
  * refusing a composition would leave CodeMirror's DOM out of step.
  */
-export const protectTags = EditorState.transactionFilter.of((tr) => {
+const protectTags = EditorState.transactionFilter.of((tr) => {
   const event = tr.annotation(Transaction.userEvent)
   if (!tr.docChanged || !event || event.startsWith('input.type.compose'))
     return tr

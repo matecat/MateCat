@@ -4,7 +4,7 @@ import {keymap} from '@codemirror/view'
 import {historyKeymap, standardKeymap} from '@codemirror/commands'
 import matchTypingSequence from '../../../utils/matchTypingSequence/matchTypingSequence'
 
-export const IS_MAC =
+const IS_MAC =
   typeof navigator !== 'undefined' &&
   /Mac|iPhone|iPad|iPod/.test(navigator.platform)
 const IS_CHROMEBOOK =
@@ -20,7 +20,7 @@ export const hasCommandModifier = (e, isMac = IS_MAC) =>
   isMac ? e.metaKey && !e.altKey : e.ctrlKey && !e.altKey
 
 /** Command replacing the selection with plain document text (never a tag). */
-export const insertDocText = (text) => (view) => {
+const insertDocText = (text) => (view) => {
   if (view.state.readOnly) return false
   view.dispatch(view.state.replaceSelection(text), {
     userEvent: 'input',

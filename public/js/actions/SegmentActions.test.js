@@ -701,7 +701,6 @@ describe('SegmentActions — simple dispatch actions', () => {
       hasError: false,
     })
     SegmentActions.setIsCurrentSearchOccurrenceTag(true)
-    SegmentActions.focusTags(['a'])
     SegmentActions.aiAlternativeSuggestion({sid: '1', data: {}})
     SegmentActions.aiFeedbackSuggestion({sid: '1', data: {}})
     SegmentActions.changeCharactersCounterRules()

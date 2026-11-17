@@ -2042,11 +2042,6 @@ AppDispatcher.register(function (action) {
         ...action,
       })
       break
-    case SegmentConstants.FOCUS_TAGS:
-      SegmentStore.emitChange(SegmentConstants.FOCUS_TAGS, {
-        ...action,
-      })
-      break
     case SegmentConstants.REFRESH_TAG_MAP:
       SegmentStore.emitChange(SegmentConstants.REFRESH_TAG_MAP)
       SegmentStore.emitChange(

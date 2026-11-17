@@ -459,7 +459,6 @@ const SourceEditor = ({segment, value}) => {
   const onBlur = () => {
     setTimeout(() => {
       SegmentActions.highlightTags()
-      SegmentActions.focusTags([])
     })
     setToolbar({visible: false, words: ''})
   }

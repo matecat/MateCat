@@ -106,7 +106,7 @@ const chipOf = (target, root) => {
  * What a hovered SegmentView chip reports, as the editor chips do: the label is the text of its label element, which
  * Tag.scss trims with an ellipsis.
  */
-export const chipHover = (chip) => {
+const chipHover = (chip) => {
   const text = chip.querySelector('.tag-text, [data-text]') ?? chip
   const {top, left, width, height} = chip.getBoundingClientRect()
   return {

@@ -80,30 +80,32 @@ describe('as a source', () => {
 })
 
 describe('as a target', () => {
-  // Each segment against its own source tags (nothing missing) and against its neighbour's (tags missing, indexes
-  // inherited from a different source), and with no source tag map at all.
-  const sourceTagMaps = (index) => [
-    undefined,
-    [],
-    sourceStoreData(SEGMENTS[index] || 'x').tagRange,
-    sourceStoreData(SEGMENTS[(index + 1) % SEGMENTS.length] || 'x').tagRange,
-  ]
+  // Each segment against its own source tags (nothing missing), against a neighbour's (tags missing, indexes inherited
+  // from a different source) and with no source tag map at all. The golden keys every case by the segment and, under
+  // `neighbours`, by the neighbour source it was frozen with, so adding, removing or reordering a case moves no other.
+  const sourceTagMap = (source) => sourceStoreData(source || 'x').tagRange
+  const update = (translation, tagMap) => ({
+    update: translationUpdate(translation, tagMap),
+    tagIdentities: tagIdentities(translation, tagMap),
+  })
 
-  test.each(SEGMENTS.map((segment, index) => [segment, index]))(
-    'updates the store as Draft does: %j',
-    (translation, index) => {
-      expect(
-        json({
-          translation,
-          maps: sourceTagMaps(index).map((sourceTagMap) => ({
-            update: translationUpdate(translation, sourceTagMap),
-            tagIdentities: tagIdentities(translation, sourceTagMap),
-          })),
-          counter: [true, false].map((countTags) =>
-            charactersCounter(translation, countTags),
-          ),
-        }),
-      ).toStrictEqual(GOLDEN.target[index])
-    },
-  )
+  test.each(SEGMENTS)('updates the store as Draft does: %j', (translation) => {
+    const golden = GOLDEN.target[translation]
+    expect(
+      json({
+        counter: [true, false].map((countTags) =>
+          charactersCounter(translation, countTags),
+        ),
+        none: update(translation, undefined),
+        empty: update(translation, []),
+        own: update(translation, sourceTagMap(translation)),
+        neighbours: Object.fromEntries(
+          Object.keys(golden?.neighbours ?? {}).map((source) => [
+            source,
+            update(translation, sourceTagMap(source)),
+          ]),
+        ),
+      }),
+    ).toStrictEqual(golden)
+  })
 })

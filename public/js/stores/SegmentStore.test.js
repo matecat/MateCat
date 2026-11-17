@@ -1146,7 +1146,6 @@ describe('SegmentStore', () => {
           sid: '1',
         },
         {actionType: SegmentConstants.OPEN_GLOSSARY_FORM_PREFILL, sid: '1'},
-        {actionType: SegmentConstants.FOCUS_TAGS, sid: '1'},
         {actionType: SegmentConstants.REFRESH_TAG_MAP},
         {actionType: SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES},
         {actionType: SegmentConstants.LARA_STYLES, data: {}},

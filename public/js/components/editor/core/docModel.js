@@ -18,9 +18,9 @@ import {
 } from '../../segmentView/segmentModel'
 import {CHARACTER_TAGS} from '../../../utils/segmentText/specialChars'
 
-export const LF = '##$_0A$##'
-export const NBSP = '##$_A0$##'
-export const TAB = '##$_09$##'
+const LF = '##$_0A$##'
+const NBSP = '##$_A0$##'
+const TAB = '##$_09$##'
 export const CR = '##$_0D$##'
 
 // Placeholders the document holds as the character they stand for. The word joiner is already that character in the

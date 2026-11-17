@@ -1725,12 +1725,6 @@ const SegmentActions = {
       ...filledFields,
     })
   },
-  focusTags: function (tagsSelected) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.FOCUS_TAGS,
-      tagsSelected,
-    })
-  },
   setCurrentSegment: function (id_segment) {
     if (id_segment == null) return
     setLastSegmentFromLocalStorage(id_segment.toString())
