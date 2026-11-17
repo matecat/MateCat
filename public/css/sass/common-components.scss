@@ -149,13 +149,15 @@ input[type='password'] {
   &::placeholder {
     color: colors.$grey400;
   }
-  &:hover {
-    border: 1px solid colors.$grey400;
-  }
-  &:focus,
-  &:active {
-    border: 1px solid colors.$grey400;
-    outline: 1px solid colors.$grey400;
+  &:not(:disabled) {
+    &:hover {
+      border: 1px solid colors.$grey400;
+    }
+    &:focus,
+    &:active {
+      border: 1px solid colors.$grey400;
+      outline: 1px solid colors.$grey400;
+    }
   }
   &:disabled {
     background-color: colors.$grey75;
