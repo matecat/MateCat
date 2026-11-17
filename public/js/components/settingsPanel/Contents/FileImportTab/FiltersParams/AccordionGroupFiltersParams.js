@@ -7,6 +7,7 @@ import {MsWord} from './MsWord'
 import {MsPowerpoint} from './MsPowerpoint'
 import {MsExcel} from './MsExcel'
 import {Dita} from './Dita'
+import {Markdown} from './Markdown'
 import {FiltersParamsContext} from './FiltersParamsContext'
 import {isEqual} from 'lodash'
 
@@ -18,6 +19,7 @@ const ACCORDION_GROUP = {
   msExcel: 'MS Excel',
   msPowerpoint: 'MS PowerPoint',
   dita: 'DITA/DITAMAP',
+  markdown: 'Markdown',
 }
 
 export const AccordionGroupFiltersParams = () => {
@@ -41,9 +43,11 @@ export const AccordionGroupFiltersParams = () => {
       <MsExcel />
     ) : ACCORDION_GROUP.msPowerpoint === section ? (
       <MsPowerpoint />
-    ) : (
+    ) : ACCORDION_GROUP.dita === section ? (
       <Dita />
-    )
+    ) : ACCORDION_GROUP.markdown === section ? (
+      <Markdown />
+    ) : null
 
   const isUnsavedSection = (section) => {
     const originalTemplate = templates.find(
