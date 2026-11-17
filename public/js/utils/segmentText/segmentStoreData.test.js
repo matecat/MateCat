@@ -184,3 +184,18 @@ describe('markup the segment string carries outside its tags', () => {
     )
   })
 })
+
+describe('a long segment', () => {
+  test('is updated in linear time', () => {
+    // The space tags were found with lookarounds scanning to both ends of the string for every blank: a 64 KB segment
+    // with no tags took seconds. The bound is loose for slow machines and still far below the quadratic time.
+    const translation = 'Some words and more words here. '.repeat(2048)
+    const {tagRange} = sourceStoreData('<g id="1">x</g>')
+
+    const start = performance.now()
+    const {missingTags} = translationUpdate(translation, tagRange)
+
+    expect(performance.now() - start).toBeLessThan(2000)
+    expect(missingTags).toHaveLength(2)
+  })
+})

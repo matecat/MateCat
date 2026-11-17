@@ -11,9 +11,10 @@ const findTagWithRegex = (text, tagName) => {
   const tagRange = []
   let matchArray
   try {
-    const {type, regex} = tagSignatures[tagName]
+    const {type, regex, find} = tagSignatures[tagName]
+    const matches = find ? find(text) : text.matchAll(regex)
 
-    while ((matchArray = regex.exec(text)) !== null) {
+    for (matchArray of matches) {
       const tag = new TagStruct(
         matchArray.index,
         matchArray[0].length,
