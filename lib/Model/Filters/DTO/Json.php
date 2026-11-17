@@ -36,12 +36,13 @@ class Json implements IDto
     public function setInnerContentType(?string $inner_content_type): void
     {
         $mimeTypes = [
-            'text/html'
+            'text/html',
+            'text/plain'
         ];
 
         if ($inner_content_type !== null && !in_array($inner_content_type, $mimeTypes)) {
             throw new DomainException(
-                "JSON Inner content type not valid. Allowed values: ['text/html']"
+                "JSON Inner content type not valid. Allowed values: ['text/html', 'text/plain']"
             );
         }
 

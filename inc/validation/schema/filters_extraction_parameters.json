@@ -31,6 +31,7 @@
           "type": ["null", "string"],
           "enum": [
             null,
+            "text/plain",
             "text/html"
           ],
           "nullable": true
@@ -129,6 +130,7 @@
           "type": ["null", "string"],
           "enum": [
             null,
+            "text/plain",
             "text/html",
             "text/xml",
             "application/xml",
