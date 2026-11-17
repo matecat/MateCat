@@ -302,6 +302,10 @@
   &:hover {
     background-color: white;
   }
+
+  &:disabled {
+    background-color: transparent !important;
+  }
 }
 
 .tm-key-row-key {
@@ -620,4 +624,8 @@
     display: flex;
     gap: 5px;
   }
+}
+
+.tm-key-row-last-column-empty {
+  width: 140px;
 }
