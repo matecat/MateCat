@@ -287,7 +287,6 @@ const makeSegment = (raw, extra = {}) => ({
   muted: false,
   openSplit: false,
   sourceTagMap: translationUpdate(raw).tagMap,
-  targetTagMap: [],
   missingTagsInTarget: [],
   warnings: {},
   tagMismatch: {},

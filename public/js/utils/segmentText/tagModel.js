@@ -296,8 +296,6 @@ function TagStruct(offset = -1, length = 0, type = null, name = null) {
     decodedText: null,
     openTagId: null,
     closeTagId: null,
-    openTagKey: null,
-    closeTagKey: null,
     placeholder: null,
     originalOffset: -1,
   }

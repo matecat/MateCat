@@ -36,8 +36,6 @@ test('TagStruct sets default fields from its constructor arguments', () => {
     decodedText: null,
     openTagId: null,
     closeTagId: null,
-    openTagKey: null,
-    closeTagKey: null,
     placeholder: null,
     originalOffset: -1,
   })

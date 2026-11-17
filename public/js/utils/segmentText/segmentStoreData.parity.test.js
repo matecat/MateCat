@@ -1,7 +1,9 @@
 // Golden check: segmentStoreData must give the store exactly what the Draft bridges (sourceEditorBridge,
 // targetEditorBridge) gave it, for every segment string: the round-trip corpus and the edge cases below. What the
-// bridges gave is frozen in __golden__/segmentStoreData.json, as JSON: compared after the same JSON round trip, so tag
-// structs are compared by their fields. The edge cases marked below are the exceptions: there Draft was wrong.
+// bridges gave is frozen in __golden__/segmentStoreData.json, as JSON: compared after the same JSON round trip, so tags
+// are compared by their fields. A tag is frozen with the fields the store keeps (its offset, and id, name, encodedText,
+// decodedText, placeholder, index and tagRole of its data), taken from Draft's tag structs. The edge cases marked below
+// are the exceptions: there Draft was wrong.
 import CORPUS from '../../components/editor/core/__fixtures__/roundTripCorpus.json'
 import {
   charactersCounter,

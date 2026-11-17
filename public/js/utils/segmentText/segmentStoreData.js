@@ -1,11 +1,11 @@
 // What the CodeMirror editors publish to the segment store, computed from the segment string alone: the decoded
 // segment, the plain text, the tag map, the missing tags, the Lexiqa text and the character counter. The store, the
-// QA warnings and the tag menu read these in the shapes Draft's encodeContent/decodeSegment/matchTagInEditor produced,
-// so this reproduces those shapes exactly, edge cases included: the editor text model below follows Draft's own
-// block and entity rules (a tag becomes an entity only when its placeholder fits inside one block, an entity cut by a
-// later range loses all its characters, and so on).
+// QA warnings and the tag menu read these with the values Draft's encodeContent/decodeSegment/matchTagInEditor
+// produced (a tag keeps only the fields they read, see storeTag), so this reproduces those values exactly, edge cases
+// included: the editor text model below follows Draft's own block and entity rules (a tag becomes an entity only when
+// its placeholder fits inside one block, an entity cut by a later range loses all its characters, and so on).
 import matchTag from './matchTag'
-import {getErrorCheckTag, getSplitBlockTag, TagStruct} from './tagModel'
+import {getErrorCheckTag, getSplitBlockTag} from './tagModel'
 import {createTagNumberer} from './compressibleTagUtils'
 import {
   decodeHtmlEntities,
@@ -240,7 +240,7 @@ const toEditorText = (segment = '', sourceTagMap) => {
         from >= blockStart &&
         !lineBreakTags.includes(tag.data.name)
       ) {
-        const entity = entities.push({type: tag.type, data: tag.data}) - 1
+        const entity = entities.push({data: tag.data}) - 1
         releaseEntitiesAtEdges(block, from - blockStart, to - blockStart)
         for (let i = from - blockStart; i < to - blockStart; i++)
           block.ents[i] = entity
@@ -278,25 +278,38 @@ const decodedSegmentOf = ({blocks, entities}) => {
   return encodeEditorText(lines.join('\n'))
 }
 
-/** The tags in the editor text, in order (nbsp and tab included, line breaks not), as the store's tag map. */
+// A tag as the store keeps it: its offset in the decoded segment (the order of the tag maps) and what the tag menu,
+// the missing tag check and the source index inheritance read. `index` and `tagRole` only for a numbered tag.
+const storeTag = ({
+  offset,
+  data: {id, name, encodedText, decodedText, placeholder, index, tagRole},
+}) => ({
+  offset,
+  data: {
+    id,
+    name,
+    encodedText,
+    decodedText,
+    placeholder,
+    ...(index !== undefined && {index}),
+    ...(tagRole !== undefined && {tagRole}),
+  },
+})
+
+/**
+ * The tags in the editor text, in order (nbsp and tab included, line breaks not). A target tag carries no index: only
+ * the source tags are numbered for the store.
+ */
 const tagMapOf = ({blocks, entities}) => {
   if (!hasText(blocks)) return []
   return blocks.flatMap((block) =>
     entityRuns(block).map(({entity}) => {
-      const {type, data} = entities[entity]
-      const tag = new TagStruct(
-        data.originalOffset,
-        data.encodedText.length,
-        type,
-      )
-      tag.data.encodedText = data.encodedText
-      tag.data.id = data.id
-      tag.data.name = data.name
-      tag.data.placeholder = data.placeholder
-      tag.data.decodedText = data.decodedText
-      tag.data.openTagId = data.openTagId
-      tag.data.closeTagId = data.closeTagId
-      return tag
+      const {originalOffset, id, name, encodedText, decodedText, placeholder} =
+        entities[entity].data
+      return storeTag({
+        offset: originalOffset,
+        data: {id, name, encodedText, decodedText, placeholder},
+      })
     }),
   )
 }
@@ -313,14 +326,15 @@ export const sourceStoreData = (source) => {
   return {
     decodedSegment,
     plainText: plainTextOf(editorText),
-    tagRange: editorText.tagRange,
+    tagRange: editorText.tagRange.map(storeTag),
     lxqText: prepareTextForLexiqa(decodedSegment),
   }
 }
 
 /**
- * What SegmentActions.updateTranslation takes for `translation` (a segment string): the plain text, the tag map, the
- * source tags missing from it and the Lexiqa text.
+ * What SegmentActions.updateTranslation takes for `translation` (a segment string): the plain text, the source tags
+ * missing from it and the Lexiqa text. `tagMap`, the tags of the translation, is what the missing tags are computed
+ * from.
  */
 export const translationUpdate = (translation, sourceTagMap) => {
   const editorText = toEditorText(translation, sourceTagMap)
@@ -329,7 +343,7 @@ export const translationUpdate = (translation, sourceTagMap) => {
   return {
     plainText: plainTextOf(editorText),
     tagMap,
-    missingTags,
+    missingTags: missingTags.map(storeTag),
     lxqDecodedTranslation: prepareTextForLexiqa(decodedSegmentOf(editorText)),
   }
 }
