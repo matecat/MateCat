@@ -136,6 +136,50 @@ class ICUCheckerTest extends AbstractTest
         $this->assertTrue($this->errorManager->thereAreErrors());
     }
 
+    // ========== HTML escaping ==========
+    // The message ends up in ErrObject::$debug, which the editor injects with
+    // dangerouslySetInnerHTML. A malformed selector makes the ICU validator echo the
+    // translator's own target text back inside the exception message, so it must arrive escaped.
+
+    #[Test]
+    public function checkICUMessageConsistencyEscapesTargetTextEchoedByTheValidator(): void
+    {
+        $comparator = new MessagePatternComparator(
+            'en',
+            'it',
+            'You have {n, plural, one{a car} other{# cars}}',
+            'You have {n, plural, o<b>ne{a car} other{# cars}}',
+        );
+
+        $this->icuChecker->setIcuPatternComparator($comparator);
+        $this->icuChecker->checkICUMessageConsistency();
+
+        $message = $this->errorManager->getErrorMessage(ErrorManager::ERR_ICU_VALIDATION);
+
+        $this->assertStringContainsString('o&lt;b&gt;ne', $message);
+        $this->assertStringNotContainsString('<b>', $message);
+    }
+
+    #[Test]
+    public function checkICUMessageConsistencyKeepsTheLineBreakSeparators(): void
+    {
+        // Escaping the parts must not escape the <br/> the checker joins them with.
+        $comparator = new MessagePatternComparator(
+            'en',
+            'it',
+            'You have {select, plural, one{a car} other{# cars}}',
+            'You have {select, plural, one{a car} other{# cars}}',
+        );
+
+        $this->icuChecker->setIcuPatternComparator($comparator);
+        $this->icuChecker->checkICUMessageConsistency();
+
+        $message = $this->errorManager->getErrorMessage(ErrorManager::ERR_ICU_VALIDATION);
+
+        $this->assertStringNotContainsString('&lt;br', $message);
+        $this->assertStringNotContainsString('&amp;', $message);
+    }
+
     // ========== Edge Cases ==========
 
     #[Test]

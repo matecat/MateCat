@@ -18,7 +18,7 @@ export const downloadFile = ({
   signal,
 }) =>
   downloadFromUrl({
-    url: `${config.basepath}api/v2/translation/${idJob}/${password}?download_type=all&disableErrorCheck=${checkErrors ? 0 : 1}`,
+    url: `${config.basepath}api/v3/jobs/${idJob}/${password}/translation?download_type=all&disableErrorCheck=${checkErrors ? 0 : 1}`,
     onProgress,
     signal,
   })

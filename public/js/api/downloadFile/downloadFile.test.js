@@ -20,7 +20,7 @@ test('downloads the translation of the given job with the error check on', async
   await downloadFile({idJob: 7, password: 'pass', onProgress, signal})
 
   expect(downloadFromUrl).toHaveBeenCalledWith({
-    url: 'http://localhost/api/v2/translation/7/pass?download_type=all&disableErrorCheck=0',
+    url: 'http://localhost/api/v3/jobs/7/pass/translation?download_type=all&disableErrorCheck=0',
     onProgress,
     signal,
   })
@@ -36,6 +36,6 @@ test('defaults to the job open in the page', async () => {
   await downloadFile({})
 
   expect(downloadFromUrl.mock.calls[0][0].url).toBe(
-    'http://localhost/api/v2/translation/9/jobpwd?download_type=all&disableErrorCheck=0',
+    'http://localhost/api/v3/jobs/9/jobpwd/translation?download_type=all&disableErrorCheck=0',
   )
 })

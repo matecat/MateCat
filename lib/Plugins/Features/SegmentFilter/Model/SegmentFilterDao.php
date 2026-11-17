@@ -81,6 +81,9 @@ class SegmentFilterDao extends AbstractDao
             'matches' => $this->getSqlForMatches($where),
             'mt', 'fuzzies_50_74', 'fuzzies_75_84', 'fuzzies_85_94', 'fuzzies_95_99' => $this->getSqlForMatchType($where),
             'todo' => $this->getSqlForToDo($where, $chunk->isReview(), $chunk->isSecondPassReview()),
+            'with_issues' => $chunk->isReview()
+                ? $this->getSqlForWithIssues($where)
+                : throw new Exception('Sample type is only available in revision: ' . $filter->sampleType()),
             default => throw new Exception('Sample type is not valid: ' . $filter->sampleType()),
         };
 
@@ -395,6 +398,32 @@ class SegmentFilterDao extends AbstractDao
            WHERE 1
            {$where['sql']}
            ORDER BY st.id_segment
+        ";
+    }
+
+    /**
+     * Segments carrying at least one live revision issue, from any revision phase (R1 and R2 alike).
+     *
+     * Driven by qa_entries through its (id_job, id_segment) index: a chunk holds far fewer issues than
+     * segments, so this never walks the whole chunk the way the segment_translations-driven filters do.
+     *
+     * @param array{sql: string, data: array<string, string>} $where
+     */
+    public function getSqlForWithIssues(array $where): string
+    {
+        return "
+          SELECT DISTINCT e.id_segment AS id
+          FROM
+           qa_entries e JOIN jobs
+           ON jobs.id = e.id_job
+           AND jobs.password = :password
+           JOIN segment_translations st ON st.id_segment = e.id_segment AND st.id_job = e.id_job
+           JOIN segments s ON s.id = e.id_segment AND s.show_in_cattool = 1
+           WHERE e.id_job = :id_job
+           AND e.id_segment BETWEEN :job_first_segment AND :job_last_segment
+           AND e.deleted_at IS NULL
+           {$where['sql']}
+           ORDER BY e.id_segment
         ";
     }
 
