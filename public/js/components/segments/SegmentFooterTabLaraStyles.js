@@ -61,7 +61,7 @@ export const SegmentFooterTabLaraStyles = ({
         SegmentUtils.getSegmentContext(sid)
 
       const jobMetadata = CatToolStore.getJobMetadata()
-      const glossaries = jobMetadata?.project?.mt_extra?.lara_glossaries || []
+      const glossaries = jobMetadata?.mt_extra?.lara_glossaries || []
       const decodedSource = decodePlaceholdersToPlainText(
         currentSegment.segment,
       )

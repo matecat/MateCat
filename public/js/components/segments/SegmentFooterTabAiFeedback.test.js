@@ -3,6 +3,8 @@ import {render, screen, act, fireEvent} from '@testing-library/react'
 import {SegmentFooterTabAiFeedback} from './SegmentFooterTabAiFeedback'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
+import CatToolStore from '../../stores/CatToolStore'
+import {JobMetadataProxy} from '../../stores/JobMetadataProxy'
 
 // --- Mocks ---
 
@@ -18,9 +20,7 @@ jest.mock('../../stores/SegmentStore', () => {
 })
 
 jest.mock('../../stores/CatToolStore', () => ({
-  getJobMetadata: () => ({
-    project: {mt_extra: {lara_style: 'faithful'}},
-  }),
+  getJobMetadata: jest.fn(),
 }))
 
 jest.mock('../../api/aiFeedback/aiFeedback', () => ({
@@ -91,6 +91,11 @@ beforeAll(() => {
     source_code: 'en-US',
     target_code: 'it-IT',
   }
+  CatToolStore.getJobMetadata.mockReturnValue(
+    new JobMetadataProxy({
+      project: {mt_extra: {lara_style: 'faithful'}},
+    }).proxy,
+  )
 })
 
 afterEach(() => {
