@@ -681,6 +681,18 @@ describe('ManageActions', () => {
     )
   })
 
+  test('getSecondPassReview resolves without notifying on failure when notify is false', async () => {
+    getSecondPassReview.mockRejectedValueOnce(new Error('fail'))
+
+    const result = await ManageActions.getSecondPassReview(1, 'pp', 2, 'pj', {
+      notify: false,
+    })
+
+    expect(result).toBeUndefined()
+    expect(CatToolActions.addNotification).not.toHaveBeenCalled()
+    expect(AppDispatcher.dispatch).not.toHaveBeenCalled()
+  })
+
   test('openModifyTeamModal fetches members and dispatches modal action', async () => {
     getTeamMembers.mockResolvedValueOnce({
       members: ['m1'],

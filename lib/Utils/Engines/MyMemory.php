@@ -502,8 +502,9 @@ class MyMemory extends AbstractEngine
       *
       * @param string $uuid
       *
-      * @return FileImportAndStatusResponse
+      * @return TMSAbstractResponse
       * @throws RuntimeException
+      * @throws Exception
       */
      public function entryStatus(string $uuid): TMSAbstractResponse
      {
@@ -513,7 +514,12 @@ class MyMemory extends AbstractEngine
             ]
         );
 
-        $this->call("entry_status_relative_url", ['uuid' => $uuid]);
+        $this->call("glossary_entry_status_relative_url", ['uuid' => $uuid]);
+
+        // call() leaves a plain array in $this->result when the engine record has no such url
+        if (!$this->result instanceof TMSAbstractResponse) {
+            throw new Exception("MyMemory entry status url is not configured");
+        }
 
         return $this->result;
     }
@@ -762,15 +768,19 @@ class MyMemory extends AbstractEngine
       * @param string $filePath
       * @param string $memoryKey
       * @param UserStruct $user * Not used
+      * @param bool $mtImport true asks MyMemory to also import the TMX into Lara with its own license.
+      *                       Example: `true` → `mt_import=true`.
       *
       * @return FileImportAndStatusResponse
       * @throws RuntimeException
       */
-     public function importMemory(string $filePath, string $memoryKey, UserStruct $user): FileImportAndStatusResponse
+     public function importMemory(string $filePath, string $memoryKey, UserStruct $user, bool $mtImport = false): FileImportAndStatusResponse
      {
         $postFields = [
-            'tmx' => $this->getCurlFile($filePath),
-            'key' => trim($memoryKey)
+            'tmx'       => $this->getCurlFile($filePath),
+            'key'       => trim($memoryKey),
+            // MyMemory expects the literal strings: a bool in multipart becomes "1" or "".
+            'mt_import' => $mtImport ? 'true' : 'false',
         ];
 
         $this->call("tmx_import_relative_url", $postFields, true);

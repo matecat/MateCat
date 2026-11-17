@@ -12,6 +12,7 @@ use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\TestWith;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\CheckGlossaryResponse;
 use Utils\Engines\Results\MyMemory\DeleteGlossaryResponse;
@@ -136,13 +137,65 @@ class MyMemoryMethodsTest extends AbstractTest
             'responseDetails' => '',
         ]);
 
-        $this->engineStruct->others['entry_status_relative_url'] = 'entry/status';
         $mock   = $this->makeMock($jsonReturn);
         $result = $mock->entryStatus($uuid);
 
         $this->assertInstanceOf(GetMemoryResponse::class, $result);
         $this->assertEquals(200, $result->responseStatus);
         $this->assertNull($result->error);
+    }
+
+    /**
+     * The shipped schema only defines "glossary_entry_status_relative_url": entryStatus() used to read
+     * "entry_status_relative_url", got the "Bad method call" array back and failed with a TypeError.
+     */
+    #[Test]
+    public function test_entryStatus_uses_glossary_key_from_shipped_schema(): void
+    {
+        $uuid = 'abc123-entry-uuid';
+
+        $this->engineStruct->others = ['glossary_entry_status_relative_url' => 'v2/entry/status'];
+
+        $calledUrl = null;
+        $mock      = $this->makeUrlRecordingMock(json_encode([
+            'responseData'   => ['id' => 42],
+            'responseStatus' => 200,
+        ]), $calledUrl);
+
+        $result = $mock->entryStatus($uuid);
+
+        $this->assertInstanceOf(GetMemoryResponse::class, $result);
+        $this->assertEquals(200, $result->responseStatus);
+        $this->assertStringContainsString('/v2/entry/status?uuid=' . $uuid, (string)$calledUrl);
+    }
+
+    #[Test]
+    public function test_entryStatus_throws_exception_when_url_is_not_configured(): void
+    {
+        $this->engineStruct->others = [];
+
+        $mock = $this->makeMock('{}');
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('MyMemory entry status url is not configured');
+
+        $mock->entryStatus('abc123-entry-uuid');
+    }
+
+    private function makeUrlRecordingMock(string $jsonReturn, ?string &$calledUrl): MyMemory
+    {
+        $mock = @$this->getMockBuilder(MyMemory::class)
+            ->setConstructorArgs([$this->engineStruct, $this->createStub(\Model\DataAccess\IDatabase::class)])
+            ->onlyMethods(['_call'])
+            ->getMock();
+
+        $mock->method('_call')->willReturnCallback(function (string $url) use (&$calledUrl, $jsonReturn) {
+            $calledUrl = $url;
+
+            return $jsonReturn;
+        });
+
+        return $mock;
     }
 
     #[Test]
@@ -366,6 +419,48 @@ class MyMemoryMethodsTest extends AbstractTest
         $this->assertEquals(202, $result->responseStatus);
         $this->assertEquals($importUuid, $result->id);
         $this->assertNull($result->error);
+    }
+
+    /**
+     * The POST fields MyMemory receives for a TMX import, as `_call` gets them. Pass no flag to
+     * import as the aligner does.
+     *
+     * @return array<string, mixed>
+     */
+    private function importMemoryPostFields(bool ...$mtImport): array
+    {
+        $mock = @$this->getMockBuilder(MyMemory::class)
+            ->setConstructorArgs([$this->engineStruct, $this->createStub(\Model\DataAccess\IDatabase::class)])
+            ->onlyMethods(['_call'])
+            ->getMock();
+
+        $postFields = [];
+        $mock->expects($this->once())->method('_call')->willReturnCallback(
+            function (string $url, array $curlOptions) use (&$postFields): string {
+                $postFields = $curlOptions[CURLOPT_POSTFIELDS];
+
+                return (string)json_encode(['responseData' => ['UUID' => 'u'], 'responseStatus' => 202, 'responseDetails' => '']);
+            }
+        );
+
+        $mock->importMemory($this->tempFilePath, 'a6043e606ac9b5d7ff24', new UserStruct(), ...$mtImport);
+
+        return $postFields;
+    }
+
+    /**
+     * @param list<bool> $mtImport the flag passed, or none
+     */
+    #[Test]
+    #[TestWith([[true], 'true'])]
+    #[TestWith([[false], 'false'])]
+    #[TestWith([[], 'false'])]
+    public function test_importMemory_sends_mt_import(array $mtImport, string $expected): void
+    {
+        $postFields = $this->importMemoryPostFields(...$mtImport);
+
+        $this->assertSame($expected, $postFields['mt_import']);
+        $this->assertSame('a6043e606ac9b5d7ff24', $postFields['key']);
     }
 
     #[Test]

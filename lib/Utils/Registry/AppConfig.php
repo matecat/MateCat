@@ -249,11 +249,6 @@ class AppConfig
     public static string $DEFAULT_TM_KEY = '';
 
     /**
-     * @var string The default MMT license is applied when Lara falls back for unsupported languages and the user doesn't add their personal MMT license.
-     */
-    public static string $DEFAULT_MMT_KEY = '';
-
-    /**
      * Holds the value of the LARA pre-shared key.
      *
      * This property stores the actual pre-shared key used for LARA authentication.

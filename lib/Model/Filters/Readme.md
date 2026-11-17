@@ -335,12 +335,36 @@ template is read back, so an older row is returned clean too.
 each member is trimmed and the ones left empty are dropped. Internal spaces are kept:
 `" Heading 1 "` becomes `"Heading 1"`.
 
-`json` and `yaml` are the exception. Their `translate_keys`, `do_not_translate_keys`, `context_keys`
-and `character_limit` hold JSON object keys and YAML mapping keys, which are arbitrary strings:
-`" label "` is a legitimate key distinct from `"label"` and is stored verbatim.
+`json`, `yaml` and `markdown` are the exception. Their `translate_keys`, `do_not_translate_keys`,
+`context_keys`, `character_limit`, `translate_frontmatter_keys` and `do_not_translate_frontmatter_keys`
+hold JSON object keys and YAML mapping keys (a Markdown frontmatter block is YAML), which are arbitrary
+strings: `" label "` is a legitimate key distinct from `"label"` and is stored verbatim.
 
 `ms_powerpoint.translate_slides` holds slide numbers rather than names and is stored as it arrives,
 so an integer list stays an integer list.
+
+### Markdown frontmatter
+
+`markdown` applies to `.md` files and controls the frontmatter block at the beginning of the file:
+
+```json
+{
+  "markdown": {
+    "extract_frontmatter": true,
+    "translate_frontmatter_keys": ["title", "description"]
+  }
+}
+```
+
+- `extract_frontmatter` (default `false`) turns frontmatter extraction on. With no key list, every
+  frontmatter key is extracted as translatable.
+- `translate_frontmatter_keys` extracts only the listed keys; `do_not_translate_frontmatter_keys`
+  extracts every key except the listed ones. The two are mutually exclusive, as for `json` and `yaml`:
+  the schema rejects a payload carrying both, and when both reach the struct the non-empty
+  `do_not_translate_frontmatter_keys` wins.
+- The key lists take effect only while `extract_frontmatter` is `true`. They are still stored and sent
+  when it is `false`, so turning extraction back on restores them.
+- Templates saved before the `markdown` column existed return `"markdown": null`.
 
 ### Schema
 

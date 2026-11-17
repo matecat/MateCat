@@ -75,7 +75,7 @@ class EntryDaoTest extends AbstractTest
     }
 
     #[Test]
-    public function getBySegmentIdsReturnsEmptyForEmptyInput(): void
+    public function getBySegmentIdsReturnsEmptyWhenNoEntryMatches(): void
     {
         $this->stmtStub->method('execute')->willReturn(true);
         $this->stmtStub->method('setFetchMode')->willReturn(true);
@@ -85,6 +85,37 @@ class EntryDaoTest extends AbstractTest
         $result = $dao->getBySegmentIds([999]);
 
         $this->assertSame([], $result);
+    }
+
+    /**
+     * A page of the segment analysis with no segments passes an empty list. Written into the SQL
+     * it became `IN (  )`, a syntax error.
+     */
+    #[Test]
+    public function getBySegmentIdsReturnsAnEmptyListWithoutQueryingWhenGivenNoIds(): void
+    {
+        $db = $this->createMock(IDatabase::class);
+        $db->expects($this->never())->method('getConnection');
+
+        $this->assertSame([], (new EntryDao($db))->getBySegmentIds([]));
+    }
+
+    #[Test]
+    public function getBySegmentIdsBindsTheIdsAsParameters(): void
+    {
+        $stmt = $this->createMock(PDOStatement::class);
+        $stmt->expects($this->once())->method('execute')->with([10, 11])->willReturn(true);
+        $stmt->method('fetchAll')->willReturn([]);
+
+        $pdo = $this->createMock(PDO::class);
+        $pdo->expects($this->once())->method('prepare')
+            ->with($this->callback(static fn(string $sql): bool => str_contains($sql, 'q.id_segment IN ( ?,? )')))
+            ->willReturn($stmt);
+
+        $db = $this->createStub(IDatabase::class);
+        $db->method('getConnection')->willReturn($pdo);
+
+        (new EntryDao($db))->getBySegmentIds([3 => 10, 7 => 11]);
     }
 
     #[Test]
