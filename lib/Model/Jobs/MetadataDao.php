@@ -150,6 +150,33 @@ class MetadataDao extends AbstractDao
     }
 
     /**
+     * Evict every cached read of every key a chunk's credential can address.
+     *
+     * A password rotation moves the rows wholesale (@see self::movePassword()), so there is no
+     * single row for the caller to name: it knows the credential, not which keys are stored under
+     * it. Naming only the credential is not enough either — get() binds the key as well, so its
+     * entries hash differently from the bulk read's and survive an eviction that names two values
+     * where the read named three. The key list is the enum's, so a key added later cannot be
+     * forgotten here.
+     *
+     * The two key-bound addresses are named per key, but the credential-bound one is named once
+     * rather than through destroyCache(): a merge sweeps every chunk it folds in, so repeating one
+     * identical eviction per key would triple the round trips for nothing.
+     *
+     * @throws PDOException
+     * @throws ReflectionException
+     */
+    public function destroyCacheForCredential(int $id_job, string $password): void
+    {
+        $this->destroyCacheByJobAndPassword($id_job, $password);
+
+        foreach (JobsMetadataMarshaller::cases() as $case) {
+            $this->destroyCacheByIdJob($id_job, $case->value);
+            $this->destroyCacheByJobAndPasswordAndKey($id_job, $password, $case->value);
+        }
+    }
+
+    /**
      * @param int $id_job
      * @param string $password
      * @param string $key

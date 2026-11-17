@@ -141,6 +141,16 @@ describe('CatToolStore', () => {
     expect(CatToolStore.getJobMetadata()).toEqual({sid: 1})
   })
 
+  test('setJobMetadata wraps job/project payloads in a JobMetadataProxy (edge cases in JobMetadataProxy.test.js)', () => {
+    CatToolStore.setJobMetadata({
+      job: {mandatory_issues: ['r2']},
+      project: {mandatory_issues: ['r1', 'r2'], icu_enabled: 1},
+    })
+
+    expect(CatToolStore.getJobMetadata().mandatory_issues).toEqual(['r2'])
+    expect(CatToolStore.getJobMetadata().icu_enabled).toBe(1)
+  })
+
   test('SHOW_CONTAINER action emits the container name', () => {
     const emitSpy = jest.spyOn(CatToolStore, 'emitChange')
 
@@ -463,7 +473,7 @@ describe('CatToolStore', () => {
     })
   })
 
-  test('GET_JOB_METADATA action stores metadata and emits the full payload', () => {
+  test('GET_JOB_METADATA action emits the full payload without storing it itself', () => {
     const emitSpy = jest.spyOn(CatToolStore, 'emitChange')
 
     AppDispatcher.dispatch({
@@ -471,7 +481,10 @@ describe('CatToolStore', () => {
       jobMetadata: {sid: 1},
     })
 
-    expect(CatToolStore.getJobMetadata()).toEqual({sid: 1})
+    // the reducer only emits: callers are responsible for calling
+    // setJobMetadata themselves before dispatching, so the store's own
+    // metadata is left untouched here
+    expect(CatToolStore.getJobMetadata()).toBeUndefined()
     expect(emitSpy).toHaveBeenCalledWith(CatToolConstants.GET_JOB_METADATA, {
       actionType: CatToolConstants.GET_JOB_METADATA,
       jobMetadata: {sid: 1},

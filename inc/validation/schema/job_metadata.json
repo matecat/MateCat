@@ -6,6 +6,10 @@
       {
         "type": "object",
         "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
         "properties": {
           "key": {
             "const": "character_counter_count_tags"
@@ -20,6 +24,10 @@
       {
         "type": "object",
         "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
         "properties": {
           "key": {
             "const": "character_counter_mode"
@@ -36,6 +44,10 @@
       {
         "type": "object",
         "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
         "properties": {
           "key": {
             "const": "subfiltering_handlers"
@@ -48,6 +60,10 @@
       {
         "type": "object",
         "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
         "properties": {
           "key": {
             "const": "mandatory_issues"
@@ -63,6 +79,10 @@
       {
         "type": "object",
         "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
         "properties": {
           "key": {
             "const": "tm_prioritization"
@@ -71,6 +91,224 @@
             "type": [
               "boolean"
             ]
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
+        "properties": {
+          "key": {
+            "const": "mt_quality_value_in_editor"
+          },
+          "value": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
+        "properties": {
+          "key": {
+            "const": "deepl_formality"
+          },
+          "value": {
+            "enum": [
+              "default",
+              "prefer_less",
+              "prefer_more"
+            ]
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
+        "properties": {
+          "key": {
+            "const": "deepl_engine_type"
+          },
+          "value": {
+            "enum": [
+              "prefer_quality_optimized",
+              "latency_optimized"
+            ]
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
+        "properties": {
+          "key": {
+            "const": "deepl_id_glossary"
+          },
+          "value": {
+            "$comment": "The empty string is an answer, not an absence: it is how a job says \"no glossary here\" over a project that has one, and the job scope wins. DELETE /metadata/{key} cannot say it — the project row is written once at creation and never updated, so dropping the job row re-inherits the project's glossary and the job is back where it started. Null is accepted as the same answer and stored the same way; unlike the Intento pair, the stored empty string is also accepted on the wire, so a client can post back the value GET /metadata just gave it.",
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 255
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
+        "properties": {
+          "key": {
+            "const": "lara_style"
+          },
+          "value": {
+            "enum": [
+              "faithful",
+              "fluid",
+              "creative"
+            ]
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
+        "properties": {
+          "key": {
+            "const": "lara_style_guideline_id"
+          },
+          "value": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
+        "properties": {
+          "key": {
+            "const": "lara_glossaries"
+          },
+          "value": {
+            "type": "array",
+            "$comment": "An empty list is an answer, not an absence: it is how a job says \"no glossary here\" over a project that has one, and the job scope wins. DELETE /metadata/{key} is the other operation — it drops the job row so the job inherits the project value again.",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
+        "properties": {
+          "key": {
+            "const": "mmt_glossaries"
+          },
+          "value": {
+            "type": "array",
+            "$comment": "An empty list is an answer, not an absence: it is how a job says \"no glossary here\" over a project that has one, and the job scope wins. DELETE /metadata/{key} is the other operation — it drops the job row so the job inherits the project value again.",
+            "items": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
+        "properties": {
+          "key": {
+            "const": "mmt_ignore_glossary_case"
+          },
+          "value": {
+            "type": [
+              "boolean"
+            ]
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key"
+        ],
+        "properties": {
+          "key": {
+            "const": "intento_provider"
+          },
+          "value": {
+            "$comment": "Null is an answer, not an absence, and unlike `lara_style_guideline_id` this key cannot be cleared with DELETE /metadata/{key}. `intento_provider` and `intento_routing` are mutually exclusive and the provider outranks the routing, while the project row is written once at creation and never updated: dropping the job row would re-inherit the project's provider and silently discard the routing the job just chose. Null is stored as the empty string, the job scope's \"explicitly none\"; unlike `deepl_id_glossary`, an empty string on the wire stays refused here, so null is the only wire form.",
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 255
+          }
+        }
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key"
+        ],
+        "properties": {
+          "key": {
+            "const": "intento_routing"
+          },
+          "value": {
+            "$comment": "Null is an answer, not an absence, and unlike `lara_style_guideline_id` this key cannot be cleared with DELETE /metadata/{key}. `intento_provider` and `intento_routing` are mutually exclusive and the provider outranks the routing, while the project row is written once at creation and never updated: dropping the job row would re-inherit the project's provider and silently discard the routing the job just chose. Null is stored as the empty string, the job scope's \"explicitly none\"; unlike `deepl_id_glossary`, an empty string on the wire stays refused here, so null is the only wire form.",
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 255
           }
         }
       }
