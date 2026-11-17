@@ -28,6 +28,10 @@ const EDGE_CASES = [
   'a##$_A0$##b##$_09$##c',
   '##$_A0$##',
   'Emoji \u{1F600} and \u{20000} astral',
+  // This case and the next are not Draft's values, on purpose: Draft decoded the entities before looking for tags, so
+  // tag markup typed as text (escaped in the segment string) became real <g> tags in the tag maps and raw markup in
+  // the decoded segment. Frozen with that text kept as text: no tags, the decoded segment still escaped. This case
+  // only changes where it is checked against the next one as its source, whose tags it no longer misses.
   '&lt;b&gt; &amp; &amp;lt; text',
   '&lt;g id="1"&gt;escaped&lt;/g&gt;',
   `<ph id="" equiv-text="base64:${b64('{1}')}"/> and <ph id="" equiv-text="base64:${b64('{2}')}"/>`,

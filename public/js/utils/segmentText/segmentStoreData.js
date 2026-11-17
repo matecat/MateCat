@@ -5,16 +5,17 @@
 // at its line breaks and places each tag as one unit inside a line: a tag only counts when its placeholder fits inside
 // one line, a tag cut by a later range loses all its characters, and a line break inside a tag's own text never splits.
 import matchTag from './matchTag'
-import {getErrorCheckTag, getSplitBlockTag} from './tagModel'
+import findTagWithRegex from './findTagWithRegex'
+import {getErrorCheckTag, getSplitBlockTag, tagSignatures} from './tagModel'
 import {createTagNumberer} from './compressibleTagUtils'
 import {
   decodeHtmlEntities,
   decodePlaceholdersToPlainText,
+  encodeHtmlEntities,
   excludeSomeTagsTransformToText,
   removeTagsFromText,
   removeZeroWidthSpace,
 } from './tagUtils'
-import {encodeEditorText} from './encodeEditorText'
 import prepareTextForLexiqa from './prepareTextForLexiqa'
 import checkForMissingTags from './checkForMissingTag'
 import {formatText, getCharactersCounter} from './textUtils'
@@ -172,14 +173,58 @@ const splitOnLineBreaks = (block) => {
   return blocks
 }
 
+// A `&lt;` or `&gt;` outside the tags of the segment string is text the translator typed, never markup: it is laid
+// out as one of these instead, so it can neither start nor end a tag. One character each, so the offsets are those of
+// the decoded string. A marker is a high surrogate with no low surrogate after it: well-formed text holds these two
+// only as the first half of a pair (U+10F800..U+10FFFF), and a marker is never followed by a low surrogate, as it
+// takes the place of an entity, after which well-formed text never starts with one.
+const TYPED_LT = '\uDBFE'
+const TYPED_GT = '\uDBFF'
+const TYPED_CHARS = /[\uDBFE\uDBFF](?![\uDC00-\uDFFF])/
+const ENTITIES = /&lt;|&gt;|&amp;/g
+const typedChar = (entity) =>
+  entity === '&lt;' ? TYPED_LT : entity === '&gt;' ? TYPED_GT : '&'
+const untype = (text) =>
+  text.replace(new RegExp(TYPED_CHARS, 'g'), (char) =>
+    char === TYPED_LT ? '<' : '>',
+  )
+
+/**
+ * The segment string decoded, with the typed `<` and `>` as TYPED_LT and TYPED_GT, and its tags, with their offsets in
+ * the decoded string. Tags are found in the string as stored, where the text the translator typed is still escaped:
+ * `&lt;g id="1"&gt;` typed in the editor stays text. A tag's own markup is decoded as a whole, as it always was.
+ */
+const decodeAndMatchTags = (segment) => {
+  const tagSpans = matchTag(segment)
+    .filter(({data}) => data.name !== 'space')
+    .map(({offset, length}) => [offset, offset + length])
+    .sort((a, b) => a[0] - b[0])
+  let markupText = ''
+  let last = 0
+  tagSpans.forEach(([start, end]) => {
+    if (end <= last) return
+    if (start > last)
+      markupText += segment.slice(last, start).replace(ENTITIES, typedChar)
+    markupText += decodeHtmlEntities(segment.slice(Math.max(start, last), end))
+    last = end
+  })
+  markupText += segment.slice(last).replace(ENTITIES, typedChar)
+  const tagRange = matchTag(markupText).filter(
+    ({data}) => data.name !== 'space' && !TYPED_CHARS.test(data.encodedText),
+  )
+  // Blanks are still found in the decoded text: one between a typed `<` and `>` is not a space tag, as before
+  if (tagSignatures.space)
+    tagRange.push(...findTagWithRegex(untype(markupText), 'space'))
+  return {markupText, tagRange}
+}
+
 /**
  * The segment string as the editor text: blocks, the tag entities covering them, and the tags the store keeps
  * (`tagRange`, the error-checked ones, with their offsets in the decoded string).
  */
 const toEditorText = (segment = '', sourceTagMap) => {
-  const text = decodeHtmlEntities(segment)
+  const {markupText, tagRange} = decodeAndMatchTags(segment)
   const lineBreakTags = getSplitBlockTag()
-  const tagRange = matchTag(text)
   tagRange.sort((a, b) => a.offset - b.offset)
   const indexedTagRange = addIncrementalIndex(
     sourceTagMap?.length && tagRange.length
@@ -188,7 +233,7 @@ const toEditorText = (segment = '', sourceTagMap) => {
   )
 
   // Every tag but the line breaks is replaced by its placeholder, between two zero-width spaces
-  let plainText = text
+  let plainText = markupText
   let slicedLength = 0
   const placed = []
   indexedTagRange.forEach((tag) => {
@@ -263,19 +308,48 @@ const hasText = (blocks) =>
 
 const editorPlainText = (blocks) => blocks.map(({text}) => text).join('\n')
 
-/** The segment string the editor text stands for, each tag placeholder turned back into its markup. */
+// Editor text back to segment string form: line breaks become the line feed placeholder, zero-width spaces go.
+const toSegmentForm = (text) =>
+  text.replace(/\n/g, config.lfPlaceholder).replace(/\u200B/g, '')
+
+// An XLIFF tag the segment string carries as markup without the editor showing it as a tag (a <ph> with no
+// equiv-text, an <mrk>): kept as is. Its name ends at a word boundary and its attributes are quoted.
+const XLIFF_MARKUP =
+  /<\/?(?:g|x|bx|ex|bpt|ept|ph|it|mrk)\b(?:\s+[\w:.-]+\s*=\s*(?:"[^"<]*"|'[^'<]*'))*\s*\/?>/gi
+
+// Text of the editor in segment string form, HTML-encoded but for the XLIFF markup it carries. Typed characters are
+// never markup: TYPED_LT and TYPED_GT are encoded.
+const encodeText = (text) => {
+  const segmentForm = toSegmentForm(text)
+  let encoded = ''
+  let last = 0
+  for (const {0: markup, index} of segmentForm.matchAll(XLIFF_MARKUP)) {
+    encoded +=
+      encodeHtmlEntities(untype(segmentForm.slice(last, index))) +
+      untype(markup)
+    last = index + markup.length
+  }
+  return encoded + encodeHtmlEntities(untype(segmentForm.slice(last)))
+}
+
+/**
+ * The segment string the editor text stands for: each tag placeholder turned back into its markup, the other text
+ * HTML-encoded. Text the translator typed stays encoded even where it looks like a tag.
+ */
 const decodedSegmentOf = ({blocks, entities}) => {
-  if (!hasText(blocks)) return editorPlainText(blocks)
+  if (!hasText(blocks)) return untype(editorPlainText(blocks))
   const lines = blocks.map((block) => {
     let line = ''
     let last = 0
     entityRuns(block).forEach(({start, end, entity}) => {
-      line += block.text.slice(last, start) + entities[entity].data.encodedText
+      line +=
+        encodeText(block.text.slice(last, start)) +
+        toSegmentForm(entities[entity].data.encodedText)
       last = end
     })
-    return line + block.text.slice(last)
+    return line + encodeText(block.text.slice(last))
   })
-  return encodeEditorText(lines.join('\n'))
+  return lines.join(config.lfPlaceholder)
 }
 
 // A tag as the store keeps it: its offset in the decoded segment (the order of the tag maps) and what the tag menu,
@@ -314,7 +388,8 @@ const tagMapOf = ({blocks, entities}) => {
   )
 }
 
-const plainTextOf = ({blocks}) => removeZeroWidthSpace(editorPlainText(blocks))
+const plainTextOf = ({blocks}) =>
+  untype(removeZeroWidthSpace(editorPlainText(blocks)))
 
 /**
  * What SegmentActions.updateSource takes for `source` (a segment string): the decoded segment, the plain text, the

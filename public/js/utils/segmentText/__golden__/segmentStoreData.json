@@ -2643,44 +2643,12 @@
     },
     "&lt;g id=\"1\"&gt;escaped&lt;/g&gt;": {
       "store": {
-        "decodedSegment": "<g id=\"1\">escaped</g>",
-        "plainText": "1escaped1",
-        "tagRange": [
-          {
-            "offset": 0,
-            "data": {
-              "id": "1",
-              "name": "g",
-              "encodedText": "<g id=\"1\">",
-              "decodedText": "1",
-              "placeholder": "1"
-            }
-          },
-          {
-            "offset": 17,
-            "data": {
-              "id": "1",
-              "name": "gCl",
-              "encodedText": "</g>",
-              "decodedText": "</g>",
-              "placeholder": "1"
-            }
-          }
-        ],
-        "lxqText": "<1>escaped<1>"
+        "decodedSegment": "&lt;g id=\"1\"&gt;escaped&lt;/g&gt;",
+        "plainText": "<g id=\"1\">escaped</g>",
+        "tagRange": [],
+        "lxqText": "<g< >id=\"1\">escaped</g>"
       },
-      "tagIdentities": [
-        {
-          "raw": "<g id=\"1\">",
-          "id": "1",
-          "placeholder": "1"
-        },
-        {
-          "raw": "</g>",
-          "id": "1",
-          "placeholder": "1"
-        }
-      ]
+      "tagIdentities": []
     },
     "<ph id=\"\" equiv-text=\"base64:ezF9\"/> and <ph id=\"\" equiv-text=\"base64:ezJ9\"/>": {
       "store": {
@@ -26751,28 +26719,7 @@
                 }
               }
             ],
-            "missingTags": [
-              {
-                "offset": 0,
-                "data": {
-                  "id": "1",
-                  "name": "g",
-                  "encodedText": "<g id=\"1\">",
-                  "decodedText": "1",
-                  "placeholder": "1"
-                }
-              },
-              {
-                "offset": 17,
-                "data": {
-                  "id": "1",
-                  "name": "gCl",
-                  "encodedText": "</g>",
-                  "decodedText": "</g>",
-                  "placeholder": "1"
-                }
-              }
-            ],
+            "missingTags": [],
             "lxqDecodedTranslation": "<b>< >&< >&lt;< >text"
           },
           "tagIdentities": []
@@ -26783,153 +26730,36 @@
       "counter": [21, 21],
       "none": {
         "update": {
-          "plainText": "1escaped1",
-          "tagMap": [
-            {
-              "offset": 0,
-              "data": {
-                "id": "1",
-                "name": "g",
-                "encodedText": "<g id=\"1\">",
-                "decodedText": "1",
-                "placeholder": "1"
-              }
-            },
-            {
-              "offset": 17,
-              "data": {
-                "id": "1",
-                "name": "gCl",
-                "encodedText": "</g>",
-                "decodedText": "</g>",
-                "placeholder": "1"
-              }
-            }
-          ],
+          "plainText": "<g id=\"1\">escaped</g>",
+          "tagMap": [],
           "missingTags": [],
-          "lxqDecodedTranslation": "<1>escaped<1>"
+          "lxqDecodedTranslation": "<g< >id=\"1\">escaped</g>"
         },
-        "tagIdentities": [
-          {
-            "raw": "<g id=\"1\">",
-            "id": "1",
-            "placeholder": "1"
-          },
-          {
-            "raw": "</g>",
-            "id": "1",
-            "placeholder": "1"
-          }
-        ]
+        "tagIdentities": []
       },
       "empty": {
         "update": {
-          "plainText": "1escaped1",
-          "tagMap": [
-            {
-              "offset": 0,
-              "data": {
-                "id": "1",
-                "name": "g",
-                "encodedText": "<g id=\"1\">",
-                "decodedText": "1",
-                "placeholder": "1"
-              }
-            },
-            {
-              "offset": 17,
-              "data": {
-                "id": "1",
-                "name": "gCl",
-                "encodedText": "</g>",
-                "decodedText": "</g>",
-                "placeholder": "1"
-              }
-            }
-          ],
+          "plainText": "<g id=\"1\">escaped</g>",
+          "tagMap": [],
           "missingTags": [],
-          "lxqDecodedTranslation": "<1>escaped<1>"
+          "lxqDecodedTranslation": "<g< >id=\"1\">escaped</g>"
         },
-        "tagIdentities": [
-          {
-            "raw": "<g id=\"1\">",
-            "id": "1",
-            "placeholder": "1"
-          },
-          {
-            "raw": "</g>",
-            "id": "1",
-            "placeholder": "1"
-          }
-        ]
+        "tagIdentities": []
       },
       "own": {
         "update": {
-          "plainText": "1escaped1",
-          "tagMap": [
-            {
-              "offset": 0,
-              "data": {
-                "id": "1",
-                "name": "g",
-                "encodedText": "<g id=\"1\">",
-                "decodedText": "1",
-                "placeholder": "1"
-              }
-            },
-            {
-              "offset": 17,
-              "data": {
-                "id": "1",
-                "name": "gCl",
-                "encodedText": "</g>",
-                "decodedText": "</g>",
-                "placeholder": "1"
-              }
-            }
-          ],
+          "plainText": "<g id=\"1\">escaped</g>",
+          "tagMap": [],
           "missingTags": [],
-          "lxqDecodedTranslation": "<1>escaped<1>"
+          "lxqDecodedTranslation": "<g< >id=\"1\">escaped</g>"
         },
-        "tagIdentities": [
-          {
-            "raw": "<g id=\"1\">",
-            "id": "1",
-            "placeholder": "1"
-          },
-          {
-            "raw": "</g>",
-            "id": "1",
-            "placeholder": "1"
-          }
-        ]
+        "tagIdentities": []
       },
       "neighbours": {
         "<ph id=\"\" equiv-text=\"base64:ezF9\"/> and <ph id=\"\" equiv-text=\"base64:ezJ9\"/>": {
           "update": {
-            "plainText": "1escaped1",
-            "tagMap": [
-              {
-                "offset": 0,
-                "data": {
-                  "id": "1",
-                  "name": "g",
-                  "encodedText": "<g id=\"1\">",
-                  "decodedText": "1",
-                  "placeholder": "1"
-                }
-              },
-              {
-                "offset": 17,
-                "data": {
-                  "id": "1",
-                  "name": "gCl",
-                  "encodedText": "</g>",
-                  "decodedText": "</g>",
-                  "placeholder": "1"
-                }
-              }
-            ],
+            "plainText": "<g id=\"1\">escaped</g>",
+            "tagMap": [],
             "missingTags": [
               {
                 "offset": 0,
@@ -26952,20 +26782,9 @@
                 }
               }
             ],
-            "lxqDecodedTranslation": "<1>escaped<1>"
+            "lxqDecodedTranslation": "<g< >id=\"1\">escaped</g>"
           },
-          "tagIdentities": [
-            {
-              "raw": "<g id=\"1\">",
-              "id": "1",
-              "placeholder": "1"
-            },
-            {
-              "raw": "</g>",
-              "id": "1",
-              "placeholder": "1"
-            }
-          ]
+          "tagIdentities": []
         }
       }
     },
