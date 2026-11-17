@@ -10,6 +10,7 @@ use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao as JobsMetadataDao;
 use Model\ProjectCreation\ProjectStructure;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Utils\Logger\MatecatLogger;
 
@@ -398,5 +399,97 @@ class SaveJobsMetadataTest extends AbstractTest
             JobsMetadataMarshaller::DIALECT_STRICT->value,
             JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value,
         ], array_keys($this->capturedMetadata));
+    }
+
+    // =========================================================================
+    // MT settings — copy-on-write, so creation writes no job row at all
+    // =========================================================================
+
+    /**
+     * The MT settings are written to project metadata at creation
+     * (@see \Model\ProjectCreation\ProjectMetadataService::save()) and a job row appears only when
+     * the owner overrides one through the API. Writing them here as well would put every project's
+     * values in job_metadata only, and reverting the job scope would then silently drop them to the
+     * engine defaults with no migration back.
+     */
+    #[Test]
+    #[DataProvider('engineMtSettingProvider')]
+    public function testEngineMtSettingIsNotWrittenToTheJobAtCreation(string $key, mixed $value): void
+    {
+        $this->setConfigAndSave([$key => $value]);
+
+        $this->assertArrayNotHasKey(
+            $key,
+            $this->capturedMetadata,
+            "'$key' belongs to the project scope at creation; a job row is written only on override"
+        );
+    }
+
+    /**
+     * @return array<string, array{string, mixed}>
+     */
+    public static function engineMtSettingProvider(): array
+    {
+        return [
+            'deepl_formality'         => ['deepl_formality', 'prefer_more'],
+            'deepl_id_glossary'       => ['deepl_id_glossary', 'gl-1'],
+            'deepl_engine_type'       => ['deepl_engine_type', 'latency_optimized'],
+            'lara_style'              => ['lara_style', 'creative'],
+            'lara_style_guideline_id' => ['lara_style_guideline_id', 'guideline-3'],
+            'lara_glossaries'         => ['lara_glossaries', '["a","b"]'],
+            'mmt_glossaries'          => ['mmt_glossaries', '[1,2]'],
+            'intento_provider'        => ['intento_provider', 'ai.text.translate.google'],
+            'intento_routing'         => ['intento_routing', 'best_quality'],
+            'ignore case true'        => ['mmt_ignore_glossary_case', true],
+            'ignore case false'       => ['mmt_ignore_glossary_case', false],
+        ];
+    }
+
+    /**
+     * The threshold is the one MT setting that arrives inside the metadata blob rather than on a
+     * ProjectStructure property, so it takes a different route out of this method — but the same
+     * rule applies to it.
+     */
+    #[Test]
+    public function testMtQualityValueInEditorIsNotWrittenToTheJobAtCreation(): void
+    {
+        $this->projectStructure->metadata = [
+            JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value => '90',
+        ];
+
+        $this->setConfigAndSave();
+
+        $this->assertArrayNotHasKey(
+            JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value,
+            $this->capturedMetadata
+        );
+    }
+
+    /**
+     * The guard against regressing to the eager write: whatever else creation persists per job, none
+     * of the eleven MT keys may be among it.
+     */
+    #[Test]
+    public function testNoMtSettingReachesTheJobEvenAlongsideTheJobOnlyKeys(): void
+    {
+        $this->projectStructure->metadata = [
+            JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value => '70',
+        ];
+
+        $this->setConfigAndSave([
+            'public_tm_penalty' => '5',
+            'tm_prioritization' => true,
+            'lara_style'        => 'fluid',
+            'deepl_formality'   => 'prefer_less',
+        ]);
+
+        $this->assertSame([
+            JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value => '5',
+            JobsMetadataMarshaller::TM_PRIORITIZATION->value => '1',
+        ], $this->capturedMetadata);
+
+        foreach (JobsMetadataMarshaller::mtSettings() as $key) {
+            $this->assertArrayNotHasKey($key, $this->capturedMetadata, "'$key' must stay project-scoped at creation");
+        }
     }
 }
