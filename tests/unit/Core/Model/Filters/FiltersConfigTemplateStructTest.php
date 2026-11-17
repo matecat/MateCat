@@ -382,6 +382,19 @@ class FiltersConfigTemplateStructTest extends AbstractTest
     }
 
     #[Test]
+    public function hydrateAllDto_hydrates_json_text_plain_inner_content_type(): void
+    {
+        $struct = new FiltersConfigTemplateStruct();
+        $struct->hydrateAllDto([
+            'json' => ['inner_content_type' => 'text/plain'],
+        ]);
+
+        $json = $struct->getJson();
+        $this->assertInstanceOf(Json::class, $json);
+        $this->assertSame('text/plain', $json->jsonSerialize()['inner_content_type']);
+    }
+
+    #[Test]
     public function hydrateAllDto_throws_on_invalid_json_inner_content_type(): void
     {
         $struct = new FiltersConfigTemplateStruct();
@@ -389,12 +402,13 @@ class FiltersConfigTemplateStructTest extends AbstractTest
         $this->expectException(DomainException::class);
         $this->expectExceptionMessage('JSON Inner content type not valid');
         $struct->hydrateAllDto([
-            'json' => ['inner_content_type' => 'text/plain'],
+            'json' => ['inner_content_type' => 'application/pdf'],
         ]);
     }
 
     /**
-     * text/html is the only value the JSON filter accepts, unlike the wider YAML allow-list.
+     * text/html and text/plain are the only values the JSON filter accepts, unlike the wider
+     * YAML allow-list.
      */
     #[Test]
     public function hydrateAllDto_throws_on_yaml_only_json_inner_content_type(): void
