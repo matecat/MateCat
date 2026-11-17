@@ -25,11 +25,16 @@ const replaceTempTags = (text) => {
   )
   return {tags, text}
 }
-const restoreTempTags = (tags, text) =>
-  text.replace(/#_([a-zA-Z]+?)_#/gi, (match, id) => {
-    const tag = tags.find((item) => item.id === id)
-    return tag ? tag.match : match
+const restoreTempTags = (tags, text) => {
+  // The first tag with an id wins, as a find over the list would pick it
+  const byId = new Map()
+  tags.forEach(({id, match}) => {
+    if (!byId.has(id)) byId.set(id, match)
   })
+  return text.replace(/#_([a-zA-Z]+?)_#/gi, (match, id) =>
+    byId.has(id) ? byId.get(id) : match,
+  )
+}
 import {isUndefined} from 'lodash'
 import matchTagStructure from './matchTag'
 import {createTagNumberer, getGEquivText} from './compressibleTagUtils'
@@ -259,23 +264,45 @@ const HTML_ENTITY_DECODE_DIFF = {
   '&gt;': 3,
   '&amp;': 4,
 }
-const isOffsetInsideTag = (offset, tagsStruct) =>
-  tagsStruct.some((tag) => offset >= tag.offset && offset < tag.offset + tag.length)
-
 // decodeHtmlEntities only decodes entities outside of tags (tags are protected
 // via temp placeholders), so offsets computed on the raw text must be shifted
-// left by however much entity-decoding shrinks the plain text before them
-const computeDecodeShrink = (text, tagsStruct, upToOffset) => {
-  let shrink = 0
+// left by however much entity-decoding shrinks the plain text before them.
+// Returns that shrink as a function of the offset, scanning the text once.
+const decodeShrinkCounter = (text, tagsStruct) => {
+  // Characters covered by a tag: +1 where a tag starts, -1 where it ends
+  const coverage = new Int32Array(text.length + 1)
+  tagsStruct.forEach(({offset, length}) => {
+    const start = Math.max(0, Math.min(offset, text.length))
+    const end = Math.max(start, Math.min(offset + length, text.length))
+    coverage[start]++
+    coverage[end]--
+  })
+  const entityOffsets = []
+  const shrinkUpTo = [0]
   const regex = /&lt;|&gt;|&amp;/g
   let match
+  let covered = 0
+  let scanned = 0
   while ((match = regex.exec(text)) !== null) {
-    if (match.index >= upToOffset) break
-    if (!isOffsetInsideTag(match.index, tagsStruct)) {
-      shrink += HTML_ENTITY_DECODE_DIFF[match[0]]
+    for (; scanned <= match.index; scanned++) covered += coverage[scanned]
+    if (covered <= 0) {
+      entityOffsets.push(match.index)
+      shrinkUpTo.push(
+        shrinkUpTo[shrinkUpTo.length - 1] + HTML_ENTITY_DECODE_DIFF[match[0]],
+      )
     }
   }
-  return shrink
+  return (upToOffset) => {
+    // Entities starting before upToOffset
+    let low = 0
+    let high = entityOffsets.length
+    while (low < high) {
+      const middle = (low + high) >> 1
+      if (entityOffsets[middle] < upToOffset) low = middle + 1
+      else high = middle
+    }
+    return shrinkUpTo[low]
+  }
 }
 
 export const transformTagsToLexiqaText = (text) => {
@@ -288,45 +315,62 @@ export const transformTagsToLexiqaText = (text) => {
   textNormalized = decodeHtmlEntities(tempText)
   textNormalized = restoreTempTags(tags, textNormalized)
 
-  return tagsStruct.reduce(
-    (acc, {data}) => {
-      const {value, difference} = acc
-      const {convertToLexiqaIgnoreAnglesBrackets, lexiqaText, decodeNeeded} =
-        tagSignatures[data.name]
+  const decodeShrinkBefore = decodeShrinkCounter(text, tagsStruct)
 
-      const decodeShrink = computeDecodeShrink(
-        text,
-        tagsStruct,
-        data.originalOffset,
+  // The text is built in chunks: `built` holds the replaced part, `rest` from `consumed` on is still
+  // untouched. Rebuilding the whole string for every tag took quadratic time on long segments.
+  const built = []
+  let builtLength = 0
+  let rest = textNormalized
+  let consumed = 0
+  let difference = 0
+  tagsStruct.forEach(({data}) => {
+    const {convertToLexiqaIgnoreAnglesBrackets, lexiqaText, decodeNeeded} =
+      tagSignatures[data.name]
+
+    const offsetStart =
+      data.originalOffset - decodeShrinkBefore(data.originalOffset) - difference
+    const offsetEnd = offsetStart + data.encodedText.length
+
+    // Must match the text the tag shows in the editor, or transformLexiqaPoints
+    // maps the warnings back to the wrong offsets: a <g> and its </g> show the
+    // <g>'s equiv-text when it has one, otherwise its id.
+    const placeholderText = isToReplaceForLexiqa(data.name)
+      ? lexiqaText
+      : decodeNeeded
+        ? data.decodedText
+        : data.name === 'g' || data.name === 'gCl'
+          ? data.placeholder
+          : data.id !== ''
+            ? data.id
+            : data.placeholder
+
+    const shouldIgnoreAngleBrackets = convertToLexiqaIgnoreAnglesBrackets
+
+    const placeholder = `${!shouldIgnoreAngleBrackets ? '<' : ''}${placeholderText}${!shouldIgnoreAngleBrackets ? '>' : ''}`
+
+    const valueLength = builtLength + rest.length - consumed
+    let newLength
+    if (offsetStart >= builtLength && offsetEnd <= valueLength) {
+      built.push(
+        rest.slice(consumed, consumed + offsetStart - builtLength),
+        placeholder,
       )
-      const offsetStart = data.originalOffset - decodeShrink - difference
-      const offsetEnd = offsetStart + data.encodedText.length
-
-      // Must match the text the tag shows in the editor, or transformLexiqaPoints
-      // maps the warnings back to the wrong offsets: a <g> and its </g> show the
-      // <g>'s equiv-text when it has one, otherwise its id.
-      const placeholderText = isToReplaceForLexiqa(data.name)
-        ? lexiqaText
-        : decodeNeeded
-          ? data.decodedText
-          : data.name === 'g' || data.name === 'gCl'
-            ? data.placeholder
-            : data.id !== ''
-              ? data.id
-              : data.placeholder
-
-      const shouldIgnoreAngleBrackets = convertToLexiqaIgnoreAnglesBrackets
-
-      const placeholder = `${!shouldIgnoreAngleBrackets ? '<' : ''}${placeholderText}${!shouldIgnoreAngleBrackets ? '>' : ''}`
-      const newValue = `${value.slice(0, offsetStart)}${placeholder}${value.substring(offsetEnd)}`
-
-      return {
-        value: newValue,
-        difference: difference + (value.length - newValue.length),
-      }
-    },
-    {value: textNormalized, difference: 0},
-  ).value
+      consumed += offsetEnd - builtLength
+      builtLength = offsetStart + placeholder.length
+      newLength = valueLength - (offsetEnd - offsetStart) + placeholder.length
+    } else {
+      // A tag overlapping one already replaced, or past the end: the whole string, as before
+      const value = built.join('') + rest.slice(consumed)
+      rest = `${value.slice(0, offsetStart)}${placeholder}${value.substring(offsetEnd)}`
+      built.length = 0
+      builtLength = 0
+      consumed = 0
+      newLength = rest.length
+    }
+    difference += valueLength - newLength
+  })
+  return built.join('') + rest.slice(consumed)
 }
 
 // Associate tag of type g with integer id

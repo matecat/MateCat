@@ -186,17 +186,38 @@ describe('markup the segment string carries outside its tags', () => {
 })
 
 describe('a long segment', () => {
-  test('is updated in linear time', () => {
-    // The space tags were found with lookarounds scanning to both ends of the string for every blank: a 64 KB segment
-    // with no tags took seconds. The bound is loose for slow machines and still far below the quadratic time.
+  // Several steps rebuilt the whole string for every tag, blank or line break, so a 256 KB segment took seconds. A time
+  // limit depends on the machine running the tests: four times the text must take about four times as long instead,
+  // where quadratic code takes twelve to sixteen times as long. The best of three runs keeps a pause out of the ratio.
+  const {tagRange} = sourceStoreData('<g id="1">x</g>')
+  const bestTime = (segment) => {
+    let best = Infinity
+    for (let run = 0; run < 3; run++) {
+      const start = performance.now()
+      translationUpdate(segment, tagRange)
+      sourceStoreData(segment)
+      best = Math.min(best, performance.now() - start)
+    }
+    return best
+  }
+
+  test.each([
+    ['plain words', 'Some words and more words here. '],
+    [
+      'tags, entities and line breaks',
+      'a &lt;b&gt; <g id="1">c</g> d##$_0A$##e ',
+    ],
+  ])('of %s is processed in linear time', (_, unit) => {
+    bestTime(unit.repeat(256))
+    const ratio = bestTime(unit.repeat(4096)) / bestTime(unit.repeat(1024))
+
+    expect(ratio).toBeLessThan(8)
+  })
+
+  test('keeps its tags', () => {
     const translation = 'Some words and more words here. '.repeat(2048)
-    const {tagRange} = sourceStoreData('<g id="1">x</g>')
 
-    const start = performance.now()
-    const {missingTags} = translationUpdate(translation, tagRange)
-
-    expect(performance.now() - start).toBeLessThan(2000)
-    expect(missingTags).toHaveLength(2)
+    expect(translationUpdate(translation, tagRange).missingTags).toHaveLength(2)
   })
 })
 

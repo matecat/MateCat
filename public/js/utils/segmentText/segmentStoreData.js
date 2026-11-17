@@ -85,46 +85,22 @@ const entityRuns = ({ents}) => {
 }
 
 // An edit at `offset` that lands inside a tag (the characters on both sides belong to it) strips the whole tag of its
-// entity: tags are immutable, they are never cut in two.
-const releaseEntityAt = (block, offset) => {
-  const before = offset > 0 ? block.ents[offset - 1] : null
-  const after = offset < block.ents.length ? block.ents[offset] : null
+// entity: tags are immutable, they are never cut in two. Characters before `from` are not looked at, as if the block
+// started there.
+const releaseEntityAt = ({ents}, offset, from = 0) => {
+  const before = offset > from ? ents[offset - 1] : null
+  const after = offset < ents.length ? ents[offset] : null
   if (after === null || after !== before) return
-  let range
-  entityRuns(block).forEach((run) => {
-    if (run.entity === after && run.start <= offset && run.end >= offset)
-      range = run
-  })
-  for (let i = range.start; i < range.end; i++) block.ents[i] = null
+  let start = offset
+  while (start > from && ents[start - 1] === after) start--
+  let end = offset
+  while (end < ents.length && ents[end] === after) end++
+  for (let i = start; i < end; i++) ents[i] = null
 }
 
 const releaseEntitiesAtEdges = (block, start, end) => {
   releaseEntityAt(block, start)
   releaseEntityAt(block, end)
-}
-
-// Removes [start, end) from the block; a range that starts and ends inside the same tag removes the whole tag.
-// Returns the offset the removal collapsed to.
-const removeRange = (block, start, end) => {
-  const startEntity = block.ents[start] ?? null
-  const endEntity = block.ents[end - 1] ?? null
-  if (startEntity !== null && startEntity === endEntity) {
-    const runs = entityRuns(block).filter(
-      (run) =>
-        run.entity === startEntity && start <= run.end && start >= run.start,
-    )
-    if (runs.length !== 1)
-      throw new Error(
-        'There should only be one entity range within this removal range.',
-      )
-    start = runs[0].start
-    end = runs[0].end
-  } else {
-    releaseEntitiesAtEdges(block, start, end)
-  }
-  block.text = block.text.slice(0, start) + block.text.slice(end)
-  block.ents.splice(start, end - start)
-  return start
 }
 
 // The line break placeholders left in the block become block breaks: a CR LF pair is one break.
@@ -145,31 +121,44 @@ const splitOnLineBreaks = (block) => {
   const carriageReturn = /##\$(_0D)\$##/gi
   while ((match = carriageReturn.exec(text)) !== null)
     splitPoints.push({offset: match.index, length: CR_PLACEHOLDER.length})
-  splitPoints.sort((a, b) => b.offset - a.offset)
+  splitPoints.sort((a, b) => a.offset - b.offset)
   // A line break in a tag's placeholder is part of the tag, not a break of the segment
   const segmentBreaks = splitPoints.filter(
     ({offset}) => block.ents[offset] === null,
   )
+  if (!segmentBreaks.length) return [block]
 
+  // The placeholders are removed, in one pass: a tag the end of one overlaps loses its entity
+  const textParts = []
+  const entsParts = []
   const breaks = []
-  while (segmentBreaks.length > 0) {
-    const point = segmentBreaks.pop()
-    breaks.push(removeRange(block, point.offset, point.offset + point.length))
-    segmentBreaks.forEach((other) => (other.offset -= point.length))
-  }
-  breaks.sort((a, b) => a - b)
+  let kept = 0
+  let removed = 0
+  segmentBreaks.forEach(({offset, length}) => {
+    releaseEntityAt(block, offset + length)
+    textParts.push(block.text.slice(kept, offset))
+    entsParts.push(block.ents.slice(kept, offset))
+    breaks.push(offset - removed)
+    removed += length
+    kept = offset + length
+  })
+  textParts.push(block.text.slice(kept))
+  entsParts.push(block.ents.slice(kept))
+  const keptText = textParts.join('')
+  const ents = []
+  entsParts.forEach((part) => part.forEach((entity) => ents.push(entity)))
 
   const blocks = []
-  let tail = block
-  let consumed = 0
-  breaks.forEach((offset) => {
-    const at = offset - consumed
-    releaseEntityAt(tail, at)
-    blocks.push({text: tail.text.slice(0, at), ents: tail.ents.slice(0, at)})
-    tail = {text: tail.text.slice(at), ents: tail.ents.slice(at)}
-    consumed = offset
+  let lineStart = 0
+  breaks.forEach((at) => {
+    releaseEntityAt({ents}, at, lineStart)
+    blocks.push({
+      text: keptText.slice(lineStart, at),
+      ents: ents.slice(lineStart, at),
+    })
+    lineStart = at
   })
-  blocks.push(tail)
+  blocks.push({text: keptText.slice(lineStart), ents: ents.slice(lineStart)})
   return blocks
 }
 
@@ -232,8 +221,13 @@ const toEditorText = (segment = '', sourceTagMap) => {
       : tagRange,
   )
 
-  // Every tag but the line breaks is replaced by its placeholder, between two zero-width spaces
-  let plainText = markupText
+  // Every tag but the line breaks is replaced by its placeholder, between two zero-width spaces. The text is built in
+  // chunks: `built` holds the replaced part, `rest` from `consumed` on is still untouched. Rebuilding the whole
+  // string for every tag took quadratic time on long segments.
+  const built = []
+  let builtLength = 0
+  let rest = markupText
+  let consumed = 0
   let slicedLength = 0
   const placed = []
   indexedTagRange.forEach((tag) => {
@@ -241,55 +235,81 @@ const toEditorText = (segment = '', sourceTagMap) => {
     if (lineBreakTags.includes(name)) return
     const start = tag.offset - slicedLength
     const end = start + encodedText.length
+    const textLength = builtLength + rest.length - consumed
     placed.push({start, tag})
-    plainText =
-      plainText.slice(0, start) +
-      ZWSP +
-      placeholder +
-      ZWSP +
-      plainText.slice(end)
+    if (start >= builtLength && end <= textLength) {
+      built.push(
+        rest.slice(consumed, consumed + start - builtLength),
+        ZWSP + placeholder + ZWSP,
+      )
+      consumed += end - builtLength
+      builtLength = start + placeholder.length + 2
+    } else {
+      // A tag overlapping one already replaced, or past the end: the whole string, as before
+      const text = built.join('') + rest.slice(consumed)
+      rest = text.slice(0, start) + ZWSP + placeholder + ZWSP + text.slice(end)
+      built.length = 0
+      builtLength = 0
+      consumed = 0
+    }
     slicedLength += end - start - (placeholder.length + 2)
   })
+  const plainText = built.join('') + rest.slice(consumed)
 
   // Real line breaks split blocks too. Offsets keep counting one character per break, also for a CR LF. A line break
   // in a tag's placeholder is kept as is, as the editor's tag chip shows it (its label is the placeholder text): it
   // belongs to the tag, which stays whole on one line.
-  const inPlaceholder = (offset) =>
-    placed.some(
-      ({start, tag}) =>
-        offset > start && offset <= start + tag.data.placeholder.length,
-    )
-  const lines = ['']
+  const inPlaceholder = new Uint8Array(plainText.length + 1)
+  placed.forEach(({start, tag}) => {
+    const last = Math.min(start + tag.data.placeholder.length, plainText.length)
+    for (let i = Math.max(start + 1, 0); i <= last; i++) inPlaceholder[i] = 1
+  })
+  const lines = []
+  let lineStart = 0
   for (let i = 0; i < plainText.length; i++) {
     const char = plainText[i]
-    if ((char !== '\r' && char !== '\n') || inPlaceholder(i)) {
-      lines[lines.length - 1] += char
-    } else {
+    if ((char === '\r' || char === '\n') && !inPlaceholder[i]) {
+      lines.push(plainText.slice(lineStart, i))
       if (char === '\r' && plainText[i + 1] === '\n') i++
-      lines.push('')
+      lineStart = i + 1
     }
   }
+  lines.push(plainText.slice(lineStart))
   const blocks = lines.map(makeBlock)
-  const entities = []
+
+  // Each tag goes in the block its placeholder starts in, when it ends there too
+  const blockEnds = []
   let maxCharsInBlocks = 0
   blocks.forEach((block, blockIndex) => {
-    const blockLength = block.text.length
-    maxCharsInBlocks += blockLength + (blockIndex !== 0 ? 1 : 0)
-    const blockStart = maxCharsInBlocks - blockLength
-    placed.forEach(({start, tag}) => {
-      const from = start + 1
-      const to = from + tag.data.placeholder.length
-      if (
-        from < maxCharsInBlocks &&
-        to <= maxCharsInBlocks &&
-        from >= blockStart &&
-        !lineBreakTags.includes(tag.data.name)
-      ) {
-        const entity = entities.push({data: tag.data}) - 1
-        releaseEntitiesAtEdges(block, from - blockStart, to - blockStart)
-        for (let i = from - blockStart; i < to - blockStart; i++)
-          block.ents[i] = entity
-      }
+    maxCharsInBlocks += block.text.length + (blockIndex !== 0 ? 1 : 0)
+    blockEnds.push(maxCharsInBlocks)
+  })
+  const placedInBlock = blocks.map(() => [])
+  placed.forEach((item) => {
+    const from = item.start + 1
+    const to = from + item.tag.data.placeholder.length
+    if (lineBreakTags.includes(item.tag.data.name)) return
+    // The first block ending after `from`
+    let low = 0
+    let high = blocks.length
+    while (low < high) {
+      const middle = (low + high) >> 1
+      if (blockEnds[middle] > from) high = middle
+      else low = middle + 1
+    }
+    if (low >= blocks.length) return
+    const blockStart = blockEnds[low] - blocks[low].text.length
+    if (from >= blockStart && to <= blockEnds[low])
+      placedInBlock[low].push({from, to, tag: item.tag})
+  })
+  const entities = []
+  blocks.forEach((block, blockIndex) => {
+    const blockStart = blockEnds[blockIndex] - block.text.length
+    placedInBlock[blockIndex].forEach(({from, to, tag}) => {
+      const entity = entities.push({data: tag.data}) - 1
+      releaseEntitiesAtEdges(block, from - blockStart, to - blockStart)
+      for (let i = from - blockStart; i < to - blockStart; i++)
+        block.ents[i] = entity
     })
   })
 
