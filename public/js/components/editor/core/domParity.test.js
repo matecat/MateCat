@@ -65,24 +65,16 @@ jest.mock('../../../stores/SegmentStore', () => {
     },
   }
 })
-// Actions do nothing, except the ones whose store event an editor draws from: focusTags reaches the chips as
-// FOCUS_TAGS (SegmentStore), as the dispatcher sends it.
-jest.mock('../../../actions/SegmentActions', () => {
-  const {FOCUS_TAGS} = jest.requireActual(
-    '../../../constants/SegmentConstants',
-  ).default
-  const store = jest.requireMock('../../../stores/SegmentStore').default
-  const actions = {
-    focusTags: (tagsSelected) =>
-      store.emit(FOCUS_TAGS, {actionType: FOCUS_TAGS, tagsSelected}),
-  }
-  return {
-    __esModule: true,
-    default: new Proxy(actions, {
+// Actions do nothing.
+jest.mock('../../../actions/SegmentActions', () => ({
+  __esModule: true,
+  default: new Proxy(
+    {},
+    {
       get: (all, name) => (all[name] ??= jest.fn()),
-    }),
-  }
-})
+    },
+  ),
+}))
 jest.mock('../../../stores/CatToolStore', () => ({
   __esModule: true,
   default: {

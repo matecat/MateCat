@@ -2,7 +2,7 @@ export const getIdAttributeRegEx = () => {
   return /id="(-?\w+)"/g
 }
 
-export const unescapeHTMLinTags = (escapedHTML) => {
+const unescapeHTMLinTags = (escapedHTML) => {
   try {
     return escapedHTML
       .replace(/&lt;/g, '<')

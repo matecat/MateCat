@@ -1,8 +1,4 @@
-import {
-  getIdAttributeRegEx,
-  unescapeHTMLinTags,
-  unescapeHTMLRecursive,
-} from './htmlUtils'
+import {getIdAttributeRegEx, unescapeHTMLRecursive} from './htmlUtils'
 
 describe('getIdAttributeRegEx', () => {
   test('matches an id attribute and captures its value', () => {
@@ -24,27 +20,16 @@ describe('getIdAttributeRegEx', () => {
   })
 })
 
-describe('unescapeHTMLinTags', () => {
-  test('unescapes all known html entities', () => {
-    expect(unescapeHTMLinTags('&lt;p&gt;')).toBe('<p>')
-    expect(unescapeHTMLinTags('&amp;amp;')).toBe('&')
-    expect(unescapeHTMLinTags('&amp;')).toBe('&')
-    expect(unescapeHTMLinTags('&nbsp;')).toBe(' ')
-    expect(unescapeHTMLinTags('&apos;')).toBe("'")
-    expect(unescapeHTMLinTags('&quot;')).toBe('"')
-  })
-
-  test('leaves plain text unchanged', () => {
-    expect(unescapeHTMLinTags('plain text')).toBe('plain text')
-  })
-
-  test('returns empty string when replace throws (non-string input)', () => {
-    expect(unescapeHTMLinTags(null)).toBe('')
-    expect(unescapeHTMLinTags(undefined)).toBe('')
-  })
-})
-
 describe('unescapeHTMLRecursive', () => {
+  test('unescapes all known html entities', () => {
+    expect(unescapeHTMLRecursive('&lt;p&gt;')).toBe('<p>')
+    expect(unescapeHTMLRecursive('&amp;amp;')).toBe('&')
+    expect(unescapeHTMLRecursive('&amp;')).toBe('&')
+    expect(unescapeHTMLRecursive('&nbsp;')).toBe(' ')
+    expect(unescapeHTMLRecursive('&apos;')).toBe("'")
+    expect(unescapeHTMLRecursive('&quot;')).toBe('"')
+  })
+
   test('unescapes nested/doubly-escaped entities', () => {
     expect(unescapeHTMLRecursive('&amp;lt;p&amp;gt;')).toBe('<p>')
   })

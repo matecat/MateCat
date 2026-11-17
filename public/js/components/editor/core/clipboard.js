@@ -19,7 +19,7 @@ import {
 import {TAG_SELECTOR} from './tags'
 
 /** The selected range, grown to whole tags, as `{from, to, raw, plain}`; null when empty. */
-export const clipboardSlice = (state) => {
+const clipboardSlice = (state) => {
   const sel = state.selection.main
   if (sel.empty) return null
   const {from, to} = snapToTags(state, sel.from, sel.to)
@@ -28,8 +28,7 @@ export const clipboardSlice = (state) => {
 }
 
 /** External plain text -> document text: tag markup dropped; a `°` stays a degree sign. */
-export const externalText = (plain) =>
-  stripTagMarkup(plain).replace(/\r\n?/g, '\n')
+const externalText = (plain) => stripTagMarkup(plain).replace(/\r\n?/g, '\n')
 
 /**
  * What a data transfer (clipboard or drop) inserts: the segment slice it carries, tags included, or else its plain

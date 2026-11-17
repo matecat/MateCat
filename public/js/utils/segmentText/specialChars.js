@@ -92,7 +92,7 @@ export const SPECIAL_CHARS = {
  * An ordinary space, marked only with the user's show whitespace option. No tooltip: one on every space of the text
  * would get in the way of reading it.
  */
-export const SPACE = space(null, 'special-char-space', {label: '·'})
+const SPACE = space(null, 'special-char-space', {label: '·'})
 
 /** The tab ("\t", the cattool tab tag): its arrow at the start of the tab's width. */
 export const TAB = {

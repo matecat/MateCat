@@ -42,7 +42,7 @@ const readOnlyCompartment = new Compartment()
  * The extensions of a segment editor state. Exported so the state can be built and tested without a view.
  * @param {object} options see `createSegmentEditor`
  */
-export const segmentEditorExtensions = ({
+const segmentEditorExtensions = ({
   mode = 'target',
   lang,
   dir = 'ltr',

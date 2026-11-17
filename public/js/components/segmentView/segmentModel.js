@@ -491,7 +491,7 @@ const tagKey = (token) =>
 
 export const DIFF_DELETE = 'delete'
 export const DIFF_INSERT = 'insert'
-export const DIFF_EQUAL = 'equal'
+const DIFF_EQUAL = 'equal'
 const OPS = {[-1]: DIFF_DELETE, 1: DIFF_INSERT, 0: DIFF_EQUAL}
 
 /**
@@ -604,7 +604,7 @@ export const sliceSegment = (segment, start, end, options) => {
  * The attribute that carries a segment slice (base64 of the raw string) in
  * the `text/html` flavour of a copy from a SegmentView.
  */
-export const CLIPBOARD_ATTRIBUTE = 'data-matecat-segment'
+const CLIPBOARD_ATTRIBUTE = 'data-matecat-segment'
 const CLIPBOARD_ATTRIBUTE_RE = new RegExp(
   CLIPBOARD_ATTRIBUTE + '="([A-Za-z0-9+/=_-]*)"',
 )

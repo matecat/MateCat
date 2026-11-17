@@ -50,7 +50,6 @@ jest.mock('../../../stores/SegmentStore', () => {
 jest.mock('../../../actions/SegmentActions', () => ({
   __esModule: true,
   default: {
-    focusTags: jest.fn(),
     getSegmentsQa: jest.fn(),
     highlightTags: jest.fn(),
     startSegmentQACheck: jest.fn(),

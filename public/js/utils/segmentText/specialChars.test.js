@@ -1,7 +1,6 @@
 import {
   CHARACTER_TAGS,
   LINE_BREAK,
-  SPACE,
   SPECIAL_CHARS,
   TAB,
   specialCharMark,
@@ -34,9 +33,10 @@ describe('specialCharMark', () => {
 
   test('the space has a mark only with showWhitespace, and it has no tooltip', () => {
     expect(specialCharMark(' ')).toBeNull()
-    expect(specialCharMark(' ', {showWhitespace: true})).toBe(SPACE)
-    expect(SPACE.title).toBeNull()
-    expect(SPACE.keepsWidth).toBe(true)
+    const mark = specialCharMark(' ', {showWhitespace: true})
+    expect(mark.className).toContain('special-char-space')
+    expect(mark.title).toBeNull()
+    expect(mark.keepsWidth).toBe(true)
   })
 })
 
