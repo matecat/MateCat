@@ -11,7 +11,7 @@ import HelpCircle from '../../../img/icons/HelpCircle'
 import IconAdd from '../../../img/icons/IconAdd'
 import {SELECT_HEIGHT} from '../../constants/Constants'
 import {Button, BUTTON_MODE, BUTTON_TYPE} from '../common/Button/Button'
-import {SETTINGS_PANEL_TABS} from '../settingsPanel'
+import {SETTINGS_PANEL_TABS} from '../settingsPanel/SettingsPanelConstants'
 
 export const TmGlossarySelect = () => {
   const {tmKeys, setOpenSettings, modifyingCurrentTemplate, projectTemplates} =

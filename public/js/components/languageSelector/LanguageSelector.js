@@ -135,8 +135,8 @@ const LanguageSelector = (props) => {
   }
 
   const onToggleLanguage = (language) => {
-    let newSelectedLanguages = [...selectedLanguages]
-    const indexSearch = selectedLanguages
+    let newSelectedLanguages = [...(selectedLanguages ?? [])]
+    const indexSearch = newSelectedLanguages
       .map((e) => e.code)
       .indexOf(language.code)
     if (indexSearch > -1) {

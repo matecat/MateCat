@@ -3,6 +3,7 @@
 namespace Matecat\Core\TmKeyManagement;
 
 use Exception;
+use JsonException;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\CapturesNamedLogs;
 use Model\DataAccess\IDatabase;
@@ -11,6 +12,7 @@ use PHPUnit\Framework\MockObject\Exception as MockObjectException;
 use Utils\TmKeyManagement\Filter;
 use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TmKeyManagement\TmKeyStruct;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 
 class TmKeyManagerTest extends AbstractTest
@@ -149,5 +151,59 @@ class TmKeyManagerTest extends AbstractTest
         $this->assertCount(1, $merged);
         $this->assertSame('0123456789abcdef0123', $merged[0]->key);
         $this->assertTrue($merged[0]->owner);
+    }
+
+    /**
+     * @throws Exception
+     * @throws MockObjectException
+     */
+    #[Test]
+    public function mergeJsonKeysKeepsEachNewKeyWhenSeveralAreAdded(): void
+    {
+        $merged = TmKeyManager::mergeJsonKeys(
+            '[{"key":"aaaaaaaaaaaaaaaaaaa1","name":"A","r":true,"w":true,"tm":true,"glos":true},{"key":"bbbbbbbbbbbbbbbbbbb2","name":"B","r":true,"w":true,"tm":true,"glos":true}]',
+            '[]',
+            $this->createStub(IDatabase::class),
+            Filter::OWNER,
+            null
+        );
+
+        $this->assertCount(2, $merged);
+        $this->assertSame(['aaaaaaaaaaaaaaaaaaa1', 'bbbbbbbbbbbbbbbbbbb2'], array_map(fn($k) => $k->key, array_values($merged)));
+        $this->assertSame(['A', 'B'], array_map(fn($k) => $k->name, array_values($merged)));
+    }
+
+    /**
+     * The client keys getNewKeys() reads, with the job keys it compares them to.
+     *
+     * @return array<string, array{list<string>, list<string>, list<string>}> client keys, job keys, expected
+     */
+    public static function newKeysCases(): array
+    {
+        return [
+            'a key not in the job'          => [['aaaaaaaaaaaaaaaaaaa1'], [], ['aaaaaaaaaaaaaaaaaaa1']],
+            'a key already in the job'      => [['aaaaaaaaaaaaaaaaaaa1'], ['aaaaaaaaaaaaaaaaaaa1'], []],
+            'the masked form of a job key'  => [[(new TmKeyStruct(['key' => 'aaaaaaaaaaaaaaaaaaa1']))->getCrypt()], ['aaaaaaaaaaaaaaaaaaa1'], []],
+            'a masked key not in the job'   => [['****************zzz9'], [], []],
+            'an empty key'                  => [[''], [], []],
+            'only the new one of two keys'  => [['aaaaaaaaaaaaaaaaaaa1', 'bbbbbbbbbbbbbbbbbbb2'], ['aaaaaaaaaaaaaaaaaaa1'], ['bbbbbbbbbbbbbbbbbbb2']],
+        ];
+    }
+
+    /**
+     * @param list<string> $clientKeys
+     * @param list<string> $jobKeys
+     * @param list<string> $expected
+     *
+     * @throws JsonException
+     */
+    #[Test]
+    #[DataProvider('newKeysCases')]
+    public function getNewKeysReturnsTheClientKeysThatAreNotInTheJob(array $clientKeys, array $jobKeys, array $expected): void
+    {
+        $clientJson = (string) json_encode(array_map(fn(string $k) => ['key' => $k, 'name' => 'A', 'r' => true, 'w' => true, 'tm' => true, 'glos' => true], $clientKeys));
+        $jobJson    = (string) json_encode(array_map(fn(string $k) => ['key' => $k, 'owner' => true, 'r' => true, 'w' => true], $jobKeys));
+
+        $this->assertSame($expected, TmKeyManager::getNewKeys($clientJson, $jobJson));
     }
 }

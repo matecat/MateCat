@@ -1,41 +1,41 @@
-import {http, HttpResponse} from 'msw'
-import {saveAs} from 'file-saver'
-import {mswServer} from '../../../mocks/mswServer'
+import {downloadFromUrl} from '../downloadFromUrl'
 import {downloadFile} from './downloadFile'
 
-jest.mock('file-saver', () => ({saveAs: jest.fn()}))
+jest.mock('../downloadFromUrl', () => ({downloadFromUrl: jest.fn()}))
 
-global.config = {
-  basepath: 'http://localhost/',
-  id_job: '77',
-  password: 'pwd',
-}
-
-const serveDownload = (headers) =>
-  mswServer.use(
-    http.get(
-      config.basepath + 'api/v2/translation/77/pwd',
-      () => new HttpResponse('content', {headers}),
-    ),
-  )
-
-beforeEach(() => saveAs.mockClear())
-
-test('saves the file under the original name', async () => {
-  serveDownload({
-    'Content-Disposition':
-      'attachment; filename="_______.txt"; filename*=UTF-8\'\'%D1%81%D0%BF%D0%B0%D1%81%D0%B8%D0%B1%D0%BE.txt',
-  })
-
-  await downloadFile({})
-
-  expect(saveAs).toHaveBeenCalledWith(expect.anything(), 'спасибо.txt')
+beforeEach(() => {
+  downloadFromUrl.mockReset()
+  global.config = {
+    ...global.config,
+    basepath: 'http://localhost/',
+    id_job: '9',
+    password: 'jobpwd',
+  }
 })
 
-test('saves the file under a fallback name without a header', async () => {
-  serveDownload({})
+test('downloads the translation of the given job with the error check on', async () => {
+  const onProgress = jest.fn()
+  const {signal} = new AbortController()
 
+  await downloadFile({idJob: 7, password: 'pass', onProgress, signal})
+
+  expect(downloadFromUrl).toHaveBeenCalledWith({
+    url: 'http://localhost/api/v3/jobs/7/pass/translation?download_type=all&disableErrorCheck=0',
+    onProgress,
+    signal,
+  })
+})
+
+test('turns the error check off when asked to skip it', async () => {
+  await downloadFile({idJob: 7, password: 'pass', checkErrors: false})
+
+  expect(downloadFromUrl.mock.calls[0][0].url).toContain('disableErrorCheck=1')
+})
+
+test('defaults to the job open in the page', async () => {
   await downloadFile({})
 
-  expect(saveAs).toHaveBeenCalledWith(expect.anything(), 'download')
+  expect(downloadFromUrl.mock.calls[0][0].url).toBe(
+    'http://localhost/api/v3/jobs/9/jobpwd/translation?download_type=all&disableErrorCheck=0',
+  )
 })

@@ -27,6 +27,7 @@ use Utils\AsyncTasks\Workers\Service\MatchSorter;
 use Utils\Constants\EngineConstants;
 use Utils\Constants\TranslationStatus;
 use Utils\Contribution\GetContributionRequest;
+use Utils\Engines\Lara\LaraQualityEstimator;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Logger\MatecatLogger;
@@ -44,15 +45,18 @@ use Utils\Tools\Utils;
 class GetContributionWorker extends AbstractWorker
 {
     private MatchSorterInterface $matchSorter;
+    private LaraQualityEstimator $qualityEstimator;
 
     public function __construct(
         AMQHandler $queueHandler,
         IDatabase $database,
         ?MatchSorterInterface $matchSorter = null,
         ?MatecatLogger $logger = null,
+        ?LaraQualityEstimator $qualityEstimator = null,
     ) {
         parent::__construct($queueHandler, $database, $logger);
         $this->matchSorter = $matchSorter ?? new MatchSorter();
+        $this->qualityEstimator = $qualityEstimator ?? new LaraQualityEstimator($this->database, $this->logger);
     }
 
     /**
@@ -105,17 +109,21 @@ class GetContributionWorker extends AbstractWorker
         if (!empty($contributionStruct->crossLangTargets)) {
             $crossLangMatches = [];
 
-            foreach ($contributionStruct->crossLangTargets as $lang) {
-                // double-check for not black lang
-                if ($lang !== '') {
-                    [, $matches] = $this->_getMatches($contributionStruct, $jobStruct, $lang, $featureSet, true);
+            // Skip blank languages, and query a language picked in both slots only once:
+            // two identical queries would publish every match twice.
+            $crossLangTargets = array_unique(array_filter(
+                $contributionStruct->crossLangTargets,
+                fn(string $lang): bool => $lang !== ''
+            ));
 
-                    $matches = array_slice($matches, 0, $contributionStruct->resultNum);
-                    $this->normalizeMTMatches($matches, $contributionStruct, $featureSet);
+            foreach ($crossLangTargets as $lang) {
+                [, $matches] = $this->_getMatches($contributionStruct, $jobStruct, $lang, $featureSet, true);
 
-                    foreach ($matches as $match) {
-                        $crossLangMatches[] = $match;
-                    }
+                $matches = array_slice($matches, 0, $contributionStruct->resultNum);
+                $this->normalizeMTMatches($matches, $contributionStruct, $featureSet);
+
+                foreach ($matches as $match) {
+                    $crossLangMatches[] = $match;
                 }
             }
 
@@ -437,6 +445,9 @@ class GetContributionWorker extends AbstractWorker
 
         if ($isCrossLang) {
             $_config['get_mt'] = false;
+            // The job's dialect_strict belongs to the job's own target language. A reference
+            // language is always variant strict, otherwise sibling variants come back penalized.
+            $_config['dialect_strict'] = true;
         }
 
         /**
@@ -527,6 +538,7 @@ class GetContributionWorker extends AbstractWorker
 
                 try {
                     $mtResponse = $mt_engine->get($config);
+                    $this->qualityEstimator->scoreIfRequested($mt_engine, $mtResponse, $config);
                     if (!empty($mtResponse->matches)) {
                         $mt_result = $mtResponse->get_matches_as_array(1)[0] ?? [];
                     }

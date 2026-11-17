@@ -163,7 +163,7 @@ export const EmailsBadge = ({
   const handleAreaKeyDown = (e) => {
     switch (e.key) {
       case 'Backspace':
-        if (highlightedEmailIndexRef.current >= 0) {
+        if (!disabled && highlightedEmailIndexRef.current >= 0) {
           removeEmail(highlightedEmailIndexRef.current)
           inputRef?.current.focus()
         }
@@ -267,6 +267,7 @@ export const EmailsBadge = ({
                 : undefined
           }
           onRemove={() => removeEmail(index)}
+          removable={!disabled}
         >
           {renderChipLabel(email)}
         </Tag>

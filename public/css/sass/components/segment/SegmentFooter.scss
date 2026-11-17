@@ -336,6 +336,6 @@ section.loaded .submenu {
 .alternatives .added,
 .suggestion_source .added,
 .suggestion_source ins {
-  background: rgba(18, 230, 130, 0.12);
+  background: rgba(colors.$green400, 0.45);
   color: colors.$green1000;
 }
