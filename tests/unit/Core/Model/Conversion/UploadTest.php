@@ -318,6 +318,23 @@ class UploadTest extends AbstractTest
         $upload->uploadFiles($files);
     }
 
+    /**
+     * A name the web upload refuses as too long is refused the same way through the API.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function uploadFilesThrowsOnAFileNameTooLong(): void
+    {
+        $upload = new Upload('upload-long-name');
+        $fakeUpload = $this->makeFakeUpload('valid.txt', 'content');
+        $fakeUpload['name'] = str_repeat('a', \Utils\Registry\AppConfig::$MAX_FILENAME_LENGTH - 3) . '.txt';
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('The file name is too long. Shorten it and try again.');
+        $upload->uploadFiles(['document' => $fakeUpload]);
+    }
+
     // ================================================
     // uploadFiles() — upload error codes (UPLOAD_ERR_*)
     // ================================================

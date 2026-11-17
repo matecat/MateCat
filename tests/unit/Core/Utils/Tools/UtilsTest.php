@@ -2529,4 +2529,14 @@ class UtilsTest extends AbstractTest
         self::assertTrue($log->hasWarningThatContains('fail deleting faildelete://dir/locked.txt'));
     }
 
+    #[Test]
+    public function isFileNameTooLongAcceptsTheLimitAndRefusesOneByteMore(): void
+    {
+        $limit = AppConfig::$MAX_FILENAME_LENGTH;
+
+        self::assertFalse(Utils::isFileNameTooLong(str_repeat('a', $limit - 4) . '.txt'));
+        self::assertTrue(Utils::isFileNameTooLong(str_repeat('a', $limit - 3) . '.txt'));
+        // bytes, not characters
+        self::assertTrue(Utils::isFileNameTooLong(str_repeat('ب', intdiv($limit, 2) + 1)));
+    }
 }

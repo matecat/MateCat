@@ -1,5 +1,5 @@
 import React from 'react'
-import {render, screen, fireEvent, waitFor} from '@testing-library/react'
+import {render, screen, fireEvent, waitFor, act} from '@testing-library/react'
 
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
 import ModalsActions from '../actions/ModalsActions'
@@ -10,6 +10,9 @@ import {getSupportedFiles} from '../api/getSupportedFiles'
 import {getSupportedLanguages} from '../api/getSupportedLanguages'
 import {getTmKeysUser} from '../api/getTmKeysUser'
 import {getMTEngines} from '../api/getMTEngines'
+import {createProject} from '../api/createProject'
+import CreateProjectStore from '../stores/CreateProjectStore'
+import NewProjectConstants from '../constants/NewProjectConstants'
 import NewProject from './NewProject'
 
 jest.mock('./mountPage', () => {
@@ -278,5 +281,27 @@ describe('NewProject', () => {
     fireEvent.click(screen.getByTitle('Swap languages'))
 
     expect(ModalsActions.showModalComponent).toHaveBeenCalled()
+  })
+
+  test('shows the backend message when the project creation fails with -230', async () => {
+    createProject.mockRejectedValue({
+      errors: [{code: -230, message: 'Failed to cache file a.xlf'}],
+    })
+    renderComponent({isUserLogged: true, isDeviceCompatible: true})
+
+    // the upload area enables Analyze through the store once the files are ready
+    const [, enableAnalyze] = CreateProjectStore.addListener.mock.calls.find(
+      ([event]) => event === NewProjectConstants.ENABLE_ANALYZE_BUTTON,
+    )
+    act(() => enableAnalyze(true))
+
+    const analyze = screen.getByRole('button', {name: /analyze/i})
+    await waitFor(() => expect(analyze).toBeEnabled())
+    fireEvent.click(analyze)
+
+    expect(
+      await screen.findByText('Failed to cache file a.xlf'),
+    ).toBeInTheDocument()
+    expect(createProject).toHaveBeenCalledTimes(1)
   })
 })

@@ -11,6 +11,8 @@ interface FilesystemAdapter
 
     public function link(string $target, string $link): bool;
 
+    public function rename(string $from, string $to): bool;
+
     public function mkdir(string $path, int $mode = 0755, bool $recursive = true): bool;
 
     public function unlink(string $path): bool;

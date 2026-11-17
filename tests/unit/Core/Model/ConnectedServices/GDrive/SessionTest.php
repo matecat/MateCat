@@ -965,6 +965,21 @@ class SessionTest extends AbstractTest
     }
 
     #[Test]
+    public function sanitizeFileNameRefusesANameTooLong(): void
+    {
+        $sessionData = $this->createSessionData();
+        $session = new Session($this->dbStub, new ArraySessionStore($sessionData), null, null, $sessionData['user'] ?? null);
+
+        $method = new \ReflectionMethod($session, 'sanitizeFileName');
+        $limit = \Utils\Registry\AppConfig::$MAX_FILENAME_LENGTH;
+        $this->assertSame(str_repeat('a', $limit - 5) . '.docx', $method->invoke($session, str_repeat('a', $limit - 5) . '.docx'));
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('The file name is too long. Shorten it and try again.');
+        $method->invoke($session, str_repeat('a', $limit - 4) . '.docx');
+    }
+
+    #[Test]
     public function sanitizeFileNameReturnsValidName(): void
     {
         $sessionData = $this->createSessionData();
@@ -1222,6 +1237,33 @@ class SessionTest extends AbstractTest
             \Utils\Registry\AppConfig::$UPLOAD_REPOSITORY = $origUploadRepo;
             self::deleteRecursiveDir($tmpDir);
         }
+    }
+
+    /**
+     * A Drive title that fits only without the export extension is refused before the file is downloaded.
+     */
+    #[Test]
+    public function importFileRefusesATitleTooLongOnceTheExtensionIsAdded(): void
+    {
+        $sessionData = $this->createSessionData();
+        $session = new TestableSession($this->dbStub, new ArraySessionStore($sessionData), null, null, $sessionData['user'] ?? null);
+        $session->setConversionParams('3f2504e0-4f89-11d3-9a0c-0305e82c3301', 'en-US', 'it-IT');
+
+        $fileMeta = new \Google_Service_Drive_DriveFile();
+        $fileMeta->setName(str_repeat('a', \Utils\Registry\AppConfig::$MAX_FILENAME_LENGTH - 4));
+        $fileMeta->setMimeType('application/vnd.google-apps.document');
+
+        $filesResource = $this->createMock(\Google_Service_Drive_Resource_Files::class);
+        $filesResource->method('get')->willReturn($fileMeta);
+        $filesResource->expects($this->never())->method('export');
+
+        $mockService = $this->createStub(Google_Service_Drive::class);
+        $mockService->files = $filesResource;
+        $session->mockService = $mockService;
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('The file name is too long. Shorten it and try again.');
+        $session->importFile('google-file-id', $this->createStub(Google_Client::class));
     }
 
     #[Test]

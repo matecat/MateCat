@@ -322,8 +322,9 @@ class GDriveController extends AbstractStatefulKleinController
             return "Google Drive does not allow exports of files in this format. Please open the file in Google Drive and save it as a Google Drive file.";
         }
 
+        // a storage error, which says nothing about the file name
         if (str_contains($message, 'The specified key does not exist.')) {
-            return "The name of the file you are trying to upload is too long, please shorten it and try again.";
+            return "Error while saving the file. Try again.";
         }
 
         return $message;
