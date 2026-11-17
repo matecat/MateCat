@@ -12,7 +12,10 @@ const SEGMENTED_CONTROL_OPTIONS = [
   {id: 'do_not_translate_keys', name: 'Non-translatable'},
 ]
 
-const INNER_CONTENT_TYPE_OPTIONS = [{id: 'text/html', name: 'HTML'}]
+const INNER_CONTENT_TYPE_OPTIONS = [
+  {id: 'text/plain', name: 'Plain text'},
+  {id: 'text/html', name: 'HTML'},
+]
 
 export const Json = () => {
   const {
