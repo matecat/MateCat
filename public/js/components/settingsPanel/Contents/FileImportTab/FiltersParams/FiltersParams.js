@@ -27,6 +27,7 @@ export const FILTERS_PARAMS_SCHEMA_KEYS = {
   msExcel: 'ms_excel',
   msPowerpoint: 'ms_powerpoint',
   dita: 'dita',
+  markdown: 'markdown',
   createdAt: 'created_at',
   modifiedAt: 'modified_at',
 }
@@ -158,7 +159,7 @@ export const FiltersParams = () => {
               <h2>Extraction parameters</h2>
               <p>
                 Set specific import preferences for JSON, XML, Word, Excel,
-                YAML, and PowerPoint files.{' '}
+                YAML, PowerPoint, and Markdown files.{' '}
                 <a
                   href="https://guides.matecat.com/file-import#extraction-parameters"
                   target="_blank"

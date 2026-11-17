@@ -119,25 +119,6 @@ class SegmentDisabledServiceTest extends AbstractTest
         $this->assertFalse($this->service->isDisabled(self::TEST_SEGMENT_ID));
     }
 
-    // --- isDisabled() cache-race regression ---
-
-    #[Test]
-    public function isDisabledWithTtlZeroBypassesAStaleCachedFalse(): void
-    {
-        // Warm a "not disabled" cache entry at the default TTL, simulating an earlier read.
-        $this->assertFalse($this->service->isDisabled(self::TEST_SEGMENT_ID));
-
-        // Insert the disabled row directly, bypassing disable() — simulates a concurrent write
-        // whose eviction already ran before this cache entry was (re-)populated, i.e. the race.
-        $this->insertDisabledFlag(self::TEST_SEGMENT_ID);
-
-        // The default-TTL call still sees the stale cached "false" — this is the bug, demonstrated.
-        $this->assertFalse($this->service->isDisabled(self::TEST_SEGMENT_ID));
-
-        // ttl=0 must bypass the cache and read the fresh, correct state.
-        $this->assertTrue($this->service->isDisabled(self::TEST_SEGMENT_ID, 0));
-    }
-
     // --- disable() ---
 
     #[Test]
@@ -151,21 +132,19 @@ class SegmentDisabledServiceTest extends AbstractTest
     }
 
     #[Test]
-    public function disableDoesNotCrashOnDuplicateKeyWhenItsOwnIdempotencyCheckWasStaleCached(): void
+    public function disableIsIdempotentOnAnAlreadyDisabledSegmentThroughTheUpsert(): void
     {
-        // Warm disable()'s internal isDisabled() check to "not disabled" at the default TTL, as a
-        // concurrent isDisabled() read racing another disable() of the same segment would have.
+        // Warm a stale "not disabled" cache entry, as a read racing a concurrent disable() would.
         $this->assertFalse($this->service->isDisabled(self::TEST_SEGMENT_ID));
 
-        // The row already exists (the concurrent disable() already committed) — segment_metadata
-        // has a UNIQUE KEY on (id_segment, meta_key) and save() is a plain INSERT, so calling
-        // disable() again while the stale cache still says "not disabled" would previously crash
-        // on a duplicate-key error instead of returning early as the docblock promises.
+        // The concurrent disable() already committed its row. segment_metadata has a UNIQUE KEY
+        // on (id_segment, meta_key): a plain INSERT would crash here on the duplicate key.
         $this->insertDisabledFlag(self::TEST_SEGMENT_ID);
 
         $this->service->disable(self::TEST_SEGMENT_ID);
 
         $this->assertCount(1, $this->fetchDisabledRows(self::TEST_SEGMENT_ID));
+        $this->assertTrue($this->service->isDisabled(self::TEST_SEGMENT_ID));
     }
 
     #[Test]

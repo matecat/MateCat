@@ -94,7 +94,7 @@ test('downloads the xliff export without opening a tab', () => {
   render(<DownloadMenu password="secret" jid="10" isGDriveProject={false} />)
   fireEvent.click(screen.getByText('Export XLIFF'))
   expect(DownloadFileUtils.downloadUrl).toHaveBeenCalledWith(
-    '/api/v2/xliff/10/secret/10.zip',
+    '/api/v3/jobs/10/secret/xliff',
   )
   expect(window.open).not.toHaveBeenCalled()
 })
@@ -103,7 +103,7 @@ test('downloads the job tmx export without opening a tab', () => {
   render(<DownloadMenu password="secret" jid="10" isGDriveProject={false} />)
   fireEvent.click(screen.getByText('Export job TMX'))
   expect(DownloadFileUtils.downloadUrl).toHaveBeenCalledWith(
-    '/api/v2/tmx/10/secret',
+    '/api/v3/jobs/10/secret/tmx',
   )
   expect(window.open).not.toHaveBeenCalled()
 })

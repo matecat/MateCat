@@ -502,8 +502,9 @@ class MyMemory extends AbstractEngine
       *
       * @param string $uuid
       *
-      * @return FileImportAndStatusResponse
+      * @return TMSAbstractResponse
       * @throws RuntimeException
+      * @throws Exception
       */
      public function entryStatus(string $uuid): TMSAbstractResponse
      {
@@ -513,7 +514,12 @@ class MyMemory extends AbstractEngine
             ]
         );
 
-        $this->call("entry_status_relative_url", ['uuid' => $uuid]);
+        $this->call("glossary_entry_status_relative_url", ['uuid' => $uuid]);
+
+        // call() leaves a plain array in $this->result when the engine record has no such url
+        if (!$this->result instanceof TMSAbstractResponse) {
+            throw new Exception("MyMemory entry status url is not configured");
+        }
 
         return $this->result;
     }

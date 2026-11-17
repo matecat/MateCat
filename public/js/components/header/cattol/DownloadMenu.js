@@ -207,7 +207,7 @@ export const DownloadMenu = ({password, jid, isGDriveProject}) => {
           ),
           onClick: () => {
             DownloadFileUtils.downloadUrl(
-              `/api/v2/xliff/${jid}/${password}/${jid}.zip`,
+              `/api/v3/jobs/${jid}/${password}/xliff`,
             )
           },
         },
@@ -219,7 +219,7 @@ export const DownloadMenu = ({password, jid, isGDriveProject}) => {
             </>
           ),
           onClick: () => {
-            DownloadFileUtils.downloadUrl(`/api/v2/tmx/${jid}/${password}`)
+            DownloadFileUtils.downloadUrl(`/api/v3/jobs/${jid}/${password}/tmx`)
           },
         },
       ]}
