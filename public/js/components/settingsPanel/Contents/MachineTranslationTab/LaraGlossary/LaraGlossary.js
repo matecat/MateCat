@@ -11,8 +11,6 @@ import {SettingsPanelContext} from '../../../SettingsPanelContext'
 import IconAdd from '../../../../../../img/icons/IconAdd'
 import {LaraGlossaryRow} from './LaraGlossaryRow'
 import {getLaraGlossaries} from '../../../../../api/getLaraGlossaries/getLaraGlossaries'
-import CatToolStore from '../../../../../stores/CatToolStore'
-import CatToolConstants from '../../../../../constants/CatToolConstants'
 import {Button, BUTTON_TYPE} from '../../../../common/Button/Button'
 
 const COLUMNS_TABLE = [
@@ -61,18 +59,6 @@ export const LaraGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
     let wasCleanup = false
 
     const glossaries = activeGlossariesRef.current
-    let memories = []
-    const getJobMetadata = ({jobMetadata}) => {
-      const rows = memories.filter(({id}) => {
-        const laraGlossaries = jobMetadata.mt_extra?.lara_glossaries
-          ? jobMetadata.mt_extra.lara_glossaries
-          : []
-
-        return laraGlossaries.some((value) => value === id)
-      })
-      updateRowsState(rows.map(({id, name}) => ({id, name, isActive: true})))
-    }
-
     if (config.ownerIsMe) {
       getLaraGlossaries({engineId: id}).then((data) => {
         const items = data
@@ -96,10 +82,6 @@ export const LaraGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
 
     return () => {
       wasCleanup = true
-      CatToolStore.removeListener(
-        CatToolConstants.GET_JOB_METADATA,
-        getJobMetadata,
-      )
     }
   }, [id, updateRowsState])
 

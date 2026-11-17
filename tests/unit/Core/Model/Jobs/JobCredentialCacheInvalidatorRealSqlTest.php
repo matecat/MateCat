@@ -4,6 +4,8 @@ namespace Matecat\Core\Model\Jobs;
 
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\RealSqlDaoTestTrait;
+use Model\FeaturesBase\FeatureSet;
+use Model\JobSplitMerge\JobSplitMergeService;
 use Model\Jobs\JobCredentialCacheInvalidator;
 use Model\Jobs\JobSettingsResolver;
 use Model\Jobs\JobsMetadataMarshaller;
@@ -16,6 +18,7 @@ use Model\Projects\ProjectDao;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Utils\Constants\SourcePages;
+use Utils\Logger\MatecatLogger;
 
 #[Group('DaoRealSql')]
 #[Group('PersistenceNeeded')]
@@ -336,5 +339,56 @@ class JobCredentialCacheInvalidatorRealSqlTest extends AbstractTest
                 "'{$case->value}' still answers for the retired password"
             );
         }
+    }
+
+    /**
+     * A merge rotates the password of every chunk it folds in and sweeps the credential caches
+     * through JobSplitMergeService::sweepCredentialCaches(). That call site used to build the
+     * invalidator without the job metadata DAO, so a merge evicted no metadata at all.
+     *
+     * movePassword() already clears what the move itself touches, so to see the sweep's own effect
+     * the cached entry has to outlive its row some other way: the row is deleted behind the DAO's
+     * back, which leaves the per-key read answering from the cache until something evicts it.
+     */
+    #[Test]
+    public function mergeSweep_evicts_the_job_metadata_cached_for_the_retired_password(): void
+    {
+        $key = JobsMetadataMarshaller::DEEPL_FORMALITY->value;
+        $resolver = new JobSettingsResolver($this->realSqlDb());
+
+        (new JobsMetadataDao($this->realSqlDb()))->set($this->idJob, $this->jobPassword, $key, 'prefer_more');
+        $this->assertSame(
+            'prefer_more',
+            $resolver->resolve($this->idJob, $this->jobPassword, null, $key, JobSettingsResolver::DEFAULT_TTL)
+        );
+
+        $this->realSqlDb()->getConnection()
+            ->prepare('DELETE FROM job_metadata WHERE id_job = :id_job AND password = :password')
+            ->execute(['id_job' => $this->idJob, 'password' => $this->jobPassword]);
+
+        $this->assertSame(
+            'prefer_more',
+            $resolver->resolve($this->idJob, $this->jobPassword, null, $key, JobSettingsResolver::DEFAULT_TTL),
+            'precondition: the deleted row still answers from the cache'
+        );
+
+        $service = new class (
+            $this->realSqlDb(),
+            $this->createStub(FeatureSet::class),
+            $this->createStub(MatecatLogger::class),
+            null,
+        ) extends JobSplitMergeService {
+            public function sweep(JobStruct $chunk, string $oldPassword, string $newPassword): void
+            {
+                $this->sweepCredentialCaches($chunk, $oldPassword, $newPassword);
+            }
+        };
+
+        $service->sweep($this->chunk(), $this->jobPassword, 'jcci_merged_pwd');
+
+        $this->assertNull(
+            $resolver->resolve($this->idJob, $this->jobPassword, null, $key, JobSettingsResolver::DEFAULT_TTL),
+            'the merge sweep must evict the job metadata cached for the retired password'
+        );
     }
 }
