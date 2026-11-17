@@ -9,6 +9,7 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Filters\DTO\Dita;
 use Model\Filters\DTO\IDto;
 use Model\Filters\DTO\Json;
+use Model\Filters\DTO\Markdown;
 use Model\Filters\DTO\MSExcel;
 use Model\Filters\DTO\MSPowerpoint;
 use Model\Filters\DTO\MSWord;
@@ -1748,6 +1749,24 @@ class CatUtilsTest extends AbstractTest
         $struct->dita = new Dita();
         $result = $this->invokeGetRightExtractionParameter('file.ditamap', $struct);
         $this->assertInstanceOf(Dita::class, $result);
+    }
+
+    #[Test]
+    public function testGetRightExtractionParameterMarkdown(): void
+    {
+        $struct = new FiltersConfigTemplateStruct();
+        $struct->markdown = new Markdown();
+        $result = $this->invokeGetRightExtractionParameter('file.md', $struct);
+        $this->assertInstanceOf(Markdown::class, $result);
+    }
+
+    #[Test]
+    public function testGetRightExtractionParameterMarkdownWithoutDtoReturnsNull(): void
+    {
+        $struct = new FiltersConfigTemplateStruct();
+        $struct->yaml = new Yaml();
+        $result = $this->invokeGetRightExtractionParameter('file.md', $struct);
+        $this->assertNull($result);
     }
 
     #[Test]

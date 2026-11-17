@@ -246,4 +246,52 @@ class FiltersConfigTemplateDaoTest extends AbstractTest
         $this->assertGreaterThan(0, $saved->id);
         $this->assertStringContainsString('Direct Save', $saved->name);
     }
+
+    #[Test]
+    #[Group('PersistenceNeeded')]
+    public function markdownRoundTripsThroughCreateAndEdit(): void
+    {
+        $created = $this->dao->createFromJSON(json_encode([
+            'name'     => 'Markdown ' . uniqid(),
+            'markdown' => ['extract_frontmatter' => true, 'translate_frontmatter_keys' => ['title', ' label ']],
+        ]), $this->uid);
+        $this->createdIds[] = $created->id;
+
+        $fetched = $this->dao->getByIdAndUser($created->id, $this->uid);
+        $this->assertSame(
+            ['extract_frontmatter' => true, 'translate_frontmatter_keys' => ['title', ' label ']],
+            $fetched->getMarkdown()->jsonSerialize()
+        );
+
+        $this->dao->editFromJSON($fetched, json_encode([
+            'name'     => $fetched->name,
+            'markdown' => ['extract_frontmatter' => false, 'do_not_translate_frontmatter_keys' => ['slug']],
+        ]), $this->uid);
+
+        $edited = $this->dao->getByIdAndUser($created->id, $this->uid);
+        $this->assertSame(
+            ['extract_frontmatter' => false, 'do_not_translate_frontmatter_keys' => ['slug']],
+            $edited->getMarkdown()->jsonSerialize()
+        );
+    }
+
+    /**
+     * A template saved before the markdown column existed has NULL there and reads back with no
+     * markdown settings; the front end fills the default in, and conversion sends none.
+     */
+    #[Test]
+    #[Group('PersistenceNeeded')]
+    public function rowWithNullMarkdownReadsBackWithoutMarkdownSettings(): void
+    {
+        $created = $this->create('Null Markdown');
+        obtainTestDatabase()->getConnection()
+            ->prepare("UPDATE filters_config_templates SET markdown = NULL WHERE id = :id")
+            ->execute(['id' => $created->id]);
+
+        $fetched = $this->dao->getByIdAndUser($created->id, $this->uid);
+
+        $this->assertNotNull($fetched);
+        $this->assertNull($fetched->getMarkdown());
+        $this->assertNull($fetched->jsonSerialize()['markdown']);
+    }
 }

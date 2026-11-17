@@ -7,6 +7,7 @@ use DomainException;
 use Exception;
 use InvalidArgumentException;
 use PDOException;
+use Psr\Log\InvalidArgumentException as LogInvalidArgumentException;
 use TypeError;
 use Model\Analysis\AnalysisDao;
 use Model\Concerns\LogsMessages;
@@ -17,10 +18,12 @@ use Model\FeaturesBase\Hook\Event\Run\PostJobSplittedEvent;
 use Model\Jobs\JobCredentialCacheInvalidator;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
 use Model\LQA\ChunkReviewDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
+use Model\Translations\WarningDao;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
 use Model\Translators\JobsTranslatorsDao;
@@ -125,6 +128,11 @@ class JobSplitMergeService
     protected function destroyAnalysisCacheByProjectId(int $projectId): void
     {
         (new AnalysisDao($this->dbHandler))->destroyCacheProjectStatsVolumeAnalysis($projectId);
+    }
+
+    protected function createWarningDao(): WarningDao
+    {
+        return new WarningDao($this->dbHandler);
     }
 
     /**
@@ -458,9 +466,12 @@ class JobSplitMergeService
         // that gets a fresh password gets an empty address: whatever is not copied onto it is gone.
         // The read binds the password of the job being split, which is what leaves MMT's mt_context
         // row out — it lives under the empty password and is already shared by every chunk.
-        $sourceMetadata = $jobsMetadataDao->getRawMapByJobIdAndPassword(
+        $sourceMetadata = $this->inheritableMetadata(
             $jobToSplit->id ?? throw new RuntimeException('Missing job id'),
-            $jobToSplit->password ?? throw new RuntimeException('Missing job password')
+            $jobsMetadataDao->getRawMapByJobIdAndPassword(
+                $jobToSplit->id,
+                $jobToSplit->password ?? throw new RuntimeException('Missing job password')
+            )
         );
 
         $newJobList = [];
@@ -500,7 +511,7 @@ class JobSplitMergeService
 
             $newJobList[] = $newJob;
 
-            // Every key the job carries goes to the chunk, not a chosen few: they are all
+            // Every valid key the job carries goes to the chunk, not a chosen few: they are all
             // configuration of the same piece of work, and a chunk that answers with the default for
             // one of them is a silent behaviour change — dialect_strict and public_tm_penalty reach
             // MyMemory, tm_prioritization orders the suggestions, mandatory_issues gates delivery.
@@ -561,6 +572,9 @@ class JobSplitMergeService
         $projectStruct = $this->getProjectForCacheInvalidation($jobToSplit);
         $this->createProjectDao()->destroyCache($projectStruct->id ?? throw new RuntimeException('Missing project id'), $projectStruct->password);
         $this->destroyAnalysisCacheByProjectId($data->idProject);
+        // Split and merge move segments between chunks without touching segment_translations, so the
+        // cached warnings of a chunk would keep listing segments it no longer owns.
+        $this->createWarningDao()->destroyCachesByJobId((int)$jobToSplit->id);
 
         $this->getCart()?->deleteCart();
 
@@ -591,6 +605,30 @@ class JobSplitMergeService
                 $this->log($output, $e);
             }
         }
+    }
+
+    /**
+     * The part of a job's stored metadata its chunks inherit.
+     *
+     * What the chunks get is what the marshaller vouches for, not whatever the table holds: a key it
+     * does not know or a value that would not pass the write path today stays on the job being split
+     * instead of being multiplied across every chunk. The keys left behind are logged by name only.
+     *
+     * @param array<string, string> $storedMetadata
+     *
+     * @return array<string, string>
+     * @throws LogInvalidArgumentException
+     */
+    private function inheritableMetadata(int $idJob, array $storedMetadata): array
+    {
+        $inheritable = JobsMetadataMarshaller::sanitizeRawMap($storedMetadata);
+
+        $droppedKeys = array_keys(array_diff_key($storedMetadata, $inheritable));
+        if (!empty($droppedKeys)) {
+            $this->log("Job split: metadata not copied to the chunks of job $idJob, not valid job metadata: " . implode(', ', $droppedKeys));
+        }
+
+        return $inheritable;
     }
 
     /**
@@ -734,6 +772,7 @@ class JobSplitMergeService
             $projectStruct = $this->getProjectForCacheInvalidation($jobStructs[0]);
             $this->createProjectDao()->destroyCache($projectStruct->id ?? throw new RuntimeException('Missing project id'), $projectStruct->password);
             $this->destroyAnalysisCacheByProjectId($data->idProject);
+            $this->createWarningDao()->destroyCachesByJobId((int)$jobStructs[0]->id);
         });
     }
 }

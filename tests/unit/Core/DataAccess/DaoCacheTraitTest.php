@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Matecat\Core\DataAccess;
 
 use Matecat\TestHelpers\AbstractTest;
+use Matecat\TestHelpers\CapturesNamedLogs;
 use Model\DataAccess\DaoCacheTrait;
 use Model\DataAccess\IDatabase;
 use PDO;
@@ -175,7 +176,8 @@ class FakeRedisClient extends Client
             'expire' => true,
             'setex' => $this->doSetex($arguments[0], $arguments[1], $arguments[2]),
             'get' => $this->strings[$arguments[0]] ?? null,
-            'del' => $this->doDel($arguments[0]),
+            'del', 'unlink' => $this->doDel($arguments[0]),
+            'hlen' => count($this->hashes[$arguments[0]] ?? []),
             default => null,
         };
     }
@@ -218,6 +220,8 @@ class FakeRedisClient extends Client
 
 class DaoCacheTraitTest extends AbstractTest
 {
+    use CapturesNamedLogs;
+
     private DaoCacheTraitHarness $harness;
     private FakeRedisClient $redis;
 
@@ -936,4 +940,66 @@ class DaoCacheTraitTest extends AbstractTest
         self::assertCount(1, $this->harness->logCalls);
     }
 
+    #[Test]
+    public function aWriteThatTakesAHashPastTheFieldCapDropsTheHashAndLogsAnError(): void
+    {
+        $log = $this->captureLog('query_cache');
+        $this->harness->setCacheTTL(60);
+        $this->fillHash('Dao::read-', 9_999);
+
+        $this->harness->callSetInCacheMap('Dao::read-', 'q-at-cap', ['row']);
+        self::assertCount(10_000, $this->redis->getStoredHash('Dao::read-'), 'a hash at the cap is kept');
+
+        $this->harness->callSetInCacheMap('Dao::read-', 'q-past-cap', ['row']);
+
+        self::assertSame([], $this->redis->getStoredHash('Dao::read-'));
+        self::assertTrue($log->hasErrorThatContains('Redis hash dropped'));
+        self::assertSame('Dao::read', $log->getRecords()[0]->context['writer']);
+    }
+
+    #[Test]
+    public function theDropLogNamesTheWriterWithoutTheBoundValues(): void
+    {
+        // A derived key map ends with the bound values, here a job id and its password.
+        $log = $this->captureLog('query_cache');
+        $this->harness->setCacheTTL(60);
+        $this->fillHash('Model\Jobs\JobDao::getByIdAndPassword-42:s3cret', 10_000);
+
+        $this->harness->callSetInCacheMap('Model\Jobs\JobDao::getByIdAndPassword-42:s3cret', 'q-past-cap', ['row']);
+
+        $context = $log->getRecords()[0]->context;
+        self::assertSame('Model\Jobs\JobDao::getByIdAndPassword', $context['writer']);
+        self::assertSame(md5('Model\Jobs\JobDao::getByIdAndPassword-42:s3cret'), $context['keyMapMd5']);
+        self::assertStringNotContainsString('s3cret', json_encode($context));
+    }
+
+    #[Test]
+    public function aBatchCountsEachHashOnceAfterAllItsWrites(): void
+    {
+        $log = $this->captureLog('query_cache');
+        $this->harness->setCacheTTL(60);
+        $this->fillHash('Dao::read-', 9_999);
+
+        // Two entries for the same hash: the first takes it to the cap, the second past it.
+        $this->harness->callSetManyInCacheMap([
+            ['keyMap' => 'Dao::read-', 'query' => 'q-at-cap', 'value' => ['row']],
+            ['keyMap' => 'Dao::read-', 'query' => 'q-past-cap', 'value' => ['row']],
+            ['keyMap' => 'Dao::read-42', 'query' => 'q1', 'value' => ['row']],
+        ]);
+
+        $hlens = array_filter($this->redis->calls, static fn(array $call): bool => $call[0] === 'hlen');
+
+        self::assertSame([], $this->redis->getStoredHash('Dao::read-'));
+        self::assertCount(1, $this->redis->getStoredHash('Dao::read-42'));
+        self::assertCount(2, $hlens, 'one HLEN per distinct hash');
+        self::assertCount(1, $log->getRecords());
+    }
+
+    /** Put fields straight into the fake Redis, as earlier writes would have. */
+    private function fillHash(string $keyMap, int $fields): void
+    {
+        for ($i = 0; $i < $fields; $i++) {
+            $this->redis->hset($keyMap, "field-$i", 'x');
+        }
+    }
 }
