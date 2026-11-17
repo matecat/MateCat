@@ -194,6 +194,41 @@ class SetTranslationControllerTest extends AbstractTest
      * 6. buildResult()           — Phase 16-18
      * 7. finalizeTranslation()   — Phase 19-20
      */
+    /**
+     * XLIFF 2.0: the disp of an inline code must survive the save path of prepareTranslation()
+     * (layer 2 -> layer 1 -> QA normalization -> layer 0). A disp like "$50" was saved as disp="",
+     * because the original tag was restored as a preg_replace() replacement and "$50" read as a backreference.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function xliff20DispWithADollarSurvivesTheSavePath(): void
+    {
+        $dataRef = 'cv-91d19b91c10f8f0cb75e6049afa9f47d9e775c388ffa8392682685c5f3a4f49c';
+        $sourceTag = '<ph dataRef="' . $dataRef . '" disp="$50" id="' . $dataRef . '-1"/>';
+        $featureSet = new FeatureSet(obtainTestDatabase());
+        $filter = MateCatFilter::getInstance($featureSet, 'en-US', 'es-ES', [$dataRef => '%{Custom.creditAmount|none}']);
+
+        // the target the editor sends when the user puts back the source tag
+        $fromTheEditor = 'Vas a recibir un crédito de hasta <ph id="' . $dataRef . '-1" ctype="x-ph_data_ref" equiv-text="base64:'
+            . base64_encode('$50') . '" x-orig="' . base64_encode($sourceTag) . '"/>*';
+
+        $segment = $filter->fromLayer0ToLayer1('You will receive a credit of up to ' . $sourceTag . '*');
+        $translation = $filter->fromLayer2ToLayer1($fromTheEditor);
+
+        $check = new QA($segment, $translation);
+        $check->setFeatureSet($featureSet);
+        $check->setSourceSegLang('en-US');
+        $check->setTargetSegLang('es-ES');
+        $check->performConsistencyCheck();
+
+        self::assertFalse($check->thereAreErrors());
+        self::assertSame(
+            'Vas a recibir un crédito de hasta ' . $sourceTag . '*',
+            $filter->fromLayer1ToLayer0($check->getTrgNormalized())
+        );
+    }
+
     #[Test]
     public function translateCallsInternalMethodsInExpectedOrder(): void
     {
