@@ -5,6 +5,7 @@ import SegmentActions from '../../../../actions/SegmentActions'
 import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper/ApplicationWrapperContext'
 import CommonUtils from '../../../../utils/commonUtils'
 import CatToolStore from '../../../../stores/CatToolStore'
+import {JobMetadataProxy} from '../../../../stores/JobMetadataProxy'
 
 jest.mock('../../../../actions/SegmentActions', () => ({
   laraStylesTab: jest.fn(),
@@ -15,9 +16,7 @@ jest.mock('../../../../utils/commonUtils', () => ({
 }))
 
 jest.mock('../../../../stores/CatToolStore', () => ({
-  getJobMetadata: jest.fn(() => ({
-    project: {mt_extra: {lara_style: 'faithful'}},
-  })),
+  getJobMetadata: jest.fn(),
 }))
 
 jest.mock(
@@ -30,6 +29,11 @@ jest.mock(
   }),
 )
 
+const mockJobMetadata = (laraStyle) =>
+  CatToolStore.getJobMetadata.mockReturnValue(
+    new JobMetadataProxy({project: {mt_extra: {lara_style: laraStyle}}}).proxy,
+  )
+
 beforeAll(() => {
   global.config = {
     ...global.config,
@@ -38,11 +42,12 @@ beforeAll(() => {
   }
 })
 
+beforeEach(() => {
+  mockJobMetadata('faithful')
+})
+
 afterEach(() => {
   jest.clearAllMocks()
-  CatToolStore.getJobMetadata.mockReturnValue({
-    project: {mt_extra: {lara_style: 'faithful'}},
-  })
 })
 
 const userInfo = {user: {uid: 'u1'}}
@@ -50,7 +55,12 @@ const userInfo = {user: {uid: 'u1'}}
 const renderComponent = (segment, props = {}) =>
   render(
     <ApplicationWrapperContext.Provider value={{userInfo}}>
-      <LaraStyles sid="10" segment={segment} isIconsBundled={false} {...props} />
+      <LaraStyles
+        sid="10"
+        segment={segment}
+        isIconsBundled={false}
+        {...props}
+      />
     </ApplicationWrapperContext.Provider>,
   )
 
@@ -114,7 +124,10 @@ describe('LaraStyles', () => {
   })
 
   test('renders bundled label when isIconsBundled is true', () => {
-    renderComponent({status: 'DRAFT', contributions: {}}, {isIconsBundled: true})
+    renderComponent(
+      {status: 'DRAFT', contributions: {}},
+      {isIconsBundled: true},
+    )
     expect(screen.getByText('Lara styles')).toBeInTheDocument()
   })
 })

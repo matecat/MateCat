@@ -4,6 +4,8 @@ import {SegmentFooterTabAiAlternatives} from './SegmentFooterTabAiAlternatives'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
 import {readSegmentClipboard} from '../segmentView/segmentModel'
+import CatToolStore from '../../stores/CatToolStore'
+import {JobMetadataProxy} from '../../stores/JobMetadataProxy'
 
 // --- Mocks ---
 
@@ -19,9 +21,7 @@ jest.mock('../../stores/SegmentStore', () => {
 })
 
 jest.mock('../../stores/CatToolStore', () => ({
-  getJobMetadata: () => ({
-    project: {mt_extra: {lara_style: 'faithful'}},
-  }),
+  getJobMetadata: jest.fn(),
 }))
 
 jest.mock('../../utils/segmentUtils', () => ({
@@ -82,6 +82,11 @@ beforeAll(() => {
     source_code: 'en-US',
     isTargetRTL: false,
   }
+  CatToolStore.getJobMetadata.mockReturnValue(
+    new JobMetadataProxy({
+      project: {mt_extra: {lara_style: 'faithful'}},
+    }).proxy,
+  )
 })
 
 afterEach(() => {

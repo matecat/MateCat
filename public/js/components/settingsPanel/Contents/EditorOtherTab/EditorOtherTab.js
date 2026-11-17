@@ -48,7 +48,7 @@ export const EditorOtherTab = () => {
         }
         CatToolStore.setJobMetadata(updatedJobMetadata)
         CatToolStore.emitChange(CatToolConstants.GET_JOB_METADATA, {
-          jobMetadata: updatedJobMetadata,
+          jobMetadata: CatToolStore.getJobMetadata(),
         })
       })
     }
