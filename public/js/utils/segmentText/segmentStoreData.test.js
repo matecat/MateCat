@@ -199,3 +199,27 @@ describe('a long segment', () => {
     expect(missingTags).toHaveLength(2)
   })
 })
+
+describe('raw line breaks mixed with tags and line break placeholders', () => {
+  // Not a supported input: the backend sends line breaks as placeholders, never as raw CR and LF characters. A raw
+  // CR LF splits a line but counts as one character, so every tag after it lands one character off. Draft garbled
+  // these strings too, differently. This pins the current output so a change to it is a decision, not an accident:
+  // the decoded segment gains a stray nbsp placeholder (the degree sign) before the nbsp and loses a `#` of the last
+  // line feed placeholder, and the plain text keeps that placeholder as text instead of splitting the line.
+  const segment = '\r\n\r\n>##$_A0$####$_0A$##'
+
+  test('is stored garbled, as found by the fuzz', () => {
+    expect(sourceStoreData(segment)).toEqual({
+      decodedSegment: '##$_0A$####$_0A$##&gt;°##$_A0$###$_0A$##',
+      plainText: '\n\n>°##$_0A$##',
+      tagRange: [],
+      lxqText: '\n\n>°< \n',
+    })
+    const {plainText, tagMap, missingTags} = translationUpdate(segment, [])
+    expect(plainText).toBe('\n\n>°##$_0A$##')
+    expect(tagMap.map(({offset, data}) => [offset, data.name])).toEqual([
+      [5, 'nbsp'],
+    ])
+    expect(missingTags).toEqual([])
+  })
+})
