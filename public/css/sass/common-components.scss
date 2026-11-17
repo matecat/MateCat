@@ -36,6 +36,12 @@
   line-height: 1;
 }
 
+.status-dropdown-option {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+
 .status-dot {
   display: inline-block;
   width: 0.875rem;
