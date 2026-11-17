@@ -70,7 +70,6 @@ enum ProjectsMetadataMarshaller: string
             ProjectsMetadataMarshaller::WPML->value => fn() => (bool)$struct->value,
             ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value => fn() => (int)$struct->value,
             ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS->value => fn() => new MTQEWorkflowParams(json_decode((string)$struct->value, true)),
-            ProjectsMetadataMarshaller::MMT_GLOSSARIES->value,
             ProjectsMetadataMarshaller::SEGMENTATION_RULE->value,
             ProjectsMetadataMarshaller::LARA_STYLE->value,
             ProjectsMetadataMarshaller::LARA_STYLE_GUIDELINE_ID->value,
@@ -82,8 +81,13 @@ enum ProjectsMetadataMarshaller: string
             ProjectsMetadataMarshaller::PRE_TRANSLATE_101_STATUS->value,
             ProjectsMetadataMarshaller::PRE_TRANSLATE_100_STATUS->value,
             ProjectsMetadataMarshaller::CONTEXT_URL->value => fn() => (string)$struct->value,
-            // backward compatibility, old projects could have JSON glossaries encoded as HTML entities
-            ProjectsMetadataMarshaller::LARA_GLOSSARIES->value => fn() => json_decode(html_entity_decode((string)$struct->value), true),
+            // Both glossary lists decode to arrays, so a client reads the same shape whichever
+            // engine it is looking at, and can post back what it just read.
+            // html_entity_decode for backward compatibility: old projects stored the JSON HTML-entity
+            // encoded, because both creation controllers run the request parameter through
+            // FILTER_SANITIZE_SPECIAL_CHARS before validating it.
+            ProjectsMetadataMarshaller::LARA_GLOSSARIES->value,
+            ProjectsMetadataMarshaller::MMT_GLOSSARIES->value => fn() => json_decode(html_entity_decode((string)$struct->value), true),
             default => fn() => json_validate((string)$struct->value) ? json_decode((string)$struct->value, true) : (string)$struct->value,
         })();
     }
