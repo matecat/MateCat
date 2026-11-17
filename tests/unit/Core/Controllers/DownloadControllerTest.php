@@ -243,6 +243,60 @@ class DownloadControllerTest extends AbstractTest
         return $this->reflector->getMethod($method)->invoke($this->controller, ...$args);
     }
 
+    // ─── abortOnFailedConversions (private) ───
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function abortOnFailedConversionsDoesNothingWhenEveryConversionSucceeded(): void
+    {
+        $this->setProp('downloadToken', 'token_ok');
+
+        $this->invokePrivate('abortOnFailedConversions', [
+            [10 => ['successful' => true, 'document_content' => 'converted']],
+            [10 => ['output_filename' => 'file.docx']],
+        ]);
+
+        // the token is left for finalize() to report "Download complete."
+        self::assertSame('token_ok', $this->reflector->getProperty('downloadToken')->getValue($this->controller));
+    }
+
+    /**
+     * A failed xliff-to-target conversion must fail the download: otherwise the intermediate
+     * XLIFF is served under the original filename as if it were the target file.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function abortOnFailedConversionsFailsTheDownloadAndReleasesTheToken(): void
+    {
+        $this->setProp('id_job', self::BASE + 2);
+        $this->setProp('downloadToken', 'token_failed');
+
+        try {
+            $this->invokePrivate('abortOnFailedConversions', [
+                [
+                    10 => ['successful' => true, 'document_content' => 'converted'],
+                    11 => ['successful' => false, 'errorMessage' => 'conversion exploded'],
+                ],
+                [
+                    10 => ['output_filename' => 'file.docx'],
+                    11 => ['output_filename' => '<b>file</b>.idml'],
+                ],
+            ]);
+            self::fail('Expected ExternalServiceException');
+        } catch (ExternalServiceException $e) {
+            self::assertStringStartsWith('Download failed: a file could not be converted back', $e->getMessage());
+            self::assertStringContainsString(AppConfig::$SUPPORT_MAIL, $e->getMessage());
+            // the message is rendered as HTML by the client: user-supplied filenames stay out of it
+            self::assertStringNotContainsString('<b>file</b>', $e->getMessage());
+        }
+
+        // unlockToken() consumed the token, so finalize() can never report a successful download
+        self::assertNull($this->reflector->getProperty('downloadToken')->getValue($this->controller));
+    }
+
     // ─── pathinfoString (private, pure) ───
 
     /**
@@ -439,6 +493,90 @@ class DownloadControllerTest extends AbstractTest
         );
 
         $this->assertFalse($this->invokePrivate('anyRemoteFile'));
+    }
+
+    // ─── outputFilename / singleFileDownloadName (private, download file naming) ───
+
+    /**
+     * Mirrors processDownload() for a job with a single output file: per-file name, then download name.
+     *
+     * @throws ReflectionException
+     */
+    private function singleFileDownloadNameFor(string $uploadedFilename, ?string $proprietaryShortName, bool $forceXliff): string
+    {
+        $this->setProp('forceXliff', $forceXliff);
+        $outputFilename = $this->invokePrivate('outputFilename', [$uploadedFilename, $proprietaryShortName]);
+
+        return $this->invokePrivate('singleFileDownloadName', [$outputFilename]);
+    }
+
+    /**
+     * Regression (Asana 1219445437332526): the XLIFF of a single-file job was named <file>.xlf.xlf.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function forcedXliffOfSingleFileJobHasOneXlfExtension(): void
+    {
+        $this->assertSame(
+            'qa-force-double-quoting.yaml.xlf',
+            $this->singleFileDownloadNameFor('qa-force-double-quoting.yaml', 'matecat_converter', true)
+        );
+    }
+
+    /**
+     * An uploaded sdlxliff is not converted, so its name keeps the original extension: the same name
+     * it gets inside a multi-file zip.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function forcedXliffOfUploadedSdlxliffHasOneXlfExtension(): void
+    {
+        $this->assertSame('test.sdlxliff.xlf', $this->singleFileDownloadNameFor('test.sdlxliff', 'trados', true));
+        $this->assertSame('test.xliff.xlf', $this->singleFileDownloadNameFor('test.xliff', null, true));
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function forcedXliffOfConvertedFileCollapsesRepeatedXlf(): void
+    {
+        $this->assertSame('doc.xlf', $this->singleFileDownloadNameFor('doc.xlf.xlf', 'matecat_converter', true));
+        $this->assertSame('doc.sdlxliff.xlf', $this->singleFileDownloadNameFor('doc.sdlxliff', 'matecat_converter', true));
+    }
+
+    /**
+     * A forced XLIFF of an OCR source is still an XLIFF: no .docx rewrite.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function forcedXliffOfOcrFileIsNotRenamedToDocx(): void
+    {
+        $this->assertSame('scan.pdf.xlf', $this->singleFileDownloadNameFor('scan.pdf', 'matecat_converter', true));
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function outputFilenameWithoutForceXliffKeepsTheUploadedName(): void
+    {
+        $this->setProp('forceXliff', false);
+        $this->assertSame('doc.sdlxliff', $this->invokePrivate('outputFilename', ['doc.sdlxliff', 'matecat_converter']));
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function translationDownloadNameOfSingleFileJob(): void
+    {
+        $this->assertSame('report.docx', $this->singleFileDownloadNameFor('report.docx', 'matecat_converter', false));
+        $this->assertSame('scan.pdf.docx', $this->singleFileDownloadNameFor('scan.pdf', 'matecat_converter', false));
+        $this->assertSame('archive.zip', $this->singleFileDownloadNameFor('archive.zip', null, false));
     }
 
     // ─── processDownload failure boundary (real-DB) ───
@@ -1133,7 +1271,7 @@ class DownloadControllerTest extends AbstractTest
 
     /**
      * forceXliff sends the xliff of a converted file instead of converting it back. The name of a
-     * single xliff gets ".xlf" twice: once in processDownload() and once more when the name is set.
+     * single xliff gets ".xlf" once, the same name it has inside the zip of a multi-file job.
      *
      * @throws Throwable
      */
@@ -1147,13 +1285,13 @@ class DownloadControllerTest extends AbstractTest
 
         $this->assertStringContainsString('>Ciao mondo</target>', (string)$this->stream()->body);
         $this->assertSame([], $this->sentToFilters[0]);
-        $this->assertSame('report.docx.xlf.xlf', $this->stream()->filename);
+        $this->assertSame('report.docx.xlf', $this->stream()->filename);
         $this->assertSame('application/xliff+xml', $this->stream()->mimeType);
     }
 
     /**
-     * The xliff of the MateCat converter loses the ".xlf" it already had before one more is added,
-     * where any other xliff keeps it: "report.xlf" gives "report.xlf.xlf", not "report.xlf.xlf.xlf".
+     * The xliff of the MateCat converter does not repeat the ".xlf" it already had: "report.xlf"
+     * stays "report.xlf", not "report.xlf.xlf".
      *
      * @throws Throwable
      */
@@ -1165,7 +1303,7 @@ class DownloadControllerTest extends AbstractTest
 
         $this->runDownload(['forceXliff' => '1']);
 
-        $this->assertSame('report.xlf.xlf', $this->stream()->filename);
+        $this->assertSame('report.xlf', $this->stream()->filename);
     }
 
     /**
