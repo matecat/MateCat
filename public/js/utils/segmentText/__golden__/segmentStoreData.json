@@ -1365,7 +1365,7 @@
     },
     "foo##$_0D$##bar": {
       "store": {
-        "decodedSegment": "foo##$_0A$##bar",
+        "decodedSegment": "foo##$_0D$##bar",
         "plainText": "foo\nbar",
         "tagRange": [],
         "lxqText": "foo\nbar"
@@ -1374,10 +1374,10 @@
     },
     "foo##$_0D$####$_0A$##bar": {
       "store": {
-        "decodedSegment": "foo##$_0A$##bar",
+        "decodedSegment": "foo##$_0D$####$_0A$##bar",
         "plainText": "foo\nbar",
         "tagRange": [],
-        "lxqText": "foo\nbar"
+        "lxqText": "foo\n\nbar"
       },
       "tagIdentities": []
     },
@@ -2211,7 +2211,7 @@
     },
     "test tag ph con ##$_SPLIT$## &lt; &gt; ##$_0A$## &amp;lt; ##$_09$## &amp;gt; ##$_A0$## ##$_0D$## <ph id=\"mtc_1\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O3AmZ3Q7\"/> <ph id=\"mtc_2\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O3N0cm9uZyZndDs=\"/> <ph id=\"mtc_3\" ctype=\"x-html\" equiv-text=\"base64:Jmx0Oy9zdHJvbmcmZ3Q7\"/>pippoL&apos; placeholder &nbsp; ##$_A0$##elle-même": {
       "store": {
-        "decodedSegment": "test tag ph con ##$_SPLIT$## &lt; &gt; ##$_0A$## &amp;lt; ##$_09$## &amp;gt; ##$_A0$## ##$_0A$## <ph id=\"mtc_1\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O3AmZ3Q7\"/> <ph id=\"mtc_2\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O3N0cm9uZyZndDs=\"/> <ph id=\"mtc_3\" ctype=\"x-html\" equiv-text=\"base64:Jmx0Oy9zdHJvbmcmZ3Q7\"/>pippoL&amp;apos; placeholder &amp;nbsp; ##$_A0$##elle-même",
+        "decodedSegment": "test tag ph con ##$_SPLIT$## &lt; &gt; ##$_0A$## &amp;lt; ##$_09$## &amp;gt; ##$_A0$## ##$_0D$## <ph id=\"mtc_1\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O3AmZ3Q7\"/> <ph id=\"mtc_2\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O3N0cm9uZyZndDs=\"/> <ph id=\"mtc_3\" ctype=\"x-html\" equiv-text=\"base64:Jmx0Oy9zdHJvbmcmZ3Q7\"/>pippoL&amp;apos; placeholder &amp;nbsp; ##$_A0$##elle-même",
         "plainText": "test·tag·ph·con··< >·\n·&lt;·⇥·&gt;·°·\n·<p>·<strong>·</strong>pippoL&apos;·placeholder·&nbsp;·°elle-même",
         "tagRange": [
           {
@@ -2385,7 +2385,7 @@
     },
     "a##$_0A$##b##$_0D$##c##$_09$##d##$_A0$##e": {
       "store": {
-        "decodedSegment": "a##$_0A$##b##$_0A$##c##$_09$##d##$_A0$##e",
+        "decodedSegment": "a##$_0A$##b##$_0D$##c##$_09$##d##$_A0$##e",
         "plainText": "a\nb\nc⇥d°e",
         "tagRange": [],
         "lxqText": "a\nb\nc< >d< >e"
@@ -2589,7 +2589,7 @@
     },
     "One##$_0D$##two": {
       "store": {
-        "decodedSegment": "One##$_0A$##two",
+        "decodedSegment": "One##$_0D$##two",
         "plainText": "One\ntwo",
         "tagRange": [],
         "lxqText": "One\ntwo"
@@ -2598,10 +2598,10 @@
     },
     "One##$_0D$####$_0A$##two": {
       "store": {
-        "decodedSegment": "One##$_0A$##two",
+        "decodedSegment": "One##$_0D$####$_0A$##two",
         "plainText": "One\ntwo",
         "tagRange": [],
-        "lxqText": "One\ntwo"
+        "lxqText": "One\n\ntwo"
       },
       "tagIdentities": []
     },
@@ -11744,7 +11744,7 @@
           "plainText": "foo\nbar",
           "tagMap": [],
           "missingTags": [],
-          "lxqDecodedTranslation": "foo\nbar"
+          "lxqDecodedTranslation": "foo\n\nbar"
         },
         "tagIdentities": []
       },
@@ -11753,7 +11753,7 @@
           "plainText": "foo\nbar",
           "tagMap": [],
           "missingTags": [],
-          "lxqDecodedTranslation": "foo\nbar"
+          "lxqDecodedTranslation": "foo\n\nbar"
         },
         "tagIdentities": []
       },
@@ -11762,7 +11762,7 @@
           "plainText": "foo\nbar",
           "tagMap": [],
           "missingTags": [],
-          "lxqDecodedTranslation": "foo\nbar"
+          "lxqDecodedTranslation": "foo\n\nbar"
         },
         "tagIdentities": []
       },
@@ -11772,7 +11772,7 @@
             "plainText": "foo\nbar",
             "tagMap": [],
             "missingTags": [],
-            "lxqDecodedTranslation": "foo\nbar"
+            "lxqDecodedTranslation": "foo\n\nbar"
           },
           "tagIdentities": []
         }
@@ -26156,7 +26156,7 @@
           "plainText": "One\ntwo",
           "tagMap": [],
           "missingTags": [],
-          "lxqDecodedTranslation": "One\ntwo"
+          "lxqDecodedTranslation": "One\n\ntwo"
         },
         "tagIdentities": []
       },
@@ -26165,7 +26165,7 @@
           "plainText": "One\ntwo",
           "tagMap": [],
           "missingTags": [],
-          "lxqDecodedTranslation": "One\ntwo"
+          "lxqDecodedTranslation": "One\n\ntwo"
         },
         "tagIdentities": []
       },
@@ -26174,7 +26174,7 @@
           "plainText": "One\ntwo",
           "tagMap": [],
           "missingTags": [],
-          "lxqDecodedTranslation": "One\ntwo"
+          "lxqDecodedTranslation": "One\n\ntwo"
         },
         "tagIdentities": []
       },
@@ -26184,7 +26184,7 @@
             "plainText": "One\ntwo",
             "tagMap": [],
             "missingTags": [],
-            "lxqDecodedTranslation": "One\ntwo"
+            "lxqDecodedTranslation": "One\n\ntwo"
           },
           "tagIdentities": []
         }

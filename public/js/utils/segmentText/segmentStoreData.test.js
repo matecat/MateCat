@@ -222,22 +222,21 @@ describe('a long segment', () => {
 })
 
 describe('raw line breaks mixed with tags and line break placeholders', () => {
-  // Not a supported input: the backend sends line breaks as placeholders, never as raw CR and LF characters. A raw
-  // CR LF splits a line but counts as one character, so every tag after it lands one character off. Draft garbled
-  // these strings too, differently. This pins the current output so a change to it is a decision, not an accident:
-  // the decoded segment gains a stray nbsp placeholder (the degree sign) before the nbsp and loses a `#` of the last
-  // line feed placeholder, and the plain text keeps that placeholder as text instead of splitting the line.
+  // Not a supported input: the backend sends line breaks as placeholders, never as raw CR and LF characters. Each one
+  // is stored as the placeholder the editor reads it as, and the tags after it keep their place. (Splitting the text
+  // into lines, as Draft did, counted a raw CR LF as one character and garbled these strings.)
   const segment = '\r\n\r\n>##$_A0$####$_0A$##'
 
-  test('is stored garbled, as found by the fuzz', () => {
+  test('is stored with every line break and tag in place, as found by the fuzz', () => {
     expect(sourceStoreData(segment)).toEqual({
-      decodedSegment: '##$_0A$####$_0A$##&gt;°##$_A0$###$_0A$##',
-      plainText: '\n\n>°##$_0A$##',
+      decodedSegment:
+        '##$_0D$####$_0A$####$_0D$####$_0A$##&gt;##$_A0$####$_0A$##',
+      plainText: '\n\n>°\n',
       tagRange: [],
-      lxqText: '\n\n>°< \n',
+      lxqText: '\n\n\n\n>< >\n',
     })
     const {plainText, tagMap, missingTags} = translationUpdate(segment, [])
-    expect(plainText).toBe('\n\n>°##$_0A$##')
+    expect(plainText).toBe('\n\n>°\n')
     expect(tagMap.map(({offset, data}) => [offset, data.name])).toEqual([
       [5, 'nbsp'],
     ])

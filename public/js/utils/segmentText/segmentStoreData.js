@@ -1,9 +1,8 @@
 // What the CodeMirror editors publish to the segment store, computed from the segment string alone: the decoded
 // segment, the plain text, the tag map, the missing tags, the Lexiqa text and the character counter. The store, the
 // QA warnings and the tag menu rely on these exact values (a tag keeps only the fields they read, see storeTag), and
-// __golden__/segmentStoreData.json pins them, edge cases included. The text model below splits the segment into lines
-// at its line breaks and places each tag as one unit inside a line: a tag only counts when its placeholder fits inside
-// one line, a tag cut by a later range loses all its characters, and a line break inside a tag's own text never splits.
+// __golden__/segmentStoreData.json pins them, edge cases included. The segment is read once, in order, as text runs,
+// tags and line breaks (piecesOf); every value is built from that list.
 import matchTag from './matchTag'
 import findTagWithRegex from './findTagWithRegex'
 import {getErrorCheckTag, getSplitBlockTag, tagSignatures} from './tagModel'
@@ -21,12 +20,6 @@ import checkForMissingTags from './checkForMissingTag'
 import {formatText, getCharactersCounter} from './textUtils'
 
 export {formatText}
-
-const ZWSP = '\u200B'
-// The line breaks of a segment string; each one splits the editor text into a new block.
-const CRLF_PLACEHOLDER = '##$_0D$####$_0A$##'
-const LF_PLACEHOLDER = '##$_0A$##'
-const CR_PLACEHOLDER = '##$_0D$##'
 
 // Numbers ONLY the compressible tags: the open and close of a pair get the same index, an index inherited from the
 // source tag map is honoured.
@@ -65,102 +58,6 @@ const inheritSourceIndexes = (tagRange, sourceTagMap) =>
       },
     }
   })
-
-// The editor text is a list of blocks (lines); `ents[i]` is the index in `entities` of the tag covering character
-// `i` of the block, or null.
-const makeBlock = (text) => ({text, ents: new Array(text.length).fill(null)})
-
-// The maximal runs of characters covered by one same entity, in order: [{start, end, entity}].
-const entityRuns = ({ents}) => {
-  const runs = []
-  let i = 0
-  while (i < ents.length) {
-    const entity = ents[i]
-    let end = i + 1
-    while (end < ents.length && ents[end] === entity) end++
-    if (entity !== null) runs.push({start: i, end, entity})
-    i = end
-  }
-  return runs
-}
-
-// An edit at `offset` that lands inside a tag (the characters on both sides belong to it) strips the whole tag of its
-// entity: tags are immutable, they are never cut in two. Characters before `from` are not looked at, as if the block
-// started there.
-const releaseEntityAt = ({ents}, offset, from = 0) => {
-  const before = offset > from ? ents[offset - 1] : null
-  const after = offset < ents.length ? ents[offset] : null
-  if (after === null || after !== before) return
-  let start = offset
-  while (start > from && ents[start - 1] === after) start--
-  let end = offset
-  while (end < ents.length && ents[end] === after) end++
-  for (let i = start; i < end; i++) ents[i] = null
-}
-
-const releaseEntitiesAtEdges = (block, start, end) => {
-  releaseEntityAt(block, start)
-  releaseEntityAt(block, end)
-}
-
-// The line break placeholders left in the block become block breaks: a CR LF pair is one break.
-const splitOnLineBreaks = (block) => {
-  const splitPoints = []
-  const text = block.text.replace(
-    /##\$_0D\$####\$_0A\$##/g,
-    (match, offset) => {
-      splitPoints.push({offset, length: CRLF_PLACEHOLDER.length})
-      // keeps the LF and CR searches below off the pair
-      return '##$_CR$####$_LF$##'
-    },
-  )
-  let match
-  const lineFeed = /##\$(_0A)\$##/gi
-  while ((match = lineFeed.exec(text)) !== null)
-    splitPoints.push({offset: match.index, length: LF_PLACEHOLDER.length})
-  const carriageReturn = /##\$(_0D)\$##/gi
-  while ((match = carriageReturn.exec(text)) !== null)
-    splitPoints.push({offset: match.index, length: CR_PLACEHOLDER.length})
-  splitPoints.sort((a, b) => a.offset - b.offset)
-  // A line break in a tag's placeholder is part of the tag, not a break of the segment
-  const segmentBreaks = splitPoints.filter(
-    ({offset}) => block.ents[offset] === null,
-  )
-  if (!segmentBreaks.length) return [block]
-
-  // The placeholders are removed, in one pass: a tag the end of one overlaps loses its entity
-  const textParts = []
-  const entsParts = []
-  const breaks = []
-  let kept = 0
-  let removed = 0
-  segmentBreaks.forEach(({offset, length}) => {
-    releaseEntityAt(block, offset + length)
-    textParts.push(block.text.slice(kept, offset))
-    entsParts.push(block.ents.slice(kept, offset))
-    breaks.push(offset - removed)
-    removed += length
-    kept = offset + length
-  })
-  textParts.push(block.text.slice(kept))
-  entsParts.push(block.ents.slice(kept))
-  const keptText = textParts.join('')
-  const ents = []
-  entsParts.forEach((part) => part.forEach((entity) => ents.push(entity)))
-
-  const blocks = []
-  let lineStart = 0
-  breaks.forEach((at) => {
-    releaseEntityAt({ents}, at, lineStart)
-    blocks.push({
-      text: keptText.slice(lineStart, at),
-      ents: ents.slice(lineStart, at),
-    })
-    lineStart = at
-  })
-  blocks.push({text: keptText.slice(lineStart), ents: ents.slice(lineStart)})
-  return blocks
-}
 
 // A `&lt;` or `&gt;` outside the tags of the segment string is text the translator typed, never markup: it is laid
 // out as one of these instead, so it can neither start nor end a tag. One character each, so the offsets are those of
@@ -208,10 +105,11 @@ const decodeAndMatchTags = (segment) => {
 }
 
 /**
- * The segment string as the editor text: blocks, the tag entities covering them, and the tags the store keeps
- * (`tagRange`, the error-checked ones, with their offsets in the decoded string).
+ * The segment string in order, as text runs (`{text}`, decoded, typed `<` and `>` marked), tags (`{tag}`) and line
+ * break placeholders (`{lineBreak}`), and the tags the store keeps (`tagRange`, the error-checked ones, with their
+ * offsets in the decoded string). A tag starting inside the one before it is left out.
  */
-const toEditorText = (segment = '', sourceTagMap) => {
+const piecesOf = (segment = '', sourceTagMap) => {
   const {markupText, tagRange} = decodeAndMatchTags(segment)
   const lineBreakTags = getSplitBlockTag()
   tagRange.sort((a, b) => a.offset - b.offset)
@@ -220,113 +118,80 @@ const toEditorText = (segment = '', sourceTagMap) => {
       ? inheritSourceIndexes(tagRange, sourceTagMap)
       : tagRange,
   )
-
-  // Every tag but the line breaks is replaced by its placeholder, between two zero-width spaces. The text is built in
-  // chunks: `built` holds the replaced part, `rest` from `consumed` on is still untouched. Rebuilding the whole
-  // string for every tag took quadratic time on long segments.
-  const built = []
-  let builtLength = 0
-  let rest = markupText
-  let consumed = 0
-  let slicedLength = 0
-  const placed = []
+  const pieces = []
+  let last = 0
   indexedTagRange.forEach((tag) => {
-    const {name, placeholder, encodedText} = tag.data
-    if (lineBreakTags.includes(name)) return
-    const start = tag.offset - slicedLength
-    const end = start + encodedText.length
-    const textLength = builtLength + rest.length - consumed
-    placed.push({start, tag})
-    if (start >= builtLength && end <= textLength) {
-      built.push(
-        rest.slice(consumed, consumed + start - builtLength),
-        ZWSP + placeholder + ZWSP,
-      )
-      consumed += end - builtLength
-      builtLength = start + placeholder.length + 2
-    } else {
-      // A tag overlapping one already replaced, or past the end: the whole string, as before
-      const text = built.join('') + rest.slice(consumed)
-      rest = text.slice(0, start) + ZWSP + placeholder + ZWSP + text.slice(end)
-      built.length = 0
-      builtLength = 0
-      consumed = 0
-    }
-    slicedLength += end - start - (placeholder.length + 2)
+    const start = tag.offset
+    if (start < last) return
+    if (start > last) pieces.push({text: markupText.slice(last, start)})
+    pieces.push(
+      lineBreakTags.includes(tag.data.name) ? {lineBreak: tag} : {tag},
+    )
+    last = start + tag.data.encodedText.length
   })
-  const plainText = built.join('') + rest.slice(consumed)
-
-  // Real line breaks split blocks too. Offsets keep counting one character per break, also for a CR LF. A line break
-  // in a tag's placeholder is kept as is, as the editor's tag chip shows it (its label is the placeholder text): it
-  // belongs to the tag, which stays whole on one line.
-  const inPlaceholder = new Uint8Array(plainText.length + 1)
-  placed.forEach(({start, tag}) => {
-    const last = Math.min(start + tag.data.placeholder.length, plainText.length)
-    for (let i = Math.max(start + 1, 0); i <= last; i++) inPlaceholder[i] = 1
-  })
-  const lines = []
-  let lineStart = 0
-  for (let i = 0; i < plainText.length; i++) {
-    const char = plainText[i]
-    if ((char === '\r' || char === '\n') && !inPlaceholder[i]) {
-      lines.push(plainText.slice(lineStart, i))
-      if (char === '\r' && plainText[i + 1] === '\n') i++
-      lineStart = i + 1
-    }
-  }
-  lines.push(plainText.slice(lineStart))
-  const blocks = lines.map(makeBlock)
-
-  // Each tag goes in the block its placeholder starts in, when it ends there too
-  const blockEnds = []
-  let maxCharsInBlocks = 0
-  blocks.forEach((block, blockIndex) => {
-    maxCharsInBlocks += block.text.length + (blockIndex !== 0 ? 1 : 0)
-    blockEnds.push(maxCharsInBlocks)
-  })
-  const placedInBlock = blocks.map(() => [])
-  placed.forEach((item) => {
-    const from = item.start + 1
-    const to = from + item.tag.data.placeholder.length
-    if (lineBreakTags.includes(item.tag.data.name)) return
-    // The first block ending after `from`
-    let low = 0
-    let high = blocks.length
-    while (low < high) {
-      const middle = (low + high) >> 1
-      if (blockEnds[middle] > from) high = middle
-      else low = middle + 1
-    }
-    if (low >= blocks.length) return
-    const blockStart = blockEnds[low] - blocks[low].text.length
-    if (from >= blockStart && to <= blockEnds[low])
-      placedInBlock[low].push({from, to, tag: item.tag})
-  })
-  const entities = []
-  blocks.forEach((block, blockIndex) => {
-    const blockStart = blockEnds[blockIndex] - block.text.length
-    placedInBlock[blockIndex].forEach(({from, to, tag}) => {
-      const entity = entities.push({data: tag.data}) - 1
-      releaseEntitiesAtEdges(block, from - blockStart, to - blockStart)
-      for (let i = from - blockStart; i < to - blockStart; i++)
-        block.ents[i] = entity
-    })
-  })
-
+  if (last < markupText.length) pieces.push({text: markupText.slice(last)})
   return {
-    blocks: blocks.flatMap(splitOnLineBreaks),
-    entities,
+    pieces,
     tagRange: indexedTagRange.filter((tag) =>
       getErrorCheckTag().includes(tag.data.name),
     ),
   }
 }
 
-// An editor with a single block of zero-width spaces only counts as empty.
-const hasText = (blocks) =>
-  blocks.length > 1 || blocks[0].text.replace(/\u200B/g, '').length > 0
+const isCarriageReturn = (piece) =>
+  piece?.lineBreak?.data.name === 'carriageReturn'
+const isLineFeed = (piece) => piece?.lineBreak?.data.name === 'lineFeed'
 
-const editorPlainText = (blocks) => blocks.map(({text}) => text).join('\n')
+/**
+ * The plain text: each tag as its placeholder, each line break as one `\n` (a CR LF pair too, written in the text or
+ * as placeholders).
+ */
+const plainTextOf = (pieces) =>
+  untype(
+    removeZeroWidthSpace(
+      pieces
+        .map((piece, i) => {
+          if (piece.text !== undefined)
+            return piece.text.replace(/\r\n|\r/g, '\n')
+          if (piece.tag) return piece.tag.data.placeholder
+          return isCarriageReturn(piece) && isLineFeed(pieces[i + 1])
+            ? ''
+            : '\n'
+        })
+        .join(''),
+    ),
+  )
+
+// A line break written in the text itself, as its placeholder: the editor reads a `\r` as a carriage return too.
+const LINE_BREAK_CHARS = /\r\n|\r|\n/g
+const lineBreakPlaceholders = (text) =>
+  text.replace(LINE_BREAK_CHARS, (lineBreak) =>
+    lineBreak === '\n'
+      ? config.lfPlaceholder
+      : lineBreak === '\r'
+        ? config.crPlaceholder
+        : config.crPlaceholder + config.lfPlaceholder,
+  )
+
+/**
+ * The segment string the store keeps: the tags and line breaks as their markup, the other text HTML-encoded. Text the
+ * translator typed stays encoded even where it looks like a tag. A carriage return stays one: the editor shows it as
+ * one, and the Lexiqa text built from this string must have as many line breaks as the editor text.
+ */
+const decodedSegmentOf = (pieces) => {
+  // Nothing but zero-width spaces: kept as they are
+  if (
+    pieces.every(({text}) => text !== undefined && !text.replace(/\u200B/g, ''))
+  )
+    return untype(pieces.map(({text}) => text).join(''))
+  return pieces
+    .map((piece) =>
+      piece.text !== undefined
+        ? encodeText(lineBreakPlaceholders(piece.text))
+        : toSegmentForm((piece.tag ?? piece.lineBreak).data.encodedText),
+    )
+    .join('')
+}
 
 // Editor text back to segment string form: line breaks become the line feed placeholder, zero-width spaces go.
 const toSegmentForm = (text) =>
@@ -352,26 +217,6 @@ const encodeText = (text) => {
   return encoded + encodeHtmlEntities(untype(segmentForm.slice(last)))
 }
 
-/**
- * The segment string the editor text stands for: each tag placeholder turned back into its markup, the other text
- * HTML-encoded. Text the translator typed stays encoded even where it looks like a tag.
- */
-const decodedSegmentOf = ({blocks, entities}) => {
-  if (!hasText(blocks)) return untype(editorPlainText(blocks))
-  const lines = blocks.map((block) => {
-    let line = ''
-    let last = 0
-    entityRuns(block).forEach(({start, end, entity}) => {
-      line +=
-        encodeText(block.text.slice(last, start)) +
-        toSegmentForm(entities[entity].data.encodedText)
-      last = end
-    })
-    return line + encodeText(block.text.slice(last))
-  })
-  return lines.join(config.lfPlaceholder)
-}
-
 // A tag as the store keeps it: its offset in the decoded segment (the order of the tag maps) and what the tag menu,
 // the missing tag check and the source index inheritance read. `index` and `tagRole` only for a numbered tag.
 const storeTag = ({
@@ -391,37 +236,32 @@ const storeTag = ({
 })
 
 /**
- * The tags in the editor text, in order (nbsp and tab included, line breaks not). A target tag carries no index: only
+ * The tags of the translation, in order (nbsp and tab included, line breaks not). A target tag carries no index: only
  * the source tags are numbered for the store.
  */
-const tagMapOf = ({blocks, entities}) => {
-  if (!hasText(blocks)) return []
-  return blocks.flatMap((block) =>
-    entityRuns(block).map(({entity}) => {
+const tagMapOf = (pieces) =>
+  pieces
+    .filter(({tag}) => tag)
+    .map(({tag}) => {
       const {originalOffset, id, name, encodedText, decodedText, placeholder} =
-        entities[entity].data
+        tag.data
       return storeTag({
         offset: originalOffset,
         data: {id, name, encodedText, decodedText, placeholder},
       })
-    }),
-  )
-}
-
-const plainTextOf = ({blocks}) =>
-  untype(removeZeroWidthSpace(editorPlainText(blocks)))
+    })
 
 /**
  * What SegmentActions.updateSource takes for `source` (a segment string): the decoded segment, the plain text, the
  * tag range and the Lexiqa text.
  */
 export const sourceStoreData = (source) => {
-  const editorText = toEditorText(source)
-  const decodedSegment = decodedSegmentOf(editorText)
+  const {pieces, tagRange} = piecesOf(source)
+  const decodedSegment = decodedSegmentOf(pieces)
   return {
     decodedSegment,
-    plainText: plainTextOf(editorText),
-    tagRange: editorText.tagRange.map(storeTag),
+    plainText: plainTextOf(pieces),
+    tagRange: tagRange.map(storeTag),
     lxqText: prepareTextForLexiqa(decodedSegment),
   }
 }
@@ -432,17 +272,16 @@ export const sourceStoreData = (source) => {
  * from.
  */
 export const translationUpdate = (translation, sourceTagMap) => {
-  const editorText = toEditorText(translation, sourceTagMap)
-  const tagMap = tagMapOf(editorText)
+  const {pieces} = piecesOf(translation, sourceTagMap)
+  const tagMap = tagMapOf(pieces)
   const {missingTags} = checkForMissingTags(sourceTagMap, tagMap)
   return {
-    plainText: plainTextOf(editorText),
+    plainText: plainTextOf(pieces),
     tagMap,
     missingTags: missingTags.map(storeTag),
-    lxqDecodedTranslation: prepareTextForLexiqa(decodedSegmentOf(editorText)),
+    lxqDecodedTranslation: prepareTextForLexiqa(decodedSegmentOf(pieces)),
   }
 }
-
 /** The character counter of `translation`; `countTags`: the project counts g, bx, ex and x tags as characters. */
 export const charactersCounter = (translation, countTags) =>
   getCharactersCounter(
@@ -456,7 +295,7 @@ export const charactersCounter = (translation, countTags) =>
  * `[{raw, id, placeholder}]`. `sourceTagMap` (for a translation) gives the tags their source index.
  */
 export const tagIdentities = (segment, sourceTagMap) =>
-  toEditorText(segment, sourceTagMap)
+  piecesOf(segment, sourceTagMap)
     .tagRange.slice()
     .sort((a, b) => a.offset - b.offset)
     .map(({data}) => ({
