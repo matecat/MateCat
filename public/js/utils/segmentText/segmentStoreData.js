@@ -1,9 +1,9 @@
 // What the CodeMirror editors publish to the segment store, computed from the segment string alone: the decoded
 // segment, the plain text, the tag map, the missing tags, the Lexiqa text and the character counter. The store, the
-// QA warnings and the tag menu read these with the values Draft's encodeContent/decodeSegment/matchTagInEditor
-// produced (a tag keeps only the fields they read, see storeTag), so this reproduces those values exactly, edge cases
-// included: the editor text model below follows Draft's own block and entity rules (a tag becomes an entity only when
-// its placeholder fits inside one block, an entity cut by a later range loses all its characters, and so on).
+// QA warnings and the tag menu rely on these exact values (a tag keeps only the fields they read, see storeTag), and
+// __golden__/segmentStoreData.json pins them, edge cases included. The text model below splits the segment into lines
+// at its line breaks and places each tag as one unit inside a line: a tag only counts when its placeholder fits inside
+// one line, a tag cut by a later range loses all its characters, and a line break inside a tag's own text never splits.
 import matchTag from './matchTag'
 import {getErrorCheckTag, getSplitBlockTag} from './tagModel'
 import {createTagNumberer} from './compressibleTagUtils'
