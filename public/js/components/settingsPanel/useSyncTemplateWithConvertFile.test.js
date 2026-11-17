@@ -1,4 +1,4 @@
-import {renderHook, act} from '@testing-library/react'
+import {renderHook, act, waitFor} from '@testing-library/react'
 import useSyncTemplateWithConvertFile from './useSyncTemplateWithConvertFile'
 
 global.config = {...global.config, is_cattool: true}
@@ -96,9 +96,12 @@ describe('useSyncTemplateWithConvertFile', () => {
         getTemplates: jest.fn(() => Promise.resolve({items})),
       }
 
-      await act(async () => {
-        renderHook(() => useSyncTemplateWithConvertFile(props))
-      })
+      renderHook(() => useSyncTemplateWithConvertFile(props))
+      await waitFor(() =>
+        expect(
+          props.setTemplates.mock.calls.some(([arg]) => Array.isArray(arg)),
+        ).toBe(true),
+      )
 
       const arrayCall = props.setTemplates.mock.calls.find(([arg]) =>
         Array.isArray(arg),
@@ -130,9 +133,12 @@ describe('useSyncTemplateWithConvertFile', () => {
         getTemplates: jest.fn(() => Promise.resolve({items})),
       }
 
-      await act(async () => {
-        renderHook(() => useSyncTemplateWithConvertFile(props))
-      })
+      renderHook(() => useSyncTemplateWithConvertFile(props))
+      await waitFor(() =>
+        expect(
+          props.setTemplates.mock.calls.some(([arg]) => Array.isArray(arg)),
+        ).toBe(true),
+      )
 
       const arrayCall = props.setTemplates.mock.calls.find(([arg]) =>
         Array.isArray(arg),
