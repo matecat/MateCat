@@ -607,10 +607,12 @@ const Search = (props) => {
     return {
       name: (
         <>
-          <div
-            className={'status-dot ' + item.label.toLowerCase() + '-color'}
-          />
-          {item.label}
+          <span className="status-dropdown-option">
+            <span
+              className={'status-dot ' + item.label.toLowerCase() + '-color'}
+            />
+            {item.label}
+          </span>
         </>
       ),
       id: item.value,

@@ -84,8 +84,8 @@
     > input {
       flex-grow: 1;
       background: unset;
-      outline: none;
-      border: none;
+      outline: none !important;
+      border: none !important;
     }
 
     .reset_button {
