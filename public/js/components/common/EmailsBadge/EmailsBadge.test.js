@@ -375,9 +375,8 @@ describe('EmailsBadge additional behaviors', () => {
     render(
       <EmailsBadge name="invite" value={['a@mail.com']} onChange={() => {}} />,
     )
-    const removeButton = screen.getByTestId('email-badge-tag-remove')
-    const icon = removeButton.querySelector('svg')
-    expect(icon).toHaveAttribute('width', '14')
-    expect(icon).toHaveAttribute('height', '14')
+    expect(screen.getByTestId('email-badge-tag-remove').innerHTML).toContain(
+      'width="14" height="14"',
+    )
   })
 })
