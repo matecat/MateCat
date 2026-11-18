@@ -49,6 +49,7 @@ import {
   removeTagsFromText,
   checkXliffTagsInText,
 } from '../utils/segmentText/tagUtils'
+import {fromDraftTranslation} from '../utils/segmentText/draftTagTextCompat'
 import {
   checkTPEnabled,
   checkCurrentSegmentTPEnabled,
@@ -149,6 +150,8 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   normalizeSplittedSegments: function (segments) {
     let newSegments = []
     $.each(segments, (i, segment) => {
+      // TEMPORARY, see draftTagTextCompat.js
+      segment.translation = fromDraftTranslation(segment.translation)
       let splittedSourceAr = segment.segment.split(
         splittedTranslationPlaceholder,
       )
