@@ -1,0 +1,75 @@
+@use 'tokens/colors';
+@use 'commons/variables';
+
+.container {
+  display: flex;
+  align-items: center;
+
+  input[type='radio'] {
+    appearance: none;
+    flex: none;
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    padding: 0;
+    cursor: pointer;
+    border: 1px solid colors.$grey400;
+    border-radius: 50%;
+    background: colors.$grey75;
+
+    &.small {
+      width: 16px;
+      height: 16px;
+
+      &:checked {
+        border-color: colors.$blue400;
+        background: radial-gradient(
+          circle,
+          colors.$white 0 4px,
+          colors.$blue400 4px
+        );
+      }
+    }
+
+    &:checked {
+      border-color: colors.$blue400;
+      background: radial-gradient(
+        circle,
+        colors.$white 0 5px,
+        colors.$blue400 5px
+      );
+    }
+
+    &:focus-visible {
+      outline: 2px solid colors.$blue400;
+      outline-offset: 2px;
+    }
+
+    &:disabled {
+      border-color: colors.$grey300;
+      background: colors.$grey50;
+      cursor: not-allowed;
+      opacity: 0.4;
+
+      &:checked {
+        box-shadow: inset 0 0 0 5px colors.$grey400;
+      }
+    }
+  }
+
+  label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: variables.$font-size-small;
+    line-height: 24px;
+    color: colors.$grey700;
+    cursor: pointer;
+  }
+
+  input:disabled + label {
+    color: colors.$grey400;
+    cursor: not-allowed;
+  }
+}
