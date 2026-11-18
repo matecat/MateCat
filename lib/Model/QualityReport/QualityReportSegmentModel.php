@@ -22,6 +22,7 @@ use Model\Jobs\MetadataDao;
 use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\LQA\CategoryDao;
+use Model\LQA\CategoryStruct;
 use PDOException;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
@@ -86,12 +87,7 @@ class QualityReportSegmentModel
      */
     public function getSegmentsIdForQR($step, int $ref_segment, $where = "after", $options = [])
     {
-        if (
-            isset($options['filter']['issue_category'])
-            && $options['filter']['issue_category'] !== ''
-            && $options['filter']['issue_category'] !== SegmentDao::ISSUE_CATEGORY_ALL
-            && !(is_array($options['filter']['issue_category']) && in_array(SegmentDao::ISSUE_CATEGORY_ALL, $options['filter']['issue_category'], true))
-        ) {
+        if (self::selectsSpecificCategories($options['filter']['issue_category'] ?? null)) {
             $idQaModel = $this->chunk->getProject(new ProjectDao($this->database))->id_qa_model;
             if ($idQaModel !== null) {
                 $options['filter']['issue_category'] = $this->expandCategoriesToSubcategories(
@@ -128,12 +124,27 @@ class QualityReportSegmentModel
     }
 
     /**
+     * Whether the category filter names specific categories, as opposed to none or "Any".
+     *
+     * @param mixed $issueCategory
+     *
+     * @return bool
+     */
+    private static function selectsSpecificCategories(mixed $issueCategory): bool
+    {
+        $values = (array)$issueCategory;
+
+        return $values !== []
+            && $values !== ['']
+            && !in_array(SegmentDao::ISSUE_CATEGORY_ALL, $values, true);
+    }
+
+    /**
      * Replace each selected category with its subcategories, or keep it when it has none.
      *
      * The filter takes one id or a list of them. Issues are filed against leaf categories, so a
-     * parent alone would match nothing. Ids that are not positive integers are dropped. If none
-     * is left, the value is returned untouched, so the query still filters and matches nothing
-     * instead of losing the filter.
+     * parent alone would match nothing. If no valid id is left, the value is returned untouched,
+     * so the query still filters and matches nothing instead of losing the filter.
      *
      * @param int $idQaModel
      * @param mixed $issueCategory
@@ -143,33 +154,40 @@ class QualityReportSegmentModel
      */
     private function expandCategoriesToSubcategories(int $idQaModel, mixed $issueCategory): mixed
     {
-        $ids = [];
-        foreach ((array)$issueCategory as $id) {
-            if (is_int($id) || (is_string($id) && ctype_digit($id))) {
-                $id = (int)$id;
-                if ($id > 0) {
-                    $ids[] = $id;
-                }
-            }
-        }
-
+        $ids = self::positiveCategoryIds($issueCategory);
         if (empty($ids)) {
             return $issueCategory;
         }
 
         $expanded = [];
-        foreach (array_unique($ids) as $id) {
-            $subCategories = $this->categoryDao->findByIdModelAndIdParent($idQaModel, $id);
-            if (empty($subCategories)) {
-                $expanded[] = $id;
-                continue;
-            }
-            foreach ($subCategories as $subCategory) {
-                $expanded[] = (int)$subCategory->id;
-            }
+        foreach ($ids as $id) {
+            $subCategoryIds = array_map(
+                fn(CategoryStruct $subCategory): int => (int)$subCategory->id,
+                $this->categoryDao->findByIdModelAndIdParent($idQaModel, $id)
+            );
+            array_push($expanded, ...($subCategoryIds ?: [$id]));
         }
 
         return array_values(array_unique($expanded));
+    }
+
+    /**
+     * The distinct positive integer ids in a category filter; anything else is dropped.
+     *
+     * @param mixed $issueCategory one id or a list of them, as ints or digit strings
+     *
+     * @return list<int>
+     */
+    private static function positiveCategoryIds(mixed $issueCategory): array
+    {
+        $ids = [];
+        foreach ((array)$issueCategory as $id) {
+            if (is_int($id) || (is_string($id) && ctype_digit($id))) {
+                $ids[] = (int)$id;
+            }
+        }
+
+        return array_values(array_unique(array_filter($ids, fn(int $id): bool => $id > 0)));
     }
 
     /**

@@ -189,6 +189,75 @@ class SegmentDao extends AbstractDao
     }
 
     /**
+     * Build the qa_entries join and the conditions for the issue category and severity filters.
+     *
+     * Within a field the values are alternatives (IN), across fields they all apply (AND). With
+     * neither filter set, no join is added.
+     *
+     * @param mixed $issueCategory one id, a list of ids, or ISSUE_CATEGORY_ALL
+     * @param mixed $severity one label or a list of labels
+     * @param array<string, mixed> $bindings receives the values to bind
+     *
+     * @return array{0: string, 1: string} the join, then the conditions
+     */
+    private static function issueFilterClauses(mixed $issueCategory, mixed $severity, array &$bindings): array
+    {
+        $issueCategory = self::normalizeCategoryFilter($issueCategory);
+        $severities = self::normalizeFilterList($severity);
+
+        if ($issueCategory === null && empty($severities)) {
+            return ['', ''];
+        }
+
+        $join = " LEFT JOIN qa_entries e ON e.id_segment = st.id_segment AND e.id_job = st.id_job AND e.deleted_at IS NULL ";
+        $conditions = '';
+
+        if ($issueCategory === self::ISSUE_CATEGORY_ALL) {
+            $conditions .= " AND e.id_category IS NOT NULL ";
+        } elseif (is_array($issueCategory)) {
+            // Case for AbstractRevisionFeature: a parent category expanded to its subcategories,
+            // or several categories picked in the filter.
+            $conditions .= " AND e.id_category IN ( " . self::bindList('issue_category', $issueCategory, $bindings) . " ) ";
+        } elseif ($issueCategory !== null) {
+            $conditions .= " AND e.id_category = :id_category ";
+            $bindings['id_category'] = $issueCategory;
+        }
+
+        if (!empty($severities)) {
+            $conditions .= " AND e.severity IN ( " . self::bindList('severity', $severities, $bindings) . " ) ";
+        }
+
+        return [$join, $conditions];
+    }
+
+    /**
+     * Reduce the category filter to null (no filter), ISSUE_CATEGORY_ALL, one value or a list.
+     *
+     * "Any" next to specific categories still means any category.
+     *
+     * @param mixed $issueCategory
+     *
+     * @return string|int|list<string>|null
+     */
+    private static function normalizeCategoryFilter(mixed $issueCategory): string|int|array|null
+    {
+        if (!is_array($issueCategory)) {
+            if (!is_scalar($issueCategory) || $issueCategory === '') {
+                return null;
+            }
+
+            return is_int($issueCategory) ? $issueCategory : (string)$issueCategory;
+        }
+
+        $list = self::normalizeFilterList($issueCategory);
+        if (in_array(self::ISSUE_CATEGORY_ALL, $list, true)) {
+            return self::ISSUE_CATEGORY_ALL;
+        }
+
+        return $list ?: null;
+    }
+
+    /**
      * Add one numbered placeholder per value to $bindings and return them comma-separated.
      *
      * The placeholders are named by position, never by value: a severity label is free text, and a
@@ -290,36 +359,13 @@ class SegmentDao extends AbstractDao
             }
         }
 
-        $issueCategory = $options['filter']['issue_category'] ?? null;
-        if (is_array($issueCategory)) {
-            $issueCategory = self::normalizeFilterList($issueCategory) ?: null;
-            // "Any" next to specific categories still means any category.
-            if ($issueCategory !== null && in_array(self::ISSUE_CATEGORY_ALL, $issueCategory, true)) {
-                $issueCategory = self::ISSUE_CATEGORY_ALL;
-            }
-        } elseif ($issueCategory === '') {
-            $issueCategory = null;
-        }
-        $severities = self::normalizeFilterList($options['filter']['severity'] ?? null);
-
-        if ($issueCategory !== null || !empty($severities)) {
-            $options_join_query .= " LEFT JOIN qa_entries e ON e.id_segment = st.id_segment AND e.id_job = st.id_job AND e.deleted_at IS NULL ";
-
-            if ($issueCategory === self::ISSUE_CATEGORY_ALL) {
-                $options_conditions_query .= " AND e.id_category IS NOT NULL ";
-            } elseif (is_array($issueCategory)) {
-                // Case for AbstractRevisionFeature: a parent category expanded to its subcategories,
-                // or several categories picked in the filter.
-                $options_conditions_query .= " AND e.id_category IN ( " . self::bindList('issue_category', $issueCategory, $options_conditions_values) . " ) ";
-            } elseif ($issueCategory !== null) {
-                $options_conditions_query .= " AND e.id_category = :id_category ";
-                $options_conditions_values['id_category'] = $issueCategory;
-            }
-
-            if (!empty($severities)) {
-                $options_conditions_query .= " AND e.severity IN ( " . self::bindList('severity', $severities, $options_conditions_values) . " ) ";
-            }
-        }
+        [$issueJoin, $issueConditions] = self::issueFilterClauses(
+            $options['filter']['issue_category'] ?? null,
+            $options['filter']['severity'] ?? null,
+            $options_conditions_values
+        );
+        $options_join_query .= $issueJoin;
+        $options_conditions_query .= $issueConditions;
 
         if (!empty($options['filter']['id_segment'])) {
             $options_conditions_query .= " AND s.id = :id_segment ";

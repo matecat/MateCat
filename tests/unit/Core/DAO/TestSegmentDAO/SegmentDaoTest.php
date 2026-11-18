@@ -394,6 +394,24 @@ class SegmentDaoTest extends AbstractTest
         $this->assertSame(2, substr_count($q['sql'], 'e.severity IN ( :severity_0, :severity_1 )'));
     }
 
+    public function testGetSegmentsIdForQRBindsAScalarCategoryAsIs(): void
+    {
+        $int = $this->captureQrQuery(['issue_category' => 316]);
+        $this->assertStringContainsString('e.id_category = :id_category', $int['sql']);
+        $this->assertSame(316, $int['params']['id_category']);
+
+        $float = $this->captureQrQuery(['issue_category' => 316.0]);
+        $this->assertSame('316', $float['params']['id_category']);
+    }
+
+    public function testGetSegmentsIdForQRIgnoresANonScalarCategory(): void
+    {
+        $q = $this->captureQrQuery(['issue_category' => new \stdClass()]);
+
+        $this->assertStringNotContainsString('qa_entries e', $q['sql']);
+        $this->assertArrayNotHasKey('id_category', $q['params']);
+    }
+
     public function testGetSegmentsIdForQROrdersEveryLimitedForwardRead(): void
     {
         $after = $this->captureQrQuery(['severity' => ['minor']]);
