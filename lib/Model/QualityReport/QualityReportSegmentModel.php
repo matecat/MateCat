@@ -22,7 +22,7 @@ use Model\Jobs\MetadataDao;
 use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\LQA\CategoryDao;
-use Model\LQA\CategoryStruct;
+use PDOException;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\EntryCommentDao;
@@ -53,6 +53,7 @@ class QualityReportSegmentModel
     private QualityReportDao $qualityReportDao;
     private EntryCommentDao $entryCommentDao;
     private CommentDao $commentDao;
+    private CategoryDao $categoryDao;
 
     public function __construct(
         JobStruct $chunk,
@@ -61,7 +62,8 @@ class QualityReportSegmentModel
         ?SegmentDao $segmentDao = null,
         ?QualityReportDao $qualityReportDao = null,
         ?EntryCommentDao $entryCommentDao = null,
-        ?CommentDao $commentDao = null
+        ?CommentDao $commentDao = null,
+        ?CategoryDao $categoryDao = null
     ) {
         $this->chunk = $chunk;
         $this->database = $database;
@@ -70,6 +72,7 @@ class QualityReportSegmentModel
         $this->qualityReportDao = $qualityReportDao ?? new QualityReportDao($database);
         $this->entryCommentDao = $entryCommentDao ?? new EntryCommentDao($database);
         $this->commentDao = $commentDao ?? new CommentDao($database);
+        $this->categoryDao = $categoryDao ?? new CategoryDao($database);
     }
 
     /**
@@ -83,19 +86,18 @@ class QualityReportSegmentModel
      */
     public function getSegmentsIdForQR($step, int $ref_segment, $where = "after", $options = [])
     {
-        if (isset($options['filter']['issue_category']) && $options['filter']['issue_category'] != 'all') {
+        if (
+            isset($options['filter']['issue_category'])
+            && $options['filter']['issue_category'] !== ''
+            && $options['filter']['issue_category'] !== SegmentDao::ISSUE_CATEGORY_ALL
+            && !(is_array($options['filter']['issue_category']) && in_array(SegmentDao::ISSUE_CATEGORY_ALL, $options['filter']['issue_category'], true))
+        ) {
             $idQaModel = $this->chunk->getProject(new ProjectDao($this->database))->id_qa_model;
             if ($idQaModel !== null) {
-                $subCategories = (new CategoryDao($this->database))->findByIdModelAndIdParent(
-                    $idQaModel,
+                $options['filter']['issue_category'] = $this->expandCategoriesToSubcategories(
+                    (int)$idQaModel,
                     $options['filter']['issue_category']
                 );
-
-                if (!empty($subCategories) > 0) {
-                    $options['filter']['issue_category'] = array_map(function (CategoryStruct $subcat) {
-                        return $subcat->id;
-                    }, $subCategories);
-                }
             }
         }
 
@@ -123,6 +125,51 @@ class QualityReportSegmentModel
         );
 
         return $segments_id;
+    }
+
+    /**
+     * Replace each selected category with its subcategories, or keep it when it has none.
+     *
+     * The filter takes one id or a list of them. Issues are filed against leaf categories, so a
+     * parent alone would match nothing. Ids that are not positive integers are dropped. If none
+     * is left, the value is returned untouched, so the query still filters and matches nothing
+     * instead of losing the filter.
+     *
+     * @param int $idQaModel
+     * @param mixed $issueCategory
+     *
+     * @return mixed list<int> when at least one id is valid, the input otherwise
+     * @throws PDOException
+     */
+    private function expandCategoriesToSubcategories(int $idQaModel, mixed $issueCategory): mixed
+    {
+        $ids = [];
+        foreach ((array)$issueCategory as $id) {
+            if (is_int($id) || (is_string($id) && ctype_digit($id))) {
+                $id = (int)$id;
+                if ($id > 0) {
+                    $ids[] = $id;
+                }
+            }
+        }
+
+        if (empty($ids)) {
+            return $issueCategory;
+        }
+
+        $expanded = [];
+        foreach (array_unique($ids) as $id) {
+            $subCategories = $this->categoryDao->findByIdModelAndIdParent($idQaModel, $id);
+            if (empty($subCategories)) {
+                $expanded[] = $id;
+                continue;
+            }
+            foreach ($subCategories as $subCategory) {
+                $expanded[] = (int)$subCategory->id;
+            }
+        }
+
+        return array_values(array_unique($expanded));
     }
 
     /**

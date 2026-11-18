@@ -32,7 +32,21 @@ const objToQueryString = (obj) => {
   for (const key in obj) {
     if (obj[key] && typeof obj[key] === 'object' && !Array.isArray(obj[key])) {
       for (const subKey in obj[key]) {
-        if (obj[key][subKey]) {
+        const value = obj[key][subKey]
+        if (Array.isArray(value)) {
+          // One `key[subKey][]=` pair per item, so the server reads a list, not "a,b"
+          value
+            .filter(
+              (item) => item !== null && item !== undefined && item !== '',
+            )
+            .forEach((item) =>
+              keyValuePairs.push(
+                encodeURIComponent(`${key}[${subKey}][]`) +
+                  '=' +
+                  encodeURIComponent(item),
+              ),
+            )
+        } else if (value) {
           keyValuePairs.push(
             encodeURIComponent(`${key}[${subKey}]`) +
               '=' +

@@ -2577,7 +2577,15 @@ header
   .layout__container
   .qr-segment-details-container
   .qr-segments-summary
-  .filter-category {
+  .filter-category,
+.qr-wrapper
+  .qr-container
+  .qr-container-inside
+  .qr-job-summary-container
+  .layout__container
+  .qr-segment-details-container
+  .qr-segments-summary
+  .filter-severity {
   max-width: 200px;
 }
 
@@ -2589,6 +2597,16 @@ header
   .qr-segment-details-container
   .qr-segments-summary
   .filter-category
+  .select__dropdown-wrapper
+  .custom-dropdown,
+.qr-wrapper
+  .qr-container
+  .qr-container-inside
+  .qr-job-summary-container
+  .layout__container
+  .qr-segment-details-container
+  .qr-segments-summary
+  .filter-severity
   .select__dropdown-wrapper
   .custom-dropdown {
   width: max-content;

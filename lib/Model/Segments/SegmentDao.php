@@ -162,6 +162,57 @@ class SegmentDao extends AbstractDao
     }
 
     /**
+     * Turn a filter value into a list of non-empty strings.
+     *
+     * A filter field takes one value (the original API form) or a list of them (a multi-select in
+     * the UI). Anything that is not a scalar, and every empty string, is dropped. Values are kept
+     * as sent, untrimmed: they are compared for equality with stored labels.
+     *
+     * @param mixed $value
+     *
+     * @return list<string>
+     */
+    private static function normalizeFilterList(mixed $value): array
+    {
+        $list = [];
+        foreach ((array)$value as $item) {
+            if (!is_scalar($item)) {
+                continue;
+            }
+            $item = (string)$item;
+            if ($item !== '') {
+                $list[] = $item;
+            }
+        }
+
+        return array_values(array_unique($list));
+    }
+
+    /**
+     * Add one numbered placeholder per value to $bindings and return them comma-separated.
+     *
+     * The placeholders are named by position, never by value: a severity label is free text, and a
+     * placeholder named after it would be invalid SQL.
+     *
+     * @param string $prefix
+     * @param list<string> $values
+     * @param array<string, mixed> $bindings
+     *
+     * @return string
+     */
+    private static function bindList(string $prefix, array $values, array &$bindings): string
+    {
+        $placeholders = [];
+        foreach ($values as $index => $value) {
+            $name = $prefix . '_' . $index;
+            $placeholders[] = ':' . $name;
+            $bindings[$name] = $value;
+        }
+
+        return implode(', ', $placeholders);
+    }
+
+    /**
      * @param JobStruct $chunk
      * @param int $step
      * @param int $ref_segment
@@ -171,8 +222,8 @@ class SegmentDao extends AbstractDao
      *     filter?: array{
      *         status?: string,
      *         issues_in_r?: int,
-     *         issue_category?: string|list<int>,
-     *         severity?: string,
+     *         issue_category?: string|list<int|string>,
+     *         severity?: string|list<string>,
      *         id_segment?: int
      *     }
      * } $options
@@ -239,43 +290,34 @@ class SegmentDao extends AbstractDao
             }
         }
 
-        if (
-            (isset($options['filter']['issue_category']) && $options['filter']['issue_category'] != '') ||
-            (isset($options['filter']['severity']) && $options['filter']['severity'] != '')
-        ) {
+        $issueCategory = $options['filter']['issue_category'] ?? null;
+        if (is_array($issueCategory)) {
+            $issueCategory = self::normalizeFilterList($issueCategory) ?: null;
+            // "Any" next to specific categories still means any category.
+            if ($issueCategory !== null && in_array(self::ISSUE_CATEGORY_ALL, $issueCategory, true)) {
+                $issueCategory = self::ISSUE_CATEGORY_ALL;
+            }
+        } elseif ($issueCategory === '') {
+            $issueCategory = null;
+        }
+        $severities = self::normalizeFilterList($options['filter']['severity'] ?? null);
+
+        if ($issueCategory !== null || !empty($severities)) {
             $options_join_query .= " LEFT JOIN qa_entries e ON e.id_segment = st.id_segment AND e.id_job = st.id_job AND e.deleted_at IS NULL ";
 
-            if (
-                isset($options['filter']['issue_category']) &&
-                $options['filter']['issue_category'] != '' &&
-                $options['filter']['issue_category'] != self::ISSUE_CATEGORY_ALL
-            ) {
-                // Case for AbstractRevisionFeature
-                if (is_array($options['filter']['issue_category'])) {
-                    $placeholders = implode(', ', array_map(function ($id) {
-                        return ':issue_category_' . $id;
-                    }, $options['filter']['issue_category']));
-
-                    $options_conditions_query .= " AND e.id_category IN ( $placeholders ) ";
-
-                    foreach ($options['filter']['issue_category'] as $id_category) {
-                        $options_conditions_values['issue_category_' . $id_category] = $id_category;
-                    }
-                } else {
-                    $options_conditions_query .= " AND e.id_category = :id_category ";
-                    $options_conditions_values['id_category'] = $options['filter']['issue_category'];
-                }
-            } elseif (
-                isset($options['filter']['issue_category']) &&
-                $options['filter']['issue_category'] == self::ISSUE_CATEGORY_ALL
-            ) {
+            if ($issueCategory === self::ISSUE_CATEGORY_ALL) {
                 $options_conditions_query .= " AND e.id_category IS NOT NULL ";
+            } elseif (is_array($issueCategory)) {
+                // Case for AbstractRevisionFeature: a parent category expanded to its subcategories,
+                // or several categories picked in the filter.
+                $options_conditions_query .= " AND e.id_category IN ( " . self::bindList('issue_category', $issueCategory, $options_conditions_values) . " ) ";
+            } elseif ($issueCategory !== null) {
+                $options_conditions_query .= " AND e.id_category = :id_category ";
+                $options_conditions_values['id_category'] = $issueCategory;
             }
 
-
-            if (isset($options['filter']['severity']) && $options['filter']['severity'] != '') {
-                $options_conditions_query .= " AND e.severity = :severity ";
-                $options_conditions_values['severity'] = $options['filter']['severity'];
+            if (!empty($severities)) {
+                $options_conditions_query .= " AND e.severity IN ( " . self::bindList('severity', $severities, $options_conditions_values) . " ) ";
             }
         }
 
@@ -284,6 +326,10 @@ class SegmentDao extends AbstractDao
             $options_conditions_values['id_segment'] = $options['filter']['id_segment'];
         }
 
+        // A LIMIT without an ORDER BY lets MySQL pick any rows: with the qa_entries join it did not
+        // return the lowest ids, and the next page, which starts after the highest id returned,
+        // skipped the ones left out. Each half reading forward is ordered ascending, as the
+        // backward halves already are descending.
         $queryAfter = "
                 SELECT * FROM (
                     (SELECT distinct(s.id) AS __sid
@@ -297,9 +343,11 @@ class SegmentDao extends AbstractDao
                         AND s.id > :ref_segment
                         AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
                         %s
+                    ORDER BY __sid ASC
                     LIMIT %u)
                     $union_ice
-                ) AS TT1";
+                ) AS TT1
+                ORDER BY __sid ASC";
 
         $queryBefore = "
                 SELECT * FROM (
@@ -336,6 +384,7 @@ class SegmentDao extends AbstractDao
                             AND s.show_in_cattool = 1
                             AND s.id >= :ref_segment
                             %s
+                        ORDER BY __sid ASC
                         LIMIT %u )
                         $union_ice
                   ) AS TT1

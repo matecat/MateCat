@@ -308,6 +308,103 @@ class SegmentDaoTest extends AbstractTest
         $this->assertSame([111], $result);
     }
 
+    /**
+     * Run getSegmentsIdForQR against a connection that records the prepared SQL and the bindings.
+     *
+     * @param array<string, mixed> $filter
+     *
+     * @return array{sql: string, params: array<string, mixed>}
+     * @throws Exception
+     */
+    private function captureQrQuery(array $filter, string $where = 'after'): array
+    {
+        $captured = ['sql' => '', 'params' => []];
+
+        $stmt = $this->createStub(PDOStatement::class);
+        $stmt->method('execute')->willReturnCallback(function (?array $params = null) use (&$captured): bool {
+            $captured['params'] = $params ?? [];
+
+            return true;
+        });
+        $stmt->method('fetchAll')->willReturn([]);
+
+        $pdo = $this->createStub(PDO::class);
+        $pdo->method('prepare')->willReturnCallback(function (string $sql) use (&$captured, $stmt): PDOStatement {
+            $captured['sql'] = $sql;
+
+            return $stmt;
+        });
+
+        $db = $this->createStub(IDatabase::class);
+        $db->method('getConnection')->willReturn($pdo);
+
+        (new SegmentDao($db))->getSegmentsIdForQR($this->makeJobStruct(), 10, 100, $where, ['filter' => $filter]);
+
+        return $captured;
+    }
+
+    public function testGetSegmentsIdForQRBindsEachSeverityToAPositionalPlaceholder(): void
+    {
+        $q = $this->captureQrQuery(['severity' => ['Minor', 'Très grave', 'Minor', '']]);
+
+        $this->assertStringContainsString('e.severity IN ( :severity_0, :severity_1 )', $q['sql']);
+        $this->assertStringContainsString('LEFT JOIN qa_entries e', $q['sql']);
+        $this->assertSame('Minor', $q['params']['severity_0']);
+        $this->assertSame('Très grave', $q['params']['severity_1']);
+        $this->assertArrayNotHasKey('severity_2', $q['params']);
+    }
+
+    public function testGetSegmentsIdForQRKeepsTheStringSeverityForm(): void
+    {
+        $q = $this->captureQrQuery(['severity' => 'major']);
+
+        $this->assertStringContainsString('e.severity IN ( :severity_0 )', $q['sql']);
+        $this->assertSame('major', $q['params']['severity_0']);
+    }
+
+    public function testGetSegmentsIdForQRWithEmptySeverityListSkipsTheJoin(): void
+    {
+        $q = $this->captureQrQuery(['severity' => ['', null]]);
+
+        $this->assertStringNotContainsString('qa_entries e', $q['sql']);
+        $this->assertStringNotContainsString('e.severity', $q['sql']);
+    }
+
+    public function testGetSegmentsIdForQRNamesCategoryPlaceholdersByPositionNotValue(): void
+    {
+        $q = $this->captureQrQuery(['issue_category' => ['316', '1,2']]);
+
+        $this->assertStringContainsString('e.id_category IN ( :issue_category_0, :issue_category_1 )', $q['sql']);
+        $this->assertSame('316', $q['params']['issue_category_0']);
+        $this->assertSame('1,2', $q['params']['issue_category_1']);
+    }
+
+    public function testGetSegmentsIdForQRCategoryListWithAllMeansAnyCategory(): void
+    {
+        $q = $this->captureQrQuery(['issue_category' => ['all', '316']]);
+
+        $this->assertStringContainsString('e.id_category IS NOT NULL', $q['sql']);
+        $this->assertStringNotContainsString('e.id_category IN', $q['sql']);
+    }
+
+    public function testGetSegmentsIdForQRCenterRepeatsTheSeverityConditionInBothHalves(): void
+    {
+        $q = $this->captureQrQuery(['severity' => ['minor', 'major']], 'center');
+
+        $this->assertSame(2, substr_count($q['sql'], 'e.severity IN ( :severity_0, :severity_1 )'));
+    }
+
+    public function testGetSegmentsIdForQROrdersEveryLimitedForwardRead(): void
+    {
+        $after = $this->captureQrQuery(['severity' => ['minor']]);
+        $this->assertMatchesRegularExpression('/ORDER BY __sid ASC\s+LIMIT 10\)/', $after['sql']);
+        $this->assertMatchesRegularExpression('/\) AS TT1\s+ORDER BY __sid ASC\s*$/', $after['sql']);
+
+        $center = $this->captureQrQuery(['severity' => ['minor']], 'center');
+        $this->assertMatchesRegularExpression('/ORDER BY __sid ASC\s+LIMIT 10 \)/', $center['sql']);
+        $this->assertMatchesRegularExpression('/ORDER BY __sid DESC\s+LIMIT 10\s/', $center['sql']);
+    }
+
     public function testGetSegmentsIdForQRWithIssueCategoryString(): void
     {
         $job = $this->makeJobStruct();
