@@ -370,4 +370,14 @@ describe('EmailsBadge additional behaviors', () => {
     )
     expect(screen.getByText('not-an-email')).toBeInTheDocument()
   })
+
+  it('renders the chip remove icon at a tappable size', () => {
+    render(
+      <EmailsBadge name="invite" value={['a@mail.com']} onChange={() => {}} />,
+    )
+    const removeButton = screen.getByTestId('email-badge-tag-remove')
+    const icon = removeButton.querySelector('svg')
+    expect(icon).toHaveAttribute('width', '14')
+    expect(icon).toHaveAttribute('height', '14')
+  })
 })
