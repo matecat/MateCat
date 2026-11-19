@@ -86,6 +86,7 @@
       background: unset;
       outline: none !important;
       border: none !important;
+      padding-left: 0 !important;
     }
 
     .reset_button {
@@ -114,7 +115,7 @@
   }
 
   .members-list {
-    height: 200px;
+    height: 170px;
     overflow-y: auto;
     padding-right: 5px;
 

@@ -19,7 +19,7 @@ export const KeysSelect = ({
   return (
     <Select
       className={`glossary-select ${className}`}
-      dropdownClassName="glossary-domain-subdomain-dropdown"
+      dropdownClassName="glossary-keys-dropdown"
       isPortalDropdown={true}
       name="glossary-term-tm"
       label="Termbase*"

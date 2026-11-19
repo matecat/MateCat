@@ -6,6 +6,7 @@ import {
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../../../../common/Button/Button'
+import {Radio, RADIO_SIZE} from '../../../../common/Radio/Radio'
 
 export const DeepLGlossaryRow = ({
   engineId,
@@ -21,8 +22,8 @@ export const DeepLGlossaryRow = ({
     setIsActive(row.isActive)
   }, [row.isActive])
 
-  const onChangeIsActive = (e) => {
-    const isActive = e.currentTarget.checked
+  const onChangeIsActive = (checked) => {
+    const isActive = checked
     setRows((prevState) =>
       prevState.map((glossary) => ({
         ...glossary,
@@ -34,13 +35,13 @@ export const DeepLGlossaryRow = ({
   return (
     <Fragment>
       <div>
-        <input
+        <Radio
           name="active"
+          size={RADIO_SIZE.SMALL}
           checked={isActive}
           onChange={onChangeIsActive}
-          type="radio"
           disabled={isWaitingResult}
-          data-testid={`deeplglossary-active-${row.id}`}
+          testId={`deeplglossary-active-${row.id}`}
         />
       </div>
       <div className="glossary-row-name">
