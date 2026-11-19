@@ -8,7 +8,7 @@ jest.mock('../../../../actions/ModalsActions')
 jest.mock('../../../../actions/CreateProjectActions')
 
 import React, {useState} from 'react'
-import {act, render, screen} from '@testing-library/react'
+import {act, render, screen, within} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import {TMKeyRow} from './TMKeyRow'
 import {SPECIAL_ROWS_ID} from './TranslationMemoryGlossaryTab'
@@ -270,6 +270,75 @@ test('delete: with no other templates involved, expands the DeleteResource row d
   expect(
     screen.getByText(/also linked to your ModernMT account/),
   ).toBeInTheDocument()
+})
+
+test('delete: checking the ModernMT removal checkbox requests removal from ModernMT', async () => {
+  const user = userEvent.setup()
+  const row = baseRow()
+  deleteTmKey.mockResolvedValue({})
+  getTmKeyEnginesInfo.mockResolvedValue(['MMT'])
+
+  render(<Wrapper row={row} />)
+
+  await act(async () => user.click(screen.getByTestId('tm-row-menu')))
+  await act(async () => user.click(screen.getByTestId('delete-resource')))
+
+  const footerContainer = screen
+    .getByText(/also linked to your ModernMT account/)
+    .closest('.tm-row-delete-remove-from-content')
+  await act(async () =>
+    user.click(within(footerContainer).getByRole('checkbox')),
+  )
+  await act(async () => user.click(screen.getByText('Confirm')))
+
+  expect(deleteTmKey).toHaveBeenCalledWith({key: row.key, removeFrom: 'MMT'})
+})
+
+test('delete: checking the Lara removal checkbox requests removal from Lara', async () => {
+  const user = userEvent.setup()
+  const row = baseRow()
+  deleteTmKey.mockResolvedValue({})
+  getTmKeyEnginesInfo.mockResolvedValue(['Lara'])
+
+  render(<Wrapper row={row} />)
+
+  await act(async () => user.click(screen.getByTestId('tm-row-menu')))
+  await act(async () => user.click(screen.getByTestId('delete-resource')))
+
+  const footerContainer = screen
+    .getByText(/This resource is also linked to your Lara account/)
+    .closest('.tm-row-delete-remove-from-content')
+  await act(async () =>
+    user.click(within(footerContainer).getByRole('checkbox')),
+  )
+  await act(async () => user.click(screen.getByText('Confirm')))
+
+  expect(deleteTmKey).toHaveBeenCalledWith({key: row.key, removeFrom: 'Lara'})
+})
+
+test('delete: when both MMT and Lara are linked, checking both checkboxes requests removal from both', async () => {
+  const user = userEvent.setup()
+  const row = baseRow()
+  deleteTmKey.mockResolvedValue({})
+  getTmKeyEnginesInfo.mockResolvedValue(['MMT', 'Lara'])
+
+  render(<Wrapper row={row} />)
+
+  await act(async () => user.click(screen.getByTestId('tm-row-menu')))
+  await act(async () => user.click(screen.getByTestId('delete-resource')))
+
+  const footerContainer = screen
+    .getByText(/also linked to your ModernMT and Lara accounts/)
+    .closest('.tm-row-delete-remove-from-content')
+  const checkboxes = within(footerContainer).getAllByRole('checkbox')
+  await act(async () => user.click(checkboxes[0]))
+  await act(async () => user.click(checkboxes[1]))
+  await act(async () => user.click(screen.getByText('Confirm')))
+
+  expect(deleteTmKey).toHaveBeenCalledWith({
+    key: row.key,
+    removeFrom: 'Lara,MMT',
+  })
 })
 
 test('delete: with other templates involved, opens the confirmation modal listing them', async () => {
