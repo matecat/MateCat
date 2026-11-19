@@ -29,6 +29,12 @@ const successData = {
 
 afterEach(() => jest.clearAllMocks())
 
+// The chunk word-count inputs share `type="text"` with the chunk-count
+// stepper's own input, so `getAllByRole('textbox')` can no longer assume
+// index 0 is the first chunk — scope to the chunk-specific class instead.
+const getChunkInputs = (container) =>
+  container.querySelectorAll('.input-small')
+
 test('shows a loader before the split data resolves', () => {
   checkSplitRequest.mockReturnValue(new Promise(() => {}))
   const {container} = render(
@@ -113,7 +119,7 @@ test('editing a chunk word count shows the words-exceeding difference and re-ena
 
   await waitFor(() => screen.getByText('Confirm'))
 
-  const inputs = screen.getAllByRole('textbox')
+  const inputs = getChunkInputs(container)
   fireEvent.change(inputs[0], {target: {value: '80'}})
 
   expect(screen.getByText('Check split')).toBeInTheDocument()
@@ -121,29 +127,47 @@ test('editing a chunk word count shows the words-exceeding difference and re-ena
   expect(container.querySelector('.diff-w')).toHaveTextContent('30')
 })
 
-test('changing the split-number select recalculates the chunk count', async () => {
-  checkSplitRequest.mockResolvedValue({data: successData})
-  const {container} = render(
-    <SplitJobModal job={baseJob} project={baseProject} callback={jest.fn()} />,
-  )
-
-  await waitFor(() => screen.getByText('Confirm'))
-
-  const select = container.querySelector('select.splitselect')
-  fireEvent.change(select, {target: {value: '4'}})
-
-  expect(screen.getByText('Chunk 4')).toBeInTheDocument()
-  expect(screen.getByText('Check split')).toBeInTheDocument()
-})
-
-test('clicking "Check split" re-issues the split request', async () => {
+test('changing the chunk count via the stepper recalculates the chunks', async () => {
   checkSplitRequest.mockResolvedValue({data: successData})
   render(
     <SplitJobModal job={baseJob} project={baseProject} callback={jest.fn()} />,
   )
 
   await waitFor(() => screen.getByText('Confirm'))
-  const inputs = screen.getAllByRole('textbox')
+
+  const stepperInput = screen.getByDisplayValue('2')
+  fireEvent.change(stepperInput, {target: {value: '4'}})
+  fireEvent.blur(stepperInput)
+
+  expect(screen.getByText('Chunk 4')).toBeInTheDocument()
+  expect(screen.getByText('Check split')).toBeInTheDocument()
+})
+
+test('typing a new chunk count without blurring shows the chunk but does not recheck the split', async () => {
+  checkSplitRequest.mockResolvedValue({data: successData})
+  render(
+    <SplitJobModal job={baseJob} project={baseProject} callback={jest.fn()} />,
+  )
+
+  await waitFor(() => screen.getByText('Confirm'))
+
+  const stepperInput = screen.getByDisplayValue('2')
+  fireEvent.change(stepperInput, {target: {value: '4'}})
+
+  // The chunk count label follows the typed value live, but the word-count
+  // split itself is only recalculated once the value is committed (blur).
+  expect(screen.getByText('Chunk 4')).toBeInTheDocument()
+  expect(screen.getByText('Confirm')).toBeInTheDocument()
+})
+
+test('clicking "Check split" re-issues the split request', async () => {
+  checkSplitRequest.mockResolvedValue({data: successData})
+  const {container} = render(
+    <SplitJobModal job={baseJob} project={baseProject} callback={jest.fn()} />,
+  )
+
+  await waitFor(() => screen.getByText('Confirm'))
+  const inputs = getChunkInputs(container)
   fireEvent.change(inputs[0], {target: {value: '80'}})
 
   checkSplitRequest.mockClear()
@@ -155,12 +179,12 @@ test('clicking "Check split" re-issues the split request', async () => {
 
 test('shows an error when "Check split" fails', async () => {
   checkSplitRequest.mockResolvedValue({data: successData})
-  render(
+  const {container} = render(
     <SplitJobModal job={baseJob} project={baseProject} callback={jest.fn()} />,
   )
 
   await waitFor(() => screen.getByText('Confirm'))
-  const inputs = screen.getAllByRole('textbox')
+  const inputs = getChunkInputs(container)
   fireEvent.change(inputs[0], {target: {value: '80'}})
 
   checkSplitRequest.mockReset()
