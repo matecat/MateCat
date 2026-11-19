@@ -229,42 +229,52 @@ class Session
         foreach ($this->gDriveSession[self::FILE_LIST] as $fileId => $file) {
             $fileName = $file[self::FILE_NAME];
 
-            if (AbstractFilesStorage::isOnS3()) {
-                $path = $this->getGDriveFilePathForS3($file);
-                $s3Client = S3FilesStorage::getStaticS3Client();
-                $s3 = $s3Client->getItem([
-                        'bucket' => S3FilesStorage::getFilesStorageBucket(),
-                        'key' => $path
-                    ]
-                );
+            // the storage lists the cache package: the stored name is not the file name
+            $path = $this->files_storage->getOriginalFromCache(
+                $file[self::FILE_HASH]['cacheHash'],
+                (string)$this->session->get(Constants::SESSION_ACTUAL_SOURCE_LANG)
+            );
 
-                $response['files'][] = [
-                    'fileId' => $fileId,
-                    'fileName' => $fileName,
-                    'fileSize' => $s3['ContentLength'],
-                    'fileExtension' => AppConfig::$MIME_TYPES[$s3['ContentType']][0]
-                ];
-            } else {
-                $path = $this->getGDriveFilePath($file);
-                if (file_exists($path) !== false) {
-                    $fileSize = filesize($path);
-
-                    $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
-
-                    $response['files'][] = [
-                        'fileId' => $fileId,
-                        'fileName' => $fileName,
-                        'fileSize' => $fileSize,
-                        'fileExtension' => $fileExtension
-                    ];
-                } else {
-                    unset($this->gDriveSession[self::FILE_LIST][$fileId]);
-                    $this->persistGDriveSession();
-                }
+            if ($path === false) {
+                $this->forgetMissingFile($fileId);
+                continue;
             }
+
+            if ($this->files_storage instanceof S3FilesStorage) {
+                try {
+                    $s3 = $this->files_storage->getItem($path);
+                } catch (Exception) {
+                    // with the S3 cache on, the key comes from an index that can still list an object already gone:
+                    // treat it as a missing file instead of failing the whole list
+                    $this->forgetMissingFile($fileId);
+                    continue;
+                }
+
+                $fileSize = $s3['ContentLength'];
+                $fileExtension = AppConfig::$MIME_TYPES[$s3['ContentType']][0] ?? pathinfo($fileName, PATHINFO_EXTENSION);
+            } else {
+                $fileSize = filesize($path);
+                $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
+            }
+
+            $response['files'][] = [
+                'fileId' => $fileId,
+                'fileName' => $fileName,
+                'fileSize' => $fileSize,
+                'fileExtension' => $fileExtension
+            ];
         }
 
         return $response;
+    }
+
+    /**
+     * Drops a file the storage no longer holds from the session, and persists the session.
+     */
+    private function forgetMissingFile(string $fileId): void
+    {
+        unset($this->gDriveSession[self::FILE_LIST][$fileId]);
+        $this->persistGDriveSession();
     }
 
     /**
@@ -531,32 +541,6 @@ class Session
         $cacheTree = implode(DIRECTORY_SEPARATOR, $cacheTreeAr);
 
         return AbstractFilesStorage::getStorageCachePath() . DIRECTORY_SEPARATOR . $cacheTree . AbstractFilesStorage::OBJECTS_SAFE_DELIMITER . $sourceLang;
-    }
-
-    /**
-     * @param array<string, mixed> $file
-     *
-     * @return string
-     */
-    private function getGDriveFilePath(array $file): string
-    {
-        $fileName = $file[self::FILE_NAME];
-        $cacheFileDir = $this->getCacheFileDir($file);
-
-        return $cacheFileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . $fileName;
-    }
-
-    /**
-     * @param array<string, mixed> $file
-     *
-     * @return string
-     */
-    private function getGDriveFilePathForS3(array $file): string
-    {
-        $fileName = $file[self::FILE_NAME];
-        $cacheFileDir = $this->getCacheFileDir($file);
-
-        return $cacheFileDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . $fileName;
     }
 
     /**

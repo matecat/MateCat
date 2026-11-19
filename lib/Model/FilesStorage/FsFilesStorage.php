@@ -166,7 +166,7 @@ class FsFilesStorage extends AbstractFilesStorage
         $path = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . self::OBJECTS_SAFE_DELIMITER . $lang . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig";
 
         //return file
-        $filePath = $this->getSingleFileInPath($path);
+        $filePath = $this->getSingleFileInPath($path, $hash . '.');
 
         //an unconverted xliff is never stored in orig dir; look for it in xliff dir
         if (!$filePath) {
@@ -190,7 +190,7 @@ class FsFilesStorage extends AbstractFilesStorage
         $path = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . self::OBJECTS_SAFE_DELIMITER . $lang . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "work";
 
         //return file
-        return $this->getSingleFileInPath($path);
+        return $this->getSingleFileInPath($path, $hash . '.');
     }
 
     /**
@@ -239,7 +239,9 @@ class FsFilesStorage extends AbstractFilesStorage
         $origDir = $cacheDir . DIRECTORY_SEPARATOR . "orig";
         $this->logger->debug($origDir);
 
-        $origFilePath = $this->getSingleFileInPath($origDir);
+        // a package written before the storage names were hashed can hold a legacy file next to the hashed one:
+        // take the hashed one, which is the file the segments are read from
+        $origFilePath = $this->getSingleFileInPath($origDir, $hash . '.');
         if (is_string($origFilePath) && $this->filesystem->isFile($origFilePath)) {
             $tmpOrigFileName = !empty($newFileName) ? $newFileName : $origFilePath;
             $res &= $this->filesystem->link($origFilePath, $fileDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . static::basename_fix($tmpOrigFileName));
@@ -251,7 +253,7 @@ class FsFilesStorage extends AbstractFilesStorage
          */
         $d = $cacheDir . DIRECTORY_SEPARATOR . "work";
         $this->logger->debug($d);
-        $convertedFilePath = $this->getSingleFileInPath($d);
+        $convertedFilePath = $this->getSingleFileInPath($d, $hash . '.');
 
         if (!is_string($convertedFilePath)) {
             throw new UnexpectedValueException('Internal error: Failed to create/copy the file on disk from cache.', -13);
@@ -599,9 +601,15 @@ class FsFilesStorage extends AbstractFilesStorage
             throw new InvalidArgumentException("Invalid date string: '$projectDate'");
         }
 
-        $datePath = $date->format('Ymd');
+        $zipDir = $this->zipDir . DIRECTORY_SEPARATOR . $date->format('Ymd') . DIRECTORY_SEPARATOR . $projectID;
 
-        return $this->zipDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $projectID . DIRECTORY_SEPARATOR . $zipName;
+        $storedPath = $zipDir . DIRECTORY_SEPARATOR . static::getStorageFileName($zipName);
+        if ($this->filesystem->fileExists($storedPath)) {
+            return $storedPath;
+        }
+
+        // a zip stored before the names were hashed keeps its original name
+        return $zipDir . DIRECTORY_SEPARATOR . $zipName;
     }
 
     /**

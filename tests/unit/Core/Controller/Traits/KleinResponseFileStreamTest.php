@@ -163,6 +163,18 @@ class KleinResponseFileStreamTest extends AbstractTest
         );
     }
 
+    /**
+     * A name outside ASCII reaches the client whole through `filename*`, with an ASCII copy in `filename`.
+     */
+    #[Test]
+    public function streamFileFromPointer_sends_a_non_ascii_name_in_filename_star(): void
+    {
+        $this->assertSame(
+            "Content-Disposition: attachment; filename=\"_______.zip\"; filename*=UTF-8''" . rawurlencode('спасибо.zip'),
+            $this->contentDispositionFor('спасибо.zip')
+        );
+    }
+
     private function contentDispositionFor(string $filename): ?string
     {
         $streamer = new RecordingHeadersFileStream(new Response());

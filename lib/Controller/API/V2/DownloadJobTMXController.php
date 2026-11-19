@@ -16,6 +16,7 @@ use Model\Projects\ProjectDao;
 use SplTempFileObject;
 use TypeError;
 use Utils\TMS\TMSService;
+use Utils\Tools\ContentDisposition;
 use Utils\Tools\Utils;
 
 class DownloadJobTMXController extends AbstractDownloadController
@@ -153,8 +154,7 @@ class DownloadJobTMXController extends AbstractDownloadController
         // the same helper every other download in this hierarchy uses. A quote in the project name
         // would otherwise close the quoted filename and let the rest of it be read as further
         // disposition parameters, and a CR would end the header and start one of its own.
-        $safeFilename = self::sanitizeContentDispositionFilename($this->fileName);
-        header("Content-Disposition: attachment; filename=\"$safeFilename\"");
+        header("Content-Disposition: " . ContentDisposition::build($this->fileName));
         header("Expires: 0");
         header("Connection: close");
 
