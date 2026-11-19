@@ -4,10 +4,12 @@ import {
   getXliffRegExpression,
   tagSignatures,
 } from '../../utils/segmentText/tagModel'
+import {getGEquivText} from '../../utils/segmentText/compressibleTagUtils'
 import {
-  createTagNumberer,
-  getGEquivText,
-} from '../../utils/segmentText/compressibleTagUtils'
+  numberTagsInDocumentOrder,
+  pairClosingTags,
+  replaceTagMatches,
+} from '../../utils/segmentText/tagScan'
 
 /**
  * Turns a cattool segment string (layer 2: XLIFF tags as markup, text
@@ -23,8 +25,6 @@ import {
  * like the span it stands for, so every later regex sees the same context.
  */
 
-// The signatures whose matches can be compressible (see compressibleTagUtils).
-const NUMBERED_TAG_KEYS = ['ph', 'g', 'gCl']
 const ZWSP = '​'
 const MARK_OPEN = ''
 const MARK_CLOSE = ''
@@ -87,32 +87,6 @@ const escapeAngleBrackets = (text) =>
 const styleFor = (signature, isRtl) =>
   isRtl && signature.styleRTL ? signature.styleRTL : signature.style
 
-// transformTagsToHtml replaces one signature at a time; numbering must follow
-// document order across ph, g and </g>, so it is computed up front.
-const numberTagsInDocumentOrder = (text) => {
-  const found = []
-  NUMBERED_TAG_KEYS.forEach((key) => {
-    const signature = tagSignatures[key]
-    if (!signature) return
-    const {regex} = signature
-    const globalRegex = new RegExp(
-      regex.source,
-      regex.flags.includes('g') ? regex.flags : regex.flags + 'g',
-    )
-    let match
-    while ((match = globalRegex.exec(text)) !== null) {
-      found.push({key, offset: match.index, encodedText: match[0]})
-    }
-  })
-  found.sort((a, b) => a.offset - b.offset)
-  const numberTag = createTagNumberer()
-  const queues = Object.fromEntries(NUMBERED_TAG_KEYS.map((key) => [key, []]))
-  found.forEach(({key, encodedText}) =>
-    queues[key].push(numberTag(encodedText)),
-  )
-  return queues
-}
-
 // Replace every tag with a marker wrapping its (HTML) content.
 const markTags = (segment, isRtl) => {
   const numbers = numberTagsInDocumentOrder(segment)
@@ -145,36 +119,42 @@ const markTags = (segment, isRtl) => {
       signature
     const className = 'tag small ' + styleFor(signature, isRtl)
     if (placeholderRegex) {
-      const globalRegex = new RegExp(
-        placeholderRegex.source,
-        placeholderRegex.flags + 'g',
+      text = replaceTagMatches(
+        text,
+        key,
+        ({0: match, 1: captured}) => {
+          const tagText = decodeNeeded
+            ? escapeAngleBrackets(Base64.decode(captured))
+            : selfClosing
+              ? captured
+              : match
+          const numbered = numbers[key]?.shift()
+          if (numbered) {
+            return wrapNumbered(
+              key,
+              match,
+              numbered,
+              signature.type === 'g'
+                ? escapeAngleBrackets(getGEquivText(match))
+                : tagText,
+            )
+          }
+          return wrap({name: key, className, raw: match, id: captured}, tagText)
+        },
+        {display: true},
       )
-      text = text.replace(globalRegex, (match, captured) => {
-        const tagText = decodeNeeded
-          ? escapeAngleBrackets(Base64.decode(captured))
-          : selfClosing
-            ? captured
-            : match
-        const numbered = numbers[key]?.shift()
-        if (numbered) {
-          return wrapNumbered(
-            key,
-            match,
-            numbered,
-            signature.type === 'g'
-              ? escapeAngleBrackets(getGEquivText(match))
-              : tagText,
-          )
-        }
-        return wrap({name: key, className, raw: match, id: captured}, tagText)
-      })
     } else if (regex) {
-      text = text.replace(new RegExp(regex), (match) => {
-        const tagText = placeholder ? placeholder : match
-        const numbered = numbers[key]?.shift()
-        if (numbered) return wrapNumbered(key, match, numbered, tagText)
-        return wrap({name: key, className, raw: match}, tagText)
-      })
+      text = replaceTagMatches(
+        text,
+        key,
+        ({0: match}) => {
+          const tagText = placeholder ? placeholder : match
+          const numbered = numbers[key]?.shift()
+          if (numbered) return wrapNumbered(key, match, numbered, tagText)
+          return wrap({name: key, className, raw: match}, tagText)
+        },
+        {display: true},
+      )
     }
   }
   return {text, tags}
@@ -215,39 +195,29 @@ const walkTags = (nodes, visit) =>
   })
 
 /**
- * matchTag at the end of transformTagsToHtml: a plain `<g>` shows its id, and
+ * showGTagIds at the end of transformTagsToHtml: a plain `<g>` shows its id, and
  * a plain `</g>` shows the id of the nearest preceding `<g>` still open, or
  * `?` when there is none. Numbered g tags no longer carry markup and are not
  * part of the pairing.
  */
 const matchGTags = (nodes) => {
-  const openings = []
-  const closings = []
+  const gTags = []
   walkTags(nodes, (node) => {
-    if (node.index !== undefined) return
-    if (node.name === 'g') openings.push(node)
-    else if (node.name === 'gCl') closings.push(node)
+    if (node.index === undefined && (node.name === 'g' || node.name === 'gCl'))
+      gTags.push(node)
   })
-  if (!openings.length && !closings.length) return
-  const order = new Map()
-  let position = 0
-  walkTags(nodes, (node) => order.set(node, position++))
-  const closed = new Set()
-  closings.forEach((closing) => {
-    let id = '?'
-    for (let i = openings.length - 1; i >= 0; i--) {
-      const opening = openings[i]
-      if (order.get(opening) < order.get(closing) && !closed.has(opening)) {
-        closed.add(opening)
-        id = opening.id
-        break
-      }
-    }
-    closing.children = [{html: ZWSP + id + ZWSP}]
+  pairClosingTags(
+    gTags,
+    (node) => node.name === 'g',
+    (node) => node.name === 'gCl',
+  ).forEach((opening, closing) => {
+    closing.children = [{html: ZWSP + (opening ? opening.id : '?') + ZWSP}]
   })
-  openings.forEach((opening) => {
-    opening.children = [{html: ZWSP + opening.id + ZWSP}]
-  })
+  gTags
+    .filter((node) => node.name === 'g')
+    .forEach((opening) => {
+      opening.children = [{html: ZWSP + opening.id + ZWSP}]
+    })
 }
 
 const flattenText = (tokens) =>

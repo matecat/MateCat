@@ -1,6 +1,5 @@
 import {
   tagSignatures,
-  TagStruct,
   getErrorCheckTag,
   getNoLexiqaTag,
   getNoGlossaryTag,
@@ -24,34 +23,6 @@ import {decodeHtmlEntities} from './tagUtils'
 
 afterEach(() => {
   setTagSignatureMiddleware('space', undefined)
-})
-
-test('TagStruct sets default fields from its constructor arguments', () => {
-  const tag = new TagStruct(5, 3, 'g', 'g')
-
-  expect(tag.offset).toBe(5)
-  expect(tag.length).toBe(3)
-  expect(tag.type).toBe('g')
-  expect(tag.mutability).toBe('IMMUTABLE')
-  expect(tag.data).toEqual({
-    id: null,
-    name: 'g',
-    encodedText: null,
-    decodedText: null,
-    openTagId: null,
-    closeTagId: null,
-    placeholder: null,
-    originalOffset: -1,
-  })
-})
-
-test('TagStruct falls back to its default arguments', () => {
-  const tag = new TagStruct()
-
-  expect(tag.offset).toBe(-1)
-  expect(tag.length).toBe(0)
-  expect(tag.type).toBeNull()
-  expect(tag.data.name).toBeNull()
 })
 
 test('getSplitBlockTag lists the line-break tags', () => {

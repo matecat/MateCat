@@ -36,37 +36,14 @@ const restoreTempTags = (tags, text) => {
   )
 }
 import {isUndefined} from 'lodash'
-import matchTagStructure from './matchTag'
-import {createTagNumberer, getGEquivText} from './compressibleTagUtils'
-
-// The signatures whose matches can be compressible (see compressibleTagUtils).
-const NUMBERED_TAG_KEYS = ['ph', 'g', 'gCl']
-
-// transformTagsToHtml replaces one signature at a time, so a single numberer fed
-// from its callbacks would number every ph before any g. Number them here in
-// document order instead, and queue each signature's results in that order for
-// its own replace to consume.
-const numberTagsInDocumentOrder = (text) => {
-  const found = []
-  NUMBERED_TAG_KEYS.forEach((key) => {
-    const {regex} = tagSignatures[key]
-    const globalRegex = new RegExp(
-      regex.source,
-      regex.flags.includes('g') ? regex.flags : regex.flags + 'g',
-    )
-    let match
-    while ((match = globalRegex.exec(text)) !== null) {
-      found.push({key, offset: match.index, encodedText: match[0]})
-    }
-  })
-  found.sort((a, b) => a.offset - b.offset)
-  const numberTag = createTagNumberer()
-  const queues = Object.fromEntries(NUMBERED_TAG_KEYS.map((key) => [key, []]))
-  found.forEach(({key, encodedText}) =>
-    queues[key].push(numberTag(encodedText)),
-  )
-  return queues
-}
+import {getGEquivText} from './compressibleTagUtils'
+import {
+  numberTagsInDocumentOrder,
+  pairClosingTags,
+  replaceTagMatches,
+  findTagMatches,
+  scanPairedTags,
+} from './tagScan'
 
 // A closing tag shows only its number (no content); an open tag shows its
 // number followed by its content. Every numbered tag takes the ph style,
@@ -112,59 +89,60 @@ export const transformTagsToHtml = (text, isRtl = 0) => {
           type,
         } = tagSignatures[key]
         if (placeholderRegex) {
-          let globalRegex = new RegExp(
-            placeholderRegex.source,
-            placeholderRegex.flags + 'g',
+          text = replaceTagMatches(
+            text,
+            key,
+            ({0: match, 1: captured}) => {
+              let tagText = decodeNeeded
+                ? escapeAngleBrackets(Base64.decode(captured))
+                : selfClosing
+                  ? captured
+                  : match
+              // Only compressible tags are numbered; a plain <g> keeps its raw
+              // markup here and gets its id from showGTagIds below.
+              const numbered = numbers[key]?.shift()
+              if (numbered) {
+                return numberedTagToHtml(
+                  isRtl,
+                  numbered,
+                  type === 'g'
+                    ? escapeAngleBrackets(getGEquivText(match))
+                    : tagText,
+                )
+              }
+              return (
+                '<span contenteditable="false" class="tag small ' +
+                (isRtl && styleRTL ? styleRTL : style) +
+                '">' +
+                tagText +
+                '</span>'
+              )
+            },
+            {display: true},
           )
-          text = text.replace(globalRegex, (match, text) => {
-            let tagText = decodeNeeded
-              ? escapeAngleBrackets(Base64.decode(text))
-              : selfClosing
-                ? text
-                : match
-            // Only compressible tags are numbered; a plain <g> keeps its raw
-            // markup here and gets its id from matchTag below.
-            const numbered = numbers[key]?.shift()
-            if (numbered) {
-              return numberedTagToHtml(
-                isRtl,
-                numbered,
-                type === 'g'
-                  ? escapeAngleBrackets(getGEquivText(match))
-                  : tagText,
-              )
-            }
-            return (
-              '<span contenteditable="false" class="tag small ' +
-              (isRtl && styleRTL ? styleRTL : style) +
-              '">' +
-              tagText +
-              '</span>'
-            )
-          })
         } else if (regex) {
-          let globalRegex = new RegExp(regex)
-          text = text.replace(globalRegex, (match) => {
-            let tagText = placeholder ? placeholder : match
-            const numbered = numbers[key]?.shift()
-            if (numbered) {
-              return numberedTagToHtml(
-                isRtl,
-                numbered,
-                tagText,
+          text = replaceTagMatches(
+            text,
+            key,
+            ({0: match}) => {
+              let tagText = placeholder ? placeholder : match
+              const numbered = numbers[key]?.shift()
+              if (numbered) {
+                return numberedTagToHtml(isRtl, numbered, tagText)
+              }
+              return (
+                '<span contenteditable="false" class="tag small ' +
+                (isRtl && styleRTL ? styleRTL : style) +
+                '">' +
+                tagText +
+                '</span>'
               )
-            }
-            return (
-              '<span contenteditable="false" class="tag small ' +
-              (isRtl && styleRTL ? styleRTL : style) +
-              '">' +
-              tagText +
-              '</span>'
-            )
-          })
+            },
+            {display: true},
+          )
         }
       }
-      text = matchTag(text)
+      text = showGTagIds(text)
     } catch (e) {
       console.error('Error parsing tag in transformTagsToHtml function', e)
     }
@@ -306,7 +284,7 @@ const decodeShrinkCounter = (text, tagsStruct) => {
 }
 
 export const transformTagsToLexiqaText = (text) => {
-  const tagsStruct = matchTagStructure(text).sort((a, b) =>
+  const tagsStruct = scanPairedTags(text).sort((a, b) =>
     a.offset > b.offset ? 1 : -1,
   )
 
@@ -324,26 +302,25 @@ export const transformTagsToLexiqaText = (text) => {
   let rest = textNormalized
   let consumed = 0
   let difference = 0
-  tagsStruct.forEach(({data}) => {
+  tagsStruct.forEach((tag) => {
     const {convertToLexiqaIgnoreAnglesBrackets, lexiqaText, decodeNeeded} =
-      tagSignatures[data.name]
+      tagSignatures[tag.name]
 
-    const offsetStart =
-      data.originalOffset - decodeShrinkBefore(data.originalOffset) - difference
-    const offsetEnd = offsetStart + data.encodedText.length
+    const offsetStart = tag.offset - decodeShrinkBefore(tag.offset) - difference
+    const offsetEnd = offsetStart + tag.encodedText.length
 
     // Must match the text the tag shows in the editor, or transformLexiqaPoints
     // maps the warnings back to the wrong offsets: a <g> and its </g> show the
     // <g>'s equiv-text when it has one, otherwise its id.
-    const placeholderText = isToReplaceForLexiqa(data.name)
+    const placeholderText = isToReplaceForLexiqa(tag.name)
       ? lexiqaText
       : decodeNeeded
-        ? data.decodedText
-        : data.name === 'g' || data.name === 'gCl'
-          ? data.placeholder
-          : data.id !== ''
-            ? data.id
-            : data.placeholder
+        ? tag.decodedText
+        : tag.name === 'g' || tag.name === 'gCl'
+          ? tag.placeholder
+          : tag.id !== ''
+            ? tag.id
+            : tag.placeholder
 
     const shouldIgnoreAngleBrackets = convertToLexiqaIgnoreAnglesBrackets
 
@@ -373,70 +350,34 @@ export const transformTagsToLexiqaText = (text) => {
   return built.join('') + rest.slice(consumed)
 }
 
-// Associate tag of type g with integer id
-const matchTag = (tx) => {
-  const openRegex = tagSignatures['g'].regex
-  const closeRegex = tagSignatures['gCl'].regex
+const ZWSP = String.fromCharCode(parseInt('200B', 16))
+
+// The last step of transformTagsToHtml: a plain <g> left as markup shows its id, a plain </g> the id of the nearest
+// <g> before it still open, or '?' when there is none. The </g> are found again once the <g> are replaced, as the id
+// written in place of a <g> can hold one.
+const showGTagIds = (tx) => {
   try {
-    let openingMatchArr
-    let openings = []
-    while ((openingMatchArr = openRegex.exec(tx)) !== null) {
-      const openingGTag = {}
-      openingGTag.length = openingMatchArr[0].length
-      openingGTag.id = openingMatchArr[1]
-      openingGTag.offset = openingMatchArr.index
-      openings.push(openingGTag)
-    }
-
-    let closingMatchArr
-    let closings = []
-    while ((closingMatchArr = closeRegex.exec(tx)) !== null) {
-      const closingGTag = {}
-      closingGTag.length = closingMatchArr[0].length
-      closingGTag.offset = closingMatchArr.index
-      closings.push(closingGTag)
-    }
-
-    openings.sort((a, b) => {
-      return b.offset - a.offset
-    })
-    closings.sort((a, b) => {
-      return a.offset - b.offset
-    })
-
-    closings.forEach((closingTag) => {
-      let i = 0,
-        notFound = true
-      while (i < openings.length && notFound) {
-        if (closingTag.offset > openings[i].offset && !openings[i].closeTagId) {
-          notFound = !notFound
-          openings[i].closeTagId = true
-          // Closing tag has no ID, so take the one available inside open tag
-          closingTag.id = openings[i].id
-        }
-        i++
-      }
-      // display every orphan closure as '?'
-      if (notFound) closingTag.id = '?'
-    })
-
-    tx = tx.replace(openRegex, function () {
-      return (
-        String.fromCharCode(parseInt('200B', 16)) +
-        openings.pop().id +
-        String.fromCharCode(parseInt('200B', 16))
-      )
-    })
-
-    tx = tx.replace(closeRegex, function () {
-      return (
-        String.fromCharCode(parseInt('200B', 16)) +
-        closings.shift().id +
-        String.fromCharCode(parseInt('200B', 16))
-      )
-    })
+    const gTags = [
+      ...findTagMatches(tx, 'g').map((match) => ({opening: true, match})),
+      ...findTagMatches(tx, 'gCl').map((match) => ({opening: false, match})),
+    ].sort((a, b) => a.match.index - b.match.index)
+    const pairs = pairClosingTags(
+      gTags,
+      (tag) => tag.opening,
+      (tag) => !tag.opening,
+    )
+    const openingIds = gTags
+      .filter((tag) => tag.opening)
+      .map((tag) => tag.match[1])
+    const closingIds = [...pairs.values()].map((opening) =>
+      opening ? opening.match[1] : '?',
+    )
+    tx = replaceTagMatches(tx, 'g', () => ZWSP + openingIds.shift() + ZWSP)
+    if (findTagMatches(tx, 'gCl').length > closingIds.length)
+      throw new Error('More closing g tags than were paired')
+    tx = replaceTagMatches(tx, 'gCl', () => ZWSP + closingIds.shift() + ZWSP)
   } catch (e) {
-    console.error('Error matching tag g in TagUtils.matchTag function')
+    console.error('Error matching tag g in TagUtils.showGTagIds function')
   }
   return tx
 }

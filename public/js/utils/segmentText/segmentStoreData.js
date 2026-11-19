@@ -3,10 +3,8 @@
 // QA warnings and the tag menu rely on these exact values (a tag keeps only the fields they read, see storeTag), and
 // __golden__/segmentStoreData.json pins them, edge cases included. The segment is read once, in order, as text runs,
 // tags and line breaks (piecesOf); every value is built from that list.
-import matchTag from './matchTag'
-import findTagWithRegex from './findTagWithRegex'
-import {getErrorCheckTag, getSplitBlockTag, tagSignatures} from './tagModel'
-import {createTagNumberer} from './compressibleTagUtils'
+import {getErrorCheckTag, getSplitBlockTag} from './tagModel'
+import {numberTags, scanPairedTags, scanTags} from './tagScan'
 import {
   decodeHtmlEntities,
   decodePlaceholdersToPlainText,
@@ -23,19 +21,20 @@ export {formatText}
 
 // Numbers ONLY the compressible tags: the open and close of a pair get the same index, an index inherited from the
 // source tag map is honoured.
-const NUMBERED_TAG_NAMES = ['ph', 'g', 'gCl']
-
 const addIncrementalIndex = (tagRange) => {
-  const numberer = createTagNumberer()
-  return tagRange.map((cur) => {
-    if (!NUMBERED_TAG_NAMES.includes(cur.data.name)) return cur
-    const result = numberer(cur.data.encodedText, cur.data.index)
-    if (!result) return cur
-    return {
-      ...cur,
-      data: {...cur.data, index: result.index, tagRole: result.role},
-    }
-  })
+  const numbers = numberTags(tagRange.map(({data}) => data))
+  return tagRange.map((cur, i) =>
+    numbers[i]
+      ? {
+          ...cur,
+          data: {
+            ...cur.data,
+            index: numbers[i].index,
+            tagRole: numbers[i].role,
+          },
+        }
+      : cur,
+  )
 }
 
 // A target tag takes the index of the source tag with the same id and name. Tags with an empty id (XLIFF 2 ph) are
@@ -81,8 +80,8 @@ const untype = (text) =>
  * `&lt;g id="1"&gt;` typed in the editor stays text. A tag's own markup is decoded as a whole, as it always was.
  */
 const decodeAndMatchTags = (segment) => {
-  const tagSpans = matchTag(segment)
-    .filter(({data}) => data.name !== 'space')
+  const notSpace = (name) => name !== 'space'
+  const tagSpans = scanTags(segment, notSpace)
     .map(({offset, length}) => [offset, offset + length])
     .sort((a, b) => a[0] - b[0])
   let markupText = ''
@@ -95,12 +94,13 @@ const decodeAndMatchTags = (segment) => {
     last = end
   })
   markupText += segment.slice(last).replace(ENTITIES, typedChar)
-  const tagRange = matchTag(markupText).filter(
-    ({data}) => data.name !== 'space' && !TYPED_CHARS.test(data.encodedText),
-  )
-  // Blanks are still found in the decoded text: one between a typed `<` and `>` is not a space tag, as before
-  if (tagSignatures.space)
-    tagRange.push(...findTagWithRegex(untype(markupText), 'space'))
+  const tagRange = [
+    ...scanPairedTags(markupText, notSpace).filter(
+      ({encodedText}) => !TYPED_CHARS.test(encodedText),
+    ),
+    // Blanks are still found in the decoded text: one between a typed `<` and `>` is not a space tag, as before
+    ...scanTags(untype(markupText), (name) => name === 'space'),
+  ].map(({offset, ...data}) => ({offset, data}))
   return {markupText, tagRange}
 }
 
@@ -243,10 +243,9 @@ const tagMapOf = (pieces) =>
   pieces
     .filter(({tag}) => tag)
     .map(({tag}) => {
-      const {originalOffset, id, name, encodedText, decodedText, placeholder} =
-        tag.data
+      const {id, name, encodedText, decodedText, placeholder} = tag.data
       return storeTag({
-        offset: originalOffset,
+        offset: tag.offset,
         data: {id, name, encodedText, decodedText, placeholder},
       })
     })

@@ -263,7 +263,7 @@ const tagSignaturesMap = {
   },
   space: {
     type: 'space',
-    // For the code that needs a RegExp. findTagWithRegex uses `find`: the lookarounds scan to the ends of the string
+    // For the code that needs a RegExp. The tag scan (tagScan.js) uses `find`: the lookarounds scan to the ends of the string
     // for every blank, quadratic on a long segment.
     regex: SPACE_REGEX,
     find: findSpaces,
@@ -314,23 +314,6 @@ const tagSignatures = new Proxy(tagSignaturesMap, {
 const initTagSignature = ({show_whitespace}) => {
   // check space placeholder is active on init
   setTagSignatureMiddleware('space', () => show_whitespace === 1)
-}
-
-function TagStruct(offset = -1, length = 0, type = null, name = null) {
-  this.offset = offset
-  this.length = length
-  this.type = type
-  this.mutability = 'IMMUTABLE'
-  this.data = {
-    id: null,
-    name: name,
-    encodedText: null,
-    decodedText: null,
-    openTagId: null,
-    closeTagId: null,
-    placeholder: null,
-    originalOffset: -1,
-  }
 }
 
 const getSplitBlockTag = () => {
@@ -424,7 +407,6 @@ export {
   tagSignatures,
   findSpaces,
   SPACE_REGEX,
-  TagStruct,
   getErrorCheckTag,
   getNoLexiqaTag,
   getNoGlossaryTag,
