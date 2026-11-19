@@ -18,16 +18,32 @@ class MatchSorter implements MatchSorterInterface
     /**
      * @param array<string, mixed>              $mtResult
      * @param array<int, array<string, mixed>>  $tmMatches
+     * @param int|null                          $limit
      *
      * @return list<array<string, mixed>>
      */
-    public function sortMatches(array $mtResult, array $tmMatches): array
+    public function sortMatches(array $mtResult, array $tmMatches, ?int $limit = null): array
     {
+        $tmMatches = array_values($tmMatches);
+
+        if ($limit !== null) {
+            // The TM is asked for $limit matches and the MT suggestion is appended to that
+            // already full list, so the merged array overflows by one. Cutting the tail after
+            // the merge would discard the MT row every time each TM match outscores the MT
+            // application threshold, so the slot is reserved before merging instead.
+            usort($tmMatches, $this->compareScoreDesc(...));
+            $tmMatches = array_slice($tmMatches, 0, max(0, $limit - (empty($mtResult) ? 0 : 1)));
+        }
+
         if (!empty($mtResult)) {
             $tmMatches[] = $mtResult;
         }
 
         usort($tmMatches, $this->compareScoreDesc(...));
+
+        if ($limit !== null) {
+            $tmMatches = array_slice($tmMatches, 0, max(0, $limit));
+        }
 
         return $tmMatches;
     }
