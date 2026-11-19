@@ -23,6 +23,11 @@ import {
   BUTTON_TYPE,
 } from '../../../../common/Button/Button'
 import IconClose from '../../../../../../img/icons/IconClose'
+import {
+  Checkbox,
+  CHECKBOX_SIZE,
+  CHECKBOX_STATE,
+} from '../../../../common/Checkbox'
 
 export const MTGlossaryRow = ({
   engineId,
@@ -97,8 +102,8 @@ export const MTGlossaryRow = ({
     inputNameRef.current.focus()
   }, [isEditingName])
 
-  const onChangeIsActive = (e) => {
-    const isActive = e.currentTarget.checked
+  const onChangeIsActive = (isChecked) => {
+    const isActive = isChecked
     setIsActive(isActive)
     setRows((prevState) =>
       prevState.map((glossary) =>
@@ -189,12 +194,12 @@ export const MTGlossaryRow = ({
   return (
     <Fragment>
       <div>
-        <input
-          checked={isActive}
+        <Checkbox
+          value={isActive ? CHECKBOX_STATE.CHECKED : CHECKBOX_STATE.UNCHECKED}
+          size={CHECKBOX_SIZE.SMALL}
           onChange={onChangeIsActive}
-          type="checkbox"
           disabled={isWaitingResult}
-          data-testid={`mtglossary-active-${row.id}`}
+          testId={`mtglossary-active-${row.id}`}
         />
       </div>
       <div className="glossary-row-name">
