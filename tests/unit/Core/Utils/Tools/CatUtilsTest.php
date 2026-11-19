@@ -1596,6 +1596,43 @@ class CatUtilsTest extends AbstractTest
     }
 
     /**
+     * An xlsx picks the ms_excel parameters, and inner_content_type travels with them to the converter.
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function testGetRightExtractionParameterMsExcelCarriesInnerContentType(): void
+    {
+        $msExcel = new MSExcel();
+        $msExcel->setInnerContentType('text/html');
+
+        $struct = new FiltersConfigTemplateStruct();
+        $struct->ms_excel = $msExcel;
+
+        $result = $this->invokeGetRightExtractionParameter('file.xlsx', $struct);
+
+        $this->assertInstanceOf(MSExcel::class, $result);
+        $this->assertSame('text/html', $result->jsonSerialize()['inner_content_type']);
+    }
+
+    /**
+     * Switching an Excel template between Plain text, HTML and unset must invalidate the cached
+     * conversion, because deleteSha() keys it on the serialized parameters.
+     */
+    #[Test]
+    public function testMsExcelInnerContentTypeChangesExtractionParameterHash(): void
+    {
+        $hashes = [];
+        foreach ([null, 'text/plain', 'text/html'] as $type) {
+            $msExcel = new MSExcel();
+            $msExcel->setInnerContentType($type);
+            $hashes[] = sha1(json_encode($msExcel));
+        }
+
+        $this->assertCount(3, array_unique($hashes));
+    }
+
+    /**
      * CatUtils::deleteSha() discriminates cached conversions by sha1(json_encode($extractionParams)),
      * so toggling inner_content_type must produce a different hash and force a re-conversion.
      */

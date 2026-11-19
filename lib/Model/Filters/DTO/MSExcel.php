@@ -2,6 +2,8 @@
 
 namespace Model\Filters\DTO;
 
+use DomainException;
+
 class MSExcel implements IDto
 {
 
@@ -14,6 +16,7 @@ class MSExcel implements IDto
     private bool $extract_sheet_names = false;
     /** @var list<string> */
     private array $exclude_columns = [];
+    private ?string $inner_content_type = null;
 
     public function setExtractDocProperties(bool $extract_doc_properties): void
     {
@@ -41,6 +44,25 @@ class MSExcel implements IDto
     }
 
     /**
+     * @throws DomainException
+     */
+    public function setInnerContentType(?string $inner_content_type): void
+    {
+        $mimeTypes = [
+            'text/plain',
+            'text/html',
+        ];
+
+        if ($inner_content_type !== null && !in_array($inner_content_type, $mimeTypes, true)) {
+            throw new DomainException(
+                "Excel inner content type not valid. Allowed values: ['text/plain', 'text/html']"
+            );
+        }
+
+        $this->inner_content_type = $inner_content_type;
+    }
+
+    /**
      * @param list<string> $exclude_columns
      */
     public function setExcludeColumns(array $exclude_columns): void
@@ -50,6 +72,8 @@ class MSExcel implements IDto
 
     /**
      * @param array<string, mixed> $data
+     *
+     * @throws DomainException
      */
     public function fromArray(array $data): void
     {
@@ -77,6 +101,10 @@ class MSExcel implements IDto
         if (isset($data['extract_sheet_names'])) {
             $this->setExtractSheetNames($data['extract_sheet_names']);
         }
+
+        if (isset($data['inner_content_type'])) {
+            $this->setInnerContentType($data['inner_content_type']);
+        }
     }
 
     /**
@@ -92,6 +120,7 @@ class MSExcel implements IDto
         $format['extract_drawings'] = $this->extract_drawings;
         $format['extract_sheet_names'] = $this->extract_sheet_names;
         $format['exclude_columns'] = $this->exclude_columns;
+        $format['inner_content_type'] = $this->inner_content_type;
 
         return $format;
     }

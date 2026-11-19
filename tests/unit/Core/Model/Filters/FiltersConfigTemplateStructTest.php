@@ -643,6 +643,110 @@ class FiltersConfigTemplateStructTest extends AbstractTest
         $this->expectException(JSONValidatorException::class);
         (new JSONValidator('filters_extraction_parameters.json', true))->validate(new JSONValidatorObject($payload));
     }
+
+    /**
+     * @return array<string, array{string|null}>
+     */
+    public static function validMsExcelInnerContentTypeProvider(): array
+    {
+        return [
+            'plain text' => ['text/plain'],
+            'html'       => ['text/html'],
+            'null'       => [null],
+        ];
+    }
+
+    /**
+     * The ms_excel block is additionalProperties:false, so the schema decides whether an API client
+     * may send inner_content_type at all; the struct then carries it through unchanged.
+     */
+    #[Test]
+    #[DataProvider('validMsExcelInnerContentTypeProvider')]
+    public function schema_accepts_ms_excel_inner_content_type_and_the_struct_serializes_it(?string $value): void
+    {
+        $payload = json_encode([
+            'name'     => 'test',
+            'uid'      => 1,
+            'ms_excel' => ['extract_hidden_cells' => true, 'inner_content_type' => $value],
+        ], JSON_THROW_ON_ERROR);
+
+        (new JSONValidator('filters_extraction_parameters.json', true))->validate(new JSONValidatorObject($payload));
+
+        $struct = (new FiltersConfigTemplateStruct())->hydrateFromJSON($payload);
+        $serialized = json_decode(json_encode($struct->jsonSerialize(), JSON_THROW_ON_ERROR), true);
+
+        $this->assertArrayHasKey('inner_content_type', $serialized['ms_excel']);
+        $this->assertSame($value, $serialized['ms_excel']['inner_content_type']);
+        $this->assertTrue($serialized['ms_excel']['extract_hidden_cells']);
+    }
+
+    /**
+     * @return array<string, array{mixed}>
+     */
+    public static function invalidMsExcelInnerContentTypeProvider(): array
+    {
+        return [
+            'unknown mime type'   => ['application/pdf'],
+            'yaml-only mime type' => ['text/markdown'],
+            'wrong case'          => ['TEXT/HTML'],
+            'non-string'          => [true],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('invalidMsExcelInnerContentTypeProvider')]
+    public function schema_rejects_invalid_ms_excel_inner_content_type(mixed $value): void
+    {
+        $payload = json_encode(['name' => 'test', 'uid' => 1, 'ms_excel' => ['inner_content_type' => $value]], JSON_THROW_ON_ERROR);
+
+        $this->expectException(JSONValidatorException::class);
+        (new JSONValidator('filters_extraction_parameters.json', true))->validate(new JSONValidatorObject($payload));
+    }
+
+    #[Test]
+    public function hydrateAllDto_hydrates_ms_excel_inner_content_type_from_a_db_row(): void
+    {
+        $struct = new FiltersConfigTemplateStruct();
+        $struct->hydrateAllDto([
+            'ms_excel' => '{"extract_sheet_names":true,"inner_content_type":"text/html"}',
+        ]);
+
+        $msExcel = $struct->getMsExcel();
+        $this->assertInstanceOf(MSExcel::class, $msExcel);
+        $this->assertSame('text/html', $msExcel->jsonSerialize()['inner_content_type']);
+        $this->assertTrue($msExcel->jsonSerialize()['extract_sheet_names']);
+    }
+
+    /**
+     * Rows saved before the parameter existed carry no key: they come back as null, which the
+     * settings panel shows as Plain text.
+     */
+    #[Test]
+    public function hydrateAllDto_ms_excel_inner_content_type_defaults_to_null_for_older_rows(): void
+    {
+        $struct = new FiltersConfigTemplateStruct();
+        $struct->hydrateAllDto([
+            'ms_excel' => '{"extract_sheet_names":false,"exclude_columns":[]}',
+        ]);
+
+        $msExcel = $struct->getMsExcel();
+        $this->assertInstanceOf(MSExcel::class, $msExcel);
+        $this->assertNull($msExcel->jsonSerialize()['inner_content_type']);
+    }
+
+    /**
+     * The DTO is the second line of defence: an invalid value that bypasses the schema (a stored row,
+     * an internal caller) still cannot reach Filters.
+     */
+    #[Test]
+    public function hydrateAllDto_throws_on_invalid_ms_excel_inner_content_type(): void
+    {
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('Excel inner content type not valid');
+        (new FiltersConfigTemplateStruct())->hydrateAllDto([
+            'ms_excel' => ['inner_content_type' => 'application/json'],
+        ]);
+    }
 }
 
 class TestableFiltersConfigTemplateStruct extends FiltersConfigTemplateStruct

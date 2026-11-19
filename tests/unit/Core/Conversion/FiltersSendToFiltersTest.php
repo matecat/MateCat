@@ -6,8 +6,14 @@ use CURLFile;
 use Exception;
 use Matecat\TestHelpers\AbstractTest;
 use Model\Conversion\Filters;
+use Model\Filters\DTO\MSExcel;
+use Monolog\Handler\TestHandler;
+use Monolog\Logger;
 use PDO;
 use PHPUnit\Framework\Attributes\Test;
+use ReflectionProperty;
+use Utils\Logger\LoggerFactory;
+use Utils\Logger\MatecatLogger;
 use Utils\Network\MultiCurlHandler;
 use Utils\Registry\AppConfig;
 
@@ -391,6 +397,65 @@ class FiltersSendToFiltersTest extends AbstractTest
             self::assertSame('<xliff version="1.2"/>', file_get_contents($path));
         } finally {
             @unlink($path);
+        }
+    }
+
+    // ── logging ────────────────────────────────────────────────────────
+
+    /**
+     * The extraction parameters are the only record of what a conversion asked Filters for, so the
+     * payload is logged next to the endpoint it is sent to.
+     */
+    #[Test]
+    public function sendToFiltersLogsTheExtractionParams(): void
+    {
+        $handler = new TestHandler();
+        $loggersMap = new ReflectionProperty(LoggerFactory::class, 'loggersMap');
+        /** @var array<string, MatecatLogger> $originalLoggers */
+        $originalLoggers = $loggersMap->getValue();
+        LoggerFactory::setAliases(['conversion'], new MatecatLogger(new Logger('conversion', [$handler])));
+
+        $this->filters->mockCurl = $this->createMockedCurl(json_encode(['ok' => true]), 200);
+
+        $tmpFile = tempnam(sys_get_temp_dir(), 'test-src-') . '.xlsx';
+        file_put_contents($tmpFile, 'content');
+
+        try {
+            $dto = new MSExcel();
+            $dto->setInnerContentType('text/html');
+
+            $this->filters->sourceToXliff($tmpFile, 'en-US', 'it-IT', null, $dto);
+
+            self::assertTrue($handler->hasDebugThatContains('Calling: http://localhost:8080/api/v2/original2xliff'));
+            self::assertTrue($handler->hasDebugThatContains('Extraction params: {'));
+            self::assertTrue($handler->hasDebugThatContains('"inner_content_type":"text\\/html"'));
+        } finally {
+            $loggersMap->setValue(null, $originalLoggers);
+            @unlink($tmpFile);
+        }
+    }
+
+    /**
+     * xliffToTarget carries no extraction parameters, so nothing beyond the endpoint is logged.
+     */
+    #[Test]
+    public function sendToFiltersDoesNotLogExtractionParamsWhenThereAreNone(): void
+    {
+        $handler = new TestHandler();
+        $loggersMap = new ReflectionProperty(LoggerFactory::class, 'loggersMap');
+        /** @var array<string, MatecatLogger> $originalLoggers */
+        $originalLoggers = $loggersMap->getValue();
+        LoggerFactory::setAliases(['conversion'], new MatecatLogger(new Logger('conversion', [$handler])));
+
+        $this->filters->mockCurl = $this->createMockedCurl(json_encode(['successful' => true, 'document_content' => base64_encode('x')]), 200);
+
+        try {
+            $this->filters->xliffToTarget([['document_content' => '<xliff/>']]);
+
+            self::assertTrue($handler->hasDebugThatContains('Calling: '));
+            self::assertFalse($handler->hasDebugThatContains('Extraction params:'));
+        } finally {
+            $loggersMap->setValue(null, $originalLoggers);
         }
     }
 }

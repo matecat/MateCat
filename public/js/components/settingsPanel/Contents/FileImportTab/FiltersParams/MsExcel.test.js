@@ -11,11 +11,13 @@ const defaultMsExcel = {
   extract_drawings: false,
   extract_sheet_names: false,
   exclude_columns: [],
+  inner_content_type: 'text/plain',
 }
 
-const setup = (
-  {msExcelOverrides = {}, currentProjectTemplateChanged = false} = {},
-) => {
+const setup = ({
+  msExcelOverrides = {},
+  currentProjectTemplateChanged = false,
+} = {}) => {
   const modifyingCurrentTemplate = jest.fn()
   const currentTemplate = {
     id: 1,
@@ -48,6 +50,14 @@ describe('MsExcel', () => {
       screen.getByText('Translate document properties'),
     ).toBeInTheDocument()
     expect(screen.getByText('Exclude columns')).toBeInTheDocument()
+    expect(
+      screen.getByText('Translatable text content type'),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        'Select the content type of the translatable text to optimize segmentation and tags.',
+      ),
+    ).toBeInTheDocument()
 
     expect(
       document.querySelector('input[name="extract_hidden_cells"]'),
@@ -57,9 +67,7 @@ describe('MsExcel', () => {
   test('toggling extract_sheet_names switch reports the updated value', async () => {
     const {modifyingCurrentTemplate, currentTemplate} = setup()
 
-    fireEvent.click(
-      document.querySelector('input[name="extract_sheet_names"]'),
-    )
+    fireEvent.click(document.querySelector('input[name="extract_sheet_names"]'))
 
     await waitFor(() => expect(modifyingCurrentTemplate).toHaveBeenCalled())
 
@@ -102,6 +110,47 @@ describe('MsExcel', () => {
       ][0]
     const updated = updater(currentTemplate)
     expect(updated.msExcel.exclude_columns).toEqual(['1C'])
+  })
+
+  test('shows Plain text as the selected content type by default', () => {
+    setup()
+
+    expect(screen.getByText('Plain text')).toBeInTheDocument()
+    expect(
+      screen.getByPlaceholderText('Select inner content type'),
+    ).toHaveValue('text/plain')
+  })
+
+  test('shows HTML when the template stores text/html', () => {
+    setup({msExcelOverrides: {inner_content_type: 'text/html'}})
+
+    expect(screen.getByText('HTML')).toBeInTheDocument()
+    expect(
+      screen.getByPlaceholderText('Select inner content type'),
+    ).toHaveValue('text/html')
+  })
+
+  test('shows the placeholder when the template has no content type', () => {
+    setup({msExcelOverrides: {inner_content_type: undefined}})
+
+    expect(screen.getByText('Select inner content type')).toBeInTheDocument()
+  })
+
+  test('selecting HTML reports the updated content type', async () => {
+    const {modifyingCurrentTemplate, currentTemplate} = setup()
+
+    fireEvent.click(screen.getByText('Plain text'))
+    fireEvent.click(await screen.findByText('HTML'))
+
+    await waitFor(() => expect(modifyingCurrentTemplate).toHaveBeenCalled())
+
+    const updater =
+      modifyingCurrentTemplate.mock.calls[
+        modifyingCurrentTemplate.mock.calls.length - 1
+      ][0]
+    const updated = updater(currentTemplate)
+    expect(updated.msExcel.inner_content_type).toBe('text/html')
+    expect(updated.msExcel.extract_hidden_cells).toBe(false)
   })
 
   test('does not call modifyingCurrentTemplate when nothing changed', () => {
