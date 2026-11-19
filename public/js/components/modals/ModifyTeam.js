@@ -194,7 +194,7 @@ export const ModifyTeam = ({team}) => {
                   <>
                     <span>Pending user</span>
                     <Button
-                      type={BUTTON_TYPE.DEFAULT}
+                      mode={BUTTON_MODE.OUTLINE}
                       size={BUTTON_SIZE.SMALL}
                       onClick={() => resendInvite(email)}
                     >
