@@ -1,5 +1,6 @@
 import React from 'react'
 import {formatWithCommas} from '../outsourceConstants'
+import {Checkbox, CHECKBOX_SIZE, CHECKBOX_STATE} from '../../common/Checkbox'
 
 const RevisionCheckbox = ({
   revision,
@@ -15,13 +16,12 @@ const RevisionCheckbox = ({
     <div className="revision-box">
       <div className="add-revision">
         <div className={'revision-checkbox ' + checkboxDisabledClass}>
-          <input
-            type="checkbox"
-            checked={revision}
+          <Checkbox
+            label="Add revision"
+            value={revision ? CHECKBOX_STATE.CHECKED : CHECKBOX_STATE.UNCHECKED}
             onChange={onToggle}
             disabled={outsourceConfirmed}
           />
-          <label>Add revision</label>
         </div>
       </div>
       {!outsourceConfirmed && (
