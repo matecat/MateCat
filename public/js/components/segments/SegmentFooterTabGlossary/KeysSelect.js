@@ -19,7 +19,7 @@ export const KeysSelect = ({
   return (
     <Select
       className={`glossary-select ${className}`}
-      dropdownClassName="glossary-domain-subdomain-dropdown"
+      dropdownClassName="glossary-keys-dropdown"
       isPortalDropdown={true}
       name="glossary-term-tm"
       label="Termbase*"
@@ -63,7 +63,7 @@ export const KeysSelect = ({
               >
                 <div className="button-create-option-content">
                   <IconAdd size={18} />
-                  <span>Create termbase key</span>
+                  <span>Add termbase key</span>
                 </div>
               </li>
             ),

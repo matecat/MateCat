@@ -98,6 +98,7 @@ export const AddCategory = () => {
     >
       <Popover
         title="Add category"
+        contentClassName="quality-framework-add-popover"
         toggleButtonProps={{
           type: BUTTON_TYPE.PRIMARY,
           mode: BUTTON_MODE.BASIC,
