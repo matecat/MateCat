@@ -62,6 +62,53 @@ import {getTranslationMismatches as getTranslationMismatchesApi} from '../api/ge
 import TextUtils from '../utils/textUtils'
 import {TAB} from '../constants/SegmentTabConstants'
 
+// How long a segment waits for its SSE glossary result before it can be
+// requested again. Under load the queue is slow, not empty: a short timeout
+// re-enqueues the same segment and adds to the load.
+export const GLOSSARY_PENDING_TIMEOUT_MS = 60000
+
+/**
+ * Segments whose glossary was requested and has not arrived yet, keyed by
+ * segment id, valued by the timer that expires the wait.
+ *
+ * The glossary `_get` POST only acknowledges that the request was queued: the
+ * terms arrive later through the SSE `glossary_get` event. A segment stays
+ * pending until then, so opening segments while the queue is slow does not
+ * enqueue the same request again. The timer frees it if the result never
+ * arrives (a worker failure, a lost message).
+ */
+const pendingGlossaryRequests = new Map()
+
+const isGlossaryPending = (sid) => pendingGlossaryRequests.has(String(sid))
+
+const clearPendingGlossary = (sid) => {
+  const key = String(sid)
+  clearTimeout(pendingGlossaryRequests.get(key))
+  pendingGlossaryRequests.delete(key)
+}
+
+const markGlossaryPending = (sid) => {
+  clearPendingGlossary(sid)
+  const key = String(sid)
+  pendingGlossaryRequests.set(
+    key,
+    setTimeout(
+      () => pendingGlossaryRequests.delete(key),
+      GLOSSARY_PENDING_TIMEOUT_MS,
+    ),
+  )
+}
+
+const requestGlossary = (sid, source) => {
+  markGlossaryPending(sid)
+  //Response inside SSE Channel
+  getGlossaryForSegment({idSegment: sid, source}).catch(() => {
+    // Nothing was queued, so no result will arrive: allow a retry.
+    clearPendingGlossary(sid)
+    OfflineUtils.failedConnection()
+  })
+}
+
 // Async-loaded to break circular dependency for static analysis.
 let _SegmentsFilterUtil
 let _SetTranslationUtil
@@ -882,18 +929,14 @@ const SegmentActions = {
   getGlossaryForSegment: function ({sid, fid, text, shouldRefresh = false}) {
     if (!CatToolStore.haveKeysGlossary) return
 
-    // refresh segment glossary already included
+    // refresh segment glossary already included: the terms changed, so a
+    // result still pending for the old ones does not cover it
     if (shouldRefresh) {
       const source = DraftMatecatUtils.removePlaceholdersForGlossary(
         DraftMatecatUtils.removeTagsFromText(text),
       )
       if (source && source !== ' ') {
-        getGlossaryForSegment({
-          idSegment: sid,
-          source,
-        }).catch(() => {
-          OfflineUtils.failedConnection()
-        })
+        requestGlossary(sid, source)
       }
       return
     }
@@ -934,6 +977,7 @@ const SegmentActions = {
       if (
         segment &&
         request.text &&
+        !isGlossaryPending(request.sid) &&
         (typeof segment.glossary === 'undefined' || sid === request.sid)
       ) {
         const source = DraftMatecatUtils.removePlaceholdersForGlossary(
@@ -941,13 +985,7 @@ const SegmentActions = {
         )
 
         if (source && source !== ' ') {
-          //Response inside SSE Channel
-          getGlossaryForSegment({
-            idSegment: request.sid,
-            source,
-          }).catch(() => {
-            OfflineUtils.failedConnection()
-          })
+          requestGlossary(request.sid, source)
         }
       }
     }
@@ -972,7 +1010,16 @@ const SegmentActions = {
     })
   },
 
+  // The SSE stream is down or was restarted: results sent meanwhile are lost,
+  // stop waiting for them.
+  clearAllPendingGlossaryRequests: () => {
+    pendingGlossaryRequests.forEach((timer) => clearTimeout(timer))
+    pendingGlossaryRequests.clear()
+  },
+
+  // SSE `glossary_get` result
   setGlossaryForSegment: (sid, terms) => {
+    clearPendingGlossary(sid)
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SET_GLOSSARY_TO_CACHE,
       sid: sid,
