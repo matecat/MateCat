@@ -127,8 +127,17 @@ const SegmentFooterTabMatches = ({segment, code, active_class, tab_class}) => {
     )
   }
 
+  const tooltipRefs = useRef(new Map())
+  const getToolipRef = (id) => {
+    if (!tooltipRefs.current.get(id)) {
+      const ref = createRef()
+      tooltipRefs.current.set(id, ref)
+    }
+
+    return tooltipRefs.current.get(id)
+  }
+
   const getMatchInfo = (match) => {
-    const penaltyPercRef = createRef()
     return (
       <ul className="graysmall-details">
         <li className="graydesc graydesc-sourcekey">
@@ -157,7 +166,10 @@ const SegmentFooterTabMatches = ({segment, code, active_class, tab_class}) => {
                 </div>
               }
             >
-              <li className={`percent per-yellow-variant`}>
+              <li
+                ref={getToolipRef(match.id)}
+                className={`percent per-yellow-variant`}
+              >
                 {match.source} {'>'} {match.target} (-1%)
               </li>
             </Tooltip>
@@ -182,7 +194,7 @@ const SegmentFooterTabMatches = ({segment, code, active_class, tab_class}) => {
             }
           >
             <li
-              ref={penaltyPercRef}
+              ref={getToolipRef(match.id)}
               className={`percent ${match.percentClass} per-red-outline`}
             >
               -{Math.round(match.penalty * 100)}%

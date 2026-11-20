@@ -308,8 +308,12 @@ const SegmentsFilter = ({active}) => {
   const statusOptions = config.searchable_statuses.map((item) => ({
     name: (
       <>
-        <div className={'status-dot ' + item.label.toLowerCase() + '-color'} />
-        {item.label}
+        <span className="status-dropdown-option">
+          <span
+            className={'status-dot ' + item.label.toLowerCase() + '-color'}
+          />
+          {item.label}
+        </span>
       </>
     ),
     id: item.value,
@@ -319,8 +323,10 @@ const SegmentsFilter = ({active}) => {
     statusOptions.push({
       name: (
         <>
-          <div className={'status-dot approved-2ndpass-color'} />
-          APPROVED 2
+          <span className="status-dropdown-option">
+            <span className={'status-dot approved-2ndpass-color'} />
+            APPROVED 2
+          </span>
         </>
       ),
       id: SEGMENTS_STATUS.APPROVED2,

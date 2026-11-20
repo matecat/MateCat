@@ -45,6 +45,7 @@ class Yaml implements IDto
     public function setInnerContentType(?string $inner_content_type): void
     {
         $mimeTypes = [
+            'text/plain',
             'text/html',
             'text/xml',
             'application/xml',
@@ -56,7 +57,7 @@ class Yaml implements IDto
 
         if ($inner_content_type !== null && !in_array($inner_content_type, $mimeTypes)) {
             throw new DomainException(
-                "YAML Inner content type not valid. Allowed values: ['text/html', 'text/xml', 'application/xml', 'text/csv', 'application/json', 'text/markdown', 'text/x-markdown']"
+                "YAML Inner content type not valid. Allowed values: ['text/plain', 'text/html', 'text/xml', 'application/xml', 'text/csv', 'application/json', 'text/markdown', 'text/x-markdown']"
             );
         }
 

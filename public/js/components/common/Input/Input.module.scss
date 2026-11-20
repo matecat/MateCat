@@ -49,13 +49,15 @@
       color: colors.$grey400;
       opacity: 1;
     }
-    &:hover {
-      border-color: colors.$grey400;
-    }
-    &:focus,
-    &:active {
-      border-color: colors.$grey400;
-      outline: 1px solid colors.$grey400;
+    &:not(:disabled) {
+      &:hover {
+        border-color: colors.$grey400;
+      }
+      &:focus,
+      &:active {
+        border-color: colors.$grey400;
+        outline: 1px solid colors.$grey400;
+      }
     }
     &.isCompressed {
       padding: 10px;

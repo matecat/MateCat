@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9a227a4eea721424db02e6f7e4a47327",
+    "content-hash": "726ca19b8b3a22b613ef2b675569e375",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -1947,16 +1947,16 @@
         },
         {
             "name": "matecat/subfiltering",
-            "version": "v4.4.1",
+            "version": "v4.4.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/subfiltering.git",
-                "reference": "d907bdd038c8943ffcdddfc36f6b0d380ee85c32"
+                "reference": "465a8d821df8e3b85dad269542ea33baa35ff017"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/d907bdd038c8943ffcdddfc36f6b0d380ee85c32",
-                "reference": "d907bdd038c8943ffcdddfc36f6b0d380ee85c32",
+                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/465a8d821df8e3b85dad269542ea33baa35ff017",
+                "reference": "465a8d821df8e3b85dad269542ea33baa35ff017",
                 "shasum": ""
             },
             "require": {
@@ -2004,9 +2004,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/subfiltering/issues",
-                "source": "https://github.com/matecat/subfiltering/tree/v4.4.1"
+                "source": "https://github.com/matecat/subfiltering/tree/v4.4.2"
             },
-            "time": "2026-11-16T14:03:35+00:00"
+            "time": "2026-11-17T11:07:52+00:00"
         },
         {
             "name": "matecat/whole-text-finder",
