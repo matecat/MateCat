@@ -36,6 +36,12 @@
   line-height: 1;
 }
 
+.status-dropdown-option {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+
 .status-dot {
   display: inline-block;
   width: 0.875rem;
@@ -143,13 +149,15 @@ input[type='password'] {
   &::placeholder {
     color: colors.$grey400;
   }
-  &:hover {
-    border: 1px solid colors.$grey400;
-  }
-  &:focus,
-  &:active {
-    border: 1px solid colors.$grey400;
-    outline: 1px solid colors.$grey400;
+  &:not(:disabled) {
+    &:hover {
+      border: 1px solid colors.$grey400;
+    }
+    &:focus,
+    &:active {
+      border: 1px solid colors.$grey400;
+      outline: 1px solid colors.$grey400;
+    }
   }
   &:disabled {
     background-color: colors.$grey75;

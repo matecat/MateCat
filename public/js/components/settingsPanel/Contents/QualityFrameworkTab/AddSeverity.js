@@ -91,6 +91,7 @@ export const AddSeverity = ({numbersOfColumns}) => {
     >
       <Popover
         title="Add severity"
+        contentClassName="quality-framework-add-popover"
         toggleButtonProps={{
           type: BUTTON_TYPE.PRIMARY,
           mode: BUTTON_MODE.BASIC,

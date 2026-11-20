@@ -647,7 +647,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           </Button>
         </div>
       ) : (
-        <div />
+        <div className="tm-key-row-last-column-empty" />
       )}
     </Fragment>
   )
