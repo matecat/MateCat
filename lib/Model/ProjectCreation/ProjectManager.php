@@ -824,7 +824,7 @@ class ProjectManager
         /** @var S3FilesStorage $fs */
         $client = $fs::getStaticS3Client();
         $params['bucket'] = AppConfig::$AWS_STORAGE_BASE_BUCKET;
-        $params['key'] = $fs::QUEUE_FOLDER . DIRECTORY_SEPARATOR . $fs::getUploadSessionSafeName((string)$fs->getTheLastPartOfKey($this->uploadDir)) . DIRECTORY_SEPARATOR . $fileName;
+        $params['key'] = $fs::getQueueObjectKey((string)$fs->getTheLastPartOfKey($this->uploadDir), $fileName);
         $params['save_as'] = "$this->uploadDir/$fileName";
         $client->downloadItem($params);
     }
