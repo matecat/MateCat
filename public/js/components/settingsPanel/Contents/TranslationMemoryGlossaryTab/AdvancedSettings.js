@@ -8,6 +8,7 @@ import {
   PRETRANSLATE_STATUS_OPTIONS,
   toStatusLockId,
 } from '../../../../utils/editorStatusLock'
+import {Radio} from '../../../common/Radio/Radio'
 
 const PRETRANSLATE_MATCHES = [
   {key: 'match_101', label: 'Pre-confirm 101% matches'},
@@ -128,12 +129,11 @@ export const AdvancedSettings = () => {
         >
           {VARIANT_MATCHING_OPTIONS.map(({dialectStrict, label}) => (
             <label key={label}>
-              <input
-                type="radio"
+              <Radio
                 name="variant-matching"
                 checked={Boolean(isDialectStrictActive) === dialectStrict}
                 onChange={() => setIsDialectStrictActive(dialectStrict)}
-                data-testid={`variant-matching-${dialectStrict ? 'exact' : 'all'}`}
+                testId={`variant-matching-${dialectStrict ? 'exact' : 'all'}`}
               />
               {label}
             </label>

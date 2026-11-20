@@ -2,7 +2,7 @@ jest.mock('../../../../../api/createAndImportDeepLGlossary')
 jest.mock('../../../../../actions/CatToolActions')
 
 import React from 'react'
-import {render, screen, waitFor} from '@testing-library/react'
+import {fireEvent, render, screen, waitFor} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import {DeepLGlossaryCreateRow} from './DeepLGlossaryCreateRow'
 import {DEEPL_GLOSSARY_CREATE_ROW_ID} from './DeepLGlossaryConstants'
@@ -109,6 +109,17 @@ test('shows an error notification when the API rejects', async () => {
       }),
     ),
   )
+})
+
+test('the active radio is disabled and updates checked state on change', () => {
+  render(<Wrapper row={{isActive: false}} />)
+
+  const radio = screen.getByRole('radio')
+  expect(radio).toBeDisabled()
+  expect(radio).not.toBeChecked()
+
+  fireEvent.click(radio)
+  expect(radio).toBeChecked()
 })
 
 test('clicking the reset button removes the create row', async () => {
