@@ -49,14 +49,14 @@ export const taggingTypes = [
   {
     id: 'square_sprintf',
     name: 'Square bracket Sprintf',
-    code: '<a target="_blank" href="https://guides.matecat.com/settings#square-bracket-sprintf">See guides page</a>',
+    code: '<a target="_blank" href="https://guides.matecat.com/settings#square-bracket-sprintf">See details</a>',
     html: true,
     default: false,
   },
   {
     id: 'sprintf',
     name: 'Sprintf',
-    code: '<a target="_blank" href="https://guides.matecat.com/settings#sprintf">See guides page</a>',
+    code: '<a target="_blank" href="https://guides.matecat.com/settings#sprintf">See details</a>',
     html: true,
     default: false,
   },

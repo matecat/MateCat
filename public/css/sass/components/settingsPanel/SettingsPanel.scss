@@ -118,7 +118,6 @@
   font-size: variables.$font-size-xsmall;
   padding: 0 20px 0 20px;
   overflow-y: auto;
-  max-height: calc(100vh - 340px);
   height: 100%;
   position: relative;
   h2 {
@@ -174,6 +173,7 @@
 }
 
 .settings-panel-templates-container-select {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: start;
@@ -188,11 +188,11 @@
   .template-name {
     width: 240px;
     height: 40px;
+    bottom: 0;
     font-size: variables.$font-size-small;
     padding: 9px 0 9px 12px;
     border-radius: variables.$border-radius-default;
     position: absolute;
-    margin-top: 40px;
     line-height: 4;
   }
 
@@ -365,12 +365,6 @@
       .menu-button-wrapper .icon {
         color: colors.$black;
       }
-    }
-  }
-
-  .settings-panel-templates-container-select {
-    .template-name {
-      margin-top: 28px;
     }
   }
 }

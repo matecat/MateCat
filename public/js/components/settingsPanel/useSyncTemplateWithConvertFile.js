@@ -29,8 +29,48 @@ function useSyncTemplateWithConvertFile({
             defaultTemplate,
           )
 
+          const normalizeProps = ['inner_content_type']
+
+          const nestedTemplatesNormalized = templatesNormalized.map(
+            (template) => {
+              return Object.entries(template).reduce((acc, [key, value]) => {
+                const nestedEntries =
+                  value && typeof value === 'object'
+                    ? Object.entries(value)
+                    : []
+                const hasNestedPropToNormalize = nestedEntries.some(
+                  ([nestedKey]) =>
+                    normalizeProps.some((value) => value === nestedKey),
+                )
+
+                if (hasNestedPropToNormalize) {
+                  return {
+                    ...acc,
+                    [key]: nestedEntries.reduce(
+                      (acc, [nestedKey, nestedValue]) => {
+                        return {
+                          ...acc,
+                          [nestedKey]:
+                            normalizeProps.some(
+                              (value) => value === nestedKey,
+                            ) &&
+                            (nestedValue === undefined || nestedValue === null)
+                              ? defaultTemplate[key][nestedKey]
+                              : nestedValue,
+                        }
+                      },
+                      {},
+                    ),
+                  }
+                } else {
+                  return {...acc, [key]: value}
+                }
+              }, {})
+            },
+          )
+
           setTemplates(
-            templatesNormalized.map((template) => ({
+            nestedTemplatesNormalized.map((template) => ({
               ...template,
               isSelected: template.id === selectedTemplateId,
             })),

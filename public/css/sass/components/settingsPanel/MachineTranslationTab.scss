@@ -426,6 +426,7 @@
 .glossary-row-name-create-input {
   width: auto;
   min-width: 70%;
+  padding: 4px 12px !important;
 }
 
 .glossary-row-confirm-button {
@@ -670,9 +671,6 @@
   }
 
   input {
-    padding: 4px 8px;
-    border-radius: variables.$border-radius-default;
-
     &:disabled {
       background-color: colors.$white !important;
       color: inherit !important;
