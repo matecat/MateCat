@@ -453,6 +453,83 @@ class S3FilesStorageUnitTest extends AbstractTest
         }
     }
 
+    /**
+     * The worker reads a native xliff back from the queue by the name the user uploaded, and S3 keys
+     * are case-sensitive: an upper-case extension stored lower-cased is a missing key.
+     */
+    #[Test]
+    public function test_moveFileFromUploadSessionToQueuePath_keeps_the_case_of_the_extension(): void
+    {
+        $uploadSession = 'fd750c37-2d33-4913-bdd1-' . bin2hex(random_bytes(6));
+        $originalUpload = AppConfig::$UPLOAD_REPOSITORY;
+        $uploadRepository = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'queue_key_case_' . uniqid();
+        mkdir($uploadRepository . DIRECTORY_SEPARATOR . $uploadSession, 0755, true);
+        file_put_contents($uploadRepository . DIRECTORY_SEPARATOR . $uploadSession . DIRECTORY_SEPARATOR . 'Test stati xliff 1.2.XLIFF', '<xliff/>');
+
+        $uploadedKeys = [];
+        $client = $this->stubClient(function (string $name, array $args) use (&$uploadedKeys) {
+            if ($name === 'uploadItem') {
+                $uploadedKeys[] = $args[0]['key'];
+            }
+
+            return true;
+        });
+
+        try {
+            AppConfig::$UPLOAD_REPOSITORY = $uploadRepository;
+
+            $this->createS3WithMocks($client, new NativeFilesystemAdapter())->moveFileFromUploadSessionToQueuePath($uploadSession);
+
+            $this->assertSame(
+                [S3FilesStorage::QUEUE_FOLDER . DIRECTORY_SEPARATOR . $uploadSession . DIRECTORY_SEPARATOR . 'Test stati xliff 1.2.XLIFF'],
+                $uploadedKeys
+            );
+            $this->assertSame([S3FilesStorage::getQueueObjectKey($uploadSession, 'Test stati xliff 1.2.XLIFF')], $uploadedKeys);
+        } finally {
+            AppConfig::$UPLOAD_REPOSITORY = $originalUpload;
+            (new RedisHandler())->getConnection()->unlink($uploadSession);
+            if (is_dir($uploadRepository)) {
+                exec('rm -rf ' . escapeshellarg($uploadRepository));
+            }
+        }
+    }
+
+    // ========================================================================
+    // getQueueObjectKey
+    // ========================================================================
+
+    #[Test]
+    public function test_getQueueObjectKey_keeps_the_file_name_and_cleans_the_session(): void
+    {
+        $this->assertSame(
+            'queue-projects/fd750c37-2d33-4913-bdd1-1c71be9d2435/Test.XLF',
+            S3FilesStorage::getQueueObjectKey('{FD750C37-2D33-4913-BDD1-1C71BE9D2435}', 'Test.XLF')
+        );
+    }
+
+    #[Test]
+    public function test_getQueueObjectKey_keeps_a_name_without_extension(): void
+    {
+        $this->assertSame(
+            'queue-projects/session/abc123__en-US',
+            S3FilesStorage::getQueueObjectKey('session', 'abc123__en-US')
+        );
+    }
+
+    /**
+     * A long name is hashed, as before, but the extension keeps its case.
+     */
+    #[Test]
+    public function test_getQueueObjectKey_hashes_a_long_name_keeping_the_case_of_the_extension(): void
+    {
+        $filename = str_repeat('a', 250);
+
+        $this->assertSame(
+            'queue-projects/session/' . sha1($filename) . '.XLIFF',
+            S3FilesStorage::getQueueObjectKey('session', $filename . '.XLIFF')
+        );
+    }
+
     // ========================================================================
     // storeFastAnalysisFile
     // ========================================================================
@@ -724,6 +801,74 @@ class S3FilesStorageUnitTest extends AbstractTest
         } finally {
             @unlink($tmpXliff);
         }
+    }
+
+    /**
+     * A native xliff with an upper-case extension is uploaded from the file on disk: only the object
+     * key takes the lower-cased name.
+     */
+    #[Test]
+    public function test_makeCachePackage_uploads_a_native_xliff_with_an_upper_case_extension_from_its_own_path(): void
+    {
+        $uploads = [];
+        $client = $this->stubClient(function (string $name, array $args) use (&$uploads) {
+            if ($name === 'uploadItem') {
+                $uploads[] = ['key' => $args[0]['key'], 'source' => $args[0]['source'], 'exists' => is_file($args[0]['source'])];
+
+                return true;
+            }
+
+            return false;
+        });
+
+        $dir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'xliff_case_' . uniqid();
+        mkdir($dir);
+        $xliffPath = $dir . DIRECTORY_SEPARATOR . 'Test stati xliff 1.2.XLIFF';
+        file_put_contents($xliffPath, '<?xml version="1.0"?><xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2"><file source-language="en" target-language="it" datatype="plaintext"><body><trans-unit id="1"><source>Hello</source></trans-unit></body></file></xliff>');
+
+        $fsMock = $this->createMock(FilesystemAdapter::class);
+        $fsMock->expects($this->once())->method('unlink')->with($xliffPath)->willReturn(true);
+
+        $fs = $this->createS3WithMocks($client, $fsMock);
+        $hash = 'abcdef1234567890abcdef1234567890abcdef12';
+
+        try {
+            $this->assertTrue($fs->makeCachePackage($hash, 'en-US', null, $xliffPath));
+        } finally {
+            exec('rm -rf ' . escapeshellarg($dir));
+        }
+
+        $this->assertSame([[
+            'key' => $fs->getCachePackageHashFolder($hash, 'en-US') . '/work/Test stati xliff 1.2.xliff.sdlxliff',
+            'source' => $xliffPath,
+            'exists' => true,
+        ]], $uploads);
+    }
+
+    /**
+     * A converted xliff whose name is too long for a key is uploaded from the file on disk, not from
+     * a path renamed after its hashed key.
+     */
+    #[Test]
+    public function test_makeCachePackage_uploads_a_long_named_xliff_from_its_own_path(): void
+    {
+        $sources = [];
+        $client = $this->stubClient(function (string $name, array $args) use (&$sources) {
+            if ($name === 'uploadItem') {
+                $sources[] = $args[0]['source'];
+
+                return true;
+            }
+
+            return false;
+        });
+
+        $xliffPath = '/tmp/' . str_repeat('a', 200) . '.docx.sdlxliff';
+
+        $fs = $this->createS3WithMocks($client);
+
+        $this->assertTrue($fs->makeCachePackage('abcdef1234567890abcdef1234567890abcdef12', 'en-US', '/tmp/original.docx', $xliffPath));
+        $this->assertSame(['/tmp/original.docx', $xliffPath], $sources);
     }
 
     // ========================================================================

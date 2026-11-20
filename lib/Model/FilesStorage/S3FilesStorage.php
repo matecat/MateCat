@@ -188,10 +188,9 @@ class S3FilesStorage extends AbstractFilesStorage
             $encodedFileName = $file_info['basename'];
         }
 
-        $xliffPath = str_replace($fileName, $encodedFileName, $xliffPath);
-        $fileName = $encodedFileName;
-
-        $file = $prefix . '/work/' . $fileName;
+        // $xliffPath is the local file and keeps its name: the encoded name (lower-case extension, hashed
+        // when too long) only names the object, and no file by that name exists on disk.
+        $file = $prefix . '/work/' . $encodedFileName;
         $valid = $this->s3Client->hasItem(['bucket' => static::$FILES_STORAGE_BUCKET, 'key' => $file]);
 
         if (AppConfig::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION !== false && $valid) {
@@ -203,7 +202,7 @@ class S3FilesStorage extends AbstractFilesStorage
         // Example: حديث_أمني_ريف_حلب_الغربي.docx (OK) -----> حديث_أمني_ريف_حلب_الغربي.docx.xliff (TOO LONG)
         //
         try {
-            $xliffDestination = $this->storeOriginalFileAndGetXliffDestination($prefix, $xliffPath, static::$FILES_STORAGE_BUCKET, $originalPath);
+            $xliffDestination = $this->storeOriginalFileAndGetXliffDestination($prefix, $xliffPath, $encodedFileName, static::$FILES_STORAGE_BUCKET, $originalPath);
             $fileName = $this->getTheLastPartOfKey($xliffDestination);
             if ($fileName === false) {
                 return false;
@@ -266,13 +265,14 @@ class S3FilesStorage extends AbstractFilesStorage
 
     /**
      * @param string $prefix
-     * @param string $xliffPath
+     * @param string $xliffPath the local xliff file
+     * @param string $xliffObjectName the encoded name of the xliff object
      * @param string $bucketName
      * @param string|null $originalPath
      *
      * @return string
      */
-    private function storeOriginalFileAndGetXliffDestination(string $prefix, string $xliffPath, string $bucketName, ?string $originalPath = null): string
+    private function storeOriginalFileAndGetXliffDestination(string $prefix, string $xliffPath, string $xliffObjectName, string $bucketName, ?string $originalPath = null): string
     {
         if (!$originalPath) {
             $force_extension = "";
@@ -281,7 +281,7 @@ class S3FilesStorage extends AbstractFilesStorage
                 $force_extension = '.sdlxliff';
             }
 
-            return $prefix . DIRECTORY_SEPARATOR . 'work' . DIRECTORY_SEPARATOR . static::basename_fix($xliffPath) . $force_extension;
+            return $prefix . DIRECTORY_SEPARATOR . 'work' . DIRECTORY_SEPARATOR . $xliffObjectName . $force_extension;
         }
 
         $raw_file_path = explode(DIRECTORY_SEPARATOR, $originalPath);
@@ -549,12 +549,8 @@ class S3FilesStorage extends AbstractFilesStorage
                     $subPathName = $short_hash . self::OBJECTS_SAFE_DELIMITER . $lang;
                 }
 
+                $encodedSubPathName = self::getQueueObjectKey($uploadSession, $subPathName);
                 $subPathName = $prefix . DIRECTORY_SEPARATOR . $subPathName;
-
-                /** @var array{dirname?: string, basename?: string, extension?: string, filename?: string} $file_info */
-                $file_info = AbstractFilesStorage::pathinfo_fix($subPathName);
-                $encodedSubPathName = self::createFileName($prefix . "/", $file_info);
-                $encodedSubPathName = $prefix . DIRECTORY_SEPARATOR . $encodedSubPathName;
 
                 // upload file
                 $this->s3Client->uploadItem([
@@ -647,6 +643,50 @@ class S3FilesStorage extends AbstractFilesStorage
     public static function getUploadSessionSafeName(string $uploadSession): string
     {
         return str_replace(['{', '}'], '', strtolower($uploadSession));
+    }
+
+    /**
+     * The key of a file of an upload session in the queue folder.
+     *
+     * The upload and the project creation worker both build the key here, so they cannot disagree on
+     * it. The file name keeps its case: the worker asks for the name the user uploaded, and S3 keys
+     * are case-sensitive, so `Test.XLIFF` stored as `Test.xliff` is a missing key.
+     *
+     * Example: `getQueueObjectKey('{FD750C37-2D33-4913-BDD1-1C71BE9D2435}', 'Test.XLIFF')` returns
+     * `queue-projects/fd750c37-2d33-4913-bdd1-1c71be9d2435/Test.XLIFF`.
+     *
+     * @param string $uploadSession
+     * @param string $fileName
+     *
+     * @return string
+     */
+    public static function getQueueObjectKey(string $uploadSession, string $fileName): string
+    {
+        $prefix = self::QUEUE_FOLDER . DIRECTORY_SEPARATOR . self::getUploadSessionSafeName($uploadSession);
+
+        return $prefix . DIRECTORY_SEPARATOR . self::createFileName($prefix . "/", self::pathInfoKeepingExtensionCase($fileName));
+    }
+
+    /**
+     * {@see AbstractFilesStorage::pathinfo_fix()} with the extension in its original case.
+     *
+     * pathinfo_fix() lowercases the extension, which is what a file type check wants, but not an
+     * object key that is read back by the original file name.
+     *
+     * @param string $path
+     *
+     * @return array{dirname?: string, basename?: string, extension?: string, filename?: string}
+     */
+    private static function pathInfoKeepingExtensionCase(string $path): array
+    {
+        /** @var array{dirname?: string, basename?: string, extension?: string, filename?: string} $fileInfo */
+        $fileInfo = AbstractFilesStorage::pathinfo_fix($path);
+
+        if (isset($fileInfo['basename'], $fileInfo['filename'], $fileInfo['extension']) && $fileInfo['filename'] !== '') {
+            $fileInfo['extension'] = substr($fileInfo['basename'], strlen($fileInfo['filename']) + 1);
+        }
+
+        return $fileInfo;
     }
 
     /**
