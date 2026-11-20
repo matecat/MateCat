@@ -8,6 +8,7 @@ import {
 import textUtils from '../../utils/textUtils'
 import ApplicationStore from '../../stores/ApplicationStore'
 import Tooltip from '../common/Tooltip'
+import {Input, INPUT_SIZE} from '../common/Input/Input'
 
 const inputTypes = {
   number: 'number',
@@ -81,7 +82,7 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
               type,
               value: values[name]
                 ? values[name].value
-                : inputDefaultValue[type],
+                : (inputDefaultValue[type] ?? ''),
             },
           }
         })
@@ -196,11 +197,7 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
             </div>
           </Tooltip>
         </div>
-        <Tooltip content={human_rule}>
-          <div ref={createRef()} className="plural-example">
-            {human_rule}
-          </div>
-        </Tooltip>
+        <div className="plural-example">{human_rule}</div>
       </div>
     ),
     [],
@@ -224,7 +221,7 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
             {analyzeICU.hasSelectOrdinal && (
               <div className="segment-footer-icu-plurals-section">
                 <div>
-                  <h3>SelectOrdinal Rules</h3>
+                  <h3>Ordinal rules</h3>
                 </div>
                 <div>{pluralRulesForLocale?.ordinal.map(renderRule)}</div>
               </div>
@@ -236,20 +233,24 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
           {variableNames.length === 0 && <div>No variables</div>}
           <div className="segment-footer-icu-inputs">
             {variableNames.map(({name, type}) => (
-              <div key={name}>
-                <label>
-                  <div>
-                    {name}
-                    <span>({inputTypes[type]})</span>
-                  </div>
-                  <input
-                    value={values[name]?.value ?? ''}
-                    onChange={(e) => onChangeValue(e, name)}
-                    style={{width: '10rem'}}
-                    type={inputTypes[type]}
-                  />
-                </label>
-              </div>
+              <Input
+                key={name}
+                name={`icu-${segment.sid ?? ''}-${name}`}
+                className="segment-footer-icu-input"
+                size={INPUT_SIZE.COMPRESSED}
+                label={
+                  <>
+                    <span className="variable-name">{name}</span>
+                    <span className="variable-type">
+                      ({inputTypes[type ?? '']})
+                    </span>
+                  </>
+                }
+                value={values[name]?.value ?? ''}
+                onChange={(e) => onChangeValue(e, name)}
+                type={inputTypes[type ?? '']}
+                min={null}
+              />
             ))}
           </div>
           <div className="segment-footer-icu-preview-container">

@@ -16,6 +16,8 @@ export const INPUT_TYPE = {
   PASSWORD: 'password',
   NUMBER: 'number',
   EMAIL: 'email',
+  DATE: 'date',
+  TIME: 'time',
 }
 
 export const Input = React.forwardRef(
