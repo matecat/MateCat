@@ -32,6 +32,11 @@ import {
   encodeTagsFromUnicodeChar,
 } from './DraftMatecatUtils/tagUtils'
 
+// How long a requested segment waits for its SSE result before it can be
+// requested again. Under load the queue is slow, not empty: a short timeout
+// re-enqueues the same segment and adds to the load.
+export const CONTRIBUTION_PENDING_TIMEOUT_MS = 60000
+
 let TranslationMatches = {
   copySuggestionInEditarea: function (segment, index, translation) {
     if (!config.translation_matches_enabled) return
@@ -119,7 +124,40 @@ let TranslationMatches = {
       }
     }
   },
-  segmentsWaitingForContributions: [],
+  /**
+   * Segments whose contributions were requested and have not arrived yet,
+   * keyed by original segment id, valued by the timer that expires the wait.
+   *
+   * The get-contribution POST only acknowledges that the request was queued:
+   * the matches arrive later through the SSE `contribution` event. A segment
+   * stays pending until then, so opening segments while the queue is slow does
+   * not enqueue the same request again. The timer frees it if the result never
+   * arrives (a worker failure, a lost message).
+   */
+  pendingContributions: new Map(),
+  isContributionPending: function (sid) {
+    return this.pendingContributions.has(String(sid))
+  },
+  markContributionPending: function (sid) {
+    this.clearPendingContribution(sid)
+    const key = String(sid)
+    this.pendingContributions.set(
+      key,
+      setTimeout(
+        () => this.pendingContributions.delete(key),
+        CONTRIBUTION_PENDING_TIMEOUT_MS,
+      ),
+    )
+  },
+  clearPendingContribution: function (sid) {
+    const key = String(sid)
+    clearTimeout(this.pendingContributions.get(key))
+    this.pendingContributions.delete(key)
+  },
+  clearAllPendingContributions: function () {
+    this.pendingContributions.forEach((timer) => clearTimeout(timer))
+    this.pendingContributions.clear()
+  },
   /**
    * Get contributions for the current segment and prefetch for the next ones
    * @param sid Segment ID
@@ -278,26 +316,14 @@ let TranslationMatches = {
         contextListAfter,
         ...(laraModel && {laraModel}),
         reasoning: laraModel === 'think',
+      }).catch((errors) => {
+        // On success the segment stays pending: the POST only queued the
+        // request, and the SSE `contribution` event frees it. On failure
+        // nothing was queued, so no result will arrive: allow a retry.
+        this.clearPendingContribution(id_segment_original)
+        CatToolActions.processErrors(errors, 'getContribution')
+        TranslationMatches.renderContributionErrors(errors, id_segment_original)
       })
-        .then(() => {
-          // Remove from waiting list
-          if (
-            this.segmentsWaitingForContributions.indexOf(id_segment_original) >
-            -1
-          ) {
-            this.segmentsWaitingForContributions.splice(
-              this.segmentsWaitingForContributions.indexOf(id_segment_original),
-              1,
-            )
-          }
-        })
-        .catch((errors) => {
-          CatToolActions.processErrors(errors, 'getContribution')
-          TranslationMatches.renderContributionErrors(
-            errors,
-            id_segment_original,
-          )
-        })
     }
 
     const jobLanguages = [config.source_code, config.target_code]
@@ -319,13 +345,13 @@ let TranslationMatches = {
     const allowedLaraProsa =
       typeof laraStyleGuide === 'string' && laraStyleGuide !== ''
 
-    if (
-      this.segmentsWaitingForContributions.indexOf(id_segment_original) > -1
-    ) {
+    // A forced request (TM keys or cross languages changed) asks with new
+    // settings, so a result still pending for the old ones does not cover it.
+    if (!force && this.isContributionPending(id_segment_original)) {
       return Promise.resolve()
     }
 
-    this.segmentsWaitingForContributions.push(id_segment_original)
+    this.markContributionPending(id_segment_original)
 
     if (
       isLaraEngine &&

@@ -4,6 +4,7 @@ import SocketListener from './SocketListener'
 import useSocketLayer, {ConnectionStates} from '../hooks/useSocketLayer'
 import CatToolActions from '../actions/CatToolActions'
 import SegmentActions from '../actions/SegmentActions'
+import TranslationMatches from '../components/segments/utils/translationMatches'
 import UserActions from '../actions/UserActions'
 import Cookies from 'js-cookie'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
@@ -178,6 +179,38 @@ describe('SocketListener', () => {
         expect.objectContaining({secure: true}),
       )
     })
+  })
+
+  describe('pending contributions', () => {
+    beforeEach(() => {
+      global.config = {...global.config, translation_matches_enabled: false}
+      TranslationMatches.clearAllPendingContributions()
+    })
+
+    afterEach(() => TranslationMatches.clearAllPendingContributions())
+
+    test('a contribution result frees its segment for a new request', () => {
+      TranslationMatches.markContributionPending(101)
+      TranslationMatches.markContributionPending(102)
+
+      eventHandlers.contribution({id_segment: '101', matches: []})
+
+      expect(TranslationMatches.isContributionPending(101)).toBe(false)
+      expect(TranslationMatches.isContributionPending(102)).toBe(true)
+    })
+
+    test.each(['disconnected', 'reconnected'])(
+      '%s frees every pending segment, since their results are lost',
+      (event) => {
+        TranslationMatches.markContributionPending(101)
+        TranslationMatches.markContributionPending(102)
+
+        eventHandlers[event]()
+
+        expect(TranslationMatches.isContributionPending(101)).toBe(false)
+        expect(TranslationMatches.isContributionPending(102)).toBe(false)
+      },
+    )
   })
 
   describe('ack', () => {
