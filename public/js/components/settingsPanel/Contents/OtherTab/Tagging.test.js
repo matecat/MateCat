@@ -118,7 +118,7 @@ describe('Tagging', () => {
       currentProjectTemplate: {subfilteringHandlers: ['sprintf']},
     })
     const sprintfOption = screen.getByTestId('option-sprintf')
-    expect(sprintfOption).toHaveTextContent('See guides page')
+    expect(sprintfOption).toHaveTextContent('See details')
   })
 
   test('clicking the html content stops event propagation', () => {

@@ -14,6 +14,7 @@ import {
   BUTTON_TYPE,
 } from '../../../../common/Button/Button'
 import IconClose from '../../../../../../img/icons/IconClose'
+import {Radio, RADIO_SIZE} from '../../../../common/Radio/Radio'
 
 export const DeepLGlossaryCreateRow = ({engineId, row, setRows}) => {
   const {portalTarget} = useContext(SettingsPanelContext)
@@ -25,8 +26,8 @@ export const DeepLGlossaryCreateRow = ({engineId, row, setRows}) => {
 
   const ref = useRef()
 
-  const onChangeIsActive = (e) => {
-    setIsActive(e.currentTarget.checked)
+  const onChangeIsActive = (checked) => {
+    setIsActive(checked)
   }
 
   const onChangeName = (e) => {
@@ -126,10 +127,11 @@ export const DeepLGlossaryCreateRow = ({engineId, row, setRows}) => {
           isWaitingResult ? ' row-content-create-glossary-waiting' : ''
         }`}
       >
-        <input
+        <Radio
+          name="deeplGlossaryNone"
+          size={RADIO_SIZE.SMALL}
           checked={isActive}
           onChange={onChangeIsActive}
-          type="radio"
           title=""
           disabled
         />

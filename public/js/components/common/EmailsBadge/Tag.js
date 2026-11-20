@@ -34,7 +34,7 @@ export const Tag = ({
           onClick={handleCLick}
           data-testid="email-badge-tag-remove"
         >
-          <IconClose size={8} />
+          <IconClose size={14} />
         </div>
       )}
     </div>

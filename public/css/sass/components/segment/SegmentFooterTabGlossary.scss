@@ -663,12 +663,8 @@ span {
   display: block;
   margin-top: 10px;
 }
-
+.glossary-keys-dropdown,
 .glossary-domain-subdomain-dropdown {
-  .dropdown__option--is-no-results-found {
-    display: none;
-  }
-
   .button-create-option {
     > div {
       width: 100%;
@@ -685,13 +681,25 @@ span {
       }
     }
 
-    &:has(+ .dropdown__option--is-no-results-found) {
-      margin-bottom: 0;
-    }
-
     &:hover {
       background-color: colors.$grey50 !important;
     }
+  }
+}
+
+.glossary-keys-dropdown {
+  .button-create-option + .dropdown__option--is-no-results-found {
+    display: none;
+  }
+}
+
+.glossary-domain-subdomain-dropdown {
+  .dropdown__option--is-no-results-found {
+    display: none;
+  }
+
+  &:has(+ .dropdown__option--is-no-results-found) {
+    margin-bottom: 0;
   }
 }
 

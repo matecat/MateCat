@@ -1,5 +1,6 @@
 import React, {Fragment, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
+import {Radio, RADIO_SIZE} from '../../../../common/Radio/Radio'
 
 export const DeepLGlossaryNoneRow = ({row, setRows}) => {
   const [isActive, setIsActive] = useState(false)
@@ -8,8 +9,8 @@ export const DeepLGlossaryNoneRow = ({row, setRows}) => {
     setIsActive(row.isActive)
   }, [row.isActive])
 
-  const onChangeIsActive = (e) => {
-    const isActive = e.currentTarget.checked
+  const onChangeIsActive = (checked) => {
+    const isActive = checked
     setRows((prevState) =>
       prevState.map((glossary) => ({
         ...glossary,
@@ -21,12 +22,12 @@ export const DeepLGlossaryNoneRow = ({row, setRows}) => {
   return (
     <Fragment>
       <div>
-        <input
+        <Radio
           name="active"
+          size={RADIO_SIZE.SMALL}
           checked={isActive}
           onChange={onChangeIsActive}
-          type="radio"
-          data-testid={`deeplglossary-active-${row.id}`}
+          testId={`deeplglossary-active-${row.id}`}
         />
       </div>
       <div className="glossary-row-name">{row.name}</div>

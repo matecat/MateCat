@@ -64,7 +64,7 @@ class YamlTest extends AbstractTest
     {
         $this->expectException(DomainException::class);
         $dto = new Yaml();
-        $dto->setInnerContentType('text/plain');
+        $dto->setInnerContentType('application/pdf');
     }
 
     #[Test]
@@ -149,6 +149,7 @@ class YamlTest extends AbstractTest
     public function allValidMimeTypesAccepted(): void
     {
         $validTypes = [
+            'text/plain',
             'text/html',
             'text/xml',
             'application/xml',

@@ -109,15 +109,24 @@ class JsonTest extends AbstractTest
     }
 
     #[Test]
+    public function setInnerContentTypeAcceptsPlainText(): void
+    {
+        $dto = new Json();
+        $dto->setInnerContentType('text/plain');
+        $this->assertSame('text/plain', $dto->jsonSerialize()['inner_content_type']);
+    }
+
+    #[Test]
     public function setInnerContentTypeThrowsOnInvalidMimeType(): void
     {
         $this->expectException(DomainException::class);
         $dto = new Json();
-        $dto->setInnerContentType('text/plain');
+        $dto->setInnerContentType('application/pdf');
     }
 
     /**
-     * text/html is the only mime type allowed for JSON; the wider YAML allow-list must not leak in.
+     * text/html and text/plain are the only mime types allowed for JSON; the wider YAML
+     * allow-list must not leak in.
      */
     #[Test]
     public function setInnerContentTypeRejectsYamlOnlyMimeTypes(): void
