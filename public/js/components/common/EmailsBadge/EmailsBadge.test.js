@@ -370,4 +370,13 @@ describe('EmailsBadge additional behaviors', () => {
     )
     expect(screen.getByText('not-an-email')).toBeInTheDocument()
   })
+
+  it('renders the chip remove icon at a tappable size', () => {
+    render(
+      <EmailsBadge name="invite" value={['a@mail.com']} onChange={() => {}} />,
+    )
+    expect(screen.getByTestId('email-badge-tag-remove').innerHTML).toContain(
+      'width="14" height="14"',
+    )
+  })
 })

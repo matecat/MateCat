@@ -1,4 +1,4 @@
-import {renderHook, act} from '@testing-library/react'
+import {renderHook, act, waitFor} from '@testing-library/react'
 import useSyncTemplateWithConvertFile from './useSyncTemplateWithConvertFile'
 
 global.config = {...global.config, is_cattool: true}
@@ -72,6 +72,78 @@ describe('useSyncTemplateWithConvertFile', () => {
       expect(normalized.find(({id}) => id === 2).isSelected).toBe(true)
       expect(normalized.find(({id}) => id === 1).isSelected).toBe(false)
       expect(normalized.find(({id}) => id === 0).isSelected).toBe(false)
+    })
+
+    test('normalizes a nested inner_content_type against the default template', async () => {
+      const defaultTemplateWithContentType = {
+        id: 0,
+        name: 'default',
+        json: {inner_content_type: 'text/plain', extract_arrays: false},
+        yaml: {inner_content_type: 'text/plain'},
+      }
+      const items = [
+        {
+          id: 1,
+          name: 'one',
+          json: {inner_content_type: null, extract_arrays: true},
+        },
+        {id: 2, name: 'two', json: {inner_content_type: 'text/html'}},
+      ]
+      const props = {
+        ...baseProps(),
+        isCattool: false,
+        defaultTemplate: defaultTemplateWithContentType,
+        getTemplates: jest.fn(() => Promise.resolve({items})),
+      }
+
+      renderHook(() => useSyncTemplateWithConvertFile(props))
+      await waitFor(() =>
+        expect(
+          props.setTemplates.mock.calls.some(([arg]) => Array.isArray(arg)),
+        ).toBe(true),
+      )
+
+      const arrayCall = props.setTemplates.mock.calls.find(([arg]) =>
+        Array.isArray(arg),
+      )
+      const normalized = arrayCall[0]
+
+      // null inner_content_type falls back to the default template's value,
+      // while other nested props on the same template stay untouched
+      const templateOne = normalized.find(({id}) => id === 1)
+      expect(templateOne.json.inner_content_type).toBe('text/plain')
+      expect(templateOne.json.extract_arrays).toBe(true)
+
+      // an explicit inner_content_type is kept as-is, not overwritten by the default
+      expect(normalized.find(({id}) => id === 2).json.inner_content_type).toBe(
+        'text/html',
+      )
+
+      // the default template itself is unaffected
+      expect(normalized.find(({id}) => id === 0).json.inner_content_type).toBe(
+        'text/plain',
+      )
+    })
+
+    test('does not crash when a template has a null top-level prop', async () => {
+      const items = [{id: 1, name: 'one', tm: null}]
+      const props = {
+        ...baseProps(),
+        isCattool: false,
+        getTemplates: jest.fn(() => Promise.resolve({items})),
+      }
+
+      renderHook(() => useSyncTemplateWithConvertFile(props))
+      await waitFor(() =>
+        expect(
+          props.setTemplates.mock.calls.some(([arg]) => Array.isArray(arg)),
+        ).toBe(true),
+      )
+
+      const arrayCall = props.setTemplates.mock.calls.find(([arg]) =>
+        Array.isArray(arg),
+      )
+      expect(arrayCall[0].find(({id}) => id === 1).tm).toBeNull()
     })
 
     test('only retrieves templates once across rerenders', async () => {
