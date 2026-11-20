@@ -24,6 +24,7 @@ import {Button, BUTTON_MODE, BUTTON_SIZE} from '../../../common/Button/Button'
 import ChevronLeft from '../../../../../img/icons/ChevronLeft'
 import ChevronRight from '../../../../../img/icons/ChevronRight'
 import {MODAL_KEY} from '../../../../constants/ModalKeys'
+import {Checkbox, CHECKBOX_SIZE, CHECKBOX_STATE} from '../../../common/Checkbox'
 
 // Mirrors TranslationStatus::$REVISION_STATUSES on the server
 const REVISION_STATUSES = [
@@ -79,8 +80,6 @@ const Search = (props) => {
   const [showReplaceOptionsInSearch] = useState(true)
 
   const sourceElRef = useRef(null)
-  const matchCaseCheckRef = useRef(null)
-  const sourceInputRef = useRef(null)
   const targetInputRef = useRef(null)
 
   // mirrors the class's non-reactive instance field: mutating this does not
@@ -681,24 +680,38 @@ const Search = (props) => {
                 </div>
                 <div className="find-exact-match">
                   <div className="exact-match">
-                    <input
-                      type="checkbox"
+                    <Checkbox
                       tabIndex={3}
-                      checked={search.matchCase}
-                      onChange={(e) => handleInputChange('matchCase', e)}
-                      ref={matchCaseCheckRef}
+                      label="Match Case"
+                      size={CHECKBOX_SIZE.SMALL}
+                      value={
+                        search.matchCase
+                          ? CHECKBOX_STATE.CHECKED
+                          : CHECKBOX_STATE.UNCHECKED
+                      }
+                      onChange={(isChecked) =>
+                        handleInputChange('matchCase', {
+                          target: {type: 'checkbox', checked: isChecked},
+                        })
+                      }
                     />
-                    <label> Match Case</label>
                   </div>
                   <div className="exact-match">
-                    <input
-                      ref={sourceInputRef}
-                      type="checkbox"
+                    <Checkbox
+                      label="Whole word"
                       tabIndex={4}
-                      checked={search.exactMatch}
-                      onChange={(e) => handleInputChange('exactMatch', e)}
+                      size={CHECKBOX_SIZE.SMALL}
+                      value={
+                        search.exactMatch
+                          ? CHECKBOX_STATE.CHECKED
+                          : CHECKBOX_STATE.UNCHECKED
+                      }
+                      onChange={(isChecked) =>
+                        handleInputChange('exactMatch', {
+                          target: {type: 'checkbox', checked: isChecked},
+                        })
+                      }
                     />
-                    <label> Whole word</label>
                   </div>
                 </div>
               </div>
@@ -724,13 +737,21 @@ const Search = (props) => {
                     <div
                       className={'enable-replace-check ' + replaceCheckboxClass}
                     >
-                      <input
-                        type="checkbox"
+                      <Checkbox
                         tabIndex={5}
-                        checked={search.enableReplace}
-                        onChange={(e) => handleInputChange('enableReplace', e)}
+                        label="Replace with"
+                        size={CHECKBOX_SIZE.SMALL}
+                        value={
+                          search.enableReplace
+                            ? CHECKBOX_STATE.CHECKED
+                            : CHECKBOX_STATE.UNCHECKED
+                        }
+                        onChange={(isChecked) =>
+                          handleInputChange('enableReplace', {
+                            target: {type: 'checkbox', checked: isChecked},
+                          })
+                        }
                       />
-                      <label> Replace with</label>
                     </div>
                   ) : null}
                 </div>
@@ -815,11 +836,19 @@ const Search = (props) => {
                 </div>
                 {jobIsSplittedRef.current && (
                   <div className="find-option">
-                    <input
-                      type="checkbox"
+                    <Checkbox
                       tabIndex={5}
-                      checked={search.entireJob}
-                      onChange={(e) => handleInputChange('entireJob', e)}
+                      size={CHECKBOX_SIZE.SMALL}
+                      value={
+                        search.entireJob
+                          ? CHECKBOX_STATE.CHECKED
+                          : CHECKBOX_STATE.UNCHECKED
+                      }
+                      onChange={(isChecked) =>
+                        handleInputChange('entireJob', {
+                          target: {type: 'checkbox', checked: isChecked},
+                        })
+                      }
                     />
                     <label> Search all chunks</label>
                   </div>

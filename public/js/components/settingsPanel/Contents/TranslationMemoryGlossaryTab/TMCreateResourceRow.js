@@ -17,6 +17,11 @@ import {
   BUTTON_TYPE,
 } from '../../../common/Button/Button'
 import IconClose from '../../../../../img/icons/IconClose'
+import {
+  Checkbox,
+  CHECKBOX_SIZE,
+  CHECKBOX_STATE,
+} from '../../../common/Checkbox'
 
 export const TMCreateResourceRow = ({row}) => {
   const {tmKeys, setTmKeys, modifyingCurrentTemplate} =
@@ -34,14 +39,14 @@ export const TMCreateResourceRow = ({row}) => {
     nameRef.current.focus()
   }, [])
 
-  const onChangeIsLookup = (e) => {
-    const isLookup = e.currentTarget.checked
+  const onChangeIsLookup = (isChecked) => {
+    const isLookup = isChecked
     setIsLookup(isLookup)
     updateRow({isUpdating, isLookup, name})
   }
 
-  const onChangeIsUpdating = (e) => {
-    const isUpdating = e.currentTarget.checked
+  const onChangeIsUpdating = (isChecked) => {
+    const isUpdating = isChecked
     setIsUpdating(isUpdating)
     updateRow({isUpdating, isLookup, name})
   }
@@ -322,13 +327,19 @@ export const TMCreateResourceRow = ({row}) => {
   return (
     <form className="settings-panel-row-content" onSubmit={onSubmit}>
       <div className="tm-key-lookup align-center">
-        <input checked={isLookup} onChange={onChangeIsLookup} type="checkbox" />
+        <Checkbox
+          value={isLookup ? CHECKBOX_STATE.CHECKED : CHECKBOX_STATE.UNCHECKED}
+          size={CHECKBOX_SIZE.SMALL}
+          onChange={onChangeIsLookup}
+          testId={`tmkey-create-lookup-${row.id}`}
+        />
       </div>
       <div className="tm-key-update align-center">
-        <input
-          checked={isUpdating}
+        <Checkbox
+          value={isUpdating ? CHECKBOX_STATE.CHECKED : CHECKBOX_STATE.UNCHECKED}
+          size={CHECKBOX_SIZE.SMALL}
           onChange={onChangeIsUpdating}
-          type="checkbox"
+          testId={`tmkey-create-update-${row.id}`}
         />
       </div>
       <div>

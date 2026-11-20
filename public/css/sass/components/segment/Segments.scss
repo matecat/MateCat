@@ -2,7 +2,7 @@
 @use '../../commons/variables';
 .segment-selected-inBulk:not(.opened) {
   .segment-add-inBulk {
-    display: block !important;
+    display: flex !important;
   }
 }
 
@@ -14,7 +14,7 @@
 
 #file section {
   &:not(.readonly):not(.muted):hover .segment-add-inBulk {
-    display: block;
+    display: flex;
   }
 
   .segment-add-inBulk,
@@ -147,19 +147,14 @@ section.readonly .txt input {
   display: none !important;
 }
 
-section.segment-selected-inBulk .sid .txt input {
-  display: unset;
-}
-/*section.editor .sid .txt input {
-    display: unset;
-}*/
-
 section.editor.segment-selected-inBulk .sid .txt.segment-add-inBulk {
-  display: block !important;
+  display: flex !important;
 }
 
-section.editor .txt.segment-add-inBulk {
-  display: block;
+.segment-add-inBulk {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 p.split-shortcut {

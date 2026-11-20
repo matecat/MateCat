@@ -11,6 +11,7 @@ import {
   BUTTON_TYPE,
 } from '../../../common/Button/Button'
 import IconClose from '../../../../../img/icons/IconClose'
+import {Checkbox, CHECKBOX_SIZE, CHECKBOX_STATE} from '../../../common/Checkbox'
 
 export const ExportTMX = ({row, onClose}) => {
   const {email, status, onSubmit, onReset} = useExport({
@@ -51,12 +52,16 @@ export const ExportTMX = ({row, onClose}) => {
             We will send a link to download the exported TM to your email.
           </span>
           <div className="translation-memory-glossary-tab-checkbox">
-            Export TM without tags
-            <input
+            <Checkbox
               name="tags"
-              type="checkbox"
-              onChange={(e) => setStripTags(e.currentTarget.checked)}
-            ></input>
+              label="Export TM without tags"
+              size={CHECKBOX_SIZE.SMALL}
+              value={
+                stripTags ? CHECKBOX_STATE.CHECKED : CHECKBOX_STATE.UNCHECKED
+              }
+              onChange={(isChecked) => setStripTags(isChecked)}
+              testId="export-tmx-strip-tags"
+            />
           </div>
         </div>
         <div className="translation-memory-glossary-tab-buttons-group align-center">

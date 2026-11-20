@@ -272,6 +272,69 @@ test('delete: with no other templates involved, expands the DeleteResource row d
   ).toBeInTheDocument()
 })
 
+test('delete: checking the ModernMT removal checkbox requests removal from ModernMT', async () => {
+  const user = userEvent.setup()
+  const row = baseRow()
+  deleteTmKey.mockResolvedValue({})
+  getTmKeyEnginesInfo.mockResolvedValue(['MMT'])
+
+  render(<Wrapper row={row} />)
+
+  await act(async () => user.click(screen.getByTestId('tm-row-menu')))
+  await act(async () => user.click(screen.getByTestId('delete-resource')))
+
+  await act(async () =>
+    user.click(screen.getByTestId('delete-remove-from-mmt')),
+  )
+  await act(async () => user.click(screen.getByText('Confirm')))
+
+  expect(deleteTmKey).toHaveBeenCalledWith({key: row.key, removeFrom: 'MMT'})
+})
+
+test('delete: checking the Lara removal checkbox requests removal from Lara', async () => {
+  const user = userEvent.setup()
+  const row = baseRow()
+  deleteTmKey.mockResolvedValue({})
+  getTmKeyEnginesInfo.mockResolvedValue(['Lara'])
+
+  render(<Wrapper row={row} />)
+
+  await act(async () => user.click(screen.getByTestId('tm-row-menu')))
+  await act(async () => user.click(screen.getByTestId('delete-resource')))
+
+  await act(async () =>
+    user.click(screen.getByTestId('delete-remove-from-lara')),
+  )
+  await act(async () => user.click(screen.getByText('Confirm')))
+
+  expect(deleteTmKey).toHaveBeenCalledWith({key: row.key, removeFrom: 'Lara'})
+})
+
+test('delete: when both MMT and Lara are linked, checking both checkboxes requests removal from both', async () => {
+  const user = userEvent.setup()
+  const row = baseRow()
+  deleteTmKey.mockResolvedValue({})
+  getTmKeyEnginesInfo.mockResolvedValue(['MMT', 'Lara'])
+
+  render(<Wrapper row={row} />)
+
+  await act(async () => user.click(screen.getByTestId('tm-row-menu')))
+  await act(async () => user.click(screen.getByTestId('delete-resource')))
+
+  await act(async () =>
+    user.click(screen.getByTestId('delete-remove-from-lara')),
+  )
+  await act(async () =>
+    user.click(screen.getByTestId('delete-remove-from-mmt')),
+  )
+  await act(async () => user.click(screen.getByText('Confirm')))
+
+  expect(deleteTmKey).toHaveBeenCalledWith({
+    key: row.key,
+    removeFrom: 'Lara,MMT',
+  })
+})
+
 test('delete: with other templates involved, opens the confirmation modal listing them', async () => {
   const user = userEvent.setup()
   const row = baseRow()

@@ -7,6 +7,8 @@ import ModalsActions from '../../actions/ModalsActions'
 import {Button, BUTTON_MODE, BUTTON_TYPE} from '../common/Button/Button'
 import Tooltip from '../common/Tooltip'
 import {SpinnerLoader} from '../common/SpinnerLoader'
+import {Checkbox, CHECKBOX_STATE} from '../common/Checkbox'
+import {NumericStepper} from '../common/NumericStepper/NumericStepper'
 
 const SplitJobModal = ({job, project, callback}) => {
   const [numSplit, setNumSplit] = useState(2)
@@ -24,9 +26,6 @@ const SplitJobModal = ({job, project, callback}) => {
   const [jobSplttable, setJobSplittable] = useState(true)
   const [isConfirming, setIsConfirming] = useState(false)
 
-  const splitSelectRef = useRef(null)
-  // A second split-job-apply on the same job re-splits it on top of the first one.
-  // The ref blocks a second click that lands before React re-renders the disabled button.
   const isConfirmingRef = useRef(false)
   const tooltipRef = useRef()
 
@@ -37,6 +36,37 @@ const SplitJobModal = ({job, project, callback}) => {
   useEffect(() => {
     checkSplitData()
   }, [splitData, splitRawWord])
+
+  const calculateSplitComputation = (numSplit) => {
+    let numWords,
+      array = []
+    let totalInt = Math.round(total)
+
+    let wordsXjob = Math.floor(totalInt / numSplit)
+    let diff = totalInt - wordsXjob * numSplit
+    for (let i = 0; i < numSplit; i++) {
+      numWords = wordsXjob
+      if (i < diff) {
+        numWords++
+      }
+
+      array.push(numWords)
+    }
+    return array
+  }
+
+  // Only runs when the stepper's value is committed (+/-, blur, Enter), not on
+  // every keystroke — mirrors the old <select onChange> firing only on an
+  // actual selection. Recomputing on every `total`/`showLoader` change (as a
+  // useEffect watching them would) reset splitChecked right back to false the
+  // moment checkSplitData() had just set it to true.
+  const changeSplitNumber = (newNumSplit) => {
+    const arraySplitNew = calculateSplitComputation(newNumSplit)
+    setNumSplit(newNumSplit)
+    setWordsArray(arraySplitNew)
+    setSplitChecked(false)
+    setShowLoader(false)
+  }
 
   const checkSplitData = () => {
     let arrayChunks = []
@@ -101,34 +131,6 @@ const SplitJobModal = ({job, project, callback}) => {
 
   const closeModal = () => {
     ModalsActions.onCloseModal()
-  }
-
-  const changeSplitNumber = () => {
-    const arraySplitNew = calculateSplitComputation(
-      splitSelectRef.current.value,
-    )
-    setNumSplit(splitSelectRef.current.value)
-    setWordsArray(arraySplitNew)
-    setSplitChecked(false)
-    setShowLoader(false)
-  }
-
-  const calculateSplitComputation = (numSplit) => {
-    let numWords,
-      array = []
-    let totalInt = Math.round(total)
-
-    let wordsXjob = Math.floor(totalInt / numSplit)
-    let diff = totalInt - wordsXjob * numSplit
-    for (let i = 0; i < numSplit; i++) {
-      numWords = wordsXjob
-      if (i < diff) {
-        numWords++
-      }
-
-      array.push(numWords)
-    }
-    return array
   }
 
   const changeInputWordsCount = (indexChanged, e) => {
@@ -289,12 +291,15 @@ const SplitJobModal = ({job, project, callback}) => {
           </div>
           <div>
             <div className="split-checkbox">
-              <span>Split based on raw word count</span>
               {splitData && parseInt(splitData.eq_word_count) !== 0 ? (
-                <input
-                  type="checkbox"
-                  checked={splitRawWord}
-                  onChange={(e) => setSplitRawWords(e.target.checked)}
+                <Checkbox
+                  label="Split based on raw word count"
+                  value={
+                    splitRawWord
+                      ? CHECKBOX_STATE.CHECKED
+                      : CHECKBOX_STATE.UNCHECKED
+                  }
+                  onChange={(checked) => setSplitRawWords(checked)}
                 />
               ) : (
                 <Tooltip
@@ -302,30 +307,28 @@ const SplitJobModal = ({job, project, callback}) => {
                     'The weighted word count for this job is 0, splitting is only available based on raw word count.'
                   }
                 >
-                  <input
-                    ref={tooltipRef}
-                    type="checkbox"
-                    checked="false"
-                    disabled="true"
-                  />
+                  <div ref={tooltipRef}>
+                    <Checkbox
+                      label="Split based on raw word count"
+                      value={CHECKBOX_STATE.UNCHECKED}
+                      onChange={() => {}}
+                      disabled
+                    />
+                  </div>
                 </Tooltip>
               )}
             </div>
-            <div className="container-split-select">
+            <div className="container-split-numeric-stepper">
               <div className="label left">Split job in:</div>
-              <select
-                name="popup-splitselect"
-                className="splitselect left"
-                ref={splitSelectRef}
-                onChange={changeSplitNumber}
+              <NumericStepper
+                value={numSplit}
+                onChange={setNumSplit}
+                onChangeCommitted={changeSplitNumber}
+                minimumValue={2}
+                maximumValue={50}
+                stepValue={1}
                 disabled={!jobSplttable}
-              >
-                {Array.from({length: 49}, (_, i) => (
-                  <option key={i + 2} value={i + 2}>
-                    {i + 2}
-                  </option>
-                ))}
-              </select>
+              />
               <div className="label left">Chunks</div>
             </div>
           </div>
