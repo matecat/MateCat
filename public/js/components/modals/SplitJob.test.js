@@ -64,7 +64,7 @@ test('confirming the split calls confirmSplitRequest and closes the modal on suc
     <SplitJobModal job={baseJob} project={baseProject} callback={callback} />,
   )
 
-  await waitFor(() => screen.getByText('Confirm'))
+  await screen.findByText('Confirm')
   fireEvent.click(screen.getByText('Confirm'))
 
   await waitFor(() => expect(callback).toHaveBeenCalledTimes(1))
@@ -78,7 +78,7 @@ test('shows an error and disables further checks when confirmSplitRequest fails'
     <SplitJobModal job={baseJob} project={baseProject} callback={jest.fn()} />,
   )
 
-  await waitFor(() => screen.getByText('Confirm'))
+  await screen.findByText('Confirm')
   fireEvent.click(screen.getByText('Confirm'))
 
   expect(await screen.findByText('confirm failed')).toBeInTheDocument()
@@ -117,7 +117,7 @@ test('editing a chunk word count shows the words-exceeding difference and re-ena
     <SplitJobModal job={baseJob} project={baseProject} callback={jest.fn()} />,
   )
 
-  await waitFor(() => screen.getByText('Confirm'))
+  await screen.findByText('Confirm')
 
   const inputs = getChunkInputs(container)
   fireEvent.change(inputs[0], {target: {value: '80'}})
@@ -133,7 +133,7 @@ test('changing the chunk count via the stepper recalculates the chunks', async (
     <SplitJobModal job={baseJob} project={baseProject} callback={jest.fn()} />,
   )
 
-  await waitFor(() => screen.getByText('Confirm'))
+  await screen.findByText('Confirm')
 
   const stepperInput = screen.getByDisplayValue('2')
   fireEvent.change(stepperInput, {target: {value: '4'}})
@@ -149,7 +149,7 @@ test('typing a new chunk count without blurring shows the chunk but does not rec
     <SplitJobModal job={baseJob} project={baseProject} callback={jest.fn()} />,
   )
 
-  await waitFor(() => screen.getByText('Confirm'))
+  await screen.findByText('Confirm')
 
   const stepperInput = screen.getByDisplayValue('2')
   fireEvent.change(stepperInput, {target: {value: '4'}})
@@ -166,7 +166,7 @@ test('clicking "Check split" re-issues the split request', async () => {
     <SplitJobModal job={baseJob} project={baseProject} callback={jest.fn()} />,
   )
 
-  await waitFor(() => screen.getByText('Confirm'))
+  await screen.findByText('Confirm')
   const inputs = getChunkInputs(container)
   fireEvent.change(inputs[0], {target: {value: '80'}})
 
@@ -183,7 +183,7 @@ test('shows an error when "Check split" fails', async () => {
     <SplitJobModal job={baseJob} project={baseProject} callback={jest.fn()} />,
   )
 
-  await waitFor(() => screen.getByText('Confirm'))
+  await screen.findByText('Confirm')
   const inputs = getChunkInputs(container)
   fireEvent.change(inputs[0], {target: {value: '80'}})
 
@@ -200,7 +200,7 @@ test('clicking Cancel closes the modal', async () => {
     <SplitJobModal job={baseJob} project={baseProject} callback={jest.fn()} />,
   )
 
-  await waitFor(() => screen.getByText('Confirm'))
+  await screen.findByText('Confirm')
   fireEvent.click(screen.getByText('Cancel'))
 
   expect(ModalsActions.onCloseModal).toHaveBeenCalledTimes(1)
@@ -214,7 +214,7 @@ test('shows a disabled tooltip checkbox when the weighted word count is 0', asyn
     <SplitJobModal job={baseJob} project={baseProject} callback={jest.fn()} />,
   )
 
-  await waitFor(() => screen.getByText('Confirm'))
+  await screen.findByText('Confirm')
   const checkbox = container.querySelector(
     '.split-checkbox input[type="checkbox"]',
   )
@@ -227,7 +227,7 @@ test('toggling the raw-word checkbox switches the displayed total', async () => 
     <SplitJobModal job={baseJob} project={baseProject} callback={jest.fn()} />,
   )
 
-  await waitFor(() => screen.getByText('Confirm'))
+  await screen.findByText('Confirm')
   const checkbox = container.querySelector(
     '.split-checkbox input[type="checkbox"]',
   )

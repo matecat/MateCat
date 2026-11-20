@@ -399,6 +399,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
                   onChange={(isChecked) => {
                     deleteTmKeyRemoveFrom.current.MMT = isChecked
                   }}
+                  testId="delete-remove-from-mmt"
                 />
                 Permanently delete it from my ModernMT account
               </div>
@@ -422,6 +423,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
                   onChange={(isChecked) => {
                     deleteTmKeyRemoveFrom.current.Lara = isChecked
                   }}
+                  testId="delete-remove-from-lara"
                 />
                 Permanently delete it from my Lara account
               </div>
@@ -450,6 +452,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
                     onChange={(isChecked) => {
                       deleteTmKeyRemoveFrom.current.Lara = isChecked
                     }}
+                    testId="delete-remove-from-lara"
                   />
                   Permanently delete it from my Lara account
                 </div>
@@ -464,6 +467,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
                     onChange={(isChecked) => {
                       deleteTmKeyRemoveFrom.current.MMT = isChecked
                     }}
+                    testId="delete-remove-from-mmt"
                   />
                   Permanently delete it from my ModernMT account
                 </div>

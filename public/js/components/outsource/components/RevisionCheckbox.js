@@ -19,6 +19,7 @@ const RevisionCheckbox = ({
           <Checkbox
             label="Add revision"
             value={revision ? CHECKBOX_STATE.CHECKED : CHECKBOX_STATE.UNCHECKED}
+            size={CHECKBOX_SIZE.SMALL}
             onChange={onToggle}
             disabled={outsourceConfirmed}
           />

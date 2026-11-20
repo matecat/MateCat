@@ -26,7 +26,10 @@ describe('Checkbox', () => {
   })
 
   it('applies the medium size class by default', () => {
+    // The size class lives on the input's wrapper div, not on an accessible
+    // role, so there is no query-by-role alternative here.
     const {container} = render(<Checkbox {...defaultProps} />)
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
     expect(container.querySelector('.input-checkbox')).toHaveClass('medium')
   })
 
@@ -34,6 +37,7 @@ describe('Checkbox', () => {
     const {container} = render(
       <Checkbox {...defaultProps} size={CHECKBOX_SIZE.SMALL} />,
     )
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
     expect(container.querySelector('.input-checkbox')).toHaveClass('small')
   })
 
@@ -96,6 +100,7 @@ describe('Checkbox', () => {
         value={CHECKBOX_STATE.CHECKED}
       />,
     )
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
     fireEvent.click(container.querySelector('.input-checkbox'), {
       shiftKey: true,
     })

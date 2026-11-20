@@ -52,7 +52,7 @@ describe('LaraGlossaryRow', () => {
   })
 
   test('updates this row active state on change', () => {
-    const {setRows, row} = setup({
+    const {setRows} = setup({
       row: {id: 'lara-1', name: 'Lara glossary', isActive: false},
     })
 

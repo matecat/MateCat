@@ -8,7 +8,7 @@ jest.mock('../../../../actions/ModalsActions')
 jest.mock('../../../../actions/CreateProjectActions')
 
 import React, {useState} from 'react'
-import {act, render, screen, within} from '@testing-library/react'
+import {act, render, screen} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import {TMKeyRow} from './TMKeyRow'
 import {SPECIAL_ROWS_ID} from './TranslationMemoryGlossaryTab'
@@ -283,11 +283,8 @@ test('delete: checking the ModernMT removal checkbox requests removal from Moder
   await act(async () => user.click(screen.getByTestId('tm-row-menu')))
   await act(async () => user.click(screen.getByTestId('delete-resource')))
 
-  const footerContainer = screen
-    .getByText(/also linked to your ModernMT account/)
-    .closest('.tm-row-delete-remove-from-content')
   await act(async () =>
-    user.click(within(footerContainer).getByRole('checkbox')),
+    user.click(screen.getByTestId('delete-remove-from-mmt')),
   )
   await act(async () => user.click(screen.getByText('Confirm')))
 
@@ -305,11 +302,8 @@ test('delete: checking the Lara removal checkbox requests removal from Lara', as
   await act(async () => user.click(screen.getByTestId('tm-row-menu')))
   await act(async () => user.click(screen.getByTestId('delete-resource')))
 
-  const footerContainer = screen
-    .getByText(/This resource is also linked to your Lara account/)
-    .closest('.tm-row-delete-remove-from-content')
   await act(async () =>
-    user.click(within(footerContainer).getByRole('checkbox')),
+    user.click(screen.getByTestId('delete-remove-from-lara')),
   )
   await act(async () => user.click(screen.getByText('Confirm')))
 
@@ -327,12 +321,12 @@ test('delete: when both MMT and Lara are linked, checking both checkboxes reques
   await act(async () => user.click(screen.getByTestId('tm-row-menu')))
   await act(async () => user.click(screen.getByTestId('delete-resource')))
 
-  const footerContainer = screen
-    .getByText(/also linked to your ModernMT and Lara accounts/)
-    .closest('.tm-row-delete-remove-from-content')
-  const checkboxes = within(footerContainer).getAllByRole('checkbox')
-  await act(async () => user.click(checkboxes[0]))
-  await act(async () => user.click(checkboxes[1]))
+  await act(async () =>
+    user.click(screen.getByTestId('delete-remove-from-lara')),
+  )
+  await act(async () =>
+    user.click(screen.getByTestId('delete-remove-from-mmt')),
+  )
   await act(async () => user.click(screen.getByText('Confirm')))
 
   expect(deleteTmKey).toHaveBeenCalledWith({
