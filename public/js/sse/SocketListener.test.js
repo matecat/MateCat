@@ -209,6 +209,9 @@ describe('SocketListener', () => {
 
         expect(TranslationMatches.isContributionPending(101)).toBe(false)
         expect(TranslationMatches.isContributionPending(102)).toBe(false)
+        expect(
+          SegmentActions.clearAllPendingGlossaryRequests,
+        ).toHaveBeenCalled()
       },
     )
   })

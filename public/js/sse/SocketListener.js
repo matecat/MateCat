@@ -17,10 +17,12 @@ const SocketListener = ({isAuthenticated, userId}) => {
     disconnected: () => {
       // Results sent while the stream is down are lost: stop waiting for them.
       TranslationMatches.clearAllPendingContributions()
+      SegmentActions.clearAllPendingGlossaryRequests()
       CatToolActions.clientConnected(false)
     },
     reconnected: () => {
       TranslationMatches.clearAllPendingContributions()
+      SegmentActions.clearAllPendingGlossaryRequests()
       CatToolActions.clientReconnect()
     },
     ack: ({clientId, serverVersion}) => {
