@@ -505,6 +505,183 @@ class SegmentDaoRealSqlTest extends AbstractTest
         $this->assertNotContains($this->segIds[0], $intIds);
     }
 
+    /**
+     * seg0: minor (cat A), seg1: critical (cat B), seg2: major (cat A), seg3: "Très grave" (cat B).
+     *
+     * @return array{0: int, 1: int} the two category ids, A then B
+     */
+    private function seedSeverityIssues(): array
+    {
+        $this->seedQrTranslations();
+        $catA = (int)$this->fixtures->makeQaCategory('RsqSevA', 1, '{}')['id'];
+        $catB = (int)$this->fixtures->makeQaCategory('RsqSevB', 1, '{}')['id'];
+        $this->insertQaEntry($this->segIds[0], $catA, 'minor', 2);
+        $this->insertQaEntry($this->segIds[1], $catB, 'critical', 2);
+        $this->insertQaEntry($this->segIds[2], $catA, 'major', 2);
+        $this->insertQaEntry($this->segIds[3], $catB, 'Très grave', 2);
+
+        return [$catA, $catB];
+    }
+
+    /**
+     * @param array<string, mixed> $filter
+     *
+     * @return list<int> sorted, deduplicated
+     */
+    private function qrIdsWithFilter(array $filter, string $where = 'after'): array
+    {
+        $ref = $where === 'center' ? $this->segIds[2] : min($this->segIds) - 1;
+        $ids = array_map('intval', $this->dao->getSegmentsIdForQR($this->jobStruct, 100, $ref, $where, ['filter' => $filter]));
+        $ids = array_values(array_unique($ids));
+        sort($ids);
+
+        return $ids;
+    }
+
+    #[Test]
+    public function getSegmentsIdForQR_severity_list_matches_any_of_the_values(): void
+    {
+        $this->seedSeverityIssues();
+
+        $this->assertSame(
+            [$this->segIds[0], $this->segIds[1]],
+            $this->qrIdsWithFilter(['severity' => ['minor', 'critical']])
+        );
+    }
+
+    #[Test]
+    public function getSegmentsIdForQR_single_item_severity_list_equals_the_string_form(): void
+    {
+        $this->seedSeverityIssues();
+
+        $this->assertSame([$this->segIds[2]], $this->qrIdsWithFilter(['severity' => ['major']]));
+        $this->assertSame([$this->segIds[2]], $this->qrIdsWithFilter(['severity' => 'major']));
+    }
+
+    #[Test]
+    public function getSegmentsIdForQR_empty_severity_list_adds_no_condition(): void
+    {
+        $this->seedSeverityIssues();
+        $unfiltered = $this->qrIdsWithFilter([]);
+
+        $this->assertNotEmpty($unfiltered);
+        $this->assertSame($unfiltered, $this->qrIdsWithFilter(['severity' => []]));
+        $this->assertSame($unfiltered, $this->qrIdsWithFilter(['severity' => ['']]));
+        $this->assertSame($unfiltered, $this->qrIdsWithFilter(['severity' => '']));
+    }
+
+    #[Test]
+    public function getSegmentsIdForQR_severity_list_drops_non_scalar_items(): void
+    {
+        $this->seedSeverityIssues();
+
+        $this->assertSame([$this->segIds[2]], $this->qrIdsWithFilter(['severity' => ['major', ['nested'], null]]));
+    }
+
+    #[Test]
+    public function getSegmentsIdForQR_severity_label_with_space_and_accent_binds(): void
+    {
+        $this->seedSeverityIssues();
+
+        $this->assertSame(
+            [$this->segIds[2], $this->segIds[3]],
+            $this->qrIdsWithFilter(['severity' => ['Très grave', 'major']])
+        );
+    }
+
+    #[Test]
+    public function getSegmentsIdForQR_category_and_severity_lists_and_across_fields(): void
+    {
+        [$catA, $catB] = $this->seedSeverityIssues();
+
+        // OR within a field, AND across fields: cat A holds minor + major, so minor-or-critical
+        // inside cat A leaves only the minor one.
+        $this->assertSame(
+            [$this->segIds[0]],
+            $this->qrIdsWithFilter(['issue_category' => [$catA], 'severity' => ['minor', 'critical']])
+        );
+        $this->assertSame(
+            [$this->segIds[0], $this->segIds[1]],
+            $this->qrIdsWithFilter(['issue_category' => [$catA, $catB], 'severity' => ['minor', 'critical']])
+        );
+    }
+
+    #[Test]
+    public function getSegmentsIdForQR_category_list_accepts_string_ids(): void
+    {
+        [$catA, $catB] = $this->seedSeverityIssues();
+
+        // A query string delivers ids as strings; positional placeholders bind any value.
+        $this->assertSame(
+            [$this->segIds[0], $this->segIds[1], $this->segIds[2], $this->segIds[3]],
+            $this->qrIdsWithFilter(['issue_category' => [(string)$catA, (string)$catB]])
+        );
+    }
+
+    #[Test]
+    public function getSegmentsIdForQR_category_list_containing_all_means_any_category(): void
+    {
+        [$catA] = $this->seedSeverityIssues();
+
+        $this->assertSame(
+            $this->qrIdsWithFilter(['issue_category' => SegmentDao::ISSUE_CATEGORY_ALL]),
+            $this->qrIdsWithFilter(['issue_category' => [SegmentDao::ISSUE_CATEGORY_ALL, (string)$catA]])
+        );
+    }
+
+    #[Test]
+    public function getSegmentsIdForQR_center_with_severity_list(): void
+    {
+        $this->seedSeverityIssues();
+
+        // 'center' embeds the join and the conditions in both halves; both must bind.
+        $this->assertSame(
+            [$this->segIds[0], $this->segIds[3]],
+            $this->qrIdsWithFilter(['severity' => ['minor', 'Très grave']], 'center')
+        );
+    }
+
+    #[Test]
+    public function getSegmentsIdForQR_after_pages_through_filtered_segments_in_order_without_skipping(): void
+    {
+        $this->seedQrTranslations();
+        // qa_entries filled from the last segment to the first: when MySQL drives the join from
+        // qa_entries, an unordered LIMIT returns ids in this insertion order, not ascending.
+        $cat = (int)$this->fixtures->makeQaCategory('RsqSevOrder', 1, '{}')['id'];
+        $severities = ['minor', 'critical', 'major', 'Très grave'];
+        foreach ([3, 2, 1, 0] as $i) {
+            $this->insertQaEntry($this->segIds[$i], $cat, $severities[$i], 2);
+        }
+
+        foreach ([['issue_category' => SegmentDao::ISSUE_CATEGORY_ALL], ['severity' => ['minor', 'critical', 'major', 'Très grave']]] as $filter) {
+            $visited = [];
+            $ref = min($this->segIds) - 1;
+            // One segment per page, each page starting after the last id of the previous one,
+            // as the QR pagination links do.
+            for ($page = 0; $page < 10; $page++) {
+                $ids = array_map('intval', $this->dao->getSegmentsIdForQR($this->jobStruct, 1, $ref, 'after', ['filter' => $filter]));
+                if (empty($ids)) {
+                    break;
+                }
+                $visited[] = $ids[0];
+                $ref = (int)end($ids);
+            }
+
+            $this->assertSame(array_slice($this->segIds, 0, 4), $visited, json_encode($filter));
+        }
+    }
+
+    #[Test]
+    public function getSegmentsIdForQR_before_with_severity_list(): void
+    {
+        $this->seedSeverityIssues();
+        $ids = array_map('intval', $this->dao->getSegmentsIdForQR($this->jobStruct, 100, $this->segIds[2], 'before', [
+            'filter' => ['severity' => ['minor', 'major']],
+        ]));
+
+        $this->assertSame([$this->segIds[0]], $ids);
+    }
+
     // =========================================================================================
     // getSegmentsForQr
     // =========================================================================================

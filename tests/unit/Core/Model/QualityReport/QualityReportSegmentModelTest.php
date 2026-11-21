@@ -13,6 +13,8 @@ use Model\DataAccess\IDatabase;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
+use Model\LQA\CategoryDao;
+use Model\LQA\CategoryStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\EntryCommentDao;
 use Model\Projects\ProjectStruct;
@@ -897,6 +899,110 @@ class QualityReportSegmentModelTest extends AbstractTest
         $result = $model->getSegmentsIdForQR(5, 50, 'after', []);
 
         $this->assertSame([5], $result);
+    }
+
+    /**
+     * Run getSegmentsIdForQR with an injected CategoryDao and return the filter the SegmentDao got.
+     *
+     * @param mixed $issueCategory
+     * @param array<int, list<int>> $subcategoriesByParent parent id => subcategory ids
+     * @param int|null $idQaModel
+     *
+     * @return array<string, mixed>
+     */
+    private function filterReachingTheDao(mixed $issueCategory, array $subcategoriesByParent, ?int $idQaModel = 9, ?CategoryDao $categoryDao = null): array
+    {
+        $project = new ProjectStruct();
+        $project->id_qa_model = $idQaModel;
+
+        $chunk = $this->getMockBuilder(JobStruct::class)->onlyMethods(['getProject'])->getMock();
+        $chunk->expects($this->atMost(1))->method('getProject')->willReturn($project);
+
+        if ($categoryDao === null) {
+            $categoryDao = $this->createStub(CategoryDao::class);
+            $categoryDao->method('findByIdModelAndIdParent')->willReturnCallback(
+                fn(int $idModel, ?int $idParent): array => array_map(
+                    fn(int $id) => new CategoryStruct(['id' => $id, 'id_model' => $idModel, 'id_parent' => $idParent, 'label' => "sub $id"]),
+                    $subcategoriesByParent[$idParent] ?? []
+                )
+            );
+        }
+
+        $received = [];
+        $segmentDao = $this->createStub(SegmentDao::class);
+        $segmentDao->method('getSegmentsIdForQR')->willReturnCallback(
+            function ($chunk, $step, $ref, $where, $options) use (&$received): array {
+                $received = $options['filter'];
+
+                return [];
+            }
+        );
+
+        $model = new QualityReportSegmentModel($chunk, obtainTestDatabase(), null, $segmentDao, null, null, null, $categoryDao);
+        $model->getSegmentsIdForQR(10, 0, 'after', ['filter' => ['issue_category' => $issueCategory, 'severity' => ['Minor', 'Major']]]);
+
+        return $received;
+    }
+
+    #[Test]
+    public function getSegmentsIdForQRExpandsEachSelectedCategoryToItsSubcategories(): void
+    {
+        $filter = $this->filterReachingTheDao(['316', '319'], [316 => [401, 402]]);
+
+        // 316 is a parent, so it becomes its children; 319 has none and is kept as is.
+        $this->assertSame([401, 402, 319], $filter['issue_category']);
+        $this->assertSame(['Minor', 'Major'], $filter['severity']);
+    }
+
+    #[Test]
+    public function getSegmentsIdForQRDeduplicatesExpandedCategories(): void
+    {
+        $filter = $this->filterReachingTheDao(['316', 316, '401'], [316 => [401, 402]]);
+
+        $this->assertSame([401, 402], $filter['issue_category']);
+    }
+
+    #[Test]
+    public function getSegmentsIdForQRTurnsAScalarLeafCategoryIntoAList(): void
+    {
+        $filter = $this->filterReachingTheDao('316', []);
+
+        $this->assertSame([316], $filter['issue_category']);
+    }
+
+    #[Test]
+    public function getSegmentsIdForQRLeavesNonNumericCategoriesUntouched(): void
+    {
+        $categoryDao = $this->createMock(CategoryDao::class);
+        $categoryDao->expects($this->never())->method('findByIdModelAndIdParent');
+
+        $filter = $this->filterReachingTheDao(['abc', '1,2'], [], 9, $categoryDao);
+
+        // Nothing valid to expand: the value reaches the DAO as sent and matches nothing there,
+        // rather than being dropped and widening the result to every segment.
+        $this->assertSame(['abc', '1,2'], $filter['issue_category']);
+    }
+
+    #[Test]
+    public function getSegmentsIdForQRSkipsExpansionWhenTheListContainsAll(): void
+    {
+        $categoryDao = $this->createMock(CategoryDao::class);
+        $categoryDao->expects($this->never())->method('findByIdModelAndIdParent');
+
+        $filter = $this->filterReachingTheDao(['all', '316'], [], 9, $categoryDao);
+
+        $this->assertSame(['all', '316'], $filter['issue_category']);
+    }
+
+    #[Test]
+    public function getSegmentsIdForQRSkipsExpansionWithoutAQaModel(): void
+    {
+        $categoryDao = $this->createMock(CategoryDao::class);
+        $categoryDao->expects($this->never())->method('findByIdModelAndIdParent');
+
+        $filter = $this->filterReachingTheDao(['316'], [], null, $categoryDao);
+
+        $this->assertSame(['316'], $filter['issue_category']);
     }
 }
 

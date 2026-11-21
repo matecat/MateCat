@@ -341,6 +341,27 @@ class QualityReportControllerAPITest extends AbstractTest
     }
 
     #[Test]
+    public function getPaginationLinks_carries_list_filters_into_next_and_prev(): void
+    {
+        $_SERVER['REQUEST_URI'] = '/api/v3/jobs/1/abc123/quality-report/segments';
+
+        $chunk = $this->createStub(JobStruct::class);
+        $chunk->method('getSegments')->willReturn(array_fill(0, 100, new \stdClass()));
+        $chunk->job_first_segment = 1;
+        $chunk->job_last_segment = 200;
+        $this->reflector->getProperty('chunk')->setValue($this->controller, $chunk);
+
+        $filter = ['severity' => ['Minor', 'Très grave'], 'issue_category' => ['316', '319']];
+        $result = $this->invokePrivate('_getPaginationLinks', [[21, 22, 23, 24, 25], 20, $filter]);
+
+        foreach (['next', 'prev'] as $link) {
+            parse_str((string)parse_url((string)$result[$link], PHP_URL_QUERY), $query);
+            // The next page request must decode back to the same lists, not to "a,b" strings.
+            $this->assertSame($filter, $query['filter'], $link);
+        }
+    }
+
+    #[Test]
     public function getTteArrayForSegment_maps_sources_and_builds_total_with_defaults(): void
     {
         $tte1 = new \stdClass();
