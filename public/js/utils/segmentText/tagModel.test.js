@@ -1,6 +1,5 @@
 import {
   tagSignatures,
-  TagStruct,
   getErrorCheckTag,
   getNoLexiqaTag,
   getNoGlossaryTag,
@@ -16,40 +15,14 @@ import {
   getTagSignature,
   setTagSignatureMiddleware,
   initTagSignature,
+  findSpaces,
+  SPACE_REGEX,
 } from './tagModel'
+import CORPUS from '../../components/editor/core/__fixtures__/roundTripCorpus.json'
+import {decodeHtmlEntities} from './tagUtils'
 
 afterEach(() => {
   setTagSignatureMiddleware('space', undefined)
-})
-
-test('TagStruct sets default fields from its constructor arguments', () => {
-  const tag = new TagStruct(5, 3, 'g', 'g')
-
-  expect(tag.offset).toBe(5)
-  expect(tag.length).toBe(3)
-  expect(tag.type).toBe('g')
-  expect(tag.mutability).toBe('IMMUTABLE')
-  expect(tag.data).toEqual({
-    id: null,
-    name: 'g',
-    encodedText: null,
-    decodedText: null,
-    openTagId: null,
-    closeTagId: null,
-    openTagKey: null,
-    closeTagKey: null,
-    placeholder: null,
-    originalOffset: -1,
-  })
-})
-
-test('TagStruct falls back to its default arguments', () => {
-  const tag = new TagStruct()
-
-  expect(tag.offset).toBe(-1)
-  expect(tag.length).toBe(0)
-  expect(tag.type).toBeNull()
-  expect(tag.data.name).toBeNull()
 })
 
 test('getSplitBlockTag lists the line-break tags', () => {
@@ -161,5 +134,52 @@ describe('initTagSignature', () => {
     initTagSignature({show_whitespace: 0})
 
     expect(tagSignatures.space).toBeUndefined()
+  })
+})
+
+describe('findSpaces', () => {
+  // The space signature's regex is the reference: findSpaces must find exactly its matches, in linear time
+  const byRegex = (text) =>
+    [...text.matchAll(SPACE_REGEX)].map((match) => [match.index, match[0]])
+  const byFindSpaces = (text) =>
+    findSpaces(text).map((match) => [match.index, match[0]])
+
+  test.each([
+    '',
+    'no blanks',
+    'a b',
+    '<g id="1">a b</g> c',
+    '<a <b c> d',
+    'a < b',
+    'a > b',
+    'a > b < c',
+    '< a > b > c',
+    'a <b <c d> e> f',
+    'tab\tand\nline feed\r\nand cr',
+    'nbsp\u00a0ideographic\u3000thin\u2009bom\ufeff',
+    '<x id="1"/>\u00a0<x id="2"/>',
+    '  <  >  ',
+  ])('finds what the regex finds in %j', (text) => {
+    expect(byFindSpaces(text)).toEqual(byRegex(text))
+  })
+
+  test('finds what the regex finds in every corpus segment, raw and decoded', () => {
+    CORPUS.forEach(({segment}) => {
+      expect(byFindSpaces(segment)).toEqual(byRegex(segment))
+      const decoded = decodeHtmlEntities(segment)
+      expect(byFindSpaces(decoded)).toEqual(byRegex(decoded))
+    })
+  })
+
+  test('finds what the regex finds in every short mix of brackets and blanks', () => {
+    const alphabet = ['<', '>', ' ', '\n', '\t', '\r', '\u00a0', 'a']
+    const strings = ['']
+    for (let length = 1; length <= 5; length++)
+      strings
+        .filter((text) => text.length === length - 1)
+        .forEach((text) =>
+          alphabet.forEach((char) => strings.push(text + char)),
+        )
+    strings.forEach((text) => expect(byFindSpaces(text)).toEqual(byRegex(text)))
   })
 })

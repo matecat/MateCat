@@ -695,7 +695,6 @@ const SegmentActions = {
     sid,
     translation,
     decodedTranslation,
-    tagMap,
     missingTagsInTarget,
     lxqDecodedTranslation,
   ) {
@@ -704,7 +703,6 @@ const SegmentActions = {
       id: sid,
       translation: translation,
       decodedTranslation,
-      tagMap,
       missingTagsInTarget,
       lxqDecodedTranslation,
     })

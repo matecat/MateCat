@@ -15,7 +15,7 @@ const chipsOf = (state) => {
   state.field(chips).between(0, state.doc.length, (from, to, deco) => {
     const {token} = deco.spec.widget
     out.push({
-      // matchTag wraps g labels in zero-width spaces, as the cattool does
+      // showGTagIds wraps g labels in zero-width spaces, as the cattool does
       label: token.label.replace(/\u200b/g, ''),
       index: token.index ?? null,
       role: token.role ?? null,

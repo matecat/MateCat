@@ -370,7 +370,7 @@ export const tagMenu = (opener, pick) => ({
 })
 
 export const format = (name) => ({
-  // TargetEditor formatSelection (TargetEditor.js:550-554)
+  // TargetEditor's formatSelection
   cm: (ed) => ed.transformSelection((text) => formatText(text, name)),
 })
 
@@ -404,7 +404,7 @@ export const CARET_ACTIONS = {
   'tag menu: < then Enter (first entry)': tagMenu('lt', 0),
   'tag menu: Alt+T then Enter (first entry)': tagMenu('altT', 0),
   'copy glossary term at caret': {
-    // TargetEditor copyGlossary (TargetEditor.js:396-403)
+    // TargetEditor's copyGlossary
     cm: (ed) => ed.insertText('R&D <i>'),
   },
   'drop a slice from another segment': {
@@ -510,7 +510,7 @@ export const lexiqaReplace = (fx, word, index, suggestion) => ({
   cm: (ed) => {
     const {view} = ed
     const segment = lexiqaSegment(fx, word, index, suggestion)
-    // TargetEditor targetLayers (TargetEditor.js:90-147): the lexiqa layer, set volatile as the target sets it
+    // TargetEditor's targetLayers: the lexiqa layer, set volatile as the target sets it
     const layer = targetLayers(view.state, segment, false).find(
       (l) => l.name === 'lexiqa',
     )
@@ -523,7 +523,8 @@ export const lexiqaReplace = (fx, word, index, suggestion) => ({
     })
     const [range] = layer.ranges()
     if (!range) return
-    // The hover tooltip on the mark (createLayerTooltip, layerTooltip.js:145-155) and its suggestion click
+    // The hover tooltip on the mark (layerTooltip.js's tooltipContent, as createLayerTooltip shows it) and its
+    // suggestion click
     const content = tooltipContent(layerRangesAt(view.state, range.from), {
       onReplace: (r, text) => replaceLayerRange(view, r, text),
     })
@@ -552,7 +553,7 @@ export const searchReplace = (term, index, text) => ({
 
 // Add all the source tags missing from the target.
 export const ADD_MISSING_TAGS = {
-  // TargetEditor addMissingSourceTagsToTarget (TargetEditor.js:518-529)
+  // TargetEditor's addMissingSourceTagsToTarget
   cm: (ed, p, fx) => {
     const {missingTags} = tagSuggestions(fx)
     const raw = missingTags.map((tag) => tag.data.encodedText).join('')
@@ -565,6 +566,6 @@ export const ADD_MISSING_TAGS = {
 
 // The store's REPLACE_TRANSLATION (a TM match or a copy of the source taking the whole target).
 export const REPLACE_TRANSLATION = {
-  // TargetEditor replaceTranslation (TargetEditor.js:370-376)
+  // TargetEditor's replaceTranslation
   cm: (ed) => ed.setValue('Nuova <g id="1">traduzione</g>##$_A0$##ok'),
 }

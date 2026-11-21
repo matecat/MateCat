@@ -20,7 +20,10 @@ import SegmentStore from '../../../stores/SegmentStore'
 import SegmentConstants from '../../../constants/SegmentConstants'
 import EditAreaConstants from '../../../constants/EditAreaConstants'
 import ContextPreviewChannel from '../../../utils/contextPreviewChannel'
-import {translationUpdate} from '../../../utils/segmentText/segmentStoreData'
+import {
+  sourceStoreData,
+  translationUpdate,
+} from '../../../utils/segmentText/segmentStoreData'
 import {setTagSignatureMiddleware} from '../../../utils/segmentText/tagModel'
 
 setTagSignatureMiddleware('space', () => false)
@@ -90,7 +93,8 @@ beforeAll(() => {
 })
 
 const SOURCE = 'Hello <g id="1">world</g> <x id="2"/>'
-const sourceTagMap = translationUpdate(SOURCE).tagMap
+// The source tag map as the store holds it
+const sourceTagMap = sourceStoreData(SOURCE).tagRange
 
 const makeSegment = (overrides = {}) => ({
   sid: '10',
@@ -102,7 +106,6 @@ const makeSegment = (overrides = {}) => ({
   openSplit: false,
   sourceTagMap,
   missingTagsInTarget: [],
-  targetTagMap: [],
   ...overrides,
 })
 
@@ -222,12 +225,11 @@ describe('TargetEditor store updates', () => {
     expect(updateCounter).toHaveBeenCalledWith(10)
     expect(SegmentActions.updateTranslation).not.toHaveBeenCalled()
     await flush()
-    const [sid, translation, plainText, tagMap, missing, lxq] =
+    const [sid, translation, plainText, missing, lxq] =
       SegmentActions.updateTranslation.mock.calls[0]
     expect([sid, translation]).toEqual(['10', 'Ciao <g id="1">mondo</g>'])
-    // Draft's shapes: tags as their placeholders in the plain text, tag structs, the source x missing
+    // Draft's shapes: tags as their placeholders in the plain text, the source x missing
     expect(plainText).toBe('Ciao 1mondo1')
-    expect(tagMap.map((tag) => tag.data.name)).toEqual(['g', 'gCl'])
     expect(missing.map((tag) => tag.data.encodedText)).toEqual(['<x id="2"/>'])
     expect(typeof lxq).toBe('string')
     expect(SegmentActions.startSegmentQACheck).toHaveBeenCalled()
@@ -252,10 +254,9 @@ describe('TargetEditor store updates', () => {
     expect(SegmentActions.updateTranslation).not.toHaveBeenCalled()
     await flush(100)
     expect(SegmentActions.updateTranslation).toHaveBeenCalledTimes(1)
-    const [sid, translation, , tagMap, missing] =
+    const [sid, translation, , missing] =
       SegmentActions.updateTranslation.mock.calls[0]
     expect([sid, translation]).toEqual(['10', 'Ciao <g id="1">mondo</g> ab'])
-    expect(tagMap).toHaveLength(2)
     expect(missing.map((tag) => tag.data.encodedText)).toEqual(['<x id="2"/>'])
     expect(updateCounter).toHaveBeenLastCalledWith(13)
   })
@@ -306,7 +307,7 @@ describe('TargetEditor store updates', () => {
     update({...segment, sourceTagMap})
     await flush(150)
     expect(SegmentActions.updateTranslation).toHaveBeenCalledTimes(1)
-    expect(SegmentActions.updateTranslation.mock.calls[0][4]).toHaveLength(1)
+    expect(SegmentActions.updateTranslation.mock.calls[0][3]).toHaveLength(1)
     expect(docOf(container)).toBe('Ciao <g id="1">mondo</g>')
   })
 })
@@ -325,7 +326,6 @@ describe('TargetEditor store events', () => {
       '10',
       'Nuovo',
       'Nuovo',
-      [],
       expect.any(Array),
       expect.any(String),
     )
@@ -677,10 +677,13 @@ describe('TargetEditor tag menu', () => {
 })
 
 describe('TargetEditor handle', () => {
-  test('addMissingSourceTagsToTarget appends the missing tags, then updates the store with them and runs the QA check', async () => {
-    const missing = translationUpdate('<x id="2"/>').tagMap
-    const segment = makeSegment({missingTagsInTarget: missing})
-    const {container, ref} = renderTarget(segment)
+  // The source x the loaded target lacks, as the store holds it.
+  const missingX = () =>
+    translationUpdate('Ciao <g id="1">mondo</g>', sourceTagMap).missingTags
+
+  test('addMissingSourceTagsToTarget appends the missing tags; the store then has none missing and the Lexiqa text of the new translation', async () => {
+    const segment = makeSegment({missingTagsInTarget: missingX()})
+    const {container, ref, updateCounter} = renderTarget(segment)
     await flush(150)
     jest.clearAllMocks()
     act(() => ref.current.addMissingSourceTagsToTarget())
@@ -690,14 +693,51 @@ describe('TargetEditor handle', () => {
     expect(SegmentActions.updateTranslation).toHaveBeenCalledWith(
       '10',
       'Ciao <g id="1">mondo</g><x id="2"/>',
-      'Ciao mondo' + missing[0].data.placeholder,
-      missing,
+      'Ciao 1mondo12',
       [],
+      'Ciao <1>mondo<1><2>',
     )
+    expect(updateCounter).toHaveBeenLastCalledWith(10)
     expect(SegmentActions.getSegmentsQa).toHaveBeenCalledWith(
       expect.objectContaining({
         translation: 'Ciao <g id="1">mondo</g><x id="2"/>',
       }),
+    )
+  })
+
+  test('addMissingSourceTagsToTarget after an edit not yet in the store keeps the edit', async () => {
+    const segment = makeSegment({missingTagsInTarget: missingX()})
+    const {container, ref} = renderTarget(segment)
+    await flush(150)
+    jest.clearAllMocks()
+    const view = viewOf(container)
+    select(view, view.state.doc.length)
+    type(view, '!')
+    act(() => ref.current.addMissingSourceTagsToTarget())
+    await flush(150)
+    expect(SegmentActions.updateTranslation).toHaveBeenCalledTimes(1)
+    expect(SegmentActions.updateTranslation).toHaveBeenCalledWith(
+      '10',
+      'Ciao <g id="1">mondo</g>!<x id="2"/>',
+      'Ciao 1mondo1!2',
+      [],
+      'Ciao <1>mondo<1>!<2>',
+    )
+  })
+
+  test('addMissingSourceTagsToTarget reaches the store when the editor unmounts first', async () => {
+    const segment = makeSegment({missingTagsInTarget: missingX()})
+    const {ref, unmount} = renderTarget(segment)
+    await flush(150)
+    jest.clearAllMocks()
+    act(() => ref.current.addMissingSourceTagsToTarget())
+    unmount()
+    expect(SegmentActions.updateTranslation).toHaveBeenCalledWith(
+      '10',
+      'Ciao <g id="1">mondo</g><x id="2"/>',
+      'Ciao 1mondo12',
+      [],
+      'Ciao <1>mondo<1><2>',
     )
   })
 
@@ -972,7 +1012,6 @@ describe('TargetEditor layers', () => {
     expect(SegmentActions.updateTranslation).toHaveBeenLastCalledWith(
       '10',
       'Una casa economica##$_0A$##una casa two',
-      expect.anything(),
       expect.anything(),
       expect.anything(),
       expect.anything(),

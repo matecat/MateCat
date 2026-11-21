@@ -1,57 +1,8 @@
-import {isUndefined} from 'lodash'
 import {regexWordDelimiter} from './segmentText/textConstants'
 import CommonUtils from './commonUtils'
 import {tagSignatures} from './segmentText/tagModel'
 
 const TEXT_UTILS = {
-  /**
-   * Replace temporaly tags with placeholder
-   * @param text
-   */
-  replaceTempTags: (text) => {
-    let tags = []
-    const makeid = (length) => {
-      let result = ''
-      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
-      const charactersLength = characters.length
-      let counter = 0
-      while (counter < length) {
-        result += characters.charAt(
-          Math.floor(Math.random() * charactersLength),
-        )
-        counter += 1
-      }
-      return result
-    }
-    text = text.replace(
-      /<(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?>/gi,
-      function (match) {
-        var id = makeid(5)
-        tags.push({
-          id,
-          match,
-        })
-        return '#_' + id + '_#'
-      },
-    )
-    return {tags, text}
-  },
-  restoreTempTags(tags, text) {
-    text = text.replace(/#_([a-zA-Z]+?)_#/gi, (match, id) => {
-      try {
-        const tag = tags.find((item) => {
-          return item.id === id
-        })
-        if (!isUndefined(tag)) {
-          return tag.match
-        }
-        return match
-      } catch (e) {
-        return match
-      }
-    })
-    return text
-  },
   htmlEncode: function (value) {
     if (value) {
       var txt = document.createElement('textarea')

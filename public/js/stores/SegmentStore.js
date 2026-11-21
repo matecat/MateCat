@@ -49,6 +49,7 @@ import {
   removeTagsFromText,
   checkXliffTagsInText,
 } from '../utils/segmentText/tagUtils'
+import {fromDraftTranslation} from '../utils/segmentText/draftTagTextCompat'
 import {
   checkTPEnabled,
   checkCurrentSegmentTPEnabled,
@@ -149,6 +150,8 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   normalizeSplittedSegments: function (segments) {
     let newSegments = []
     $.each(segments, (i, segment) => {
+      // TEMPORARY, see draftTagTextCompat.js
+      segment.translation = fromDraftTranslation(segment.translation)
       let splittedSourceAr = segment.segment.split(
         splittedTranslationPlaceholder,
       )
@@ -410,7 +413,6 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     sid,
     translation,
     decodedTranslation,
-    tagMap,
     missingTagsInTarget,
     lxqDecodedTranslation,
   ) {
@@ -429,7 +431,6 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       [index, 'decodedTranslation'],
       decodedTranslation,
     )
-    this._segments = this._segments.setIn([index, 'targetTagMap'], tagMap)
     this._segments = this._segments.setIn(
       [index, 'missingTagsInTarget'],
       missingTagsInTarget,
@@ -1471,7 +1472,6 @@ AppDispatcher.register(function (action) {
         action.id,
         action.translation,
         action.decodedTranslation,
-        action.tagMap,
         action.missingTagsInTarget,
         action.lxqDecodedTranslation,
       )
