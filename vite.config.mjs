@@ -215,6 +215,10 @@ export default defineConfig(({mode, command}) => {
       'process.env.version': JSON.stringify(matecatConfig.BUILD_NUMBER ?? ''),
       'process.env.MODE': JSON.stringify(mode),
       'process.env.SENTRY_DSN': JSON.stringify(matecatConfig.SENTRY_DSN ?? ''),
+      // On by default: only false, 0 or "false" in config.ini switch back to Draft.
+      'process.env.ENABLE_NEW_EDITOR': JSON.stringify(
+        ![false, 'false', 0, '0'].includes(matecatConfig.ENABLE_NEW_EDITOR),
+      ),
       global: 'globalThis',
     },
 

@@ -17,6 +17,7 @@ import {displayExtensions} from './display'
 import {keymapExtensions} from './keymap'
 import {clipboardExtensions} from './clipboard'
 import {historyExtensions} from './history'
+import {layerExtensions} from './layers'
 
 const theme = EditorView.theme({
   '&': {fontFamily: 'inherit', fontSize: 'inherit'},
@@ -42,6 +43,7 @@ export const segmentEditorExtensions = ({
   const editable = !readOnly
   return [
     tagExtensions({dir, onEvent}),
+    layerExtensions(),
     displayExtensions({showWhitespace}),
     keymapExtensions({editable}),
     clipboardExtensions({editable}),
@@ -81,6 +83,7 @@ export const createSegmentState = (value, options) => {
  * @param {boolean} [options.showWhitespace] mark spaces (display only)
  * @param {(value: string) => void} [options.onChange] the segment string after every document change
  * @param {(name: string, payload: object) => void} [options.onEvent] `tagClick`
+ * @param {import('@codemirror/state').Extension} [options.extensions] added to the editor, kept across `setValue`
  */
 export const createSegmentEditor = ({
   parent,
@@ -91,7 +94,10 @@ export const createSegmentEditor = ({
   const notify = EditorView.updateListener.of((update) => {
     if (update.docChanged && onChange) onChange(serialize(update.state))
   })
-  const stateOptions = {...options, extensions: [notify]}
+  const stateOptions = {
+    ...options,
+    extensions: [notify, options.extensions ?? []],
+  }
   const view = new EditorView({
     parent,
     state: createSegmentState(value, stateOptions),
