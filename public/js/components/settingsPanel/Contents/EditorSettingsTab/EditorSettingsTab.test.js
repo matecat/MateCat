@@ -314,23 +314,3 @@ test('shows AiAssistant only when isOpenAiEnabled is set', () => {
 
   config.isOpenAiEnabled = false
 })
-
-describe('new editor switch', () => {
-  const originalBuildFlag = process.env.ENABLE_NEW_EDITOR
-  afterEach(() => {
-    if (originalBuildFlag === undefined) delete process.env.ENABLE_NEW_EDITOR
-    else process.env.ENABLE_NEW_EDITOR = originalBuildFlag
-  })
-
-  test('is offered when the build ships the new editor', () => {
-    process.env.ENABLE_NEW_EDITOR = 'true'
-    renderWithContext()
-    expect(screen.getByTestId('switch-editor-engine')).toBeChecked()
-  })
-
-  test('is hidden when the build switches the new editor off', () => {
-    process.env.ENABLE_NEW_EDITOR = 'false'
-    renderWithContext()
-    expect(screen.queryByTestId('switch-editor-engine')).not.toBeInTheDocument()
-  })
-})

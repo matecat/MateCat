@@ -27,8 +27,20 @@ import {ApplicationWrapperContext} from '../../common/ApplicationWrapper/Applica
 import TagBox from '../../segments/TagMenu/TagBox'
 import {createSegmentEditor} from '../core/createSegmentEditor'
 import {insertRaw} from '../core/docModel'
+import {
+  SEARCH_LAYER,
+  applyLayers,
+  setLayer,
+  withoutRangesOverlapping,
+} from '../core/layers'
 import {chipTokens, setTagState} from '../core/tags'
 import {createTagTooltip} from './tagTooltip'
+import {layerTooltipExtensions} from './layerTooltip'
+import {searchChipRanges, searchRanges} from './layers/search'
+import {searchedTagText} from '../../segmentView/segmentModel'
+import {lexiqaRanges} from './layers/lexiqa'
+import {blacklistRanges} from './layers/blacklist'
+import {icuRanges} from './layers/icu'
 import {chipsWithIdentity, highlightedChips} from './SourceEditor'
 
 const MENU_MIN_WIDTH = 300
@@ -61,6 +73,27 @@ export const tagWarningClass = (raw, {tagMismatch} = {}) => {
   return ''
 }
 
+/**
+ * Where the unpaired `g` tags start: a closing tag with no open tag before it (the chip labelled `?`), and an open tag
+ * never closed. A closing tag pairs with the nearest open tag before it, as the chip labels do. The QA check reports an
+ * unclosed `g` without naming the tag, so the target marks these itself.
+ * @param {Array<{from: number, token: {name: string}}>} chips the chips in document order (chipTokens)
+ * @returns {Set<number>}
+ */
+export const unpairedTagStarts = (chips) => {
+  const open = []
+  const unpaired = new Set()
+  chips.forEach(({from, token}) => {
+    if (token.name === 'g') open.push(from)
+    else if (token.name === 'gCl') {
+      if (open.length) open.pop()
+      else unpaired.add(from)
+    }
+  })
+  open.forEach((from) => unpaired.add(from))
+  return unpaired
+}
+
 // The menu entries in the order the menu shows them: tags missing from the target first.
 const menuEntries = ({missingTags = [], sourceTags = []}) => [
   ...missingTags,
@@ -68,6 +101,86 @@ const menuEntries = ({missingTags = [], sourceTags = []}) => [
 ]
 
 const CLOSED_MENU = {open: false, suggestions: {}, focused: 0, position: {}}
+
+/**
+ * The layers of the target of `segment` over `state`, as Editarea's checkDecorators picks its decorators: search,
+ * when it searches the target, hides the others; Lexiqa waits for the blacklist check when the job has glossary keys
+ * (the blacklist takes precedence). Each layer is `{name, key, volatile?, ranges: () => ranges}`: it is recomputed
+ * only when its key changes, and mapped through edits in between.
+ * @param {boolean} haveKeysGlossary CatToolStore.getHaveKeysGlossary()
+ */
+export const targetLayers = (state, segment, haveKeysGlossary) => {
+  const inSearch = Boolean(segment.inSearch && segment.searchParams?.target)
+  const doc = state.doc.toString()
+  const showLexiqa =
+    !inSearch &&
+    (haveKeysGlossary === false || Array.isArray(segment.qaBlacklistGlossary))
+  // ICU syntax wins over the blacklist and Lexiqa, as Editarea's ICU decorator does: a mark touching it is not shown.
+  const outsideIcu = (ranges) =>
+    segment.icu
+      ? withoutRangesOverlapping(ranges, icuRanges(state, config.target_code))
+      : ranges
+  return [
+    {
+      name: SEARCH_LAYER,
+      key: inSearch && [
+        doc,
+        segment.searchParams,
+        segment.currentInSearch,
+        segment.currentInSearchIndex,
+        segment.occurrencesInSearch,
+      ],
+      ranges: () => (inSearch ? searchRanges(state, segment, false) : []),
+    },
+    {
+      name: 'blacklist',
+      key: !inSearch && [doc, segment.qaBlacklistGlossary],
+      ranges: () =>
+        inSearch ? [] : outsideIcu(blacklistRanges(state, segment)),
+    },
+    {
+      // Lexiqa describes the text it checked: recomputed when its results change (once the store has the Lexiqa
+      // text of the target), an edit drops what it touches. The ICU syntax is the one of the checked text.
+      name: 'lexiqa',
+      key: showLexiqa &&
+        segment.lxqDecodedTranslation !== undefined && [
+          segment.lexiqa?.target,
+          Boolean(segment.icu),
+        ],
+      volatile: true,
+      ranges: () =>
+        showLexiqa ? outsideIcu(lexiqaRanges(state, segment, false)) : [],
+    },
+    {
+      name: 'icu',
+      key: !inSearch && Boolean(segment.icu) && [doc],
+      ranges: () =>
+        !inSearch && segment.icu
+          ? icuRanges(state, config.target_code, {showErrors: true})
+          : [],
+    },
+    {
+      // Not a layer: the chips whose label holds the searched text, applied as tag states.
+      name: 'searchChips',
+      key: inSearch && [doc, segment.searchParams],
+      ranges: () => (inSearch ? searchChipRanges(state, segment, false) : []),
+    },
+  ]
+}
+
+/**
+ * Chip ranges kept outside the editor state, moved through an edit: a range whose chip the edit removed is dropped.
+ * @param {Array<{from: number, to: number}>} ranges
+ * @param {import('@codemirror/state').ChangeSet} changes
+ */
+export const mapChipRanges = (ranges, changes) =>
+  ranges
+    .map((r) => ({
+      ...r,
+      from: changes.mapPos(r.from, 1),
+      to: changes.mapPos(r.to, -1),
+    }))
+    .filter((r) => r.to > r.from)
 
 const isArrowKey = (key) =>
   key === 'ArrowLeft' ||
@@ -103,6 +216,9 @@ const TargetEditor = forwardRef(
     const highlightRef = useRef([])
     const focusRef = useRef([])
     const warningRef = useRef([])
+    const searchChipRef = useRef([])
+    // The key each layer was last computed for (see targetLayers).
+    const layerKeysRef = useRef({})
 
     const [menu, setMenu] = useState(CLOSED_MENU)
 
@@ -169,14 +285,14 @@ const TargetEditor = forwardRef(
       )
     }
 
-    const applyTagState = () => {
-      const editor = editorRef.current
-      if (!editor) return
+    // The chip classes of every source (highlight, focus, QA warning, search), merged per chip.
+    const tagStateEffect = () => {
       const byRange = new Map()
       ;[
         ...highlightRef.current,
         ...focusRef.current,
         ...warningRef.current,
+        ...searchChipRef.current,
       ].forEach((r) => {
         const k = `${r.from}-${r.to}`
         const prev = byRange.get(k)
@@ -185,17 +301,53 @@ const TargetEditor = forwardRef(
           prev ? {...prev, className: `${prev.className} ${r.className}`} : r,
         )
       })
-      editor.view.dispatch({effects: setTagState.of([...byRange.values()])})
+      return setTagState.of([...byRange.values()])
+    }
+
+    const applyTagState = () => {
+      const editor = editorRef.current
+      if (!editor) return
+      editor.view.dispatch({effects: tagStateEffect()})
+    }
+
+    // The layers whose data changed, recomputed; while an IME composition runs this waits for it to end.
+    const refreshLayers = () => {
+      const editor = editorRef.current
+      if (!editor) return
+      applyLayers(editor.view, (state) => {
+        const effects = []
+        targetLayers(
+          state,
+          latestRef.current.segment,
+          CatToolStore.getHaveKeysGlossary(),
+        ).forEach(({name, key, volatile, ranges}) => {
+          const serialized = JSON.stringify(key)
+          if (layerKeysRef.current[name] === serialized) return
+          layerKeysRef.current[name] = serialized
+          if (name === 'searchChips') {
+            searchChipRef.current = ranges()
+            effects.push(tagStateEffect())
+          } else {
+            effects.push(setLayer.of({name, ranges: ranges(), volatile}))
+          }
+        })
+        return effects
+      })
     }
 
     const refreshWarnings = () => {
       if (!editorRef.current) return
       const {segment} = latestRef.current
-      warningRef.current = chipTokens(editorRef.current.view.state)
+      const chips = chipTokens(editorRef.current.view.state)
+      // Only the open segment shows tag warnings, as Draft's tags do.
+      const unpaired = segment.opened ? unpairedTagStarts(chips) : new Set()
+      warningRef.current = chips
         .map(({from, to, token}) => ({
           from,
           to,
-          className: tagWarningClass(token.raw, segment),
+          className:
+            tagWarningClass(token.raw, segment) ||
+            (unpaired.has(from) ? 'tag-mismatch-error' : ''),
         }))
         .filter((r) => r.className)
       applyTagState()
@@ -310,6 +462,7 @@ const TargetEditor = forwardRef(
         },
         extensions: [
           tagTooltip.extension,
+          layerTooltipExtensions({editable: true}),
           Prec.highest(
             EditorView.domEventHandlers({
               // A triple click selects the whole target, not only the clicked line
@@ -324,6 +477,12 @@ const TargetEditor = forwardRef(
             }),
           ),
           EditorView.updateListener.of((update) => {
+            // The chip classes are dispatched again on every selection change: their ranges follow the text.
+            if (update.docChanged) {
+              ;[highlightRef, focusRef, warningRef, searchChipRef].forEach(
+                (r) => (r.current = mapChipRanges(r.current, update.changes)),
+              )
+            }
             if (!update.selectionSet && !update.focusChanged) return
             const {state} = update
             const byUser = update.transactions.some(
@@ -343,13 +502,15 @@ const TargetEditor = forwardRef(
         ],
       })
       editorRef.current = editor
+      refreshLayers()
       const timer = setTimeout(() => {
         eventsRef.current.updateTranslationInStore()
         if (latestRef.current.segment.opened) editor.focus('end')
       })
       return () => {
         clearTimeout(timer)
-        updateTranslationDebounced.cancel()
+        // An edit still waiting for the store is not lost: it goes in before the editor does.
+        updateTranslationDebounced.flush()
         refreshWarningsDebounced.cancel()
         editorRef.current = null
         editor.destroy()
@@ -388,7 +549,8 @@ const TargetEditor = forwardRef(
           TextUtils.escapeRegExp(searchParams.target),
           'gi',
         )
-        if (editor.replaceOccurrence(regex, index, text)) {
+        // Numbered as the cattool numbers the hits (in its search text, tags included): a hit in a tag is skipped.
+        if (editor.replaceOccurrence(regex, index, text, searchedTagText)) {
           updateTranslationDebounced.cancel()
           eventsRef.current.updateTranslationInStore()
         }
@@ -496,6 +658,11 @@ const TargetEditor = forwardRef(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [segment.sourceTagMap])
 
+    // The layers follow the store: Lexiqa results, the QA check's blacklist, search, ICU.
+    useEffect(() => {
+      refreshLayers()
+    })
+
     // Locked, muted or closed: read-only.
     useEffect(() => {
       editorRef.current?.setReadOnly(readOnly)
@@ -506,13 +673,15 @@ const TargetEditor = forwardRef(
       editorRef.current?.setShowWhitespace(showWhitespace)
     }, [showWhitespace])
 
-    // Opening the segment focuses the target at the end.
+    // Opening the segment focuses the target at the end. Closing it saves the store translation (Segment, after this
+    // effect): an edit still waiting for the store goes in first.
     const prevOpenedRef = useRef(segment.opened)
     useEffect(() => {
       const wasOpened = prevOpenedRef.current
       prevOpenedRef.current = segment.opened
       if (!wasOpened && segment.opened) editorRef.current?.focus('end')
-    }, [segment.opened])
+      if (wasOpened && !segment.opened) updateTranslationDebounced.flush()
+    }, [segment.opened, updateTranslationDebounced])
 
     // Appends the source tags missing from the target, then updates the store and runs the QA check, as Editarea.
     const addMissingSourceTagsToTarget = () => {

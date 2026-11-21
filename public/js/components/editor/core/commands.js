@@ -50,30 +50,45 @@ export const transformSelectionSpec = (state, fn) => {
   return {changes, selection: {anchor: map(sel.anchor), head: map(sel.head)}}
 }
 
+// A character no term matches: by default a tag stands for it, so a match never runs across a tag.
+const UNMATCHABLE = '\uFFFC'
+
 /**
- * Transaction spec replacing the `index`-th match of `regex` in the text between tags (counted from 0 through the
- * document) with `text`. Null when there is no such match.
+ * Transaction spec replacing the `index`-th match of `regex` (counted from 0 through the document) with `text`. Each
+ * tag is searched as `tagText(its markup)`, so a match inside a tag takes its number; it is never replaced, a tag being
+ * locked. Null when there is no such match, or when it touches a tag.
  */
-export const replaceOccurrenceSpec = (state, regex, index, text) => {
+export const replaceOccurrenceSpec = (
+  state,
+  regex,
+  index,
+  text,
+  tagText = () => UNMATCHABLE,
+) => {
   const global = new RegExp(
     regex.source,
     regex.flags.includes('g') ? regex.flags : regex.flags + 'g',
   )
-  let n = 0
-  for (const run of textRuns(state)) {
-    const str = state.sliceDoc(run.from, run.to)
-    global.lastIndex = 0
-    let match
-    while ((match = global.exec(str)) !== null) {
-      if (!match[0].length) {
-        global.lastIndex++
-        continue
-      }
-      if (n++ === index) {
-        const from = run.from + match.index
-        return {changes: {from, to: from + match[0].length, insert: text}}
-      }
-    }
+  // The searched text, and the document position of each of its characters: null for those of a tag.
+  let searched = ''
+  const posOf = []
+  const add = (str, from) => {
+    searched += str
+    for (let i = 0; i < str.length; i++)
+      posOf.push(from === null ? null : from + i)
   }
-  return null
+  let at = 0
+  for (const tag of tagList(state)) {
+    add(state.sliceDoc(at, tag.from), at)
+    add(tagText(state.sliceDoc(tag.from, tag.to)), null)
+    at = tag.to
+  }
+  add(state.sliceDoc(at), at)
+  const match = [...searched.matchAll(global)].filter((m) => m[0].length)[index]
+  if (!match) return null
+  // A match in one stretch of text has consecutive positions; one in a tag, or across one, has not.
+  const positions = posOf.slice(match.index, match.index + match[0].length)
+  const from = positions[0]
+  if (from === null || positions.some((pos, i) => pos !== from + i)) return null
+  return {changes: {from, to: from + match[0].length, insert: text}}
 }

@@ -1,13 +1,20 @@
 name: Editor E2E
 
-# The acceptance suite of the segment editor core, in Chromium, against a test page that needs no backend.
-# Firefox and WebKit run locally: yarn test:editor-e2e --project=firefox
+# The acceptance suite of the segment editor core, in Chromium, Firefox and WebKit, against a test page that needs no
+# backend. The paths are what that page loads: the editor, the segment model, the text utilities and the chip styles.
 on:
   pull_request:
     types: [opened, reopened, synchronize, ready_for_review]
     paths:
       - 'public/js/components/editor/**'
       - 'public/js/components/segmentView/**'
+      - 'public/js/utils/segmentText/**'
+      - 'public/js/utils/matchTypingSequence/**'
+      - 'public/css/sass/components/segment/Tag.scss'
+      - 'public/css/sass/components/segment/SpecialCharMarks.scss'
+      - 'public/css/sass/commons/_aria-label-tooltip.scss'
+      - 'public/css/sass/commons/_variables.scss'
+      - 'public/css/sass/tokens/_colors.scss'
       - 'package.json'
       - 'yarn.lock'
       - '.github/workflows/editor-e2e.yml'
@@ -16,10 +23,15 @@ permissions:
   contents: read
 
 jobs:
-  chromium:
-    name: Editor acceptance suite (Chromium)
+  e2e:
+    name: Editor acceptance suite (${{ matrix.browser }})
     runs-on: ubuntu-latest
     if: github.event.pull_request.draft == false
+    strategy:
+      # One browser failing must not cancel the others: a failure in a single engine is the useful signal.
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
     steps:
       - name: Checkout
         # Submodules are not fetched: the editor does not import any plugin.
@@ -34,16 +46,16 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile --ignore-scripts
 
-      - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+      - name: Install ${{ matrix.browser }}
+        run: npx playwright install --with-deps ${{ matrix.browser }}
 
       - name: Run the suite
-        run: yarn test:editor-e2e --project=chromium
+        run: yarn test:editor-e2e --project=${{ matrix.browser }}
 
       - name: Upload traces of failed tests
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: editor-e2e-traces
+          name: editor-e2e-traces-${{ matrix.browser }}
           path: test-results/editor-e2e
           retention-days: 7

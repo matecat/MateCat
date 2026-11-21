@@ -1,4 +1,4 @@
-// Lexiqa warnings on the source (activateLexiqa). Lexiqa checks the "Lexiqa text" of the segment (prepareTextForLexiqa:
+// Lexiqa warnings on the source and the target (activateLexiqa). Lexiqa checks the "Lexiqa text" of the segment (prepareTextForLexiqa:
 // text decoded, each tag written as `<label>`, whitespace tags as their `lexiqaText`), so its offsets are aligned back
 // to the document here: a document character is itself, or what its whitespace tag is written as, and every other tag
 // spans whatever Lexiqa text lies between the text before it and the text after it.
@@ -53,9 +53,12 @@ export const alignLexiqaText = (state, lexiqaText) => {
     const run = doc.slice(at, end)
     const match = matchRun(lexiqaText, j, run)
     if (!match) return false
-    match.starts.forEach((start, i) => {
-      const next = i + 1 < run.length ? match.starts[i + 1] : match.end
-      for (let k = start; k < next; k++) map.push(at + i)
+    // A character outside the BMP is two positions in the document: `pos` steps by character, not by index.
+    let pos = at
+    ;[...run].forEach((ch, i) => {
+      const next = i + 1 < match.starts.length ? match.starts[i + 1] : match.end
+      for (let k = match.starts[i]; k < next; k++) map.push(pos)
+      pos += ch.length
     })
     j = match.end
     at = end
@@ -116,19 +119,23 @@ export const lexiqaDocRanges = (state, warnings, lexiqaText) => {
     .filter(({from, to}) => to > from && !coversNoLexiqaTag(state, from, to))
 }
 
-/** The Lexiqa layer of the source of `segment` (`lexiqa.source`, `lxqDecodedSource`). */
-export const lexiqaRanges = (state, {lexiqa, lxqDecodedSource, sid}) => {
-  if (!lexiqa?.source || !Object.keys(lexiqa.source).length) return []
-  const ranges = LexiqaUtils.getRanges(
-    cloneDeep(lexiqa.source),
-    lxqDecodedSource,
-    true,
-  )
-  return lexiqaDocRanges(state, ranges, lxqDecodedSource).map(
+/**
+ * The Lexiqa layer of the source (`lexiqa.source` over `lxqDecodedSource`) or, with `isSource` false, of the target
+ * (`lexiqa.target` over `lxqDecodedTranslation`) of `segment`. Target warnings also carry Lexiqa's suggestions.
+ */
+export const lexiqaRanges = (state, segment, isSource = true) => {
+  const {lexiqa, sid} = segment
+  const results = isSource ? lexiqa?.source : lexiqa?.target
+  const lexiqaText = isSource
+    ? segment.lxqDecodedSource
+    : segment.lxqDecodedTranslation
+  if (!results || !Object.keys(results).length) return []
+  const ranges = LexiqaUtils.getRanges(cloneDeep(results), lexiqaText, isSource)
+  return lexiqaDocRanges(state, ranges, lexiqaText).map(
     ({from, to, warning}) => {
       const messages =
         warning.myClass && warning.errorid
-          ? LexiqaUtils.buildTooltipMessages(warning, sid, true)
+          ? LexiqaUtils.buildTooltipMessages(warning, sid, isSource)
           : undefined
       return {
         from,

@@ -79,9 +79,14 @@ class TagWidget extends WidgetType {
   toDOM(view) {
     const {token} = this
     const el = document.createElement('span')
+    // Draft's open chip, `.tag` (13px, 8px arrows), not the closed segment's `.tag.small` that tokenize gives.
+    const className = token.className
+      .split(' ')
+      .filter((name) => name !== 'small')
+      .join(' ')
     el.className = this.stateClass
-      ? `${token.className} ${this.stateClass}`
-      : token.className
+      ? `${className} ${this.stateClass}`
+      : className
     el.setAttribute('contenteditable', 'false')
     el.dataset.tagName = token.name
     // As TagEntity: the pair number, then the label in its own span (Tag.scss trims it with an ellipsis, and

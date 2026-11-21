@@ -77,7 +77,8 @@ module.exports = {
         'public/js/components/segmentView/**/*.js',
         'public/js/utils/segmentText/**/*.js',
       ],
-      excludedFiles: ['**/*.test.js'],
+      // Tests, and the harness the Draft parity tests share (editor/core/__parity__), compare against Draft.
+      excludedFiles: ['**/*.test.js', '**/__parity__/**'],
       rules: {
         'no-restricted-imports': [
           'error',

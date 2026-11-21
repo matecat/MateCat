@@ -28,9 +28,9 @@ import Assistant from '../../../../img/icons/Assistant'
 import Education from '../../../../img/icons/Education'
 import {createSegmentEditor} from '../core/createSegmentEditor'
 import {serialize} from '../core/docModel'
-import {SEARCH_LAYER, setLayer} from '../core/layers'
+import {SEARCH_LAYER, setLayer, withoutRangesOverlapping} from '../core/layers'
 import {chipTokens, setTagState} from '../core/tags'
-import {searchRanges} from './layers/search'
+import {searchChipRanges, searchRanges} from './layers/search'
 import {glossaryRanges, qaCheckGlossaryRanges} from './layers/glossary'
 import {lexiqaRanges} from './layers/lexiqa'
 import {icuRanges} from './layers/icu'
@@ -120,6 +120,7 @@ const SourceEditor = ({segment, value, bridge}) => {
   const layerKeyRef = useRef(null)
   const highlightRef = useRef([])
   const focusRef = useRef([])
+  const searchChipRef = useRef([])
 
   // Fixed for the life of the segment, as in SegmentSource: what split mode goes back to, and data-original.
   const [initialValue] = useState(() => value)
@@ -138,7 +139,11 @@ const SourceEditor = ({segment, value, bridge}) => {
     const editor = editorRef.current
     if (!editor) return
     const byRange = new Map()
-    ;[...highlightRef.current, ...focusRef.current].forEach((r) => {
+    ;[
+      ...highlightRef.current,
+      ...focusRef.current,
+      ...searchChipRef.current,
+    ].forEach((r) => {
       const k = `${r.from}-${r.to}`
       const prev = byRange.get(k)
       byRange.set(
@@ -179,18 +184,28 @@ const SourceEditor = ({segment, value, bridge}) => {
     if (!force && key === layerKeyRef.current) return
     layerKeyRef.current = key
     const inSearch = segment.inSearch && segment.searchParams?.source
+    const icu =
+      segment.icu && !inSearch ? icuRanges(state, config.source_code) : []
+    // ICU syntax wins over the glossary and Lexiqa, as SegmentSource's ICU decorator does: a mark touching it is not shown.
+    const outsideIcu = (ranges) => withoutRangesOverlapping(ranges, icu)
     const layers = {
       [SEARCH_LAYER]: inSearch ? searchRanges(state, segment) : [],
-      glossary: inSearch ? [] : glossaryRanges(state, segment),
-      qaCheckGlossary: inSearch ? [] : qaCheckGlossaryRanges(state, segment),
-      lexiqa: inSearch ? [] : lexiqaRanges(state, segment),
-      icu: segment.icu && !inSearch ? icuRanges(state, config.source_code) : [],
+      glossary: inSearch ? [] : outsideIcu(glossaryRanges(state, segment)),
+      qaCheckGlossary: inSearch
+        ? []
+        : outsideIcu(qaCheckGlossaryRanges(state, segment)),
+      lexiqa: inSearch ? [] : outsideIcu(lexiqaRanges(state, segment)),
+      icu,
     }
     editor.view.dispatch({
       effects: Object.entries(layers).map(([name, ranges]) =>
         setLayer.of({name, ranges}),
       ),
     })
+    // A hit inside a tag label marks its chip, as TagEntity's markSearch does.
+    searchChipRef.current = inSearch ? searchChipRanges(state, segment) : []
+    applyTagState()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const publish = useCallback(() => {
