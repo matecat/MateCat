@@ -78,7 +78,7 @@ class DeepL extends AbstractEngine
             'target' => $target,
             'raw_segment' => $segment,
             'raw_translation' => $translation,
-            'match' => "85%",
+            'match' => $this->getStandardMtPenaltyString(),
             'created-by' => $this->getMTName(),
             'create-date' => date("Y-m-d"),
         ]);
