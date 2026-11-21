@@ -24,7 +24,7 @@ describe('Lara', () => {
     expect(
       screen.getByRole('button', {name: /learn more/i}),
     ).toBeInTheDocument()
-    expect(screen.getByText('ModernMT License')).toBeInTheDocument()
+    expect(screen.queryByText('ModernMT License')).not.toBeInTheDocument()
   })
 
   test('does not call addMTEngine when required fields are empty', async () => {
@@ -37,7 +37,7 @@ describe('Lara', () => {
     })
   })
 
-  test('submits form data through addMTEngine, including optional license', async () => {
+  test('submits form data through addMTEngine, without a ModernMT license', async () => {
     const {addMTEngine, container} = setup()
 
     fireEvent.change(
@@ -47,16 +47,12 @@ describe('Lara', () => {
     fireEvent.change(container.querySelector('input[name="secret"]'), {
       target: {value: 'my-secret'},
     })
-    fireEvent.change(container.querySelector('input[name="mmt-license"]'), {
-      target: {value: 'my-license'},
-    })
     fireEvent.click(screen.getByRole('button', {name: /confirm/i}))
 
     await waitFor(() => {
       expect(addMTEngine).toHaveBeenCalledWith({
         'lara-access-key-id': 'my-key-id',
         secret: 'my-secret',
-        'mmt-license': 'my-license',
       })
     })
   })

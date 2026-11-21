@@ -1,7 +1,5 @@
-import React, {useRef} from 'react'
+import React from 'react'
 import {useForm} from 'react-hook-form'
-import Tooltip from '../../../../common/Tooltip'
-import InfoIcon from '../../../../../../img/icons/InfoIcon'
 import {
   Button,
   BUTTON_MODE,
@@ -18,8 +16,6 @@ export const Lara = ({
   error,
   isRequestInProgress,
 }) => {
-  const infoIcon1 = useRef()
-
   const {
     register,
     handleSubmit,
@@ -54,8 +50,7 @@ export const Lara = ({
           </strong>
           . <br />
           Lara is only available for machine translation post-editing,
-          pre-translation is always performed with ModernMT Lite, or your
-          personal ModernMT Full engine if a valid license is provided.
+          pre-translation is always performed with ModernMT Lite.
         </p>
         <br />
         <Button
@@ -92,29 +87,6 @@ export const Lara = ({
                 type="text"
                 placeholder="Enter your access key secret"
                 {...register('secret', {required: true})}
-              />
-            </div>
-            <div className="provider-field-row">
-              <div className="provider-license-label-with-icon">
-                <label>ModernMT License</label>
-                <Tooltip
-                  content={
-                    <div>
-                      (Optional) Enter your ModernMT license to use your
-                      personal ModernMT Full engine for pre-translation.
-                    </div>
-                  }
-                >
-                  <div ref={infoIcon1}>
-                    <InfoIcon size={16} />
-                  </div>
-                </Tooltip>
-              </div>
-              <input
-                className="required"
-                type="text"
-                placeholder="Enter your ModernMT license (optional)"
-                {...register('mmt-license')}
               />
             </div>
             {errors.secret && (
