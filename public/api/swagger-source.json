@@ -5892,6 +5892,15 @@
                 "type": "string"
               },
               "default": []
+            },
+            "inner_content_type": {
+              "type": "string",
+              "description": "How the translatable text of a cell is read. text/plain (or null) is the default and is not forwarded to Filters.",
+              "enum": [
+                "text/plain",
+                "text/html"
+              ],
+              "x-nullable": true
             }
           },
           "additionalProperties": false

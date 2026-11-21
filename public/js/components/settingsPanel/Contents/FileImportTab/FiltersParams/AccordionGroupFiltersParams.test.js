@@ -48,6 +48,7 @@ const baseTemplate = {
     extract_drawings: false,
     extract_sheet_names: false,
     exclude_columns: [],
+    inner_content_type: null,
   },
   msPowerpoint: {extract_doc_properties: false, extract_notes: true, translate_slides: []},
   dita: {do_not_translate_elements: []},
