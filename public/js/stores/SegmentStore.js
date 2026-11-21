@@ -44,15 +44,23 @@ import {
   splittedTranslationPlaceholder,
 } from '../constants/Constants'
 
-import {transformTagsToText, removeTagsFromText, checkXliffTagsInText} from '../components/segments/utils/DraftMatecatUtils/tagUtils'
-import {checkTPEnabled, checkCurrentSegmentTPEnabled} from '../utils/tagProjectionUtils'
+import {
+  transformTagsToText,
+  removeTagsFromText,
+  checkXliffTagsInText,
+} from '../utils/segmentText/tagUtils'
+import {
+  checkTPEnabled,
+  checkCurrentSegmentTPEnabled,
+} from '../utils/tagProjectionUtils'
 // Async-loaded to break circular dependency for static analysis.
 let _SegmentUtils
 import('../utils/segmentUtils').then((m) => {
   _SegmentUtils = m.default
 })
 const getSegmentUtils = () => {
-  if (!_SegmentUtils) throw new Error('[SegmentStore] SegmentUtils not loaded yet')
+  if (!_SegmentUtils)
+    throw new Error('[SegmentStore] SegmentUtils not loaded yet')
   return _SegmentUtils
 }
 
@@ -172,9 +180,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             has_reference: 'false',
             readonly: false,
             segment: splittedSourceAr[i],
-            decodedSource: transformTagsToText(
-              segment.segment,
-            ),
+            decodedSource: transformTagsToText(segment.segment),
             segment_hash: segment.segment_hash,
             original_sid: segment.sid,
             sid: segment.sid + '-' + (i + 1),
@@ -189,8 +195,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             time_to_edit: 0,
             originalDecodedTranslation: translation ? translation : '',
             translation: translation ? translation : '',
-            decodedTranslation:
-              transformTagsToText(translation),
+            decodedTranslation: transformTagsToText(translation),
             warning: false,
             warnings: {},
             tagged: !this.hasSegmentTagProjectionEnabled(segment),
@@ -239,15 +244,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         segment.occurrencesInSearch = occurrencesInSearch
         segment.searchParams = this.searchParams
         segment.originalDecodedTranslation = segment.translation
-        segment.decodedTranslation = transformTagsToText(
-          segment.translation,
-        )
-        segment.decodedSource = transformTagsToText(
-          segment.segment,
-        )
-        segment.updatedSource = checkCurrentSegmentTPEnabled(
-          segment,
-        )
+        segment.decodedTranslation = transformTagsToText(segment.translation)
+        segment.decodedSource = transformTagsToText(segment.segment)
+        segment.updatedSource = checkCurrentSegmentTPEnabled(segment)
           ? removeTagsFromText(segment.segment)
           : segment.segment
         segment.openComments = false
@@ -1972,8 +1971,7 @@ AppDispatcher.register(function (action) {
         SegmentConstants.HIGHLIGHT_TAGS,
         action.tagId,
         action.tagPlaceholder,
-        action.entityKey,
-        action.isTarget,
+        action.chipKey,
       )
       break
     case SegmentConstants.SET_SEGMENT_SAVING:
@@ -2041,11 +2039,6 @@ AppDispatcher.register(function (action) {
       break
     case SegmentConstants.OPEN_GLOSSARY_FORM_PREFILL:
       SegmentStore.emitChange(SegmentConstants.OPEN_GLOSSARY_FORM_PREFILL, {
-        ...action,
-      })
-      break
-    case SegmentConstants.FOCUS_TAGS:
-      SegmentStore.emitChange(SegmentConstants.FOCUS_TAGS, {
         ...action,
       })
       break

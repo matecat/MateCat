@@ -1,37 +1,5 @@
 @use '../../tokens/colors';
 @use '../../commons/variables';
-.DraftEditor-root {
-  .public-DraftEditor-content > div > div {
-    // everything
-    &:not(:last-child) {
-      .public-DraftStyleDefault-block {
-        & > * {
-          &:last-child {
-            &:after {
-              content: '\21B5'; //↵
-              padding: 0 4px;
-              font-size: variables.$font-size-xsmall;
-              color: colors.$blue500;
-            }
-          }
-        }
-      }
-    }
-    // hide <br> line
-    &:not(:last-child) {
-      .public-DraftStyleDefault-block {
-        & > span {
-          &:only-child[data-offset-key] {
-            br {
-              display: none;
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
 .tag-container {
   position: relative;
   display: inline-block;
@@ -485,8 +453,8 @@
 
 // Body-level toggle for HTML-rendered (closed) segments
 // Scoped to compressible (numbered) tags ONLY. Targeting every .tag-ph would also
-// hide the Draft.js-rendered text (span[data-text='true']) of normal/semantic ph
-// tags in the open editor, making them vanish when compaction is on.
+// hide the text (span[data-text='true']) of normal/semantic ph tags, making them
+// vanish when compaction is on.
 body.tags-compressed {
   .tag.tag-numbered {
     .index-counter {
@@ -503,7 +471,7 @@ body.tags-compressed {
 
 // Ensure inline layout for index + text inside HTML-rendered ph and numbered tags.
 // Scoped to tag-container-lite so it does not override display:flow-root
-// in the Draft.js editor (where flex handles inline layout automatically).
+// elsewhere (where flex handles inline layout automatically).
 .tag-container-lite .tag.tag-ph,
 .tag-container-lite .tag.tag-numbered {
   .index-counter,
@@ -750,13 +718,12 @@ body.tags-compressed {
   }
 }
 
-// A chip directly in a CodeMirror line flows inline, where Draft wraps each chip in an inline-block `.tag-container`.
+// A chip directly in a CodeMirror line flows inline.
 .cm-line .tag {
   display: inline-flex;
 }
 
-// A search hit inside a tag label in the CodeMirror editors: the label is marked, with the colour of TagEntity's
-// markSearch (which marks only the matching part).
+// A search hit inside a tag label in the CodeMirror editors: the label is marked.
 .tag.tag-search-match .tag-text {
   background-color: rgb(255 255 0);
 }
@@ -764,7 +731,7 @@ body.tags-compressed {
   background-color: rgb(255 210 14);
 }
 // With the tags compressed, a chip holding a hit shows its label again, or the hit (and the current one) could not be
-// seen: Draft, while searching, draws the text of its chips with markSearch, which compaction does not hide.
+// seen.
 body.tags-compressed .tag.tag-numbered.tag-search-match .tag-text {
   display: flow-root;
 }

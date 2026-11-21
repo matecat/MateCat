@@ -1,7 +1,7 @@
 import React from 'react'
 import {render, screen, act, fireEvent} from '@testing-library/react'
 import {SegmentFooterTabLaraStyles} from './SegmentFooterTabLaraStyles'
-import {setTagSignatureMiddleware} from './utils/DraftMatecatUtils/tagModel'
+import {setTagSignatureMiddleware} from '../../utils/segmentText/tagModel'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
 import {SegmentContext} from './SegmentContext'
@@ -32,7 +32,7 @@ jest.mock('../../utils/segmentUtils', () => ({
   })),
 }))
 
-jest.mock('./utils/DraftMatecatUtils/tagUtils', () => ({
+jest.mock('../../utils/segmentText/tagUtils', () => ({
   __esModule: true,
   decodePlaceholdersToPlainText: jest.fn((t) => t),
   encodePlaceholdersToTags: jest.fn((t) => t),
@@ -293,7 +293,7 @@ describe('SegmentFooterTabLaraStyles', () => {
     const {getSegmentContext} = require('../../utils/segmentUtils')
     const {
       decodePlaceholdersToPlainText,
-    } = require('./utils/DraftMatecatUtils/tagUtils')
+    } = require('../../utils/segmentText/tagUtils')
     const {laraAuthJob} = require('../../api/laraAuth')
     const {laraTranslate} = require('../../api/laraTranslate')
 

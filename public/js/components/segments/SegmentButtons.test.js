@@ -38,7 +38,7 @@ jest.mock('../../constants/CatToolConstants', () => ({
   SET_PROGRESS: 'SET_PROGRESS',
 }))
 
-jest.mock('./utils/DraftMatecatUtils/tagUtils', () => ({
+jest.mock('../../utils/segmentText/tagUtils', () => ({
   decodePlaceholdersToPlainText: jest.fn((str) => str),
   removeTagsFromText: jest.fn((str) => str),
 }))

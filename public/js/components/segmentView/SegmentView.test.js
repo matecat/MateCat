@@ -8,7 +8,7 @@ import {SPECIAL_CHARS} from '../../utils/segmentText/specialChars'
 import {
   initTagSignature,
   setTagSignatureMiddleware,
-} from '../segments/utils/DraftMatecatUtils/tagModel'
+} from '../../utils/segmentText/tagModel'
 
 // The space placeholder is a user option (show_whitespace), off by default.
 beforeAll(() => initTagSignature({show_whitespace: 0}))

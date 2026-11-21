@@ -13,7 +13,7 @@ import {
  * Turns a cattool segment string (layer 2: XLIFF tags as markup, text
  * HTML-encoded, `##$_XX$##` placeholders) into display tokens.
  *
- * The rules mirror `transformTagsToHtml` in DraftMatecatUtils/tagUtils.js,
+ * The rules mirror `transformTagsToHtml` in utils/segmentText/tagUtils.js,
  * which renders the same string as an HTML string: same signatures, same
  * order, same numbering, same `<g>` id pairing. That function replaces one
  * signature at a time on the growing HTML, so a later signature also matches
@@ -491,7 +491,7 @@ const tagKey = (token) =>
 
 export const DIFF_DELETE = 'delete'
 export const DIFF_INSERT = 'insert'
-export const DIFF_EQUAL = 'equal'
+const DIFF_EQUAL = 'equal'
 const OPS = {[-1]: DIFF_DELETE, 1: DIFF_INSERT, 0: DIFF_EQUAL}
 
 /**
@@ -604,7 +604,7 @@ export const sliceSegment = (segment, start, end, options) => {
  * The attribute that carries a segment slice (base64 of the raw string) in
  * the `text/html` flavour of a copy from a SegmentView.
  */
-export const CLIPBOARD_ATTRIBUTE = 'data-matecat-segment'
+const CLIPBOARD_ATTRIBUTE = 'data-matecat-segment'
 const CLIPBOARD_ATTRIBUTE_RE = new RegExp(
   CLIPBOARD_ATTRIBUTE + '="([A-Za-z0-9+/=_-]*)"',
 )
@@ -618,14 +618,14 @@ export const segmentClipboardHtml = ({raw, text}) =>
 
 /**
  * External text with every XLIFF tag markup removed (what a paste from
- * outside the app keeps; see `removeTagsFromText` in DraftMatecatUtils).
+ * outside the app keeps; see `removeTagsFromText` in utils/segmentText/tagUtils).
  */
 export const stripTagMarkup = (text) =>
   text.replace(getXliffRegExpression(), '')
 
 /**
  * Where `text` holds XLIFF tag markup (known to `tokenize` or not), as
- * `{from, to}` offsets. The Draft editors save such markup as it is.
+ * `{from, to}` offsets. The editors save such markup as it is.
  */
 export const findTagMarkup = (text) =>
   [...text.matchAll(getXliffRegExpression())].map((match) => ({

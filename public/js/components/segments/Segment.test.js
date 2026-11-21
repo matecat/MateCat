@@ -146,7 +146,7 @@ jest.mock('../header/cattol/search/searchUtils', () => ({
   default: {getHighlightedElementData: jest.fn(() => null), searchOpen: false},
 }))
 
-jest.mock('./utils/DraftMatecatUtils/segmentStringUtils', () => ({
+jest.mock('../../utils/segmentText/segmentStringUtils', () => ({
   __esModule: true,
   default: {
     checkXliffTagsInText: jest.fn(() => false),

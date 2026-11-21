@@ -151,7 +151,7 @@ describe('glossary click', () => {
   })
 })
 
-describe('the Lexiqa tooltip of the target (Editarea.replaceWordAt, C4)', () => {
+describe('the Lexiqa tooltip of the target', () => {
   const suggestion = [{type: 'suggestion', msg: 'two', start: 0, end: 3}]
   let editor
 

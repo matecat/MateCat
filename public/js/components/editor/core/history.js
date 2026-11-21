@@ -3,7 +3,7 @@
 import {history, invertedEffects} from '@codemirror/commands'
 import {addTags, tagList} from './docModel'
 
-export const restoreDeletedTags = invertedEffects.of((tr) => {
+const restoreDeletedTags = invertedEffects.of((tr) => {
   if (!tr.docChanged) return []
   const lost = tagList(tr.startState).filter(
     (tag) => tr.changes.mapPos(tag.from, 1) >= tr.changes.mapPos(tag.to, -1),

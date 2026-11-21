@@ -51,8 +51,8 @@ export const searchRanges = (state, segment, isSource = true) => {
 }
 
 /**
- * The chips whose label holds the searched text of their side, as tag states `{from, to, className}`: Draft marks the
- * matching part of the tag text; here the chip label is marked. The chip holding the current hit is marked current
+ * The chips whose label holds the searched text of their side, as tag states `{from, to, className}`: the chip label
+ * is marked. The chip holding the current hit is marked current
  * too, as markSearch colours its part as the current one.
  */
 export const searchChipRanges = (state, segment, isSource = true) => {

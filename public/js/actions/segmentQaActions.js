@@ -1,6 +1,6 @@
 import {getLocalWarnings} from '../api/getLocalWarnings'
 import {getGlossaryCheck} from '../api/getGlossaryCheck'
-import {removeTagsFromText} from '../components/segments/utils/DraftMatecatUtils/tagUtils'
+import {removeTagsFromText} from '../utils/segmentText/tagUtils'
 import CommonUtils from '../utils/commonUtils'
 import {setSegmentWarnings} from './segmentDispatchActions'
 import CatToolConstants from '../constants/CatToolConstants'

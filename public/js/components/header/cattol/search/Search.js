@@ -11,7 +11,7 @@ import SegmentActions from '../../../../actions/SegmentActions'
 import CatToolActions from '../../../../actions/CatToolActions'
 import AlertModal from '../../../modals/AlertModal'
 import ModalsActions from '../../../../actions/ModalsActions'
-import {tagSignatures} from '../../../segments/utils/DraftMatecatUtils/tagModel'
+import {tagSignatures} from '../../../../utils/segmentText/tagModel'
 import CommonUtils from '../../../../utils/commonUtils'
 import SegmentUtils from '../../../../utils/segmentUtils'
 import {

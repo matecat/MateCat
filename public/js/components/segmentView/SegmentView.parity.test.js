@@ -2,11 +2,11 @@ import React from 'react'
 import {render} from '@testing-library/react'
 import {Base64} from 'js-base64'
 import SegmentView from './SegmentView'
-import {transformTagsToHtml} from '../segments/utils/DraftMatecatUtils/tagUtils'
+import {transformTagsToHtml} from '../../utils/segmentText/tagUtils'
 import {
   initTagSignature,
   setTagSignatureMiddleware,
-} from '../segments/utils/DraftMatecatUtils/tagModel'
+} from '../../utils/segmentText/tagModel'
 
 // Regression guarantee for replacing `transformTagsToHtml` + innerHTML with
 // <SegmentView>: for real segment strings both must give the same text and the

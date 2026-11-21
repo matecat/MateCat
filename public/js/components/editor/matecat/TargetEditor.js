@@ -1,6 +1,5 @@
-// The target of the open segment in the CodeMirror editor: editable, wired to the segment store and actions the way
-// Editarea (the Draft target) is, behind the same handle SegmentTarget and its toolbar use. Picked by SegmentTarget
-// when the new editor is active, so source and target always switch together.
+// The target of the open segment in the CodeMirror editor: editable, wired to the segment store and actions, behind
+// the handle SegmentTarget and its toolbar use.
 import React, {
   forwardRef,
   useContext,
@@ -22,6 +21,12 @@ import EditAreaConstants from '../../../constants/EditAreaConstants'
 import ContextPreviewChannel from '../../../utils/contextPreviewChannel'
 import TextUtils from '../../../utils/textUtils'
 import {classifyCompressibleTag} from '../../../utils/segmentText/compressibleTagUtils'
+import {
+  charactersCounter,
+  formatText,
+  tagIdentities,
+  translationUpdate,
+} from '../../../utils/segmentText/segmentStoreData'
 import {SegmentContext} from '../../segments/SegmentContext'
 import {ApplicationWrapperContext} from '../../common/ApplicationWrapper/ApplicationWrapperContext'
 import TagBox from '../../segments/TagMenu/TagBox'
@@ -61,7 +66,7 @@ export const tagMenuPosition = (coords, box, minWidth = MENU_MIN_WIDTH) => {
 }
 
 /**
- * The warning class of a target tag (`raw`, its markup), as the Draft tag shows it: an error when the QA check lists
+ * The warning class of a target tag (`raw`, its markup): an error when the QA check lists
  * it as a target mismatch, a warning when it lists it as out of order. Compressible (pc) tags are never marked in
  * the target.
  */
@@ -103,7 +108,7 @@ const menuEntries = ({missingTags = [], sourceTags = []}) => [
 const CLOSED_MENU = {open: false, suggestions: {}, focused: 0, position: {}}
 
 /**
- * The layers of the target of `segment` over `state`, as Editarea's checkDecorators picks its decorators: search,
+ * The layers of the target of `segment` over `state`: search,
  * when it searches the target, hides the others; Lexiqa waits for the blacklist check when the job has glossary keys
  * (the blacklist takes precedence). Each layer is `{name, key, volatile?, ranges: () => ranges}`: it is recomputed
  * only when its key changes, and mapped through edits in between.
@@ -115,7 +120,7 @@ export const targetLayers = (state, segment, haveKeysGlossary) => {
   const showLexiqa =
     !inSearch &&
     (haveKeysGlossary === false || Array.isArray(segment.qaBlacklistGlossary))
-  // ICU syntax wins over the blacklist and Lexiqa, as Editarea's ICU decorator does: a mark touching it is not shown.
+  // ICU syntax wins over the blacklist and Lexiqa: a mark touching it is not shown.
   const outsideIcu = (ranges) =>
     segment.icu
       ? withoutRangesOverlapping(ranges, icuRanges(state, config.target_code))
@@ -195,13 +200,9 @@ const isArrowKey = (key) =>
  * @param {string} props.translation the translation of the store, which the counter starts from
  * @param {(counter: number) => void} props.updateCounter
  * @param {(show: boolean) => void} props.toggleFormatMenu
- * @param {object} props.bridge targetEditorBridge: what the store and the counter need computed by Draft
  */
 const TargetEditor = forwardRef(
-  (
-    {segment, value, translation, updateCounter, toggleFormatMenu, bridge},
-    ref,
-  ) => {
+  ({segment, value, translation, updateCounter, toggleFormatMenu}, ref) => {
     const context = useContext(SegmentContext)
     // The user's show whitespace option, from the application context: it changes live when the user toggles it.
     const showWhitespace =
@@ -233,28 +234,27 @@ const TargetEditor = forwardRef(
       translation,
       updateCounter,
       toggleFormatMenu,
-      bridge,
       menu,
     }
 
     const counterOf = (str) =>
-      latestRef.current.bridge.charactersCounter(
+      charactersCounter(
         str,
         CatToolStore.getCurrentProjectTemplate().characterCounterCountTags,
       )
 
-    // The store update after an edit, as Editarea's updateTranslationInStore.
+    // The store update after an edit.
     const updateTranslationInStore = () => {
       const editor = editorRef.current
       if (!editor) return
-      const {segment, bridge, updateCounter} = latestRef.current
+      const {segment, updateCounter} = latestRef.current
       const str = editor.getValue()
       if (str === '') {
         updateCounter(0)
         return
       }
       const {plainText, tagMap, missingTags, lxqDecodedTranslation} =
-        bridge.translationUpdate(str, segment.sourceTagMap)
+        translationUpdate(str, segment.sourceTagMap)
       SegmentActions.updateTranslation(
         segment.sid,
         str,
@@ -273,14 +273,11 @@ const TargetEditor = forwardRef(
     }
 
     const chips = () => {
-      const {bridge, segment} = latestRef.current
+      const {segment} = latestRef.current
       const {state} = editorRef.current.view
       return chipsWithIdentity(
         state,
-        bridge.tagIdentities(
-          editorRef.current.getValue(),
-          segment.sourceTagMap,
-        ),
+        tagIdentities(editorRef.current.getValue(), segment.sourceTagMap),
         `cm-target-${segment.sid}`,
       )
     }
@@ -339,7 +336,7 @@ const TargetEditor = forwardRef(
       if (!editorRef.current) return
       const {segment} = latestRef.current
       const chips = chipTokens(editorRef.current.view.state)
-      // Only the open segment shows tag warnings, as Draft's tags do.
+      // Only the open segment shows tag warnings.
       const unpaired = segment.opened ? unpairedTagStarts(chips) : new Set()
       warningRef.current = chips
         .map(({from, to, token}) => ({
@@ -516,7 +513,7 @@ const TargetEditor = forwardRef(
         editor.destroy()
         tagTooltip.destroy()
       }
-      // Mounted once per segment, as Editarea builds its editor state once.
+      // Mounted once per segment.
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
@@ -526,7 +523,7 @@ const TargetEditor = forwardRef(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    // Store events, as Editarea listens to them.
+    // Store events.
     useEffect(() => {
       const replaceTranslation = (sid, str) => {
         const editor = editorRef.current
@@ -683,7 +680,7 @@ const TargetEditor = forwardRef(
       if (wasOpened && !segment.opened) updateTranslationDebounced.flush()
     }, [segment.opened, updateTranslationDebounced])
 
-    // Appends the source tags missing from the target, then updates the store and runs the QA check, as Editarea.
+    // Appends the source tags missing from the target, then updates the store and runs the QA check.
     const addMissingSourceTagsToTarget = () => {
       const editor = editorRef.current
       if (!editor) return
@@ -717,12 +714,10 @@ const TargetEditor = forwardRef(
 
     // The toolbar's upper case, lower case and capitalize, applied to the selected text and never to its tags.
     const formatSelection = (format) => {
-      editorRef.current?.transformSelection((text) =>
-        latestRef.current.bridge.formatText(text, format),
-      )
+      editorRef.current?.transformSelection((text) => formatText(text, format))
     }
 
-    // Editarea's handle: SegmentTarget, the toolbar and AiAlternatives reach the editor through it.
+    // The handle SegmentTarget, the toolbar and AiAlternatives reach the editor through.
     const handleRef = useRef(null)
     handleRef.current = {addMissingSourceTagsToTarget, formatSelection}
     useImperativeHandle(

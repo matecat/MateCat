@@ -10,20 +10,8 @@ import OfflineUtils from '../../utils/offlineUtils'
 import SegmentUtils from '../../utils/segmentUtils'
 import CursorUtils from '../../utils/cursorUtils'
 import {Base64} from 'js-base64'
-import {setTagSignatureMiddleware} from './utils/DraftMatecatUtils/tagModel'
+import {setTagSignatureMiddleware} from '../../utils/segmentText/tagModel'
 
-jest.mock('./Editarea', () => (props) => (
-  <div
-    data-testid="edit-area"
-    data-translation={props.translation}
-    data-sid={props.segment?.sid}
-  />
-))
-
-let mockNewEditor = false
-jest.mock('../editor/matecat/editorEngine', () => ({
-  isNewEditorEnabled: () => mockNewEditor,
-}))
 jest.mock('../editor/matecat/TargetEditor', () => {
   const React = require('react')
   return React.forwardRef((props, ref) => {
@@ -33,16 +21,11 @@ jest.mock('../editor/matecat/TargetEditor', () => {
         data-testid="target-editor"
         data-value={props.value}
         data-translation={props.translation}
-        data-bridge={props.bridge?.name}
       />
     )
   })
 })
 const mockTargetHandle = {addMissingSourceTagsToTarget: jest.fn()}
-jest.mock('./targetEditorBridge', () => ({
-  targetEditorBridge: {name: 'target-bridge'},
-}))
-
 jest.mock('./SegmentButtons', () => (props) => (
   <div data-testid="segment-buttons" data-disabled={String(props.disabled)} />
 ))
@@ -82,11 +65,11 @@ jest.mock('../../actions/SegmentActions', () => ({
   characterCounter: jest.fn(),
 }))
 
-jest.mock('./utils/DraftMatecatUtils/segmentStringUtils', () => ({
+jest.mock('../../utils/segmentText/segmentStringUtils', () => ({
   autoFillTagsInTarget: jest.fn(() => 'auto-filled-translation'),
 }))
 
-jest.mock('./utils/DraftMatecatUtils/tagUtils', () => ({
+jest.mock('../../utils/segmentText/tagUtils', () => ({
   removeTagsFromText: jest.fn((text) => `clean-${text}`),
   textHasTags: jest.fn(() => false),
 }))
@@ -175,7 +158,7 @@ describe('SegmentTarget', () => {
   })
 
   describe('locked edit area', () => {
-    test('renders the read-only highlighted view instead of EditArea', () => {
+    test('renders the read-only highlighted view instead of the editor', () => {
       const {container} = renderTarget({
         segment: buildSegment({edit_area_locked: true}),
       })
@@ -183,7 +166,7 @@ describe('SegmentTarget', () => {
         container.querySelector('.issuesHighlightArea'),
       ).toBeInTheDocument()
       expect(
-        container.querySelector('[data-testid="edit-area"]'),
+        container.querySelector('[data-testid="target-editor"]'),
       ).not.toBeInTheDocument()
     })
 
@@ -245,12 +228,12 @@ describe('SegmentTarget', () => {
   })
 
   describe('editable area', () => {
-    test('renders EditArea and the target toolbar', () => {
+    test('renders the editor and the target toolbar', () => {
       const {container} = renderTarget({
         segment: buildSegment({edit_area_locked: false}),
       })
       expect(
-        container.querySelector('[data-testid="edit-area"]'),
+        container.querySelector('[data-testid="target-editor"]'),
       ).toBeInTheDocument()
       expect(
         container.querySelector('[data-testid="segment-target-toolbar"]'),
@@ -392,26 +375,21 @@ describe('SegmentTarget', () => {
   })
 })
 
-describe('SegmentTarget editor engine', () => {
+describe('SegmentTarget editor', () => {
   beforeEach(() => {
     window.config = {target_code: 'en', isTargetRTL: false, isReview: false}
   })
   afterEach(() => {
-    mockNewEditor = false
     SegmentUtils.checkCurrentSegmentTPEnabled.mockReturnValue(false)
   })
 
-  test('with the new editor active the target opens in the CodeMirror editor, wired to the Draft bridge', () => {
-    mockNewEditor = true
+  test('the target opens on the translation', () => {
     renderTarget()
     const editor = screen.getByTestId('target-editor')
     expect(editor).toHaveAttribute('data-value', 'some translation')
-    expect(editor).toHaveAttribute('data-bridge', 'target-bridge')
-    expect(screen.queryByTestId('edit-area')).not.toBeInTheDocument()
   })
 
-  test('with tag projection on, the CodeMirror target starts from the translation without tags', () => {
-    mockNewEditor = true
+  test('with tag projection on, the target starts from the translation without tags', () => {
     SegmentUtils.checkCurrentSegmentTPEnabled.mockReturnValue(true)
     renderTarget()
     const editor = screen.getByTestId('target-editor')
@@ -419,8 +397,7 @@ describe('SegmentTarget editor engine', () => {
     expect(editor).toHaveAttribute('data-translation', 'some translation')
   })
 
-  test('the toolbar reaches the CodeMirror target through the same handle as the Draft one', () => {
-    mockNewEditor = true
+  test('the toolbar reaches the target editor through its handle', () => {
     const {rerender, segment} = renderTarget()
     rerender(
       <SegmentContext.Provider
@@ -438,12 +415,6 @@ describe('SegmentTarget editor engine', () => {
     expect(props.addMissingSourceTagsToTarget).toBe(
       mockTargetHandle.addMissingSourceTagsToTarget,
     )
-  })
-
-  test('with the new editor off the target stays the Draft editor', () => {
-    renderTarget()
-    expect(screen.getByTestId('edit-area')).toBeInTheDocument()
-    expect(screen.queryByTestId('target-editor')).not.toBeInTheDocument()
   })
 })
 

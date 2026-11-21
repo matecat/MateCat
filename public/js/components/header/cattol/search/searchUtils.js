@@ -11,7 +11,7 @@ import {searchTermIntoSegments} from '../../../../api/searchTermIntoSegments'
 import {replaceAllIntoSegments} from '../../../../api/replaceAllIntoSegments'
 import AlertModal from '../../../modals/AlertModal'
 import ModalsActions from '../../../../actions/ModalsActions'
-import {tagSignatures} from '../../../segments/utils/DraftMatecatUtils/tagModel'
+import {tagSignatures} from '../../../../utils/segmentText/tagModel'
 import {OPAQUE_TAG} from '../../../segmentView/segmentModel'
 import {
   REVISE_STEP_NUMBER,

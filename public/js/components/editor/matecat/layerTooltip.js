@@ -1,5 +1,5 @@
-// Hover tooltips of the editor layers (what GlossaryHighlight, QaCheckGlossaryHighlight, QaCheckBlacklistHighlight,
-// LexiqaHighlight and IcuHighlight show in Draft), drawn with common/Tooltip as they are, and the click on a glossary
+// Hover tooltips of the editor layers (glossary, termbase check, blacklist, Lexiqa and ICU), drawn with
+// common/Tooltip, and the click on a glossary
 // term that opens it in the footer glossary tab. The Lexiqa tooltip stays open while the pointer moves into it: its
 // suggestions replace the warned text (in the target) and Ignore drops the warning (LXQ.ignoreError).
 import React from 'react'

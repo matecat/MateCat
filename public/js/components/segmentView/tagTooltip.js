@@ -1,6 +1,6 @@
-// The tooltip of a trimmed or compressed tag chip: the full tag text, shown as TagEntity shows it in Draft
-// (common/Tooltip, above the chip, after the same delay). Never for a closing tag, which shows only its number. Shared
-// by the editors (editor/matecat/tagTooltip.js) and the read-only segment view; neither Draft nor CodeMirror here.
+// The tooltip of a trimmed or compressed tag chip: the full tag text (common/Tooltip, above the chip, after a delay).
+// Never for a closing tag, which shows only its number. Shared by the editors (editor/matecat/tagTooltip.js) and the
+// read-only segment view; no CodeMirror here.
 import React from 'react'
 import {createRoot} from 'react-dom/client'
 import Tooltip, {TOOLTIP_MODE} from '../common/Tooltip'
@@ -106,7 +106,7 @@ const chipOf = (target, root) => {
  * What a hovered SegmentView chip reports, as the editor chips do: the label is the text of its label element, which
  * Tag.scss trims with an ellipsis.
  */
-export const chipHover = (chip) => {
+const chipHover = (chip) => {
   const text = chip.querySelector('.tag-text, [data-text]') ?? chip
   const {top, left, width, height} = chip.getBoundingClientRect()
   return {

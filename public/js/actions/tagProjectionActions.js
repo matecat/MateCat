@@ -1,4 +1,4 @@
-import {hasDataOriginalTags} from '../components/segments/utils/DraftMatecatUtils/tagUtils'
+import {hasDataOriginalTags} from '../utils/segmentText/tagUtils'
 import {setSegmentAsTagged} from './segmentDispatchActions'
 import SegmentStore from '../stores/SegmentStore'
 import {checkTPEnabled} from '../utils/tagProjectionUtils'

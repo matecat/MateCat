@@ -4,7 +4,7 @@ jest.mock('../api/getLocalWarnings', () => ({
 jest.mock('../api/getGlossaryCheck', () => ({
   getGlossaryCheck: jest.fn(),
 }))
-jest.mock('../components/segments/utils/DraftMatecatUtils/tagUtils', () => ({
+jest.mock('../utils/segmentText/tagUtils', () => ({
   removeTagsFromText: jest.fn((text) => text),
 }))
 jest.mock('../utils/commonUtils', () => ({
