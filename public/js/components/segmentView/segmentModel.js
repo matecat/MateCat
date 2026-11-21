@@ -1,10 +1,13 @@
 import {Base64} from 'js-base64'
 import diff_match_patch from 'diff-match-patch'
-import {tagSignatures} from '../segments/utils/DraftMatecatUtils/tagModel'
+import {
+  getXliffRegExpression,
+  tagSignatures,
+} from '../../utils/segmentText/tagModel'
 import {
   createTagNumberer,
   getGEquivText,
-} from '../segments/utils/DraftMatecatUtils/compressibleTagUtils'
+} from '../../utils/segmentText/compressibleTagUtils'
 
 /**
  * Turns a cattool segment string (layer 2: XLIFF tags as markup, text
@@ -61,8 +64,15 @@ const stripMarkup = (html) => {
   return text
 }
 
-export const decodeHtmlText = (html) =>
-  stripMarkup(html)
+export const decodeHtmlText = (html) => decodeEntities(stripMarkup(html))
+
+/**
+ * The entity half of `decodeHtmlText`: entities decoded and CR/CRLF
+ * normalised to LF, markup left as text. For text that is edited rather than
+ * shown, where a stray `<br>` must survive as the characters it is.
+ */
+export const decodeEntities = (text) =>
+  text
     .replace(ENTITY_RE, (match, dec, hex, named, apos) => {
       if (dec) return fromCodePoint(parseInt(dec, 10))
       if (hex) return fromCodePoint(parseInt(hex, 16))
@@ -496,7 +506,7 @@ export const diffTokens = (oldTokens, newTokens) => {
 }
 
 // Text tokens hold decoded text; the segment string stores it HTML-encoded.
-const encodeText = (text) =>
+export const encodeText = (text) =>
   text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
 // What a tag chip yields as plain text: whitespace chips the character they
@@ -560,6 +570,23 @@ const CLIPBOARD_ATTRIBUTE_RE = new RegExp(
  */
 export const segmentClipboardHtml = ({raw, text}) =>
   `<span ${CLIPBOARD_ATTRIBUTE}="${Base64.encode(raw)}">${encodeText(text)}</span>`
+
+/**
+ * External text with every XLIFF tag markup removed (what a paste from
+ * outside the app keeps; see `removeTagsFromText` in DraftMatecatUtils).
+ */
+export const stripTagMarkup = (text) =>
+  text.replace(getXliffRegExpression(), '')
+
+/**
+ * Where `text` holds XLIFF tag markup (known to `tokenize` or not), as
+ * `{from, to}` offsets. The Draft editors save such markup as it is.
+ */
+export const findTagMarkup = (text) =>
+  [...text.matchAll(getXliffRegExpression())].map((match) => ({
+    from: match.index,
+    to: match.index + match[0].length,
+  }))
 
 const MARKUP_TAG_KEYS = ['ph', 'gSc', 'g', 'gCl', 'bx', 'ex', 'x']
 
