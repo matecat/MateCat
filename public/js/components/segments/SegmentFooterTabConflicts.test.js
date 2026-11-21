@@ -162,9 +162,8 @@ describe('SegmentFooterTabConflicts', () => {
     })
 
     expect(screen.getByText('Ciao &', {exact: false})).toBeInTheDocument()
-    const chips = screen.getAllByText(/7/)
+    const chips = screen.getAllByText(/7/, {selector: '.tag > .tag-text'})
     expect(chips).toHaveLength(2)
-    chips.forEach((chip) => expect(chip).toHaveClass('tag'))
     expect(screen.queryByText(/id=/)).not.toBeInTheDocument()
   })
 

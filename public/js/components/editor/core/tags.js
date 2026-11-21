@@ -84,18 +84,18 @@ class TagWidget extends WidgetType {
       : token.className
     el.setAttribute('contenteditable', 'false')
     el.dataset.tagName = token.name
+    // As TagEntity: the pair number, then the label in its own span (Tag.scss trims it with an ellipsis, and
+    // compaction hides it). A closing tag shows only its number.
     if (token.index !== undefined && token.index !== null) {
       el.dataset.tagIndex = token.index
       const counter = el.appendChild(document.createElement('span'))
       counter.className = 'index-counter'
       counter.textContent = String(token.index + 1)
-      if (token.role !== 'close') {
-        const label = el.appendChild(document.createElement('span'))
-        label.dataset.text = 'true'
-        label.textContent = token.label
-      }
-    } else {
-      el.textContent = token.label
+    }
+    if (token.role !== 'close') {
+      const label = el.appendChild(document.createElement('span'))
+      label.className = 'tag-text'
+      label.textContent = token.label
     }
     el.addEventListener('mousedown', (event) => {
       if (event.button !== 0) return
@@ -103,6 +103,23 @@ class TagWidget extends WidgetType {
       const from = view.posAtDOM(el)
       selectTag(view, from, from + this.length, token)
     })
+    el.addEventListener('mouseenter', () => {
+      // The label span carries the ellipsis; a closing tag has none and is never trimmed.
+      const text = el.querySelector('.tag-text') ?? el
+      const {top, left, width, height} = el.getBoundingClientRect()
+      view.state.facet(tagEventSink)?.('tagHover', {
+        name: token.name,
+        index: token.index ?? null,
+        role: token.role ?? null,
+        className: token.className,
+        label: token.label,
+        truncated: text.offsetWidth < text.scrollWidth,
+        rect: {top, left, width, height},
+      })
+    })
+    el.addEventListener('mouseleave', () =>
+      view.state.facet(tagEventSink)?.('tagLeave', {}),
+    )
     return el
   }
 

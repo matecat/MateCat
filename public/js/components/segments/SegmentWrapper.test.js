@@ -147,10 +147,30 @@ describe('SegmentWrapper on a closed segment', () => {
     )
 
     expect(screen.getByText("L'a &nbsp;", {exact: false})).toBeInTheDocument()
-    const chips = screen.getAllByText(/^\u200B1\u200B$/)
+    const chips = screen.getAllByText(/^\u200B1\u200B$/, {
+      selector: '.tag > .tag-text',
+    })
     expect(chips).toHaveLength(2)
-    chips.forEach((chip) => expect(chip).toHaveClass('tag'))
-    expect(screen.getByText('\u00B0')).toHaveClass('tag-nbsp')
+    // the nbsp is the editor's mark, not a chip
+    expect(
+      screen.getByLabelText('Non-breaking space (U+00A0)'),
+    ).not.toHaveClass('tag')
+  })
+
+  test("marks the spaces as soon as the user's show whitespace option changes", () => {
+    const segment = makeSegment({segment: 'a b'})
+    const spaceMarks = () =>
+      screen.queryAllByText((_, el) =>
+        el.classList.contains('special-char-space'),
+      ).length
+    const {rerender} = renderWrapper(segment, {}, {show_whitespace: 0})
+    expect(spaceMarks()).toBe(0)
+
+    rerender(tree(segment, {}, {show_whitespace: 1}))
+    expect(spaceMarks()).toBe(1)
+
+    rerender(tree(segment, {}, {show_whitespace: 0}))
+    expect(spaceMarks()).toBe(0)
   })
 
   test('strips tags when tag projection is enabled for the segment', () => {

@@ -23,7 +23,7 @@ There is no `DraftSource/` folder on this branch, so nothing is listed for it.
 | resolveEditorCommand                |    15 | M1 (keys), M3 (tag menu, Ctrl+K)          | `core/keymap.test.js`, `e2e/editing.e2e.js`               | Enter, Tab, nbsp, Ctrl/Cmd+Enter unbound; tag menu and Ctrl+K are M3                                   |
 | insertEntityAtSelection             |     3 | M1                                        | `core/createSegmentEditor.test.js` (insertRaw)            | inserting a tag replaces the selection                                                                 |
 | getSegmentSlice                     |     6 | M1                                        | `core/clipboard.test.js`, `e2e/clipboard.e2e.js`          | copy writes the raw slice                                                                              |
-| buildPastedEditorState              |     5 | M1 (content), M3 (wiring)                 | `core/clipboard.test.js`, `e2e/clipboard.e2e.js`          | outside paste strips tags, maps `°`                                                                    |
+| buildPastedEditorState              |     5 | M1 (content), M3 (wiring)                 | `core/clipboard.test.js`, `e2e/clipboard.e2e.js`          | outside paste strips tags, keeps `°`                                                                  |
 | buildPastedEditorState.segmentSlice |     5 | M1 (content), M3 (wiring)                 | `core/clipboard.test.js`, `e2e/clipboard.e2e.js`          | an internal slice pastes with its tags, forged markup does not become tags                             |
 | resolveDrop                         |     8 | M1 (refuse onto chip), M3 (Alt/Ctrl copy) | `core/clipboard.test.js`, `e2e/clipboard.e2e.js`          | nothing may be dropped onto a tag; move vs copy                                                        |
 | buildFragmentFromText               |     2 | M3                                        |                                                           | text → insertable content                                                                              |
@@ -65,8 +65,8 @@ There is no `DraftSource/` folder on this branch, so nothing is listed for it.
 | findTagWithRegex           |     4 | string regex helper, no Draft                                                               |
 | textConstants              |     2 | word delimiter regex                                                                        |
 | TagMenu/checkForMissingTag |    16 | missing tags on strings (tag menu order, R3)                                                |
-| TagMenu/TagBox             |     6 | reused tag menu UI (plan open question 4)                                                   |
-| TagMenu/TagSuggestion      |     4 | reused tag menu UI                                                                          |
+| TagMenu/TagBox             |     6 | reused tag menu UI (plan open question 4), moved to `segments/TagMenu/` in M3a              |
+| TagMenu/TagSuggestion      |     4 | reused tag menu UI, moved to `segments/TagMenu/` in M3a                                     |
 
 ## Delete with Draft
 

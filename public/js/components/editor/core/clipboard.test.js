@@ -66,12 +66,12 @@ describe('clipboard content (buildPastedEditorState)', () => {
     })
   })
 
-  test('outside text loses its tag markup and maps ° to an nbsp', () => {
+  test('outside text loses its tag markup and keeps a degree sign as a degree sign', () => {
     const data = fakeTransfer({
       'text/html': '<b>bold</b>',
-      'text/plain': 'a<x id="1"/>b°c\r\nd',
+      'text/plain': 'a<x id="1"/>b25°C\r\nd',
     })
-    expect(transferContent(data)).toEqual({text: 'ab\u00a0c\nd', tags: []})
+    expect(transferContent(data)).toEqual({text: 'ab25°C\nd', tags: []})
   })
 })
 
@@ -144,6 +144,16 @@ describe('paste (buildPastedEditorState)', () => {
     })
     expect(editor.getValue()).toBe('axyb')
     expect(tagsOf(editor)).toEqual([])
+  })
+
+  test('a pasted degree sign is saved as a degree sign, not an nbsp, and gets no nbsp mark', () => {
+    const editor = mount('ab')
+    select(editor, 1, 1)
+    fire(editor.view.contentDOM, 'paste', {
+      clipboardData: fakeTransfer({'text/plain': '25°C'}),
+    })
+    expect(editor.getValue()).toBe('a25°Cb')
+    expect(editor.view.contentDOM.querySelector('.special-char-nbsp')).toBeNull()
   })
 
   test('a paste into the read-only source changes nothing', () => {

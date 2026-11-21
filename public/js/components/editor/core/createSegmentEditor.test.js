@@ -164,3 +164,30 @@ describe('host extensions', () => {
     expect(seen).toEqual(['two!'])
   })
 })
+
+describe('read-only and text edits', () => {
+  test('a target made read-only refuses edits, also after a new value is loaded, until made editable again', () => {
+    const editor = mount('ab')
+    editor.setReadOnly(true)
+    expect(editor.view.state.readOnly).toBe(true)
+    editor.setValue('cd', {undoable: false})
+    expect(editor.view.state.readOnly).toBe(true)
+    editor.view.dispatch({selection: {anchor: 0, head: 2}})
+    expect(editor.transformSelection((t) => t.toUpperCase())).toBe(false)
+    expect(editor.replaceOccurrence(/c/g, 0, 'x')).toBe(false)
+    expect(editor.getValue()).toBe('cd')
+    editor.setReadOnly(false)
+    expect(editor.transformSelection((t) => t.toUpperCase())).toBe(true)
+    expect(editor.replaceOccurrence(/D/g, 0, 'x')).toBe(true)
+    expect(editor.getValue()).toBe('Cx')
+  })
+
+  test('a text edit is one undo step', () => {
+    const editor = mount('a <g id="1">b</g>')
+    editor.view.dispatch({selection: {anchor: 0, head: 17}})
+    editor.transformSelection((t) => t.toUpperCase())
+    expect(editor.getValue()).toBe('A <g id="1">B</g>')
+    editor.undo()
+    expect(editor.getValue()).toBe('a <g id="1">b</g>')
+  })
+})
