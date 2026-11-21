@@ -5,7 +5,7 @@ import SegmentUtils from '../../../utils/segmentUtils'
 import CommonUtils from '../../../utils/commonUtils'
 import OfflineUtils from '../../../utils/offlineUtils'
 import Speech2Text from '../../../utils/speech2text'
-import DraftMatecatUtils from './DraftMatecatUtils'
+import SegmentStringUtils from './DraftMatecatUtils/segmentStringUtils'
 import {addClassToSegment} from '../../../actions/segmentClassActions'
 import {
   replaceEditAreaTextContent,
@@ -94,7 +94,7 @@ let TranslationMatches = {
         translation = currentContribution.translation
         if (SegmentUtils.checkCurrentSegmentTPEnabled(segmentObj)) {
           if (parseInt(match) !== 100) {
-            translation = DraftMatecatUtils.removeTagsFromText(translation)
+            translation = SegmentStringUtils.removeTagsFromText(translation)
           } else {
             disableTPOnSegment(segmentObj)
           }

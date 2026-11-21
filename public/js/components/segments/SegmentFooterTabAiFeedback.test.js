@@ -47,7 +47,7 @@ jest.mock('../../utils/commonUtils', () => ({
   dispatchTrackingEvents: jest.fn(),
 }))
 
-jest.mock('./utils/DraftMatecatUtils', () => ({
+jest.mock('./utils/DraftMatecatUtils/segmentStringUtils', () => ({
   __esModule: true,
   default: {
     transformTagsToText: jest.fn((text) => text),

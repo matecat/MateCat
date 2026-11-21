@@ -1,6 +1,7 @@
 import React from 'react'
 import {render, screen, fireEvent, act} from '@testing-library/react'
 import SegmentFooterTabMatches from './SegmentFooterTabMatches'
+import {setTagSignatureMiddleware} from './utils/DraftMatecatUtils/tagModel'
 import {SegmentContext} from './SegmentContext'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
@@ -48,13 +49,6 @@ jest.mock('./utils/translationMatches', () => ({
   },
 }))
 
-jest.mock('./utils/DraftMatecatUtils', () => ({
-  __esModule: true,
-  default: {
-    transformTagsToHtml: jest.fn((text) => text),
-  },
-}))
-
 beforeAll(() => {
   global.config = {
     ...global.config,
@@ -71,6 +65,9 @@ afterEach(() => {
   jest.clearAllMocks()
   CatToolStore.getJobTmKeys.mockReturnValue([])
 })
+
+// Spaces as plain text, as with the show-whitespace switch off
+setTagSignatureMiddleware('space', () => false)
 
 const baseSegment = {
   sid: '20',
@@ -169,6 +166,47 @@ describe('SegmentFooterTabMatches', () => {
       screen.getByText('No match found for this segment'),
     ).toBeInTheDocument()
     global.config.mt_enabled = true
+  })
+
+  const renderSourceOf = (match) =>
+    renderComponent({
+      segment: {
+        ...baseSegment,
+        segment: 'Hi world',
+        contributions: {
+          matches: [makeMatch({segment: 'Yes world', match})],
+        },
+      },
+    })
+
+  test.each(['71', '99'])(
+    'a %s match shows its source as a diff from the match to the segment',
+    (match) => {
+      renderSourceOf(match)
+      expect(screen.getByText('Yes')).toHaveClass('deleted')
+      expect(screen.getByText('Hi')).toHaveClass('added')
+    },
+  )
+
+  test.each(['70', '100', 'MT'])(
+    'a %s match shows its source as it is',
+    (match) => {
+      renderSourceOf(match)
+      expect(screen.getByText('Yes world')).toHaveClass('suggestion_source')
+    },
+  )
+
+  test('renders the match translation as text and tag chips', () => {
+    renderComponent({
+      segment: {
+        ...baseSegment,
+        contributions: {
+          matches: [makeMatch({translation: 'a &lt;b&gt; <x id="3"/>'})],
+        },
+      },
+    })
+    expect(screen.getByText('3')).toHaveClass('tag')
+    expect(screen.getByText('a <b>', {exact: false})).toHaveClass('translation')
   })
 
   test('renders match items with origin info', () => {

@@ -1,13 +1,14 @@
 import React from 'react'
-import {render, act} from '@testing-library/react'
+import {render, act, screen} from '@testing-library/react'
 import '@testing-library/jest-dom'
 
 import SegmentTarget from './SegmentTarget'
 import {SegmentContext} from './SegmentContext'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentActions from '../../actions/SegmentActions'
-import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import OfflineUtils from '../../utils/offlineUtils'
+import {Base64} from 'js-base64'
+import {setTagSignatureMiddleware} from './utils/DraftMatecatUtils/tagModel'
 
 jest.mock('./Editarea', () => (props) => (
   <div
@@ -56,8 +57,7 @@ jest.mock('../../actions/SegmentActions', () => ({
   characterCounter: jest.fn(),
 }))
 
-jest.mock('./utils/DraftMatecatUtils', () => ({
-  transformTagsToHtml: jest.fn((text) => text),
+jest.mock('./utils/DraftMatecatUtils/segmentStringUtils', () => ({
   autoFillTagsInTarget: jest.fn(() => 'auto-filled-translation'),
 }))
 
@@ -80,6 +80,9 @@ jest.mock('../../utils/segmentUtils', () => ({
     unitCharacters: charactersCounter?.counter ?? 0,
   })),
 }))
+
+const ph = (html) =>
+  `<ph id="m1" ctype="x-html" equiv-text="base64:${Base64.encode(html)}"/>`
 
 const buildSegment = (overrides = {}) => ({
   sid: '1-1',
@@ -191,13 +194,18 @@ describe('SegmentTarget', () => {
       renderTarget({
         segment: buildSegment({
           edit_area_locked: true,
-          versions: [{translation: 'versioned text'}],
+          translation: 'current',
+          versions: [{translation: 'versioned&amp;text'}],
         }),
       })
-      expect(DraftMatecatUtils.transformTagsToHtml).toHaveBeenCalledWith(
-        'versioned text',
-        false,
+      // The issue selection offsets count the area's direct children, so the
+      // text must sit straight in the area, not in a wrapper.
+      expect(screen.getByText('versioned&text')).toHaveClass(
+        'targetarea',
+        'issuesHighlightArea',
+        'errorTaggingArea',
       )
+      expect(screen.queryByText('current')).not.toBeInTheDocument()
     })
 
     test('renders SegmentButtons with disabled computed from translation/offline state', () => {
@@ -277,6 +285,81 @@ describe('SegmentTarget', () => {
         'FILL_TAGS_IN_TARGET',
         expect.any(Function),
       )
+    })
+  })
+  describe('locked translation area', () => {
+    beforeAll(() => setTagSignatureMiddleware('space', () => false))
+    afterAll(() => setTagSignatureMiddleware('space', () => undefined))
+
+    const lockedWith = (translation) =>
+      renderTarget({
+        segment: buildSegment({edit_area_locked: true, translation}),
+      })
+
+    test('shows the translation text and its tags as chips, with entities decoded', () => {
+      lockedWith(`Tom &amp; ${ph('&lt;br/&gt;')}Jerry`)
+      expect(screen.getByText('<br/>')).toHaveClass('tag', 'tag-ph')
+      expect(screen.getByText(/Tom &/)).toHaveClass('errorTaggingArea')
+      expect(screen.queryByText(/equiv-text/)).not.toBeInTheDocument()
+    })
+
+    // CursorUtils.getSelectionData counts the area's direct children to turn a
+    // selection into issue offsets: a wrapper in between would break them.
+    test('puts text and chips directly inside the area, with no wrapper', () => {
+      lockedWith(`Tom ${ph('&lt;br/&gt;')}Jerry`)
+      const area = screen.getByText(/Tom/)
+      expect(area).toHaveClass('errorTaggingArea')
+      // eslint-disable-next-line testing-library/no-node-access
+      expect(screen.getByText('<br/>').parentElement).toBe(area)
+      // eslint-disable-next-line testing-library/no-node-access
+      expect(Array.from(area.childNodes).map((n) => n.textContent)).toEqual([
+        'Tom ',
+        '<br/>',
+        'Jerry',
+      ])
+    })
+
+    test('shows the latest version translation instead of the current one', () => {
+      renderTarget({
+        segment: buildSegment({
+          edit_area_locked: true,
+          translation: 'current',
+          versions: [{translation: 'revised', issues: []}],
+        }),
+      })
+      expect(screen.getByText('revised')).toHaveClass('errorTaggingArea')
+      expect(screen.queryByText('current')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('filling tags in the target', () => {
+    const fillTagsListener = () =>
+      SegmentStore.addListener.mock.calls.find(
+        ([event]) => event === 'FILL_TAGS_IN_TARGET',
+      )[1]
+
+    beforeEach(() => {
+      jest.clearAllMocks()
+      jest.useFakeTimers()
+    })
+    afterEach(() => jest.useRealTimers())
+
+    test('replaces the edit area content with the auto-filled translation', () => {
+      const {segment} = renderTarget()
+      fillTagsListener()(segment.sid)
+      jest.advanceTimersByTime(100)
+      expect(SegmentActions.replaceEditAreaTextContent).toHaveBeenCalledWith(
+        segment.sid,
+        'auto-filled-translation',
+      )
+      expect(SegmentActions.getSegmentsQa).toHaveBeenCalled()
+    })
+
+    test('ignores the event for another segment', () => {
+      renderTarget()
+      fillTagsListener()('other-sid')
+      jest.advanceTimersByTime(100)
+      expect(SegmentActions.replaceEditAreaTextContent).not.toHaveBeenCalled()
     })
   })
 })

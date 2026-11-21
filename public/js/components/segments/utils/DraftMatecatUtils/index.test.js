@@ -13,7 +13,6 @@ describe('DraftMatecatUtils barrel export', () => {
     expect(typeof DraftMatecatUtils.activateSearch).toBe('function')
     expect(typeof DraftMatecatUtils.activateLexiqa).toBe('function')
     expect(typeof DraftMatecatUtils.activateGlossary).toBe('function')
-    expect(typeof DraftMatecatUtils.buildFragmentFromJson).toBe('function')
     expect(typeof DraftMatecatUtils.buildFragmentFromText).toBe('function')
     expect(typeof DraftMatecatUtils.duplicateFragment).toBe('function')
     expect(typeof DraftMatecatUtils.canDecorateRange).toBe('function')

@@ -30,10 +30,6 @@ jest.mock('../../stores/SegmentStore', () => ({
   default: {
     addListener: jest.fn(),
     removeListener: jest.fn(),
-    getFragmentFromClipboard: jest.fn(() => ({
-      fragment: null,
-      plainText: '',
-    })),
   },
 }))
 
@@ -45,7 +41,6 @@ jest.mock('../../actions/SegmentActions', () => ({
     focusTags: jest.fn(),
     highlightTags: jest.fn(),
     editAreaChanged: jest.fn(),
-    copyFragmentToClipboard: jest.fn(),
     getSegmentsQa: jest.fn(),
   },
 }))
@@ -108,6 +103,11 @@ import ContextPreviewChannel from '../../utils/contextPreviewChannel'
 import SegmentUtils from '../../utils/segmentUtils'
 import {SegmentContext} from './SegmentContext'
 import {setTagSignatureMiddleware} from './utils/DraftMatecatUtils/tagModel'
+import DraftMatecatUtils from './utils/DraftMatecatUtils'
+import {
+  readSegmentClipboard,
+  segmentClipboardHtml,
+} from '../segmentView/segmentModel'
 import SegmentConstants from '../../constants/SegmentConstants'
 import EditAreaConstants from '../../constants/EditAreaConstants'
 
@@ -221,10 +221,6 @@ beforeEach(() => {
   })
   CatToolStore.getHaveKeysGlossary.mockReturnValue(false)
   SegmentUtils.checkCurrentSegmentTPEnabled.mockReturnValue(false)
-  SegmentStore.getFragmentFromClipboard.mockReturnValue({
-    fragment: null,
-    plainText: '',
-  })
   LexiqaUtils.getRanges.mockReturnValue([])
   jest.spyOn(console, 'log').mockImplementation(() => {})
 })
@@ -1046,6 +1042,48 @@ describe('the tag decorator sees the current segment', () => {
 // report the selection, so the format menu never appeared and the AI
 // alternatives button never activated. The whole suite passed regardless: the
 // old tests never fired a mouse-up at the editor.
+// jsdom gives Draft no real selection, so the slice of it is stubbed: what is
+// checked here is that copy, cut and drag all put it on the event the same way.
+describe('copy, cut and drag carry the raw segment slice', () => {
+  const slice = {raw: 'Ciao <x id="1"/>', text: 'Ciao 1x'}
+
+  const fakeDataTransfer = () => {
+    const data = {}
+    return {
+      data,
+      clearData: jest.fn(),
+      setData: jest.fn((type, value) => (data[type] = value)),
+    }
+  }
+
+  test.each([
+    ['copy', 'clipboardData'],
+    ['cut', 'clipboardData'],
+    ['dragStart', 'dataTransfer'],
+  ])('%s writes the slice and its plain text', (event, field) => {
+    jest.spyOn(DraftMatecatUtils, 'getSegmentSlice').mockReturnValue(slice)
+    const {container} = mountEditarea({translation: 'Ciao'})
+    const transfer = fakeDataTransfer()
+
+    fireEvent[event](editorNode(container), {[field]: transfer})
+
+    expect(transfer.data['text/plain']).toBe('Ciao 1x')
+    expect(readSegmentClipboard(transfer.data['text/html'])).toBe(
+      'Ciao <x id="1"/>',
+    )
+  })
+
+  test('a copy of nothing writes nothing', () => {
+    jest.spyOn(DraftMatecatUtils, 'getSegmentSlice').mockReturnValue(null)
+    const {container} = mountEditarea({translation: 'Ciao'})
+    const clipboardData = fakeDataTransfer()
+
+    fireEvent.copy(editorNode(container), {clipboardData})
+
+    expect(clipboardData.setData).not.toHaveBeenCalled()
+  })
+})
+
 describe('the format menu follows the selection', () => {
   test('mouse up reports whether anything is selected', () => {
     const {container, toggleFormatMenu} = mountEditarea({translation: 'ciao'})
@@ -1256,5 +1294,79 @@ describe('rendering does not update the parent', () => {
 
     // 'null' is the parent's initial state, before Editarea reports anything
     expect(screen.getByTestId('counter')).not.toHaveTextContent('null')
+  })
+})
+
+// A lexiqa suggestion replaces the word its warning covers. The warning's
+// offsets are relative to its own block, so the replacement must land in that
+// block even when the caret sits in another one.
+describe('replacing a word from a lexiqa suggestion', () => {
+  const mountWithLexiqaWarning = (translation) => {
+    LexiqaUtils.getRanges.mockReturnValue([{start: 0, end: 4}])
+    const activateLexiqa = jest.spyOn(DraftMatecatUtils, 'activateLexiqa')
+    const view = mountEditarea({
+      translation,
+      segment: makeSegment({translation, lexiqa: {target: [{}]}}),
+    })
+    const [editorState, , , , , replaceWordAt] = activateLexiqa.mock.calls[0]
+    const blockKeys = editorState
+      .getCurrentContent()
+      .getBlocksAsArray()
+      .map((block) => block.getKey())
+    return {...view, replaceWordAt, blockKeys}
+  }
+
+  const lastTranslationSent = () =>
+    SegmentActions.updateTranslation.mock.calls.at(-1)[1]
+
+  test('replaces the word in the block of the warning, not in the caret block', () => {
+    // The caret is at the end, in the second block
+    const {replaceWordAt, blockKeys} = mountWithLexiqaWarning('Ciao\nmondo')
+    expect(blockKeys).toHaveLength(2)
+
+    act(() =>
+      replaceWordAt({
+        newWord: 'Salve',
+        start: 0,
+        end: 4,
+        blockKey: blockKeys[0],
+      }),
+    )
+    flush()
+
+    expect(lastTranslationSent()).toMatch(/^Salve.*mondo$/s)
+  })
+
+  test('replaces the word in the caret block when no block is given', () => {
+    const {replaceWordAt} = mountWithLexiqaWarning('Ciao')
+
+    act(() => replaceWordAt({newWord: 'Salve', start: 0, end: 4}))
+    flush()
+
+    expect(lastTranslationSent()).toBe('Salve')
+  })
+})
+
+describe('pasting a segment copy', () => {
+  const clipboardWith = (data) => ({
+    types: Object.keys(data),
+    getData: (type) => data[type] ?? '',
+    items: [],
+  })
+
+  test('inserts the copied tags as tags, not as their text', () => {
+    const {container} = mountEditarea({translation: 'Ciao'})
+    const raw = 'mondo <x id="1"/>'
+    const clipboardData = clipboardWith({
+      'text/plain': 'mondo 1x',
+      'text/html': segmentClipboardHtml({raw, text: 'mondo 1x'}),
+    })
+
+    fireEvent.paste(editorNode(container), {clipboardData})
+    flush()
+
+    const translation = SegmentActions.updateTranslation.mock.calls.at(-1)[1]
+    expect(translation).toContain('<x id="1"/>')
+    expect(translation).not.toContain('1x')
   })
 })

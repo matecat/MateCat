@@ -9,7 +9,7 @@ setTagSignatureMiddleware('space', () => false)
 const mockCheckCurrentSegmentTPEnabled = jest.fn(() => false)
 const mockGetRanges = jest.fn(() => [])
 const mockUpdateOffset = jest.fn(() => [])
-const mockGetFragmentFromSelection = jest.fn(() => null)
+const mockGetSegmentSlice = jest.fn(() => null)
 const mockGetSelectedTextWithoutEntities = jest.fn(() => [])
 
 jest.mock('../../stores/SegmentStore', () => ({
@@ -31,7 +31,6 @@ jest.mock('../../actions/SegmentActions', () => ({
   default: {
     activateTab: jest.fn(),
     closeSplitSegment: jest.fn(),
-    copyFragmentToClipboard: jest.fn(),
     focusTags: jest.fn(),
     helpAiAssistant: jest.fn(),
     highlightTags: jest.fn(),
@@ -59,14 +58,6 @@ jest.mock('./utils/DraftMatecatUtils/updateOffsetBasedOnEditorState', () => ({
   __esModule: true,
   default: (...args) => mockUpdateOffset(...args),
 }))
-
-jest.mock(
-  './utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection',
-  () => ({
-    __esModule: true,
-    default: (...args) => mockGetFragmentFromSelection(...args),
-  }),
-)
 
 jest.mock('../../utils/shortcuts', () => ({
   Shortcuts: {
@@ -161,7 +152,8 @@ jest.mock('./utils/DraftMatecatUtils', () => {
         strategy: () => {},
         component: () => null,
       })),
-      getEntitiesInFragment: jest.fn(() => ({})),
+      // jsdom has no real selection to give the editor
+      getSegmentSlice: (...args) => mockGetSegmentSlice(...args),
       getSelectedTextWithoutEntities: (...args) =>
         mockGetSelectedTextWithoutEntities(...args),
     },
@@ -178,6 +170,7 @@ import SegmentSource, {
 import {SegmentContext} from './SegmentContext'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentActions from '../../actions/SegmentActions'
+import {readSegmentClipboard} from '../segmentView/segmentModel'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import SegmentConstants from '../../constants/SegmentConstants'
 
@@ -282,8 +275,8 @@ beforeEach(() => {
   mockGetRanges.mockReturnValue([])
   mockUpdateOffset.mockReset()
   mockUpdateOffset.mockReturnValue([])
-  mockGetFragmentFromSelection.mockReset()
-  mockGetFragmentFromSelection.mockReturnValue(null)
+  mockGetSegmentSlice.mockReset()
+  mockGetSegmentSlice.mockReturnValue(null)
   mockGetSelectedTextWithoutEntities.mockReset()
   mockGetSelectedTextWithoutEntities.mockReturnValue([])
   jest.clearAllMocks()
@@ -864,39 +857,62 @@ describe('SegmentSource editor handlers', () => {
 })
 
 describe('SegmentSource clipboard and drag', () => {
-  test('copying without an internal clipboard fragment dispatches nothing', async () => {
+  const slice = {raw: 'Hello <x id="1"/>', text: 'Hello 1x'}
+
+  const fakeDataTransfer = () => {
+    const data = {}
+    return {
+      data,
+      clearData: jest.fn(),
+      setData: jest.fn((type, value) => (data[type] = value)),
+    }
+  }
+
+  test('a copy writes the selection as a raw segment slice and its plain text', async () => {
+    mockGetSegmentSlice.mockReturnValue(slice)
     const {container} = renderSource(makeSegment())
     await flushTimers()
+    const clipboardData = fakeDataTransfer()
 
-    fireEvent.copy(getSourceEl(container))
+    const notPrevented = fireEvent.copy(getSourceEl(container), {clipboardData})
 
-    expect(SegmentActions.copyFragmentToClipboard).not.toHaveBeenCalled()
+    expect(notPrevented).toBe(false)
+    expect(clipboardData.data['text/plain']).toBe('Hello 1x')
+    expect(readSegmentClipboard(clipboardData.data['text/html'])).toBe(
+      'Hello <x id="1"/>',
+    )
   })
 
-  test('dragFragment writes the serialised fragment onto the drag event', async () => {
-    mockGetFragmentFromSelection.mockReturnValue([{getText: () => 'Hello'}])
+  test('a copy of nothing is left to the browser', async () => {
     const {container} = renderSource(makeSegment())
     await flushTimers()
-    const dataTransfer = {clearData: jest.fn(), setData: jest.fn()}
+    const clipboardData = fakeDataTransfer()
+
+    const notPrevented = fireEvent.copy(getSourceEl(container), {clipboardData})
+
+    expect(notPrevented).toBe(true)
+    expect(clipboardData.setData).not.toHaveBeenCalled()
+  })
+
+  test('a drag carries the selection as a raw segment slice, replacing the browser data', async () => {
+    mockGetSegmentSlice.mockReturnValue(slice)
+    const {container} = renderSource(makeSegment())
+    await flushTimers()
+    const dataTransfer = fakeDataTransfer()
 
     fireEvent.dragStart(getSourceEl(container), {dataTransfer})
 
     expect(dataTransfer.clearData).toHaveBeenCalled()
-    expect(dataTransfer.setData).toHaveBeenCalledWith(
-      'text/plain',
-      expect.stringContaining('orderedMap'),
-    )
-    expect(dataTransfer.setData).toHaveBeenCalledWith(
-      'text/html',
-      expect.stringContaining('orderedMap'),
+    expect(dataTransfer.data['text/plain']).toBe('Hello 1x')
+    expect(readSegmentClipboard(dataTransfer.data['text/html'])).toBe(
+      'Hello <x id="1"/>',
     )
   })
 
-  test('dragFragment does nothing without a selection fragment', async () => {
-    mockGetFragmentFromSelection.mockReturnValue(null)
+  test('a drag of nothing leaves the drag data alone', async () => {
     const {container} = renderSource(makeSegment())
     await flushTimers()
-    const dataTransfer = {clearData: jest.fn(), setData: jest.fn()}
+    const dataTransfer = fakeDataTransfer()
 
     fireEvent.dragStart(getSourceEl(container), {dataTransfer})
     expect(dataTransfer.setData).not.toHaveBeenCalled()
@@ -1098,8 +1114,5 @@ describe('getUpdatedSegmentInfo', () => {
 //   `handleDroppedFiles`, `handlePastedFiles`) are all wired to `preventEdit`,
 //   which is unit-tested directly above — driving them through the editor needs
 //   real contentEditable + `Selection` behaviour that jsdom does not implement.
-// - Copying a non-empty fragment: `copyFragment` reads DraftJS's own internal
-//   clipboard, which is only ever populated by a real cut/copy against a live
-//   contentEditable. Only the empty-clipboard path is reachable here.
 // - Triple-click select-all: `CommonUtils.DetectTripleClick` gates on
 //   `getBoundingClientRect()` geometry, which jsdom reports as all-zero.

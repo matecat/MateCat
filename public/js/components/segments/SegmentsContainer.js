@@ -23,10 +23,11 @@ import Speech2Text from '../../utils/speech2text'
 import SegmentActions from '../../actions/SegmentActions'
 import {isUndefined} from 'lodash'
 import SegmentUtils from '../../utils/segmentUtils'
-import DraftMatecatUtils from './utils/DraftMatecatUtils'
+import SegmentStringUtils from './utils/DraftMatecatUtils/segmentStringUtils'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import ContextPreviewChannel from '../../utils/contextPreviewChannel'
 import IconSplit from '../../../img/icons/IconSplit'
+import SegmentView from '../segmentView/SegmentView'
 
 const ROW_MARGIN = 3
 const ROW_HEIGHT = 90
@@ -1010,12 +1011,9 @@ const getSegmentStructure = (segment, sideOpen) => {
   let source = segment.segment
   let target = segment.translation
   if (SegmentUtils.checkCurrentSegmentTPEnabled(segment)) {
-    source = DraftMatecatUtils.removeTagsFromText(source)
-    target = DraftMatecatUtils.removeTagsFromText(target)
+    source = SegmentStringUtils.removeTagsFromText(source)
+    target = SegmentStringUtils.removeTagsFromText(target)
   }
-
-  source = DraftMatecatUtils.transformTagsToHtml(source, config.isSourceRTL)
-  target = DraftMatecatUtils.transformTagsToHtml(target, config.isTargetRTL)
 
   return (
     <section
@@ -1043,10 +1041,12 @@ const getSegmentStructure = (segment, sideOpen) => {
         >
           <div className="wrap">
             <div className="outersource">
-              <div
+              <SegmentView
+                as="div"
                 className="source item"
                 tabIndex="0"
-                dangerouslySetInnerHTML={{__html: source}}
+                segment={source}
+                isRtl={!!config.isSourceRTL}
               />
               <div className="copy" title="Copy source to target">
                 <a href="#"> </a>
@@ -1054,10 +1054,12 @@ const getSegmentStructure = (segment, sideOpen) => {
               </div>
               <div className="target item">
                 <div className="textarea-container">
-                  <div
+                  <SegmentView
+                    as="div"
                     className="targetarea editarea"
                     spellCheck="true"
-                    dangerouslySetInnerHTML={{__html: target}}
+                    segment={target}
+                    isRtl={!!config.isTargetRTL}
                   />
                   <div className="toolbar">
                     <a

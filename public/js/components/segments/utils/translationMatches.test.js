@@ -28,7 +28,7 @@ jest.mock('../../../utils/speech2text', () => ({
   isContributionToBeAllowed: jest.fn(() => true),
 }))
 
-jest.mock('./DraftMatecatUtils', () => ({
+jest.mock('./DraftMatecatUtils/segmentStringUtils', () => ({
   removeTagsFromText: jest.fn((text) => text),
 }))
 
@@ -104,7 +104,7 @@ import SegmentUtils from '../../../utils/segmentUtils'
 import CommonUtils from '../../../utils/commonUtils'
 import OfflineUtils from '../../../utils/offlineUtils'
 import Speech2Text from '../../../utils/speech2text'
-import DraftMatecatUtils from './DraftMatecatUtils'
+import SegmentStringUtils from './DraftMatecatUtils/segmentStringUtils'
 import CatToolStore from '../../../stores/CatToolStore'
 import {JobMetadataProxy} from '../../../stores/JobMetadataProxy'
 import CatToolActions from '../../../actions/CatToolActions'
@@ -490,7 +490,7 @@ describe('translationMatches', () => {
 
       expect(setChoosenSuggestion).toHaveBeenCalledWith(1, 1)
       expect(disableTPOnSegment).toHaveBeenCalled()
-      expect(DraftMatecatUtils.removeTagsFromText).not.toHaveBeenCalled()
+      expect(SegmentStringUtils.removeTagsFromText).not.toHaveBeenCalled()
     })
 
     test('strips tags instead of disabling tag projection for a non-100% match', () => {
@@ -503,7 +503,7 @@ describe('translationMatches', () => {
 
       TranslationMatches.useSuggestionInEditArea(1)
 
-      expect(DraftMatecatUtils.removeTagsFromText).toHaveBeenCalledWith(
+      expect(SegmentStringUtils.removeTagsFromText).toHaveBeenCalledWith(
         'suggested',
       )
       expect(disableTPOnSegment).not.toHaveBeenCalled()
@@ -515,7 +515,7 @@ describe('translationMatches', () => {
 
       TranslationMatches.useSuggestionInEditArea(1)
 
-      expect(DraftMatecatUtils.removeTagsFromText).not.toHaveBeenCalled()
+      expect(SegmentStringUtils.removeTagsFromText).not.toHaveBeenCalled()
       expect(disableTPOnSegment).not.toHaveBeenCalled()
     })
 

@@ -1,101 +1,9 @@
 import {isUndefined} from 'lodash'
-import $ from 'jquery'
 import {regexWordDelimiter} from '../components/segments/utils/DraftMatecatUtils/textConstants'
 import CommonUtils from './commonUtils'
-import diff_match_patch from 'diff-match-patch'
 import {tagSignatures} from '../components/segments/utils/DraftMatecatUtils/tagModel'
 
 const TEXT_UTILS = {
-  diffMatchPatch: new diff_match_patch(),
-  getDiffHtml: function (source, target) {
-    let dmp = new diff_match_patch()
-    /*
-        There are problems when you delete or add a tag next to another, the algorithm that makes the diff fails to recognize the tags,
-        they come out of the function broken.
-        Before passing them to the function that makes the diff we replace all the tags with placeholders and we keep a map of the tags
-        indexed with the id of the tags.
-         */
-    var phTagsObject = []
-    var diff
-    try {
-      source = source.replace(
-        /<(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?>/gi,
-        function (match) {
-          const existingTag = phTagsObject.find((item) => item.match === match)
-          if (!existingTag) {
-            const id = Math.floor(Math.random() * 10000)
-            phTagsObject.push({
-              id,
-              match,
-            })
-            return '<' + id + '>'
-          } else {
-            return '<' + existingTag.id + '>'
-          }
-        },
-      )
-
-      target = target.replace(
-        /<(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?>/gi,
-        function (match) {
-          const existingTag = phTagsObject.find((item) => item.match === match)
-          if (!existingTag) {
-            const id = Math.floor(Math.random() * 10000)
-            phTagsObject.push({
-              id,
-              match,
-            })
-            return '<' + id + '>'
-          } else {
-            return '<' + existingTag.id + '>'
-          }
-        },
-      )
-
-      diff = dmp.diff_main(
-        this.replacePlaceholder(
-          source.replace(/&nbsp; /g, '  ').replace(/&nbsp;/g, ''),
-        ),
-        this.replacePlaceholder(
-          target.replace(/&nbsp; /g, '  ').replace(/&nbsp;/g, ''),
-        ),
-      )
-
-      dmp.diff_cleanupSemantic(diff)
-
-      /*
-      Before adding spans to identify added or subtracted portions we need to check and fix broken tags
-      */
-      diff = this.setUnclosedTagsInDiff(diff)
-      var diffTxt = ''
-      $.each(diff, (index, text) => {
-        text[1] = text[1].replace(/<(.*?)>/gi, (match, id) => {
-          try {
-            var tag = phTagsObject.find((item) => {
-              return item.id === parseInt(id)
-            })
-            if (!isUndefined(tag)) {
-              return tag.match
-            }
-            return match
-          } catch (e) {
-            return match
-          }
-        })
-
-        if (text[0] === -1) {
-          diffTxt += '<span class="deleted">' + text[1] + '</span>'
-        } else if (text[0] === 1) {
-          diffTxt += '<span class="added">' + text[1] + '</span>'
-        } else {
-          diffTxt += text[1]
-        }
-      })
-      return this.restorePlaceholders(diffTxt)
-    } catch (e) {
-      return source
-    }
-  },
   /**
    * Replace temporaly tags with placeholder
    * @param text
@@ -144,106 +52,6 @@ const TEXT_UTILS = {
     })
     return text
   },
-  /**
-   *This function takes in the array that exits the TextUtils.diffMatchPatch.diff_main function and parses the array elements to see if they contain broken tags.
-   * The array is of the type:
-   *
-   * [0, "text"],
-   * [-1, "deletedText"]
-   * [1, "addedText"]
-   *
-   * For each element of the array in the first position there is 0, 1, -1 which indicate if the text is equal, added, removed
-   */
-  setUnclosedTagsInDiff: function (array) {
-    /*
-        Function to understand if an element contains broken tags
-         */
-    var thereAreUncompletedTagsInDiff = function (text) {
-      return (
-        (text.indexOf('<') > -1 || text.indexOf('>') > -1) &&
-        (text.split('<').length - 1 !== text.split('>').length - 1 ||
-          text.indexOf('<') >= text.indexOf('>'))
-      )
-    }
-    /*
-        Function to understand if an element contains broken tags where the opening part is missing
-         */
-    var thereAreCloseTags = function (text) {
-      return (
-        thereAreUncompletedTagsInDiff(text) &&
-        (item[1].split('<').length - 1 < item[1].split('>').length - 1 ||
-          (item[1].indexOf('>') > -1 &&
-            item[1].indexOf('>') < item[1].indexOf('<')))
-      )
-    }
-    /*
-        Function to understand if an element contains broken tags where the closing part is missing
-         */
-    var thereAreOpenTags = function (text) {
-      return (
-        thereAreUncompletedTagsInDiff(text) &&
-        (item[1].split('<').length - 1 < item[1].split('>').length - 1 ||
-          (item[1].indexOf('<') > -1 &&
-            item[1].indexOf('>') < item[1].indexOf('<')))
-      )
-    }
-    var i
-    var indexTemp
-    var adding = false
-    var tagToMoveOpen = ''
-    var tagToMoveClose = ''
-    for (i = 0; i < array.length; i++) {
-      var item = array[i]
-      var thereAreUnclosedTags = thereAreUncompletedTagsInDiff(item[1])
-      if (!adding && item[0] === 0) {
-        if (thereAreUnclosedTags) {
-          tagToMoveOpen = item[1].substr(
-            item[1].lastIndexOf('<'),
-            item[1].length + 1,
-          )
-          array[i][1] = item[1].substr(0, item[1].lastIndexOf('<'))
-          indexTemp = i
-          adding = true
-        }
-      } else if (adding && item[0] === 0) {
-        if (thereAreUnclosedTags && thereAreCloseTags(item[1])) {
-          tagToMoveClose = item[1].substr(0, item[1].indexOf('>') + 1)
-          tagToMoveOpen = ''
-          array[i][1] = item[1].substr(
-            item[1].indexOf('>') + 1,
-            item[1].length + 1,
-          )
-          i = indexTemp
-        } else {
-          if (thereAreUnclosedTags && thereAreOpenTags(item[1])) {
-            i = i - 1 //There are more unclosed tags, restart from here
-          }
-          indexTemp = 0
-          adding = false
-          tagToMoveOpen = ''
-          tagToMoveClose = ''
-        }
-      } else if (adding) {
-        array[i][1] = tagToMoveOpen + item[1] + tagToMoveClose
-      }
-    }
-    return array
-  },
-  replacePlaceholder: function (string) {
-    return string.replaceAll(config.lfPlaceholder, 'softReturnMonad').replaceAll(config.crPlaceholder, 'crPlaceholder')
-        // No line for the combined ##$_0D0A$## placeholder on purpose: matecat/subfiltering encodes a
-        // CRLF as the two single placeholders (SpecialEntitiesToPlaceholdersForView), so the combined
-        // one never reaches the page. Only the decoder still accepts it, as legacy defence.
-        .replaceAll(config.tabPlaceholder, 'tabMarkerMonad').replaceAll(config.nbspPlaceholder, 'nbspPlMark')
-  },
-
-  restorePlaceholders: function (string) {
-    return string
-      .replace(/softReturnMonad/g, config.lfPlaceholder)
-      .replace(/crPlaceholder/g, config.crPlaceholder)
-      .replace(/tabMarkerMonad/g, config.tabPlaceholder)
-      .replace(/nbspPlMark/g, config.nbspPlaceholder)
-  },
   htmlEncode: function (value) {
     if (value) {
       var txt = document.createElement('textarea')
@@ -265,26 +73,6 @@ const TEXT_UTILS = {
 
   escapeRegExp(str = '') {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // $& means the whole matched string
-  },
-
-  execDiff: function (mainStr, cfrStr) {
-    let _str = cfrStr
-    let _edit = mainStr.replace(String.fromCharCode(parseInt(0x21e5, 10)), '\t')
-
-    //Prepend Unicode Character 'ZERO WIDTH SPACE' invisible, not printable, no spaced character,
-    //used to detect initial and final spaces in html diff
-    _str =
-      String.fromCharCode(parseInt(0x200b, 10)) +
-      _str +
-      String.fromCharCode(parseInt(0x200b, 10))
-    _edit =
-      String.fromCharCode(parseInt(0x200b, 10)) +
-      _edit +
-      String.fromCharCode(parseInt(0x200b, 10))
-
-    let diff_obj = this.diffMatchPatch.diff_main(_edit, _str)
-    this.diffMatchPatch.diff_cleanupEfficiency(diff_obj)
-    return diff_obj
   },
 
   justSelecting: function () {

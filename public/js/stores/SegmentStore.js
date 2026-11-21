@@ -109,8 +109,6 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   nextUntranslatedFromServer: null,
   consecutiveCopySourceNum: [],
   consecutiveUnlockSegments: [],
-  clipboardFragment: '',
-  clipboardPlainText: '',
   sideOpen: false,
   isSearchingGlossaryInTarget: false,
   helpAiAssistantWords: undefined,
@@ -1288,18 +1286,6 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     )
     return commentOpen !== -1 || issueOpen !== -1
   },
-  copyFragmentToClipboard: function (fragment, plainText) {
-    this.clipboardFragment = fragment
-    this.clipboardPlainText = plainText
-  },
-  getFragmentFromClipboard: function () {
-    const fragment = this.clipboardFragment
-    const plainText = this.clipboardPlainText
-    return {
-      fragment,
-      plainText,
-    }
-  },
   emitChange: function () {
     this.emit.apply(this, arguments)
   },
@@ -1959,9 +1945,6 @@ AppDispatcher.register(function (action) {
         EditAreaConstants.REPLACE_SEARCH_RESULTS,
         action.text,
       )
-      break
-    case EditAreaConstants.COPY_FRAGMENT_TO_CLIPBOARD:
-      SegmentStore.copyFragmentToClipboard(action.fragment, action.plainText)
       break
     case SegmentConstants.SET_GUESS_TAGS: {
       SegmentStore.setTagProjectionStatus(action.enabled)

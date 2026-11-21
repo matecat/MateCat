@@ -2,7 +2,8 @@ import React from 'react'
 import {render, screen} from '@testing-library/react'
 
 const mockCheckCurrentSegmentTPEnabled = jest.fn(() => false)
-const mockMarkText = jest.fn((text) => `marked:${text}`)
+const MARKS = [{start: 0, end: 3, className: 'searchMarker'}]
+const mockGetSearchMarks = jest.fn(() => MARKS)
 const mockRemoveTagsFromText = jest.fn((text) => `stripped:${text}`)
 
 jest.mock('./SegmentSource', () => ({
@@ -15,20 +16,6 @@ jest.mock('./SegmentTarget', () => ({
   default: ({segment}) => <div data-testid="segment-target">{segment.sid}</div>,
 }))
 
-jest.mock('./SimpleEditor', () => ({
-  __esModule: true,
-  default: ({text, isTarget, isRtl, className}) => (
-    <div
-      data-testid="simple-editor"
-      data-is-target={String(isTarget)}
-      data-is-rtl={String(isRtl)}
-      data-class-name={className}
-    >
-      {text}
-    </div>
-  ),
-}))
-
 jest.mock('../../utils/segmentUtils', () => ({
   __esModule: true,
   default: {
@@ -39,16 +26,20 @@ jest.mock('../../utils/segmentUtils', () => ({
 
 jest.mock('../header/cattol/search/searchUtils', () => ({
   __esModule: true,
-  default: {markText: (...args) => mockMarkText(...args)},
+  default: {getSearchMarks: (...args) => mockGetSearchMarks(...args)},
 }))
 
-jest.mock('./utils/DraftMatecatUtils', () => ({
+jest.mock('./utils/DraftMatecatUtils/segmentStringUtils', () => ({
   __esModule: true,
   default: {removeTagsFromText: (...args) => mockRemoveTagsFromText(...args)},
 }))
 
 import SegmentWrapper from './SegmentWrapper'
 import {SegmentContext} from './SegmentContext'
+import {setTagSignatureMiddleware} from './utils/DraftMatecatUtils/tagModel'
+
+// Spaces as plain text, as with the show-whitespace switch off
+setTagSignatureMiddleware('space', () => false)
 
 function makeSegment(overrides = {}) {
   return {
@@ -74,10 +65,12 @@ beforeEach(() => {
     ...window.config,
     isSourceRTL: false,
     isTargetRTL: true,
+    source_code: 'en-US',
+    target_code: 'it-IT',
   }
   mockCheckCurrentSegmentTPEnabled.mockReset()
   mockCheckCurrentSegmentTPEnabled.mockReturnValue(false)
-  mockMarkText.mockClear()
+  mockGetSearchMarks.mockClear()
   mockRemoveTagsFromText.mockClear()
 })
 
@@ -96,32 +89,40 @@ describe('SegmentWrapper on an opened segment', () => {
 })
 
 describe('SegmentWrapper on a closed segment', () => {
-  test('renders the read-only source through SimpleEditor', () => {
+  test('renders the read-only source in the source language', () => {
     const {container} = renderWrapper(makeSegment())
 
     const wrapper = container.querySelector('#segment-42-source')
     expect(wrapper).not.toBeNull()
     expect(wrapper.className).toBe('source item')
 
-    const editor = screen.getByTestId('simple-editor')
-    expect(editor.textContent).toBe('source text')
-    expect(editor.dataset.isTarget).toBe('undefined')
-    expect(editor.dataset.isRtl).toBe('false')
-    expect(editor.dataset.className).toBe('')
+    const text = screen.getByText('source text')
+    expect(text).toHaveAttribute('lang', 'en-US')
+    expect(text).not.toHaveClass('targetarea')
   })
 
-  test('renders the read-only target through SimpleEditor', () => {
+  test('renders the read-only target in the target language', () => {
     const {container} = renderWrapper(makeSegment(), {isTarget: true})
 
     const wrapper = container.querySelector('#segment-42-target')
     expect(wrapper).not.toBeNull()
     expect(wrapper.className).toBe('target item')
 
-    const editor = screen.getByTestId('simple-editor')
-    expect(editor.textContent).toBe('target text')
-    expect(editor.dataset.isTarget).toBe('true')
-    expect(editor.dataset.isRtl).toBe('true')
-    expect(editor.dataset.className).toBe('targetarea editarea')
+    const text = screen.getByText('target text')
+    expect(text).toHaveAttribute('lang', 'it-IT')
+    expect(text).toHaveClass('targetarea', 'editarea')
+  })
+
+  test('shows the text decoded and the tags as chips', () => {
+    renderWrapper(
+      makeSegment({segment: 'L&apos;a &amp;nbsp; <g id="1">tag</g>##$_A0$##'}),
+    )
+
+    expect(screen.getByText("L'a &nbsp;", {exact: false})).toBeInTheDocument()
+    const chips = screen.getAllByText(/^\u200B1\u200B$/)
+    expect(chips).toHaveLength(2)
+    chips.forEach((chip) => expect(chip).toHaveClass('tag'))
+    expect(screen.getByText('\u00B0')).toHaveClass('tag-nbsp')
   })
 
   test('strips tags when tag projection is enabled for the segment', () => {
@@ -129,23 +130,30 @@ describe('SegmentWrapper on a closed segment', () => {
     renderWrapper(makeSegment())
 
     expect(mockRemoveTagsFromText).toHaveBeenCalledWith('source text')
-    expect(screen.getByTestId('simple-editor').textContent).toBe(
-      'stripped:source text',
-    )
+    expect(screen.getByText('stripped:source text')).toBeInTheDocument()
   })
 
-  test('marks the search hits when the segment is in search', () => {
-    renderWrapper(makeSegment({inSearch: true}))
+  test('marks the search hits found on the visible text, not the markup', () => {
+    renderWrapper(
+      makeSegment({inSearch: true, segment: 'a &amp; <x id="1"/>b'}),
+    )
 
-    expect(mockMarkText).toHaveBeenCalledWith('source text', true, '42')
-    expect(screen.getByTestId('simple-editor').textContent).toBe(
-      'marked:source text',
+    expect(mockGetSearchMarks).toHaveBeenCalledWith('a & \uFFFCb', true, '42')
+    expect(screen.getByText('a &', {selector: 'mark'})).toHaveClass(
+      'searchMarker',
     )
   })
 
   test('marks the target search hits with isSource false', () => {
     renderWrapper(makeSegment({inSearch: true}), {isTarget: true})
 
-    expect(mockMarkText).toHaveBeenCalledWith('target text', false, '42')
+    expect(mockGetSearchMarks).toHaveBeenCalledWith('target text', false, '42')
+  })
+
+  test('marks nothing when the segment is not in search', () => {
+    renderWrapper(makeSegment())
+
+    expect(mockGetSearchMarks).not.toHaveBeenCalled()
+    expect(screen.queryByText(/.*/, {selector: 'mark'})).not.toBeInTheDocument()
   })
 })
