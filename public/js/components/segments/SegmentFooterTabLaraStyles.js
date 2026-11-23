@@ -149,26 +149,10 @@ export const SegmentFooterTabLaraStyles = ({
       contextListAfter,
       laraStyle: style.id,
       reasoning: false,
+    }).catch((errors) => {
+      CatToolActions.processErrors(errors, 'getContribution')
+      TranslationMatches.renderContributionErrors(errors, segment.sid)
     })
-      .then(() => {
-        // Remove from waiting list
-        if (
-          TranslationMatches.segmentsWaitingForContributions.indexOf(
-            segment.sid,
-          ) > -1
-        ) {
-          TranslationMatches.segmentsWaitingForContributions.splice(
-            TranslationMatches.segmentsWaitingForContributions.indexOf(
-              segment.sid,
-            ),
-            1,
-          )
-        }
-      })
-      .catch((errors) => {
-        CatToolActions.processErrors(errors, 'getContribution')
-        TranslationMatches.renderContributionErrors(errors, segment.sid)
-      })
   }
 
   const allowHTML = (string) => {
