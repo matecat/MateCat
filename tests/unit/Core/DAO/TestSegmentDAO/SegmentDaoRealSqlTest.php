@@ -444,6 +444,24 @@ class SegmentDaoRealSqlTest extends AbstractTest
     }
 
     #[Test]
+    public function getSegmentsIdForQR_issues_in_r_and_severity_match_the_same_issue(): void
+    {
+        $this->seedQrTranslations();
+        $cat = $this->fixtures->makeQaCategory('RsqQrSame', 1, '{}');
+        // segment 0: minor in R1 (source_page 2) and polish in R2 (source_page 3): not a "minor in R2".
+        $this->insertQaEntry($this->segIds[0], $cat['id'], 'minor', 2);
+        $this->insertQaEntry($this->segIds[0], $cat['id'], 'polish', 3);
+        // segment 1: minor in R2.
+        $this->insertQaEntry($this->segIds[1], $cat['id'], 'minor', 3);
+
+        $ids = array_map('intval', $this->dao->getSegmentsIdForQR($this->jobStruct, 100, min($this->segIds) - 1, 'after', [
+            'filter' => ['issues_in_r' => '2', 'severity' => 'minor'],
+        ]));
+
+        $this->assertSame([$this->segIds[1]], $ids);
+    }
+
+    #[Test]
     public function getSegmentsIdForQR_issue_category_string_and_severity(): void
     {
         $this->seedQrTranslations();
