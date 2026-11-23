@@ -206,14 +206,7 @@ const ReviewExtendedIssuePanel = ({
       )
     })
 
-    return (
-      <div>
-        {!issueEditing && (
-          <div className="re-item-head pad-left-10">New issue</div>
-        )}
-        {categoryComponents}
-      </div>
-    )
+    return <div>{categoryComponents}</div>
   }
 
   const getSubCategoriesHtml = () => {
@@ -382,6 +375,9 @@ const ReviewExtendedIssuePanel = ({
     <div className="re-issues-box re-to-create">
       {/*<h4 className="re-issues-box-title">Error list</h4>*/}
       {/*<div className="comment-triangle comment-triangle-topleft"></div>*/}
+      {!issueEditing && (
+        <div className="re-item-head pad-left-10">New issue</div>
+      )}
       <div
         className="re-list errors"
         id={'re-category-list-' + context.segment.sid}

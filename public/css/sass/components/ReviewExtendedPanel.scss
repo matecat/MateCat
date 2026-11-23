@@ -56,7 +56,7 @@ input {
   overflow-y: hidden;
 }
 
-.review-balloon-container .re-wrapper .re-issues-box .re-list .re-item-head {
+.re-issues-box .re-item-head {
   border-bottom: 1px solid colors.$grey50;
   padding-top: 10px;
   margin-right: 1px;
@@ -65,11 +65,7 @@ input {
   padding-bottom: 3px;
 }
 
-.review-balloon-container
-  .re-wrapper
-  .re-issues-box
-  .re-list.issues
-  .re-item-head {
+.re-issues-box .re-list.issues .re-item-head {
   margin-top: 3px;
   padding-bottom: 5px;
 }
