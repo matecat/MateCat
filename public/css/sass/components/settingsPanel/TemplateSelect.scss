@@ -35,7 +35,7 @@
   width: 100%;
   height: 40px;
   border-radius: variables.$border-radius-default;
-  top: 27px;
+  bottom: 0;
   background-color: rgba(colors.$white, 0.9);
 
   .project-template-select-loading-icon {
