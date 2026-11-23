@@ -120,6 +120,39 @@ describe('MessageHandler.onReceive', () => {
     expect(app.sendRoomNotifications).not.toHaveBeenCalled();
   });
 
+  test('routes bulk_action_completed to id_job room, even with an id_client', () => {
+    handler.onReceive({
+      _type: 'bulk_action_completed',
+      data: {
+        id_job: 99,
+        passwords: 'abc',
+        payload: {action: 'replace_all', id_job: 99, password: 'abc', id_client: 'tab-1', segment_ids: [1, 2], status: null},
+      },
+    });
+    expect(app.sendRoomNotifications).toHaveBeenCalledTimes(1);
+    expect(app.sendRoomNotifications).toHaveBeenCalledWith(
+        '99', 'message', {
+          data: {
+            action: 'replace_all',
+            id_job: 99,
+            password: 'abc',
+            id_client: 'tab-1',
+            segment_ids: [1, 2],
+            status: null,
+            _type: 'bulk_action_completed',
+          },
+        },
+    );
+  });
+
+  test('returns early when bulk_action_completed missing id_job', () => {
+    handler.onReceive({
+      _type: 'bulk_action_completed',
+      data: {id_client: 'tab-1', payload: {action: 'replace_all', segment_ids: []}},
+    });
+    expect(app.sendRoomNotifications).not.toHaveBeenCalled();
+  });
+
   test('broadcasts GLOBAL_MESSAGES', () => {
     handler.onReceive({
       _type: 'global_messages',

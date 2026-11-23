@@ -2,6 +2,7 @@
 
 namespace Matecat\Core\Workers;
 
+use ArrayObject;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\IDatabase;
 use Model\Propagation\PropagationTotalStruct;
@@ -11,7 +12,9 @@ use PDOStatement;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
+use Stomp\Exception\ConnectionException;
 use Utils\ActiveMQ\AMQHandler;
+use Utils\ActiveMQ\BulkActionCompletedMessage;
 use Utils\AsyncTasks\Workers\PropagationWorker;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\Params;
@@ -23,6 +26,9 @@ class PropagationWorkerTest extends AbstractTest
 {
     private PDOStatement $stmtStub;
     private \PDO $pdoStub;
+
+    /** @var ArrayObject<int, array<string, mixed>> what the worker under test published, in order */
+    private ArrayObject $published;
 
     protected function setUp(): void
     {
@@ -45,10 +51,19 @@ class PropagationWorkerTest extends AbstractTest
         $dbMock->method('getConnection')->willReturn($this->pdoStub);
         $versionDao = $this->createStub(TranslationVersionDao::class);
 
-        return $this->getMockBuilder(PropagationWorker::class)
+        $worker = $this->getMockBuilder(PropagationWorker::class)
             ->setConstructorArgs([$amq, $dbMock, $versionDao])
-            ->onlyMethods(['_checkDatabaseConnection'])
+            ->onlyMethods(['_checkDatabaseConnection', 'publishToNodeJsClients'])
             ->getMock();
+
+        $published = $this->published = new ArrayObject();
+        $worker->method('publishToNodeJsClients')->willReturnCallback(
+            static function (mixed $message) use ($published): void {
+                $published[] = $message;
+            }
+        );
+
+        return $worker;
     }
 
     private function buildStructures(bool $executeUpdate = true, array $segmentsForPropagation = [], array $idsToUpdateVersion = []): array
@@ -91,7 +106,7 @@ class PropagationWorkerTest extends AbstractTest
         $ref = new \ReflectionMethod($worker, 'propagateTranslation');
         $ref->invoke($worker, $structures);
 
-        $this->assertTrue(true);
+        $this->assertCount(0, $this->published, 'nothing was written, so nothing is announced');
     }
 
     #[Test]
@@ -103,7 +118,7 @@ class PropagationWorkerTest extends AbstractTest
         $ref = new \ReflectionMethod($worker, 'propagateTranslation');
         $ref->invoke($worker, $structures);
 
-        $this->assertTrue(true);
+        $this->assertCount(0, $this->published, 'nothing was written, so nothing is announced');
     }
 
     #[Test]
@@ -121,7 +136,46 @@ class PropagationWorkerTest extends AbstractTest
         $ref = new \ReflectionMethod($worker, 'propagateTranslation');
         $ref->invoke($worker, $structures);
 
-        $this->assertTrue(true);
+        $this->assertCount(1, $this->published);
+        $this->assertSame([
+            '_type' => BulkActionCompletedMessage::TYPE,
+            'data' => [
+                'id_job' => 1,
+                'passwords' => 'abc',
+                'payload' => [
+                    'action' => BulkActionCompletedMessage::ACTION_PROPAGATION,
+                    'id_job' => 1,
+                    'password' => 'abc',
+                    'id_client' => null,
+                    'segment_ids' => [200, 300],
+                    'status' => 'TRANSLATED',
+                ],
+            ],
+        ], $this->published[0]);
+    }
+
+    /**
+     * The propagation is written when the notification goes out. A broker failure that escaped
+     * would requeue the message and save every propagated version a second time.
+     */
+    #[Test]
+    public function propagateTranslationSwallowsABrokerFailureAfterTheWrite(): void
+    {
+        $this->stmtStub->method('execute')->willReturn(true);
+
+        $amq = $this->createStub(AMQHandler::class);
+        $dbMock = $this->createStub(IDatabase::class);
+        $dbMock->method('getConnection')->willReturn($this->pdoStub);
+
+        $worker = $this->getMockBuilder(PropagationWorker::class)
+            ->setConstructorArgs([$amq, $dbMock, $this->createStub(TranslationVersionDao::class)])
+            ->onlyMethods(['_checkDatabaseConnection', 'publishToNodeJsClients'])
+            ->getMock();
+        $worker->expects($this->once())->method('publishToNodeJsClients')
+            ->willThrowException(new ConnectionException('Broker unreachable'));
+
+        $ref = new \ReflectionMethod($worker, 'propagateTranslation');
+        $ref->invoke($worker, $this->buildStructures(true, [['id_segment' => 200, 'id_job' => 1]]));
     }
 
     #[Test]
@@ -153,10 +207,13 @@ class PropagationWorkerTest extends AbstractTest
         ];
         $structures = $this->buildStructures(true, $segments);
 
-        $this->expectException(EndQueueException::class);
-
-        $ref = new \ReflectionMethod($worker, 'propagateTranslation');
-        $ref->invoke($worker, $structures);
+        try {
+            $ref = new \ReflectionMethod($worker, 'propagateTranslation');
+            $ref->invoke($worker, $structures);
+            $this->fail('A failed propagation must end the message');
+        } catch (EndQueueException) {
+            $this->assertCount(0, $this->published, 'a failed propagation is not announced as completed');
+        }
     }
 
     // ─── rebuildObjects() ───

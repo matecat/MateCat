@@ -5,6 +5,7 @@ namespace Controller\API\App;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\PublishesBulkActionCompletedTrait;
 use DomainException;
 use Exception;
 use Model\FeaturesBase\FeatureCodes;
@@ -22,10 +23,13 @@ use ReflectionException;
 use RuntimeException;
 use Throwable;
 use TypeError;
+use Utils\ActiveMQ\BulkActionCompletedMessage;
 use Utils\Constants\TranslationStatus;
 
 class CopyAllSourceToTargetController extends KleinController
 {
+    use PublishesBulkActionCompletedTrait;
+
     private JobStruct $chunk;
 
     protected function registerValidators(): void
@@ -47,14 +51,19 @@ class CopyAllSourceToTargetController extends KleinController
      */
     public function copy(): void
     {
-        $data = $this->saveEventsAndUpdateTranslations($this->chunk);
+        ['response' => $data, 'segment_ids' => $segmentIds] = $this->saveEventsAndUpdateTranslations($this->chunk);
+
+        // After the scope has committed: a tab told before the commit would reload the old rows.
+        $this->publishBulkActionCompleted($this->chunk, BulkActionCompletedMessage::ACTION_COPY_SOURCE_TO_TARGET, $segmentIds);
+
         $this->response->json($data);
     }
 
     /**
      * @param JobStruct $chunk
      *
-     * @return array<string, mixed>
+     * @return array{response: array<string, mixed>, segment_ids: list<int>} the response body, and the
+     *         segments the copy wrote
      * @throws ReflectionException
      * @throws TypeError
      * @throws Exception
@@ -92,6 +101,7 @@ class CopyAllSourceToTargetController extends KleinController
             }
 
             $affected_rows = 0;
+            $segment_ids = [];
 
             foreach ($segments as $segment) {
                 $old_translation = $translations[(int)$segment->id] ?? null;
@@ -115,7 +125,11 @@ class CopyAllSourceToTargetController extends KleinController
                     // autocommit batches, so a job wiped mid-copy leaves this loop holding rows
                     // that no longer exist. That is a no-op here. Batched, it recreates each one
                     // with an empty segment_hash, which is the key TM propagation matches on.
-                    $affected_rows += $segmentTranslationDao->updateTranslationAndStatusAndDate($new_translation);
+                    $updated = $segmentTranslationDao->updateTranslationAndStatusAndDate($new_translation);
+                    $affected_rows += $updated;
+                    if ($updated > 0) {
+                        $segment_ids[] = (int)$segment->id;
+                    }
                 } catch (Exception $e) {
                     // Re-thrown rather than rolled back: the scope owns the undo and re-throws this.
                     throw new RuntimeException($e->getMessage(), -4);
@@ -150,7 +164,7 @@ class CopyAllSourceToTargetController extends KleinController
             $this->logger->debug('Segment Translation events saved completed');
             $this->logger->debug($data);
 
-            return $data;
+            return ['response' => $data, 'segment_ids' => $segment_ids];
         });
     }
 }

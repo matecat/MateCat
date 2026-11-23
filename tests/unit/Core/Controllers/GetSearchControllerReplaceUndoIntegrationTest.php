@@ -6,6 +6,8 @@ use Controller\API\App\GetSearchController;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
+use Matecat\TestHelpers\RecordingStatefulStomp;
+use Matecat\TestHelpers\UnreachableStatefulStomp;
 use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
@@ -16,6 +18,8 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use ReflectionException;
+use Utils\ActiveMQ\AMQHandler;
+use Utils\ActiveMQ\BulkActionCompletedMessage;
 use Utils\Constants\SourcePages;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
@@ -25,8 +29,15 @@ use Utils\Registry\AppConfig;
  */
 class ReplaceUndoTestableController extends GetSearchController
 {
+    public AMQHandler $fakeQueueHandler;
+
     public function __construct()
     {
+    }
+
+    protected function getQueueHandler(): AMQHandler
+    {
+        return $this->fakeQueueHandler;
     }
 }
 
@@ -55,6 +66,7 @@ class GetSearchControllerReplaceUndoIntegrationTest extends AbstractTest
     private ReflectionClass $reflector;
     private ReplaceUndoTestableController $controller;
     private Response&MockObject $responseMock;
+    private RecordingStatefulStomp $stomp;
     private string $originalDriver;
     private int $originalTtl;
 
@@ -77,6 +89,7 @@ class GetSearchControllerReplaceUndoIntegrationTest extends AbstractTest
         (new MetadataDao(obtainTestDatabase()))->set(self::TEST_PROJECT_ID, 'features', 'translation_versions');
 
         $this->controller = new ReplaceUndoTestableController();
+        [$this->controller->fakeQueueHandler, $this->stomp] = RecordingStatefulStomp::handler();
         $this->reflector = new ReflectionClass(GetSearchController::class);
 
         $this->reflector->getProperty('request')->setValue($this->controller, new Request());
@@ -246,5 +259,49 @@ class GetSearchControllerReplaceUndoIntegrationTest extends AbstractTest
 
         // the first/only replace-all is undoable: cursor is back to 0
         $this->assertSame(0, $this->cursor(), 'the first replace-all is fully undoable (cursor back to 0)');
+    }
+
+    #[Test]
+    public function replace_all_and_undo_each_tell_the_job_room_which_segments_they_wrote(): void
+    {
+        $this->setRequestParams($this->replaceParams() + ['client_id' => 'tab-1']);
+        $this->controller->replaceAll();
+
+        $this->setRequestParams($this->replaceParams());
+        $this->controller->undoReplaceAll();
+
+        $messages = $this->stomp->decodedBodies();
+        $this->assertCount(2, $messages);
+
+        [$replace, $undo] = $messages;
+        $this->assertSame(BulkActionCompletedMessage::TYPE, $replace['_type']);
+        $this->assertSame(self::TEST_JOB_ID, $replace['data']['id_job']);
+        $this->assertSame(BulkActionCompletedMessage::ACTION_REPLACE_ALL, $replace['data']['payload']['action']);
+        $this->assertSame(self::TEST_JOB_PASSWORD, $replace['data']['payload']['password']);
+        $this->assertSame('tab-1', $replace['data']['payload']['id_client']);
+        // Only the committed segment: segment 2 is no search hit, so nothing was written to it.
+        $this->assertSame([self::TEST_SEGMENT_1], $replace['data']['payload']['segment_ids']);
+
+        $this->assertSame(BulkActionCompletedMessage::ACTION_UNDO_REPLACE_ALL, $undo['data']['payload']['action']);
+        $this->assertSame([self::TEST_SEGMENT_1], $undo['data']['payload']['segment_ids']);
+        $this->assertNull($undo['data']['payload']['id_client']);
+    }
+
+    /**
+     * The replacement is committed before the publish, so an unreachable broker must not fail the
+     * request or leave the history half-written.
+     */
+    #[Test]
+    public function replace_all_responds_and_keeps_the_write_when_the_broker_is_unreachable(): void
+    {
+        [$this->controller->fakeQueueHandler] = UnreachableStatefulStomp::handler();
+
+        $this->responseMock->expects($this->once())->method('json');
+
+        $this->setRequestParams($this->replaceParams());
+        $this->controller->replaceAll();
+
+        $this->assertStringContainsString('universo', (string)$this->translationOf(self::TEST_SEGMENT_1)?->translation);
+        $this->assertSame(1, $this->cursor());
     }
 }
