@@ -20,9 +20,12 @@ use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
 use ReflectionException;
 use Stomp\Client;
+use Stomp\Exception\ConnectionException;
 use Stomp\StatefulStomp;
+use Stomp\Transport\Message;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\Constants\SourcePages;
+use Utils\Registry\AppConfig;
 
 class TestableCommentController extends CommentController
 {
@@ -52,6 +55,11 @@ class FakeJobStructForTeamMentions extends JobStruct
 #[AllowMockObjectsWithoutExpectations]
 class CommentControllerTest extends AbstractTest
 {
+    private const string UNREACHABLE_BROKER_MESSAGE = 'Stubbed broker is unreachable.';
+
+    /** @var list<string> */
+    private array $sentDestinations = [];
+
     private ReflectionClass $reflector;
     private TestableCommentController $controller;
     private Request $requestStub;
@@ -237,6 +245,44 @@ class CommentControllerTest extends AbstractTest
         $stompStub->method('getClient')->willReturn($clientStub);
 
         $this->controller->fakeQueueHandler = new AMQHandler(preconfiguredStomp: $stompStub);
+    }
+
+    /**
+     * Installs a fake AMQHandler whose transport fails the way an unreachable broker does,
+     * and records the destination of every send attempt.
+     * Example: enqueueComment() throws ConnectionException("Stubbed broker is unreachable.").
+     */
+    private function installUnreachableQueueHandler(): void
+    {
+        $stompStub = $this->createStub(StatefulStomp::class);
+        $stompStub->method('send')->willReturnCallback(
+            function (string $destination, Message $message): never {
+                $this->sentDestinations[] = $destination;
+                throw new ConnectionException(self::UNREACHABLE_BROKER_MESSAGE);
+            }
+        );
+        // AMQHandler::__destruct() disconnects through the client
+        $stompStub->method('getClient')->willReturn($this->createStub(Client::class));
+
+        $this->controller->fakeQueueHandler = new AMQHandler(preconfiguredStomp: $stompStub);
+    }
+
+    /**
+     * Runs $call and checks that it fails on the stubbed broker, after exactly one send
+     * to the socket notifications queue. Any other error is not caught and fails the test.
+     */
+    private function assertFailsOnUnreachableBroker(callable $call): void
+    {
+        try {
+            $call();
+        } catch (ConnectionException $e) {
+            $this->assertSame(self::UNREACHABLE_BROKER_MESSAGE, $e->getMessage());
+            $this->assertSame([AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME], $this->sentDestinations);
+
+            return;
+        }
+
+        $this->fail('Expected the enqueue to fail on the unreachable broker.');
     }
 
     #[Test]
@@ -758,15 +804,21 @@ class CommentControllerTest extends AbstractTest
         $comment->timestamp = time();
         $comment->create_date = date('Y-m-d H:i:s');
 
-        $this->expectException(\Throwable::class);
-        $this->invokePrivate('enqueueComment', [$comment, 1886428330, '1886428338', 'client-test']);
+        $this->installUnreachableQueueHandler();
+
+        $this->assertFailsOnUnreachableBroker(
+            fn() => $this->invokePrivate('enqueueComment', [$comment, 1886428330, '1886428338', 'client-test'])
+        );
     }
 
     #[Test]
     public function enqueueDeleteCommentMessage_throws_when_broker_is_unavailable(): void
     {
-        $this->expectException(\Throwable::class);
-        $this->invokePrivate('enqueueDeleteCommentMessage', ['1886428338', 'client-test', 1886428330, 7, 1, '1']);
+        $this->installUnreachableQueueHandler();
+
+        $this->assertFailsOnUnreachableBroker(
+            fn() => $this->invokePrivate('enqueueDeleteCommentMessage', ['1886428338', 'client-test', 1886428330, 7, 1, '1'])
+        );
     }
 
     #[Test]
@@ -796,9 +848,9 @@ class CommentControllerTest extends AbstractTest
             'revision_number' => '0',
             'is_anonymous' => '0',
         ]));
+        $this->installUnreachableQueueHandler();
 
-        $this->expectException(\Throwable::class);
-        $this->controller->create();
+        $this->assertFailsOnUnreachableBroker(fn() => $this->controller->create());
     }
 
     #[Test]
@@ -811,9 +863,9 @@ class CommentControllerTest extends AbstractTest
             'revision_number' => '0',
             'is_anonymous' => '0',
         ]));
+        $this->installUnreachableQueueHandler();
 
-        $this->expectException(\Throwable::class);
-        $this->controller->resolve();
+        $this->assertFailsOnUnreachableBroker(fn() => $this->controller->resolve());
     }
 
     #[Test]
