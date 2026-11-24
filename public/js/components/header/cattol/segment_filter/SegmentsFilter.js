@@ -423,13 +423,14 @@ const SegmentsFilter = ({active}) => {
                     </button>
                   </div>
                 )}
-                {filteredCount > 0 && samplingType === 'ice' && (
-                  <div className="select-all-filter">
-                    <button onClick={handleUnlockAll}>
-                      Unlock all filtered segments
-                    </button>
-                  </div>
-                )}
+                {filteredCount > 0 &&
+                  (samplingType === 'ice' || samplingType === 'locked') && (
+                    <div className="select-all-filter">
+                      <button onClick={handleUnlockAll}>
+                        Unlock all filtered segments
+                      </button>
+                    </div>
+                  )}
               </div>
             )}
           </div>
