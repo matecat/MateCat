@@ -37,11 +37,18 @@ class TestableXliffConfigTemplateController extends XliffConfigTemplateControlle
     }
 }
 
+class ValidatingXliffConfigTemplateController extends XliffConfigTemplateController
+{
+    public function __construct()
+    {
+    }
+}
+
 #[AllowMockObjectsWithoutExpectations]
 class XliffConfigTemplateControllerTest extends AbstractTest
 {
     private ReflectionClass $reflector;
-    private TestableXliffConfigTemplateController $controller;
+    private XliffConfigTemplateController $controller;
     /** @var Request&MockObject */
     private Request&MockObject $requestStub;
     /** @var Response&MockObject */
@@ -390,6 +397,64 @@ class XliffConfigTemplateControllerTest extends AbstractTest
         $this->controller->create();
     }
 
+    /**
+     * The real schema validation, which the default controller bypasses.
+     *
+     * @throws ReflectionException
+     */
+    private function useValidatingController(): void
+    {
+        $this->controller = new ValidatingXliffConfigTemplateController();
+
+        $parentRef = new ReflectionClass(XliffConfigTemplateController::class);
+        $parentRef->getProperty('request')->setValue($this->controller, $this->requestStub);
+        $parentRef->getProperty('response')->setValue($this->controller, $this->responseMock);
+        $parentRef->getProperty('xliffConfigTemplateDao')->setValue($this->controller, $this->daoMock);
+
+        $this->setControllerUser(99);
+    }
+
+    /** @throws ReflectionException */
+    #[Test]
+    public function createAcceptsAValidBodyThroughTheRealSchema(): void
+    {
+        $this->useValidatingController();
+        $this->setJsonContentType();
+        $this->requestStub->method('body')->willReturn('{"name":"Test","rules":{}}');
+
+        $this->daoMock->expects($this->once())
+            ->method('createFromJSON')
+            ->with('{"name":"Test","rules":{}}', 99)
+            ->willReturn(new XliffConfigTemplateStruct());
+
+        $this->responseMock->expects($this->once())
+            ->method('code')
+            ->with(201);
+
+        $this->controller->create();
+    }
+
+    /** @throws ReflectionException */
+    #[Test]
+    public function createRefusesAUidInTheBody(): void
+    {
+        $this->useValidatingController();
+        $this->setJsonContentType();
+        $this->requestStub->method('body')->willReturn('{"uid":56,"name":"Test","rules":{}}');
+
+        $this->daoMock->expects($this->never())->method('createFromJSON');
+
+        $this->responseMock->expects($this->once())
+            ->method('code')
+            ->with(400);
+
+        $this->responseMock->expects($this->once())
+            ->method('json')
+            ->with($this->callback(fn(array $payload) => str_contains(json_encode($payload) ?: '', 'uid')));
+
+        $this->controller->create();
+    }
+
     // ─── update() ────────────────────────────────────────────────────────
 
     #[Test]
@@ -456,6 +521,24 @@ class XliffConfigTemplateControllerTest extends AbstractTest
         $this->responseMock->expects($this->once())
             ->method('json')
             ->with($updated);
+
+        $this->controller->update();
+    }
+
+    /** @throws ReflectionException */
+    #[Test]
+    public function updateRefusesAUidInTheBody(): void
+    {
+        $this->useValidatingController();
+        $this->setJsonContentType();
+        $this->requestStub->method('param')->willReturn('5');
+        $this->requestStub->method('body')->willReturn('{"uid":56,"name":"Test","rules":{}}');
+
+        $this->daoMock->expects($this->never())->method('editFromJSON');
+
+        $this->responseMock->expects($this->once())
+            ->method('code')
+            ->with(400);
 
         $this->controller->update();
     }
@@ -554,6 +637,20 @@ class XliffConfigTemplateControllerTest extends AbstractTest
         $this->responseMock->expects($this->once())
             ->method('json')
             ->with($this->isInstanceOf(\stdClass::class));
+
+        $this->controller->schema();
+    }
+
+    #[Test]
+    public function schemaDoesNotAdvertiseUid(): void
+    {
+        $this->responseMock->expects($this->once())
+            ->method('json')
+            ->with($this->callback(
+                fn(\stdClass $schema) => !property_exists($schema->properties, 'uid')
+                    && property_exists($schema->properties, 'name')
+                    && property_exists($schema->properties->rules->properties, 'xliff12')
+            ));
 
         $this->controller->schema();
     }
