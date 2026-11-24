@@ -405,4 +405,30 @@ describe('segment history toggle', () => {
       screen.queryByRole('button', {name: /open history/i}),
     ).not.toBeInTheDocument()
   })
+
+  test('lists two confirmations that share the same second', async () => {
+    // Every confirmation is its own history row now, and two can land in the
+    // same second. The rows used to be keyed on the date alone, which made
+    // React drop all but one of them.
+    const consoleError = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {})
+    const user = userEvent.setup()
+    const approve = {
+      ...historyEvent('APPROVED2'),
+      source_page: 3,
+      version_number: 4,
+    }
+    renderWithHistory([approve, {...approve, translation: 'approved again'}])
+
+    await user.click(screen.getByRole('button', {name: /open history/i}))
+
+    expect(document.querySelectorAll('.qr-history-item')).toHaveLength(2)
+    expect(consoleError).not.toHaveBeenCalledWith(
+      expect.stringContaining('same key'),
+      expect.anything(),
+      expect.anything(),
+    )
+    consoleError.mockRestore()
+  })
 })
