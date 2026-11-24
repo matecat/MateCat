@@ -423,7 +423,8 @@ describe('segment history toggle', () => {
 
     await user.click(screen.getByRole('button', {name: /open history/i}))
 
-    expect(document.querySelectorAll('.qr-history-item')).toHaveLength(2)
+    // Each row prints its own date, so the shared second shows up once per row.
+    expect(screen.getAllByText('2026/01/02 10:00:00')).toHaveLength(2)
     expect(consoleError).not.toHaveBeenCalledWith(
       expect.stringContaining('same key'),
       expect.anything(),
