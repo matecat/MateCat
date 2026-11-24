@@ -35,6 +35,7 @@ use Utils\Constants\ProjectStatus;
 use Utils\Registry\AppConfig;
 use Utils\Constants\TranslationStatus;
 use Utils\TaskRunner\Commons\Context;
+use Utils\TaskRunner\Commons\ContextList;
 use Utils\Engines\Results\MyMemory\AnalyzeResponse;
 use Utils\Logger\MatecatLogger;
 
@@ -2015,6 +2016,58 @@ class FastAnalysisTest extends AbstractTest
         $db->method('getConnection')->willReturn($pdo);
 
         return $db;
+    }
+
+    // ─── _getQueueAddressesByPriority ────────────────────────────────────
+
+    /**
+     * Lara is the only adaptive engine left, so it alone takes the P4 queue; any other MT engine
+     * still goes to P3. Each case installs a real engine row and removes it afterwards, evicting the
+     * EngineDAO cache on both sides so no neighbouring test reads it.
+     */
+    #[Test]
+    #[DataProvider('queuePriorityByEngineProvider')]
+    public function getQueueAddressesByPriorityRoutesTheEngineToItsQueue(string $classLoad, string $expectedQueue): void
+    {
+        $database   = obtainTestDatabase();
+        $connection = $database->getConnection();
+        $connection->exec(
+            "INSERT INTO engines (name, type, description, base_url, translate_relative_url, class_load, others, extra_parameters, penalty, active) "
+            . "VALUES ('queue priority fixture', 'MT', 'fixture', 'https://example.invalid', 'translate', " . $connection->quote($classLoad) . ", '{}', '{}', 0, 1)"
+        );
+        $struct     = EngineStruct::getStruct();
+        $struct->id = (int)$connection->lastInsertId();
+        $dao        = new EngineDAO($database);
+        $dao->destroyCache($struct);
+
+        try {
+            $daemon = $this->daemonWithDb($database);
+            $this->setProp($daemon, '_queueContextList', ContextList::get([
+                'P1' => ['queue_name' => 'p1', 'max_executors' => 1],
+                'P2' => ['queue_name' => 'p2', 'max_executors' => 1],
+                'P3' => ['queue_name' => 'p3', 'max_executors' => 1],
+                'P4' => ['queue_name' => 'p4', 'max_executors' => 1],
+            ]));
+
+            $context = $this->invoke($daemon, '_getQueueAddressesByPriority', 0, $struct->id);
+
+            $this->assertInstanceOf(Context::class, $context);
+            $this->assertSame($expectedQueue, $context->queue_name);
+        } finally {
+            $connection->exec('DELETE FROM engines WHERE id = ' . $struct->id);
+            $dao->destroyCache($struct);
+        }
+    }
+
+    /**
+     * @return array<string, array{string, string}>
+     */
+    public static function queuePriorityByEngineProvider(): array
+    {
+        return [
+            'Lara is adaptive'         => ['Lara', 'p4'],
+            'DeepL is a plain MT'      => ['DeepL', 'p3'],
+        ];
     }
 }
 

@@ -1,5 +1,5 @@
 import React from 'react'
-import {render, screen, fireEvent, waitFor} from '@testing-library/react'
+import {act, render, screen, fireEvent, waitFor} from '@testing-library/react'
 
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
 import ModalsActions from '../actions/ModalsActions'
@@ -11,6 +11,9 @@ import {getSupportedLanguages} from '../api/getSupportedLanguages'
 import {getTmKeysUser} from '../api/getTmKeysUser'
 import {getMTEngines} from '../api/getMTEngines'
 import NewProject from './NewProject'
+import CreateProjectStore from '../stores/CreateProjectStore'
+import NewProjectConstants from '../constants/NewProjectConstants'
+import {createProject} from '../api/createProject'
 
 jest.mock('./mountPage', () => {
   // jest.mock factories are hoisted before ES6 imports, so this runs before
@@ -275,5 +278,46 @@ describe('NewProject', () => {
     fireEvent.click(screen.getByTitle('Swap languages'))
 
     expect(ModalsActions.showModalComponent).toHaveBeenCalled()
+  })
+
+  test('sends the mt glossaries as their own params and spreads the rest of mt extra', async () => {
+    createProject.mockReturnValue(new Promise(() => {}))
+    renderComponent({
+      isUserLogged: true,
+      currentProjectTemplate: {
+        ...defaultTemplate,
+        mt: {
+          id: 5,
+          extra: {
+            lara_glossaries: ['gls_1', 'gls_2'],
+            deepl_id_glossary: 'deepl-gls',
+            deepl_formality: 'more',
+          },
+        },
+      },
+    })
+
+    await waitFor(() => {
+      expect(getSupportedLanguages).toHaveBeenCalled()
+    })
+
+    const enableAnalyzeButton = CreateProjectStore.addListener.mock.calls.find(
+      ([event]) => event === NewProjectConstants.ENABLE_ANALYZE_BUTTON,
+    )[1]
+    act(() => enableAnalyzeButton(true))
+
+    fireEvent.click(screen.getByRole('button', {name: /analyze/i}))
+
+    expect(createProject).toHaveBeenCalledTimes(1)
+    const params = createProject.mock.calls[0][0]
+    expect(params).toEqual(
+      expect.objectContaining({
+        mt_engine: 5,
+        lara_glossaries: JSON.stringify(['gls_1', 'gls_2']),
+        deepl_id_glossary: 'deepl-gls',
+        deepl_formality: 'more',
+      }),
+    )
+    expect(params).not.toHaveProperty('mmt_glossaries')
   })
 })
