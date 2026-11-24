@@ -215,9 +215,9 @@ class TMSService
                     //retrieve OWNER EnginesFactory License
                     $uid = $user->uid ?? throw new InvalidArgumentException('User uid is required to load adaptive MT metadata');
                     $engineClassLoad = $engine->getEngineRecord()->class_load ?? throw new InvalidArgumentException('Engine class name is required to load adaptive MT metadata');
-                    $ownerEngineMetaData = (new MetadataDao($this->database))->setCacheTTL(60 * 60 * 24 * 30)->get($uid, $engineClassLoad); // engine_id
-                    if (!empty($ownerEngineMetaData)) {
-                        $engineId = $ownerEngineMetaData->value;
+                    $ownerMmtEngineMetaData = (new MetadataDao($this->database))->setCacheTTL(60 * 60 * 24 * 30)->get($uid, $engineClassLoad); // engine_id
+                    if (!empty($ownerMmtEngineMetaData)) {
+                        $engineId = $ownerMmtEngineMetaData->value;
                         if (!is_numeric($engineId)) {
                             $this->logger->debug("Invalid engine ID value for user $user->uid: " . print_r($engineId, true));
                             continue;

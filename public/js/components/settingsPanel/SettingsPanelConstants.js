@@ -1,4 +1,3 @@
-import React from 'react'
 import {SCHEMA_KEYS} from '../../hooks/useProjectTemplates'
 
 export const SETTINGS_PANEL_TABS = {
