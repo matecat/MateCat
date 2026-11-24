@@ -302,6 +302,39 @@ test('setFilter with extended state applies it, submits, and enables the unlock 
   jest.useRealTimers()
 })
 
+test('the unlock action is offered for the locked sample, not for the unlocked one', () => {
+  jest.useFakeTimers()
+
+  const applyFilter = (samplingType) => {
+    act(() => {
+      CatToolStore.emit(
+        CatToolConstants.SET_SEGMENT_FILTER,
+        {count: 2, segment_ids: [3, 4]},
+        {samplingType, samplingSize: 10, dataSampleEnabled: true},
+      )
+    })
+    act(() => {
+      jest.advanceTimersByTime(100)
+    })
+  }
+
+  const {unmount} = renderFilter()
+  applyFilter('locked')
+
+  fireEvent.click(screen.getByText('Unlock all filtered segments'))
+  expect(SegmentActions.unlockSegments).toHaveBeenCalledWith([3, 4])
+
+  unmount()
+  renderFilter()
+  applyFilter('unlocked')
+
+  expect(
+    screen.queryByText('Unlock all filtered segments'),
+  ).not.toBeInTheDocument()
+
+  jest.useRealTimers()
+})
+
 test('selecting a status submits the filter and the reset button clears it', () => {
   jest.useFakeTimers()
   renderFilter()
