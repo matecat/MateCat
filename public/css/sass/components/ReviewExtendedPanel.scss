@@ -58,11 +58,9 @@ input {
 
 .re-issues-box .re-item-head {
   border-bottom: 1px solid colors.$grey50;
-  padding-top: 10px;
-  margin-right: 1px;
+  padding: 8px 0;
   font-size: variables.$font-size-small;
   font-weight: bold;
-  padding-bottom: 3px;
 }
 
 .re-issues-box .re-list.issues .re-item-head {
