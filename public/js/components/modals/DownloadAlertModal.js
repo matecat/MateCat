@@ -25,9 +25,8 @@ export const DownloadAlertModal = ({
             You can:
             <ul
               style={{
-                'list-style': 'decimal',
+                'list-style': 'disc',
                 'margin-left': '40px',
-                'padding-top': '20px',
               }}
             >
               <li>

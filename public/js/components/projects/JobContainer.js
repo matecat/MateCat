@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import React, {useEffect, useRef, useState} from 'react'
-import {Checkbox, CHECKBOX_STATE} from '../common/Checkbox'
+import {Checkbox, CHECKBOX_SIZE, CHECKBOX_STATE} from '../common/Checkbox'
 import JobMenu from './JobMenu'
 import Download from '../../../img/icons/Download'
 import CommonUtils from '../../utils/commonUtils'
@@ -726,6 +726,7 @@ export const JobContainer = ({
       >
         {!isChunk && (
           <Checkbox
+            size={CHECKBOX_SIZE.SMALL}
             onChange={() => onCheckedJob(job.get('id'))}
             value={
               isChecked ? CHECKBOX_STATE.CHECKED : CHECKBOX_STATE.UNCHECKED

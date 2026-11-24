@@ -17,6 +17,11 @@ import {
   BUTTON_TYPE,
 } from '../../../../common/Button/Button'
 import IconClose from '../../../../../../img/icons/IconClose'
+import {
+  Checkbox,
+  CHECKBOX_SIZE,
+  CHECKBOX_STATE,
+} from '../../../../common/Checkbox'
 
 export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
   const {portalTarget} = useContext(SettingsPanelContext)
@@ -36,8 +41,8 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
     return () => statusEntry.current.cancel()
   }, [])
 
-  const onChangeIsActive = (e) => {
-    setIsActive(e.currentTarget.checked)
+  const onChangeIsActive = (isChecked) => {
+    setIsActive(isChecked)
   }
 
   const onChangeName = (e) => {
@@ -148,10 +153,10 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
           isWaitingResult ? ' row-content-create-glossary-waiting' : ''
         }`}
       >
-        <input
-          checked={isActive}
+        <Checkbox
+          value={isActive ? CHECKBOX_STATE.CHECKED : CHECKBOX_STATE.UNCHECKED}
+          size={CHECKBOX_SIZE.SMALL}
           onChange={onChangeIsActive}
-          type="checkbox"
           title=""
           disabled
         />

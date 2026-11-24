@@ -52,6 +52,11 @@ import {
   DropdownMenu,
 } from '../../../common/DropdownMenu/DropdownMenu'
 import Tooltip from '../../../common/Tooltip'
+import {
+  Checkbox,
+  CHECKBOX_SIZE,
+  CHECKBOX_STATE,
+} from '../../../common/Checkbox'
 
 export const TMKeyRow = ({row, onExpandRow}) => {
   const {isImportTMXInProgress} = useContext(CreateProjectContext)
@@ -89,8 +94,8 @@ export const TMKeyRow = ({row, onExpandRow}) => {
     setIsUpdating(row.w ?? false)
   }, [row.r, row.w])
 
-  const onChangeIsLookup = (e) => {
-    const isLookup = e.currentTarget.checked
+  const onChangeIsLookup = (isChecked) => {
+    const isLookup = isChecked
     if (
       isLookup &&
       !row.isActive &&
@@ -117,8 +122,8 @@ export const TMKeyRow = ({row, onExpandRow}) => {
     setIsLookup(isLookup)
   }
 
-  const onChangeIsUpdating = (e) => {
-    const isUpdating = e.currentTarget.checked
+  const onChangeIsUpdating = (isChecked) => {
+    const isUpdating = isChecked
     updateRow({isLookup, isUpdating})
     setIsUpdating(isUpdating)
   }
@@ -384,12 +389,17 @@ export const TMKeyRow = ({row, onExpandRow}) => {
                 This resource is also linked to your ModernMT account:
               </span>
               <div>
-                <input
-                  checked={deleteTmKeyRemoveFrom.current.MMT}
-                  onChange={(e) => {
-                    deleteTmKeyRemoveFrom.current.MMT = e.currentTarget.checked
+                <Checkbox
+                  value={
+                    deleteTmKeyRemoveFrom.current.MMT
+                      ? CHECKBOX_STATE.CHECKED
+                      : CHECKBOX_STATE.UNCHECKED
+                  }
+                  size={CHECKBOX_SIZE.SMALL}
+                  onChange={(isChecked) => {
+                    deleteTmKeyRemoveFrom.current.MMT = isChecked
                   }}
-                  type="checkbox"
+                  testId="delete-remove-from-mmt"
                 />
                 Permanently delete it from my ModernMT account
               </div>
@@ -403,12 +413,17 @@ export const TMKeyRow = ({row, onExpandRow}) => {
               )}
               <span>This resource is also linked to your Lara account:</span>
               <div>
-                <input
-                  checked={deleteTmKeyRemoveFrom.current.Lara}
-                  onChange={(e) => {
-                    deleteTmKeyRemoveFrom.current.Lara = e.currentTarget.checked
+                <Checkbox
+                  value={
+                    deleteTmKeyRemoveFrom.current.Lara
+                      ? CHECKBOX_STATE.CHECKED
+                      : CHECKBOX_STATE.UNCHECKED
+                  }
+                  size={CHECKBOX_SIZE.SMALL}
+                  onChange={(isChecked) => {
+                    deleteTmKeyRemoveFrom.current.Lara = isChecked
                   }}
-                  type="checkbox"
+                  testId="delete-remove-from-lara"
                 />
                 Permanently delete it from my Lara account
               </div>
@@ -427,24 +442,32 @@ export const TMKeyRow = ({row, onExpandRow}) => {
                   accounts:
                 </span>
                 <div>
-                  <input
-                    checked={deleteTmKeyRemoveFrom.current.Lara}
-                    onChange={(e) => {
-                      deleteTmKeyRemoveFrom.current.Lara =
-                        e.currentTarget.checked
+                  <Checkbox
+                    value={
+                      deleteTmKeyRemoveFrom.current.Lara
+                        ? CHECKBOX_STATE.CHECKED
+                        : CHECKBOX_STATE.UNCHECKED
+                    }
+                    size={CHECKBOX_SIZE.SMALL}
+                    onChange={(isChecked) => {
+                      deleteTmKeyRemoveFrom.current.Lara = isChecked
                     }}
-                    type="checkbox"
+                    testId="delete-remove-from-lara"
                   />
                   Permanently delete it from my Lara account
                 </div>
                 <div>
-                  <input
-                    checked={deleteTmKeyRemoveFrom.current.MMT}
-                    onChange={(e) => {
-                      deleteTmKeyRemoveFrom.current.MMT =
-                        e.currentTarget.checked
+                  <Checkbox
+                    value={
+                      deleteTmKeyRemoveFrom.current.MMT
+                        ? CHECKBOX_STATE.CHECKED
+                        : CHECKBOX_STATE.UNCHECKED
+                    }
+                    size={CHECKBOX_SIZE.SMALL}
+                    onChange={(isChecked) => {
+                      deleteTmKeyRemoveFrom.current.MMT = isChecked
                     }}
-                    type="checkbox"
+                    testId="delete-remove-from-mmt"
                   />
                   Permanently delete it from my ModernMT account
                 </div>
@@ -510,30 +533,34 @@ export const TMKeyRow = ({row, onExpandRow}) => {
   return (
     <Fragment>
       <div className="tm-key-lookup align-center">
-        <input
-          checked={isLookup}
+        <Checkbox
+          value={isLookup ? CHECKBOX_STATE.CHECKED : CHECKBOX_STATE.UNCHECKED}
+          size={CHECKBOX_SIZE.SMALL}
           onChange={onChangeIsLookup}
           disabled={
             (!isOwner && !isMMSharedKey) ||
             (isMMSharedKey && !config.ownerIsMe) ||
             row.isTmFromFile
           }
-          type="checkbox"
-          data-testid={`tmkey-lookup-${row.id}`}
+          testId={`tmkey-lookup-${row.id}`}
         />
       </div>
       <div className="tm-key-update align-center">
         {row.isActive && (
-          <input
-            checked={isMMSharedKey ? isMMSharedUpdateChecked : isUpdating}
+          <Checkbox
+            value={
+              (isMMSharedKey ? isMMSharedUpdateChecked : isUpdating)
+                ? CHECKBOX_STATE.CHECKED
+                : CHECKBOX_STATE.UNCHECKED
+            }
+            size={CHECKBOX_SIZE.SMALL}
             onChange={onChangeIsUpdating}
-            type="checkbox"
             disabled={isMMSharedKey || !isOwner}
             {...(isMMSharedKey &&
               isMMSharedUpdateChecked && {
                 title: 'Add a private resource to disable updating',
               })}
-            data-testid={`tmkey-update-${row.id}`}
+            testId={`tmkey-update-${row.id}`}
           />
         )}
       </div>

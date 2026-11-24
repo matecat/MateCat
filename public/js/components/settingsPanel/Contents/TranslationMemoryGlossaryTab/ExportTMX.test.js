@@ -37,6 +37,17 @@ test('renders the export explanation text and the strip-tags checkbox', () => {
   expect(screen.getByText('Export TM without tags')).toBeInTheDocument()
 })
 
+test('clicking the strip-tags checkbox visually checks it', () => {
+  render(<ExportTMX row={row} onClose={jest.fn()} />)
+
+  const checkbox = screen.getByRole('checkbox')
+  expect(checkbox).not.toBeChecked()
+
+  fireEvent.click(checkbox)
+
+  expect(checkbox).toBeChecked()
+})
+
 test('submitting the form passes the current strip-tags checkbox state to onSubmit', () => {
   const onSubmit = jest.fn((e) => e.preventDefault())
   useExport.mockReturnValue({...baseHookReturn, onSubmit})

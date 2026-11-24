@@ -1,4 +1,4 @@
-@use "../tokens/colors";
+@use '../tokens/colors';
 @use 'commons/variables';
 
 /*Split modal*/
@@ -44,7 +44,6 @@
     overflow: hidden;
     font-size: variables.$font-size-base;
     color: colors.$grey500;
-    font-weight: bold;
     display: flex;
     flex-direction: column;
     padding: 8px 25px;
@@ -79,24 +78,10 @@
     font-size: variables.$font-size-base;
   }
 
-  .container-split-select {
-    .label {
-      display: inline-block;
-    }
-    .splitselect {
-      width: auto;
-      height: 37px;
-      padding: 4px;
-      color: colors.$grey500;
-      font-size: variables.$font-size-base;
-      border: 1px solid colors.$grey500;
-      box-sizing: border-box;
-      display: inline-block;
-      background: white;
-      border-radius: 6px;
-    }
+  .container-split-numeric-stepper {
+    display: flex;
+    align-items: center;
   }
-
 
   .split-box3 {
     margin: 5px 15px;
@@ -111,19 +96,9 @@
   }
 
   .input-small {
-    height: 20px;
-    float: left;
     text-align: right;
     width: 70px;
-    margin-right: 0px;
-    padding: 6px 5px 5px 5px;
-    font-size: variables.$font-size-base;
-    background: colors.$white;
-    background-size: 13px 11px;
-    box-sizing: content-box;
-    border: 1px solid colors.$grey200;
-    border-radius: 6px;
-    box-shadow: inset 0 1px 3px colors.$grey200;
+    padding: 4px 12px;
   }
 
   .split-box3 .jobs li {
@@ -198,17 +173,6 @@
     width: 120px;
   }
 
-  input.input-small {
-    outline: none !important;
-    &:hover {
-      border-color: rgba(34, 36, 38, 0.35);
-      box-shadow: none;
-    }
-    &:focus {
-      border-color: colors.$grey300;
-      box-shadow: none;
-    }
-  }
   .split-box4 {
     display: flex;
     justify-content: flex-end;
@@ -216,9 +180,9 @@
     gap: 20px;
   }
   .button-loader {
-     position: relative;
-     top: 10px;
-     margin-right: 10px;
+    position: relative;
+    top: 10px;
+    margin-right: 10px;
   }
 }
 /************/

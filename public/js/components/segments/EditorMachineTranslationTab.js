@@ -4,11 +4,19 @@ import {SettingsPanelContext} from '../settingsPanel/SettingsPanelContext'
 import CatToolStore from '../../stores/CatToolStore'
 import {updateJobMetadata} from '../../api/updateJobMetadata'
 import CatToolConstants from '../../constants/CatToolConstants'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
+import SegmentActions from '../../actions/SegmentActions'
+import SegmentStore from '../../stores/SegmentStore'
+import {METADATA_KEY} from '../../constants/Constants'
 
 export const EditorMachineTranslationTab = (props) => {
   const {currentProjectTemplate, modifyingCurrentTemplate} =
     useContext(SettingsPanelContext)
 
+  const {userInfo} = useContext(ApplicationWrapperContext)
+
+  const userInfoRef = useRef(userInfo)
+  userInfoRef.current = userInfo
   const previousCurrentProjectTemplate = useRef()
   const wasCheckIntentoDoubleKey = useRef()
 
@@ -134,6 +142,12 @@ export const EditorMachineTranslationTab = (props) => {
           jobMetadata: CatToolStore.getJobMetadata(),
         })
       })
+
+      SegmentActions.getContributions(
+        SegmentStore.getCurrentSegmentId(),
+        userInfoRef.current.metadata[METADATA_KEY],
+        true,
+      )
     }
 
     previousCurrentProjectTemplate.current = {
