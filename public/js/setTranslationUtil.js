@@ -327,6 +327,7 @@ const setTranslation_success = (response, item) => {
   const {segment, status} = item
 
   SegmentActions.setStatus(segment.sid, null, status)
+  SegmentActions.setSavedTranslation(segment.sid, segment.translation)
   CatToolActions.setProgress(response)
   CatToolActions.checkWarnings(false)
   checkSegmentsPropagation(item, response.propagation)

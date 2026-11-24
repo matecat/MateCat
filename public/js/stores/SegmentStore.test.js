@@ -368,6 +368,26 @@ describe('SegmentStore', () => {
       expect(seg.decodedTranslation).toBe('orig')
     })
 
+    test('a loaded segment keeps the translation the server holds, apart from later edits', () => {
+      const loaded = SegmentStore.getSegmentByIdToJS('1')
+      SegmentStore.updateTranslation('1', '', '', [], [], '')
+
+      expect(SegmentStore.getSegmentByIdToJS('1').savedTranslation).toBe(
+        loaded.translation,
+      )
+    })
+
+    test('SET_SAVED_TRANSLATION records the translation the server now holds', () => {
+      dispatch({
+        actionType: SegmentConstants.SET_SAVED_TRANSLATION,
+        id: '1',
+        translation: 'saved',
+      })
+      expect(SegmentStore.getSegmentByIdToJS('1').savedTranslation).toBe(
+        'saved',
+      )
+    })
+
     test('REPLACE_TRANSLATION replaces translation', () => {
       dispatch({
         actionType: SegmentConstants.REPLACE_TRANSLATION,

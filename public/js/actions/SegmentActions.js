@@ -253,6 +253,11 @@ const SegmentActions = {
     this.closeIssuesPanel()
   },
   saveSegmentBeforeClose: function (segment) {
+    // An empty target is never saved: leaving it, show again the translation the server holds
+    if (!segment.translation && segment.savedTranslation) {
+      SegmentActions.restoreSavedTranslation(segment)
+      return Promise.resolve()
+    }
     if (getSetTranslationUtil().translationIsToSaveBeforeClose(segment)) {
       return getSetTranslationUtil().segmentTranslation(
         segment,
@@ -263,6 +268,12 @@ const SegmentActions = {
     } else {
       return Promise.resolve()
     }
+  },
+  restoreSavedTranslation: function ({sid, savedTranslation}) {
+    // The original first, so the store does not count the restored text as a change
+    SegmentActions.updateOriginalTranslation(sid, savedTranslation)
+    // Through the editor, which stays mounted when the segment closes and keeps its own content
+    SegmentActions.replaceEditAreaTextContent(sid, savedTranslation)
   },
   scrollToCurrentSegment() {
     if (SegmentStore.getCurrentSegment())
@@ -442,6 +453,8 @@ const SegmentActions = {
         !segToModify.splitted
       ) {
         SegmentActions.updateOriginalTranslation(sid, segment.translation)
+        // The server saved it there too
+        SegmentActions.setSavedTranslation(sid, segment.translation)
         SegmentActions.replaceEditAreaTextContent(sid, segment.translation)
         //Tag Projection: disable it if enable
         SegmentActions.setSegmentAsTagged(sid)
@@ -774,6 +787,13 @@ const SegmentActions = {
    * @param fid
    * @param originalTranslation
    */
+  setSavedTranslation: function (sid, translation) {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.SET_SAVED_TRANSLATION,
+      id: sid,
+      translation,
+    })
+  },
   updateOriginalTranslation: function (sid, originalTranslation) {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION,

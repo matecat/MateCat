@@ -190,6 +190,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
                 : status,
             time_to_edit: 0,
             originalDecodedTranslation: translation ? translation : '',
+            savedTranslation: translation ? translation : '',
             translation: translation ? translation : '',
             decodedTranslation:
               transformTagsToText(translation),
@@ -241,6 +242,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         segment.occurrencesInSearch = occurrencesInSearch
         segment.searchParams = this.searchParams
         segment.originalDecodedTranslation = segment.translation
+        segment.savedTranslation = segment.translation
         segment.decodedTranslation = transformTagsToText(
           segment.translation,
         )
@@ -389,6 +391,19 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     } else {
       this._segments = this._segments.setIn([index, 'autopropagated_from'], 0)
     }
+  },
+  /**
+   * The translation the server holds for the segment, as far as this page knows: the one it loaded
+   * with, then each one saved or propagated to it. Shown again when a target is left empty, since an
+   * empty target is never saved.
+   */
+  setSavedTranslation(sid, translation) {
+    const index = this.getSegmentIndex(sid)
+    if (index === -1) return
+    this._segments = this._segments.setIn(
+      [index, 'savedTranslation'],
+      translation,
+    )
   },
   replaceTranslation(sid, translation) {
     var index = this.getSegmentIndex(sid)
@@ -1476,6 +1491,9 @@ AppDispatcher.register(function (action) {
         action.id,
         action.originalTranslation,
       )
+      break
+    case SegmentConstants.SET_SAVED_TRANSLATION:
+      SegmentStore.setSavedTranslation(action.id, action.translation)
       break
     case SegmentConstants.REPLACE_TRANSLATION:
       SegmentStore.replaceTranslation(action.id, action.translation)

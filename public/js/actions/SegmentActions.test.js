@@ -827,6 +827,48 @@ describe('SegmentActions.saveSegmentBeforeClose', () => {
     ).resolves.toBeUndefined()
     expect(SetTranslationUtil.segmentTranslation).not.toHaveBeenCalled()
   })
+
+  test('shows again the saved translation when the target is left empty', async () => {
+    const calls = []
+    const updateOrigSpy = jest
+      .spyOn(SegmentActions, 'updateOriginalTranslation')
+      .mockImplementation((...args) => calls.push(['original', ...args]))
+    const replaceSpy = jest
+      .spyOn(SegmentActions, 'replaceEditAreaTextContent')
+      .mockImplementation((...args) => calls.push(['editor', ...args]))
+
+    await SegmentActions.saveSegmentBeforeClose({
+      sid: '1',
+      translation: '',
+      savedTranslation: 'Ciao',
+    })
+
+    // The original first, so the restored text does not count as a change
+    expect(calls).toEqual([
+      ['original', '1', 'Ciao'],
+      ['editor', '1', 'Ciao'],
+    ])
+    expect(SetTranslationUtil.segmentTranslation).not.toHaveBeenCalled()
+    updateOrigSpy.mockRestore()
+    replaceSpy.mockRestore()
+  })
+
+  test('leaves an empty target alone when nothing was ever saved', async () => {
+    SetTranslationUtil.translationIsToSaveBeforeClose.mockReturnValue(false)
+
+    const replaceSpy = jest
+      .spyOn(SegmentActions, 'replaceEditAreaTextContent')
+      .mockReturnValue()
+
+    await SegmentActions.saveSegmentBeforeClose({
+      sid: '1',
+      translation: '',
+      savedTranslation: '',
+    })
+
+    expect(replaceSpy).not.toHaveBeenCalled()
+    replaceSpy.mockRestore()
+  })
 })
 
 describe('SegmentActions.splitSegment (async)', () => {
@@ -1036,14 +1078,20 @@ describe('SegmentActions.propagateTranslation', () => {
     const setStatusSpy = jest
       .spyOn(SegmentActions, 'setStatus')
       .mockReturnValue()
+    const setSavedSpy = jest
+      .spyOn(SegmentActions, 'setSavedTranslation')
+      .mockReturnValue()
     const setAltSpy = jest
       .spyOn(SegmentActions, 'setAlternatives')
       .mockReturnValue()
     SegmentActions.propagateTranslation('1', ['2', '3'], 'TRANSLATED')
     expect(updateOrigSpy).toHaveBeenCalledWith('2', 'hola')
+    // The server propagated it: that is now the translation it holds for the repetition
+    expect(setSavedSpy).toHaveBeenCalledWith('2', 'hola')
     expect(setStatusSpy).toHaveBeenCalledWith('2', null, 'TRANSLATED')
     expect(setAltSpy).toHaveBeenCalledWith('1', undefined)
     updateOrigSpy.mockRestore()
+    setSavedSpy.mockRestore()
     setStatusSpy.mockRestore()
     setAltSpy.mockRestore()
   })

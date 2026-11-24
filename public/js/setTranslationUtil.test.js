@@ -12,6 +12,7 @@ jest.mock('./actions/SegmentActions', () => ({
     getSegmentVersionsIssues: jest.fn(),
     getTranslationMismatches: jest.fn(),
     setStatus: jest.fn(),
+    setSavedTranslation: jest.fn(),
     removeClassToSegment: jest.fn(),
     propagateTranslation: jest.fn(),
     setSegmentPropagation: jest.fn(),
@@ -715,6 +716,11 @@ describe('setTranslationUtil', () => {
       expect(SegmentActions.setChoosenSuggestion).toHaveBeenCalledWith(1, null)
       expect(SegmentActions.setSegmentSaving).toHaveBeenCalledWith(1, false)
       expect(SegmentActions.setStatus).toHaveBeenCalledWith(1, null, 'DRAFT')
+      // What the server now holds, shown again if the target is later left empty
+      expect(SegmentActions.setSavedTranslation).toHaveBeenCalledWith(
+        1,
+        'hello',
+      )
       expect(CatToolActions.setProgress).toHaveBeenCalledWith({
         data: 'OK',
         propagation: null,
