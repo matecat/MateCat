@@ -131,6 +131,17 @@ const getSetTranslationUtil = () => {
   return _SetTranslationUtil
 }
 
+// Segments sent in a single bulk status change request
+const BULK_STATUS_CHUNK_SIZE = 100
+const MAX_LISTED_SEGMENT_IDS = 20
+
+const listSegmentIds = (ids) =>
+  ids.length > MAX_LISTED_SEGMENT_IDS
+    ? `${ids.slice(0, MAX_LISTED_SEGMENT_IDS).join(', ')} and ${
+        ids.length - MAX_LISTED_SEGMENT_IDS
+      } more`
+    : ids.join(', ')
+
 const SegmentActions = {
   localStorageCommentsClosed:
     'commentsPanelClosed-' + config.id_job + config.password,
@@ -1425,23 +1436,26 @@ const SegmentActions = {
     return promise
   },
 
-  showApproveAllModalWarnirng: function () {
-    var props = {
-      text: 'It was not possible to approve all segments. There are some segments that have not been translated.',
-      successText: 'Ok',
-      successCallback: function () {
-        ModalsActions.onCloseModal()
-      },
-    }
-    ModalsActions.showModalComponent(
-      MODAL_KEY.CONFIRM_MESSAGE,
-      props,
-      'Warning',
+  showApproveAllModalWarnirng: function (segmentIds) {
+    SegmentActions.showBulkStatusWarning(
+      'It was not possible to approve all segments. There are some segments that have not been translated.',
+      segmentIds,
     )
   },
-  showTranslateAllModalWarnirng: function () {
-    var props = {
-      text: 'It was not possible to translate all segments.',
+  showTranslateAllModalWarnirng: function (segmentIds) {
+    SegmentActions.showBulkStatusWarning(
+      'It was not possible to translate all segments.',
+      segmentIds,
+    )
+  },
+  showBulkStatusWarning: function (message, segmentIds) {
+    const props = {
+      text: (
+        <>
+          <p>{message}</p>
+          <p>Segments not saved: {listSegmentIds(segmentIds)}</p>
+        </>
+      ),
       successText: 'Ok',
       successCallback: function () {
         ModalsActions.onCloseModal()
@@ -1454,56 +1468,52 @@ const SegmentActions = {
     )
   },
   approveFilteredSegments: function (segmentsArray) {
-    if (segmentsArray.length >= 100) {
-      var subArray = segmentsArray.slice(0, 99)
-      var todoArray = segmentsArray.slice(99, segmentsArray.length - 1)
-      return this.approveFilteredSegments(subArray).then(() => {
-        return this.approveFilteredSegments(todoArray)
-      })
-    } else {
-      const promise = approveSegments(segmentsArray)
-      promise.then((response) => {
-        this.checkUnchangebleSegments(
-          response,
-          segmentsArray,
-          SEGMENTS_STATUS.APPROVED,
-        )
-        setTimeout(CatToolActions.updateFooterStatistics(), 2000)
-      })
-      return promise
-    }
+    return SegmentActions.changeFilteredSegmentsStatus(
+      segmentsArray,
+      approveSegments,
+    )
   },
   translateFilteredSegments: function (segmentsArray) {
-    if (segmentsArray.length >= 100) {
-      var subArray = segmentsArray.slice(0, 99)
-      var todoArray = segmentsArray.slice(99, segmentsArray.length)
-      return this.translateFilteredSegments(subArray).then(() => {
-        return this.translateFilteredSegments(todoArray)
-      })
-    } else {
-      const promise = translateSegments(segmentsArray)
-      promise.then((response) => {
-        this.checkUnchangebleSegments(
-          response,
-          segmentsArray,
-          SEGMENTS_STATUS.TRANSLATED,
-        )
-        setTimeout(CatToolActions.updateFooterStatistics(), 2000)
-      })
-      return promise
-    }
+    return SegmentActions.changeFilteredSegmentsStatus(
+      segmentsArray,
+      translateSegments,
+    )
   },
-  checkUnchangebleSegments: function (response, status) {
-    if (response.unchangeble_segments.length > 0) {
+  /**
+   * Sends the bulk status change in chunks, one after the other, and reports once, at the end, every
+   * segment the server left unchanged.
+   *
+   * @returns {Promise<Array>} the ids of the segments the server did not change
+   */
+  changeFilteredSegmentsStatus: async function (segmentsArray, request) {
+    const unchangeable = []
+    for (let i = 0; i < segmentsArray.length; i += BULK_STATUS_CHUNK_SIZE) {
+      const response = await request(
+        segmentsArray.slice(i, i + BULK_STATUS_CHUNK_SIZE),
+      )
+      unchangeable.push(...(response?.unchangeble_segments ?? []))
+    }
+    // The footer statistics are not refreshed here: the request only queues the change, and the
+    // statistics are right once the worker has committed it (see bulkChangeStatusCallback)
+    SegmentActions.checkUnchangebleSegments(unchangeable)
+    return unchangeable
+  },
+  checkUnchangebleSegments: function (segmentIds) {
+    if (segmentIds.length > 0) {
       if (!config.isReview) {
-        this.showTranslateAllModalWarnirng()
+        SegmentActions.showTranslateAllModalWarnirng(segmentIds)
       } else {
-        this.showApproveAllModalWarnirng()
+        SegmentActions.showApproveAllModalWarnirng(segmentIds)
       }
     }
   },
+  /**
+   * Runs on the bulk_segment_status_change SSE message, which the worker publishes after committing
+   * the change: from here the job statistics include it.
+   */
   bulkChangeStatusCallback: function (segmentsArray, status) {
     if (segmentsArray.length > 0) {
+      CatToolActions.updateFooterStatistics()
       segmentsArray.forEach((item) => {
         var segment = SegmentStore.getSegmentByIdToJS(item)
         if (segment) {

@@ -160,6 +160,12 @@ const setTranslationTail = ({
   callback,
   errorCallback,
 }) => {
+  // An empty target is never sent. Refuse it here, before the segment is marked as saving: only the
+  // answer to a request clears that state, so a segment marked and never sent stays saving forever.
+  if (!segment.translation) {
+    errorCallback?.()
+    return
+  }
   const queueItem = {
     segment,
     status,
@@ -168,31 +174,21 @@ const setTranslationTail = ({
     callback,
     errorCallback,
   }
-  //Check if the translation is not already in the tail
-  const saveTranslation = translationIsToSave(segment)
-  // If not save it or update
-  if (saveTranslation) {
-    SegmentActions.addClassToSegment(
-      queueItem.segment.sid,
-      'setTranslationPending',
-    )
-    setTranslationQueue.push(queueItem)
+  // A segment saved again while its previous save is still queued (offline) replaces it: only the
+  // latest version is sent, and it does not take another slot of the offline cache
+  const queuedIndex = setTranslationQueue.findIndex(
+    (current) => current.segment.sid === segment.sid,
+  )
+  const alreadyQueued = queuedIndex !== -1
+  if (alreadyQueued) {
+    setTranslationQueue[queuedIndex] = queueItem
   } else {
-    SegmentActions.addClassToSegment(
-      queueItem.segment.sid,
-      'setTranslationPending',
-    )
-    setTranslationQueue[
-      setTranslationQueue.findIndex(
-        (current) => current.segment.sid === queueItem.segment.sid,
-      )
-    ] = queueItem
+    setTranslationQueue.push(queueItem)
   }
+  SegmentActions.addClassToSegment(segment.sid, 'setTranslationPending')
   SegmentActions.setSegmentSaving(segment.sid, true)
-  // If is offline and is in the tail I decrease the counter
-  // else I execute the tail
   if (OfflineUtils.offline && config.offlineModeEnabled) {
-    if (saveTranslation) {
+    if (!alreadyQueued) {
       OfflineUtils.decrementOfflineCacheRemaining()
       OfflineUtils.failedConnection()
     }
@@ -200,6 +196,8 @@ const setTranslationTail = ({
     OfflineUtils.checkConnection()
     if (callback) {
       callback.call(this)
+      // The translator has already moved on: draining the queue must not move them a second time
+      queueItem.callback = undefined
     }
   } else {
     return execSetTranslationTail()
@@ -363,20 +361,8 @@ export const translationIsToSaveBeforeClose = (segment) => {
       segment.status === config.status_labels.DRAFT.toUpperCase())
   )
 }
-const translationIsToSave = (segment) => {
-  // add to setTranslation tail
-  const alreadySet = alreadyInSetTranslationTail(segment.sid)
-  const emptyTranslation = segment && segment.translation.length === 0
-
-  return !alreadySet && !emptyTranslation
-}
-const alreadyInSetTranslationTail = (sid) => {
-  let alreadySet = false
-  setTranslationQueue.forEach((item) => {
-    if (item.id_segment === sid) alreadySet = true
-  })
-  return alreadySet
-}
+const alreadyInSetTranslationTail = (sid) =>
+  setTranslationQueue.some((item) => item.segment.sid === sid)
 export const isTranslationTailEmpty = () => {
   return setTranslationQueue.length === 0
 }

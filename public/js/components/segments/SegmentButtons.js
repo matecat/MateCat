@@ -336,6 +336,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
       <Button
         type={BUTTON_TYPE.PRIMARY}
         size={BUTTON_SIZE.SMALL}
+        disabled={disabled}
         onClick={(e) => clickOnTranslatedButton(e, false)}
         tooltip={`${isMac ? 'CMD' : 'CTRL'}+ENTER`}
       >
@@ -353,6 +354,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
       <Button
         type={type}
         size={BUTTON_SIZE.SMALL}
+        disabled={disabled}
         onClick={(event) => clickOnApprovedButton(event, false)}
         tooltip={`${isMac ? 'CMD' : 'CTRL'}+ENTER`}
       >

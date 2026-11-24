@@ -282,16 +282,92 @@ describe('setTranslationUtil', () => {
       expect(SetTranslationUtil.isTranslationTailEmpty()).toBe(false)
     })
 
-    test('does not decrement offline cache when translation is not newly saved (empty translation)', () => {
+    test('a segment saved again while queued replaces its queued save and takes one cache slot', () => {
       OfflineUtils.offline = true
-      const segment = buildSegment({translation: ''})
+      const SegmentUtils = require('./utils/segmentUtils').default
 
-      SetTranslationUtil.segmentTranslation(segment, 'DRAFT', jest.fn(), false)
+      SetTranslationUtil.segmentTranslation(
+        buildSegment({translation: 'first'}),
+        'DRAFT',
+        jest.fn(),
+        false,
+      )
+      SetTranslationUtil.segmentTranslation(
+        buildSegment({translation: 'second'}),
+        'TRANSLATED',
+        jest.fn(),
+        false,
+      )
+      expect(OfflineUtils.decrementOfflineCacheRemaining).toHaveBeenCalledTimes(
+        1,
+      )
 
-      // translationIsToSave is false (empty translation), so decrement/failedConnection are skipped
+      OfflineUtils.offline = false
+      SetTranslationUtil.execSetTranslationTail()
+
+      expect(setTranslationApi).toHaveBeenCalledTimes(1)
+      expect(SegmentUtils.createSetTranslationRequest).toHaveBeenCalledWith(
+        expect.objectContaining({translation: 'second'}),
+        'TRANSLATED',
+        false,
+      )
+      expect(SetTranslationUtil.isTranslationTailEmpty()).toBe(true)
+    })
+
+    test('a save queued offline does not move the translator again when it is sent', () => {
+      OfflineUtils.offline = true
+      const callback = jest.fn()
+
+      SetTranslationUtil.segmentTranslation(
+        buildSegment(),
+        'TRANSLATED',
+        callback,
+        false,
+      )
+      expect(callback).toHaveBeenCalledTimes(1)
+
+      OfflineUtils.offline = false
+      SetTranslationUtil.execSetTranslationTail()
+
+      expect(setTranslationApi).toHaveBeenCalledTimes(1)
+      expect(callback).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('empty target', () => {
+    test.each([
+      ['online', false],
+      ['offline', true],
+    ])('is refused %s without being marked as saving', (_, offline) => {
+      OfflineUtils.offline = offline
+      const callback = jest.fn()
+      const errorCallback = jest.fn()
+
+      SetTranslationUtil.segmentTranslation(
+        buildSegment({translation: ''}),
+        'TRANSLATED',
+        callback,
+        false,
+        errorCallback,
+      )
+
+      expect(SegmentActions.setSegmentSaving).not.toHaveBeenCalled()
+      expect(setTranslationApi).not.toHaveBeenCalled()
       expect(OfflineUtils.decrementOfflineCacheRemaining).not.toHaveBeenCalled()
-      expect(OfflineUtils.failedConnection).not.toHaveBeenCalled()
-      expect(OfflineUtils.changeStatusOffline).toHaveBeenCalledWith(1)
+      expect(SetTranslationUtil.isTranslationTailEmpty()).toBe(true)
+      expect(callback).not.toHaveBeenCalled()
+      expect(errorCallback).toHaveBeenCalledTimes(1)
+    })
+
+    test('a target made only of tags is saved', () => {
+      SetTranslationUtil.segmentTranslation(
+        buildSegment({translation: '&lt;g id="1"&gt;&lt;/g&gt;'}),
+        'TRANSLATED',
+        jest.fn(),
+        false,
+      )
+
+      expect(setTranslationApi).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -306,7 +382,12 @@ describe('setTranslationUtil', () => {
       const segment = buildSegment()
       const callback = jest.fn()
 
-      SetTranslationUtil.segmentTranslation(segment, 'TRANSLATED', callback, false)
+      SetTranslationUtil.segmentTranslation(
+        segment,
+        'TRANSLATED',
+        callback,
+        false,
+      )
 
       expect(setTranslationApi).toHaveBeenCalledTimes(1)
       expect(callback).toHaveBeenCalledTimes(1)
@@ -422,9 +503,7 @@ describe('setTranslationUtil', () => {
       const {container} = render(
         CatToolActions.addNotification.mock.calls[0][0].text,
       )
-      expect(container).toHaveTextContent(
-        /locked segments have been excluded/,
-      )
+      expect(container).toHaveTextContent(/locked segments have been excluded/)
       expect(container).not.toHaveTextContent(
         /non-locked segments have been excluded/,
       )
@@ -545,6 +624,24 @@ describe('setTranslationUtil', () => {
         status: 'NEW',
         modified: true,
         translation: '',
+      })
+      expect(SetTranslationUtil.translationIsToSaveBeforeClose(segment)).toBe(
+        false,
+      )
+    })
+
+    test('is false when the segment is already waiting in the queue', () => {
+      OfflineUtils.offline = true
+      SetTranslationUtil.segmentTranslation(
+        buildSegment({translation: 'queued'}),
+        'DRAFT',
+        jest.fn(),
+        false,
+      )
+      const segment = buildSegment({
+        status: 'DRAFT',
+        modified: true,
+        translation: 'edited after',
       })
       expect(SetTranslationUtil.translationIsToSaveBeforeClose(segment)).toBe(
         false,

@@ -1754,59 +1754,82 @@ describe('SegmentActions bulk approve/translate', () => {
     jest.clearAllMocks()
   })
 
-  test('approveFilteredSegments approves small batches', async () => {
+  const bulkWarningText = () => {
+    expect(ModalsActions.showModalComponent).toHaveBeenCalledTimes(1)
+    // React is mocked in this file (createElement only), so the JSX text cannot be rendered: read
+    // the strings it was built from off the createElement calls instead
+    return React.createElement.mock.calls
+      .flatMap(([, , ...children]) => children)
+      .filter((child) => typeof child === 'string')
+      .join('')
+  }
+
+  test('approveFilteredSegments sends every selected segment, in chunks of 100', async () => {
     approveSegments.mockResolvedValue({unchangeble_segments: []})
-    const promise = SegmentActions.approveFilteredSegments([1, 2])
-    await promise
-    expect(approveSegments).toHaveBeenCalledWith([1, 2])
+    const ids = Array.from({length: 150}, (_, i) => i + 1)
+    await SegmentActions.approveFilteredSegments(ids)
+    expect(approveSegments.mock.calls.map(([chunk]) => chunk)).toEqual([
+      ids.slice(0, 100),
+      ids.slice(100),
+    ])
   })
 
-  test('approveFilteredSegments recurses for large batches', async () => {
+  test('translateFilteredSegments sends every selected segment, in chunks of 100', async () => {
+    translateSegments.mockResolvedValue({unchangeble_segments: []})
+    const ids = Array.from({length: 201}, (_, i) => i + 1)
+    await SegmentActions.translateFilteredSegments(ids)
+    expect(translateSegments.mock.calls.map(([chunk]) => chunk)).toEqual([
+      ids.slice(0, 100),
+      ids.slice(100, 200),
+      ids.slice(200),
+    ])
+  })
+
+  test('a bulk change lists, in one warning, the segments every chunk left unchanged', async () => {
+    global.config.isReview = false
+    translateSegments
+      .mockResolvedValueOnce({unchangeble_segments: [3]})
+      .mockResolvedValueOnce({unchangeble_segments: [104, 120]})
+    const ids = Array.from({length: 150}, (_, i) => i + 1)
+    const unchangeable = await SegmentActions.translateFilteredSegments(ids)
+    expect(unchangeable).toEqual([3, 104, 120])
+    const text = bulkWarningText()
+    expect(text).toContain('It was not possible to translate all segments.')
+    expect(text).toContain('Segments not saved: 3, 104, 120')
+  })
+
+  test('a bulk change shows no warning when every segment was changed', async () => {
     approveSegments.mockResolvedValue({unchangeble_segments: []})
-    const arr = Array.from({length: 150}, (_, i) => i)
-    const promise = SegmentActions.approveFilteredSegments(arr)
-    await promise
-    expect(approveSegments).toHaveBeenCalled()
+    await SegmentActions.approveFilteredSegments([1, 2])
+    expect(ModalsActions.showModalComponent).not.toHaveBeenCalled()
   })
 
-  test('translateFilteredSegments translates small batches', async () => {
-    translateSegments.mockResolvedValue({unchangeble_segments: []})
-    await SegmentActions.translateFilteredSegments([1, 2])
-    expect(translateSegments).toHaveBeenCalledWith([1, 2])
-  })
-
-  test('translateFilteredSegments recurses for large batches', async () => {
-    translateSegments.mockResolvedValue({unchangeble_segments: []})
-    const arr = Array.from({length: 150}, (_, i) => i)
-    await SegmentActions.translateFilteredSegments(arr)
-    expect(translateSegments).toHaveBeenCalled()
-  })
-
-  test('checkUnchangebleSegments shows translate warning when not review', () => {
-    const spy = jest
-      .spyOn(SegmentActions, 'showTranslateAllModalWarnirng')
-      .mockReturnValue()
-    SegmentActions.checkUnchangebleSegments({unchangeble_segments: [1]})
-    expect(spy).toHaveBeenCalled()
-    spy.mockRestore()
-  })
-
-  test('checkUnchangebleSegments shows approve warning when review', () => {
+  test('a bulk approval warns with the approve message in revise', async () => {
     global.config.isReview = true
-    const spy = jest
-      .spyOn(SegmentActions, 'showApproveAllModalWarnirng')
-      .mockReturnValue()
-    SegmentActions.checkUnchangebleSegments({unchangeble_segments: [1]})
-    expect(spy).toHaveBeenCalled()
-    spy.mockRestore()
+    approveSegments.mockResolvedValue({unchangeble_segments: [7]})
+    await SegmentActions.approveFilteredSegments([7, 8])
+    const text = bulkWarningText()
+    expect(text).toContain('It was not possible to approve all segments.')
+    expect(text).toContain('Segments not saved: 7')
+    global.config.isReview = false
   })
 
-  test('showApproveAllModalWarnirng and showTranslateAllModalWarnirng show modals with callbacks', () => {
-    SegmentActions.showApproveAllModalWarnirng()
-    SegmentActions.showTranslateAllModalWarnirng()
-    const calls = ModalsActions.showModalComponent.mock.calls
-    calls.forEach((c) => c[1].successCallback && c[1].successCallback())
-    expect(ModalsActions.showModalComponent).toHaveBeenCalledTimes(2)
+  test('the bulk warning lists 20 segments and counts the rest', () => {
+    const ids = Array.from({length: 25}, (_, i) => i + 1)
+    SegmentActions.showTranslateAllModalWarnirng(ids)
+    expect(bulkWarningText()).toContain(
+      `Segments not saved: ${ids.slice(0, 20).join(', ')} and 5 more`,
+    )
+  })
+
+  test('a failed chunk rejects the bulk change and stops the next chunks', async () => {
+    approveSegments.mockRejectedValueOnce({errors: [{message: 'nope'}]})
+    const ids = Array.from({length: 150}, (_, i) => i + 1)
+    await expect(SegmentActions.approveFilteredSegments(ids)).rejects.toEqual({
+      errors: [{message: 'nope'}],
+    })
+    expect(approveSegments).toHaveBeenCalledTimes(1)
+    expect(ModalsActions.showModalComponent).not.toHaveBeenCalled()
   })
 
   test('bulkChangeStatusCallback updates present segments', () => {
@@ -1814,6 +1837,8 @@ describe('SegmentActions bulk approve/translate', () => {
     const statusSpy = jest.spyOn(SegmentActions, 'setStatus').mockReturnValue()
     SegmentActions.bulkChangeStatusCallback(['1'], 'TRANSLATED')
     expect(statusSpy).toHaveBeenCalledWith('1', 7, 'TRANSLATED')
+    // The worker publishes this message after committing: the statistics now include the change
+    expect(CatToolActions.updateFooterStatistics).toHaveBeenCalledTimes(1)
     statusSpy.mockRestore()
   })
 
@@ -1821,7 +1846,14 @@ describe('SegmentActions bulk approve/translate', () => {
     const statusSpy = jest.spyOn(SegmentActions, 'setStatus').mockReturnValue()
     SegmentActions.bulkChangeStatusCallback([], 'TRANSLATED')
     expect(statusSpy).not.toHaveBeenCalled()
+    expect(CatToolActions.updateFooterStatistics).not.toHaveBeenCalled()
     statusSpy.mockRestore()
+  })
+
+  test('a bulk request does not refresh the statistics before the worker has changed them', async () => {
+    translateSegments.mockResolvedValue({unchangeble_segments: []})
+    await SegmentActions.translateFilteredSegments([1, 2])
+    expect(CatToolActions.updateFooterStatistics).not.toHaveBeenCalled()
   })
 })
 
