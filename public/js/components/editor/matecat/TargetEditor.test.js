@@ -299,6 +299,28 @@ describe('TargetEditor store updates', () => {
     expect(SegmentActions.updateTranslation).not.toHaveBeenCalled()
   })
 
+  test('deleting the whole target empties the store translation', async () => {
+    const {container, updateCounter} = renderTarget(
+      makeSegment({translation: 'a'}),
+    )
+    await flush()
+    jest.clearAllMocks()
+    const view = viewOf(container)
+    act(() => {
+      view.dispatch({changes: {from: 0, to: view.state.doc.length}})
+    })
+    await flush(150)
+    // Left out, the store kept the last character: the confirm buttons stayed enabled and
+    // confirming saved that character
+    expect(SegmentActions.updateTranslation).toHaveBeenCalledTimes(1)
+    expect(SegmentActions.updateTranslation.mock.calls[0].slice(0, 3)).toEqual([
+      '10',
+      '',
+      '',
+    ])
+    expect(updateCounter).toHaveBeenLastCalledWith(0)
+  })
+
   test('a new source tag map updates the store again, without touching the text', async () => {
     const segment = makeSegment({sourceTagMap: []})
     const {container, update} = renderTarget(segment)
