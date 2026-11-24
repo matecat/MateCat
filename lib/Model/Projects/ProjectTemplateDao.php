@@ -724,6 +724,32 @@ class ProjectTemplateDao extends AbstractDao
     }
 
     /**
+     * Every cached read of one user's templates: the list and the default, both kept for a day, and
+     * each template by id. For a write made outside this DAO, such as a migration rewriting `mt`
+     * with plain SQL, which leaves all of them serving the rows it replaced.
+     *
+     * Example: $dao->destroyCachesByUid(42);
+     *
+     * @throws PDOException
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function destroyCachesByUid(int $uid): void
+    {
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare("SELECT id FROM " . self::TABLE . " WHERE uid = :uid ");
+        $stmt->execute(['uid' => $uid]);
+
+        foreach ($stmt->fetchAll(PDO::FETCH_COLUMN) as $id) {
+            $this->destroyFetchByIdCache((int)$id, ProjectTemplateStruct::class);
+            $this->destroyQueryByIdAndUserCache($conn, (int)$id, $uid);
+        }
+
+        $this->destroyDefaultTemplateCache($conn, $uid);
+        $this->destroyQueryPaginated($uid);
+    }
+
+    /**
      * @param PDO $conn
      * @param int $uid
      *

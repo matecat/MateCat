@@ -353,6 +353,38 @@ class ProjectTemplateDaoRealSqlTest extends AbstractTest
         self::assertSame($struct->id, $this->dao->getTheDefaultProject($this->uid)->id);
     }
 
+    // ---- destroyCachesByUid ----------------------------------------------------------------------
+
+    /**
+     * A migration rewrites `mt` with plain SQL, so no DAO write evicts anything. The list and the
+     * default are cached for a day, and both must serve the new value once the caches are cleared.
+     */
+    public function testDestroyCachesByUidEvictsEveryReadOfTheUsersTemplates(): void
+    {
+        $struct = $this->newStruct('rewritten by sql', true);
+        $struct->mt = '{"id":9999,"extra":{}}';
+        $saved = $this->dao->save($struct);
+        $this->trackTemplate($saved->id);
+
+        $this->dao->getAllPaginated($this->uid, '/api/v3/project-template?page=', 1, 20, 3600);
+        $this->dao->getTheDefaultProject($this->uid, 3600);
+        $this->dao->getByIdAndUser($saved->id, $this->uid, 3600);
+
+        $this->realSqlDb()->getConnection()
+            ->prepare("UPDATE project_templates SET mt = '{\"id\":1,\"extra\":{}}' WHERE id = :id")
+            ->execute(['id' => $saved->id]);
+
+        $this->dao->destroyCachesByUid($this->uid);
+
+        $listed = array_values(array_filter(
+            $this->dao->getAllPaginated($this->uid, '/api/v3/project-template?page=', 1, 20, 3600)['items'],
+            fn(ProjectTemplateStruct $template): bool => $template->id === $saved->id
+        ));
+        self::assertSame(1, $listed[0]->getMt()->id);
+        self::assertSame(1, $this->dao->getTheDefaultProject($this->uid, 3600)->getMt()->id);
+        self::assertSame(1, $this->dao->getByIdAndUser($saved->id, $this->uid, 3600)->getMt()->id);
+    }
+
     // ---- getDefaultTemplate ----------------------------------------------------------------------
 
     public function testGetDefaultTemplateBuildsSyntheticDefault(): void
