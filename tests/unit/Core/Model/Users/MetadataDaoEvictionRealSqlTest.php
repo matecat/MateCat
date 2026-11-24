@@ -26,10 +26,10 @@ class MetadataDaoEvictionRealSqlTest extends AbstractTest
     private const array TABLE_DEPS = ['users', 'user_metadata'];
 
     /** The key an adaptive MT engine is stored under: its class_load. */
-    private const string CLASS_LOAD = 'Utils\Engines\MMT';
+    private const string CLASS_LOAD = 'Utils\Engines\Lara';
 
     /** What EngineStruct::getEngineType() returns for that class_load, and what delete() is given. */
-    private const string ENGINE_TYPE = 'MMT';
+    private const string ENGINE_TYPE = 'Lara';
 
     private MetadataDao $dao;
     private int $uid;
@@ -53,7 +53,7 @@ class MetadataDaoEvictionRealSqlTest extends AbstractTest
     }
 
     /**
-     * EngineController::delete() hands the engine TYPE to a DELETE matching on `key` LIKE '%MMT',
+     * EngineController::delete() hands the engine TYPE to a DELETE matching on `key` LIKE '%Lara',
      * which removes the row stored under the full class_load. TMSService:212,
      * TmKeyManagementController:183 and UserKeysController:282 all read that row by class_load at a
      * 30-day TTL, so the address the delete has to clear is the one it never names.

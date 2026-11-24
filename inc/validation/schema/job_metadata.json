@@ -235,45 +235,6 @@
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "key",
-          "value"
-        ],
-        "properties": {
-          "key": {
-            "const": "mmt_glossaries"
-          },
-          "value": {
-            "type": "array",
-            "$comment": "An empty list is an answer, not an absence: it is how a job says \"no glossary here\" over a project that has one, and the job scope wins. DELETE /metadata/{key} is the other operation — it drops the job row so the job inherits the project value again.",
-            "items": {
-              "type": "integer",
-              "minimum": 1
-            }
-          }
-        }
-      },
-      {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "key",
-          "value"
-        ],
-        "properties": {
-          "key": {
-            "const": "mmt_ignore_glossary_case"
-          },
-          "value": {
-            "type": [
-              "boolean"
-            ]
-          }
-        }
-      },
-      {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
           "key"
         ],
         "properties": {

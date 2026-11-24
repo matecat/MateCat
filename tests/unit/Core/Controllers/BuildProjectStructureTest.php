@@ -172,7 +172,6 @@ class BuildProjectStructureTest extends AbstractTest
             ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS->value                 => null,
             'lara_glossaries'                       => null,
             'lara_style'                            => null,
-            'mmt_glossaries'                        => null,
             'qaModelTemplate'                       => null,
             'qaModel'                               => null,
             'mt_qe_workflow_payable_rate'            => null,
@@ -390,13 +389,13 @@ class BuildProjectStructureTest extends AbstractTest
     {
         // Engine declares two config parameters; request has values for both
         StubEngine::$configParams = [
-            'mmt_glossaries',
+            'lara_glossaries',
             'deepl_formality',
         ];
         $engine = new StubEngine();
 
         $request = $this->makeNewControllerRequest([
-            'mmt_glossaries'  => 'glossary-123',
+            'lara_glossaries' => 'glossary-123',
             'deepl_formality' => 'more',
         ]);
         $filesFound = $this->makeFilesFound();
@@ -409,7 +408,7 @@ class BuildProjectStructureTest extends AbstractTest
             $engine,
         );
 
-        $this->assertSame('glossary-123', $ps->mmt_glossaries);
+        $this->assertSame('glossary-123', $ps->lara_glossaries);
         $this->assertSame('more', $ps->deepl_formality);
     }
 
@@ -417,12 +416,12 @@ class BuildProjectStructureTest extends AbstractTest
     public function newControllerSkipsNullEngineConfigParameters(): void
     {
         StubEngine::$configParams = [
-            'mmt_glossaries',
+            'lara_glossaries',
         ];
         $engine = new StubEngine();
 
         $request = $this->makeNewControllerRequest([
-            'mmt_glossaries' => null,
+            'lara_glossaries' => null,
         ]);
         $filesFound = $this->makeFilesFound();
 
@@ -435,25 +434,25 @@ class BuildProjectStructureTest extends AbstractTest
         );
 
         // The default from ProjectStructure should remain
-        $this->assertNull($ps->mmt_glossaries);
+        $this->assertNull($ps->lara_glossaries);
     }
 
     #[Test]
     public function newControllerSetsOptionalFieldsWhenPresent(): void
     {
-        // Engine must declare lara_glossaries, lara_style, mmt_glossaries
+        // Engine must declare lara_glossaries, lara_style, deepl_id_glossary
         // as configuration parameters so the generic loop picks them up.
         StubEngine::$configParams = [
             'lara_glossaries',
             'lara_style',
-            'mmt_glossaries',
+            'deepl_id_glossary',
         ];
         $engine = new StubEngine();
 
         $request = $this->makeNewControllerRequest([
             'lara_glossaries' => 'glossary-abc',
             'lara_style'      => 'formal',
-            'mmt_glossaries'  => 'mmt-456',
+            'deepl_id_glossary' => 'gl-456',
             JobsMetadataMarshaller::DIALECT_STRICT->value  => ['it-IT' => true],
             ProjectsMetadataMarshaller::MT_EVALUATION->value   => true,
         ]);
@@ -469,7 +468,7 @@ class BuildProjectStructureTest extends AbstractTest
 
         $this->assertSame('glossary-abc', $ps->lara_glossaries);
         $this->assertSame('formal', $ps->lara_style);
-        $this->assertSame('mmt-456', $ps->mmt_glossaries);
+        $this->assertSame('gl-456', $ps->deepl_id_glossary);
         $this->assertSame(['it-IT' => true], $ps->dialect_strict);
         $this->assertTrue($ps->mt_evaluation);
     }
@@ -492,7 +491,7 @@ class BuildProjectStructureTest extends AbstractTest
         // These should remain at their ProjectStructure defaults (null)
         $this->assertNull($ps->lara_glossaries);
         $this->assertNull($ps->lara_style);
-        $this->assertNull($ps->mmt_glossaries);
+        $this->assertNull($ps->deepl_id_glossary);
         $this->assertNull($ps->dialect_strict);
         $this->assertNull($ps->mt_evaluation);
         $this->assertNull($ps->filters_extraction_parameters);
@@ -1219,25 +1218,6 @@ class BuildProjectStructureTest extends AbstractTest
         );
 
         $this->assertNull($ps->lara_style);
-    }
-
-    #[Test]
-    public function newControllerMmtGlossariesFalsyBranch(): void
-    {
-        $request = $this->makeNewControllerRequest([
-            'mmt_glossaries' => null,
-        ]);
-        $filesFound = $this->makeFilesFound();
-
-        $ps = $this->newController->buildProjectStructure(
-            $request,
-            $filesFound,
-            'tok',
-            $this->user,
-            $this->engine,
-        );
-
-        $this->assertNull($ps->mmt_glossaries);
     }
 
     #[Test]

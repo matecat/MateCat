@@ -1521,7 +1521,7 @@ class FastAnalysisTest extends AbstractTest
     //
     // The DAO and the resolver are both constructed inline from db(), so there is nothing to inject:
     // these drive the real test connection with real job_metadata rows, the same way the engine
-    // suites do for the same reason (@see MMTEngineMethodsTest, LaraEngineTest).
+    // suites do for the same reason (@see LaraEngineTest).
     // ---------------------------------------------------------------------------------------
 
     private const int JOB_METADATA_TEST_JOB_ID = 990111;

@@ -12,7 +12,6 @@ use Lara\LaraApiException;
 use Lara\LaraException;
 use Lara\TextBlock;
 use Lara\TranslateOptions;
-use Model\Engines\Structs\MMTStruct;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobSettingsResolver;
 use Model\Jobs\JobsMetadataMarshaller;
@@ -34,13 +33,11 @@ use Utils\Constants\EngineConstants;
 use Utils\Engines\Lara\Headers;
 use Utils\Engines\Lara\HttpClientInterface;
 use Utils\Engines\Lara\LaraClient;
-use Utils\Engines\MMT as MMTEngine;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Engines\Results\MyMemory\Matches;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\TmKeyManager;
-use Utils\TmKeyManagement\TmKeyStruct;
 
 /**
  * Created by PhpStorm.
@@ -71,11 +68,6 @@ class Lara extends AbstractEngine
     protected bool $_isAdaptiveMT = true;
 
     private ?LaraClient $clientLoaded = null;
-
-    /**
-     * @var ?MMTEngine
-     */
-    private ?MMTEngine $mmt_SET_PrivateLicense = null;
 
     /**
      * @var bool
@@ -123,7 +115,7 @@ class Lara extends AbstractEngine
     }
 
     /**
-     * Get MMTServiceApi client
+     * Get the Lara client
      *
      * @return LaraClient
      * @throws LaraException
@@ -138,25 +130,12 @@ class Lara extends AbstractEngine
         $extraParams = $this->getEngineRecord()->getExtraParamsAsArray();
         $credentials = new AccessKey($extraParams['Lara-AccessKeyId'], $extraParams['Lara-AccessKeySecret']);
 
-        if (!empty($extraParams['MMT-License'])) {
-            $mmtStruct = MMTStruct::getStruct();
-            $mmtStruct->type = EngineConstants::MT;
-            $mmtStruct->extra_parameters = [
-                'MMT-License' => $extraParams['MMT-License'],
-            ];
-            /**
-             * @var MMTEngine $engine
-             */
-            $engine = EnginesFactory::createTempInstance($mmtStruct, $this->database);
-            $this->mmt_SET_PrivateLicense = $engine;
-        }
-
         $this->clientLoaded = new LaraClient($credentials);
         return $this->clientLoaded;
     }
 
     /**
-     * Get the available languages in MMT
+     * Get the available languages in Lara
      *
      * @return array<int, string>
      * @throws LaraException
@@ -282,7 +261,7 @@ class Lara extends AbstractEngine
             // This is a normal request, not Lara Think
             $reasoning = false;
 
-            // init lara client and mmt fallback
+            // init lara client
             $client = $this->_getClient();
 
             $_config = $this->configureContribution($_config);
@@ -526,8 +505,7 @@ class Lara extends AbstractEngine
             return false;
         }
 
-//         let MMT to have the last word on requeue
-        return empty($this->mmt_SET_PrivateLicense) || $this->mmt_SET_PrivateLicense->update($_config);
+        return true;
     }
 
     /**
@@ -552,16 +530,6 @@ class Lara extends AbstractEngine
     {
         $clientMemories = $this->_getClient()->memories;
         try {
-            if (!empty($this->mmt_SET_PrivateLicense)) {
-                $memoryKeyToUpdate = new MemoryKeyStruct();
-                $memoryKeyToUpdate->tm_key = new TmKeyStruct(['key' => str_replace('ext_my_', '', $memoryKey['externalId'])]);
-
-                $memoryMMT = $this->mmt_SET_PrivateLicense->getMemoryIfMine($memoryKeyToUpdate);
-                if (!empty($memoryMMT)) {
-                    $this->mmt_SET_PrivateLicense->deleteMemory($memoryMMT);
-                }
-            }
-
             $time_start = microtime(true);
             $res = $clientMemories->delete(trim($memoryKey['id']))->jsonSerialize();
             $time_end = microtime(true);
@@ -584,7 +552,7 @@ class Lara extends AbstractEngine
 
     /**
      * In 'Lara', there is no need to check the ownership of the memory because if a memory exists within an account, it definitely ALSO belongs to me and can be safely deleted (unlinked from my account).
-     * Therefore, unlike ModernMT, this method is simply an alias of the memoryExists method.
+     * Therefore, this method is simply an alias of the memoryExists method.
      * @throws LaraException
      * @throws Exception
      */
@@ -626,10 +594,6 @@ class Lara extends AbstractEngine
         $this->logger->debug($res);
 
         $fp_out = null;
-
-        if (!empty($this->mmt_SET_PrivateLicense)) {
-            $this->mmt_SET_PrivateLicense->importMemory($filePath, $memoryKey, $user);
-        }
     }
 
     /**

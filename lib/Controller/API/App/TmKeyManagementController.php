@@ -180,9 +180,9 @@ class TmKeyManagementController extends AbstractStatefulKleinController
 
                 if ($engine->isAdaptiveMT()) {
                      //retrieve OWNER EnginesFactory License
-                     $ownerMmtEngineMetaData = (new MetadataDao($this->getDatabase()))->setCacheTTL(60 * 60 * 24 * 30)->get($uid, $engine->getEngineRecord()->class_load ?? throw new \RuntimeException('Missing engine class_load')); // engine_id
-                    if (!empty($ownerMmtEngineMetaData)) {
-                        $engineId = $ownerMmtEngineMetaData->value;
+                     $ownerEngineMetaData = (new MetadataDao($this->getDatabase()))->setCacheTTL(60 * 60 * 24 * 30)->get($uid, $engine->getEngineRecord()->class_load ?? throw new \RuntimeException('Missing engine class_load')); // engine_id
+                    if (!empty($ownerEngineMetaData)) {
+                        $engineId = $ownerEngineMetaData->value;
                         if (!is_numeric($engineId)) {
                             continue;
                         }

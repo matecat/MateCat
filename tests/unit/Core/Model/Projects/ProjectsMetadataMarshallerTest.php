@@ -26,7 +26,7 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
     #[Test]
     public function enumHasExactlyThirtyCases(): void
     {
-        $this->assertCount(36, ProjectsMetadataMarshaller::cases());
+        $this->assertCount(33, ProjectsMetadataMarshaller::cases());
     }
 
     #[Test]
@@ -50,8 +50,6 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
             'PRE_TRANSLATE_101_STATUS'      => [ProjectsMetadataMarshaller::PRE_TRANSLATE_101_STATUS, 'pretranslate_101_status'],
             'PRE_TRANSLATE_100_STATUS'      => [ProjectsMetadataMarshaller::PRE_TRANSLATE_100_STATUS, 'pretranslate_100_status'],
             'PROJECT_COMPLETION'            => [ProjectsMetadataMarshaller::PROJECT_COMPLETION, 'project_completion'],
-            'MMT_ACTIVATE_CONTEXT_ANALYZER' => [ProjectsMetadataMarshaller::MMT_ACTIVATE_CONTEXT_ANALYZER, 'mmt_activate_context_analyzer'],
-            'MMT_IGNORE_GLOSSARY_CASE'      => [ProjectsMetadataMarshaller::MMT_IGNORE_GLOSSARY_CASE, 'mmt_ignore_glossary_case'],
             'FROM_API'                      => [ProjectsMetadataMarshaller::FROM_API, 'from_api'],
             'MT_QE_WORKFLOW_PARAMETERS'     => [ProjectsMetadataMarshaller::MT_QE_WORKFLOW_PARAMETERS, 'mt_qe_workflow_parameters'],
             'FEATURES_KEY'                  => [ProjectsMetadataMarshaller::FEATURES_KEY, 'features'],
@@ -63,7 +61,6 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
             'SUBFILTERING_HANDLERS'         => [ProjectsMetadataMarshaller::SUBFILTERING_HANDLERS, 'subfiltering_handlers'],
             'XLIFF_PARAMETERS'              => [ProjectsMetadataMarshaller::XLIFF_PARAMETERS, 'xliff_parameters'],
             'FILTERS_EXTRACTION_PARAMETERS' => [ProjectsMetadataMarshaller::FILTERS_EXTRACTION_PARAMETERS, 'filters_extraction_parameters'],
-            'MMT_GLOSSARIES'                => [ProjectsMetadataMarshaller::MMT_GLOSSARIES, 'mmt_glossaries'],
             'LARA_GLOSSARIES'               => [ProjectsMetadataMarshaller::LARA_GLOSSARIES, 'lara_glossaries'],
             'LARA_STYLE'                    => [ProjectsMetadataMarshaller::LARA_STYLE, 'lara_style'],
             'LARA_STYLE_GUIDELINE_ID'       => [ProjectsMetadataMarshaller::LARA_STYLE_GUIDELINE_ID, 'lara_style_guideline_id'],
@@ -121,8 +118,6 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
             'pretranslate_101_lock',
             'pretranslate_100_lock',
             'project_completion',
-            'mmt_activate_context_analyzer',
-            'mmt_ignore_glossary_case',
             'from_api',
             'mt_qe_workflow_enabled',
         ];
@@ -155,8 +150,6 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
             'pretranslate_101_lock',
             'pretranslate_100_lock',
             'project_completion',
-            'mmt_activate_context_analyzer',
-            'mmt_ignore_glossary_case',
             'from_api',
             'mt_qe_workflow_enabled',
         ];
@@ -479,8 +472,17 @@ class ProjectsMetadataMarshallerTest extends AbstractTest
     {
         return [
             'lara_glossaries' => ['lara_glossaries'],
-            'mmt_glossaries'  => ['mmt_glossaries'],
         ];
+    }
+
+    #[Test]
+    public function unMarshallReadsARetiredModernMtKeyThroughTheDefaultBranch(): void
+    {
+        // Projects created before the ModernMT Full removal still hold these rows. They are no
+        // longer enum cases, so they must load as plain data instead of breaking the read.
+        $this->assertSame([1, 2], ProjectsMetadataMarshaller::unMarshall($this->makeStruct('mmt_glossaries', '[1,2]')));
+        $this->assertSame(1, ProjectsMetadataMarshaller::unMarshall($this->makeStruct('mmt_activate_context_analyzer', '1')));
+        $this->assertNull(ProjectsMetadataMarshaller::tryFrom('mmt_ignore_glossary_case'));
     }
 
     // =========================================================================

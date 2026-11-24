@@ -44,7 +44,6 @@ use Utils\Engines\Validators\Contracts\EngineValidatorObject;
 use Utils\Engines\Validators\DeepLEngineOptionsValidator;
 use Utils\Engines\Validators\IntentoEngineOptionsValidator;
 use Utils\Engines\Validators\LaraGlossaryValidator;
-use Utils\Engines\Validators\MMTGlossaryValidator;
 use Utils\Registry\AppConfig;
 use Utils\Subfiltering\SubfilteringOptionsValidator;
 use Utils\TmKeyManagement\TmKeyManager;
@@ -241,13 +240,6 @@ class CreateProjectController extends AbstractStatefulKleinController
         // MT SETTINGS
         $enable_mt_analysis = filter_var($this->request->param('enable_mt_analysis'), FILTER_VALIDATE_BOOLEAN);
 
-        // The UI ask for case-sensitive matching true/false.
-        // Negate the validated boolean because the MMT default flag is ignore_glossary_case.
-        // true becomes false, false (or invalid/missing) becomes true.
-        $mmt_ignore_glossary_case = filter_var($this->request->param('mmt_ignore_glossary_case'), FILTER_VALIDATE_BOOLEAN);
-
-        $mmt_glossaries = filter_var($this->request->param('mmt_glossaries'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
-        $mmt_activate_context_analyzer = filter_var($this->request->param('mmt_activate_context_analyzer'), FILTER_VALIDATE_BOOLEAN);
         $intento_provider = filter_var($this->request->param('intento_provider'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $intento_routing = filter_var($this->request->param('intento_routing'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $lara_glossaries = filter_var($this->request->param('lara_glossaries'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
@@ -361,9 +353,6 @@ class CreateProjectController extends AbstractStatefulKleinController
             'tm_prioritization' => $tm_prioritization ?? null,
             'id_team' => $id_team,
             'enable_mt_analysis' => $enable_mt_analysis ?? null,
-            'mmt_ignore_glossary_case' => $mmt_ignore_glossary_case,
-            'mmt_glossaries' => (!empty($mmt_glossaries)) ? $mmt_glossaries : null,
-            'mmt_activate_context_analyzer' => $mmt_activate_context_analyzer ?? null,
             'intento_provider' => (!empty($intento_provider)) ? $intento_provider : null,
             'intento_routing' => (!empty($intento_routing)) ? $intento_routing : null,
             'lara_glossaries' => (!empty($lara_glossaries)) ? $lara_glossaries : null,
@@ -435,7 +424,6 @@ class CreateProjectController extends AbstractStatefulKleinController
         ) : null;
         $data['source_lang'] = $this->validateSourceLang(Languages::getInstance(), $data['source_lang']);
         $data['target_lang'] = $this->validateTargetLangs(Languages::getInstance(), $data['target_lang']);
-        $data['mmt_glossaries'] = $this->validateMMTGlossaries($data['mmt_glossaries']);
         $data['qa_model_template'] = $this->validateQaModelTemplate(
             $data['qa_model_template'],
             $data['qa_model_template_id']
@@ -602,35 +590,6 @@ class CreateProjectController extends AbstractStatefulKleinController
         }
 
         return implode(',', $targets);
-    }
-
-    /**
-     * Validate `mmt_glossaries` string
-     *
-     * @param null $mmt_glossaries
-     *
-     * @return string|null
-     * @throws InvalidArgumentException
-     */
-    private function validateMMTGlossaries($mmt_glossaries = null): ?string
-    {
-        if (!empty($mmt_glossaries)) {
-            try {
-                $mmtGlossaries = html_entity_decode($mmt_glossaries);
-
-                (new MMTGlossaryValidator)->validate(
-                    EngineValidatorObject::fromArray([
-                        'glossaryString' => $mmtGlossaries,
-                    ])
-                );
-
-                return $mmtGlossaries;
-            } catch (Exception $exception) {
-                throw new InvalidArgumentException($exception->getMessage(), -6);
-            }
-        }
-
-        return null;
     }
 
     /**

@@ -11,8 +11,10 @@ use Utils\Engines\Validators\Contracts\EngineValidatorObject;
 use Utils\Engines\Validators\GoogleTranslateEngineValidator;
 
 /**
- * Covers the injected-IDatabase plumbing in GoogleTranslateEngineValidator without
- * hitting external services (see MMTEngineValidatorTest for the strategy rationale).
+ * Covers the injected-IDatabase plumbing in GoogleTranslateEngineValidator without hitting
+ * external services: validate() hands $this->database to
+ * EnginesFactory::createTempInstance(), and a struct with no class_load makes the
+ * factory throw before any network call.
  */
 class GoogleTranslateEngineValidatorTest extends AbstractTest
 {

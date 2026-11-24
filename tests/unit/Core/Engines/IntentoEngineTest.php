@@ -132,8 +132,8 @@ namespace Matecat\Core\Engines {
         // permanent fallback for projects created before that move.
         //
         // The resolver is constructed inline from $this->database, so there is nothing to inject:
-        // these seed real metadata rows and drive the real read path, the same way the MMT and Lara
-        // engine suites do for the same reason.
+        // these seed real metadata rows and drive the real read path, the same way the Lara engine
+        // suite does for the same reason.
         // ---------------------------------------------------------------------------------------
 
         /**

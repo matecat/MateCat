@@ -353,6 +353,7 @@ class CreateProjectControllerTest extends AbstractTest
             'mine'       => [['key' => 'aaaaaaaaaaaaaaaa']],
             'anonymous'  => [['key' => 'bbbbbbbbbbbbbbbb']],
         ]);
+        // A client still sending the retired ModernMT parameter gets it ignored, not rejected.
         $params['mmt_glossaries']  = '[1,2]';
         $params['lara_glossaries'] = '["g1"]';
         $this->setRequestParams($params);
@@ -361,7 +362,7 @@ class CreateProjectControllerTest extends AbstractTest
         $data = $this->invokePrivate('validateTheRequest');
 
         $this->assertCount(2, $data['private_tm_key']);
-        $this->assertSame('[1,2]', $data['mmt_glossaries']);
+        $this->assertArrayNotHasKey('mmt_glossaries', $data);
         $this->assertSame('["g1"]', $data['lara_glossaries']);
     }
 
@@ -777,16 +778,7 @@ class CreateProjectControllerTest extends AbstractTest
         $this->invokePrivate('validateTargetLangs', [Languages::getInstance(), 'zz-ZZ']);
     }
 
-    // ─── validateMMTGlossaries / validateLaraGlossaries ───
-
-    /**
-     * @throws Throwable
-     */
-    #[Test]
-    public function validateMMTGlossaries_returns_null_when_empty(): void
-    {
-        $this->assertNull($this->invokePrivate('validateMMTGlossaries', [null]));
-    }
+    // ─── validateLaraGlossaries ───
 
     /**
      * @throws Throwable
@@ -795,29 +787,6 @@ class CreateProjectControllerTest extends AbstractTest
     public function validateLaraGlossaries_returns_null_when_empty(): void
     {
         $this->assertNull($this->invokePrivate('validateLaraGlossaries', [null]));
-    }
-
-    /**
-     * @throws Throwable
-     */
-    #[Test]
-    public function validateMMTGlossaries_returns_decoded_string_for_valid_json(): void
-    {
-        $result = $this->invokePrivate('validateMMTGlossaries', ['[1,2]']);
-
-        $this->assertSame('[1,2]', $result);
-    }
-
-    /**
-     * @throws Throwable
-     */
-    #[Test]
-    public function validateMMTGlossaries_throws_for_invalid_json(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionCode(-6);
-
-        $this->invokePrivate('validateMMTGlossaries', ['not-json']);
     }
 
     /**

@@ -67,7 +67,7 @@ class LaraQualityEstimator
     /**
      * Returns the match to score, or null when no score is wanted or there is nothing to score.
      *
-     * Example: a 500 response, or an engine with its own score such as ModernMT, gives null.
+     * Example: a 500 response, or an engine with its own score, gives null.
      *
      * @param array<string, mixed> $engineConfig
      */

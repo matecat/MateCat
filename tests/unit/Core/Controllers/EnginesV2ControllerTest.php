@@ -229,7 +229,7 @@ class EnginesV2ControllerTest extends AbstractTest
         // Multiple engines render their engine_type from the resolved class_load.
         $this->stubEngineRows([
             $this->makeEngine(9049030, 'Some MT', 'MyMemory'),
-            $this->makeEngine(9049031, 'Another MT', 'MMT'),
+            $this->makeEngine(9049031, 'Another MT', 'DeepL'),
         ]);
 
         $captured = null;
@@ -248,6 +248,41 @@ class EnginesV2ControllerTest extends AbstractTest
         self::assertIsArray($captured);
         self::assertCount(2, $captured);
         self::assertSame('MyMemory', $captured[0]['engine_type']);
-        self::assertSame('MMT', $captured[1]['engine_type']);
+        self::assertSame('DeepL', $captured[1]['engine_type']);
+    }
+
+    /**
+     * ModernMT Full was removed. A row the migration has not deactivated yet still carries its
+     * class_load, and must render as NONE instead of breaking the whole list.
+     *
+     * @throws ReflectionException
+     * @throws MockObjectException
+     * @throws Exception
+     */
+    #[Test]
+    public function listEngines_renders_an_engine_whose_class_was_removed_as_none(): void
+    {
+        $this->stubEngineRows([
+            $this->makeEngine(9049030, 'Some MT', 'MyMemory'),
+            $this->makeEngine(9049031, 'Retired MT', 'MMT'),
+        ]);
+
+        $captured = null;
+        $response = $this->createMock(Response::class);
+        $response->expects(self::once())
+            ->method('json')
+            ->with(self::callback(function ($payload) use (&$captured) {
+                $captured = $payload;
+
+                return is_array($payload);
+            }));
+        $this->reflector->getProperty('response')->setValue($this->controller, $response);
+
+        $this->controller->listEngines();
+
+        self::assertIsArray($captured);
+        self::assertCount(2, $captured);
+        self::assertSame('MyMemory', $captured[0]['engine_type']);
+        self::assertSame('NONE', $captured[1]['engine_type']);
     }
 }

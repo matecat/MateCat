@@ -374,106 +374,33 @@ export const TMKeyRow = ({row, onExpandRow}) => {
 
     getTmKeyEnginesInfo(row.key)
       .then((data) => {
-        const isMMT = data.some((value) => value === 'MMT')
         const isLara = data.some((value) => value === 'Lara')
 
-        const footerContent =
-          isMMT && !isLara ? (
-            <div className="tm-row-delete-remove-from-content">
-              {templatesInvolved.length >= 1 && (
-                <span>
-                  If you confirm, it will be removed from the template(s).
-                </span>
-              )}
+        const footerContent = isLara && (
+          <div className="tm-row-delete-remove-from-content">
+            {templatesInvolved.length >= 1 && (
               <span>
-                This resource is also linked to your ModernMT account:
+                If you confirm, it will be removed from the template(s).
               </span>
-              <div>
-                <Checkbox
-                  value={
-                    deleteTmKeyRemoveFrom.current.MMT
-                      ? CHECKBOX_STATE.CHECKED
-                      : CHECKBOX_STATE.UNCHECKED
-                  }
-                  size={CHECKBOX_SIZE.SMALL}
-                  onChange={(isChecked) => {
-                    deleteTmKeyRemoveFrom.current.MMT = isChecked
-                  }}
-                  testId="delete-remove-from-mmt"
-                />
-                Permanently delete it from my ModernMT account
-              </div>
+            )}
+            <span>This resource is also linked to your Lara account:</span>
+            <div>
+              <Checkbox
+                value={
+                  deleteTmKeyRemoveFrom.current.Lara
+                    ? CHECKBOX_STATE.CHECKED
+                    : CHECKBOX_STATE.UNCHECKED
+                }
+                size={CHECKBOX_SIZE.SMALL}
+                onChange={(isChecked) => {
+                  deleteTmKeyRemoveFrom.current.Lara = isChecked
+                }}
+                testId="delete-remove-from-lara"
+              />
+              Permanently delete it from my Lara account
             </div>
-          ) : !isMMT && isLara ? (
-            <div className="tm-row-delete-remove-from-content">
-              {templatesInvolved.length >= 1 && (
-                <span>
-                  If you confirm, it will be removed from the template(s).
-                </span>
-              )}
-              <span>This resource is also linked to your Lara account:</span>
-              <div>
-                <Checkbox
-                  value={
-                    deleteTmKeyRemoveFrom.current.Lara
-                      ? CHECKBOX_STATE.CHECKED
-                      : CHECKBOX_STATE.UNCHECKED
-                  }
-                  size={CHECKBOX_SIZE.SMALL}
-                  onChange={(isChecked) => {
-                    deleteTmKeyRemoveFrom.current.Lara = isChecked
-                  }}
-                  testId="delete-remove-from-lara"
-                />
-                Permanently delete it from my Lara account
-              </div>
-            </div>
-          ) : (
-            isMMT &&
-            isLara && (
-              <div className="tm-row-delete-remove-from-content">
-                {templatesInvolved.length >= 1 && (
-                  <span>
-                    If you confirm, it will be removed from the template(s).
-                  </span>
-                )}
-                <span>
-                  This resource is also linked to your ModernMT and Lara
-                  accounts:
-                </span>
-                <div>
-                  <Checkbox
-                    value={
-                      deleteTmKeyRemoveFrom.current.Lara
-                        ? CHECKBOX_STATE.CHECKED
-                        : CHECKBOX_STATE.UNCHECKED
-                    }
-                    size={CHECKBOX_SIZE.SMALL}
-                    onChange={(isChecked) => {
-                      deleteTmKeyRemoveFrom.current.Lara = isChecked
-                    }}
-                    testId="delete-remove-from-lara"
-                  />
-                  Permanently delete it from my Lara account
-                </div>
-                <div>
-                  <Checkbox
-                    value={
-                      deleteTmKeyRemoveFrom.current.MMT
-                        ? CHECKBOX_STATE.CHECKED
-                        : CHECKBOX_STATE.UNCHECKED
-                    }
-                    size={CHECKBOX_SIZE.SMALL}
-                    onChange={(isChecked) => {
-                      deleteTmKeyRemoveFrom.current.MMT = isChecked
-                    }}
-                    testId="delete-remove-from-mmt"
-                  />
-                  Permanently delete it from my ModernMT account
-                </div>
-              </div>
-            )
-          )
+          </div>
+        )
 
         if (templatesInvolved.length) {
           ModalsActions.showModalComponent(

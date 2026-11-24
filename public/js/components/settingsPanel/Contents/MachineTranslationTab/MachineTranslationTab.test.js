@@ -5,11 +5,7 @@ import {MachineTranslationTab} from './MachineTranslationTab'
 import {mswServer} from '../../../../../mocks/mswServer'
 import {http, HttpResponse} from 'msw'
 import projectTemplatesMock from '../../../../../mocks/projectTemplateMock'
-import {
-  engineListMock,
-  mmtKeysMock,
-  mtEnginesMock,
-} from '../../../../../mocks/mtEnginesMock'
+import {engineListMock, mtEnginesMock} from '../../../../../mocks/mtEnginesMock'
 import userEvent from '@testing-library/user-event'
 import ModalsActions from '../../../../actions/ModalsActions'
 
@@ -27,11 +23,6 @@ beforeEach(() => {
     isLoggedIn: 1,
   }
 
-  mswServer.use(
-    http.get(`${config.basepath}api/v3/mmt/:engineId/keys`, () => {
-      return HttpResponse.json(mmtKeysMock)
-    }),
-  )
   mswServer.use(
     http.post(config.basepath, () => {
       return HttpResponse.json()
@@ -237,80 +228,6 @@ test('Delete MT Confirm', async () => {
   expect(confirmButton).toBeInTheDocument()
   await user.click(confirmButton)
   expect(values.modifyingCurrentTemplate.call.length).toBe(1)
-})
-
-test('Modern MT and glossary', async () => {
-  const user = userEvent.setup()
-
-  global.config.isLoggedIn = true
-  global.config.ownerIsMe = true
-  config.is_cattool = false
-
-  const projectTemplates = [
-    ...projectTemplatesMock.items,
-    {
-      ...projectTemplatesMock.items[1],
-      id: 4,
-      mt: {id: 5, extra: {mmt_glossaries: [374333]}},
-    },
-  ]
-  const currentProjectTemplate = {
-    ...projectTemplates[1],
-    mt: {id: 5, extra: {}},
-  }
-
-  let modifiedTemplate = currentProjectTemplate
-  const modifyingCurrentTemplateFn = (value) =>
-    (modifiedTemplate = value(currentProjectTemplate))
-
-  const values = {
-    mtEngines: mtEnginesMock,
-    setMtEngines: () => {},
-    openLoginModal: jest.fn(),
-    modifyingCurrentTemplate: modifyingCurrentTemplateFn,
-    currentProjectTemplate,
-    projectTemplates,
-  }
-  render(<WrapperComponent {...values} />)
-  let activeMTContainert = screen.getByTestId('active-mt')
-  let mtName = within(activeMTContainert).getByText('ModernMT')
-  expect(mtName).toBeInTheDocument()
-  const glossaryButton = await screen.findByTitle('Glossary options')
-  expect(glossaryButton).toBeInTheDocument()
-
-  await user.click(glossaryButton)
-
-  const rowGlossary1 = screen.getByTestId('mtglossary-active-374333')
-  const rowGlossary2 = screen.getByTestId('mtglossary-active-374533')
-  expect(rowGlossary1).toBeInTheDocument()
-  expect(rowGlossary2).toBeInTheDocument()
-
-  await user.click(rowGlossary1)
-
-  expect(modifiedTemplate).toEqual({
-    ...currentProjectTemplate,
-    mt: {id: 5, extra: {mmt_glossaries: [374333]}},
-  })
-
-  const spyShowModal = jest.spyOn(ModalsActions, 'showModalComponent')
-
-  await user.click(screen.getByTestId('delete-mtglossary-374333'))
-
-  const modalContent = spyShowModal.mock.calls[0][1].content
-  expect(modalContent).toBe(
-    'The glossary you are about to delete is linked to an MT license and used in the following project creation template(s):',
-  )
-
-  const newButton = screen.getByText('New glossary')
-  expect(newButton).toBeInTheDocument()
-
-  await user.click(newButton)
-
-  const inputName = screen.getByTestId('mtglossary-create-name')
-  expect(inputName).toBeInTheDocument()
-
-  const confirm = screen.getByTestId('mtglossary-create-confirm')
-  expect(confirm).toBeDisabled()
 })
 
 test('DeepL and glossary', async () => {

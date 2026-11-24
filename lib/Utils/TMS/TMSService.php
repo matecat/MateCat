@@ -142,7 +142,7 @@ class TMSService
 
             // The default key is the TM everyone shares: its TMX stays on MyMemory and reaches no
             // adaptive engine. The engines are read before the import because they decide mt_import,
-            // checked in this order: default key → false; any adaptive engine (Lara, ModernMT) →
+            // checked in this order: default key → false; an adaptive engine (Lara) →
             // false, Matecat imports on them itself; no engine → true, MyMemory imports into Lara.
             $isSharedTmKey = $file->getTmKey() === AppConfig::$DEFAULT_TM_KEY;
             $userAdaptiveEngines = $isSharedTmKey ? [] : $this->getUserAdaptiveMTEngines($user);
@@ -174,7 +174,7 @@ class TMSService
                 try {
                     $engine->importMemory($file->getFilePath(), $file->getTmKey(), $user);
                 } catch (Exception $e) {
-                    //NOTICE: ModernMT response is 404 NOT FOUND if the key on which we are importing the tmx is not synced with it
+                    //NOTICE: Lara throws when the memory of the key is not synced with it
                     $this->logger->debug($e->getMessage());
                     $engineName = $engine->getEngineRecord()->getEngineType();
                     $warnings[] = ['engine' => $engineName, 'message' => $e->getMessage(), 'file' => $file->getName()];
@@ -215,9 +215,9 @@ class TMSService
                     //retrieve OWNER EnginesFactory License
                     $uid = $user->uid ?? throw new InvalidArgumentException('User uid is required to load adaptive MT metadata');
                     $engineClassLoad = $engine->getEngineRecord()->class_load ?? throw new InvalidArgumentException('Engine class name is required to load adaptive MT metadata');
-                    $ownerMmtEngineMetaData = (new MetadataDao($this->database))->setCacheTTL(60 * 60 * 24 * 30)->get($uid, $engineClassLoad); // engine_id
-                    if (!empty($ownerMmtEngineMetaData)) {
-                        $engineId = $ownerMmtEngineMetaData->value;
+                    $ownerEngineMetaData = (new MetadataDao($this->database))->setCacheTTL(60 * 60 * 24 * 30)->get($uid, $engineClassLoad); // engine_id
+                    if (!empty($ownerEngineMetaData)) {
+                        $engineId = $ownerEngineMetaData->value;
                         if (!is_numeric($engineId)) {
                             $this->logger->debug("Invalid engine ID value for user $user->uid: " . print_r($engineId, true));
                             continue;

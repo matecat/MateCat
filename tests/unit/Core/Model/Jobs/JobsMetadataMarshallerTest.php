@@ -26,8 +26,8 @@ class JobsMetadataMarshallerTest extends AbstractTest
     #[Test]
     public function enumHasOneCasePerKnownKey(): void
     {
-        // Seven job-only keys plus the eleven MT settings that moved off the project.
-        $this->assertCount(18, JobsMetadataMarshaller::cases());
+        // Seven job-only keys plus the nine MT settings that moved off the project.
+        $this->assertCount(16, JobsMetadataMarshaller::cases());
     }
 
     #[Test]
@@ -53,8 +53,6 @@ class JobsMetadataMarshallerTest extends AbstractTest
             'LARA_STYLE'                   => [JobsMetadataMarshaller::LARA_STYLE, 'lara_style'],
             'LARA_STYLE_GUIDELINE_ID'      => [JobsMetadataMarshaller::LARA_STYLE_GUIDELINE_ID, 'lara_style_guideline_id'],
             'LARA_GLOSSARIES'              => [JobsMetadataMarshaller::LARA_GLOSSARIES, 'lara_glossaries'],
-            'MMT_GLOSSARIES'               => [JobsMetadataMarshaller::MMT_GLOSSARIES, 'mmt_glossaries'],
-            'MMT_IGNORE_GLOSSARY_CASE'     => [JobsMetadataMarshaller::MMT_IGNORE_GLOSSARY_CASE, 'mmt_ignore_glossary_case'],
             'INTENTO_ROUTING'              => [JobsMetadataMarshaller::INTENTO_ROUTING, 'intento_routing'],
             'INTENTO_PROVIDER'             => [JobsMetadataMarshaller::INTENTO_PROVIDER, 'intento_provider'],
         ];
@@ -82,12 +80,11 @@ class JobsMetadataMarshallerTest extends AbstractTest
             $engineKeys = array_merge($engineKeys, $engineName::getConfigurationParameters());
         }
 
-        // Every engine parameter is job-scoped except these two, which the analysis was priced on
-        // (enable_mt_analysis) or which is only ever consumed once at creation time
-        // (mmt_activate_context_analyzer, read by MMT::syncMemories() from a project row).
+        // Every engine parameter is job-scoped except enable_mt_analysis, which the analysis was
+        // priced on.
         $expected = array_values(array_diff(
             array_unique($engineKeys),
-            ['enable_mt_analysis', 'mmt_activate_context_analyzer']
+            ['enable_mt_analysis']
         ));
 
         sort($expected);
@@ -113,22 +110,6 @@ class JobsMetadataMarshallerTest extends AbstractTest
     {
         $result = JobsMetadataMarshaller::unMarshall($this->makeStruct('mt_quality_value_in_editor', $rawValue));
         $this->assertSame($expected, $result);
-    }
-
-    #[Test]
-    #[DataProvider('booleanTruthyProvider')]
-    public function unMarshallMmtIgnoreGlossaryCaseTruthyReturnsTrue(mixed $rawValue): void
-    {
-        $result = JobsMetadataMarshaller::unMarshall($this->makeStruct('mmt_ignore_glossary_case', $rawValue));
-        $this->assertTrue($result);
-    }
-
-    #[Test]
-    #[DataProvider('booleanFalsyProvider')]
-    public function unMarshallMmtIgnoreGlossaryCaseFalsyReturnsFalse(mixed $rawValue): void
-    {
-        $result = JobsMetadataMarshaller::unMarshall($this->makeStruct('mmt_ignore_glossary_case', $rawValue));
-        $this->assertFalse($result);
     }
 
     #[Test]
@@ -178,38 +159,13 @@ class JobsMetadataMarshallerTest extends AbstractTest
     }
 
     #[Test]
-    public function unMarshallMmtGlossariesDecodesJsonArray(): void
+    public function unMarshallReadsARetiredModernMtKeyThroughTheDefaultBranch(): void
     {
-        // Not a raw string: the two glossary lists have to leave the marshaller with the same shape,
-        // or a client reading both out of the same mt_extra object gets an array for one and a
-        // string for the other, and posting back what it read fails the write schema.
-        $result = JobsMetadataMarshaller::unMarshall($this->makeStruct('mmt_glossaries', '[12,34]'));
-        $this->assertSame([12, 34], $result);
-    }
-
-    #[Test]
-    public function unMarshallMmtGlossariesDecodesHtmlEntityEncodedJson(): void
-    {
-        // Both creation controllers run the request parameter through FILTER_SANITIZE_SPECIAL_CHARS
-        // before validating it, so old rows can still hold the entity-encoded form.
-        $result = JobsMetadataMarshaller::unMarshall($this->makeStruct('mmt_glossaries', '[&quot;g1&quot;]'));
-        $this->assertSame(['g1'], $result);
-    }
-
-    #[Test]
-    public function unMarshallMmtGlossariesDecodesEmptyList(): void
-    {
-        // An empty list is a stored answer — the job shadowing a project that has glossaries — and
-        // has to survive as one, not collapse to null.
-        $result = JobsMetadataMarshaller::unMarshall($this->makeStruct('mmt_glossaries', '[]'));
-        $this->assertSame([], $result);
-    }
-
-    #[Test]
-    public function unMarshallMmtGlossariesReturnsNullForUndecodableValue(): void
-    {
-        $result = JobsMetadataMarshaller::unMarshall($this->makeStruct('mmt_glossaries', 'not json'));
-        $this->assertNull($result);
+        // Jobs created before the ModernMT Full removal still hold these rows. They are no longer
+        // enum cases, so they load as plain data instead of breaking the read.
+        $this->assertNull(JobsMetadataMarshaller::tryFrom('mmt_glossaries'));
+        $this->assertSame([12, 34], JobsMetadataMarshaller::unMarshall($this->makeStruct('mmt_glossaries', '[12,34]')));
+        $this->assertSame(0, JobsMetadataMarshaller::unMarshall($this->makeStruct('mmt_ignore_glossary_case', '0')));
     }
 
     #[Test]
@@ -476,7 +432,6 @@ class JobsMetadataMarshallerTest extends AbstractTest
             'subfiltering empty'       => [JobsMetadataMarshaller::SUBFILTERING_HANDLERS, '', ''],
             'subfiltering none'        => [JobsMetadataMarshaller::SUBFILTERING_HANDLERS, 'none', 'none'],
             'MT threshold zero'        => [JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR, 0, '0'],
-            'glossary case false'      => [JobsMetadataMarshaller::MMT_IGNORE_GLOSSARY_CASE, false, '0'],
             'DeepL formality'          => [JobsMetadataMarshaller::DEEPL_FORMALITY, 'prefer_more', 'prefer_more'],
             'DeepL engine type'        => [JobsMetadataMarshaller::DEEPL_ENGINE_TYPE, 'prefer_quality_optimized', 'prefer_quality_optimized'],
             'Lara style'               => [JobsMetadataMarshaller::LARA_STYLE, 'creative', 'creative'],
@@ -484,7 +439,6 @@ class JobsMetadataMarshallerTest extends AbstractTest
             'DeepL glossary none'      => [JobsMetadataMarshaller::DEEPL_ID_GLOSSARY, '', ''],
             'Intento routing'          => [JobsMetadataMarshaller::INTENTO_ROUTING, 'best_price', 'best_price'],
             'Lara glossaries'          => [JobsMetadataMarshaller::LARA_GLOSSARIES, ['g1'], '["g1"]'],
-            'MMT glossaries none'      => [JobsMetadataMarshaller::MMT_GLOSSARIES, [], '[]'],
         ];
     }
 
@@ -512,10 +466,8 @@ class JobsMetadataMarshallerTest extends AbstractTest
             'subfiltering handler not text' => [JobsMetadataMarshaller::SUBFILTERING_HANDLERS, [1]],
             'subfiltering plain word'       => [JobsMetadataMarshaller::SUBFILTERING_HANDLERS, 'markup'],
             'MT threshold above range'      => [JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR, 101],
-            'glossary case as int'          => [JobsMetadataMarshaller::MMT_IGNORE_GLOSSARY_CASE, 0],
             'DeepL glossary as null'        => [JobsMetadataMarshaller::DEEPL_ID_GLOSSARY, null],
             'Intento routing as int'        => [JobsMetadataMarshaller::INTENTO_ROUTING, 3],
-            'MMT glossaries as object'      => [JobsMetadataMarshaller::MMT_GLOSSARIES, ['a' => 1]],
         ];
     }
 
@@ -545,8 +497,6 @@ class JobsMetadataMarshallerTest extends AbstractTest
             JobsMetadataMarshaller::LARA_STYLE->value                   => 'fluid',
             JobsMetadataMarshaller::LARA_STYLE_GUIDELINE_ID->value      => 'guideline-1',
             JobsMetadataMarshaller::LARA_GLOSSARIES->value              => '["lara-g1","lara-g2"]',
-            JobsMetadataMarshaller::MMT_GLOSSARIES->value               => '[1,2]',
-            JobsMetadataMarshaller::MMT_IGNORE_GLOSSARY_CASE->value     => '0',
             JobsMetadataMarshaller::INTENTO_ROUTING->value              => 'best_quality',
             JobsMetadataMarshaller::INTENTO_PROVIDER->value             => '',
         ];
@@ -556,7 +506,7 @@ class JobsMetadataMarshallerTest extends AbstractTest
 
     /**
      * A job says "none here" over a project that has a value with the empty string (the DeepL
-     * glossary and the Intento pair) or an empty list (both glossary lists). A split that dropped
+     * glossary and the Intento pair) or an empty list (the Lara glossary list). A split that dropped
      * those rows would hand the new chunk the project's value back.
      */
     #[Test]
@@ -567,7 +517,6 @@ class JobsMetadataMarshallerTest extends AbstractTest
             JobsMetadataMarshaller::INTENTO_PROVIDER->value  => '',
             JobsMetadataMarshaller::INTENTO_ROUTING->value   => '',
             JobsMetadataMarshaller::LARA_GLOSSARIES->value   => '[]',
-            JobsMetadataMarshaller::MMT_GLOSSARIES->value    => '[]',
         ];
 
         $this->assertSame($raw, JobsMetadataMarshaller::sanitizeRawMap($raw));
@@ -597,7 +546,9 @@ class JobsMetadataMarshallerTest extends AbstractTest
     {
         return [
             // Check 1: the key.
-            'MMT context'                      => ['mt_context', 'some context'],
+            'ModernMT context'                 => ['mt_context', 'some context'],
+            'ModernMT glossaries'              => ['mmt_glossaries', '[1,2]'],
+            'ModernMT glossary case'           => ['mmt_ignore_glossary_case', '0'],
             'key no code reads'                => ['retired_setting', '1'],
             // Check 2: the value. unMarshall() would cast both of these to a boolean.
             'boolean spelled as a word'        => [JobsMetadataMarshaller::DIALECT_STRICT->value, 'yes'],
@@ -612,15 +563,12 @@ class JobsMetadataMarshallerTest extends AbstractTest
             'unknown subfiltering handler'     => [JobsMetadataMarshaller::SUBFILTERING_HANDLERS->value, '["html"]'],
             'MT threshold above range'         => [JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value, '101'],
             'MT threshold with trailing text'  => [JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value, '85%'],
-            'glossary case spelled as a word'  => [JobsMetadataMarshaller::MMT_IGNORE_GLOSSARY_CASE->value, 'true'],
             'unknown DeepL formality'          => [JobsMetadataMarshaller::DEEPL_FORMALITY->value, 'casual'],
             'unknown DeepL engine type'        => [JobsMetadataMarshaller::DEEPL_ENGINE_TYPE->value, 'fast'],
             'unknown Lara style'               => [JobsMetadataMarshaller::LARA_STYLE->value, 'poetic'],
             'empty Lara style guideline'       => [JobsMetadataMarshaller::LARA_STYLE_GUIDELINE_ID->value, ''],
             'Lara glossaries not a list'       => [JobsMetadataMarshaller::LARA_GLOSSARIES->value, '"lara-g1"'],
             'Lara glossary with an empty id'   => [JobsMetadataMarshaller::LARA_GLOSSARIES->value, '[""]'],
-            'MMT glossary id as a string'      => [JobsMetadataMarshaller::MMT_GLOSSARIES->value, '["1"]'],
-            'MMT glossary id zero'             => [JobsMetadataMarshaller::MMT_GLOSSARIES->value, '[0]'],
             'Intento provider too long'        => [JobsMetadataMarshaller::INTENTO_PROVIDER->value, str_repeat('p', 256)],
         ];
     }

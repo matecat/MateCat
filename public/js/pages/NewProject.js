@@ -39,7 +39,6 @@ import ApplicationActions from '../actions/ApplicationActions'
 import useDeviceCompatibility from '../hooks/useDeviceCompatibility'
 import useProjectTemplates, {SCHEMA_KEYS} from '../hooks/useProjectTemplates'
 import {TemplateSelect} from '../components/settingsPanel/ProjectTemplate/TemplateSelect'
-import {getMMTKeys} from '../api/getMMTKeys'
 import {AlertDeleteResourceProjectTemplates} from '../components/modals/AlertDeleteResourceProjectTemplates'
 import {handleCreationStatus} from '../utils/newProjectUtils'
 import {getPretranslateParams} from '../utils/editorStatusLock'
@@ -221,80 +220,6 @@ const NewProject = () => {
   const prevSourceLang = useRef(sourceLang)
   const createProject = useRef()
   const idTeamPreset = useRef(parseInt(idTeamFromQueryString))
-
-  const checkMMTGlossariesWasCancelledIntoTemplates = useRef(
-    (() => {
-      let wasChecked = false
-
-      return ({engineId, projectTemplates}) => {
-        if (
-          !wasChecked &&
-          typeof engineId === 'number' &&
-          projectTemplates.length &&
-          projectTemplates.find(({isSelected}) => isSelected)?.mt.id ===
-            engineId
-        ) {
-          getMMTKeys({engineId}).then((data) => {
-            const projectTemplatesInvolved = projectTemplates.filter(
-              ({mt}) =>
-                mt.id === engineId &&
-                Array.isArray(mt.extra?.glossaries) &&
-                mt.extra.glossaries.some(
-                  (glossaryId) => !data.find(({id}) => glossaryId === id),
-                ),
-            )
-
-            if (projectTemplatesInvolved.length) {
-              const projectTemplatesUpdated = projectTemplatesInvolved.map(
-                (template) => {
-                  const filteredGlossaries =
-                    template.mt.extra.glossaries.filter((glossaryId) =>
-                      data.find(({id}) => id === glossaryId),
-                    )
-                  const {glossaries, ...prevExtra} = template.mt.extra // eslint-disable-line
-
-                  return {
-                    ...template,
-                    [SCHEMA_KEYS.mt]: {
-                      ...template.mt,
-                      extra: {
-                        ...prevExtra,
-                        ...(filteredGlossaries.length && {
-                          glossaries: filteredGlossaries,
-                        }),
-                      },
-                    },
-                  }
-                },
-              )
-
-              // Notify template to server without glossaries delete
-              CreateProjectActions.updateProjectTemplates({
-                templates: projectTemplatesUpdated,
-                modifiedPropsCurrentProjectTemplate: {
-                  tm: projectTemplatesUpdated.find(
-                    ({isTemporary}) => isTemporary,
-                  )?.tm,
-                },
-              })
-
-              ModalsActions.showModalComponent(
-                AlertDeleteResourceProjectTemplates,
-                {
-                  projectTemplatesInvolved,
-                  content:
-                    'A different user has deleted one or more of the MT glossaries used in the following project creation template(s):',
-                },
-                'MT glossary deletion',
-              )
-            }
-          })
-
-          wasChecked = true
-        }
-      }
-    })(),
-  )
 
   const checkDeepLGlossaryWasCancelledIntoTemplates = useRef(
     (() => {
@@ -526,8 +451,7 @@ const NewProject = () => {
       ),
     )
 
-    const {mmt_glossaries, lara_glossaries, deepl_id_glossary, ...mtExtra} =
-      mt?.extra ?? {}
+    const {lara_glossaries, deepl_id_glossary, ...mtExtra} = mt?.extra ?? {}
 
     // update store recently used target languages
     setRecentlyUsedLanguages(targetLangs)
@@ -557,9 +481,6 @@ const NewProject = () => {
       get_public_matches: getPublicMatches,
       public_tm_penalty: publicTmPenalty,
       ...mtExtra,
-      ...(mmt_glossaries?.length && {
-        mmt_glossaries: JSON.stringify(mmt_glossaries),
-      }),
       ...(deepl_id_glossary && {
         deepl_id_glossary,
       }),
@@ -895,10 +816,6 @@ const NewProject = () => {
 
   const isLoadingTemplates = !projectTemplates.length
 
-  checkMMTGlossariesWasCancelledIntoTemplates.current({
-    engineId: mtEngines?.find(({engine_type}) => engine_type === 'MMT')?.id,
-    projectTemplates,
-  })
   checkDeepLGlossaryWasCancelledIntoTemplates.current({
     engineId: mtEngines?.find(({engine_type}) => engine_type === 'DeepL')?.id,
     projectTemplates,

@@ -34,12 +34,12 @@ describe('MTRow', () => {
   test('renders the checkbox checked when the row is the active engine', () => {
     render(
       <Wrapper
-        row={{id: 1, name: 'MMT'}}
+        row={{id: 1, name: 'DeepL'}}
         currentProjectTemplate={{mt: {id: 1}}}
       />,
     )
 
-    expect(screen.getByTestId('checkbox-mt-active-MMT')).toBeChecked()
+    expect(screen.getByTestId('checkbox-mt-active-DeepL')).toBeChecked()
   })
 
   test('calls onCheckboxClick with the row when the checkbox is clicked', () => {
@@ -56,12 +56,12 @@ describe('MTRow', () => {
     global.config = {is_cattool: true}
     render(
       <Wrapper
-        row={{id: 1, name: 'MMT'}}
+        row={{id: 1, name: 'DeepL'}}
         currentProjectTemplate={{mt: {id: 1}}}
       />,
     )
 
-    expect(screen.getByTestId('checkbox-mt-active-MMT')).toBeDisabled()
+    expect(screen.getByTestId('checkbox-mt-active-DeepL')).toBeDisabled()
   })
 
   test('renders the delete button when the row is not default outside the cattool', () => {

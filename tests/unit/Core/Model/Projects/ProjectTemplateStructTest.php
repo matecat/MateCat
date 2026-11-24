@@ -41,7 +41,7 @@ class ProjectTemplateStructTest extends AbstractTest
         $this->assertTrue($struct->tm_prioritization);
         $this->assertFalse($struct->dialect_strict);
         $this->assertTrue($struct->get_public_matches);
-        $this->assertSame('{"engine":"modernmt","enabled":true}', $struct->mt);
+        $this->assertSame('{"engine":"deepl","enabled":true}', $struct->mt);
         $this->assertSame('[{"id":11},{"id":22}]', $struct->tm);
         $this->assertSame(25, $struct->public_tm_penalty);
         $this->assertSame(7, $struct->payable_rate_template_id);
@@ -121,7 +121,7 @@ class ProjectTemplateStructTest extends AbstractTest
     {
         $struct = new ProjectTemplateStruct();
         $struct->segmentation_rule = '{"rule":"srx"}';
-        $struct->mt = '{"provider":"mmt"}';
+        $struct->mt = '{"provider":"deepl"}';
 
         $segmentationRule = $struct->getSegmentationRule();
         $mt = $struct->getMt();
@@ -129,7 +129,7 @@ class ProjectTemplateStructTest extends AbstractTest
         $this->assertInstanceOf(stdClass::class, $segmentationRule);
         $this->assertSame('srx', $segmentationRule->rule);
         $this->assertInstanceOf(stdClass::class, $mt);
-        $this->assertSame('mmt', $mt->provider);
+        $this->assertSame('deepl', $mt->provider);
 
         $struct->segmentation_rule = '';
         $struct->mt = null;
@@ -242,7 +242,7 @@ class ProjectTemplateStructTest extends AbstractTest
         $struct->uid = 55;
         $struct->id_team = 22;
         $struct->segmentation_rule = '{"break":"sentence"}';
-        $struct->mt = '{"provider":"mmt"}';
+        $struct->mt = '{"provider":"deepl"}';
         $struct->tm = '[{"id":1001}]';
         $struct->payable_rate_template_id = 0;
         $struct->qa_model_template_id = 0;
@@ -278,7 +278,7 @@ class ProjectTemplateStructTest extends AbstractTest
         $this->assertSame(55, $payload['uid']);
         $this->assertSame(22, $payload['id_team']);
         $this->assertSame('sentence', $payload['segmentation_rule']->break);
-        $this->assertSame('mmt', $payload['mt']->provider);
+        $this->assertSame('deepl', $payload['mt']->provider);
         $this->assertCount(1, $payload['tm']);
         $this->assertSame(1001, $payload['tm'][0]->id);
         $this->assertSame(0, $payload['payable_rate_template_id']);
@@ -344,7 +344,7 @@ class ProjectTemplateStructTest extends AbstractTest
             'tm_prioritization' => true,
             'dialect_strict' => false,
             'get_public_matches' => true,
-            'mt' => (object)['engine' => 'modernmt', 'enabled' => true],
+            'mt' => (object)['engine' => 'deepl', 'enabled' => true],
             'tm' => [(object)['id' => 11], (object)['id' => 22]],
             'payable_rate_template_id' => 7,
             'qa_model_template_id' => 8,

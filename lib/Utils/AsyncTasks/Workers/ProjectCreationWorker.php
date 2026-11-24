@@ -100,7 +100,14 @@ class ProjectCreationWorker extends AbstractWorker
             throw new EndQueueException("--- (Worker " . $this->_workerPid . ") :  empty params found.", self::ERR_REQUEUE_END);
         }
 
-        $this->projectStructure = new ProjectStructure($queueElement->params->toArray());
+        // A payload queued before the ModernMT Full removal still carries its three retired keys,
+        // and ProjectStructure throws on a property it does not declare.
+        $params = array_diff_key(
+            $queueElement->params->toArray(),
+            array_flip(['mmt_glossaries', 'mmt_activate_context_analyzer', 'mmt_ignore_glossary_case'])
+        );
+
+        $this->projectStructure = new ProjectStructure($params);
         $projectManager = $this->createProjectManager($this->projectStructure);
         $projectManager->createProject();
     }

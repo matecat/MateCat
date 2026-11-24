@@ -21,7 +21,6 @@ use ReflectionClass;
 use RuntimeException;
 use Utils\Engines\EngineInterface;
 use Utils\Engines\Lara;
-use Utils\Engines\MMT;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\CreateUserResponse;
 use Utils\Engines\Results\MyMemory\ExportResponse;
@@ -818,8 +817,6 @@ class TMSServiceTest extends AbstractTest
             'the default key'                     => ['default-mm-key', [], false],
             'the default key, even with Lara'     => ['default-mm-key', [Lara::class], false],
             'a user with Lara'                    => ['tm-key-123', [Lara::class], false],
-            'a user with ModernMT only'           => ['tm-key-123', [MMT::class], false],
-            'a user with Lara and ModernMT'       => ['tm-key-123', [Lara::class, MMT::class], false],
             'a user without adaptive engines'     => ['tm-key-123', [], true],
         ];
     }

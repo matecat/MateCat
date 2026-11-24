@@ -193,8 +193,9 @@ class MetadataDaoRealSqlTest extends AbstractTest
     }
 
     /**
-     * MMT reads the MT context by (id_job, key) alone, with no password, and caches it for a month.
-     * A write has to reach that address too, or the engine keeps sending the context it replaced.
+     * getByIdJob() reads by (id_job, key) alone, with no password, and caches it for a month (the
+     * retired ModernMT engine read its MT context this way). A write has to reach that address too,
+     * or the reader keeps getting the value it replaced.
      *
      * The entry is primed at a real TTL first: with nothing cached the assertion below holds for the
      * wrong reason.
@@ -318,8 +319,8 @@ class MetadataDaoRealSqlTest extends AbstractTest
     }
 
     /**
-     * The read binds the password, which is what keeps MMT's MT context out of a copy: it is stored
-     * under the empty password and read back by (id_job, key) alone, so it already belongs to every
+     * The read binds the password, which is what keeps the retired ModernMT engine's MT context out
+     * of a copy: it is stored under the empty password and read back by (id_job, key) alone, so it already belongs to every
      * chunk of the job. Duplicating it per chunk would leave getByIdJob() picking from N rows.
      */
     public function testGetRawMapByJobIdAndPasswordIgnoresOtherChunksAndThePasswordLessRow(): void
@@ -454,8 +455,8 @@ class MetadataDaoRealSqlTest extends AbstractTest
     }
 
     /**
-     * The empty password is not a credential anything rotates: it is where MMT keeps the MT context,
-     * shared by every chunk. Moving it would take the context away from the chunks that stayed put.
+     * The empty password is not a credential anything rotates: it is where the retired ModernMT
+     * engine kept the MT context, shared by every chunk. Moving it would take the context away from the chunks that stayed put.
      */
     public function testMovePasswordRefusesToMoveTheEmptyPasswordAddress(): void
     {

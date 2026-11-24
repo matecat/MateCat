@@ -359,19 +359,17 @@ class SaveMetadataTest extends AbstractTest
     }
 
     // =========================================================================
-    // Engine extra keys (enable_mt_analysis, mmt_activate_context_analyzer)
+    // Engine extra keys (enable_mt_analysis)
     // =========================================================================
 
     #[Test]
     public function testProjectWideEngineExtraKeysArePersistedFromProjectStructure(): void
     {
         $this->projectStructure->enable_mt_analysis = '1';
-        $this->projectStructure->mmt_activate_context_analyzer = '1';
 
         $this->service->save($this->projectStructure, $this->features);
 
         self::assertSame('1', $this->getPersistedValue('enable_mt_analysis'));
-        self::assertSame('1', $this->getPersistedValue('mmt_activate_context_analyzer'));
     }
 
     /**
@@ -400,13 +398,6 @@ class SaveMetadataTest extends AbstractTest
      */
     public static function jobScopedMtSettingProvider(): array
     {
-        // ProjectStructure declares these with real types, so the input has to be type-appropriate
-        // and the expectation is the string the DAO is handed. mmt_ignore_glossary_case is the one
-        // that is not a string: it is ?bool, and the write normalises it to '1'/'0'.
-        $inputs = [
-            JobsMetadataMarshaller::MMT_IGNORE_GLOSSARY_CASE->value => [true, '1'],
-        ];
-
         $cases = [];
 
         foreach (JobsMetadataMarshaller::mtSettings() as $key) {
@@ -416,8 +407,7 @@ class SaveMetadataTest extends AbstractTest
                 continue;
             }
 
-            [$value, $expected] = $inputs[$key] ?? ['some_value', 'some_value'];
-            $cases[$key] = [$key, $value, $expected];
+            $cases[$key] = [$key, 'some_value', 'some_value'];
         }
 
         return $cases;
@@ -444,24 +434,18 @@ class SaveMetadataTest extends AbstractTest
     /**
      * The guard the eager per-job write used to own, now that these keys go through the project
      * write again. `!empty()` is right for the project-wide engine params — there, falsy is the
-     * absent default — but for the MT settings a threshold of 0 and mmt_ignore_glossary_case turned
-     * off are answers the owner chose, and dropping them silently reverts to the engine default.
+     * absent default — but for the MT settings a threshold of 0 is an answer the owner chose, and
+     * dropping it silently reverts to the engine default.
      */
     #[Test]
     public function testFalsyMtSettingsAreStillPersisted(): void
     {
-        $this->projectStructure->mmt_ignore_glossary_case = false;
         $this->projectStructure->metadata = [
             ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value => '0',
         ];
 
         $this->service->save($this->projectStructure, $this->features);
 
-        self::assertSame(
-            '0',
-            $this->getPersistedValue(JobsMetadataMarshaller::MMT_IGNORE_GLOSSARY_CASE->value),
-            'mmt_ignore_glossary_case = false is an answer, not an absence'
-        );
         self::assertSame(
             '0',
             $this->getPersistedValue(ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value),
@@ -510,7 +494,7 @@ class SaveMetadataTest extends AbstractTest
         $this->projectStructure->metadata = [
             ProjectsMetadataMarshaller::ICU_ENABLED->value                   => '1',
             ProjectsMetadataMarshaller::MT_EVALUATION->value                 => '0',
-            ProjectsMetadataMarshaller::MMT_ACTIVATE_CONTEXT_ANALYZER->value => '1',
+            ProjectsMetadataMarshaller::WPML->value                          => '1',
         ];
 
         $this->service->save($this->projectStructure, $this->features);
@@ -521,7 +505,7 @@ class SaveMetadataTest extends AbstractTest
 
         self::assertSame('1', $this->getPersistedValue(ProjectsMetadataMarshaller::ICU_ENABLED->value));
         self::assertSame('0', $this->getPersistedValue(ProjectsMetadataMarshaller::MT_EVALUATION->value));
-        self::assertSame('1', $this->getPersistedValue(ProjectsMetadataMarshaller::MMT_ACTIVATE_CONTEXT_ANALYZER->value));
+        self::assertSame('1', $this->getPersistedValue(ProjectsMetadataMarshaller::WPML->value));
 
         foreach ($metadata as $value) {
             self::assertIsString($value, 'All bulkSet() metadata values must be strings');
@@ -538,7 +522,7 @@ class SaveMetadataTest extends AbstractTest
         $this->projectStructure->from_api = true;
         $this->projectStructure->pretranslate_101 = '0';
         $this->projectStructure->enable_mt_analysis = '1';
-        $this->projectStructure->mmt_glossaries = 'gl_abc';
+        $this->projectStructure->lara_glossaries = '["gl_abc"]';
         $this->projectStructure->subfiltering_handlers = '[{"name":"handler1"}]';
         $this->projectStructure->metadata = [
             ProjectsMetadataMarshaller::ICU_ENABLED->value => '1',
@@ -556,7 +540,7 @@ class SaveMetadataTest extends AbstractTest
 
         // Set alongside the rest: the MT settings are written here as the project's base value, and
         // a job row only appears if the owner later overrides one.
-        self::assertSame('gl_abc', $this->getPersistedValue('mmt_glossaries'));
+        self::assertSame('["gl_abc"]', $this->getPersistedValue('lara_glossaries'));
     }
 
     // =========================================================================
@@ -610,15 +594,13 @@ class SaveMetadataTest extends AbstractTest
     #[Test]
     public function testEngineExtraKeysPassThroughGuard(): void
     {
-        // enable_mt_analysis and mmt_activate_context_analyzer are engine configuration parameter
-        // keys that stay project-wide, and must be allowed through the guard
+        // enable_mt_analysis is an engine configuration parameter key that stays project-wide, and
+        // must be allowed through the guard
         $this->projectStructure->enable_mt_analysis = '1';
-        $this->projectStructure->mmt_activate_context_analyzer = '1';
 
         $this->service->save($this->projectStructure, $this->features);
 
         self::assertSame('1', $this->getPersistedValue('enable_mt_analysis'));
-        self::assertSame('1', $this->getPersistedValue('mmt_activate_context_analyzer'));
     }
 
     #[Test]
@@ -688,7 +670,7 @@ class SaveMetadataTest extends AbstractTest
     {
         $this->projectStructure->metadata = [
             ProjectsMetadataMarshaller::ICU_ENABLED->value          => '1',
-            ProjectsMetadataMarshaller::MMT_ACTIVATE_CONTEXT_ANALYZER->value => '1',
+            ProjectsMetadataMarshaller::WPML->value                 => '1',
             'injected_evil_key'                                      => 'evil_value',
             'metadata_pollution'                                     => 'polluted_value',
         ];
@@ -697,7 +679,7 @@ class SaveMetadataTest extends AbstractTest
 
         // Valid keys must survive
         self::assertSame('1', $this->getPersistedValue(ProjectsMetadataMarshaller::ICU_ENABLED->value));
-        self::assertSame('1', $this->getPersistedValue(ProjectsMetadataMarshaller::MMT_ACTIVATE_CONTEXT_ANALYZER->value));
+        self::assertSame('1', $this->getPersistedValue(ProjectsMetadataMarshaller::WPML->value));
 
         // Unknown keys must be absent
         self::assertEmpty(

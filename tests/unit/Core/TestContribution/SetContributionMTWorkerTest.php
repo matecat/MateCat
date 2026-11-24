@@ -20,7 +20,7 @@ use Utils\AsyncTasks\Workers\SetContributionWorker;
 use Utils\Constants\EngineConstants;
 use Utils\Contribution\SetContributionRequest;
 use Utils\Engines\Lara;
-use Utils\Engines\MMT;
+use Utils\Engines\MyMemory;
 use Utils\Engines\NONE;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\ContextList;
@@ -125,15 +125,15 @@ class SetContributionMTWorkerTest extends AbstractTest
      * @throws Exception
      */
     #[Test]
-    public function test_ExecContribution_WillCall_MMT_With_single_tm_key()
+    public function test_ExecContribution_WillCall_Lara_With_single_tm_key()
     {
         /**
          * @var $_worker SetContributionMTWorker
          */
         $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub(), obtainTestDatabase());
 
-        //create a stub EnginesFactory MMT
-        $stubEngine = $this->getMockBuilder(MMT::class)
+        //create a stub EnginesFactory Lara
+        $stubEngine = $this->getMockBuilder(Lara::class)
             ->disableOriginalConstructor()
             ->onlyMethods(['update'])
             ->getMock();
@@ -207,7 +207,7 @@ class SetContributionMTWorkerTest extends AbstractTest
      * @throws Exception
      */
     #[Test]
-    public function test_ExecContribution_WillCall_MMT_With_multiple_tm_keys()
+    public function test_ExecContribution_WillCall_Lara_With_multiple_tm_keys()
     {
         /**
          * @var $_worker SetContributionMTWorker
@@ -215,7 +215,7 @@ class SetContributionMTWorkerTest extends AbstractTest
         $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub(), obtainTestDatabase());
 
         //create a stub EnginesFactory Matches
-        $stubEngine = @$this->getMockBuilder(MMT::class)
+        $stubEngine = @$this->getMockBuilder(Lara::class)
             ->onlyMethods(['update'])
             ->disableOriginalConstructor()
             ->getMock();
@@ -319,67 +319,6 @@ class SetContributionMTWorkerTest extends AbstractTest
      * @throws ReflectionException
      */
     #[Test]
-    public function testExceptionForEngineSetFailure_MMT()
-    {
-        /**
-         * @var $_worker SetContributionMTWorker
-         */
-        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub(), obtainTestDatabase());
-
-        //create a stub EnginesFactory Matches
-        $stubEngine = $this
-            ->getMockBuilder(MMT::class)
-            ->onlyMethods(['update'])
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $stubEngine->expects($this->once())
-            ->method('update')
-            ->with($this->anything())
-            ->willReturn(false);
-
-        $engineStruct = new EngineStruct();
-        $engineStruct->id = 0;
-        $engineStruct->type = EngineConstants::MT;
-        $_worker->setEngine($stubEngine);
-
-        /**
-         * @var $queueElement SetContributionRequest
-         */
-        $contributionMockQueueObject = $this->getMockBuilder(SetContributionRequest::class)->getMock();
-        $contributionMockQueueObject->id_job = 1999999;
-        $contributionMockQueueObject->id_file = 1999999;
-        $contributionMockQueueObject->id_mt = 1999999;
-        $contributionMockQueueObject->id_segment = 1999999;
-
-        $contributionMockQueueObject->expects($this->once())
-            ->method('getJobStruct')
-            ->willReturn(
-                new JobStruct(
-                    [
-                        'id' => $this->contributionStruct->id_job,
-                        'password' => $this->contributionStruct->job_password,
-                        'source' => 'en-US',
-                        'target' => 'it-IT',
-                        'id_tms' => 0,
-                        'id_mt_engine' => 0,
-                        'tm_keys' => '[]'
-                    ]
-                )
-            );
-
-        $reflectedMethod = new ReflectionMethod($_worker, '_execContribution');
-
-
-        $this->expectException(ReQueueException::class);
-        $reflectedMethod->invokeArgs($_worker, [$contributionMockQueueObject]);
-    }
-
-    /**
-     * @test
-     * @throws ReflectionException
-     */
-    #[Test]
     public function testExceptionForEngineSetFailure_Lara()
     {
         /**
@@ -454,12 +393,40 @@ class SetContributionMTWorkerTest extends AbstractTest
             new JobStruct(
                 [
                     'id_tms' => 1,
+                    'id_mt_engine' => 1,
+                ]
+            )
+        ]);
+
+        $this->assertInstanceOf(MyMemory::class, $engineLoaded);
+    }
+
+    /**
+     * Engine 2 is seeded as a ModernMT Full engine, whose class was removed. A job the migration
+     * has not moved yet must load the NONE engine instead of ending the queue.
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function should_load_the_none_engine_for_a_retired_engine_class()
+    {
+        /**
+         * @var $_worker SetContributionMTWorker
+         */
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub(), obtainTestDatabase());
+
+        $reflectedMethod = new ReflectionMethod($_worker, '_loadEngine');
+
+        $engineLoaded = $reflectedMethod->invokeArgs($_worker, [
+            new JobStruct(
+                [
+                    'id_tms' => 1,
                     'id_mt_engine' => 2,
                 ]
             )
         ]);
 
-        $this->assertInstanceOf(MMT::class, $engineLoaded);
+        $this->assertInstanceOf(NONE::class, $engineLoaded);
     }
 
     /**

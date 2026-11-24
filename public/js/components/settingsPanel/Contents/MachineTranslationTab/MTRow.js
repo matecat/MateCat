@@ -42,15 +42,6 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
             <InfoIcon size={16} />
           </a>
         )}
-        {row.engine_type === 'MMT' && (
-          <a
-            href="https://guides.matecat.com/modernmt-mmt-plug-in"
-            target="_blank"
-            rel="noreferrer"
-          >
-            <InfoIcon size={16} />
-          </a>
-        )}
         {row.engine_type === 'DeepL' && (
           <a
             href="https://guides.matecat.com/deepl"

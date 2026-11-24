@@ -59,7 +59,7 @@ class ReadEngineTest extends AbstractTest
         $this->engine_struct_param->contribute_relative_url = "contribute";
         $this->engine_struct_param->delete_relative_url = "delete";
         $this->engine_struct_param->others = [];
-        $this->engine_struct_param->class_load = "MMT";
+        $this->engine_struct_param->class_load = "DeepL";
         $this->engine_struct_param->extra_parameters = [];
         $this->engine_struct_param->penalty = 1;
         $this->engine_struct_param->active = 4;
@@ -126,7 +126,7 @@ class ReadEngineTest extends AbstractTest
         $this->assertEquals("translate", $result['translate_relative_url']);
         $this->assertEquals("delete", $result['delete_relative_url']);
         $this->assertEquals([], $result['others']);
-        $this->assertEquals("MMT", $result['class_load']);
+        $this->assertEquals("DeepL", $result['class_load']);
         $this->assertEquals([], $result['extra_parameters']);
         $this->assertEquals(1, $result['penalty']);
         $this->assertEquals(4, $result['active']);

@@ -41,7 +41,6 @@ use Utils\Constants\ProjectStatus as ProjectStatus;
 use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\Lara;
-use Utils\Engines\MMT;
 use Utils\Engines\MyMemory;
 use Utils\Engines\NONE;
 use Utils\Engines\Results\MyMemory\AnalyzeResponse;
@@ -1561,7 +1560,7 @@ HD;
 
         //use this kind of construct to easily add/remove queues and to disable feature by: comment rows or change the switch flag to false
         return match (true) {
-            $mtEngine instanceof MMT || $mtEngine instanceof Lara => $contextList['P4'],
+            $mtEngine instanceof Lara => $contextList['P4'],
             !$mtEngine instanceof MyMemory && !$mtEngine instanceof NONE => $contextList['P3'],
             $queueLen >= 10000 => $contextList['P2'],
             default => $contextList['P1'],

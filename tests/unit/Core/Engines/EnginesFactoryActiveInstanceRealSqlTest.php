@@ -11,9 +11,9 @@ use Model\Engines\Structs\EngineStruct;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Utils\Constants\EngineConstants;
+use Utils\Engines\DeepL;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\Lara;
-use Utils\Engines\MMT;
 
 #[Group('PersistenceNeeded')]
 #[Group('DaoRealSql')]
@@ -67,7 +67,7 @@ class EnginesFactoryActiveInstanceRealSqlTest extends AbstractTest
     #[Test]
     public function getActiveInstanceByUserAndClassReturnsNullForAnotherClass(): void
     {
-        $this->createEngine($this->uid, MMT::class);
+        $this->createEngine($this->uid, DeepL::class);
 
         self::assertNull(EnginesFactory::getActiveInstanceByUserAndClass($this->uid, $this->realSqlDb(), Lara::class));
     }

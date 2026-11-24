@@ -89,7 +89,6 @@ class ProjectStructure extends AbstractDaoObjectStruct implements JsonSerializab
     public ?string $subfiltering_handlers = null;
 
     // Dynamic engine configuration (known keys declared explicitly)
-    public ?string $mmt_glossaries = null;
     public ?string $deepl_formality = null;
     public ?string $deepl_id_glossary = null;
     public ?string $deepl_engine_type = null;
@@ -99,8 +98,6 @@ class ProjectStructure extends AbstractDaoObjectStruct implements JsonSerializab
     public ?string $intento_routing = null;
     public ?string $intento_provider = null;
     public ?string $enable_mt_analysis = null;
-    public ?string $mmt_activate_context_analyzer = null;
-    public ?bool $mmt_ignore_glossary_case = null;
 
     // ── Group B: Mutable pipeline keys (10 keys) ────────────────────
 

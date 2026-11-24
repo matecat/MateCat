@@ -220,7 +220,6 @@
     text-align: center;
   }
 
-  .active-table-ModernMT,
   .active-table-DeepL,
   .active-table-Lara {
     .settings-panel-row-extra-content {
@@ -339,11 +338,6 @@
 .glossary-row-name {
   display: flex;
   gap: 10px;
-
-  .editing-buttons {
-    display: flex;
-    gap: 10px;
-  }
 
   .tooltip-input-name {
     min-width: 75%;

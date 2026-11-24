@@ -150,7 +150,7 @@ class JobSettingsResolverTest extends AbstractTest
         // present, so the project is never consulted, and the caller gets [] rather than the
         // project's list — the engines turn that into an omitted parameter.
         $this->jobDao->method('get')->willReturn(
-            $this->struct(JobsMetadataMarshaller::MMT_GLOSSARIES->value, '[]')
+            $this->struct(JobsMetadataMarshaller::LARA_GLOSSARIES->value, '[]')
         );
         $this->projectDao->expects($this->never())->method('getValue');
 
@@ -160,7 +160,7 @@ class JobSettingsResolverTest extends AbstractTest
                 self::JOB_ID,
                 self::PASSWORD,
                 self::PROJECT_ID,
-                JobsMetadataMarshaller::MMT_GLOSSARIES->value
+                JobsMetadataMarshaller::LARA_GLOSSARIES->value
             )
         );
     }
@@ -304,7 +304,7 @@ class JobSettingsResolverTest extends AbstractTest
     #[Test]
     public function engineConfigFallsBackToPidWhenIdProjectIsAbsent(): void
     {
-        // DeepL and Intento are handed `pid`, Lara and MMT `id_project`. Before this the two halves
+        // DeepL and Intento are handed `pid`, Lara `id_project`. Before this the two halves
         // silently resolved nothing when a caller populated only the other one.
         $this->jobDao->method('get')->willReturn(null);
         $this->projectDao->expects($this->once())

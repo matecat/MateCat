@@ -131,9 +131,6 @@ jest.mock('../api/getSupportedFiles', () => ({
 jest.mock('../api/getSupportedLanguages', () => ({
   getSupportedLanguages: jest.fn(),
 }))
-jest.mock('../api/getMMTKeys/getMMTKeys', () => ({
-  getMMTKeys: jest.fn(() => Promise.resolve([])),
-}))
 jest.mock('../api/getDeepLGlosssaries/getDeepLGlosssaries', () => ({
   getDeepLGlosssaries: jest.fn(() => Promise.resolve({glossaries: []})),
 }))

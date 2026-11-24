@@ -87,8 +87,6 @@ export const EditorMachineTranslationTab = (props) => {
       'lara_style',
       'lara_style_guideline_id',
       'lara_glossaries',
-      'mmt_glossaries',
-      'mmt_ignore_glossary_case',
       'intento_provider',
       'intento_routing',
     ]

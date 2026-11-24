@@ -63,7 +63,6 @@ use Utils\Engines\Validators\Contracts\EngineValidatorObject;
 use Utils\Engines\Validators\DeepLEngineOptionsValidator;
 use Utils\Engines\Validators\IntentoEngineOptionsValidator;
 use Utils\Engines\Validators\LaraGlossaryValidator;
-use Utils\Engines\Validators\MMTGlossaryValidator;
 use Utils\Registry\AppConfig;
 use Utils\Subfiltering\SubfilteringOptionsValidator;
 use Utils\TaskRunner\Exceptions\EndQueueException;
@@ -394,13 +393,6 @@ class NewController extends KleinController
         // MT SETTINGS
         $enable_mt_analysis = filter_var($this->request->param('enable_mt_analysis', 'INVALID BOOL'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? true;
 
-        // The UI ask for case-sensitive matching true/false.
-        // Negate the validated boolean because the MMT default flag is ignore_glossary_case.
-        // true becomes false, false (or invalid/missing) becomes true.
-        $mmt_ignore_glossary_case = filter_var($this->request->param('mmt_ignore_glossary_case'), FILTER_VALIDATE_BOOLEAN);
-
-        $mmt_glossaries = filter_var($this->request->param('mmt_glossaries'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
-        $mmt_activate_context_analyzer = filter_var($this->request->param('mmt_activate_context_analyzer'), FILTER_VALIDATE_BOOLEAN);
         $intento_routing = filter_var($this->request->param('intento_routing'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $intento_provider = filter_var($this->request->param('intento_provider'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $lara_glossaries = filter_var($this->request->param('lara_glossaries'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
@@ -468,7 +460,6 @@ class NewController extends KleinController
         $qaModelTemplate = $this->validateQaModelTemplate($id_qa_model_template ?: null);
         $payableRateModelTemplate = $this->validatePayableRateTemplate($payable_rate_template_id);
         $qaModel = $this->validateQaModel($id_qa_model ?: null);
-        $mmt_glossaries = $this->validateMMTGlossaries($mmt_glossaries);
 
         (new DeepLEngineOptionsValidator())->validate(
             EngineValidatorObject::fromArray(
@@ -573,9 +564,6 @@ class NewController extends KleinController
             'id_team' => $id_team,
             'team' => $team,
             'enable_mt_analysis' => $enable_mt_analysis,
-            'mmt_ignore_glossary_case' => $mmt_ignore_glossary_case ?? null,
-            'mmt_glossaries' => $mmt_glossaries ?? null,
-            'mmt_activate_context_analyzer' => $mmt_activate_context_analyzer ?? null,
             'intento_routing' => $intento_routing ?? null,
             'intento_provider' => $intento_provider ?? null,
             'lara_glossaries' => $lara_glossaries ?? null,
@@ -1125,33 +1113,6 @@ class NewController extends KleinController
             }
 
             return $qaModel;
-        }
-
-        return null;
-    }
-
-    /**
-     * @param string|false|null $mmt_glossaries
-     *
-     * @return string|null
-     * @throws InvalidArgumentException
-     */
-    private function validateMMTGlossaries(string|false|null $mmt_glossaries = null): ?string
-    {
-        if (!empty($mmt_glossaries)) {
-            try {
-                $mmtGlossaries = html_entity_decode($mmt_glossaries);
-
-                (new MMTGlossaryValidator)->validate(
-                    EngineValidatorObject::fromArray([
-                        'glossaryString' => $mmtGlossaries,
-                    ])
-                );
-
-                return $mmtGlossaries;
-            } catch (Exception $exception) {
-                throw new InvalidArgumentException($exception->getMessage(), -6);
-            }
         }
 
         return null;

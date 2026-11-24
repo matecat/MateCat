@@ -437,11 +437,8 @@ class SaveJobsMetadataTest extends AbstractTest
             'lara_style'              => ['lara_style', 'creative'],
             'lara_style_guideline_id' => ['lara_style_guideline_id', 'guideline-3'],
             'lara_glossaries'         => ['lara_glossaries', '["a","b"]'],
-            'mmt_glossaries'          => ['mmt_glossaries', '[1,2]'],
             'intento_provider'        => ['intento_provider', 'ai.text.translate.google'],
             'intento_routing'         => ['intento_routing', 'best_quality'],
-            'ignore case true'        => ['mmt_ignore_glossary_case', true],
-            'ignore case false'       => ['mmt_ignore_glossary_case', false],
         ];
     }
 

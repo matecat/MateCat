@@ -261,7 +261,7 @@ class DeepLEngineTest extends AbstractTest
     // change them after creation, and are read through JobSettingsResolver with the project scope as
     // a permanent fallback for projects created before that move. The resolver is constructed inline
     // from $this->database, so there is nothing to inject: these seed real metadata rows and drive
-    // the real read path, the same way the Intento, MMT and Lara engine suites do.
+    // the real read path, the same way the Intento and Lara engine suites do.
     // ---------------------------------------------------------------------------------------
 
     /**

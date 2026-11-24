@@ -1,6 +1,5 @@
 import React, {useState} from 'react'
 import PropTypes from 'prop-types'
-import {MMTOptions} from './MMTOptions'
 import {LaraOptions} from './LaraOptions'
 import {DeepLOptions} from './DeepLOptions'
 import {BasicOptions} from './BasicOptions'
@@ -8,7 +7,6 @@ import {IntentoOptions} from './IntentoOptions'
 import IconDown from '../../../../../img/icons/IconDown'
 
 const ContentComponent = {
-  MMT: MMTOptions,
   Lara: LaraOptions,
   DeepL: DeepLOptions,
   Intento: IntentoOptions,

@@ -79,6 +79,32 @@ class ProjectCreationWorkerTest extends AbstractTest
         $worker->process($queueElement);
     }
 
+    /**
+     * A payload queued before the ModernMT Full removal still carries the three retired keys, which
+     * ProjectStructure no longer declares. The project must still be created.
+     */
+    #[Test]
+    public function processCreatesAProjectQueuedWithTheRetiredModernMtKeys(): void
+    {
+        $projectManager = $this->createMock(ProjectManager::class);
+        $projectManager->expects($this->once())->method('createProject');
+
+        $worker = $this->createWorker();
+        $worker->expects($this->once())
+            ->method('createProjectManager')
+            ->with($this->callback(fn(ProjectStructure $structure): bool => $structure->project_name === 'Test'))
+            ->willReturn($projectManager);
+
+        $queueElement = $this->createQueueElement(0, [
+            'id_project'                    => 1,
+            'project_name'                  => 'Test',
+            'mmt_glossaries'                => null,
+            'mmt_activate_context_analyzer' => '1',
+            'mmt_ignore_glossary_case'      => true,
+        ]);
+        $worker->process($queueElement);
+    }
+
     #[Test]
     public function processThrowsEndQueueOnPDOException(): void
     {

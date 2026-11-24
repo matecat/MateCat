@@ -11,7 +11,6 @@ use Model\Engines\Structs\DeepLStruct;
 use Model\Engines\Structs\EngineStruct;
 use Model\Engines\Structs\GoogleTranslateStruct;
 use Model\Engines\Structs\LaraStruct;
-use Model\Engines\Structs\MMTStruct;
 use Model\Engines\Structs\SmartMATEStruct;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -38,7 +37,6 @@ class EngineStructTypeSafetyTest extends AbstractTest
         return [
             'DeepL'           => [DeepLStruct::class],
             'Lara'            => [LaraStruct::class],
-            'MMT'             => [MMTStruct::class],
             'SmartMATE'       => [SmartMATEStruct::class],
             'GoogleTranslate' => [GoogleTranslateStruct::class],
             'Altlang'         => [AltlangStruct::class],

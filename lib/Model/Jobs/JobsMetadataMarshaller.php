@@ -46,8 +46,6 @@ enum JobsMetadataMarshaller: string
     case LARA_STYLE                   = 'lara_style';
     case LARA_STYLE_GUIDELINE_ID      = 'lara_style_guideline_id';
     case LARA_GLOSSARIES              = 'lara_glossaries';
-    case MMT_GLOSSARIES               = 'mmt_glossaries';
-    case MMT_IGNORE_GLOSSARY_CASE     = 'mmt_ignore_glossary_case';
     case INTENTO_ROUTING              = 'intento_routing';
     case INTENTO_PROVIDER             = 'intento_provider';
 
@@ -67,7 +65,6 @@ enum JobsMetadataMarshaller: string
         return (match ($struct->key) {
             JobsMetadataMarshaller::CHARACTER_COUNTER_COUNT_TAGS->value,
             JobsMetadataMarshaller::DIALECT_STRICT->value,
-            JobsMetadataMarshaller::MMT_IGNORE_GLOSSARY_CASE->value,
             JobsMetadataMarshaller::TM_PRIORITIZATION->value => fn() => (bool)$struct->value,
             JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value,
             JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value => fn() => (int)$struct->value,
@@ -80,13 +77,11 @@ enum JobsMetadataMarshaller: string
             JobsMetadataMarshaller::DEEPL_ENGINE_TYPE->value,
             JobsMetadataMarshaller::INTENTO_ROUTING->value,
             JobsMetadataMarshaller::INTENTO_PROVIDER->value => fn() => (string)$struct->value,
-            // Both glossary lists decode to arrays, so a client reads the same shape whichever
-            // engine it is looking at, and can post back what it just read.
+            // The glossary list decodes to an array, so a client can post back what it just read.
             // html_entity_decode for backward compatibility: old projects stored the JSON HTML-entity
             // encoded, because both creation controllers run the request parameter through
             // FILTER_SANITIZE_SPECIAL_CHARS before validating it.
-            JobsMetadataMarshaller::LARA_GLOSSARIES->value,
-            JobsMetadataMarshaller::MMT_GLOSSARIES->value => fn() => json_decode(html_entity_decode((string)$struct->value), true),
+            JobsMetadataMarshaller::LARA_GLOSSARIES->value => fn() => json_decode(html_entity_decode((string)$struct->value), true),
             default => fn() => json_validate((string)$struct->value) ? json_decode((string)$struct->value, true) : (string)$struct->value,
         })();
     }
@@ -94,10 +89,6 @@ enum JobsMetadataMarshaller: string
     /**
      * The MT tuning settings that are persisted per job and resolved with a project-metadata
      * fallback.
-     *
-     * `mmt_activate_context_analyzer` is deliberately absent: it is only consumed by
-     * {@see \Utils\Engines\MMT::syncMemories()}, which runs once at project creation from a
-     * project row and has no job context, so changing it afterwards would have no effect.
      *
      * @return list<string>
      */
@@ -111,8 +102,6 @@ enum JobsMetadataMarshaller: string
             self::LARA_STYLE->value,
             self::LARA_STYLE_GUIDELINE_ID->value,
             self::LARA_GLOSSARIES->value,
-            self::MMT_GLOSSARIES->value,
-            self::MMT_IGNORE_GLOSSARY_CASE->value,
             self::INTENTO_ROUTING->value,
             self::INTENTO_PROVIDER->value,
         ];
@@ -131,7 +120,6 @@ enum JobsMetadataMarshaller: string
         return match ($this) {
             self::CHARACTER_COUNTER_COUNT_TAGS,
             self::DIALECT_STRICT,
-            self::MMT_IGNORE_GLOSSARY_CASE,
             self::TM_PRIORITIZATION => is_bool($value) ? ($value ? '1' : '0') : null,
             self::PUBLIC_TM_PENALTY,
             self::MT_QUALITY_VALUE_IN_EDITOR => is_int($value) && $value >= 0 && $value <= 100 ? (string)$value : null,
@@ -147,7 +135,6 @@ enum JobsMetadataMarshaller: string
             self::INTENTO_PROVIDER => is_string($value) && mb_strlen($value) <= 255 ? $value : null,
             // An empty list is an answer too: "no glossary here" over a project that has one.
             self::LARA_GLOSSARIES => self::marshallList($value, fn(mixed $id): bool => is_string($id) && $id !== ''),
-            self::MMT_GLOSSARIES => self::marshallList($value, fn(mixed $id): bool => is_int($id) && $id >= 1),
             self::MANDATORY_ISSUES => self::marshallList($value, fn(mixed $phase): bool => in_array($phase, self::MANDATORY_ISSUES_PHASES, true)),
             // A JSON null stores "every handler disabled", and '' and 'none' are the two spellings
             // subfiltering_handlers.json lets the editor send for the same thing. They are kept as
@@ -165,11 +152,11 @@ enum JobsMetadataMarshaller: string
      * canonical form. This is what a copy goes through, so it carries what the marshaller vouches for
      * and not merely whatever the table holds.
      *
-     * Two checks per row. The key has to be a case of this enum: anything else — MMT's mt_context, a
-     * key a feature has since stopped reading — is not job configuration and stays where it is. The
-     * value has to survive unMarshall() and marshall() back. unMarshall() alone is too lenient for
-     * that: its casts turn any string into a boolean or an integer, so the scalar keys are checked on
-     * the raw string first.
+     * Two checks per row. The key has to be a case of this enum: anything else — a key a feature
+     * has since stopped reading, such as the retired ModernMT settings — is not job configuration
+     * and stays where it is. The value has to survive unMarshall() and marshall() back. unMarshall()
+     * alone is too lenient for that: its casts turn any string into a boolean or an integer, so the
+     * scalar keys are checked on the raw string first.
      *
      * @param array<string, string> $raw
      *
@@ -207,7 +194,6 @@ enum JobsMetadataMarshaller: string
         return match ($this) {
             self::CHARACTER_COUNTER_COUNT_TAGS,
             self::DIALECT_STRICT,
-            self::MMT_IGNORE_GLOSSARY_CASE,
             self::TM_PRIORITIZATION => in_array($raw, ['1', '0', ''], true),
             self::PUBLIC_TM_PENALTY,
             self::MT_QUALITY_VALUE_IN_EDITOR => preg_match('/^\d{1,3}$/', $raw) === 1,
