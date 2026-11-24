@@ -133,7 +133,10 @@ const TargetEditor = forwardRef(
       if (!editor) return
       const {segment, bridge, updateCounter} = latestRef.current
       const str = editor.getValue()
-      if (str === '') {
+      // Nothing to tell the store when both are empty (a segment opened without a translation). An
+      // emptied target must reach it, though: skipping every empty editor left the last character
+      // in the store, so the confirm buttons stayed enabled and confirming saved that character.
+      if (str === '' && !segment.translation) {
         updateCounter(0)
         return
       }
