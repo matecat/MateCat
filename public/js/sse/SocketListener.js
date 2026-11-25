@@ -4,6 +4,7 @@ import CatToolActions from '../actions/CatToolActions'
 import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
 import CommonUtils from '../utils/commonUtils'
+import TranslationMatches from '../components/segments/utils/translationMatches'
 import CommentsActions from '../actions/CommentsActions'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
 import UserActions from '../actions/UserActions'
@@ -14,9 +15,14 @@ const SocketListener = ({isAuthenticated, userId}) => {
   const {forceLogout} = useContext(ApplicationWrapperContext)
   const eventHandlers = {
     disconnected: () => {
+      // Results sent while the stream is down are lost: stop waiting for them.
+      TranslationMatches.clearAllPendingContributions()
+      SegmentActions.clearAllPendingGlossaryRequests()
       CatToolActions.clientConnected(false)
     },
     reconnected: () => {
+      TranslationMatches.clearAllPendingContributions()
+      SegmentActions.clearAllPendingGlossaryRequests()
       CatToolActions.clientReconnect()
     },
     ack: ({clientId, serverVersion}) => {
@@ -160,6 +166,7 @@ const SocketListener = ({isAuthenticated, userId}) => {
       CommentsActions.updateCommentsFromSse(data)
     },
     contribution: (data) => {
+      TranslationMatches.clearPendingContribution(data.id_segment)
       if (config.translation_matches_enabled) {
         const segment = SegmentStore.getSegmentByIdToJS(data.id_segment)
         if (segment && segment.splitted) {

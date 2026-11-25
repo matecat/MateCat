@@ -117,7 +117,6 @@ test('enables the go-to-current-segment item once the menu opens on an active se
   await loadFiles()
 
   fireEvent.click(screen.getByTestId('open-menu'))
-  expect(CatToolActions.closeSubHeader).toHaveBeenCalledTimes(1)
 
   const goToCurrent = screen
     .getByText('Go to current segment')

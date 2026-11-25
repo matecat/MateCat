@@ -132,7 +132,7 @@ const SegmentHeader = ({
   const counterLimitClass =
     counter > limit
       ? 'segment-counter-limit-error'
-      : limit > 0 && counter > limit - 20
+      : limit > 0 && counter > (limit / 100) * 85
         ? 'segment-counter-limit-warning'
         : ''
 

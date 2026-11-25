@@ -4,6 +4,11 @@ import {SettingsPanelContext} from '../../SettingsPanelContext'
 import InfoIcon from '../../../../../img/icons/InfoIcon'
 import {Button, BUTTON_SIZE} from '../../../common/Button/Button'
 import Trash from '../../../../../img/icons/Trash'
+import {
+  Checkbox,
+  CHECKBOX_SIZE,
+  CHECKBOX_STATE,
+} from '../../../common/Checkbox'
 
 export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
   const {currentProjectTemplate} = useContext(SettingsPanelContext)
@@ -12,14 +17,18 @@ export const MTRow = ({row, deleteMT, onCheckboxClick}) => {
   return (
     <>
       <div className="settings-panel-cell-center">
-        <input
-          type="checkbox"
+        <Checkbox
           title="Use in this project"
-          data-testid={`checkbox-mt-active-${row.name}`}
-          checked={row.id === activeMTEngine ? true : false}
+          testId={`checkbox-mt-active-${row.name}`}
+          value={
+            row.id === activeMTEngine
+              ? CHECKBOX_STATE.CHECKED
+              : CHECKBOX_STATE.UNCHECKED
+          }
+          size={CHECKBOX_SIZE.SMALL}
           onChange={() => onCheckboxClick(row)}
           disabled={config.is_cattool && row.id === activeMTEngine}
-        ></input>
+        />
       </div>
 
       <div className="settings-panel-mt-row">

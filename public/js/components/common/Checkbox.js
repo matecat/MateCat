@@ -1,7 +1,48 @@
-import React, {useRef, useEffect} from 'react'
+import React, {useRef, useEffect, useId} from 'react'
 
 import PropTypes from 'prop-types'
 import styles from './Checkbox.module.scss'
+
+const CheckmarkIcon = ({size = 14}) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    fill="none"
+    viewBox="0 0 14 14"
+  >
+    <path
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      d="M11.667 3.5 5.25 9.917 2.334 7"
+    />
+  </svg>
+)
+
+const MinusIcon = ({size = 14}) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    fill="none"
+    viewBox="0 0 14 14"
+  >
+    <path
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      d="M2.917 7h8.167"
+    />
+  </svg>
+)
+
+export const CHECKBOX_SIZE = {
+  SMALL: 'small',
+  MEDIUM: 'medium',
+}
 
 export const CHECKBOX_STATE = {
   CHECKED: 'checked',
@@ -11,15 +52,20 @@ export const CHECKBOX_STATE = {
 
 export const Checkbox = ({
   label,
+  size = CHECKBOX_SIZE.MEDIUM,
   value = CHECKBOX_STATE.UNCHECKED,
   onChange,
   disabled = false,
   error,
   className = '',
   testId,
+  id,
+  ...props
 }) => {
   const checkboxRef = useRef(null)
   const shiftKeyPressed = useRef(false)
+  const generatedId = useId()
+  const inputId = id ?? generatedId
 
   const handleLabelClick = (e) => {
     e.stopPropagation()
@@ -33,69 +79,63 @@ export const Checkbox = ({
 
   const handleChange = (e) => {
     const isChecked = !shiftKeyPressed.current ? e.target.checked : true
-    checkboxRef.current.checked = isChecked
     onChange(isChecked, shiftKeyPressed.current)
   }
 
+  // `indeterminate` has no HTML attribute/JSX prop equivalent — it can only be
+  // set imperatively on the DOM node. `checked` is a real controlled prop below
+  // so React's own input-restoration handles it (e.g. reverting a click when the
+  // caller rejects the change and the value prop doesn't actually change).
   useEffect(() => {
     if (checkboxRef.current) {
-      if (value === CHECKBOX_STATE.CHECKED) {
-        checkboxRef.current.checked = true
-        checkboxRef.current.indeterminate = false
-      } else if (value === CHECKBOX_STATE.UNCHECKED) {
-        checkboxRef.current.checked = false
-        checkboxRef.current.indeterminate = false
-      } else if (value === CHECKBOX_STATE.INDETERMINATE) {
-        checkboxRef.current.checked = false
-        checkboxRef.current.indeterminate = true
-      }
+      checkboxRef.current.indeterminate = value === CHECKBOX_STATE.INDETERMINATE
     }
   }, [value])
 
   return (
     <>
-      <div
-        className={[styles['input-checkbox'], disabled && styles.isDisabled, value !== CHECKBOX_STATE.UNCHECKED && styles.checked, className].filter(Boolean).join(' ')}
-        onClick={handleLabelClick}
-      >
-        <input
-          ref={checkboxRef}
-          type="checkbox"
-          onChange={handleChange}
-          onClick={handleCheckboxClick}
-          disabled={disabled}
-          data-testid={testId}
-        />
-        <svg width="14" height="14" viewBox="0 0 16 16">
-          {value == CHECKBOX_STATE.CHECKED ? (
-            <path
-              d="M14 0a30 30 0 0 1 2 2v12a30 30 0 0 1-2 2H2a30 30 0 0 1-2-2V2a30 30 0 0 1 2-2h12Zm-1.685 4.9a1 1 0 0 0-1.414-.015L6.69 9 5.099 7.445a1 1 0 0 0-1.398 1.43l2.29 2.24a1 1 0 0 0 1.399 0l4.91-4.8a1 1 0 0 0 .015-1.414Z"
-              fill="currentColor"
-              fillRule="evenodd"
-            />
-          ) : value === CHECKBOX_STATE.INDETERMINATE ? (
-            <path
-              d="M14 0a30 30 0 0 1 2 2v12a30 30 0 0 1-2 2H2a30 30 0 0 1-2-2V2a30 30 0 0 1 2-2h12Zm-2 7H4a1 1 0 1 0 0 2h8a1 1 0 0 0 0-2Z"
-              fill="currentColor"
-              fillRule="evenodd"
-            />
+      <div className={styles.container}>
+        <div
+          className={[
+            styles['input-checkbox'],
+            styles[size],
+            disabled && styles.isDisabled,
+            value !== CHECKBOX_STATE.UNCHECKED && styles.checked,
+            className,
+          ]
+            .filter(Boolean)
+            .join(' ')}
+          onClick={handleLabelClick}
+        >
+          <input
+            ref={checkboxRef}
+            id={inputId}
+            type="checkbox"
+            checked={value === CHECKBOX_STATE.CHECKED}
+            onChange={handleChange}
+            onClick={handleCheckboxClick}
+            disabled={disabled}
+            data-testid={testId}
+            {...props}
+          />
+          {value === CHECKBOX_STATE.CHECKED ? (
+            <CheckmarkIcon size={size === CHECKBOX_SIZE.MEDIUM ? 14 : 10} />
           ) : (
-            <path
-              d="M14 0H2a30 30 0 0 0-2 2v12a30 30 0 0 0 2 2h12a30 30 0 0 0 2-2V2a30 30 0 0 0-2-2Zm0 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12Z"
-              fill="currentColor"
-              fillRule="evenodd"
-            />
+            value === CHECKBOX_STATE.INDETERMINATE && (
+              <MinusIcon size={size === CHECKBOX_SIZE.MEDIUM ? 14 : 10} />
+            )
           )}
-        </svg>
-        {label && <span>{label}</span>}
+        </div>
+        {label && <label htmlFor={inputId}>{label}</label>}
+        {error && <span className={styles.errorMessage}>{error}</span>}
       </div>
-      {error && <span className={styles.errorMessage}>{error}</span>}
     </>
   )
 }
 
 Checkbox.propTypes = {
   label: PropTypes.node,
+  size: PropTypes.string,
   value: PropTypes.oneOf([...Object.values(CHECKBOX_STATE)]),
   onChange: PropTypes.func.isRequired,
   disabled: PropTypes.bool,
