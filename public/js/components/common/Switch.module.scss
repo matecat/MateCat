@@ -11,7 +11,7 @@
     color: colors.$grey700;
   }
   .switch-container-active {
-    color: colors.$blue700;
+    color: colors.$blue500;
   }
 }
 .switch-container {
@@ -52,7 +52,7 @@
   }
 
   input:checked + span {
-    background-color: colors.$blue700;
+    background-color: colors.$blue500;
   }
 
   input:checked + span::before {

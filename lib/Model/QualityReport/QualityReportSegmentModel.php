@@ -301,24 +301,36 @@ class QualityReportSegmentModel
             return $event->id_segment == $seg->sid;
         });
 
+        // A version keeps its number through every confirmation that does not change the text, so
+        // one (version, step) pair can hold several events — a second R2 approve, for one. Its
+        // issues belong to that version once, so they go on the last of those events only.
+        $lastEventOfVersionAndStep = [];
+        foreach ($eventsForThisSegment as $index => $event) {
+            $lastEventOfVersionAndStep[$event->version_number . '-' . $event->source_page] = $index;
+        }
+
         /** @var HistoryElementStruct $event */
-        foreach ($eventsForThisSegment as $event) {
+        foreach ($eventsForThisSegment as $index => $event) {
             $translation = ($isForUI) ? $Filter->fromLayer0ToLayer2($event->translation) : $event->translation;
+            $ownsTheIssues = $lastEventOfVersionAndStep[$event->version_number . '-' . $event->source_page] === $index;
 
             $elements[] = [
                 'status' => $event->status,
-                'date' => $event->creation_date ?? $event->create_date,
+                // The event's own time. creation_date is set only on the version-0 row, which has no
+                // event; a versions row's creation_date is when its text was replaced, not saved.
+                'date' => $event->create_date ?? $event->creation_date,
                 'revision_number' => ReviewUtils::sourcePageToRevisionNumber($event->source_page),
                 'source_page' => $event->source_page,
                 'version_number' => $event->version_number,
                 'translation' => $translation,
-                'issues' => array_filter($issues, function ($issue) use ($event) {
+                'issues' => !$ownsTheIssues ? [] : array_values(array_filter($issues, function ($issue) use ($event) {
                     return
                         $issue->deleted_at === null &&
                         $event->id_segment == $issue->segment_id &&
-                        $event->version_number == $issue->translation_version
+                        $event->version_number == $issue->translation_version &&
+                        $event->source_page == $issue->source_page
                     ;
-                })
+                }))
             ];
         }
 
