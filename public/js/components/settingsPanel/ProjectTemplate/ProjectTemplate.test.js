@@ -83,12 +83,12 @@ test('Render properly', async () => {
   const selectLabel = screen.getByText('Standard')
   expect(selectLabel).toBeInTheDocument()
 
-  await act(async () => user.click(selectLabel))
+  await user.click(selectLabel)
 
   const itemTestingTemplate = screen.getByText('Testing template')
   expect(itemTestingTemplate).toBeInTheDocument()
 
-  await act(async () => user.click(itemTestingTemplate))
+  await user.click(itemTestingTemplate)
 
   projectTemplates = result.current.projectTemplates
   currentProjectTemplate = result.current.currentProjectTemplate
@@ -215,12 +215,12 @@ test('Create, update and delete template', async () => {
   const buttonCreate = screen.getByTestId('save-as-new-template')
   expect(buttonCreate).toBeInTheDocument()
 
-  await act(async () => user.click(buttonCreate))
+  await user.click(buttonCreate)
 
   const input = screen.getByTestId('template-name-input')
   expect(input).toHaveFocus()
 
-  await act(async () => user.type(input, 'my template'))
+  await user.type(input, 'my template')
   await waitFor(async () =>
     user.click(screen.getByTestId('create-update-template')),
   )
@@ -285,9 +285,7 @@ test('Create, update and delete template', async () => {
   expect(screen.getByText('my template')).toBeInTheDocument()
 
   // delete
-  await act(async () =>
-    user.click(screen.getByTestId('project-template-more-menu')),
-  )
+  await user.click(screen.getByTestId('project-template-more-menu'))
 
   await waitFor(async () => user.click(screen.getByTestId('delete-template')))
 
@@ -333,8 +331,8 @@ test('Renaming a template to an already used name shows a notification and does 
     </ApplicationWrapperContext.Provider>,
   )
 
-  await act(async () => user.click(screen.getByText('Standard')))
-  await act(async () => user.click(screen.getByText('Testing template')))
+  await user.click(screen.getByText('Standard'))
+  await user.click(screen.getByText('Testing template'))
 
   projectTemplates = result.current.projectTemplates
   currentProjectTemplate = result.current.currentProjectTemplate
@@ -344,19 +342,13 @@ test('Renaming a template to an already used name shows a notification and does 
     />,
   )
 
-  await act(async () =>
-    user.click(screen.getByTestId('project-template-more-menu')),
-  )
-  await act(async () => user.click(screen.getByText('Rename')))
+  await user.click(screen.getByTestId('project-template-more-menu'))
+  await user.click(screen.getByText('Rename'))
 
   const input = screen.getByTestId('template-name-input')
-  await act(async () => {
-    await user.clear(input)
-    await user.type(input, 'Standard')
-  })
-  await act(async () =>
-    user.click(screen.getByTestId('create-update-template')),
-  )
+  await user.clear(input)
+  await user.type(input, 'Standard')
+  await user.click(screen.getByTestId('create-update-template'))
 
   expect(spyNotification).toHaveBeenCalledWith(
     expect.objectContaining({title: 'Duplicated name'}),
@@ -405,8 +397,8 @@ test('Renaming a template persists the new name via the API', async () => {
     </ApplicationWrapperContext.Provider>,
   )
 
-  await act(async () => user.click(screen.getByText('Standard')))
-  await act(async () => user.click(screen.getByText('Testing template')))
+  await user.click(screen.getByText('Standard'))
+  await user.click(screen.getByText('Testing template'))
 
   projectTemplates = result.current.projectTemplates
   currentProjectTemplate = result.current.currentProjectTemplate
@@ -421,16 +413,12 @@ test('Renaming a template persists the new name via the API', async () => {
     />,
   )
 
-  await act(async () =>
-    user.click(screen.getByTestId('project-template-more-menu')),
-  )
-  await act(async () => user.click(screen.getByText('Rename')))
+  await user.click(screen.getByTestId('project-template-more-menu'))
+  await user.click(screen.getByText('Rename'))
 
   const input = screen.getByTestId('template-name-input')
-  await act(async () => {
-    await user.clear(input)
-    await user.type(input, 'Renamed template')
-  })
+  await user.clear(input)
+  await user.type(input, 'Renamed template')
   await waitFor(async () =>
     user.click(screen.getByTestId('create-update-template')),
   )
@@ -492,12 +480,12 @@ test('Set template as default', async () => {
   const selectLabel = screen.getByText('Standard')
   expect(selectLabel).toBeInTheDocument()
 
-  await act(async () => user.click(selectLabel))
+  await user.click(selectLabel)
 
   const itemTestingTemplate = screen.getByText('Testing template')
   expect(itemTestingTemplate).toBeInTheDocument()
 
-  await act(async () => user.click(itemTestingTemplate))
+  await user.click(itemTestingTemplate)
 
   projectTemplates = result.current.projectTemplates
   currentProjectTemplate = result.current.currentProjectTemplate

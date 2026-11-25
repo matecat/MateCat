@@ -1,4 +1,4 @@
-import {render, screen, waitFor, fireEvent, act} from '@testing-library/react'
+import {render, screen, waitFor, fireEvent} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import React from 'react'
 import {SegmentContext} from './SegmentContext'
@@ -501,9 +501,7 @@ test('Click tab', async () => {
     </SegmentContext.Provider>,
   )
 
-  await act(
-    async () => await userEvent.click(screen.getByTestId('concordances')),
-  )
+  await userEvent.click(screen.getByTestId('concordances'))
   expect(screen.getByTestId('concordances')).toHaveClass('active')
 })
 
