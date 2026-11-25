@@ -28,59 +28,53 @@
     justify-content: flex-start;
     > div {
       display: flex;
-      row-gap: 8px;
-      column-gap: 8px;
+      gap: 8px;
       align-self: stretch;
       flex-wrap: wrap;
     }
   }
-  .segment-footer-icu-plurals-section:nth-of-type(2) {
-    margin-top: 20px;
+  .segment-footer-icu-plurals-rule {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    box-sizing: border-box;
+    width: 184px;
+    padding: 8px 12px;
+    border: 1px solid colors.$grey150;
+    border-radius: variables.$border-radius-default;
+    background: colors.$grey50;
+    font-size: variables.$font-size-xsmall;
+    text-align: left;
   }
   .plural-title {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
+    align-items: baseline;
+    gap: 8px;
+    min-width: 0;
     .category {
-      text-transform: capitalize;
+      flex-shrink: 0;
       font-weight: 700;
-      font-size: variables.$font-size-xsmall;
+      &::first-letter {
+        text-transform: uppercase;
+      }
+    }
+    // Tooltip wraps .rule in a plain div: that wrapper is the flex item that must shrink
+    > :last-child {
+      flex: 1;
+      min-width: 0;
     }
     .rule {
-      color: colors.$grey400;
-      font-size: variables.$font-size-xsmall;
-      width: 100%;
-      max-width: 120px;
-      text-overflow: ellipsis;
+      color: colors.$grey700;
+      text-align: left;
       white-space: nowrap;
       overflow: hidden;
-      text-align: right;
+      text-overflow: ellipsis;
     }
   }
   .plural-example {
-    width: 100%;
-    max-width: 184px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
-    text-align: left;
-  }
-  .segment-footer-icu-plurals-rule {
-    display: flex;
-    padding: 16px;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-    grid-row: 1 / span 1;
-    grid-column: 1 / span 1;
-    justify-self: stretch;
-    border-radius: 16px;
-    border: 1px solid colors.$grey150;
-    background: colors.$grey50;
-    width: 184px;
-    height: 50px;
-    justify-content: space-between;
+    color: colors.$grey700;
+    overflow-wrap: anywhere;
   }
   .segment-footer-icu-editor {
     display: flex;
@@ -88,25 +82,32 @@
     gap: 8px;
     justify-content: flex-start;
     align-items: flex-start;
-    label {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 4px;
-      div {
-        text-transform: capitalize;
-      }
-      div span {
-        color: colors.$grey400;
-        font-weight: 400;
-        margin-left: 4px;
-      }
-    }
     .segment-footer-icu-inputs {
       display: flex;
       gap: 16px;
       flex-wrap: wrap;
-      font-size: variables.$font-size-xsmall;
+    }
+    .segment-footer-icu-input {
+      width: 184px;
+      label {
+        display: flex;
+        gap: 4px;
+        min-width: 0;
+        color: colors.$black;
+        font-size: variables.$font-size-xsmall;
+        font-weight: 700;
+        cursor: default;
+      }
+      .variable-name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .variable-type {
+        flex-shrink: 0;
+        color: colors.$grey700;
+        font-weight: 400;
+      }
     }
     .segment-footer-icu-preview-container {
       display: flex;

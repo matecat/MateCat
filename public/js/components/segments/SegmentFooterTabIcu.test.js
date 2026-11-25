@@ -93,7 +93,7 @@ describe('SegmentFooterTabIcu', () => {
       />,
     )
 
-    expect(screen.getByText('SelectOrdinal Rules')).toBeInTheDocument()
+    expect(screen.getByText('Ordinal rules')).toBeInTheDocument()
   })
 
   test('renders number input for plural variables', () => {
@@ -143,6 +143,23 @@ describe('SegmentFooterTabIcu', () => {
 
     expect(screen.getByText('gender')).toBeInTheDocument()
     expect(screen.getByText('(text)')).toBeInTheDocument()
+  })
+
+  test('shows untyped variables as text and never previews them as undefined', () => {
+    const segment = createSegment(
+      '{brand} sent {count, plural, one {# item} other {# items}}',
+    )
+    render(
+      <SegmentFooterTabIcu
+        segment={segment}
+        active_class="active"
+        tab_class="open"
+      />,
+    )
+
+    expect(screen.getByText('(text)')).toBeInTheDocument()
+    expect(screen.getByText(/sent 1 item/)).toBeInTheDocument()
+    expect(screen.queryByText(/undefined/)).not.toBeInTheDocument()
   })
 
   test('handles invalid ICU string gracefully', () => {
