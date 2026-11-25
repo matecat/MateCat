@@ -145,7 +145,7 @@ describe('ReviewExtendedIssuePanel', () => {
       const headers = Array.from(
         container.querySelectorAll('.re-item-head'),
       ).map((el) => el.textContent)
-      expect(headers).toEqual(['Accuracy', 'Fluency'])
+      expect(headers).toEqual(['New issue', 'Accuracy', 'Fluency'])
       // category 10's actual subcategory rendered underneath its own header
       expect(screen.getByText('Mistranslation')).toBeInTheDocument()
     })

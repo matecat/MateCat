@@ -19,7 +19,7 @@
         "matecat/simple-s3": "^v2.0.0",
         "matecat/subfiltering": "^4.4.2",
         "matecat/whole-text-finder": "^2.0",
-        "matecat/xliff-parser": "~v3.0",
+        "matecat/xliff-parser": "^3.0.9",
         "matecat/icu-intl": "^v1",
         "monolog/monolog": "^3",
         "orhanerday/open-ai": "^4.7",

@@ -186,7 +186,7 @@ jest.mock('../utils/segmentLocalStorage', () => ({
 }))
 
 import React from 'react'
-import SegmentActions from './SegmentActions'
+import SegmentActions, {GLOSSARY_PENDING_TIMEOUT_MS} from './SegmentActions'
 import SegmentUtils from '../utils/segmentUtils'
 import ModalsActions from './ModalsActions'
 import CatToolStore from '../stores/CatToolStore'
@@ -1432,6 +1432,7 @@ describe('SegmentActions glossary flows', () => {
     global.config = baseConfig()
     jest.clearAllMocks()
     CatToolStore.haveKeysGlossary = true
+    SegmentActions.clearAllPendingGlossaryRequests()
   })
 
   test('getGlossaryForSegment returns early without glossary keys', () => {
@@ -1459,6 +1460,85 @@ describe('SegmentActions glossary flows', () => {
     SegmentStore.getSegmentByIdToJS.mockReturnValue({glossary: undefined})
     SegmentActions.getGlossaryForSegment({sid: '1', fid: 2, text: 'hi'})
     expect(getGlossaryForSegment).toHaveBeenCalled()
+  })
+
+  describe('pending glossary requests', () => {
+    beforeEach(() => {
+      getGlossaryForSegment.mockReturnValue(Promise.resolve())
+      SegmentStore.getNextSegment.mockReturnValue(null)
+      SegmentStore.getSegmentByIdToJS.mockReturnValue({glossary: undefined})
+    })
+
+    afterEach(() => {
+      jest.useRealTimers()
+      SegmentActions.clearAllPendingGlossaryRequests()
+    })
+
+    const openSegment = (sid = '1') =>
+      SegmentActions.getGlossaryForSegment({sid, fid: 2, text: 'hello'})
+
+    test('reopening a segment whose result has not arrived does not request it again', () => {
+      openSegment()
+      openSegment()
+      expect(getGlossaryForSegment).toHaveBeenCalledTimes(1)
+    })
+
+    test('the SSE result frees the segment for a new request', () => {
+      openSegment()
+      SegmentActions.setGlossaryForSegment(1, [])
+      openSegment()
+      expect(getGlossaryForSegment).toHaveBeenCalledTimes(2)
+    })
+
+    test('a prefetched segment still waiting for its result is not requested again', () => {
+      SegmentStore.getNextSegment.mockImplementation(({current_sid}) =>
+        current_sid === '1' ? {sid: '2', fid: 2, segment: 'next'} : null,
+      )
+      openSegment('1')
+      openSegment('1')
+      const requested = getGlossaryForSegment.mock.calls.map(
+        ([{idSegment}]) => idSegment,
+      )
+      expect(requested).toEqual(['1', '2'])
+    })
+
+    test('a failed request frees the segment, since no result will arrive', async () => {
+      getGlossaryForSegment.mockReturnValueOnce(Promise.reject(new Error('x')))
+      openSegment()
+      await Promise.resolve()
+      await Promise.resolve()
+      openSegment()
+      expect(getGlossaryForSegment).toHaveBeenCalledTimes(2)
+      expect(OfflineUtils.failedConnection).toHaveBeenCalled()
+    })
+
+    test('a result that never arrives frees the segment after the timeout', () => {
+      jest.useFakeTimers()
+      openSegment()
+      jest.advanceTimersByTime(GLOSSARY_PENDING_TIMEOUT_MS - 1)
+      openSegment()
+      expect(getGlossaryForSegment).toHaveBeenCalledTimes(1)
+      jest.advanceTimersByTime(1)
+      openSegment()
+      expect(getGlossaryForSegment).toHaveBeenCalledTimes(2)
+    })
+
+    test('a refresh asks again even while a result is pending', () => {
+      openSegment()
+      SegmentActions.getGlossaryForSegment({
+        sid: '1',
+        text: 'hello',
+        shouldRefresh: true,
+      })
+      expect(getGlossaryForSegment).toHaveBeenCalledTimes(2)
+    })
+
+    test('clearing all pending requests frees every segment', () => {
+      openSegment('1')
+      SegmentActions.clearAllPendingGlossaryRequests()
+      openSegment('1')
+      expect(getGlossaryForSegment).toHaveBeenCalledTimes(2)
+    })
   })
 
   test('searchGlossary calls api and tracks target search flag', () => {

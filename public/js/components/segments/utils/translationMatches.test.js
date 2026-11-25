@@ -98,7 +98,9 @@ jest.mock('../../../utils/segmentText/tagUtils', () => ({
   encodeTagsFromUnicodeChar: jest.fn((text) => text),
 }))
 
-import TranslationMatches from './translationMatches'
+import TranslationMatches, {
+  CONTRIBUTION_PENDING_TIMEOUT_MS,
+} from './translationMatches'
 import SegmentStore from '../../../stores/SegmentStore'
 import SegmentUtils from '../../../utils/segmentUtils'
 import CommonUtils from '../../../utils/commonUtils'
@@ -140,7 +142,7 @@ const mockJobMetadata = (mtExtra) =>
 describe('translationMatches', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    TranslationMatches.segmentsWaitingForContributions = []
+    TranslationMatches.clearAllPendingContributions()
 
     global.config = {
       translation_matches_enabled: true,
@@ -214,7 +216,8 @@ describe('translationMatches', () => {
       }),
     )
 
-    expect(TranslationMatches.segmentsWaitingForContributions).toEqual([])
+    // Queued, not answered: the SSE result frees it
+    expect(TranslationMatches.isContributionPending(101)).toBe(true)
   })
 
   test('falls back to classic contributions when Lara auth fails', async () => {
@@ -773,7 +776,7 @@ describe('translationMatches', () => {
     })
 
     test('does not start a duplicate request for a segment already awaiting contributions', async () => {
-      TranslationMatches.segmentsWaitingForContributions = [101]
+      TranslationMatches.markContributionPending(101)
       global.config.active_engine = {engine_type: 'DeepL'}
 
       await TranslationMatches.getContribution({
@@ -869,6 +872,85 @@ describe('translationMatches', () => {
         [],
         expect.any(Error),
       )
+    })
+  })
+
+  describe('pending contributions', () => {
+    const request = (overrides = {}) =>
+      TranslationMatches.getContribution({
+        sid: 1,
+        crossLanguageSettings: null,
+        force: false,
+        ...overrides,
+      })
+
+    beforeEach(() => {
+      global.config.active_engine = {engine_type: 'DeepL'}
+    })
+
+    afterEach(() => jest.useRealTimers())
+
+    test('does not enqueue a segment again once the request is queued but its result has not arrived', async () => {
+      getContributions.mockResolvedValue({data: {message: 'OK'}})
+
+      await request()
+      await request()
+
+      expect(getContributions).toHaveBeenCalledTimes(1)
+    })
+
+    test('requests the segment again after its SSE result frees it', async () => {
+      getContributions.mockResolvedValue({data: {message: 'OK'}})
+
+      await request()
+      // The SSE payload carries the id as a string
+      TranslationMatches.clearPendingContribution('101')
+      await request()
+
+      expect(getContributions).toHaveBeenCalledTimes(2)
+    })
+
+    test('requests the segment again after a failed request', async () => {
+      getContributions.mockRejectedValueOnce([{code: -1, message: 'boom'}])
+      getContributions.mockResolvedValueOnce({data: {message: 'OK'}})
+
+      await request()
+      await request()
+
+      expect(getContributions).toHaveBeenCalledTimes(2)
+    })
+
+    test('requests the segment again when its result never arrives', async () => {
+      jest.useFakeTimers()
+      getContributions.mockResolvedValue({data: {message: 'OK'}})
+
+      await request()
+      jest.advanceTimersByTime(CONTRIBUTION_PENDING_TIMEOUT_MS - 1)
+      await request()
+      expect(getContributions).toHaveBeenCalledTimes(1)
+
+      jest.advanceTimersByTime(1)
+      await request()
+      expect(getContributions).toHaveBeenCalledTimes(2)
+    })
+
+    test('a forced request is sent even while the segment is pending', async () => {
+      getContributions.mockResolvedValue({data: {message: 'OK'}})
+
+      await request()
+      await request({force: true})
+
+      expect(getContributions).toHaveBeenCalledTimes(2)
+    })
+
+    test('clearing all pending segments allows every segment to be requested again', async () => {
+      getContributions.mockResolvedValue({data: {message: 'OK'}})
+
+      await request()
+      TranslationMatches.clearAllPendingContributions()
+      await request()
+
+      expect(getContributions).toHaveBeenCalledTimes(2)
     })
   })
 
