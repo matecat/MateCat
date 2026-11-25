@@ -1,5 +1,15 @@
 @use '../tokens/colors';
 @use '../commons/variables';
+@use '../commons/mixins';
+
+@include mixins.keyframes(fadeIn) {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
 
 /********Modal window ****/
 .matecat-modal,
@@ -14,6 +24,8 @@
   overflow: auto;
   background-color: colors.$black;
   background-color: rgba(0, 0, 0, 0.4);
+  @include mixins.animation-name(fadeIn);
+  @include mixins.animation-duration(0.25s);
 }
 
 .matecat-modal p,
@@ -99,10 +111,6 @@
   transform: translate(-50%, -50%);
   width: 60%;
   border-radius: 16px;
-  -webkit-animation-name: animatetop;
-  -webkit-animation-duration: 0.4s;
-  animation-name: animatetop;
-  animation-duration: 0.4s;
   text-align: center;
   max-width: 640px;
   min-width: 400px;

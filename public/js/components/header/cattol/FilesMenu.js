@@ -37,7 +37,6 @@ export const FilesMenu = ({projectName}) => {
 
   const toggleMenu = (open) => {
     if (open) {
-      CatToolActions.closeSubHeader()
       const current = SegmentStore.getCurrentSegment()
       if (current && current.opened) {
         setCurrentSegment(current.sid)

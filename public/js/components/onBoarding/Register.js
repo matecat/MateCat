@@ -16,6 +16,7 @@ import Checkmark from '../../../img/icons/Checkmark'
 import {registerUser} from '../../api/registerUser'
 import CommonUtils from '../../utils/commonUtils'
 import {resendEmailConfirmation} from '../../api/resendEmailConfirmation/resendEmailConfirmation'
+import {Checkbox, CHECKBOX_STATE} from '../common/Checkbox'
 
 const Register = () => {
   const {setStep, redirectAfterLogin} = useContext(OnBoardingContext)
@@ -254,9 +255,14 @@ const Register = () => {
               }) => (
                 <div className="terms-and-conditions">
                   <div className="input-container">
-                    <input
-                      type="checkbox"
-                      {...{name, value, onChange, error}}
+                    <Checkbox
+                      name={name}
+                      value={
+                        value
+                          ? CHECKBOX_STATE.CHECKED
+                          : CHECKBOX_STATE.UNCHECKED
+                      }
+                      onChange={(isChecked) => onChange(isChecked)}
                     />
                     <span>
                       Accept{' '}

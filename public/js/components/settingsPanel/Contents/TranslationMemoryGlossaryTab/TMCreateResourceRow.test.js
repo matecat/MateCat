@@ -56,6 +56,40 @@ test('the name input is focused on mount', () => {
   expect(screen.getByTestId(row.id)).toHaveFocus()
 })
 
+test('toggling the lookup checkbox updates the special row via setSpecialRows', async () => {
+  const user = userEvent.setup()
+  const row = newResourceRow()
+  const setSpecialRows = jest.fn()
+
+  render(<Wrapper row={row} setSpecialRows={setSpecialRows} />)
+
+  await user.click(screen.getByTestId(`tmkey-create-lookup-${row.id}`))
+
+  expect(setSpecialRows).toHaveBeenCalledWith(expect.any(Function))
+  const updater = setSpecialRows.mock.calls[0][0]
+  const result = updater([{id: row.id, r: false}])
+  expect(result).toEqual([
+    {id: row.id, r: true, w: false, name: '', key: undefined},
+  ])
+})
+
+test('toggling the update checkbox updates the special row via setSpecialRows', async () => {
+  const user = userEvent.setup()
+  const row = newResourceRow()
+  const setSpecialRows = jest.fn()
+
+  render(<Wrapper row={row} setSpecialRows={setSpecialRows} />)
+
+  await user.click(screen.getByTestId(`tmkey-create-update-${row.id}`))
+
+  expect(setSpecialRows).toHaveBeenCalledWith(expect.any(Function))
+  const updater = setSpecialRows.mock.calls[0][0]
+  const result = updater([{id: row.id, w: false}])
+  expect(result).toEqual([
+    {id: row.id, w: true, r: false, name: '', key: undefined},
+  ])
+})
+
 test('the confirm button is disabled until a name is provided for a new resource', async () => {
   const user = userEvent.setup()
   const row = newResourceRow()
