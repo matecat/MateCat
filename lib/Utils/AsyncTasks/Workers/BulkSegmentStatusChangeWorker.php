@@ -22,6 +22,7 @@ use ReflectionException;
 use Throwable;
 use TypeError;
 use Utils\ActiveMQ\AMQHandler;
+use Utils\ActiveMQ\BulkActionCompletedMessage;
 use Utils\Logger\MatecatLogger;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
@@ -133,6 +134,16 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker
 
             return true;
         });
+
+        // Sent on every completion, a no-op included, so a tab waiting for the write to land is
+        // always released. The per-client message below predates it and is kept as it was.
+        $this->publishCompletion(BulkActionCompletedMessage::build(
+            $chunk,
+            BulkActionCompletedMessage::ACTION_BULK_STATUS_CHANGE,
+            $changed ? $params['segment_ids'] : [],
+            $status,
+            $client_id ? (string)$client_id : null,
+        ));
 
         if (!$changed) {
             return;

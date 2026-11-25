@@ -11,6 +11,8 @@ use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
+use Matecat\TestHelpers\RecordingStatefulStomp;
+use Matecat\TestHelpers\UnreachableStatefulStomp;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
@@ -27,7 +29,10 @@ use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use ReflectionException;
 use TypeError;
+use Utils\ActiveMQ\AMQHandler;
+use Utils\ActiveMQ\BulkActionCompletedMessage;
 use Utils\Constants\SourcePages;
+use Utils\Registry\AppConfig;
 use Utils\Logger\MatecatLogger;
 
 /**
@@ -40,8 +45,15 @@ use Utils\Logger\MatecatLogger;
  */
 class TestableCopyAllSourceToTargetController extends CopyAllSourceToTargetController
 {
+    public AMQHandler $fakeQueueHandler;
+
     public function __construct()
     {
+    }
+
+    protected function getQueueHandler(): AMQHandler
+    {
+        return $this->fakeQueueHandler;
     }
 
     protected function initDependencies(): void
@@ -68,6 +80,7 @@ class CopyAllSourceToTargetControllerTest extends AbstractTest
     private TestableCopyAllSourceToTargetController $controller;
     private Request $requestStub;
     private Response&MockObject $responseMock;
+    private RecordingStatefulStomp $stomp;
 
     /**
      * @throws ReflectionException
@@ -85,6 +98,7 @@ class CopyAllSourceToTargetControllerTest extends AbstractTest
         $this->seedTestData();
 
         $this->controller = new TestableCopyAllSourceToTargetController();
+        [$this->controller->fakeQueueHandler, $this->stomp] = RecordingStatefulStomp::handler();
         $this->reflector  = new ReflectionClass(CopyAllSourceToTargetController::class);
 
         $this->requestStub  = new Request();
@@ -665,4 +679,82 @@ class CopyAllSourceToTargetControllerTest extends AbstractTest
         self::assertSame([], $this->eventSegmentIds());
     }
 
+    // ─── bulk action completed notification ───
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
+     */
+    #[Test]
+    public function copy_tells_the_job_room_which_segments_it_promoted(): void
+    {
+        $promoted = $this->seedExtraSegments([
+            ['source' => 'New one', 'status' => 'NEW'],
+            ['source' => 'Already done', 'status' => 'TRANSLATED', 'translation' => 'Fatto'],
+        ])[0];
+        $this->setRequestParams(['client_id' => 'tab-1']);
+
+        $this->controller->copy();
+
+        $this->assertCount(1, $this->stomp->sentMessages);
+        $this->assertSame(AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME, $this->stomp->sentMessages[0][0]);
+
+        $message = $this->stomp->decodedBodies()[0];
+        $this->assertSame(BulkActionCompletedMessage::TYPE, $message['_type']);
+        $this->assertSame($this->jobId(self::BASE), $message['data']['id_job']);
+        $this->assertSame(BulkActionCompletedMessage::ACTION_COPY_SOURCE_TO_TARGET, $message['data']['payload']['action']);
+        $this->assertSame(self::JOB_PASSWORD, $message['data']['payload']['password']);
+        $this->assertSame('tab-1', $message['data']['payload']['id_client']);
+        $this->assertNull($message['data']['payload']['status']);
+
+        $segmentIds = $message['data']['payload']['segment_ids'];
+        sort($segmentIds);
+        $this->assertSame([$this->segmentId(self::BASE), $promoted], $segmentIds);
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
+     */
+    #[Test]
+    public function copy_still_notifies_when_nothing_was_promoted(): void
+    {
+        $this->seedConnection()->exec(
+            "UPDATE segment_translations SET status = 'TRANSLATED' WHERE id_job = " . $this->jobId(self::BASE)
+        );
+
+        $this->controller->copy();
+
+        $message = $this->stomp->decodedBodies()[0];
+        $this->assertSame([], $message['data']['payload']['segment_ids']);
+        $this->assertNull($message['data']['payload']['id_client']);
+    }
+
+    /**
+     * The copy is committed before the publish, so an unreachable broker must not turn it into an
+     * error: the response still goes out and the rows stay promoted.
+     *
+     * @throws ReflectionException
+     * @throws Exception
+     * @throws TypeError
+     */
+    #[Test]
+    public function copy_responds_and_keeps_the_write_when_the_broker_is_unreachable(): void
+    {
+        [$this->controller->fakeQueueHandler] = UnreachableStatefulStomp::handler();
+
+        $this->responseMock->expects($this->once())
+            ->method('json')
+            ->with($this->callback(function (array $data): bool {
+                $this->assertSame(1, $data['segments_modified']);
+
+                return true;
+            }));
+
+        $this->controller->copy();
+
+        $this->assertSame('DRAFT', $this->translationRows()[$this->segmentId(self::BASE)]['status']);
+    }
 }

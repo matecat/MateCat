@@ -21,6 +21,7 @@ const CROSS_LANG_CONTRIBUTIONS = 'cross_language_matches';
 const BULK_STATUS_CHANGE_TYPE = 'bulk_segment_status_change';
 const SEGMENT_DISABLED_TYPE = 'segment_disabled';
 const SEGMENT_ENABLED_TYPE = 'segment_enabled';
+const BULK_ACTION_COMPLETED_TYPE = 'bulk_action_completed';
 
 const LOGOUT = 'logout';
 const UPGRADE = 'upgrade';
@@ -55,6 +56,14 @@ export class MessageHandler {
         break;
       case ENGINE_QUOTA_EXCEEDED:
       case COMMENTS_TYPE:
+        room = message.data.id_job.toString();
+        break;
+      case BULK_ACTION_COMPLETED_TYPE:
+        // Every tab on the job reloads the segments, not only the one that started the action.
+        if (!message.data.id_job) {
+          logger.error('Missing id_job in AMQ message', {type: message._type, data: message.data});
+          return;
+        }
         room = message.data.id_job.toString();
         break;
       case SEGMENT_DISABLED_TYPE:

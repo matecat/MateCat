@@ -13,6 +13,7 @@ use Exception;
 use Model\DataAccess\IDatabase;
 use PDOException;
 use Stomp\Transport\Message;
+use Throwable;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\Logger\LoggerFactory;
 use Utils\Logger\MatecatLogger;
@@ -215,6 +216,26 @@ abstract class AbstractWorker
         }
         $this->_getAmqHandlerForPublish()->publishToNodeJsClients(AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message($message, ['persistent' => 'false']));
         $this->logger->debug($message);
+    }
+
+    /**
+     * Publishes a notification for work that is already committed.
+     *
+     * A failure is logged, never thrown: a throw here would requeue the message and run the
+     * committed write a second time, for a notification the browser can do without — a tab that
+     * misses it reads the right state on its next load.
+     *
+     * @param array<string, mixed> $message
+     */
+    protected function publishCompletion(array $message): void
+    {
+        try {
+            $this->publishToNodeJsClients($message);
+        } catch (Throwable $e) {
+            $this->logger->error('Failed to publish the completion notification to the socket queue: ' . $e->getMessage(), [
+                'type' => $message['_type'] ?? null,
+            ]);
+        }
     }
 
     /**

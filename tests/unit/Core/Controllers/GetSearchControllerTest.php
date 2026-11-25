@@ -9,6 +9,7 @@ use InvalidArgumentException;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
+use Matecat\TestHelpers\RecordingStatefulStomp;
 use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\Hook\Event\Run\PostAddSegmentTranslationEvent;
@@ -24,6 +25,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use ReflectionException;
 use RuntimeException;
+use Utils\ActiveMQ\AMQHandler;
 use Utils\Constants\SourcePages;
 use Utils\Logger\MatecatLogger;
 use Utils\Search\ReplaceHistory;
@@ -34,6 +36,13 @@ class TestableGetSearchController extends GetSearchController
     {
     }
 
+    /**
+     * Never a real broker: replace-all and undo publish a completion notification.
+     */
+    protected function getQueueHandler(): AMQHandler
+    {
+        return RecordingStatefulStomp::handler()[0];
+    }
 }
 
 /**

@@ -5,6 +5,7 @@ namespace Controller\API\App;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\PublishesBulkActionCompletedTrait;
 use DomainException;
 use Exception;
 use InvalidArgumentException;
@@ -31,6 +32,7 @@ use ReflectionException;
 use RuntimeException;
 use Throwable;
 use TypeError;
+use Utils\ActiveMQ\BulkActionCompletedMessage;
 use Utils\Constants\TranslationStatus;
 use Utils\Registry\AppConfig;
 use Utils\Search\ReplaceHistory;
@@ -39,6 +41,7 @@ use Utils\Tools\Utils;
 
 class GetSearchController extends AbstractStatefulKleinController
 {
+    use PublishesBulkActionCompletedTrait;
 
     private JobStruct $chunk;
 
@@ -127,6 +130,14 @@ class GetSearchController extends AbstractStatefulKleinController
             array_filter($committed, static fn(SegmentTranslationStruct $translation): bool => $translation->isLocked())
         ));
 
+        // Every segment's scope has committed by now. `segments` lists every search hit, skipped
+        // ones included, so the message names only the committed ones.
+        $this->publishBulkActionCompleted(
+            $this->chunk,
+            BulkActionCompletedMessage::ACTION_REPLACE_ALL,
+            array_map(static fn(SegmentTranslationStruct $translation): int => (int)$translation->id_segment, $committed)
+        );
+
         $this->response->json([
             "errors" => [],
             "data" => [],
@@ -148,6 +159,12 @@ class GetSearchController extends AbstractStatefulKleinController
         $search_results = $this->getSegmentForUndoReplaceAll($shr);
         $this->undoSegments($search_results, (int)$this->chunk->id, $request['queryParams'], true);
         $shr->undo();
+
+        $this->publishBulkActionCompleted(
+            $this->chunk,
+            BulkActionCompletedMessage::ACTION_UNDO_REPLACE_ALL,
+            array_map(static fn(array $row): int => (int)$row['id_segment'], $search_results)
+        );
 
         $this->response->json([
             'success' => true

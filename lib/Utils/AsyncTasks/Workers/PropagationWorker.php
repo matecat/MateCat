@@ -13,6 +13,7 @@ use PDOException;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
 use ReflectionException;
 use Utils\ActiveMQ\AMQHandler;
+use Utils\ActiveMQ\BulkActionCompletedMessage;
 use Utils\Logger\MatecatLogger;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
@@ -169,6 +170,18 @@ class PropagationWorker extends AbstractWorker
 
             // Propagation copies `warning` and `status` onto other segments of the job.
             (new WarningDao($this->database))->destroyCachesByJobId((int)$propagatorSegment['id_job']);
+
+            // Only this branch writes, so only this branch notifies: every other run of the worker
+            // would announce a propagation that changed nothing, once per saved translation.
+            $this->publishCompletion(BulkActionCompletedMessage::build(
+                $structures['job'],
+                BulkActionCompletedMessage::ACTION_PROPAGATION,
+                array_map(
+                    static fn($segment): int => (int)$segment['id_segment'],
+                    $propagationTotalStruct->getAllToPropagate()
+                ),
+                $propagatorSegment['status'],
+            ));
         }
     }
 

@@ -2,6 +2,7 @@
 
 namespace Matecat\Core\Workers;
 
+use ArrayObject;
 use Exception;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\AbstractDaoObjectStruct;
@@ -16,9 +17,12 @@ use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\MockObject;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use Plugins\Features\TranslationEvents\TranslationEventsHandler;
+use Stomp\Exception\ConnectionException;
 use Utils\ActiveMQ\AMQHandler;
+use Utils\ActiveMQ\BulkActionCompletedMessage;
 use Utils\AsyncTasks\Workers\BulkSegmentStatusChangeWorker;
 use Utils\Constants\SourcePages;
 use Utils\Registry\AppConfig;
@@ -131,17 +135,40 @@ class BulkSegmentStatusChangeWorkerTest extends AbstractTest
         );
     }
 
+    /**
+     * Records every message the worker publishes, in order.
+     *
+     * @return ArrayObject<int, array<string, mixed>>
+     */
+    private function recordPublishes(BulkSegmentStatusChangeWorker&MockObject $worker): ArrayObject
+    {
+        $published = new ArrayObject();
+        $worker->method('publishToNodeJsClients')->willReturnCallback(
+            static function (mixed $message) use ($published): void {
+                $published[] = $message;
+            }
+        );
+
+        return $published;
+    }
+
+    /**
+     * Nothing to change still completes the action, so the job room is told, with no segments, and
+     * a tab waiting on it is released. The per-client message stays silent, as it always was.
+     */
     #[Test]
-    public function processReturnsEarlyOnEmptyTranslations(): void
+    public function processAnnouncesAnEmptyCompletionOnEmptyTranslations(): void
     {
         $this->stmtStub->method('fetchAll')->willReturn([]);
 
         $worker = $this->createWorker();
-        $worker->expects($this->never())->method('publishToNodeJsClients');
+        $published = $this->recordPublishes($worker);
 
         $worker->process($this->createQueueElement());
 
-        $this->assertTrue(true);
+        $this->assertCount(1, $published);
+        $this->assertSame(BulkActionCompletedMessage::TYPE, $published[0]['_type']);
+        $this->assertSame([], $published[0]['data']['payload']['segment_ids']);
     }
 
     #[Test]
@@ -158,13 +185,37 @@ class BulkSegmentStatusChangeWorkerTest extends AbstractTest
         $this->stmtStub->method('rowCount')->willReturn(1);
 
         $worker = $this->createWorker();
-        $worker->expects($this->once())->method('publishToNodeJsClients');
+        $published = $this->recordPublishes($worker);
 
         $worker->process($this->createQueueElement());
+
+        $this->assertCount(2, $published);
+
+        [$completed, $legacy] = $published->getArrayCopy();
+        $this->assertSame([
+            '_type' => BulkActionCompletedMessage::TYPE,
+            'data' => [
+                'id_job' => 1,
+                'passwords' => 'abc',
+                'payload' => [
+                    'action' => BulkActionCompletedMessage::ACTION_BULK_STATUS_CHANGE,
+                    'id_job' => 1,
+                    'password' => 'abc',
+                    'id_client' => 'client1',
+                    'segment_ids' => [10, 20, 30],
+                    'status' => 'TRANSLATED',
+                ],
+            ],
+        ], $completed);
+
+        // The per-client message the editor already listens to is unchanged.
+        $this->assertSame('bulk_segment_status_change', $legacy['_type']);
+        $this->assertSame('client1', $legacy['data']['id_client']);
+        $this->assertSame(['segment_ids' => [10, 20, 30], 'status' => 'TRANSLATED'], $legacy['data']['payload']);
     }
 
     #[Test]
-    public function processSkipsPublishWhenNoClientId(): void
+    public function processAnnouncesOnlyTheCompletionWhenNoClientId(): void
     {
         $seg = new SegmentTranslationStruct();
         $seg->id_segment = 10;
@@ -177,9 +228,39 @@ class BulkSegmentStatusChangeWorkerTest extends AbstractTest
         $this->stmtStub->method('rowCount')->willReturn(1);
 
         $worker = $this->createWorker();
-        $worker->expects($this->never())->method('publishToNodeJsClients');
+        $published = $this->recordPublishes($worker);
 
         $worker->process($this->createQueueElement(null));
+
+        $this->assertCount(1, $published);
+        $this->assertSame(BulkActionCompletedMessage::TYPE, $published[0]['_type']);
+        $this->assertNull($published[0]['data']['payload']['id_client']);
+        $this->assertSame([10, 20, 30], $published[0]['data']['payload']['segment_ids']);
+    }
+
+    /**
+     * The status change is committed when the notification goes out. A broker failure that escaped
+     * would requeue the message and book every revision event a second time.
+     */
+    #[Test]
+    public function processSwallowsABrokerFailureAfterTheCommit(): void
+    {
+        $seg = new SegmentTranslationStruct();
+        $seg->id_segment = 10;
+        $seg->id_job = 1;
+        $seg->status = 'DRAFT';
+        $seg->segment_hash = 'abc';
+
+        $this->stmtStub->method('fetchAll')->willReturn([$seg]);
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('rowCount')->willReturn(1);
+
+        $worker = $this->createWorker();
+        $worker->method('publishToNodeJsClients')->willThrowException(new ConnectionException('Broker unreachable'));
+
+        $worker->process($this->createQueueElement(null));
+
+        $this->addToAssertionCount(1);
     }
 
     #[Test]
