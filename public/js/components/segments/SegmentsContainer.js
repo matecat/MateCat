@@ -10,7 +10,8 @@ import React, {
 } from 'react'
 import PropTypes from 'prop-types'
 import {fromJS} from 'immutable'
-import ReactDOMServer from 'react-dom/server'
+import {flushSync} from 'react-dom'
+import {createRoot} from 'react-dom/client'
 import {useHotkeys} from 'react-hotkeys-hook'
 import {Shortcuts} from '../../utils/shortcuts'
 import VirtualList from '../common/VirtualList/VirtualList'
@@ -297,14 +298,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
   }, [])
 
   const getSegmentRealHeight = useCallback(
-    ({segment, previousSegment}) => {
-      const container = document.createElement('div', {})
-      const html = getSegmentStructure(segment.toJS(), isSideOpen)
-      container.innerHTML = ReactDOMServer.renderToStaticMarkup(html)
-      document.getElementById('outer').appendChild(container)
-      const height = container.getElementsByTagName('section')[0].clientHeight
-      container.parentNode.removeChild(container)
-
+    ({segment, previousSegment, height}) => {
       const getBasicSize = ({segment, previousSegment}) => {
         let basicSize = 0
         // if is the first segment of a file, add the 43px of the file header
@@ -334,7 +328,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
       const realHeight = height + getBasicSize({segment, previousSegment})
       return realHeight > ROW_HEIGHT ? realHeight : ROW_HEIGHT
     },
-    [isSideOpen, files],
+    [files],
   )
 
   const setBulkSelection = useCallback(
@@ -644,28 +638,45 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
           : // default start index of virtual list component
             startIndex
 
-    rows
+    const rowsToMeasure = rows
       .filter(
         ({segImmutable}, index) =>
           index <= stopIndex || segImmutable.get('opened'),
       )
-      .forEach((row, index) => {
-        const cached = cachedRowsHeightMap.current.get(row.id)
-        const previousSegment =
-          index > 0 ? rows[index - 1].segImmutable : undefined
-        const newHeight = !cached
-          ? getRowHeightWithMargin({
-              id: row.id,
-              height: getSegmentRealHeight({
-                segment: row.segImmutable,
-                previousSegment,
-              }),
-            })
-          : cached
-        cachedRowsHeightMap.current.set(row.id, newHeight)
-      })
+      .map((row, index) => ({
+        row,
+        previousSegment: index > 0 ? rows[index - 1].segImmutable : undefined,
+      }))
+      .filter(({row}) => !cachedRowsHeightMap.current.get(row.id))
 
-    setHasCachedRows(true)
+    // React cannot render the measuring markup synchronously from inside an
+    // effect, so it runs in a microtask: after the effect, still before the
+    // browser paints or handles any input.
+    let cancelled = false
+    queueMicrotask(() => {
+      if (cancelled) return
+      const heights = measureSegmentStructures(
+        rowsToMeasure.map(({row}) => row.segImmutable.toJS()),
+        isSideOpen,
+      )
+      rowsToMeasure.forEach(({row, previousSegment}, index) => {
+        cachedRowsHeightMap.current.set(
+          row.id,
+          getRowHeightWithMargin({
+            id: row.id,
+            height: getSegmentRealHeight({
+              segment: row.segImmutable,
+              previousSegment,
+              height: heights[index],
+            }),
+          }),
+        )
+      })
+      setHasCachedRows(true)
+    })
+    return () => {
+      cancelled = true
+    }
   }, [
     rows,
     essentialRows,
@@ -674,6 +685,7 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     startIndex,
     getSegmentRealHeight,
     getRowHeightWithMargin,
+    isSideOpen,
   ])
 
   // adapt scroll when was added more segments before
@@ -1016,10 +1028,7 @@ const getSegmentStructure = (segment, sideOpen) => {
   }
 
   return (
-    <section
-      className={`status-draft ${sideOpen ? 'slide-right' : ''}`}
-      ref={(section) => (this.section = section)}
-    >
+    <section className={`status-draft ${sideOpen ? 'slide-right' : ''}`}>
       <div className="sid">
         <div className="txt">0000000</div>
         <div className="txt segment-add-inBulk">
@@ -1120,4 +1129,31 @@ const getSegmentStructure = (segment, sideOpen) => {
       <div className="segment-side-container"></div>
     </section>
   )
+}
+
+// Height of the placeholder structure of each segment as laid out in the list.
+// All segments render in one detached root and one layout; the root and its
+// container are gone before this returns. Must run outside React rendering
+// and effects, where flushSync cannot render synchronously.
+const measureSegmentStructures = (segments, sideOpen) => {
+  if (!segments.length) return []
+  const container = document.createElement('div')
+  document.getElementById('outer').appendChild(container)
+  const root = createRoot(container)
+  try {
+    flushSync(() =>
+      root.render(
+        segments.map((segment, index) => (
+          <div key={index}>{getSegmentStructure(segment, sideOpen)}</div>
+        )),
+      ),
+    )
+    return Array.from(
+      container.children,
+      (child) => child.getElementsByTagName('section')[0].clientHeight,
+    )
+  } finally {
+    root.unmount()
+    container.remove()
+  }
 }

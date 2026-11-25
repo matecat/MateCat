@@ -1,5 +1,5 @@
 import React from 'react'
-import {render, act, fireEvent, within} from '@testing-library/react'
+import {render, act, fireEvent, screen, within} from '@testing-library/react'
 import {fromJS} from 'immutable'
 import SegmentStore from '../../stores/SegmentStore'
 import CatToolStore from '../../stores/CatToolStore'
@@ -48,6 +48,7 @@ const mockSegmentStoreListeners = {}
 const mockCatToolStoreListeners = {}
 let mockCapturedFindFirstVisibleRow
 let mockCapturedScrollToIndex
+let mockCapturedItems = []
 
 jest.mock('../../stores/SegmentStore', () => ({
   addListener: jest.fn((event, cb) => {
@@ -128,10 +129,6 @@ jest.mock('../common/ApplicationWrapper/ApplicationWrapperContext', () => {
   }
 })
 
-jest.mock('react-dom/server', () => ({
-  renderToStaticMarkup: jest.fn(() => '<section></section>'),
-}))
-
 jest.mock('../common/VirtualList/VirtualList', () => {
   const React = require('react')
   return React.forwardRef(
@@ -150,6 +147,7 @@ jest.mock('../common/VirtualList/VirtualList', () => {
     ) => {
       mockCapturedFindFirstVisibleRow = findFirstVisibleRow
       mockCapturedScrollToIndex = scrollToIndex
+      mockCapturedItems = items
 
       React.useEffect(() => {
         if (setFirstRowIdVisible) setFirstRowIdVisible(items[0]?.id)
@@ -378,9 +376,9 @@ describe('SegmentsContainer', () => {
       }).not.toThrow()
     })
 
-    test('does not crash when fired after segments are rendered', () => {
+    test('does not crash when fired after segments are rendered', async () => {
       renderComponent()
-      act(() => {
+      await act(async () => {
         mockSegmentStoreListeners[SegmentConstants.RENDER_SEGMENTS](
           makeSegments(['1', '2', '3']),
         )
@@ -402,10 +400,10 @@ describe('SegmentsContainer', () => {
       // No crash, component still renders
     })
 
-    test('updates segments state when segments are provided', () => {
+    test('updates segments state when segments are provided', async () => {
       renderComponent()
       const segs = makeSegments(['1', '2', '3'])
-      act(() => {
+      await act(async () => {
         mockSegmentStoreListeners[SegmentConstants.RENDER_SEGMENTS](segs)
       })
       // No crash means state update was handled
@@ -485,9 +483,9 @@ describe('SegmentsContainer', () => {
       expect(getByTestId('virtual-list')).toBeInTheDocument()
     })
 
-    test('scrolls directly to the target index with a start align and a numeric offset', () => {
+    test('scrolls directly to the target index with a start align and a numeric offset', async () => {
       renderComponent({startSegmentId: '2'})
-      act(() => {
+      await act(async () => {
         mockSegmentStoreListeners[SegmentConstants.RENDER_SEGMENTS](
           makeSegments(['1', '2', '3']),
         )
@@ -500,9 +498,9 @@ describe('SegmentsContainer', () => {
       })
     })
 
-    test('does not apply an offset when scrolling to the selected segment (align auto)', () => {
+    test('does not apply an offset when scrolling to the selected segment (align auto)', async () => {
       renderComponent({startSegmentId: '1'})
-      act(() => {
+      await act(async () => {
         mockSegmentStoreListeners[SegmentConstants.RENDER_SEGMENTS](
           makeSegments(['1', '2', '3']),
         )
@@ -517,9 +515,9 @@ describe('SegmentsContainer', () => {
       expect(mockCapturedScrollToIndex.offset).toBeUndefined()
     })
 
-    test('populates a numeric offset even before the sticky bar has been measured', () => {
+    test('populates a numeric offset even before the sticky bar has been measured', async () => {
       renderComponent({startSegmentId: '5'})
-      act(() => {
+      await act(async () => {
         mockSegmentStoreListeners[SegmentConstants.RENDER_SEGMENTS](
           makeSegments(['5']),
         )
@@ -530,13 +528,13 @@ describe('SegmentsContainer', () => {
   })
 
   describe('goToFirstSegment', () => {
-    test('calls SegmentActions.scrollToSegment with firstJobSegment on button click', () => {
+    test('calls SegmentActions.scrollToSegment with firstJobSegment on button click', async () => {
       const {container} = renderComponent({firstJobSegment: '42'})
 
       // Manually trigger scrollTopVisible by dispatching state
       // Since the button only appears when scrollTopVisible is true,
       // we test SegmentActions directly
-      act(() => {
+      await act(async () => {
         // Trigger scroll visibility by simulating a render_segments + scroll
         mockSegmentStoreListeners[SegmentConstants.RENDER_SEGMENTS]?.(
           makeSegments(['1']),
@@ -596,7 +594,6 @@ describe('SegmentsContainer height calculation', () => {
 })
 
 describe('SegmentsContainer height measuring markup', () => {
-  const ReactDOMServer = require('react-dom/server')
   const SegmentUtils = require('../../utils/segmentUtils')
   const SegmentStringUtils = require('../../utils/segmentText/segmentStringUtils')
   const {Base64} = require('js-base64')
@@ -607,23 +604,33 @@ describe('SegmentsContainer height measuring markup', () => {
   const ph = (html) =>
     `<ph id="m1" ctype="x-html" equiv-text="base64:${Base64.encode(html)}"/>`
 
-  // Renders one segment and returns the markup measured for it, as a DOM node
-  const measuredMarkup = (segment) => {
-    const {renderToStaticMarkup: toStaticMarkup} =
-      jest.requireActual('react-dom/server')
-    const measured = []
-    ReactDOMServer.renderToStaticMarkup.mockImplementation((element) => {
-      measured.push(toStaticMarkup(element))
-      return measured.at(-1)
+  // jsdom lays nothing out: every measured section reports the height given
+  // by `heightOf`, and a copy of it is kept to check what was measured
+  let measuredSections
+  let clientHeightSpy
+  const measureSectionsAs = (heightOf) => {
+    clientHeightSpy.mockImplementation(function () {
+      if (this.tagName !== 'SECTION') return 0
+      measuredSections.push(this.cloneNode(true))
+      return heightOf(this)
     })
-    renderComponent()
-    act(() => {
+  }
+
+  const renderSegments = async (segments, props) => {
+    renderComponent(props)
+    await act(async () => {
       mockSegmentStoreListeners[SegmentConstants.RENDER_SEGMENTS](
-        fromJS([segment.toJS()]),
+        fromJS(segments.map((segment) => segment.toJS())),
       )
     })
+  }
+
+  // Renders one segment and returns the markup measured for it, as a DOM node
+  const measuredMarkup = async (segment) => {
+    measureSectionsAs(() => 0)
+    await renderSegments([segment])
     const node = document.createElement('div')
-    node.innerHTML = measured[0]
+    node.append(measuredSections[0])
     return node
   }
 
@@ -639,16 +646,14 @@ describe('SegmentsContainer height measuring markup', () => {
       mockCatToolStoreListeners[event] = cb
     })
     CatToolStore.getJobFilesInfo.mockReturnValue([])
+    measuredSections = []
+    clientHeightSpy = jest.spyOn(Element.prototype, 'clientHeight', 'get')
   })
 
-  afterEach(() => {
-    ReactDOMServer.renderToStaticMarkup.mockImplementation(
-      () => '<section></section>',
-    )
-  })
+  afterEach(() => clientHeightSpy.mockRestore())
 
-  test('measures the source and target text with tags as chips and entities decoded', () => {
-    const markup = measuredMarkup(
+  test('measures the source and target text with tags as chips and entities decoded', async () => {
+    const markup = await measuredMarkup(
       makeSegment('1', {
         segment: `Tom &amp; ${ph('&lt;br/&gt;')}Jerry`,
         translation: `Ciao &lt;mondo&gt; ${ph('&lt;hr/&gt;')}`,
@@ -667,12 +672,12 @@ describe('SegmentsContainer height measuring markup', () => {
     expect(within(markup).queryByText(/equiv-text/)).not.toBeInTheDocument()
   })
 
-  test('measures a segment with tag projection enabled without its tags', () => {
+  test('measures a segment with tag projection enabled without its tags', async () => {
     SegmentUtils.checkCurrentSegmentTPEnabled.mockReturnValue(true)
     SegmentStringUtils.removeTagsFromText.mockImplementation((text) =>
       text.replace(/<ph[^>]*\/>/g, ''),
     )
-    const markup = measuredMarkup(
+    const markup = await measuredMarkup(
       makeSegment('1', {
         segment: `Source ${ph('&lt;br/&gt;')}text`,
         translation: `Target ${ph('&lt;br/&gt;')}text`,
@@ -684,5 +689,26 @@ describe('SegmentsContainer height measuring markup', () => {
     expect(within(markup).getByText('Source text')).toHaveClass('source')
     expect(within(markup).getByText('Target text')).toHaveClass('targetarea')
     expect(within(markup).queryByText('<br/>')).not.toBeInTheDocument()
+  })
+
+  test('gives each row the height its segment takes laid out in the page, then removes the measuring markup', async () => {
+    measureSectionsAs((section) =>
+      section.textContent.includes('Long source') ? 500 : 300,
+    )
+    await renderSegments(
+      [
+        makeSegment('1'),
+        makeSegment('2'),
+        makeSegment('3', {segment: 'Long source'}),
+      ],
+      {startSegmentId: '3'},
+    )
+
+    expect(measuredSections).toHaveLength(3)
+    const [, second, third] = mockCapturedItems
+    // the first row also carries the file header; the other two differ only by their text
+    expect(third.height - second.height).toBe(200)
+    // the rows of the list are mocked and show no text: only leftover measuring markup would
+    expect(screen.queryByText('Long source')).not.toBeInTheDocument()
   })
 })
