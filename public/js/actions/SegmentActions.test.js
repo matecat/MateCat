@@ -141,7 +141,6 @@ jest.mock('../api/getTranslationMismatches', () => ({
   getTranslationMismatches: jest.fn(),
 }))
 
-jest.mock('react', () => ({createElement: jest.fn()}))
 jest.mock('jquery', () => {
   const $ = jest.fn(() => ({find: jest.fn()}))
   $.each = (arr, cb) =>
@@ -185,7 +184,7 @@ jest.mock('../utils/segmentLocalStorage', () => ({
   setLastSegmentFromLocalStorage: jest.fn(),
 }))
 
-import React from 'react'
+import {render, screen} from '@testing-library/react'
 import SegmentActions, {GLOSSARY_PENDING_TIMEOUT_MS} from './SegmentActions'
 import SegmentUtils from '../utils/segmentUtils'
 import ModalsActions from './ModalsActions'
@@ -292,18 +291,13 @@ describe('SegmentActions.handleClickOnReadOnly', () => {
       'Locked segment',
     )
 
-    // `react` is mocked to a bare `createElement` stub in this file (see the
-    // jest.mock('react', ...) above), so the locked-segment alert's JSX `text`
-    // can't be rendered here — instead verify the message was built by
-    // inspecting the arguments passed to the mocked createElement.
-    const lockedTextCall = React.createElement.mock.calls.find((call) =>
-      call.some(
-        (arg) =>
-          typeof arg === 'string' &&
-          arg.includes("locked and shouldn't be edited"),
-      ),
+    const [, {text}] = ModalsActions.showModalComponent.mock.calls.find(
+      ([, , title]) => title === 'Locked segment',
     )
-    expect(lockedTextCall).toBeDefined()
+    render(text)
+    expect(
+      screen.getByText(/locked and shouldn't be edited/),
+    ).toBeInTheDocument()
   })
 
   test('does not show disabled modal when translation_disabled is false', () => {
