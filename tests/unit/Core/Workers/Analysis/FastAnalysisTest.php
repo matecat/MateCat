@@ -34,6 +34,11 @@ use Utils\AsyncTasks\Workers\Analysis\FastAnalysis;
 use Utils\Constants\ProjectStatus;
 use Utils\Registry\AppConfig;
 use Utils\Constants\TranslationStatus;
+use Utils\Engines\AbstractEngine;
+use Utils\Engines\DeepL;
+use Utils\Engines\Lara;
+use Utils\Engines\MyMemory;
+use Utils\Engines\NONE;
 use Utils\TaskRunner\Commons\Context;
 use Utils\TaskRunner\Commons\ContextList;
 use Utils\Engines\Results\MyMemory\AnalyzeResponse;
@@ -2066,7 +2071,38 @@ class FastAnalysisTest extends AbstractTest
     {
         return [
             'Lara is adaptive'         => ['Lara', 'p4'],
+            'Lara by its full name'    => ['Utils\Engines\Lara', 'p4'],
             'DeepL is a plain MT'      => ['DeepL', 'p3'],
+        ];
+    }
+
+    // ─── Engines that use the MT queues ──────────────────────────────────
+
+    /**
+     * @param class-string<AbstractEngine>|null $engineClass
+     */
+    #[Test]
+    #[DataProvider('mtQueueEngineProvider')]
+    public function usesMtQueueMatchesTheMtQueueEngines(?string $engineClass, bool $expected): void
+    {
+        // instanceof needs no engine settings, so the constructor is skipped.
+        $engine = $engineClass === null ? null : (new ReflectionClass($engineClass))->newInstanceWithoutConstructor();
+        $daemon = $this->daemonWithDb($this->stubDatabase());
+
+        $this->assertSame($expected, $this->invoke($daemon, '_usesMtQueue', $engine));
+    }
+
+    /**
+     * @return array<string, array{class-string<AbstractEngine>|null, bool}>
+     */
+    public static function mtQueueEngineProvider(): array
+    {
+        return [
+            'Lara'      => [Lara::class, true],
+            'MyMemory'  => [MyMemory::class, false],
+            'NONE'      => [NONE::class, false],
+            'DeepL'     => [DeepL::class, false],
+            'no engine' => [null, false],
         ];
     }
 }

@@ -1539,6 +1539,31 @@ HD;
     }
 
     /**
+     * Engines whose projects are analysed on the MT queue.
+     *
+     * Example: a project with a Lara job goes to P4.
+     *
+     * @var list<class-string<AbstractEngine>>
+     */
+    private const array MT_QUEUE_ENGINES = [Lara::class];
+
+    /**
+     * Tells whether the engine's projects go to the MT queues.
+     *
+     * Example: a Lara engine gives true; DeepL, MyMemory or no engine at all gives false.
+     */
+    protected function _usesMtQueue(?AbstractEngine $engine): bool
+    {
+        foreach (self::MT_QUEUE_ENGINES as $class) {
+            if ($engine instanceof $class) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Select the right Queue (and the associated redis Key) by its length (simplest implementation simple)
      *
      * @param $queueLen     int
@@ -1560,7 +1585,7 @@ HD;
 
         //use this kind of construct to easily add/remove queues and to disable feature by: comment rows or change the switch flag to false
         return match (true) {
-            $mtEngine instanceof Lara => $contextList['P4'],
+            $this->_usesMtQueue($mtEngine) => $contextList['P4'],
             !$mtEngine instanceof MyMemory && !$mtEngine instanceof NONE => $contextList['P3'],
             $queueLen >= 10000 => $contextList['P2'],
             default => $contextList['P1'],
