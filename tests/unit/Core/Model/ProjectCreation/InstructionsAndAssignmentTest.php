@@ -6,7 +6,6 @@ use ArrayObject;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\TestHelpers\AbstractTest;
 use Model\FeaturesBase\FeatureSet;
-use Model\FeaturesBase\Hook\Event\Filter\DecodeInstructionsEvent;
 use Model\Files\MetadataDao;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
@@ -52,22 +51,15 @@ class InstructionsAndAssignmentTest extends AbstractTest
     // ── _insertInstructions() ──────────────────────────────────────
 
     #[Test]
-    public function insertInstructionsPassesValueThroughFeatureFilter(): void
+    public function insertInstructionsStoresTheValueVerbatimWithoutDispatchingAnyHook(): void
     {
         $features = $this->createMock(FeatureSet::class);
-        $features->expects($this->once())->method('dispatch')
-            ->with($this->callback(function (DecodeInstructionsEvent $event): bool {
-                return $event->getValue() === 'raw instructions';
-            }))
-            ->willReturnCallback(function (DecodeInstructionsEvent $event): DecodeInstructionsEvent {
-                $event->setValue('decoded instructions');
-                return $event;
-            });
+        $features->expects($this->never())->method('dispatch');
 
         $dao = $this->createMock(MetadataDao::class);
         $dao->expects($this->once())
             ->method('insert')
-            ->with(999, 42, 'instructions', 'decoded instructions');
+            ->with(999, 42, 'instructions', '&lt;b&gt;raw instructions&lt;/b&gt;');
 
         $this->pm->initForTest(
             $this->createStub(MateCatFilter::class),
@@ -76,18 +68,12 @@ class InstructionsAndAssignmentTest extends AbstractTest
             $this->createStub(MatecatLogger::class),
         );
 
-        $this->pm->callInsertInstructions(42, 'raw instructions');
+        $this->pm->callInsertInstructions(42, '&lt;b&gt;raw instructions&lt;/b&gt;');
     }
 
     #[Test]
     public function insertInstructionsUsesProjectIdFromStructure(): void
     {
-        $features = $this->createStub(FeatureSet::class);
-        $features->method('dispatch')
-            ->willReturnCallback(function (DecodeInstructionsEvent $event): DecodeInstructionsEvent {
-                return $event;
-            });
-
         $dao = $this->createMock(MetadataDao::class);
         $dao->expects($this->once())
             ->method('insert')
@@ -95,40 +81,13 @@ class InstructionsAndAssignmentTest extends AbstractTest
 
         $this->pm->initForTest(
             $this->createStub(MateCatFilter::class),
-            $features,
+            $this->createStub(FeatureSet::class),
             $dao,
             $this->createStub(MatecatLogger::class),
         );
         $this->pm->setProjectStructureValue('id_project', 777);
 
         $this->pm->callInsertInstructions(10, 'some text');
-    }
-
-    #[Test]
-    public function insertInstructionsFilterReturnsTransformedValue(): void
-    {
-        $features = $this->createStub(FeatureSet::class);
-        $features->method('dispatch')
-            ->willReturnCallback(function (DecodeInstructionsEvent $event): DecodeInstructionsEvent {
-                if ($event->getValue() === 'base64data') {
-                    $event->setValue('plain text result');
-                }
-                return $event;
-            });
-
-        $dao = $this->createMock(MetadataDao::class);
-        $dao->expects($this->once())
-            ->method('insert')
-            ->with(999, 5, 'instructions', 'plain text result');
-
-        $this->pm->initForTest(
-            $this->createStub(MateCatFilter::class),
-            $features,
-            $dao,
-            $this->createStub(MatecatLogger::class),
-        );
-
-        $this->pm->callInsertInstructions(5, 'base64data');
     }
 
     // ── __checkForProjectAssignment() ──────────────────────────────

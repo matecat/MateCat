@@ -16,7 +16,6 @@ use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
 use Model\FeaturesBase\FeatureSet;
-use Model\FeaturesBase\Hook\Event\Filter\DecodeInstructionsEvent;
 use Model\Files\FilesInfoUtility;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
@@ -259,21 +258,15 @@ class FileInfoControllerTest extends AbstractTest
     }
 
     /**
-     * The sanitizer runs on the value returned by the plugin hook.
+     * No plugin rewrites the instructions any more: the request value goes straight to the sanitizer.
      */
     #[Test]
-    public function setInstructions_dispatches_the_decode_hook_before_sanitizing(): void
+    public function setInstructions_sanitizes_the_request_value_without_dispatching_any_hook(): void
     {
-        $this->setRequest(['id_file' => '35', 'instructions' => 'ignored, the hook rewrites it']);
+        $this->setRequest(['id_file' => '35', 'instructions' => '<a href="http://t.co">label</a>']);
 
         $featureSet = $this->createMock(FeatureSet::class);
-        $featureSet->expects(self::once())
-            ->method('dispatch')
-            ->willReturnCallback(static function (DecodeInstructionsEvent $event): DecodeInstructionsEvent {
-                $event->setValue('&lt;a href="http://t.co"&gt;label&lt;/a&gt;');
-
-                return $event;
-            });
+        $featureSet->expects(self::never())->method('dispatch');
         $this->reflector->getProperty('featureSet')->setValue($this->controller, $featureSet);
 
         $utility = $this->createMock(FilesInfoUtility::class);
