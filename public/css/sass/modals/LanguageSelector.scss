@@ -126,13 +126,13 @@
       }
     }
     /* Tag chips */
-    .language-to .language-search .react-tagsinput {
+    .language-to .language-search .language-search-tags {
       width: 100%;
       & > span {
         display: inline-block;
       }
     }
-    .language-to .language-search .tag {
+    .language-to .language-search .language-search-tag {
       position: relative;
       display: inline-block;
       padding: 4px 12px;
@@ -146,16 +146,22 @@
       &:hover {
         cursor: default;
       }
-      .react-tagsinput-remove {
+      .language-search-tag-remove {
+        // Drop the native button look so the cross stays plain text
+        appearance: none;
+        background: none;
+        border: none;
+        padding: 0;
+        font: inherit;
+        line-height: inherit;
         color: $light-blue;
-        text-decoration: none;
         margin: 0 0 0 4px;
         cursor: pointer;
       }
       &.highlightDelete {
         background: $light-blue;
         color: colors.$white;
-        .react-tagsinput-remove {
+        .language-search-tag-remove {
           color: colors.$white;
         }
       }

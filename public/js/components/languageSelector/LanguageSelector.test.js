@@ -44,7 +44,7 @@ describe('LanguageSelector', () => {
       /Italian/,
     )
     expect(
-      container.querySelector('.language-search .tag'),
+      container.querySelector('.language-search .language-search-tag'),
     ).toHaveTextContent(/French/)
   })
 
