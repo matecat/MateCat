@@ -1,5 +1,5 @@
 import React from 'react'
-import {render, screen, waitFor} from '@testing-library/react'
+import {render, screen, waitFor, within} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Immutable from 'immutable'
 
@@ -214,5 +214,76 @@ describe('FilterSegments', () => {
     })
     expect(screen.getByText('Revise 1')).toBeInTheDocument()
     expect(screen.queryByText('Revise 2')).not.toBeInTheDocument()
+  })
+
+  describe('multiple selection', () => {
+    // The label can also appear in the trigger once selected, so look inside the open list
+    const clickOption = async (user, label) => {
+      await user.click(within(screen.getByRole('list')).getByText(label))
+    }
+
+    const lastFilter = (applyFilter) =>
+      applyFilter.mock.calls[applyFilter.mock.calls.length - 1][0]
+
+    test('severity accumulates selections into a list', async () => {
+      const user = userEvent.setup()
+      const applyFilter = jest.fn()
+      renderComponent({applyFilter})
+
+      await user.click(screen.getByText('Issue severity'))
+      await clickOption(user, 'minor')
+      expect(lastFilter(applyFilter).severity).toEqual(['minor'])
+
+      // The dropdown stays open, so the second option is clickable without reopening
+      await clickOption(user, 'major')
+      expect(lastFilter(applyFilter).severity).toEqual(['minor', 'major'])
+    })
+
+    test('severity deselection removes the item and an empty list becomes null', async () => {
+      const user = userEvent.setup()
+      const applyFilter = jest.fn()
+      renderComponent({applyFilter})
+
+      await user.click(screen.getByText('Issue severity'))
+      await clickOption(user, 'minor')
+      await clickOption(user, 'major')
+      await clickOption(user, 'minor')
+      expect(lastFilter(applyFilter).severity).toEqual(['major'])
+
+      await clickOption(user, 'major')
+      expect(lastFilter(applyFilter).severity).toBeNull()
+    })
+
+    test('selected severities mark the filter as filtered', async () => {
+      const user = userEvent.setup()
+      const {container} = renderComponent()
+      // The class is a styling hook with no accessible equivalent
+      // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+      const severityFilter = () => container.querySelector('.filter-severity')
+
+      expect(severityFilter()).toHaveClass('not-filtered')
+      await user.click(screen.getByText('Issue severity'))
+      await clickOption(user, 'minor')
+
+      expect(severityFilter()).toHaveClass('filtered')
+    })
+
+    test('severity and category lists combine in the same filter', async () => {
+      const user = userEvent.setup()
+      const applyFilter = jest.fn()
+      renderComponent({applyFilter})
+
+      await user.click(screen.getByText('Issue category'))
+      await clickOption(user, 'Typing')
+      await clickOption(user, 'Translation')
+      expect(lastFilter(applyFilter).issue_category).toEqual(['1', '2'])
+
+      await user.click(screen.getByText('Issue severity'))
+      await clickOption(user, 'major')
+      expect(lastFilter(applyFilter)).toMatchObject({
+        issue_category: ['1', '2'],
+        severity: ['major'],
+      })
+    })
   })
 })

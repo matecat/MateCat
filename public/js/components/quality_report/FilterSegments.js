@@ -40,7 +40,21 @@ const getSeverities = (categories) => {
 }
 
 const getFilterClassName = (value) =>
-  value && value !== '' ? 'filtered' : 'not-filtered'
+  (Array.isArray(value) ? value.length > 0 : value && value !== '')
+    ? 'filtered'
+    : 'not-filtered'
+
+// Add the id when missing, remove it when present; an empty selection becomes null (no filter)
+const toggleInList = (list, id) => {
+  const ids = list ? [...list] : []
+  const index = ids.indexOf(id)
+  if (index > -1) {
+    ids.splice(index, 1)
+  } else {
+    ids.push(id)
+  }
+  return ids.length ? ids : null
+}
 
 const REVISION_OPTIONS = [
   {id: '1', name: 'Revise 1'},
@@ -191,18 +205,12 @@ const FilterSegments = ({
           <Select
             multipleSelect="dropdown"
             options={optionsCategory}
-            onToggleOption={(value) => {
-              const optionsIds = filter.issue_category
-                ? [...filter.issue_category]
-                : []
-              const index = optionsIds.indexOf(value.id)
-              if (index > -1) {
-                optionsIds.splice(index, 1)
-              } else {
-                optionsIds.push(value.id)
-              }
-              filterSelectChanged('issue_category', optionsIds)
-            }}
+            onToggleOption={(value) =>
+              filterSelectChanged(
+                'issue_category',
+                toggleInList(filter.issue_category, value.id),
+              )
+            }
             activeOptions={
               filter.issue_category?.length
                 ? optionsCategory.filter(
@@ -215,13 +223,24 @@ const FilterSegments = ({
             resetFunction={() => updateFilter({issue_category: null})}
           />
         </div>
-        <div className={`${getFilterClassName(filter.severity)}`}>
+        <div
+          className={`filter-severity ${getFilterClassName(filter.severity)}`}
+        >
           <Select
+            multipleSelect="dropdown"
             options={optionsSeverities}
-            onSelect={(value) => filterSelectChanged('severity', value.id)}
-            activeOption={
-              optionsSeverities.find((item) => item.id == filter.severity) ||
-              undefined
+            onToggleOption={(value) =>
+              filterSelectChanged(
+                'severity',
+                toggleInList(filter.severity, value.id),
+              )
+            }
+            activeOptions={
+              filter.severity?.length
+                ? optionsSeverities.filter((item) =>
+                    filter.severity.includes(item.id),
+                  )
+                : undefined
             }
             placeholder="Issue severity"
             showResetButton={true}
