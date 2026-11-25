@@ -43,6 +43,7 @@ import {
   BUTTON_TYPE,
 } from '../common/Button/Button'
 import {TOOLTIP_POSITION} from '../common/Tooltip'
+import {Checkbox, CHECKBOX_SIZE, CHECKBOX_STATE} from '../common/Checkbox'
 
 const SegmentComponent = ({
   segment,
@@ -57,7 +58,6 @@ const SegmentComponent = ({
   files,
   speech2textEnabledFn,
   multiMatchLangs,
-  setBulkSelection,
   setLastSelectedSegment,
 }) => {
   const {userInfo} = useContext(ApplicationWrapperContext)
@@ -618,14 +618,9 @@ const SegmentComponent = ({
     SegmentActions.setSegmentLocked(segment, fid, !segment.unlocked)
   }
 
-  const handleChangeBulk = (event) => {
-    event.stopPropagation()
-    if (event.shiftKey) {
-      setBulkSelection(segment.sid, fid)
-    } else {
-      SegmentActions.toggleSegmentOnBulk(segment.sid, fid)
-      setLastSelectedSegment(segment.sid, fid)
-    }
+  const handleChangeBulk = () => {
+    SegmentActions.toggleSegmentOnBulk(segment.sid, fid)
+    setLastSelectedSegment(segment.sid, fid)
   }
 
   const onClickEvent = () => {
@@ -722,10 +717,14 @@ const SegmentComponent = ({
           ) : null}
 
           <div className="txt segment-add-inBulk">
-            <input
-              type="checkbox"
-              checked={segment.inBulk}
-              onClick={handleChangeBulk}
+            <Checkbox
+              value={
+                segment.inBulk
+                  ? CHECKBOX_STATE.CHECKED
+                  : CHECKBOX_STATE.UNCHECKED
+              }
+              size={CHECKBOX_SIZE.SMALL}
+              onChange={handleChangeBulk}
             />
           </div>
 

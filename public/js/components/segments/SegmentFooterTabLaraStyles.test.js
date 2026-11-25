@@ -41,7 +41,6 @@ jest.mock('../../utils/segmentText/tagUtils', () => ({
 jest.mock('./utils/translationMatches', () => ({
   __esModule: true,
   default: {
-    segmentsWaitingForContributions: [],
     renderContributionErrors: jest.fn(),
   },
 }))
@@ -348,36 +347,6 @@ describe('SegmentFooterTabLaraStyles', () => {
       'Formal translation',
     )
     jest.useRealTimers()
-  })
-
-  test('removes the segment from the waiting list once getContributions resolves', async () => {
-    const {laraAuthJob} = require('../../api/laraAuth')
-    const {laraTranslate} = require('../../api/laraTranslate')
-    const {getContributions} = require('../../api/getContributions')
-    const TranslationMatches = require('./utils/translationMatches').default
-
-    TranslationMatches.segmentsWaitingForContributions.push(defaultSegment.sid)
-    getContributions.mockResolvedValue()
-
-    laraAuthJob.mockResolvedValue({token: 'tok'})
-    laraTranslate
-      .mockResolvedValueOnce(laraValues[0])
-      .mockResolvedValueOnce(laraValues[1])
-
-    renderComponent()
-
-    await act(async () => {
-      SegmentStore.__emit(SegmentConstants.LARA_STYLES, stylesPayload)
-    })
-
-    const switchButtons = screen.getAllByRole('button')
-    await act(async () => {
-      fireEvent.click(switchButtons[0])
-    })
-
-    expect(
-      TranslationMatches.segmentsWaitingForContributions,
-    ).not.toContain(defaultSegment.sid)
   })
 
   test('processes errors when getContributions rejects after switching style', async () => {

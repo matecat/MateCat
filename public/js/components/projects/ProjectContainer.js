@@ -7,7 +7,7 @@ import React, {
   useState,
 } from 'react'
 import {ProjectsBulkActionsContext} from './ProjectsBulkActions/ProjectsBulkActionsContext'
-import {Checkbox, CHECKBOX_STATE} from '../common/Checkbox'
+import {Checkbox, CHECKBOX_SIZE, CHECKBOX_STATE} from '../common/Checkbox'
 import {Controller, useForm} from 'react-hook-form'
 import ManageActions from '../../actions/ManageActions'
 import {Input} from '../common/Input/Input'
@@ -665,6 +665,7 @@ export const ProjectContainer = ({
       <div className="project-container-header">
         <div className="project-container-header-sx">
           <Checkbox
+            size={CHECKBOX_SIZE.SMALL}
             className="project-checkbox"
             onChange={() => onCheckedProject(project.get('id'))}
             value={
