@@ -11,7 +11,7 @@ import {
   BUTTON_TYPE,
 } from '../../../common/Button/Button'
 import {QualityFrameworkTabContext} from './QualityFrameworkTabContext'
-import IconAdd from '../../../icons/IconAdd'
+import IconAdd from '../../../../../img/icons/IconAdd'
 import Checkmark from '../../../../../img/icons/Checkmark'
 import {getCodeFromLabel} from './CategoriesSeveritiesTableUtils'
 import {TOOLTIP_POSITION} from '../../../common/Tooltip'
@@ -90,17 +90,20 @@ export const AddSeverity = ({numbersOfColumns}) => {
       data-testid="qf-add-severity"
     >
       <Popover
-        title="Add Severity"
+        title="Add severity"
+        contentClassName="quality-framework-add-popover"
         toggleButtonProps={{
           type: BUTTON_TYPE.PRIMARY,
           mode: BUTTON_MODE.BASIC,
-          size: BUTTON_SIZE.ICON_SMALL,
+          size: BUTTON_SIZE.ICON_XSMALL,
+          tooltip: 'Add severity',
+          tooltipPosition: TOOLTIP_POSITION.RIGHT,
           testId: 'add-severity-button',
           disabled: isDisabled,
           ...(isDisabled && {
             tooltip: `You have reached the limit of ${MAX_ENTRY} severities\nallowed in a quality framework`,
+            tooltipPosition: TOOLTIP_POSITION.LEFT,
           }),
-          tooltipPosition: TOOLTIP_POSITION.LEFT,
           children: (
             <>
               <IconAdd size={16} />
@@ -110,11 +113,10 @@ export const AddSeverity = ({numbersOfColumns}) => {
         confirmButtonProps={{
           ref: confirmRef,
           type: BUTTON_TYPE.PRIMARY,
-          size: BUTTON_SIZE.MEDIUM,
           disabled: !name || typeof error === 'string',
           children: (
             <>
-              <Checkmark size={14} />
+              <Checkmark size={18} />
               Confirm
             </>
           ),
@@ -122,7 +124,6 @@ export const AddSeverity = ({numbersOfColumns}) => {
         }}
         cancelButtonProps={{
           mode: BUTTON_MODE.OUTLINE,
-          size: BUTTON_SIZE.MEDIUM,
           children: 'Cancel',
         }}
         align={POPOVER_ALIGN.RIGHT}
@@ -136,6 +137,7 @@ export const AddSeverity = ({numbersOfColumns}) => {
         >
           <input
             className={`quality-framework-input input${error ? ' quality-framework-input-error' : ''}`}
+            type="text"
             placeholder="Name"
             value={name}
             onChange={(e) => {

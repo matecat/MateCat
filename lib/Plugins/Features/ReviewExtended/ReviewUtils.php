@@ -9,21 +9,12 @@
 namespace Plugins\Features\ReviewExtended;
 
 use Exception;
-use Model\Jobs\JobStruct;
-use Model\LQA\ChunkReviewDao;
 use Model\LQA\ModelStruct;
 use Utils\Constants\SourcePages;
 use Utils\Constants\TranslationStatus;
 
 class ReviewUtils
 {
-    private ChunkReviewDao $chunkReviewDao;
-
-    public function __construct(ChunkReviewDao $chunkReviewDao)
-    {
-        $this->chunkReviewDao = $chunkReviewDao;
-    }
-
     /**
      * @param int|null $number
      *
@@ -38,18 +29,6 @@ class ReviewUtils
         ];
 
         return empty($number) ? null : ($statuses[$number] ?? null);
-    }
-
-    /**
-     * @deprecated Backend should't be instgructed by the front-end about the revision level, this is an internal. It muist be retrieved by the password url.
-     *
-     * @param int|null $number
-     *
-     * @return int
-     */
-    public static function revisionNumberToSourcePage(?int $number = null): int
-    {
-        return (!empty($number)) ? $number + 1 : 1;
     }
 
     /**
@@ -81,18 +60,4 @@ class ReviewUtils
         return (int)$value;
     }
 
-    /**
-     * @param JobStruct $chunk
-     *
-     * @return int[]
-     * @throws Exception
-     */
-    public function validRevisionNumbers(JobStruct $chunk): array
-    {
-        $chunkReviews = $this->chunkReviewDao->findChunkReviews($chunk);
-
-        return array_values(array_filter(array_map(function ($chunkReview) {
-            return self::sourcePageToRevisionNumber($chunkReview->source_page);
-        }, $chunkReviews)));
-    }
 }

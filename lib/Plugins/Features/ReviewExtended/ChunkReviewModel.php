@@ -21,6 +21,9 @@ use Model\LQA\ModelDao;
 use Model\LQA\ModelStruct;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
+use PDOException;
+use Throwable;
+use Utils\Logger\LoggerFactory;
 
 class ChunkReviewModel implements IChunkReviewModel
 {
@@ -142,15 +145,28 @@ class ChunkReviewModel implements IChunkReviewModel
     protected function _updatePassFailResult(ProjectStruct $project, array $data, UserStruct $actingUser): void
     {
         $chunkReviewDao = new ChunkReviewDao($this->database);
+
+        // The delta itself is applied by a single self-referential statement under the row lock, so
+        // it cannot lose an update to another delta. The lock is still taken here to serialize
+        // against the *absolute* writers (recountAndUpdatePassFailResult, resetScore,
+        // alterChunkReviewStruct), which read then write and would otherwise overwrite this delta.
+        $chunkReviewDao->lockByJobId((int)$this->chunk_review->id_job);
+
         $chunkReviewDao->passFailCountsAtomicUpdate((int)$this->chunk_review->id, $data);
 
-        FeatureSet::forProject($project, $this->database)->dispatch(new ChunkReviewUpdatedEvent(
-            $this->chunk_review,
-            1,
-            $this,
-            $project,
-            $actingUser
-        ));
+        // Deferred past the commit for two reasons. Correctness: busting while the transaction is
+        // still open lets a concurrent reader repopulate the cache from the pre-commit row, and that
+        // stale value then outlives the commit for the whole TTL — the same "displayed score is
+        // wrong" symptom this PR exists to fix, moved from the database into Redis. Lock hold time:
+        // these are three Redis round trips, and until now they ran with the job-wide row locks held
+        // on the highest-volume write path in the product.
+        $chunkReview = $this->chunk_review;
+        // Deferred to the commit inside DaoCacheTrait; the caller does not schedule it.
+        $chunkReviewDao->destroyCache($chunkReview);
+
+        // Published after the commit, once per row however many deltas this transaction applies,
+        // and from the committed row: $this->chunk_review still holds the counters before the delta.
+        $this->publishUpdatedOnCommit($project, $actingUser);
     }
 
     /**
@@ -178,22 +194,76 @@ class ChunkReviewModel implements IChunkReviewModel
      */
     public function recountAndUpdatePassFailResult(ProjectStruct $project, UserStruct $actingUser): void
     {
+        $chunkReviewDao = new ChunkReviewDao($this->database);
+
+        // This method is a read-modify-write that ends in an *absolute* value, so it must not
+        // interleave with a concurrent delta: taking the row locks before the aggregate reads below
+        // means a delta either lands before the sums are taken (and is included in them) or waits
+        // until this transaction commits. Locking here rather than at each call site covers every
+        // caller of the recount — BatchReviewProcessor, split/merge, and the repair CLI alike.
+        $chunkReviewDao->lockByJobId((int)$this->chunk_review->id_job);
+
+        $this->applyRecount(
+            $chunkReviewDao,
+            $chunkReviewDao->getReviewedWordsCountForSecondPass($this->chunk, $this->chunk_review->source_page),
+            $project,
+            $actingUser
+        );
+    }
+
+    /**
+     * Same recount, deriving reviewed_words_count from the final revision records rather than from the
+     * segments' current status.
+     *
+     * The status derivation used above only answers the question for the top phase of a job, so on a job
+     * with both R1 and R2 it recounts R1 towards zero as R2 approves. This entry point exists for the
+     * repair tasks, which have to be correct for any job shape. The split/merge callers deliberately keep
+     * the older derivation for now, so that re-partitioning a job does not silently change its numbers as
+     * a side effect of this fix; that path needs its own change.
+     *
+     * @throws Exception
+     */
+    public function recountAndUpdatePassFailResultFromFinalRevisions(ProjectStruct $project, UserStruct $actingUser): void
+    {
+        $chunkReviewDao = new ChunkReviewDao($this->database);
+
+        // Same ordering requirement as the recount above: lock before the aggregate reads.
+        $chunkReviewDao->lockByJobId((int)$this->chunk_review->id_job);
+
+        $this->applyRecount(
+            $chunkReviewDao,
+            $chunkReviewDao->getReviewedWordsCountFromFinalRevisions($this->chunk, (int)$this->chunk_review->source_page),
+            $project,
+            $actingUser
+        );
+    }
+
+    /**
+     * The body shared by both recount entry points. Callers must already hold the job's chunk review row
+     * locks and must have computed $reviewedWordsCount while holding them.
+     *
+     * @throws Exception
+     */
+    private function applyRecount(ChunkReviewDao $chunkReviewDao, int $reviewedWordsCount, ProjectStruct $project, UserStruct $actingUser): void
+    {
         /**
          * Count penalty points based on this source_page
          */
-        $chunkReviewDao = new ChunkReviewDao($this->database);
         $this->chunk_review->penalty_points = $chunkReviewDao->getPenaltyPointsForChunk($this->chunk, $this->chunk_review->source_page);
-        $this->chunk_review->reviewed_words_count = $chunkReviewDao->getReviewedWordsCountForSecondPass($this->chunk, $this->chunk_review->source_page);
+        $this->chunk_review->reviewed_words_count = $reviewedWordsCount;
         $this->chunk_review->total_tte = $chunkReviewDao->countTimeToEdit($this->chunk, $this->chunk_review->source_page);
 
+        // No LQA model means no pass/fail verdict, and NULL is how that third state is already
+        // represented: is_pass is a nullable tinyint, and QualitySummary reads NULL as "no score"
+        // rather than as a failure. This used to write true, asserting a verdict that was never
+        // computed and making a model-less chunk indistinguishable from a genuinely passing one --
+        // while passFailCountsAtomicUpdate(), the high-volume delta writer, left the same case NULL.
+        // Assigned rather than skipped, so rows carrying a stale 1 converge on the next recount.
         $lqaModel = $project->id_qa_model !== null ? (new ModelDao($this->database))->findById($project->id_qa_model) : null;
-        if ($lqaModel) {
-            $this->chunk_review->is_pass = ($this->getScore() <= $this->getQALimit($lqaModel));
-        } else {
-            $this->chunk_review->is_pass = true;
-        }
+        $this->chunk_review->is_pass = $lqaModel !== null ? ($this->getScore() <= $this->getQALimit($lqaModel)) : null;
 
-        $update_result = (new ChunkReviewDao($this->database))->updateStruct($this->chunk_review, [
+        $chunkReviewDao = new ChunkReviewDao($this->database);
+        $chunkReviewDao->updateStruct($this->chunk_review, [
                 'fields' => [
                     'reviewed_words_count',
                     'is_pass',
@@ -202,15 +272,67 @@ class ChunkReviewModel implements IChunkReviewModel
                 ]
             ]
         );
+        $chunkReview = $this->chunk_review;
+        // Deferred to the commit inside DaoCacheTrait; the caller does not schedule it.
+        $chunkReviewDao->destroyCache($chunkReview);
 
-        // External call by Plugins
-        FeatureSet::forProject($project, $this->database)->dispatch(new ChunkReviewUpdatedEvent(
-            $this->chunk_review,
-            $update_result,
-            $this,
-            $project,
-            $actingUser
-        ));
+        // Published after the commit, like the cache bust above, so a rolled-back score is never
+        // reported. A split recounts every chunk review of the job, so this also keeps that
+        // publishing out of the split transaction.
+        $this->publishUpdatedOnCommit($project, $actingUser);
+    }
+
+    /**
+     * Queues ChunkReviewUpdatedEvent for the commit. A transaction that updates the row several times,
+     * such as a bulk status change, publishes it once, with the last actor.
+     *
+     * @throws PDOException
+     */
+    private function publishUpdatedOnCommit(ProjectStruct $project, UserStruct $actingUser): void
+    {
+        $id = (int)$this->chunk_review->id;
+
+        $this->database->onCommit(
+            fn() => $this->publishUpdated($id, $project, $actingUser),
+            callbackDedupeKey: 'chunk_review_updated:' . $id
+        );
+    }
+
+    /**
+     * Publishes the committed row. A failure is logged rather than thrown: the score is committed, and
+     * a broker outage on one chunk must not stop the work queued after it.
+     *
+     * Logged on 'feature_set', which in a worker the Executor aliases to the queue's log.
+     */
+    private function publishUpdated(int $id, ProjectStruct $project, UserStruct $actingUser): void
+    {
+        try {
+            // Read inside a transaction so the row comes from the primary: an autocommit read can be
+            // routed to a replica that has not seen the commit yet. Uncached, because the cached copy
+            // may predate the write that queued this publish.
+            $chunkReview = $this->database->transaction(
+                fn() => (new ChunkReviewDao($this->database))->fetchById($id, ChunkReviewStruct::class, 0)
+            );
+
+            if (!$chunkReview instanceof ChunkReviewStruct) {
+                return;
+            }
+
+            FeatureSet::forProject($project, $this->database)->dispatch(new ChunkReviewUpdatedEvent(
+                $chunkReview,
+                1,
+                new ChunkReviewModel($chunkReview, $this->database),
+                $project,
+                $actingUser
+            ));
+        } catch (Throwable $e) {
+            LoggerFactory::getLogger('feature_set')->error('chunk review updated event failed', [
+                'id_chunk_review' => $id,
+                'id_project' => $project->id,
+                'exception' => $e::class,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
 

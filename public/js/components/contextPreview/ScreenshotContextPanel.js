@@ -69,3 +69,5 @@ ScreenshotContextPanel.propTypes = {
   zoomLevel: PropTypes.number.isRequired,
   title: PropTypes.string.isRequired,
 }
+
+ScreenshotContextPanel.displayName = 'ScreenshotContextPanel'

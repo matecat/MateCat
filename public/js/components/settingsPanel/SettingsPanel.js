@@ -6,7 +6,7 @@ import {MachineTranslationTab} from './Contents/MachineTranslationTab'
 import {OtherTab} from './Contents/OtherTab'
 import {TranslationMemoryGlossaryTab} from './Contents/TranslationMemoryGlossaryTab'
 import {ProjectTemplate} from './ProjectTemplate/ProjectTemplate'
-import {SCHEMA_KEYS, isStandardTemplate} from '../../hooks/useProjectTemplates'
+import {isStandardTemplate} from '../../hooks/useProjectTemplates'
 import {AnalysisTab} from './Contents/AnalysisTab'
 import {QualityFrameworkTab} from './Contents/QualityFrameworkTab'
 import {updateProjectTemplate} from '../../api/updateProjectTemplate'
@@ -21,64 +21,41 @@ import defaultFiltersParams from './Contents/defaultTemplates/filterParams.json'
 import {isEqual} from 'lodash'
 import useSyncTemplateWithConvertFile from './useSyncTemplateWithConvertFile'
 import {EditorOtherTab} from './Contents/EditorOtherTab'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../common/Button/Button'
+import IconClose from '../../../img/icons/IconClose'
+import {EditorMachineTranslationTab} from '../segments/EditorMachineTranslationTab'
+import {SETTINGS_PANEL_TABS} from './SettingsPanelConstants'
 
 let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
   'openTab',
 )
 
-export const SETTINGS_PANEL_TABS = {
-  translationMemoryGlossary: 'tm',
-  machineTranslation: 'mt',
-  other: 'other',
-  analysis: 'analysis',
-  qualityFramework: 'qf',
-  fileImport: 'fileImport',
-  editorSettings: 'editorSettings',
-  editorOther: 'editorOther',
-}
-
-export const TEMPLATE_PROPS_BY_TAB = {
-  [SETTINGS_PANEL_TABS.translationMemoryGlossary]: [
-    SCHEMA_KEYS.tm,
-    SCHEMA_KEYS.getPublicMatches,
-    SCHEMA_KEYS.publicTmPenalty,
-    SCHEMA_KEYS.pretranslate100,
-    SCHEMA_KEYS.tmPrioritization,
-  ],
-  [SETTINGS_PANEL_TABS.machineTranslation]: [SCHEMA_KEYS.mt],
-  [SETTINGS_PANEL_TABS.qualityFramework]: [SCHEMA_KEYS.qaModelTemplateId],
-  [SETTINGS_PANEL_TABS.fileImport]: [
-    SCHEMA_KEYS.segmentationRule,
-    SCHEMA_KEYS.filtersTemplateId,
-    SCHEMA_KEYS.XliffConfigTemplateId,
-  ],
-  [SETTINGS_PANEL_TABS.analysis]: [SCHEMA_KEYS.payableRateTemplateId],
-  [SETTINGS_PANEL_TABS.other]: [
-    SCHEMA_KEYS.speech2text,
-    SCHEMA_KEYS.tagProjection,
-    SCHEMA_KEYS.lexica,
-    SCHEMA_KEYS.crossLanguageMatches,
-    SCHEMA_KEYS.idTeam,
-  ],
-  [SETTINGS_PANEL_TABS.editorSettings]: [],
-  [SETTINGS_PANEL_TABS.editorOther]: [],
-}
+export {SETTINGS_PANEL_TABS}
 
 const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
   return [
     {
       id: SETTINGS_PANEL_TABS.translationMemoryGlossary,
-      label: 'Translation Memory and Termbase',
+      label: 'Translation memory and termbase',
       description:
         'Manage your language resources and select which should be used on your new project. <a href="https://guides.matecat.com/activ" target="_blank">More details</a>',
       component: <TranslationMemoryGlossaryTab />,
     },
     {
       id: SETTINGS_PANEL_TABS.machineTranslation,
-      label: 'Machine Translation',
+      label: 'Machine translation',
       description:
         'Manage your machine translation engines and select which should be used on your new project. <a href="https://guides.matecat.com/machine-translation-engines" target="_blank">More details</a>',
-      component: <MachineTranslationTab />,
+      component: isCattool ? (
+        <EditorMachineTranslationTab />
+      ) : (
+        <MachineTranslationTab />
+      ),
     },
     ...(!isCattool
       ? [
@@ -137,12 +114,10 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
   ]
 }
 
-
-
 export const SettingsPanel = ({
   onClose,
   isOpened,
-  tabOpen = SETTINGS_PANEL_TABS.translationMemoryGlossary,
+  tabOpen,
   user,
   tmKeys,
   setTmKeys,
@@ -160,6 +135,7 @@ export const SettingsPanel = ({
   fileImportFiltersParamsTemplates = {},
   fileImportXliffSettingsTemplates = {},
   subtemplatesNotSaved,
+  onTabOpened,
 }) => {
   const [isVisible, setIsVisible] = useState(false)
   const [tabs, setTabs] = useState(() => {
@@ -169,7 +145,8 @@ export const SettingsPanel = ({
         (value) => value === tabOpenFromQueryString,
       )
         ? tabOpenFromQueryString === tab.id
-        : tabOpen === tab.id,
+        : (tabOpen ?? SETTINGS_PANEL_TABS.translationMemoryGlossary) ===
+          tab.id,
     }))
 
     tabOpenFromQueryString = false
@@ -192,7 +169,27 @@ export const SettingsPanel = ({
     },
   })
 
+  const openedTabId = tabs.find((tab) => tab.isOpened)?.id
+
+  useEffect(() => {
+    if (isOpened && openedTabId) onTabOpened?.(openedTabId)
+  }, [isOpened, openedTabId, onTabOpened])
+
   const wrapperRef = useRef()
+
+  useEffect(() => {
+    if (!tabOpen) return
+
+    setTabs(() => {
+      const updatedState = DEFAULT_CONTENTS().map((tab) => ({
+        ...tab,
+        isOpened: tabOpen === tab.id,
+      }))
+
+      tabOpenFromQueryString = false
+      return updatedState
+    })
+  }, [tabOpen])
 
   useEffect(() => {
     setIsVisible(typeof isOpened !== 'undefined' ? isOpened : true)
@@ -354,8 +351,15 @@ export const SettingsPanel = ({
             <>
               <div className="settings-panel-header">
                 <div className="settings-panel-header-logo" />
-                <span>Settings</span>
-                <div onClick={close} className="close-matecat-modal x-popup" />
+                <h4>Settings</h4>
+                <Button
+                  type={BUTTON_TYPE.ICON}
+                  size={BUTTON_SIZE.ICON_STANDARD}
+                  mode={BUTTON_MODE.GHOST}
+                  onClick={close}
+                >
+                  <IconClose size={20} />
+                </Button>
               </div>
               {isEnabledProjectTemplateComponent && <ProjectTemplate />}
               {currentProjectTemplate && <ContentWrapper />}
@@ -370,6 +374,7 @@ export const SettingsPanel = ({
 SettingsPanel.propTypes = {
   onClose: PropTypes.func.isRequired,
   isOpened: PropTypes.bool,
+  onTabOpened: PropTypes.func,
   tabOpen: PropTypes.oneOf(Object.values(SETTINGS_PANEL_TABS)),
   user: PropTypes.object,
   tmKeys: PropTypes.array,

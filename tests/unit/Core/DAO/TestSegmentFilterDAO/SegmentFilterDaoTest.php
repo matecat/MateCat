@@ -7,6 +7,7 @@ use Exception;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\Database;
 use Model\Jobs\JobStruct;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use Plugins\Features\SegmentFilter\Model\FilterDefinition;
 use Plugins\Features\SegmentFilter\Model\SegmentFilterDao;
@@ -82,6 +83,7 @@ class SegmentFilterDaoTest extends AbstractTest
     public function tearDown(): void
     {
         $conn = $this->database_instance->getConnection();
+        $conn->query("DELETE FROM qa_entries WHERE id_job = {$this->jobId}");
         $conn->query("DELETE FROM segment_translations WHERE id_job = {$this->jobId}");
         $conn->query("DELETE FROM jobs WHERE id = {$this->jobId}");
         $firstSeg = $this->baseSegmentId + 1;
@@ -239,7 +241,8 @@ class SegmentFilterDaoTest extends AbstractTest
         $sql = $dao->getSqlForIce($where);
 
         $this->assertStringContainsString("match_type = 'ICE'", $sql);
-        $this->assertStringContainsString('version_number = 0', $sql);
+        $this->assertStringContainsString('st.version_number = 0', $sql);
+        $this->assertStringNotContainsString('locked', $sql);
     }
 
     public function test_instance_getSqlForModifiedIce_returns_valid_sql(): void
@@ -250,7 +253,32 @@ class SegmentFilterDaoTest extends AbstractTest
         $sql = $dao->getSqlForModifiedIce($where);
 
         $this->assertStringContainsString("match_type = 'ICE'", $sql);
-        $this->assertStringContainsString('version_number > 0', $sql);
+        $this->assertStringContainsString('st.version_number > 0', $sql);
+        $this->assertStringNotContainsString('locked', $sql);
+    }
+
+    public function test_instance_getSqlForLocked_returns_valid_sql(): void
+    {
+        $dao = new SegmentFilterDao(obtainTestDatabase());
+        $where = ['sql' => '', 'data' => []];
+
+        $sql = $dao->getSqlForLocked($where);
+
+        $this->assertStringContainsString('st.locked = 1', $sql);
+        $this->assertStringContainsString('st.version_number = 0', $sql);
+        $this->assertStringNotContainsString('match_type', $sql);
+    }
+
+    public function test_instance_getSqlForModifiedLocked_returns_valid_sql(): void
+    {
+        $dao = new SegmentFilterDao(obtainTestDatabase());
+        $where = ['sql' => '', 'data' => []];
+
+        $sql = $dao->getSqlForModifiedLocked($where);
+
+        $this->assertStringContainsString('st.locked = 1', $sql);
+        $this->assertStringContainsString('st.version_number > 0', $sql);
+        $this->assertStringNotContainsString('match_type', $sql);
     }
 
     public function test_instance_getSqlForToDo_returns_valid_sql(): void
@@ -457,6 +485,60 @@ class SegmentFilterDaoTest extends AbstractTest
         $this->assertCount(5, $ids);
     }
 
+    /**
+     * ICE is the match type and `locked` is the scope: the two columns vary independently,
+     * and each bucket reads only its own column, split by version.
+     *
+     * @return array<string, array{string, list<int>}>
+     */
+    public static function iceAndLockedBuckets(): array
+    {
+        return [
+            'ice'             => ['ice', [1, 4]],
+            'modified_ice'    => ['modified_ice', [3, 6]],
+            'locked'          => ['locked', [1, 2]],
+            'modified_locked' => ['modified_locked', [3]],
+            'unlocked'        => ['unlocked', [4, 5, 6, 7]],
+        ];
+    }
+
+    /**
+     * @param list<int> $expectedOffsets
+     *
+     * @throws Exception
+     */
+    #[DataProvider('iceAndLockedBuckets')]
+    public function test_instance_findSegmentIdsForSample_ice_and_locked_bucket_membership(string $type, array $expectedOffsets): void
+    {
+        $conn = $this->database_instance->getConnection();
+        $rows = [
+            1 => ['ICE', 1, 0],
+            2 => ['100%', 1, 0],
+            3 => ['ICE', 1, 2],
+            4 => ['ICE', 0, 0],
+            5 => ['85%-94%', 0, 0],
+            6 => ['ICE', 0, 1],
+        ];
+        foreach ($rows as $offset => [$matchType, $locked, $version]) {
+            $segId = $this->baseSegmentId + $offset;
+            $conn->query(
+                "UPDATE segment_translations SET match_type = '$matchType', locked = $locked, version_number = $version
+                 WHERE id_segment = $segId AND id_job = {$this->jobId}"
+            );
+        }
+
+        $filter = new FilterDefinition([
+            'status' => '',
+            'sample' => ['type' => $type, 'size' => 0]
+        ]);
+
+        $dao = new SegmentFilterDao(obtainTestDatabase());
+        $ids = array_map(fn($r) => (int)$r->id, $dao->findSegmentIdsForSample($this->chunk, $filter));
+
+        $expected = array_map(fn(int $offset) => $this->baseSegmentId + $offset, $expectedOffsets);
+        $this->assertSame($expected, $ids);
+    }
+
     public function test_instance_findSegmentIdsForSample_invalid_type_throws(): void
     {
         $filter = new FilterDefinition([
@@ -470,5 +552,96 @@ class SegmentFilterDaoTest extends AbstractTest
         $this->expectExceptionMessage('Sample type is not valid');
         $dao->findSegmentIdsForSample($this->chunk, $filter);
     }
-}
 
+    /**
+     * Flags a revision issue on the segment at the given offset.
+     */
+    private function insertIssue(int $offset, int $sourcePage, bool $deleted = false): void
+    {
+        $segId = $this->baseSegmentId + $offset;
+        $deletedAt = $deleted ? 'NOW()' : 'NULL';
+        $this->database_instance->getConnection()->query(
+            "INSERT INTO qa_entries (id_segment, id_job, id_category, severity, translation_version, start_node, start_offset,
+                end_node, end_offset, is_full_segment, source_page, deleted_at)
+             VALUES ($segId, {$this->jobId}, 1, 'Minor', 0, 0, 0, 0, 0, 1, $sourcePage, $deletedAt)"
+        );
+    }
+
+    /**
+     * @return list<int>
+     * @throws Exception
+     */
+    private function findWithIssues(string $status = ''): array
+    {
+        $filter = new FilterDefinition([
+            'status' => $status,
+            'sample' => ['type' => 'with_issues', 'size' => 0]
+        ]);
+
+        $dao = new SegmentFilterDao(obtainTestDatabase());
+
+        return array_map(fn($r) => (int)$r->id, $dao->findSegmentIdsForSample($this->chunk, $filter));
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function test_instance_findSegmentIdsForSample_with_issues_lists_r1_and_r2_issues_once(): void
+    {
+        $this->chunk->setIsReview(true);
+        $this->insertIssue(4, 2);
+        $this->insertIssue(2, 3);
+        $this->insertIssue(2, 2);  // a second issue on the same segment
+        $this->insertIssue(5, 2, true);  // deleted
+        $this->insertIssue(9, 2);  // show_in_cattool = 0
+
+        $this->assertSame([$this->baseSegmentId + 2, $this->baseSegmentId + 4], $this->findWithIssues());
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function test_instance_findSegmentIdsForSample_with_issues_honours_status_and_chunk_range(): void
+    {
+        $this->chunk->setIsReview(true);
+        $this->insertIssue(2, 2);  // TRANSLATED
+        $this->insertIssue(6, 2);  // NEW
+        $this->insertIssue(7, 3);  // NEW, outside the chunk once it is narrowed
+
+        $this->assertSame([$this->baseSegmentId + 2], $this->findWithIssues('TRANSLATED'));
+
+        $this->chunk->job_last_segment = $this->baseSegmentId + 6;
+        $this->assertSame([$this->baseSegmentId + 2, $this->baseSegmentId + 6], $this->findWithIssues());
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function test_instance_findSegmentIdsForSample_with_issues_returns_empty_without_issues(): void
+    {
+        $this->chunk->setIsReview(true);
+
+        $this->assertSame([], $this->findWithIssues());
+    }
+
+    public function test_instance_findSegmentIdsForSample_with_issues_throws_outside_revision(): void
+    {
+        $this->insertIssue(2, 2);
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Sample type is only available in revision');
+        $this->findWithIssues();
+    }
+
+    public function test_instance_getSqlForWithIssues_returns_valid_sql(): void
+    {
+        $dao = new SegmentFilterDao(obtainTestDatabase());
+        $where = ['sql' => ' AND st.status = :status ', 'data' => []];
+
+        $sql = $dao->getSqlForWithIssues($where);
+        $this->assertStringContainsString('qa_entries', $sql);
+        $this->assertStringContainsString('e.deleted_at IS NULL', $sql);
+        $this->assertStringContainsString('AND st.status = :status', $sql);
+        $this->assertStringNotContainsString('source_page', $sql);
+    }
+}

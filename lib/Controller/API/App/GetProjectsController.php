@@ -90,7 +90,10 @@ class GetProjectsController extends KleinController
         $this->response->json([
             'data' => $projects,
             'page' => $page,
-            'pnumber' => $projnum[0]['c'],
+            // `pnumber` stops at a ceiling, so it is a lower bound once `pnumber_approximated` is
+            // true: there are at least that many projects, and the exact figure was not paid for.
+            'pnumber' => $projnum->value,
+            'pnumber_approximated' => $projnum->approximated,
             'pageStep' => $step,
         ]);
     }

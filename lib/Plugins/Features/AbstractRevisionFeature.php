@@ -7,7 +7,6 @@ use DomainException;
 use Exception;
 use Klein\Klein;
 use Model\ChunksCompletion\ChunkCompletionEventStruct;
-use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\FeatureCodes;
@@ -166,10 +165,6 @@ abstract class AbstractRevisionFeature extends BaseFeature
     {
         $projectStructure = $event->projectStructure;
 
-        if ($this instanceof ReviewExtended) {
-            return;
-        }
-
         $this->setQaModelFromJsonFile($projectStructure);
         $this->createChunkReviewRecords($projectStructure);
     }
@@ -234,6 +229,51 @@ abstract class AbstractRevisionFeature extends BaseFeature
     }
 
     /**
+     * Creates the chunk review records of the new chunks, one set per revision found in the old records.
+     *
+     * The old records are grouped by revision (source_page) first, so each chunk is written once per
+     * revision however many old records there are. Each revision keeps the review_password of its first
+     * old record, which goes to the first chunk.
+     *
+     * Example: old records for revisions 2, 2 and 3 give one set for revision 2 and one for revision 3.
+     *
+     * Read $previousRecords before the old rows are deleted. $chunks must be a list: its first element
+     * gets the kept review_password.
+     *
+     * @param ChunkReviewStruct[] $previousRecords
+     * @param JobStruct[] $chunks
+     *
+     * @return ChunkReviewStruct[]
+     *
+     * @throws Exception
+     * @throws TypeError
+     */
+    private function recreateChunkReviewsPerRevision(array $previousRecords, array $chunks, ProjectStruct $project): array
+    {
+        $firstReviewPasswordBySourcePage = [];
+        foreach ($previousRecords as $review) {
+            $firstReviewPasswordBySourcePage[$review->source_page] ??= $review->review_password;
+        }
+
+        $reviews = [];
+        foreach ($firstReviewPasswordBySourcePage as $sourcePage => $reviewPassword) {
+            $reviews = array_merge(
+                $reviews,
+                $this->createQaChunkReviewRecords(
+                    $chunks,
+                    $project,
+                    [
+                        'first_record_password' => $reviewPassword,
+                        'source_page' => $sourcePage
+                    ]
+                )
+            );
+        }
+
+        return $reviews;
+    }
+
+    /**
      * Deletes the previously created record and creates the new records matching the new chunks.
      *
      * @throws Exception
@@ -243,43 +283,34 @@ abstract class AbstractRevisionFeature extends BaseFeature
     {
         $projectStructure = $event->data;
 
-        /**
-         * By definition, when running postJobSplitted callback, the job is not split.
-         * So we expect to find just one record in chunk_reviews for the job.
-         * If we find more than one record, it's one record for each revision.
-         *
-         */
-
         $id_job = $projectStructure->jobToSplit ?? throw new RuntimeException('Job id is required when splitting a job');
+
         $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
+
+        // Dispatched inside JobSplitMergeService::applySplit's transaction (begin -> splitJob ->
+        // commit), so these row locks are held for the whole delete+recreate+recount and released
+        // only at commit. The id_job index range is gap-locked too, which is what keeps another
+        // writer out of the window where the rows have been deleted but not yet recreated.
+        $chunkReviewDao->lockByJobId($id_job);
+
+        // SplitJobController refuses a job that is already split, so this is one record per revision.
+        // Grouping by revision below keeps it so even if older rows repeat a revision.
         $previousRevisionRecords = $chunkReviewDao->findByIdJob($id_job);
         $project = $this->getProjectDao()->findById($projectStructure->idProject, 86400)
             ?? throw new RuntimeException('Project not found for id: ' . $projectStructure->idProject);
 
         $chunkReviewDao->deleteByJobId($id_job);
 
-        $jobDao = new JobDao($this->getDatabase());
-        $chunksStructArray = $jobDao->getNotDeletedById($id_job);
+        $chunksStructArray = (new JobDao($this->getDatabase()))->getNotDeletedById($id_job);
 
-        $reviews = [];
-        foreach ($previousRevisionRecords as $review) {
-            // check if $review belongs to a deleted job
-            $chunk = $jobDao->getByIdAndPassword($review->id_job, $review->password);
+        // Skip the records of deleted chunks: their passwords are not among the chunks just read.
+        $livePasswords = array_column($chunksStructArray, 'password');
+        $previousRevisionRecords = array_filter(
+            $previousRevisionRecords,
+            fn(ChunkReviewStruct $review) => in_array($review->password, $livePasswords, true)
+        );
 
-            if ($chunk !== null && !$chunk->isDeleted()) {
-                $reviews = array_merge(
-                    $reviews,
-                    $this->createQaChunkReviewRecords(
-                        $chunksStructArray,
-                        $project,
-                        [
-                            'first_record_password' => $review->review_password,
-                            'source_page' => $review->source_page
-                        ]
-                    )
-                );
-            }
-        }
+        $reviews = $this->recreateChunkReviewsPerRevision($previousRevisionRecords, $chunksStructArray, $project);
 
         foreach ($reviews as $review) {
             $model = new ChunkReviewModel($review, $this->getDatabase());
@@ -299,39 +330,23 @@ abstract class AbstractRevisionFeature extends BaseFeature
         $projectStructure = $event->data;
 
         $id_job = $projectStructure->jobToMerge ?? throw new RuntimeException('Job id is required when merging jobs');
+
         $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
+
+        // Dispatched inside JobSplitMergeService::mergeALL's transaction, so the locks below span
+        // the delete+recreate+recount and release at commit. See postJobSplitted for why the gap
+        // lock on the id_job range matters here.
+        $chunkReviewDao->lockByJobId($id_job);
+
         $old_reviews = $chunkReviewDao->findByIdJob($id_job);
         $project = $this->getProjectDao()->findById($projectStructure->idProject, 86400)
             ?? throw new RuntimeException('Project not found for id: ' . $projectStructure->idProject);
-
-        $reviewGroupedData = [];
-
-        foreach ($old_reviews as $review) {
-            if (!isset($reviewGroupedData[$review->source_page])) {
-                $reviewGroupedData[$review->source_page] = [
-                    'first_record_password' => $review->review_password
-                ];
-            }
-        }
 
         $chunkReviewDao->deleteByJobId($id_job);
 
         $chunksStructArray = (new JobDao($this->getDatabase()))->getNotDeletedById($id_job);
 
-        $reviews = [];
-        foreach ($reviewGroupedData as $source_page => $data) {
-            $reviews = array_merge(
-                $reviews,
-                $this->createQaChunkReviewRecords(
-                    $chunksStructArray,
-                    $project,
-                    [
-                        'first_record_password' => $data['first_record_password'],
-                        'source_page' => $source_page
-                    ]
-                )
-            );
-        }
+        $reviews = $this->recreateChunkReviewsPerRevision($old_reviews, $chunksStructArray, $project);
 
         foreach ($reviews as $review) {
             $model = new ChunkReviewModel($review, $this->getDatabase());
@@ -340,15 +355,24 @@ abstract class AbstractRevisionFeature extends BaseFeature
     }
 
     /**
-     * @throws \Exception
-     * @throws \TypeError
+     * @throws Exception
+     * @throws TypeError
      */
     public function projectCompletionEventSaved(ProjectCompletionEventSavedEvent $event): void
     {
-        // The event stays a pure notification and must NOT carry an IDatabase handle; the feature
-        // itself carries one (set by FeatureSet::dispatch), so source the db from getDatabase().
-        $model = new QualityReportModel($event->chunk, $this->getDatabase());
-        $model->resetScore($event->completionEventId);
+        $this->createQualityReportModel($event->chunk)->resetScore($event->completionEventId);
+    }
+
+    /**
+     * The event stays a pure notification and must NOT carry an IDatabase handle; the feature
+     * itself carries one (set by FeatureSet::dispatch), so source the db from getDatabase().
+     *
+     * Kept as a seam so a test can observe the reset instead of only the exception it used to
+     * raise against an unseeded chunk.
+     */
+    protected function createQualityReportModel(JobStruct $chunk): QualityReportModel
+    {
+        return new QualityReportModel($chunk, $this->getDatabase());
     }
 
     /**
@@ -360,13 +384,18 @@ abstract class AbstractRevisionFeature extends BaseFeature
     public function alterChunkReviewStruct(AlterChunkReviewStructEvent $event): void
     {
         $struct = $event->event;
+
+        // Restores absolute values from undo_data, so it is a read-modify-write like resetScore:
+        // lock the job's rows before reading the review back.
+        (new ChunkReviewDao($this->getDatabase()))->lockByJobId((int)$struct->id_job);
+
         $review = (new ChunkReviewDao($this->getDatabase()))->findChunkReviews(new JobStruct(['id' => $struct->id_job, 'password' => $struct->password]))[0]
-            ?? throw new ValidationError('chunk review not found');
+            ?? throw new ValidationError('Chunk review not found');
 
         $undo_data = $review->getUndoData();
 
         if (is_null($undo_data)) {
-            throw new ValidationError('undo data is not available');
+            throw new ValidationError('Undo data is not available');
         }
 
         $this->_validateUndoData($struct, $undo_data);
@@ -376,7 +405,8 @@ abstract class AbstractRevisionFeature extends BaseFeature
         $review->reviewed_words_count = $undo_data['reviewed_words_count'];
         $review->undo_data = null;
 
-        (new ChunkReviewDao($this->getDatabase()))->updateStruct($review, [
+        $chunkReviewDao = new ChunkReviewDao($this->getDatabase());
+        $chunkReviewDao->updateStruct($review, [
             'fields' => [
                 'is_pass',
                 'penalty_points',
@@ -384,8 +414,10 @@ abstract class AbstractRevisionFeature extends BaseFeature
                 'undo_data'
             ]
         ]);
+        // Deferred to the commit inside DaoCacheTrait; the caller does not schedule it.
+        $chunkReviewDao->destroyCache($review);
 
-        LoggerFactory::doJsonLog("CompletionEventController deleting event: " . var_export($struct->getArrayCopy(), true));
+        LoggerFactory::getLogger('feature_set')->debug("CompletionEventController deleting event: " . var_export($struct->getArrayCopy(), true));
     }
 
     /**
@@ -403,25 +435,30 @@ abstract class AbstractRevisionFeature extends BaseFeature
                 'is_pass'
             ]);
         } catch (Exception $e) {
-            throw new ValidationError('undo data is missing some keys. ' . $e->getMessage());
+            throw new ValidationError('Undo data is missing some keys. ' . $e->getMessage());
         }
 
         if ($undo_data['reset_by_event_id'] != (string)$event->id) {
-            throw new ValidationError('event does not match with latest revision data');
+            throw new ValidationError('Event does not match with latest revision data');
         }
     }
 
     /**
      * @throws PDOException
+     * @throws ReflectionException
      */
     public function reviewPasswordChanged(ReviewPasswordChangedEvent $event): void
     {
+        // No cache eviction here: the event is dispatched inside the rotation's transaction, where an
+        // eviction is undone by any concurrent read of the pre-rotation row. Whoever rotates the
+        // password sweeps through JobCredentialCacheInvalidator once its own commit is through.
         $feedbackDao = new FeedbackDAO($this->getDatabase());
         $feedbackDao->updateFeedbackPassword($event->jobId, $event->oldPassword, $event->newPassword, $event->revisionNumber);
     }
 
     /**
      * @throws PDOException
+     * @throws ReflectionException
      * @throws RuntimeException
      */
     public function jobPasswordChanged(JobPasswordChangedEvent $event): void
@@ -429,6 +466,9 @@ abstract class AbstractRevisionFeature extends BaseFeature
         $jobId = $event->job->id ?? throw new RuntimeException('Job id is required to update chunk review password');
         $jobPassword = $event->job->password ?? throw new RuntimeException('Job password is required to update chunk review password');
 
+        // Mirroring the new job password onto the phase rows is all this handler owns: the eviction of
+        // everything the replaced credential reaches belongs to the rotation entry point, after its
+        // commit. See reviewPasswordChanged() above.
         $dao = new ChunkReviewDao($this->getDatabase());
         $dao->updatePassword($jobId, $event->oldPassword, $jobPassword);
     }
@@ -471,7 +511,7 @@ abstract class AbstractRevisionFeature extends BaseFeature
     }
 
     /**
-     * Validate the project is valid in the scope of the ReviewExtended feature.
+     * Validate the project is valid in the scope of the revision feature.
      * A project is valid if we can find a qa_model.json file inside a `__meta` folder.
      * The qa_model.json file must also be valid.
      *
@@ -480,10 +520,6 @@ abstract class AbstractRevisionFeature extends BaseFeature
      */
     public static function loadAndValidateQualityFramework(ProjectStructure &$projectStructure, ?string $jsonPath = null): void
     {
-        if (is_a(static::class, ReviewExtended::class, true)) {
-            return;
-        }
-
         $decoded_model = $projectStructure->qa_model_template ?? $projectStructure->qa_model;
 
         if (empty($decoded_model)) {

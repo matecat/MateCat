@@ -122,15 +122,10 @@ class TmKeyManagementController extends AbstractStatefulKleinController
 
         }
 
-        if (!empty($sortedKeys)) {
-            $sortedKeys = array_map(function (ClientTmKeyStruct $jobKey) {
-                if ($jobKey->name !== null) {
-                    $jobKey->name = html_entity_decode($jobKey->name);
-                }
-
-                return $jobKey;
-            }, $sortedKeys);
-        }
+        // A html_entity_decode over every name used to sit here. It existed only to undo the
+        // FILTER_SANITIZE_SPECIAL_CHARS that TmKeyManager::sanitize() applied on the way in, and now
+        // that names are stored as typed it would corrupt them instead: a resource someone called
+        // "A &amp; B" on purpose would come back as "A & B".
 
         return $sortedKeys;
     }

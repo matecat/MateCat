@@ -1,79 +1,52 @@
-import React from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import TagsInput from 'react-tagsinput'
 
-class LanguageSelectorSearch extends React.Component {
-  constructor(props) {
-    super(props)
-  }
+const LanguageSelectorSearch = ({
+  onQueryChange,
+  querySearch,
+  selectedLanguages,
+  onDeleteLanguage,
+}) => {
+  const [highlightDelete, setHighlightDelete] = useState(false)
+  const tagsInputRef = useRef(null)
 
-  state = {
-    highlightDelete: false,
-  }
-
-  componentDidMount() {
-    document.addEventListener('mousedown', () => {
-      this.setState({highlightDelete: false})
-    })
-
-    this.tagsInput.focus()
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener('mousedown', () => {
-      this.setState({highlightDelete: false})
-    })
-  }
-
-  componentDidUpdate(prevProps) {
-    if (prevProps.querySearch !== this.props.querySearch) {
-      this.setState({
-        highlightDelete: false,
-      })
+  useEffect(() => {
+    const handleMouseDown = () => {
+      setHighlightDelete(false)
     }
-  }
 
-  handleChange = () => {
-    const {onDeleteLanguage, selectedLanguages} = this.props
-    const {highlightDelete} = this.state
+    document.addEventListener('mousedown', handleMouseDown)
 
+    tagsInputRef.current.focus()
+
+    return () => {
+      document.removeEventListener('mousedown', handleMouseDown)
+    }
+  }, [])
+
+  const isFirstRender = useRef(true)
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
+    setHighlightDelete(false)
+  }, [querySearch])
+
+  const handleChange = () => {
     if (highlightDelete) {
       onDeleteLanguage(selectedLanguages[selectedLanguages.length - 1])
-      this.setState({
-        highlightDelete: false,
-      })
+      setHighlightDelete(false)
     } else {
-      this.setState({
-        highlightDelete: true,
-      })
+      setHighlightDelete(true)
     }
   }
-  removeLanguageWithIconTag = (tagIndex) => {
-    const {onDeleteLanguage, selectedLanguages} = this.props
+
+  const removeLanguageWithIconTag = (tagIndex) => {
     onDeleteLanguage(selectedLanguages[tagIndex])
   }
 
-  render() {
-    const {defaultRenderTag} = this
-    const {onQueryChange, querySearch, selectedLanguages} = this.props
-    return (
-      <TagsInput
-        inputValue={querySearch}
-        addKeys={[]}
-        inputProps={{placeholder: 'Search...'}}
-        onChangeInput={onQueryChange}
-        renderTag={defaultRenderTag}
-        value={selectedLanguages ? selectedLanguages.map((e) => e.name) : []}
-        onChange={this.handleChange}
-        autofocus={true}
-        ref={(tagsInput) => (this.tagsInput = tagsInput)}
-      />
-    )
-  }
-
-  defaultRenderTag = (props) => {
-    const {removeLanguageWithIconTag} = this
-    const {highlightDelete} = this.state
-    const {selectedLanguages} = this.props
+  const defaultRenderTag = (props) => {
     let {
       tag,
       key,
@@ -102,6 +75,20 @@ class LanguageSelectorSearch extends React.Component {
       </span>
     )
   }
+
+  return (
+    <TagsInput
+      inputValue={querySearch}
+      addKeys={[]}
+      inputProps={{placeholder: 'Search...'}}
+      onChangeInput={onQueryChange}
+      renderTag={defaultRenderTag}
+      value={selectedLanguages ? selectedLanguages.map((e) => e.name) : []}
+      onChange={handleChange}
+      autofocus={true}
+      ref={tagsInputRef}
+    />
+  )
 }
 
 LanguageSelectorSearch.defaultProps = {

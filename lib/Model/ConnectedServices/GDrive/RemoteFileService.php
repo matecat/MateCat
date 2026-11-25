@@ -180,7 +180,7 @@ class RemoteFileService
         try {
             return $this->gdriveService->files->copy($originFileId, $copiedFile, $optParams);
         } catch (Exception $e) {
-            throw new Exception('Copy File - GDrive Error: ' . json_decode($e->getMessage())->error->message, $e->getCode());
+            throw new Exception('Copy file - GDrive error: ' . json_decode($e->getMessage())->error->message, $e->getCode());
         }
     }
 

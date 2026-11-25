@@ -4,14 +4,13 @@ namespace Matecat\Core\Controllers;
 
 use Controller\API\App\SetChunkCompletedController;
 use Exception;
-use InvalidArgumentException;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
-use Model\Jobs\JobStruct;
+use Model\Jobs\JobDao;
 use Model\Users\UserStruct;
 use PDOException;
 use PHPUnit\Event\NoPreviousThrowableException;
@@ -25,6 +24,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use ReflectionException;
 use TypeError;
+use Utils\Constants\SourcePages;
 use Utils\Logger\MatecatLogger;
 
 class TestableSetChunkCompletedController extends SetChunkCompletedController
@@ -156,91 +156,41 @@ class SetChunkCompletedControllerTest extends AbstractTest
     }
 
     /**
-     * @param array<string, string> $params
+     * ChunkPasswordValidator runs before the action in production; these tests call the action
+     * (and isRevision) directly, so seed the credential-resolved chunk the controller now reads.
      *
      * @throws ReflectionException
      */
-    private function setRequestParams(array $params): void
+    private function seedChunk(int $sourcePage): void
     {
-        $serverParams      = ['REQUEST_URI' => '/api/app/setchunkcompleted', 'REQUEST_METHOD' => 'POST'];
-        $this->requestStub = new Request($params, [], [], $serverParams);
-        $this->setProp('request', $this->requestStub);
+        $chunk = (new JobDao(obtainTestDatabase()))->getByIdAndPassword($this->jobId(self::BASE), 'chunkpw');
+        self::assertNotNull($chunk);
+        $chunk->setSourcePage($sourcePage);
+        $this->setProp('chunk', $chunk);
     }
 
-    // ─── validateTheRequest ───
+    // ─── isRevision() phase derivation (credential-resolved source_page, never the Referer) ───
 
     /**
      * @throws ReflectionException
      */
     #[Test]
-    public function validateTheRequest_throws_when_id_job_is_empty(): void
+    public function isRevision_is_false_when_chunk_source_page_is_translate(): void
     {
-        $this->setRequestParams(['password' => 'chunkpw']);
+        $this->seedChunk(SourcePages::SOURCE_PAGE_TRANSLATE);
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionCode(-1);
-
-        $this->invokePrivate('validateTheRequest');
-    }
-
-    /**
-     * @throws ReflectionException
-     */
-    #[Test]
-    public function validateTheRequest_throws_when_password_is_empty(): void
-    {
-        $this->setRequestParams(['id_job' => (string) $this->jobId(self::BASE)]);
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionCode(-2);
-
-        $this->invokePrivate('validateTheRequest');
+        $this->assertFalse($this->invokePrivate('isRevision'));
     }
 
     /**
      * @throws ReflectionException
      */
     #[Test]
-    public function validateTheRequest_throws_when_password_is_wrong(): void
+    public function isRevision_is_true_when_chunk_source_page_is_revision(): void
     {
-        $this->setRequestParams([
-            'id_job'   => (string) $this->jobId(self::BASE),
-            'password' => 'totally_wrong_pw',
-        ]);
+        $this->seedChunk(SourcePages::SOURCE_PAGE_REVISION);
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionCode(-10);
-
-        $this->invokePrivate('validateTheRequest');
-    }
-
-    /**
-     * @throws ReflectionException
-     * @throws PHPUnitException
-     * @throws ExpectationFailedException
-     */
-    #[Test]
-    public function validateTheRequest_returns_job_struct_and_sets_controller_state(): void
-    {
-        $this->setRequestParams([
-            'id_job'           => (string) $this->jobId(self::BASE),
-            'password'         => 'chunkpw',
-            'current_password' => 'chunkpw',
-        ]);
-
-        $result = $this->invokePrivate('validateTheRequest');
-
-        $this->assertIsArray($result);
-        $this->assertSame((string) $this->jobId(self::BASE), $result['id_job']);
-        $this->assertSame('chunkpw', $result['password']);
-        $this->assertInstanceOf(JobStruct::class, $result['job']);
-        $this->assertSame($this->jobId(self::BASE), $result['job']->id);
-
-        $idJobProp = $this->reflector->getProperty('id_job');
-        $this->assertSame($this->jobId(self::BASE), $idJobProp->getValue($this->controller));
-
-        $pwProp = $this->reflector->getProperty('request_password');
-        $this->assertSame('chunkpw', $pwProp->getValue($this->controller));
+        $this->assertTrue($this->invokePrivate('isRevision'));
     }
 
     // ─── complete() public action ───
@@ -248,50 +198,14 @@ class SetChunkCompletedControllerTest extends AbstractTest
     /**
      * @throws Exception
      * @throws TypeError
-     */
-    #[Test]
-    public function complete_throws_invalid_argument_for_wrong_password(): void
-    {
-        $this->setRequestParams([
-            'id_job'   => (string) $this->jobId(self::BASE),
-            'password' => 'totally_wrong_pw',
-        ]);
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionCode(-10);
-
-        $this->controller->complete();
-    }
-
-    /**
-     * @throws Exception
-     * @throws TypeError
-     */
-    #[Test]
-    public function complete_throws_when_id_job_missing(): void
-    {
-        $this->setRequestParams(['password' => 'chunkpw']);
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionCode(-1);
-
-        $this->controller->complete();
-    }
-
-    /**
-     * @throws Exception
-     * @throws TypeError
      * @throws PHPUnitException
      * @throws ExpectationFailedException
+     * @throws ReflectionException
      */
     #[Test]
     public function complete_returns_event_id_on_success(): void
     {
-        $this->setRequestParams([
-            'id_job'           => (string) $this->jobId(self::BASE),
-            'password'         => 'chunkpw',
-            'current_password' => 'chunkpw',
-        ]);
+        $this->seedChunk(SourcePages::SOURCE_PAGE_TRANSLATE);
 
         $captured = null;
         $this->responseMock->expects($this->once())

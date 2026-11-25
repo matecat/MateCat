@@ -5,7 +5,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain';
  *
  * @param {Object} options
  * @param {string} [options.idJob=config.id_job]
- * @param {string} [options.password=config.password]
+ * @param {string} [options.password=config.currentPassword]
  * @param {string} options.token
  * @param {string} options.source
  * @param {string} options.target
@@ -13,7 +13,6 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain';
  * @param {boolean} options.matchcase
  * @param {boolean} options.exactmatch
  * @param {string} options.replace
- * @param {string} [options.revisionNumber=config.revisionNumber]
  * @returns {Promise<object>}
  */
 export const searchTermIntoSegments = async ({
@@ -27,8 +26,8 @@ export const searchTermIntoSegments = async ({
   exactmatch,
   inCurrentChunkOnly,
   replace,
-  revisionNumber,
 }) => {
+  // No revision_number: the phase is derived server side from this password.
   const paramsData = {
     id_job: idJob,
     password,
@@ -40,7 +39,6 @@ export const searchTermIntoSegments = async ({
     exactmatch,
     inCurrentChunkOnly: inCurrentChunkOnly,
     replace,
-    revision_number: revisionNumber,
   }
   const formData = new FormData()
 

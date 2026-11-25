@@ -2,12 +2,19 @@ import React, {useContext, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import Upload from '../../../../../../img/icons/Upload'
 import Checkmark from '../../../../../../img/icons/Checkmark'
-import Close from '../../../../../../img/icons/Close'
 import {DEEPL_GLOSSARY_CREATE_ROW_ID} from './DeepLGlossaryConstants'
 import {createAndImportDeepLGlossary} from '../../../../../api/createAndImportDeepLGlossary'
 import LabelWithTooltip from '../../../../common/LabelWithTooltip'
 import CatToolActions from '../../../../../actions/CatToolActions'
 import {SettingsPanelContext} from '../../../SettingsPanelContext'
+import {
+  Button,
+  BUTTON_HTML_TYPE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../../../../common/Button/Button'
+import IconClose from '../../../../../../img/icons/IconClose'
+import {Radio, RADIO_SIZE} from '../../../../common/Radio/Radio'
 
 export const DeepLGlossaryCreateRow = ({engineId, row, setRows}) => {
   const {portalTarget} = useContext(SettingsPanelContext)
@@ -19,8 +26,8 @@ export const DeepLGlossaryCreateRow = ({engineId, row, setRows}) => {
 
   const ref = useRef()
 
-  const onChangeIsActive = (e) => {
-    setIsActive(e.currentTarget.checked)
+  const onChangeIsActive = (checked) => {
+    setIsActive(checked)
   }
 
   const onChangeName = (e) => {
@@ -68,7 +75,6 @@ export const DeepLGlossaryCreateRow = ({engineId, row, setRows}) => {
         type: 'error',
         text: !name ? 'Name mandatory' : 'File mandatory',
         position: 'br',
-        allowHtml: true,
         timer: 5000,
       })
       return false
@@ -89,7 +95,6 @@ export const DeepLGlossaryCreateRow = ({engineId, row, setRows}) => {
       type: 'success',
       text: 'Glossary created successfully',
       position: 'br',
-      allowHtml: true,
       timer: 5000,
     })
     setIsWaitingResult(false)
@@ -100,7 +105,6 @@ export const DeepLGlossaryCreateRow = ({engineId, row, setRows}) => {
       type: 'error',
       text: 'Error creating glossary',
       position: 'br',
-      allowHtml: true,
       timer: 5000,
     })
     setIsWaitingResult(false)
@@ -123,10 +127,11 @@ export const DeepLGlossaryCreateRow = ({engineId, row, setRows}) => {
           isWaitingResult ? ' row-content-create-glossary-waiting' : ''
         }`}
       >
-        <input
+        <Radio
+          name="deeplGlossaryNone"
+          size={RADIO_SIZE.SMALL}
           checked={isActive}
           onChange={onChangeIsActive}
-          type="radio"
           title=""
           disabled
         />
@@ -137,6 +142,7 @@ export const DeepLGlossaryCreateRow = ({engineId, row, setRows}) => {
         }`}
       >
         <input
+          type="text"
           className={inputNameClasses}
           placeholder="Please insert a name for the glossary"
           value={name}
@@ -172,25 +178,27 @@ export const DeepLGlossaryCreateRow = ({engineId, row, setRows}) => {
           isWaitingResult ? ' row-content-create-glossary-waiting' : ''
         }`}
       >
-        <button
-          className="ui primary button settings-panel-button-icon confirm-button"
-          type="submit"
+        <Button
+          type={BUTTON_TYPE.PRIMARY}
+          size={BUTTON_SIZE.SMALL}
           disabled={isWaitingResult || !isFormFilled}
-          data-testid="deeplglossary-create-confirm"
+          htmlType={BUTTON_HTML_TYPE.SUBMIT}
+          testId="deeplglossary-create-confirm"
         >
-          <Checkmark size={12} />
+          <Checkmark size={16} />
           Confirm
-        </button>
+        </Button>
       </div>
       <div className="glossary-row-delete">
-        <button
-          className="ui button orange close-button"
+        <Button
+          type={BUTTON_TYPE.WARNING}
+          size={BUTTON_SIZE.ICON_SMALL}
+          htmlType={BUTTON_HTML_TYPE.RESET}
           onClick={onReset}
-          type="reset"
           disabled={isWaitingResult}
         >
-          <Close size={18} />
-        </button>
+          <IconClose size={16} />
+        </Button>
       </div>
       {isWaitingResult && <div className="spinner"></div>}
     </form>

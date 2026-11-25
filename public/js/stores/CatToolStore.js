@@ -5,6 +5,7 @@ import {filter} from 'lodash'
 import AppDispatcher from './AppDispatcher'
 import CatToolConstants from '../constants/CatToolConstants'
 import ModalsConstants from '../constants/ModalsConstants'
+import {JobMetadataProxy} from './JobMetadataProxy'
 
 EventEmitter.prototype.setMaxListeners(0)
 
@@ -13,8 +14,9 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   qr: null,
   firstLoad: true,
   languages: [],
-  // pc-carrying ph tags are collapsed by default; only an explicit opt-out persists
-  phTagsCompressed: (() => {
+  // compressible tags are collapsed by default; only an explicit opt-out persists.
+  // The storage key keeps its old `phTagsCompressed-` name so saved choices survive.
+  tagsCompressed: (() => {
     try {
       return (
         localStorage.getItem('phTagsCompressed-' + config.userMail) !== 'false'
@@ -139,21 +141,26 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
     this._currentProjectTemplate = currentProjectTemplate
   },
   setJobMetadata: function (jobMetadata) {
-    this.jobMetadata = jobMetadata
+    // The API returns metadata as {job, project}: job-level settings override
+    // the project's own defaults when a job scopes an MT/editor setting to
+    // itself. JobMetadataProxy exposes a flattened view so every consumer can
+    // read e.g. jobMetadata.mt_extra directly, without knowing or caring
+    // whether the value came from the job or fell back to the project.
+    this.jobMetadata = new JobMetadataProxy(jobMetadata).proxy
   },
   getJobMetadata: function () {
     return this.jobMetadata
   },
-  isPhTagsCompressed: function () {
-    return this.phTagsCompressed
+  isTagsCompressed: function () {
+    return this.tagsCompressed
   },
   emitChange: function () {
     this.emit.apply(this, arguments)
   },
 })
 
-if (CatToolStore.phTagsCompressed) {
-  document.body.classList.add('ph-tags-compressed')
+if (CatToolStore.tagsCompressed) {
+  document.body.classList.add('tags-compressed')
 }
 
 // Register callback to handle all updates
@@ -297,7 +304,6 @@ AppDispatcher.register(function (action) {
       })
       break
     case CatToolConstants.GET_JOB_METADATA:
-      CatToolStore.setJobMetadata(action.jobMetadata)
       CatToolStore.emitChange(CatToolConstants.GET_JOB_METADATA, {
         ...action,
       })
@@ -307,23 +313,26 @@ AppDispatcher.register(function (action) {
         ...action,
       })
       break
-    case CatToolConstants.TOGGLE_PH_TAGS_COMPRESSED:
-      CatToolStore.phTagsCompressed = !CatToolStore.phTagsCompressed
+    case CatToolConstants.TOGGLE_TAGS_COMPRESSED:
+      CatToolStore.tagsCompressed = !CatToolStore.tagsCompressed
       try {
         localStorage.setItem(
           'phTagsCompressed-' + config.userMail,
-          CatToolStore.phTagsCompressed,
+          CatToolStore.tagsCompressed,
         )
-      } catch (e) {}
+      } catch {
+        // localStorage throws when it is unavailable or full. The value is only
+        // remembered between visits, so the toggle above still holds for this one.
+      }
       if (document?.body) {
         document.body.classList.toggle(
-          'ph-tags-compressed',
-          CatToolStore.phTagsCompressed,
+          'tags-compressed',
+          CatToolStore.tagsCompressed,
         )
       }
       CatToolStore.emitChange(
-        CatToolConstants.TOGGLE_PH_TAGS_COMPRESSED,
-        CatToolStore.phTagsCompressed,
+        CatToolConstants.TOGGLE_TAGS_COMPRESSED,
+        CatToolStore.tagsCompressed,
       )
       break
   }

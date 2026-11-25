@@ -91,21 +91,6 @@ class TestableTranslationVersionsHandler extends TranslationVersionsHandler
     }
 }
 
-class TestableEventsHandler extends TranslationEventsHandler
-{
-    protected function openTransaction(): void
-    {
-    }
-
-    protected function commitTransaction(): void
-    {
-    }
-
-    protected function rollbackTransaction(): void
-    {
-    }
-}
-
 #[Group('PersistenceNeeded')]
 class TranslationVersionsHandlerTest extends AbstractTest
 {
@@ -208,6 +193,23 @@ class TranslationVersionsHandlerTest extends AbstractTest
         $conn->exec("DELETE FROM files WHERE id = " . self::FILE_ID);
         $conn->exec("DELETE FROM project_metadata WHERE id_project = " . self::PROJECT_ID);
         $conn->exec("DELETE FROM projects WHERE id = " . self::PROJECT_ID);
+    }
+
+    /**
+     * A TranslationEventDao stub whose handle runs a transaction scope inline.
+     *
+     * save() opens its scope on the dao's own handle. Left auto-stubbed, transaction() would return
+     * null without ever calling the closure, so nothing under test would run and every assertion
+     * below would pass against a method that did nothing.
+     */
+    private function makeEventDaoStub(): TranslationEventDao
+    {
+        [$database] = $this->createDatabaseMock();
+
+        $eventDao = $this->createStub(TranslationEventDao::class);
+        $eventDao->method('getDatabaseHandler')->willReturn($database);
+
+        return $eventDao;
     }
 
     private function makeChunk(): JobStruct
@@ -519,10 +521,10 @@ class TranslationVersionsHandlerTest extends AbstractTest
     #[Test]
     public function storeTranslationEventSavesSourceEvent(): void
     {
-        $eventDao = $this->createStub(TranslationEventDao::class);
+        $eventDao = $this->makeEventDaoStub();
         $eventDao->method('insertStruct')->willReturn(1);
 
-        $eventsHandler = new TestableEventsHandler($this->makeChunk(), $eventDao);
+        $eventsHandler = new TranslationEventsHandler($this->makeChunk(), $eventDao);
 
         $handler = $this->makeHandler();
         $handler->setEventsHandlerOverride($eventsHandler);
@@ -546,10 +548,10 @@ class TranslationVersionsHandlerTest extends AbstractTest
     #[Test]
     public function storeTranslationEventWithPropagation(): void
     {
-        $eventDao = $this->createStub(TranslationEventDao::class);
+        $eventDao = $this->makeEventDaoStub();
         $eventDao->method('insertStruct')->willReturn(1);
 
-        $eventsHandler = new TestableEventsHandler($this->makeChunk(), $eventDao);
+        $eventsHandler = new TranslationEventsHandler($this->makeChunk(), $eventDao);
 
         $handler = $this->makeHandler();
         $handler->setEventsHandlerOverride($eventsHandler);
@@ -569,10 +571,10 @@ class TranslationVersionsHandlerTest extends AbstractTest
     #[Test]
     public function storeTranslationEventWithIcePropagation(): void
     {
-        $eventDao = $this->createStub(TranslationEventDao::class);
+        $eventDao = $this->makeEventDaoStub();
         $eventDao->method('insertStruct')->willReturn(1);
 
-        $eventsHandler = new TestableEventsHandler($this->makeChunk(), $eventDao);
+        $eventsHandler = new TranslationEventsHandler($this->makeChunk(), $eventDao);
 
         $handler = $this->makeHandler();
         $handler->setEventsHandlerOverride($eventsHandler);
@@ -606,10 +608,10 @@ class TranslationVersionsHandlerTest extends AbstractTest
     #[Test]
     public function storeTranslationEventWrapsExceptionInRuntimeException(): void
     {
-        $eventDao = $this->createStub(TranslationEventDao::class);
+        $eventDao = $this->makeEventDaoStub();
         $eventDao->method('insertStruct')->willThrowException(new \Exception('DB error'));
 
-        $eventsHandler = new TestableEventsHandler($this->makeChunk(), $eventDao);
+        $eventsHandler = new TranslationEventsHandler($this->makeChunk(), $eventDao);
 
         $handler = $this->makeHandler();
         $handler->setEventsHandlerOverride($eventsHandler);

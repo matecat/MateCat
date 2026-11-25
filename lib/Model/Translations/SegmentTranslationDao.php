@@ -218,6 +218,10 @@ class SegmentTranslationDao extends AbstractDao
             $rowCount += $stmt->rowCount();
         }
 
+        foreach (array_unique(array_map(fn(SegmentTranslationStruct $row) => (int)$row->id_job, $translation_struct)) as $id_job) {
+            (new WarningDao($this->database))->destroyCachesByJobId($id_job);
+        }
+
         return $rowCount;
     }
 
@@ -296,6 +300,10 @@ class SegmentTranslationDao extends AbstractDao
         $stmt->execute($data);
 
         $rc = $stmt->rowCount();
+        if ($rc > 0) {
+            (new WarningDao($this->database))->destroyCachesByJobId((int)$data['id_job']);
+        }
+
         if ($rc === 0) {
             return $this->isTranslationSkipped(
                 (int)($data['id_segment'] ?? throw new Exception('Missing id_segment in data')),
@@ -352,7 +360,7 @@ class SegmentTranslationDao extends AbstractDao
             $where_values[] = TranslationStatus::STATUS_APPROVED;
             $where_values[] = TranslationStatus::STATUS_APPROVED2;
         } else {
-            throw new Exception('not allowed to change status to ' . $status);
+            throw new Exception('Not allowed to change status to ' . $status);
         }
 
         $status_placeholders = str_repeat('?,', count($where_values) - 1) . '?';
@@ -408,6 +416,7 @@ class SegmentTranslationDao extends AbstractDao
      *
      * @return int
      * @throws PDOException
+     * @throws Exception
      */
     public function addTranslation(SegmentTranslationStruct $translation_struct, bool $is_revision): int
     {
@@ -494,6 +503,8 @@ class SegmentTranslationDao extends AbstractDao
             throw new PDOException("Error when (UPDATE) the translation for the segment {$translation['id_segment']} - Error: {$e->getCode()}");
         }
 
+        (new WarningDao($this->database))->destroyCachesByJobId((int)$translation_struct->id_job);
+
         return $stmt->rowCount();
     }
 
@@ -517,7 +528,10 @@ class SegmentTranslationDao extends AbstractDao
             $values['fields'][] = 'version_number';
         }
 
-        return $this->updateStruct($translation_struct, $values);
+        $rowCount = $this->updateStruct($translation_struct, $values);
+        (new WarningDao($this->database))->destroyCachesByJobId((int)$translation_struct->id_job);
+
+        return $rowCount;
     }
 
     /**
@@ -588,8 +602,7 @@ class SegmentTranslationDao extends AbstractDao
         }
 
         $queryTotals = "
-           SELECT $sum_sql as total, sum(1) as countSeg, segment_translations.*
-
+           SELECT $sum_sql as total, sum(1) as repetitions_count, segment_translations.*
            FROM segment_translations
               INNER JOIN  segments
               ON segments.id = segment_translations.id_segment
@@ -666,14 +679,13 @@ class SegmentTranslationDao extends AbstractDao
                 $propagationAnalyser = new PropagationAnalyser();
                 $propagationTotal = $propagationAnalyser->analyse($segmentTranslationStruct, $arrayOfSegmentTranslationToPropagate);
 
+                // The last row of a GROUP BY ... WITH ROLLUP is the super-aggregate: the word count and
+                // the row count over every repetition of this segment inside the chunk, the current one
+                // excluded by the query. Only the two aggregates carry meaning here; the row's other
+                // columns are either NULL or an arbitrary member of the group.
                 $propagationTotal->setTotals([
-                    'propagated_ice_total' => $propagationAnalyser->getPropagatedIceCount(),
-                    'not_propagated_total' => $propagationAnalyser->getNotPropagatedCount(),
-                    'propagated_total' => $propagationAnalyser->getPropagatedCount(),
-                    'not_propagated_ice_total' => $propagationAnalyser->getNotPropagatedIceCount(),
                     'total' => $lastRow[0],
-                    'countSeg' => $lastRow[1],
-                    'status' => $lastRow[2],
+                    'repetitions_count' => $lastRow[1],
                 ]);
 
                 $propagationObject = [

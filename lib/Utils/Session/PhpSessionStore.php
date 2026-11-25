@@ -14,7 +14,9 @@ namespace Utils\Session;
  *
  * Starting the session is not this class's job. Controllers already decide that through
  * `$useSession`, and starting one here would silently give a stateless controller session state —
- * which is precisely the boundary `StatelessSessionStore` exists to enforce.
+ * which is precisely the boundary `StatelessSessionStore` exists to enforce. The session's other
+ * lifecycle operations are not this class's either: they belong to {@see PhpSession}, which this
+ * class calls for the two the interface exposes.
  */
 class PhpSessionStore implements SessionStore
 {
@@ -50,21 +52,14 @@ class PhpSessionStore implements SessionStore
     }
 
     /**
-     * `true` deletes the old id's storage rather than orphaning it, so a stolen pre-rotation id
-     * cannot be resumed.
-     *
-     * Both guards are required, and the second is the less obvious one: rotating emits a Set-Cookie
-     * header, so once the response has begun `session_regenerate_id()` raises a warning and does
-     * nothing. Returning quietly keeps a caller that rotates late from turning a missed rotation into
-     * a visible error, and there is nothing it could do about it at that point anyway.
+     * Rotating the id is a lifecycle operation on the session rather than an operation on its
+     * contents, so the call itself lives in {@see PhpSession::regenerateId()} along with the guards
+     * it needs. Kept on the interface because rotation is something a caller holding a store asks
+     * for, and a stateless store must be able to refuse it.
      */
     public function regenerateId(): void
     {
-        if (session_status() !== PHP_SESSION_ACTIVE || headers_sent()) {
-            return;
-        }
-
-        session_regenerate_id(true);
+        PhpSession::regenerateId();
     }
 
     /**
@@ -83,8 +78,6 @@ class PhpSessionStore implements SessionStore
     {
         $_SESSION = [];
 
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_destroy();
-        }
+        PhpSession::destroy();
     }
 }

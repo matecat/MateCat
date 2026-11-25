@@ -56,7 +56,9 @@ class BatchReviewProcessorTest extends AbstractTest
         self::$originalSkipCache = AppConfig::$SKIP_SQL_CACHE;
         AppConfig::$SKIP_SQL_CACHE = true;
 
-        [$this->dbStub, $this->pdoStub, $this->stmtStub] = $this->createDatabaseMock();
+        // process() locks the job's chunk reviews and reaches a real ChunkReviewModel; every caller
+        // arrives through TranslationEventsHandler::save(), which opens the transaction.
+        [$this->dbStub, $this->pdoStub, $this->stmtStub] = $this->createDatabaseMock(inTransaction: true);
 
         $this->chunkReviewDaoStub = $this->createStub(ChunkReviewDao::class);
         $this->chunkReviewDaoStub->method('getDatabaseHandler')->willReturn($this->dbStub);
@@ -345,5 +347,59 @@ class BatchReviewProcessorTest extends AbstractTest
         $this->assertSame(1.0, $this->chunk->rejected_words);
         $this->assertSame(10, $this->chunk->draft_raw_words);
         $this->assertSame(80, $this->chunk->new_raw_words);
+    }
+
+    /**
+     * The lock must be taken before the first read, not merely somewhere in process().
+     *
+     * Ordering is the whole invariant. Two things depend on it: acquiring qa_chunk_reviews before
+     * deleteIssues() touches qa_entries is what keeps this path from deadlocking against
+     * TranslationIssueModel, which locks in that order; and holding the id_job gap lock before
+     * findChunkReviews() is what closes the find-then-create race with a concurrent request.
+     */
+    #[Test]
+    public function processLocksTheJobsChunkReviewsBeforeReadingThem(): void
+    {
+        $calls = [];
+
+        $daoMock = $this->createMock(ChunkReviewDao::class);
+        $daoMock->method('getDatabaseHandler')->willReturn($this->dbStub);
+        $daoMock->expects($this->once())
+            ->method('lockByJobId')
+            ->with(10)
+            ->willReturnCallback(function () use (&$calls): void {
+                $calls[] = 'lockByJobId';
+            });
+        $daoMock->method('findChunkReviews')->willReturnCallback(function () use (&$calls): array {
+            $calls[] = 'findChunkReviews';
+
+            return [$this->createStub(ChunkReviewStruct::class)];
+        });
+
+        $processor = new BatchReviewProcessor($daoMock, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
+        $processor->setChunk($this->chunk);
+        $processor->setPreparedEvents([]);
+        $processor->process();
+
+        $this->assertSame(['lockByJobId', 'findChunkReviews'], $calls);
+    }
+
+    #[Test]
+    public function processThrowsWhenTheChunkHasNoId(): void
+    {
+        $projectStub = $this->createStub(ProjectStruct::class);
+        $projectStub->id = 1;
+        $chunk = new BatchReviewProcessorStubJobStruct(
+            ['id' => null, 'password' => 'test_pw', 'id_project' => 1],
+            $projectStub
+        );
+
+        $processor = new BatchReviewProcessor($this->chunkReviewDaoStub, new UserStruct(['uid' => 987, 'email' => 'actor@example.org']));
+        $processor->setChunk($chunk);
+        $processor->setPreparedEvents([]);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Missing chunk id');
+        $processor->process();
     }
 }

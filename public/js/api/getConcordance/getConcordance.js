@@ -9,18 +9,16 @@ import SegmentStore from '../../stores/SegmentStore'
  * @param {number} type
  * @param {string} [idJob=config.id_job]
  * @param {string} [idTranslator=config.id_translator]
- * @param {string} [password=config.password]
- * @param {string} [idClient=config.id_client]
  * @param {string} [currentPassword=config.currentPassword]
+ * @param {string} [idClient=config.id_client]
  * @returns {Promise<object>}
  */
 export const getConcordance = async (
   query,
   type,
   idJob = config.id_job,
-  password = config.password,
-  idClient = config.id_client,
   currentPassword = config.currentPassword,
+  idClient = config.id_client,
 ) => {
   const dataParams = {
     is_concordance: 1,
@@ -29,9 +27,8 @@ export const getConcordance = async (
     text: query,
     id_job: idJob,
     num_results: NUM_CONCORDANCE_RESULTS,
-    password: password,
+    password: currentPassword,
     id_client: idClient,
-    current_password: currentPassword,
   }
   const formData = new FormData()
 

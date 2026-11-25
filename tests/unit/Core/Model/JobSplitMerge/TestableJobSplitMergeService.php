@@ -11,6 +11,7 @@ use Model\JobSplitMerge\JobSplitMergeService;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use Model\Translations\WarningDao;
 use Model\Translators\TranslatorsModel;
 use Model\Users\UserDao;
 use Model\WordCount\CounterModel;
@@ -38,7 +39,6 @@ class TestableJobSplitMergeService extends JobSplitMergeService
     private array $randomStrings = [];
     private int $randomStringIndex = 0;
 
-    private bool $beginTransactionCalled = false;
     private bool $destroyAnalysisCacheCalled = false;
     private ?int $destroyAnalysisCacheProjectId = null;
 
@@ -47,8 +47,8 @@ class TestableJobSplitMergeService extends JobSplitMergeService
 
     /** @var array{job: JobStruct, newPassword: string|false}[] */
     private array $updateForMergeCalls = [];
-    /** @var JobStruct[] */
-    private array $deleteOnMergeCalls = [];
+    /** @var array{chunk: JobStruct, oldPassword: string, newPassword: string}[] */
+    private array $sweepCredentialCachesCalls = [];
 
     /** @var array<string, mixed>[] Owner keys to return */
     private array $ownerKeysOverride = [];
@@ -91,18 +91,6 @@ class TestableJobSplitMergeService extends JobSplitMergeService
     protected function getJobByIdAndPassword(int $id, string $password): ?JobStruct
     {
         return $this->jobByIdAndPasswordOverride ?? parent::getJobByIdAndPassword($id, $password);
-    }
-
-    // ── beginTransaction ──
-
-    protected function beginTransaction(): void
-    {
-        $this->beginTransactionCalled = true;
-    }
-
-    public function wasBeginTransactionCalled(): bool
-    {
-        return $this->beginTransactionCalled;
     }
 
     // ── Cart ──
@@ -218,6 +206,18 @@ class TestableJobSplitMergeService extends JobSplitMergeService
         $this->destroyAnalysisCacheProjectId = $projectId;
     }
 
+    private ?WarningDao $warningDaoOverride = null;
+
+    public function setWarningDao(WarningDao $dao): void
+    {
+        $this->warningDaoOverride = $dao;
+    }
+
+    protected function createWarningDao(): WarningDao
+    {
+        return $this->warningDaoOverride ?? parent::createWarningDao();
+    }
+
     public function wasDestroyAnalysisCacheCalled(): bool
     {
         return $this->destroyAnalysisCacheCalled;
@@ -243,7 +243,7 @@ class TestableJobSplitMergeService extends JobSplitMergeService
         return $this->enqueuedWorkers;
     }
 
-    // ── updateForMerge / deleteOnMerge ──
+    // ── updateForMerge ──
 
     protected function updateForMerge(JobStruct $job, string $newPassword): void
     {
@@ -258,17 +258,22 @@ class TestableJobSplitMergeService extends JobSplitMergeService
         return $this->updateForMergeCalls;
     }
 
-    protected function deleteOnMerge(JobStruct $job): void
+
+    protected function sweepCredentialCaches(JobStruct $chunk, string $oldPassword, string $newPassword): void
     {
-        $this->deleteOnMergeCalls[] = $job;
+        $this->sweepCredentialCachesCalls[] = [
+            'chunk' => $chunk,
+            'oldPassword' => $oldPassword,
+            'newPassword' => $newPassword,
+        ];
     }
 
     /**
-     * @return JobStruct[]
+     * @return array{chunk: JobStruct, oldPassword: string, newPassword: string}[]
      */
-    public function getDeleteOnMergeCalls(): array
+    public function getSweepCredentialCachesCalls(): array
     {
-        return $this->deleteOnMergeCalls;
+        return $this->sweepCredentialCachesCalls;
     }
 
     // ── getOwnerKeys ──

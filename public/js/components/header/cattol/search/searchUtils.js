@@ -1,6 +1,4 @@
-import {isUndefined, clone} from 'lodash'
-import {find} from 'lodash/collection'
-import {findIndex} from 'lodash/array'
+import {isUndefined, clone, find, findIndex} from 'lodash'
 
 import {
   addSearchResultToSegments,
@@ -91,7 +89,7 @@ let SearchUtils = {
         {
           text: 'Enter text in source or target input boxes or select a status.',
         },
-        'Search Alert',
+        'Search alert',
       )
       return false
     }
@@ -121,7 +119,6 @@ let SearchUtils = {
         matchcase: this.searchParams['match-case'],
         exactmatch: this.searchParams['exact-match'],
         inCurrentChunkOnly: this.searchParams['inCurrentChunkOnly'],
-        revisionNumber: params.revisionNumber,
         replace,
       }).then((data) => {
         SearchUtils.execFind_success(data)
@@ -232,11 +229,11 @@ let SearchUtils = {
       searchResultsDictionary = {}
     let searchParams = {}
     searchParams.source = this.searchParams.source
-      ? this.searchParams.source.replace(/ /g, tagSignatures.nbsp.placeholder)
+      ? this.searchParams.source.replace(/\u00A0/g, tagSignatures.nbsp.placeholder)
       : null
 
     searchParams.target = this.searchParams.target
-      ? this.searchParams.target.replace(/ /g, tagSignatures.nbsp.placeholder)
+      ? this.searchParams.target.replace(/\u00A0/g, tagSignatures.nbsp.placeholder)
       : null
 
     if (tagSignatures.space) {
@@ -385,7 +382,7 @@ let SearchUtils = {
         {
           text: 'You must specify the Target value to replace.',
         },
-        'Search Alert',
+        'Search alert',
       )
       delete this.searchParams.target
       return false
@@ -400,7 +397,7 @@ let SearchUtils = {
         {
           text: 'You must specify the replacement value.',
         },
-        'Search Alert',
+        'Search alert',
       )
       delete this.searchParams.replace
       return false

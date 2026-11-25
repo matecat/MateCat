@@ -7,8 +7,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @param {string} options.idComment
  * @param {string} options.idSegment
  * @param {string} [options.idJob=config.id_job]
- * @param {string} [options.password=config.password]
- * @param {string} [options.sourcePage=config.revisionNumber]
+ * @param {string} [options.password=config.currentPassword]
  * @param {string} [options.idClient=config.id_client]
  * @returns {Promise<object>}
  */
@@ -16,15 +15,14 @@ export const deleteComment = async ({
   idComment,
   idSegment,
   idJob = config.id_job,
-  password = config.password,
-  sourcePage = config.revisionNumber,
+  password = config.currentPassword,
 }) => {
+  // No source_page: the server only lets this password delete comments of the phase it resolves to.
   const dataParams = {
     id_comment: idComment,
     id_segment: idSegment,
     id_job: idJob,
     password,
-    source_page: sourcePage ? sourcePage + 1 : 1,
   }
   const formData = new FormData()
 

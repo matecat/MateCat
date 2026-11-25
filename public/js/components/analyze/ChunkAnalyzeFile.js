@@ -18,14 +18,11 @@ const ChunkAnalyzeFile = ({file, index, size, rates, workflowType}) => {
         className={`chunk-file-detail-background ${size === index ? 'last' : ''} `}
       />
       <div className={'chunk-file-detail-filename'}>
-        <div>
-          <div>
-            <FileIcon size={14} />
-          </div>
-          <LabelWithTooltip className={`chunk-file-detail-name `}>
-            <span>{file.name}</span>
-          </LabelWithTooltip>
-        </div>
+        <FileIcon size={14} />
+
+        <LabelWithTooltip className={`chunk-file-detail-name `}>
+          <span>{file.name}</span>
+        </LabelWithTooltip>
       </div>
       <div>
         <div>{matches.find((item) => item.type === 'new').equivalent}</div>

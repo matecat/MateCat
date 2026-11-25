@@ -4,7 +4,9 @@ namespace Matecat\Core\Controllers;
 
 use ArrayObject;
 use Controller\API\App\SplitJobController as AppSplitJobController;
-use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\AuthorizationError;
+use Controller\API\Commons\Exceptions\ConflictError;
+use Controller\API\Commons\JobRestructureLock;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\V2\SplitJobController;
 use InvalidArgumentException;
@@ -12,7 +14,10 @@ use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
+use Matecat\TestHelpers\FakeLockRedisClient;
 use Model\Exceptions\NotFoundException;
+use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\Hook\Event\Filter\IsAnInternalUserEvent;
 use Model\Jobs\JobStruct;
 use Model\JobSplitMerge\JobSplitMergeManager;
 use Model\JobSplitMerge\SplitMergeProjectData;
@@ -30,8 +35,16 @@ class TestableSplitJobController extends SplitJobController
     /** @var JobStruct[]|null */
     public ?array $fakeJobs = null;
 
+    public FakeLockRedisClient $redis;
+
     public function __construct()
     {
+        $this->redis = new FakeLockRedisClient();
+    }
+
+    protected function restructureLock(): JobRestructureLock
+    {
+        return new JobRestructureLock($this->redis);
     }
 
     protected function getProjectData(int $project_id, string $project_pass, bool $split_raw_words = false): array
@@ -50,6 +63,22 @@ class TestableSplitJobController extends SplitJobController
         }
 
         return $this->fakeJobs;
+    }
+
+    /** @var list<int> the job ids checked against the project, in order */
+    public array $jobInProjectLookups = [];
+
+    /** @var JobStruct[]|null what the check before the lock sees; null falls back to fakeJobs */
+    public ?array $fakeJobInProject = null;
+
+    protected function findJobInProject(int $jid, ProjectStruct $project): array
+    {
+        $this->jobInProjectLookups[] = $jid;
+
+        return array_values(array_filter(
+            $this->fakeJobInProject ?? $this->getProjectJobs($project),
+            fn(JobStruct $job): bool => $job->id == $jid
+        ));
     }
 }
 
@@ -83,6 +112,69 @@ class SplitJobControllerTest extends AbstractTest
 
         $resProp = $this->reflector->getProperty('response');
         $resProp->setValue($this->controller, $this->responseMock);
+
+        // The controller resolves the internal-user exemption through the feature set, and
+        // TestableSplitJobController skips the constructor that would build one. Left unset, every route
+        // dies on the uninitialised typed property before reaching its own subject. This default leaves
+        // the event as dispatched, so isInternal() keeps its false default and the authorization runs.
+        $this->controller->setFeatureSet($this->featureSetLeavingEventUntouched());
+    }
+
+    /**
+     * A feature set with no listener for the event: dispatch() hands the event straight back.
+     */
+    private function featureSetLeavingEventUntouched(): FeatureSet
+    {
+        $featureSet = $this->createStub(FeatureSet::class);
+        $featureSet->method('dispatch')->willReturnArgument(0);
+
+        return $featureSet;
+    }
+
+    /**
+     * A feature set standing in for the Translated plugin's isAnInternalUser listener, which marks the
+     * event rather than throwing. $seenEmail captures what the controller asked about.
+     */
+    private function featureSetMarkingInternal(?string &$seenEmail = null): FeatureSet
+    {
+        $featureSet = $this->createStub(FeatureSet::class);
+        $featureSet->method('dispatch')->willReturnCallback(
+            function (object $event) use (&$seenEmail): object {
+                if ($event instanceof IsAnInternalUserEvent) {
+                    $seenEmail = $event->getEmail();
+                    $event->setIsInternal(true);
+                }
+
+                return $event;
+            }
+        );
+
+        return $featureSet;
+    }
+
+    /**
+     * A feature set answering the way the Translated plugin's matcher does — a valid address on a known
+     * internal domain, nothing else. Used where the point is which address the controller offers, rather
+     * than what a listener does with it; the domain list itself is the plugin's own test to keep.
+     */
+    private function featureSetAnsweringDomains(?string &$seenEmail = null): FeatureSet
+    {
+        $featureSet = $this->createStub(FeatureSet::class);
+        $featureSet->method('dispatch')->willReturnCallback(
+            function (object $event) use (&$seenEmail): object {
+                if ($event instanceof IsAnInternalUserEvent) {
+                    $seenEmail = $event->getEmail();
+                    $email = filter_var($event->getEmail(), FILTER_VALIDATE_EMAIL);
+                    $event->setIsInternal(
+                        $email !== false && str_ends_with($email, '@translated.net')
+                    );
+                }
+
+                return $event;
+            }
+        );
+
+        return $featureSet;
     }
 
     #[Test]
@@ -211,43 +303,35 @@ class SplitJobControllerTest extends AbstractTest
     {
         $job = $this->makeJobStub(10, 'pw', true);
 
-        $this->expectException(AuthenticationError::class);
+        $this->expectException(NotFoundException::class);
         $this->callPrivate('filterJobsById', 10, [$job]);
     }
 
+    /**
+     * 404 rather than 401 for every route that reaches here. The caller is past LoginValidator and
+     * past the owner-or-member check by now, so a job id naming nothing in the project is a missing
+     * record, not a missing login. Message and code stay as merge already returned them.
+     */
     #[Test]
-    public function filterJobsById_throws_when_no_match(): void
+    public function filterJobsById_throws_not_found_when_no_match(): void
     {
         $job = $this->makeJobStub(20, 'pw', false);
 
-        $this->expectException(AuthenticationError::class);
+        $this->expectException(NotFoundException::class);
         $this->expectExceptionCode(-10);
+        $this->expectExceptionMessage('Access denied');
         $this->callPrivate('filterJobsById', 99, [$job]);
     }
 
     #[Test]
-    public function checkMergeAccess_returns_matching_jobs(): void
+    public function filterJobsById_returns_the_chunks_of_the_named_job(): void
     {
         $job = $this->makeJobStub(5, 'pw', false);
 
-        $result = $this->callPrivate('checkMergeAccess', 5, [$job]);
+        $result = $this->callPrivate('filterJobsById', 5, [$job]);
 
         self::assertCount(1, $result);
         self::assertSame($job, $result[0]);
-    }
-
-    /**
-     * The conversion itself, isolated: filterJobsById() raises AuthenticationError (401) for the split
-     * endpoints, and checkMergeAccess() must turn that into a 404 for merge. Without this the retired
-     * JobMergeController's 404 would have silently become a 401 for its api-key callers.
-     */
-    #[Test]
-    public function checkMergeAccess_converts_access_error_into_not_found(): void
-    {
-        $job = $this->makeJobStub(5, 'pw', false);
-
-        $this->expectException(NotFoundException::class);
-        $this->callPrivate('checkMergeAccess', 4321, [$job]);
     }
 
     #[Test]
@@ -267,6 +351,17 @@ class SplitJobControllerTest extends AbstractTest
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionCode(-10);
         $this->callPrivate('checkSplitAccess', 5, 'wrong_pw', [$job]);
+    }
+
+    #[Test]
+    public function checkSplitAccess_throws_on_a_numerically_equal_password(): void
+    {
+        $job = $this->makeJobStub(5, '1000', false);
+
+        // `!=` compares two numeric strings numerically, so '1e3' would have been accepted
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionCode(-10);
+        $this->callPrivate('checkSplitAccess', 5, '1e3', [$job]);
     }
 
     #[Test]
@@ -302,8 +397,7 @@ class SplitJobControllerTest extends AbstractTest
     {
         $job = $this->makeJobStub(99, 'jp', false);
 
-        $project = new ProjectStruct();
-        $project->id = 1;
+        $project = $this->makeOwnedProject();
 
         // splitResult is seeded here only to prove merge() ignores it: nothing on the merge path sets
         // it, so echoing it back — as this endpoint used to — could only ever emit null.
@@ -346,8 +440,7 @@ class SplitJobControllerTest extends AbstractTest
     {
         $job = $this->makeJobStub(99, 'jp', false);
 
-        $project = new ProjectStruct();
-        $project->id = 1;
+        $project = $this->makeOwnedProject();
 
         $splitResult = new ArrayObject(['chunks' => [1, 2, 3]]);
         $data        = new SplitMergeProjectData(1);
@@ -388,8 +481,7 @@ class SplitJobControllerTest extends AbstractTest
     {
         $job = $this->makeJobStub(99, 'jp', false);
 
-        $project = new ProjectStruct();
-        $project->id = 1;
+        $project = $this->makeOwnedProject();
 
         $splitResult = new ArrayObject(['chunks' => [1, 2]]);
         $data        = new SplitMergeProjectData(1);
@@ -426,17 +518,16 @@ class SplitJobControllerTest extends AbstractTest
     }
 
     /**
-     * 404, not the 401 the split endpoints raise for the same condition. checkMergeAccess() converts
-     * it deliberately, so that retiring JobMergeController — which answered 404 here through its
-     * ProjectPasswordValidator — left the status unchanged for this route's api-key callers.
+     * 404 for a job id that is not in the project — the status the retired JobMergeController gave
+     * this route through its ProjectPasswordValidator, and now the status check and apply give the
+     * same input too.
      */
     #[Test]
     public function merge_throws_when_job_not_found(): void
     {
         $job = $this->makeJobStub(10, 'pw', false);
 
-        $project = new ProjectStruct();
-        $project->id = 1;
+        $project = $this->makeOwnedProject();
 
         $data     = new SplitMergeProjectData(1);
         $pManager = $this->createStub(JobSplitMergeManager::class);
@@ -465,8 +556,7 @@ class SplitJobControllerTest extends AbstractTest
     {
         $job = $this->makeJobStub(99, 'correct_pw', false);
 
-        $project = new ProjectStruct();
-        $project->id = 1;
+        $project = $this->makeOwnedProject();
 
         $data     = new SplitMergeProjectData(1);
         $pManager = $this->createStub(JobSplitMergeManager::class);
@@ -490,6 +580,52 @@ class SplitJobControllerTest extends AbstractTest
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionCode(-10);
         $this->controller->check();
+    }
+
+    /**
+     * The status this route gives a job id that is not in the project. It answered 401 until the
+     * conversion merge already did moved into filterJobsById(): the caller has passed LoginValidator
+     * and the owner-or-member check by this point, so nothing about the request is unauthenticated.
+     */
+    #[Test]
+    public function check_throws_not_found_when_the_job_is_not_in_the_project(): void
+    {
+        $this->expectException(NotFoundException::class);
+        $this->runRouteWithAForeignJobId('check');
+    }
+
+    #[Test]
+    public function apply_throws_not_found_when_the_job_is_not_in_the_project(): void
+    {
+        $this->expectException(NotFoundException::class);
+        $this->runRouteWithAForeignJobId('apply');
+    }
+
+    /**
+     * Drive a split route with a job id no job in the project carries.
+     */
+    private function runRouteWithAForeignJobId(string $route): void
+    {
+        $job = $this->makeJobStub(99, 'correct_pw', false);
+        $project = $this->makeOwnedProject();
+
+        $this->controller->fakeJobs = [$job];
+        $this->controller->fakeProjectData = [
+            'data' => new SplitMergeProjectData(1),
+            'pManager' => $this->createStub(JobSplitMergeManager::class),
+            'count_type' => 'eq_word_count',
+            'project' => $project,
+        ];
+
+        $this->stubRequestParams([
+            'project_id' => '1',
+            'project_pass' => 'pp',
+            'job_id' => '4321',
+            'job_pass' => 'correct_pw',
+            'num_split' => '2',
+        ]);
+
+        $this->controller->$route();
     }
 
     #[Test]
@@ -540,6 +676,698 @@ class SplitJobControllerTest extends AbstractTest
         } finally {
             $this->cleanFragments($base);
         }
+    }
+
+    // ─── who may restructure a project ───────────────────────────────
+
+    /**
+     * The project password proves knowledge of the project, not standing over it. Before this check a
+     * removed team member who had kept a manage URL could still split, merge and re-split every job in
+     * the project, and so could any authenticated identity that came by the pair some other way.
+     */
+    #[Test]
+    public function merge_refusesACallerWhoIsNeitherOwnerNorTeamMember(): void
+    {
+        $base = self::REAL_DB_BASE + 100;
+
+        try {
+            $this->seedRestructureScope($base, member: false);
+            $this->stubRestructureRequest($base);
+
+            $this->expectException(AuthorizationError::class);
+            $this->expectExceptionMessage('Not authorized');
+            $this->controller->merge();
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    #[Test]
+    public function check_refusesACallerWhoIsNeitherOwnerNorTeamMember(): void
+    {
+        $base = self::REAL_DB_BASE + 200;
+
+        try {
+            $this->seedRestructureScope($base, member: false);
+            $this->stubRestructureRequest($base);
+
+            $this->expectException(AuthorizationError::class);
+            $this->expectExceptionMessage('Not authorized');
+            $this->controller->check();
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    #[Test]
+    public function apply_refusesACallerWhoIsNeitherOwnerNorTeamMember(): void
+    {
+        $base = self::REAL_DB_BASE + 300;
+
+        try {
+            $this->seedRestructureScope($base, member: false);
+            $this->stubRestructureRequest($base);
+
+            $this->expectException(AuthorizationError::class);
+            $this->expectExceptionMessage('Not authorized');
+            $this->controller->apply();
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    /**
+     * A team member who does not own the project may restructure it: the membership is the standing.
+     */
+    #[Test]
+    public function aTeamMemberWhoIsNotTheOwnerMayRestructure(): void
+    {
+        $base = self::REAL_DB_BASE + 400;
+
+        try {
+            $project = $this->seedRestructureScope($base, member: true);
+
+            $this->callPrivate('enforceRestructureAccess', $project);
+            self::assertNotSame($project->id_customer, $this->controller->getUser()->email);
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    /**
+     * The owner is allowed explicitly rather than left to the membership lookup. A project outlives the
+     * owner's membership of its team — moved to another team, or the owner removed from the one it is in
+     * — and on the development dataset 1 project of 1205 is already in that state, plus 9 carrying no
+     * team at all. Membership alone would take those away from the person who created them.
+     */
+    #[Test]
+    public function theOwnerMayRestructureWithoutBelongingToTheProjectTeam(): void
+    {
+        $base = self::REAL_DB_BASE + 500;
+
+        try {
+            $project = $this->seedRestructureScope($base, member: false);
+            $project->id_customer = $this->controller->getUser()->email ?? '';
+
+            $this->callPrivate('enforceRestructureAccess', $project);
+            self::assertTrue(true, 'no AuthorizationError for the owner');
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    #[Test]
+    public function theOwnerMayRestructureAProjectThatCarriesNoTeam(): void
+    {
+        $base = self::REAL_DB_BASE + 600;
+
+        try {
+            $project = $this->seedRestructureScope($base, member: false);
+            $project->id_customer = $this->controller->getUser()->email ?? '';
+            $project->id_team     = null;
+
+            $this->callPrivate('enforceRestructureAccess', $project);
+            self::assertTrue(true, 'no AuthorizationError for the owner of a team-less project');
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    /**
+     * A project created by an unauthenticated caller carries id_customer = '' (CreateProjectController),
+     * so the owner branch must not treat an empty owner as a match for an equally empty caller identity.
+     *
+     * Defence in depth rather than a reachable state: isLogged() requires a non-empty email, so a caller
+     * that got past LoginValidator has one. The emptiness check costs a comparison and removes the need
+     * to keep believing that.
+     */
+    #[Test]
+    public function anEmptyProjectOwnerMatchesAnEmptyCallerIdentity(): void
+    {
+        $base = self::REAL_DB_BASE + 700;
+
+        try {
+            $project = $this->seedRestructureScope($base, member: false);
+            $project->id_customer = '';
+
+            $this->reflector->getProperty('user')->setValue(
+                $this->controller,
+                new UserStruct(['uid' => $this->userId($base), 'email' => ''])
+            );
+
+            $this->expectException(AuthorizationError::class);
+            $this->callPrivate('enforceRestructureAccess', $project);
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    // ─── the internal-user exemption ─────────────────────────────────
+
+    /**
+     * Translated's own staff restructure customer projects they neither own nor share a team with, which
+     * is support work, not an IDOR. The exemption is resolved through the feature set: the plugin decides
+     * who is internal, the controller only reads the answer back off the dispatched event.
+     *
+     * One test per route even though loadProjectForRestructure() is the single choke point, because that
+     * is the property being pinned — a later route that authorizes on its own would pass the merge case
+     * and fail here.
+     */
+    #[Test]
+    public function merge_letsAnInternalUserRestructureWithoutOwnershipOrMembership(): void
+    {
+        $base = self::REAL_DB_BASE + 800;
+
+        try {
+            $this->seedRestructureScope($base, member: false);
+            $this->stubRestructureRequest($base);
+            $this->controller->setFeatureSet($this->featureSetMarkingInternal());
+
+            $this->controller->merge();
+
+            self::assertNotSame(
+                $this->controller->fakeProjectData['project']->id_customer,
+                $this->controller->getUser()->email,
+                'the caller must not be the owner, or the exemption is not what let the merge through'
+            );
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    #[Test]
+    public function check_letsAnInternalUserRestructureWithoutOwnershipOrMembership(): void
+    {
+        $base = self::REAL_DB_BASE + 900;
+
+        try {
+            $this->seedRestructureScope($base, member: false);
+            $this->stubRestructureRequest($base);
+            $this->controller->setFeatureSet($this->featureSetMarkingInternal());
+
+            $this->controller->check();
+
+            self::assertNotSame(
+                $this->controller->fakeProjectData['project']->id_customer,
+                $this->controller->getUser()->email
+            );
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    #[Test]
+    public function apply_letsAnInternalUserRestructureWithoutOwnershipOrMembership(): void
+    {
+        $base = self::REAL_DB_BASE + 1000;
+
+        try {
+            $this->seedRestructureScope($base, member: false);
+            $this->stubRestructureRequest($base);
+            $this->controller->setFeatureSet($this->featureSetMarkingInternal());
+
+            $this->controller->apply();
+
+            self::assertNotSame(
+                $this->controller->fakeProjectData['project']->id_customer,
+                $this->controller->getUser()->email
+            );
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    /**
+     * The exemption must widen by CALLER, never by project. Asking about the project's id_customer would
+     * let any identity holding the id and password restructure a project that happens to be owned by an
+     * internal address — the opposite of the intent, and reachable by picking a target rather than by
+     * holding a credential.
+     */
+    #[Test]
+    public function theInternalUserQuestionIsAskedAboutTheCallerAndNotTheProjectOwner(): void
+    {
+        $base = self::REAL_DB_BASE + 1100;
+
+        try {
+            $this->seedRestructureScope($base, member: false);
+            $this->stubRestructureRequest($base);
+
+            $askedAbout = null;
+            $this->controller->setFeatureSet($this->featureSetMarkingInternal($askedAbout));
+
+            $this->controller->merge();
+
+            self::assertSame($this->controller->getUser()->email, $askedAbout);
+            self::assertNotSame($this->controller->fakeProjectData['project']->id_customer, $askedAbout);
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    /**
+     * Fail closed when nothing answers the event. isInternal() defaults to false and dispatch() never
+     * throws, so a feature set carrying no listener — the Translated plugin not autoloaded, an event
+     * renamed, a handler removed — leaves the owner-or-member check in force rather than skipping it.
+     * The refuse tests above rely on this same default, which is what makes them meaningful.
+     */
+    #[Test]
+    public function theCheckStandsWhenNoFeatureAnswersTheInternalUserEvent(): void
+    {
+        $base = self::REAL_DB_BASE + 1200;
+
+        try {
+            $this->seedRestructureScope($base, member: false);
+            $this->stubRestructureRequest($base);
+            $this->controller->setFeatureSet($this->featureSetLeavingEventUntouched());
+
+            $this->expectException(AuthorizationError::class);
+            $this->controller->merge();
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    /**
+     * An anonymous identity is not internal. The plugin's matcher runs the address through
+     * FILTER_VALIDATE_EMAIL, so '' fails it, but the controller must not be the thing that relies on
+     * that: it passes '' rather than skipping the dispatch, and the check stays in force.
+     */
+    #[Test]
+    public function anEmptyCallerEmailIsNotTreatedAsInternal(): void
+    {
+        $base = self::REAL_DB_BASE + 1300;
+
+        try {
+            $this->seedRestructureScope($base, member: false);
+            $this->stubRestructureRequest($base);
+
+            $this->reflector->getProperty('user')->setValue(
+                $this->controller,
+                new UserStruct(['uid' => $this->userId($base), 'email' => ''])
+            );
+
+            $askedAbout = 'not asked';
+            $this->controller->setFeatureSet($this->featureSetAnsweringDomains($askedAbout));
+
+            $this->expectException(AuthorizationError::class);
+            $this->controller->merge();
+        } finally {
+            self::assertSame('', $askedAbout, 'the dispatch must happen even with no address to offer');
+            $this->cleanFragments($base);
+        }
+    }
+
+    // ─── the per-job restructure lock ───
+
+    /**
+     * Wire the controller with $jobs as the project's chunks and $pManager as the manager, and a request
+     * naming job 99 with password 'jp'.
+     *
+     * @param JobStruct[] $jobs
+     */
+    private function prepareRestructure(array $jobs, JobSplitMergeManager $pManager, ?SplitMergeProjectData $data = null): SplitMergeProjectData
+    {
+        $data ??= new SplitMergeProjectData(1);
+        $data->splitResult ??= new ArrayObject(['chunks' => [1, 2]]);
+
+        $this->controller->fakeJobs = $jobs;
+        $this->controller->fakeProjectData = [
+            'data'       => $data,
+            'pManager'   => $pManager,
+            'count_type' => 'eq_word_count',
+            'project'    => $this->makeOwnedProject(),
+        ];
+
+        $this->stubRequestParams([
+            'project_id'   => '1',
+            'project_pass' => 'pp',
+            'job_id'       => '99',
+            'job_pass'     => 'jp',
+            'num_split'    => '2',
+        ]);
+
+        return $data;
+    }
+
+    #[Test]
+    public function apply_holds_the_job_while_it_splits_and_releases_it_after(): void
+    {
+        $lockLogAtSplit = null;
+        $pManager = $this->createMock(JobSplitMergeManager::class);
+        $pManager->expects(self::once())
+            ->method('applySplit')
+            ->willReturnCallback(function () use (&$lockLogAtSplit): void {
+                $lockLogAtSplit = $this->controller->redis->log;
+            });
+
+        $this->prepareRestructure([$this->makeJobStub(99, 'jp', false)], $pManager);
+
+        $this->controller->apply();
+
+        self::assertSame(['set job_restructure:99'], $lockLogAtSplit, 'the split must run holding the job');
+        self::assertSame(['set job_restructure:99', 'del job_restructure:99'], $this->controller->redis->log);
+        [$key, , $ex, $ttl, $nx] = $this->controller->redis->setCalls[0];
+        self::assertSame(['job_restructure:99', 'EX', JobRestructureLock::TTL_SECONDS, 'NX'], [$key, $ex, $ttl, $nx]);
+    }
+
+    #[Test]
+    public function apply_releases_the_job_when_the_split_fails(): void
+    {
+        $pManager = $this->createStub(JobSplitMergeManager::class);
+        $pManager->method('applySplit')->willThrowException(new \RuntimeException('split failed'));
+
+        $this->prepareRestructure([$this->makeJobStub(99, 'jp', false)], $pManager);
+
+        try {
+            $this->controller->apply();
+            self::fail('the split failure must reach the caller');
+        } catch (\RuntimeException $e) {
+            self::assertSame('split failed', $e->getMessage());
+        }
+
+        self::assertSame([], $this->controller->redis->keys, 'a failed split must not leave the job locked');
+    }
+
+    /**
+     * The second of two concurrent applies: refused before it reads a chunk, so it cannot validate the
+     * job as it was before the first one commits.
+     */
+    #[Test]
+    public function apply_answers_conflict_and_reads_nothing_while_another_request_holds_the_job(): void
+    {
+        $pManager = $this->createMock(JobSplitMergeManager::class);
+        $pManager->expects(self::never())->method('getSplitData');
+        $pManager->expects(self::never())->method('applySplit');
+
+        $this->prepareRestructure([$this->makeJobStub(99, 'jp', false)], $pManager);
+        $this->controller->fakeJobInProject = $this->controller->fakeJobs;
+        $this->controller->fakeJobs = null; // getProjectJobs() throws if it is reached
+        $this->controller->redis->keys['job_restructure:99'] = 1;
+
+        try {
+            $this->controller->apply();
+            self::fail('a held job must be refused');
+        } catch (ConflictError) {
+        }
+
+        self::assertSame(['job_restructure:99' => 1], $this->controller->redis->keys, 'the holder keeps its lock');
+    }
+
+    /**
+     * The retry that comes after the first apply committed: the job holds two chunks by then.
+     */
+    #[Test]
+    public function apply_refuses_a_job_already_split_and_releases_it(): void
+    {
+        $pManager = $this->createMock(JobSplitMergeManager::class);
+        $pManager->expects(self::never())->method('applySplit');
+
+        $this->prepareRestructure([$this->makeJobStub(99, 'jp', false), $this->makeJobStub(99, 'jp2', false)], $pManager);
+
+        try {
+            $this->controller->apply();
+            self::fail('a job already split must be refused');
+        } catch (InvalidArgumentException $e) {
+            self::assertSame(-11, $e->getCode());
+        }
+
+        self::assertSame([], $this->controller->redis->keys);
+    }
+
+    #[Test]
+    public function check_refuses_a_job_already_split_without_taking_the_job(): void
+    {
+        $this->prepareRestructure(
+            [$this->makeJobStub(99, 'jp', false), $this->makeJobStub(99, 'jp2', false)],
+            $this->createStub(JobSplitMergeManager::class)
+        );
+
+        try {
+            $this->controller->check();
+            self::fail('a job already split must be refused');
+        } catch (InvalidArgumentException $e) {
+            self::assertSame(-11, $e->getCode());
+        }
+
+        self::assertSame([], $this->controller->redis->log, 'check writes nothing, so it takes no lock');
+    }
+
+    /**
+     * The password is checked first, so a caller who does not hold the job learns nothing about its chunks.
+     */
+    #[Test]
+    public function apply_answers_access_denied_before_telling_a_job_is_split(): void
+    {
+        $this->prepareRestructure(
+            [$this->makeJobStub(99, 'other_pw', false), $this->makeJobStub(99, 'jp2', false)],
+            $this->createStub(JobSplitMergeManager::class)
+        );
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionCode(-10);
+        $this->controller->apply();
+    }
+
+    /**
+     * A caller with no standing over the project never holds its jobs, so cannot keep them from their
+     * owners.
+     *
+     * @return list<array{string, int}>
+     */
+    public static function restructuringRoutes(): array
+    {
+        return [['apply', 1400], ['merge', 1500]];
+    }
+
+    #[Test]
+    #[\PHPUnit\Framework\Attributes\DataProvider('restructuringRoutes')]
+    public function a_caller_without_standing_never_takes_the_job(string $route, int $offset): void
+    {
+        $base = self::REAL_DB_BASE + $offset;
+
+        try {
+            $this->seedRestructureScope($base, member: false);
+            $this->stubRestructureRequest($base);
+
+            try {
+                $this->controller->$route();
+                self::fail('a caller without standing must be refused');
+            } catch (AuthorizationError) {
+            }
+
+            self::assertSame([], $this->controller->redis->log);
+        } finally {
+            $this->cleanFragments($base);
+        }
+    }
+
+    #[Test]
+    public function merge_holds_the_job_while_it_merges_and_releases_it_after(): void
+    {
+        $lockLogAtMerge = null;
+        $pManager = $this->createMock(JobSplitMergeManager::class);
+        $pManager->expects(self::once())
+            ->method('mergeALL')
+            ->willReturnCallback(function () use (&$lockLogAtMerge): void {
+                $lockLogAtMerge = $this->controller->redis->log;
+            });
+
+        $this->prepareRestructure([$this->makeJobStub(99, 'jp', false), $this->makeJobStub(99, 'jp2', false)], $pManager);
+
+        $this->controller->merge();
+
+        self::assertSame(['set job_restructure:99'], $lockLogAtMerge);
+        self::assertSame(['set job_restructure:99', 'del job_restructure:99'], $this->controller->redis->log);
+    }
+
+    #[Test]
+    public function merge_answers_conflict_and_reads_nothing_while_another_request_holds_the_job(): void
+    {
+        $pManager = $this->createMock(JobSplitMergeManager::class);
+        $pManager->expects(self::never())->method('mergeALL');
+
+        $this->prepareRestructure([$this->makeJobStub(99, 'jp', false)], $pManager);
+        $this->controller->fakeJobInProject = $this->controller->fakeJobs;
+        $this->controller->fakeJobs = null; // getProjectJobs() throws if it is reached
+        $this->controller->redis->keys['job_restructure:99'] = 1;
+
+        $this->expectException(ConflictError::class);
+        $this->controller->merge();
+    }
+
+    /**
+     * The lock is keyed by the job id alone: a caller with standing over one project must not be able
+     * to take a job of another, or the owner's own split, merge and password change answer 409.
+     */
+    #[Test]
+    public function merge_refuses_a_job_outside_the_project_before_taking_it(): void
+    {
+        $pManager = $this->createMock(JobSplitMergeManager::class);
+        $pManager->expects(self::never())->method('mergeALL');
+
+        $this->prepareRestructure([$this->makeJobStub(99, 'jp', false)], $pManager);
+        $this->controller->fakeJobInProject = [];
+        $this->controller->fakeJobs = null; // getProjectJobs() throws if it is reached
+
+        try {
+            $this->controller->merge();
+            self::fail('a job outside the project must be refused');
+        } catch (NotFoundException $e) {
+            self::assertSame(-10, $e->getCode());
+        }
+
+        self::assertSame([99], $this->controller->jobInProjectLookups);
+        self::assertSame([], $this->controller->redis->log, 'no lock is taken on a job the caller cannot see');
+    }
+
+    #[Test]
+    public function apply_refuses_a_job_outside_the_project_before_taking_it(): void
+    {
+        $pManager = $this->createMock(JobSplitMergeManager::class);
+        $pManager->expects(self::never())->method('getSplitData');
+        $pManager->expects(self::never())->method('applySplit');
+
+        $this->prepareRestructure([$this->makeJobStub(99, 'jp', false)], $pManager);
+        $this->controller->fakeJobInProject = [];
+        $this->controller->fakeJobs = null; // getProjectJobs() throws if it is reached
+
+        try {
+            $this->controller->apply();
+            self::fail('a job outside the project must be refused');
+        } catch (NotFoundException $e) {
+            self::assertSame(-10, $e->getCode());
+        }
+
+        self::assertSame([99], $this->controller->jobInProjectLookups);
+        self::assertSame([], $this->controller->redis->log, 'no lock is taken on a job the caller cannot see');
+    }
+
+    /**
+     * A deleted chunk counts as outside the project: the lock is not taken on it either.
+     */
+    #[Test]
+    public function merge_refuses_a_deleted_job_before_taking_it(): void
+    {
+        $pManager = $this->createMock(JobSplitMergeManager::class);
+        $pManager->expects(self::never())->method('mergeALL');
+
+        $this->prepareRestructure([$this->makeJobStub(99, 'jp', false)], $pManager);
+        $this->controller->fakeJobInProject = [$this->makeJobStub(99, 'jp', true)];
+        $this->controller->fakeJobs = null;
+
+        try {
+            $this->controller->merge();
+            self::fail('a deleted job must be refused');
+        } catch (NotFoundException $e) {
+            self::assertSame(-10, $e->getCode());
+        }
+
+        self::assertSame([], $this->controller->redis->log);
+    }
+
+    #[Test]
+    public function merge_releases_the_job_when_the_merge_fails(): void
+    {
+        $pManager = $this->createStub(JobSplitMergeManager::class);
+        $pManager->method('mergeALL')->willThrowException(new \RuntimeException('merge failed'));
+
+        $this->prepareRestructure([$this->makeJobStub(99, 'jp', false), $this->makeJobStub(99, 'jp2', false)], $pManager);
+
+        try {
+            $this->controller->merge();
+            self::fail('the merge failure must reach the caller');
+        } catch (\RuntimeException $e) {
+            self::assertSame('merge failed', $e->getMessage());
+        }
+
+        self::assertSame([], $this->controller->redis->keys);
+    }
+
+    /**
+     * A project the acting user owns, so the restructure authorization clears without touching a
+     * database and the test stays about its own subject.
+     */
+    private function makeOwnedProject(): ProjectStruct
+    {
+        $email = 'ctrlowner@example.org';
+
+        $this->reflector->getProperty('user')->setValue(
+            $this->controller,
+            new UserStruct(['uid' => 987, 'email' => $email])
+        );
+        $this->reflector->getProperty('userIsLogged')->setValue($this->controller, true);
+
+        $project              = new ProjectStruct();
+        $project->id          = 1;
+        $project->id_customer = $email;
+
+        return $project;
+    }
+
+    /**
+     * Seed a real team, user and membership row, point the controller at the test database and act as
+     * that user. Returns the project the restructure is about — owned by somebody else, so the caller's
+     * standing rests on the membership alone unless a test overrides id_customer.
+     */
+    private function seedRestructureScope(int $base, bool $member): ProjectStruct
+    {
+        $this->seedUser($base);
+        $this->seedTeam($base);
+
+        if ($member) {
+            $this->seedMembership($base);
+        }
+
+        $this->reflector->getProperty('database')->setValue($this->controller, obtainTestDatabase());
+        $this->reflector->getProperty('user')->setValue(
+            $this->controller,
+            new UserStruct(['uid' => $this->userId($base), 'email' => 'ctrluser_' . $base . '@example.org'])
+        );
+        $this->reflector->getProperty('userIsLogged')->setValue($this->controller, true);
+
+        $project              = new ProjectStruct();
+        $project->id          = $this->projectId($base);
+        $project->id_customer = 'someone_else_' . $base . '@example.org';
+        $project->id_team     = $this->teamId($base);
+
+        return $project;
+    }
+
+    /**
+     * A merge/check/apply request whose project and job resolve, so the only thing that can refuse it is
+     * the authorization check.
+     */
+    private function stubRestructureRequest(int $base): void
+    {
+        $job = $this->makeJobStub(99, 'jp', false);
+
+        $data = new SplitMergeProjectData($this->projectId($base));
+
+        $this->controller->fakeJobs        = [$job];
+        $this->controller->fakeProjectData = [
+            'data'       => $data,
+            'pManager'   => $this->createStub(JobSplitMergeManager::class),
+            'count_type' => 'eq_word_count',
+            'project'    => $this->seedRestructureProject($base),
+        ];
+
+        $this->stubRequestParams([
+            'project_id'   => (string)$this->projectId($base),
+            'project_pass' => 'pp',
+            'job_id'       => '99',
+            'job_pass'     => 'jp',
+            'num_split'    => '2',
+        ]);
+    }
+
+    private function seedRestructureProject(int $base): ProjectStruct
+    {
+        $project              = new ProjectStruct();
+        $project->id          = $this->projectId($base);
+        $project->id_customer = 'someone_else_' . $base . '@example.org';
+        $project->id_team     = $this->teamId($base);
+
+        return $project;
     }
 
     /**

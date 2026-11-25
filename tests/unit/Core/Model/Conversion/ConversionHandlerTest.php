@@ -16,6 +16,7 @@ use Model\FilesStorage\Exceptions\FileSystemException;
 use Model\FilesStorage\FsFilesStorage;
 use Model\Filters\DTO\Dita;
 use Model\Filters\DTO\Json;
+use Model\Filters\DTO\Markdown;
 use Model\Filters\DTO\MSExcel;
 use Model\Filters\DTO\MSPowerpoint;
 use Model\Filters\DTO\MSWord;
@@ -846,6 +847,42 @@ class ConversionHandlerTest extends AbstractTest
      * @throws Exception
      */
     #[Test]
+    public function getRightExtractionParameterMarkdown(): void
+    {
+        $handler = $this->createHandler('test.md');
+        $struct = new FiltersConfigTemplateStruct();
+        $struct->yaml = new Yaml();
+        $struct->markdown = new Markdown();
+        $handler->setFiltersExtractionParameters($struct);
+        $this->createTempFile('test.md', "---\ntitle: Hello\n---\n# Body");
+
+        $this->assertSame($struct->markdown, $this->invokePrivateMethod($handler, [$handler->getLocalFilePath()]));
+    }
+
+    /**
+     * A template saved before the markdown column existed has no markdown DTO: the file
+     * converts with no extraction parameters, as before the feature.
+     *
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    #[Test]
+    public function getRightExtractionParameterMarkdownWithoutDtoReturnsNull(): void
+    {
+        $handler = $this->createHandler('test.md');
+        $struct = new FiltersConfigTemplateStruct();
+        $struct->yaml = new Yaml();
+        $handler->setFiltersExtractionParameters($struct);
+        $this->createTempFile('test.md', '# Body');
+
+        $this->assertNull($this->invokePrivateMethod($handler, [$handler->getLocalFilePath()]));
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    #[Test]
     public function getRightExtractionParameterUnknownExtensionReturnsNull(): void
     {
         $handler = $this->createHandler('test.csv');
@@ -1093,7 +1130,7 @@ class ConversionHandlerTest extends AbstractTest
         $result = $handler->extractZipFile();
 
         $this->assertEmpty($result);
-        $this->assertStringContainsString('Zip error', $handler->getResult()->getMessage());
+        $this->assertStringContainsString('ZIP error', $handler->getResult()->getMessage());
         $this->assertStringContainsString('Cannot open zip file', $handler->getResult()->getMessage());
     }
 
@@ -1113,7 +1150,7 @@ class ConversionHandlerTest extends AbstractTest
         $result = $handler->extractZipFile();
 
         $this->assertEmpty($result);
-        $this->assertStringContainsString('Zip error', $handler->getResult()->getMessage());
+        $this->assertStringContainsString('ZIP error', $handler->getResult()->getMessage());
         $this->assertStringContainsString('Cannot open zip file', $handler->getResult()->getMessage());
     }
 

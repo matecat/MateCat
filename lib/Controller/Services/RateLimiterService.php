@@ -40,17 +40,25 @@ class RateLimiterService
      * @param string   $identifier  Stable, attacker-invariant identifier (email, IP). NEVER a secret.
      * @param string   $route       Static route pattern. NEVER include passwords, tokens, or secrets.
      * @param int      $maxRetries
+     * @param int $weight What this call costs the window. Defaults to one, so a caller
+     *                              that limits requests needs no change; a caller whose single
+     *                              request does a variable amount of the thing being limited —
+     *                              sending N emails, say — passes N so the budget is spent in the
+     *                              units that matter rather than in calls.
      * @return Response|null  429 response if rate-limited, null if under limit.
      * @throws Exception
      */
-    public function checkAndIncrement(Response $response, string $identifier, string $route, int $maxRetries = 10): ?Response
+    public function checkAndIncrement(Response $response, string $identifier, string $route, int $maxRetries = 10, int $weight = 1): ?Response
     {
         $key   = $this->getKey($identifier, $route);
         $redis = $this->getRedis();
 
-        $current = $redis->incr($key);
+        $weight = max(1, $weight);
+        $current = $redis->incrby($key, $weight);
 
-        if ($current === 1) {
+        // the counter rises monotonically, so only the first call of a window can come back
+        // holding exactly what it just added
+        if ($current === $weight) {
             $redis->expire($key, $this->getTtl());
         }
 

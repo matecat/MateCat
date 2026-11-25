@@ -25,7 +25,7 @@ class SupportedFilesController extends KleinController
     }
 
     /**
-     * @return array<string, list<list<array{ext: int|string, class: mixed}>>>
+     * @return array<string, list<list<array{ext: string, class: string}>>>
      */
     private function getFileList(): array
     {
@@ -35,8 +35,8 @@ class SupportedFilesController extends KleinController
             $val = [];
             foreach ($value as $ext => $info) {
                 $val[] = [
-                    'ext' => $ext,
-                    'class' => $info[2]
+                    'ext' => $info['label'] ?? $ext,
+                    'class' => $info['class']
                 ];
             }
 

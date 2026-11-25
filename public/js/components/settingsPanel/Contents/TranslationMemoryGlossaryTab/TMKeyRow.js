@@ -1,4 +1,11 @@
-import React, {Fragment, useContext, useEffect, useRef, useState} from 'react'
+import React, {
+  createRef,
+  Fragment,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {TranslationMemoryGlossaryTabContext} from './TranslationMemoryGlossaryTabContext'
@@ -7,9 +14,11 @@ import {
   getTmDataStructureToSendServer,
   isOwnerOfKey,
   orderTmKeys,
+} from './ResourceManagement'
+import {
+  getSavedTemplateTm,
+  toTemplateTmEntry,
 } from './TranslationMemoryGlossaryTabUtils'
-import {MenuButton} from '../../../common/MenuButton/MenuButton'
-import {MenuButtonItem} from '../../../common/MenuButton/MenuButtonItem'
 import {ImportTMX} from './ImportTMX'
 import {ImportGlossary} from './ImportGlossary'
 import {ExportTMX} from './ExportTMX'
@@ -35,9 +44,19 @@ import {deleteTmKey} from '../../../../api/deleteTmKey'
 import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
 import {Button, BUTTON_SIZE} from '../../../common/Button/Button'
 import {NumericStepper} from '../../../common/NumericStepper/NumericStepper'
-import IconClose from '../../../icons/IconClose'
+import IconClose from '../../../../../img/icons/IconClose'
 import {getTmKeyEnginesInfo} from '../../../../api/getTmKeyEnginesInfo/getTmKeyEnginesInfo'
 import Globe from '../../../../../img/icons/Globe'
+import {
+  DROPDOWN_MENU_ALIGN,
+  DropdownMenu,
+} from '../../../common/DropdownMenu/DropdownMenu'
+import Tooltip from '../../../common/Tooltip'
+import {
+  Checkbox,
+  CHECKBOX_SIZE,
+  CHECKBOX_STATE,
+} from '../../../common/Checkbox'
 
 export const TMKeyRow = ({row, onExpandRow}) => {
   const {isImportTMXInProgress} = useContext(CreateProjectContext)
@@ -75,8 +94,8 @@ export const TMKeyRow = ({row, onExpandRow}) => {
     setIsUpdating(row.w ?? false)
   }, [row.r, row.w])
 
-  const onChangeIsLookup = (e) => {
-    const isLookup = e.currentTarget.checked
+  const onChangeIsLookup = (isChecked) => {
+    const isLookup = isChecked
     if (
       isLookup &&
       !row.isActive &&
@@ -87,7 +106,6 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         type: 'error',
         text: 'You can activate up to 10 resources per project.',
         position: 'br',
-        allowHtml: true,
         timer: 5000,
       })
       setIsLookup(false)
@@ -104,8 +122,8 @@ export const TMKeyRow = ({row, onExpandRow}) => {
     setIsLookup(isLookup)
   }
 
-  const onChangeIsUpdating = (e) => {
-    const isUpdating = e.currentTarget.checked
+  const onChangeIsUpdating = (isChecked) => {
+    const isUpdating = isChecked
     updateRow({isLookup, isUpdating})
     setIsUpdating(isUpdating)
   }
@@ -134,7 +152,9 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         tm: orderTmKeys(
           updatedKeys.filter(({isActive}) => isActive),
           prevTemplate.tm.map(({key}) => key),
-        ).map(({id, isActive, ...rest}) => rest), //eslint-disable-line
+        ).map((tmKey) =>
+          toTemplateTmEntry(tmKey, getSavedTemplateTm(projectTemplates)),
+        ),
       }))
     } else {
       setSpecialRows((prevState) =>
@@ -179,7 +199,6 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         type: 'error',
         text: 'This name is already in use, please choose a different one',
         position: 'br',
-        allowHtml: true,
         timer: 5000,
       })
 
@@ -238,7 +257,6 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           type: 'error',
           text: 'Resource name cannot be empty. Please provide a valid name.',
           position: 'br',
-          allowHtml: true,
           timer: 5000,
         })
         setTmKeys((prevState) =>
@@ -324,10 +342,13 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         }
         const notification = {
           title: 'Resource deleted',
-          text: `The resource (<b>${row.name}</b>) has been successfully deleted`,
+          text: (
+            <>
+              The resource (<b>{row.name}</b>) has been successfully deleted
+            </>
+          ),
           type: 'success',
           position: 'br',
-          allowHtml: true,
           timer: 5000,
         }
         CatToolActions.addNotification(notification)
@@ -338,7 +359,6 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           type: 'error',
           text: 'There was an error saving your data. Please retry!',
           position: 'br',
-          allowHtml: true,
           timer: 5000,
         })
         onExpandRow({row, shouldExpand: false})
@@ -369,12 +389,17 @@ export const TMKeyRow = ({row, onExpandRow}) => {
                 This resource is also linked to your ModernMT account:
               </span>
               <div>
-                <input
-                  checked={deleteTmKeyRemoveFrom.current.MMT}
-                  onChange={(e) => {
-                    deleteTmKeyRemoveFrom.current.MMT = e.currentTarget.checked
+                <Checkbox
+                  value={
+                    deleteTmKeyRemoveFrom.current.MMT
+                      ? CHECKBOX_STATE.CHECKED
+                      : CHECKBOX_STATE.UNCHECKED
+                  }
+                  size={CHECKBOX_SIZE.SMALL}
+                  onChange={(isChecked) => {
+                    deleteTmKeyRemoveFrom.current.MMT = isChecked
                   }}
-                  type="checkbox"
+                  testId="delete-remove-from-mmt"
                 />
                 Permanently delete it from my ModernMT account
               </div>
@@ -388,12 +413,17 @@ export const TMKeyRow = ({row, onExpandRow}) => {
               )}
               <span>This resource is also linked to your Lara account:</span>
               <div>
-                <input
-                  checked={deleteTmKeyRemoveFrom.current.Lara}
-                  onChange={(e) => {
-                    deleteTmKeyRemoveFrom.current.Lara = e.currentTarget.checked
+                <Checkbox
+                  value={
+                    deleteTmKeyRemoveFrom.current.Lara
+                      ? CHECKBOX_STATE.CHECKED
+                      : CHECKBOX_STATE.UNCHECKED
+                  }
+                  size={CHECKBOX_SIZE.SMALL}
+                  onChange={(isChecked) => {
+                    deleteTmKeyRemoveFrom.current.Lara = isChecked
                   }}
-                  type="checkbox"
+                  testId="delete-remove-from-lara"
                 />
                 Permanently delete it from my Lara account
               </div>
@@ -412,24 +442,32 @@ export const TMKeyRow = ({row, onExpandRow}) => {
                   accounts:
                 </span>
                 <div>
-                  <input
-                    checked={deleteTmKeyRemoveFrom.current.Lara}
-                    onChange={(e) => {
-                      deleteTmKeyRemoveFrom.current.Lara =
-                        e.currentTarget.checked
+                  <Checkbox
+                    value={
+                      deleteTmKeyRemoveFrom.current.Lara
+                        ? CHECKBOX_STATE.CHECKED
+                        : CHECKBOX_STATE.UNCHECKED
+                    }
+                    size={CHECKBOX_SIZE.SMALL}
+                    onChange={(isChecked) => {
+                      deleteTmKeyRemoveFrom.current.Lara = isChecked
                     }}
-                    type="checkbox"
+                    testId="delete-remove-from-lara"
                   />
                   Permanently delete it from my Lara account
                 </div>
                 <div>
-                  <input
-                    checked={deleteTmKeyRemoveFrom.current.MMT}
-                    onChange={(e) => {
-                      deleteTmKeyRemoveFrom.current.MMT =
-                        e.currentTarget.checked
+                  <Checkbox
+                    value={
+                      deleteTmKeyRemoveFrom.current.MMT
+                        ? CHECKBOX_STATE.CHECKED
+                        : CHECKBOX_STATE.UNCHECKED
+                    }
+                    size={CHECKBOX_SIZE.SMALL}
+                    onChange={(isChecked) => {
+                      deleteTmKeyRemoveFrom.current.MMT = isChecked
                     }}
-                    type="checkbox"
+                    testId="delete-remove-from-mmt"
                   />
                   Permanently delete it from my ModernMT account
                 </div>
@@ -475,16 +513,16 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           stepValue={1}
         />
         <Button
-          className="penalty-numeric-stepper-close-button"
+          className="settings-panel-grey-button"
           size={BUTTON_SIZE.ICON_SMALL}
           onClick={() => onChangePenalty(0)}
         >
-          <IconClose />
+          <IconClose size={18} />
         </Button>
       </div>
     ) : (
       <Button
-        className="tm-row-penalty-button"
+        className="settings-panel-grey-button"
         size={BUTTON_SIZE.SMALL}
         onClick={() => onChangePenalty(1)}
       >
@@ -495,35 +533,40 @@ export const TMKeyRow = ({row, onExpandRow}) => {
   return (
     <Fragment>
       <div className="tm-key-lookup align-center">
-        <input
-          checked={isLookup}
+        <Checkbox
+          value={isLookup ? CHECKBOX_STATE.CHECKED : CHECKBOX_STATE.UNCHECKED}
+          size={CHECKBOX_SIZE.SMALL}
           onChange={onChangeIsLookup}
           disabled={
             (!isOwner && !isMMSharedKey) ||
             (isMMSharedKey && !config.ownerIsMe) ||
             row.isTmFromFile
           }
-          type="checkbox"
-          data-testid={`tmkey-lookup-${row.id}`}
+          testId={`tmkey-lookup-${row.id}`}
         />
       </div>
       <div className="tm-key-update align-center">
         {row.isActive && (
-          <input
-            checked={isMMSharedKey ? isMMSharedUpdateChecked : isUpdating}
+          <Checkbox
+            value={
+              (isMMSharedKey ? isMMSharedUpdateChecked : isUpdating)
+                ? CHECKBOX_STATE.CHECKED
+                : CHECKBOX_STATE.UNCHECKED
+            }
+            size={CHECKBOX_SIZE.SMALL}
             onChange={onChangeIsUpdating}
-            type="checkbox"
             disabled={isMMSharedKey || !isOwner}
             {...(isMMSharedKey &&
               isMMSharedUpdateChecked && {
                 title: 'Add a private resource to disable updating',
               })}
-            data-testid={`tmkey-update-${row.id}`}
+            testId={`tmkey-update-${row.id}`}
           />
         )}
       </div>
       <div>
         <input
+          type="text"
           className={`tm-key-row-name${
             isMMSharedKey ? ' tm-key-row-name-disabled' : ''
           }`}
@@ -535,9 +578,11 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         ></input>
       </div>
       {!isMMSharedKey && <div className="tm-key-row-key">{row.key}</div>}
-      <div title={iconDetails.title} className="align-center tm-key-row-icons">
-        {iconDetails.icon}
-      </div>
+      <Tooltip content={iconDetails.title}>
+        <div ref={createRef()} className="align-center tm-key-row-icons">
+          {iconDetails.icon}
+        </div>
+      </Tooltip>
       {isOwner &&
         row.isActive &&
         isLookup &&
@@ -545,74 +590,91 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           <div className="align-center tm-row-penalty">{renderPenalty}</div>
         )}
       {!isMMSharedKey && isOwner && !row.isTmFromFile ? (
-        <div className="align-center">
-          <MenuButton
-            label="Import TMX"
-            onClick={() => handleExpandeRow(ImportTMX)}
-            icon={<DotsHorizontal />}
-            className="tm-key-row-menu-button"
-            dropdownClassName="tm-key-row-menu-button-dropdown"
+        <div className="tm-key-row-options-menu-container">
+          <Button
+            className="settings-panel-grey-button"
+            size={BUTTON_SIZE.SMALL}
             disabled={isImportTMXInProgress}
-            itemsTarget={portalTarget}
-          >
-            <MenuButtonItem
-              className="tm-key-row-button-item"
-              onMouseDown={() => handleExpandeRow(ImportGlossary)}
-              data-testid="import-glossary"
-            >
-              <div>
-                <Upload size={20} /> Import termbase
-              </div>
-            </MenuButtonItem>
-            <MenuButtonItem
-              className="tm-key-row-button-item"
-              onMouseDown={() => handleExpandeRow(ExportTMX)}
-              data-testid="export-tmx"
-            >
-              <div>
-                <Download size={20} /> Export TMX
-              </div>
-            </MenuButtonItem>
-            <MenuButtonItem
-              className="tm-key-row-button-item"
-              onMouseDown={() => handleExpandeRow(ExportGlossary)}
-              data-testid="export-glossary"
-            >
-              <div>
-                <Download size={20} /> Export termbase
-              </div>
-            </MenuButtonItem>
-            <MenuButtonItem
-              className="tm-key-row-button-item"
-              onMouseDown={() => handleExpandeRow(ShareResource)}
-              data-testid="share-resource"
-            >
-              <div>
-                <Share size={20} /> Share resource
-              </div>
-            </MenuButtonItem>
-            <MenuButtonItem
-              className="tm-key-row-button-item"
-              onMouseDown={showConfirmDelete}
-              data-testid="delete-resource"
-            >
-              <div>
-                <Trash size={20} /> Delete resource
-              </div>
-            </MenuButtonItem>
-          </MenuButton>
-        </div>
-      ) : isMMSharedKey && !config.not_empty_default_tm_key ? (
-        <div className="tm-key-row-menu-button">
-          <button
-            className="just-button-import-tmx"
+            testId="tm-row-import-tmx"
             onClick={() => handleExpandeRow(ImportTMX)}
           >
             Import TMX
-          </button>
+          </Button>
+          <DropdownMenu
+            dropdownClassName="settings-panel-dropdownMenu"
+            align={DROPDOWN_MENU_ALIGN.RIGHT}
+            toggleButtonProps={{
+              className: 'settings-panel-grey-button',
+              size: BUTTON_SIZE.ICON_SMALL,
+              disabled: isImportTMXInProgress,
+              testId: 'tm-row-menu',
+              children: (
+                <>
+                  <DotsHorizontal size={16} />
+                </>
+              ),
+            }}
+            items={[
+              {
+                label: (
+                  <>
+                    <Upload size={20} /> Import termbase
+                  </>
+                ),
+                onClick: () => handleExpandeRow(ImportGlossary),
+                testId: 'import-glossary',
+              },
+              {
+                label: (
+                  <>
+                    <Download size={20} /> Export TMX
+                  </>
+                ),
+                onClick: () => handleExpandeRow(ExportTMX),
+                testId: 'export-tmx',
+              },
+              {
+                label: (
+                  <>
+                    <Download size={20} /> Export termbase
+                  </>
+                ),
+                onClick: () => handleExpandeRow(ExportGlossary),
+                testId: 'export-glossary',
+              },
+              {
+                label: (
+                  <>
+                    <Share size={20} /> Share resource
+                  </>
+                ),
+                onClick: () => handleExpandeRow(ShareResource),
+                testId: 'share-resource',
+              },
+              {
+                label: (
+                  <>
+                    <Trash size={20} /> Delete resource
+                  </>
+                ),
+                onClick: showConfirmDelete,
+                testId: 'delete-resource',
+              },
+            ]}
+          />
+        </div>
+      ) : isMMSharedKey && !config.not_empty_default_tm_key ? (
+        <div className="tm-key-row-menu-button">
+          <Button
+            className="settings-panel-grey-button"
+            size={BUTTON_SIZE.SMALL}
+            onClick={() => handleExpandeRow(ImportTMX)}
+          >
+            Import TMX
+          </Button>
         </div>
       ) : (
-        <div />
+        <div className="tm-key-row-last-column-empty" />
       )}
     </Fragment>
   )

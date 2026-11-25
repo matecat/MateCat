@@ -20,10 +20,11 @@ use Model\Segments\SegmentMetadataDao;
 use Model\Segments\SegmentMetadataStruct;
 use Model\Segments\SegmentOriginalDataDao;
 use Model\Segments\SegmentOriginalDataStruct;
-use Utils\Constants\XliffTranslationStatus;
+use Utils\Constants\TranslationStatus;
 use Utils\Logger\MatecatLogger;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
+use TypeError;
 
 /**
  * Encapsulates segment storage logic that was previously embedded in
@@ -142,7 +143,7 @@ class SegmentStorageService
      * @throws EndQueueException
      * @throws ReQueueException
      * @throws \PDOException
-     * @throws \Exception
+     * @throws Exception
      * @throws \TypeError
      */
     private function prepareAndPersistSegment(
@@ -259,7 +260,7 @@ class SegmentStorageService
             foreach ($struct as $translationTuple) {
                 $rule = $translationTuple->rule;
 
-                if (XliffTranslationStatus::isFinalState($translationTuple->state)) {
+                if ($rule->asEditorStatus() === TranslationStatus::STATUS_APPROVED2) {
                     $createSecondPassReview = true;
                 }
 
@@ -271,7 +272,7 @@ class SegmentStorageService
                     'status'                 => $rule->asEditorStatus(),
                     'translation'            => $translationTuple->translationLayer0,
                     'suggestion'             => $translationTuple->suggestionLayer0,
-                    'locked'                 => 0,
+                    'locked'                 => (int)$rule->isLocked(),
                     'match_type'             => $rule->asMatchType(),
                     'eq_word_count'          => $rule->asEquivalentWordCount($translationTuple->rawWordCount, $payable_rates),
                     'serialized_errors_list' => $translationTuple->serializedErrors,
@@ -321,7 +322,8 @@ class SegmentStorageService
     /**
      * Persist a single segment metadata record.
      * Protected so test subclasses can override to capture calls.
-     * @throws \Exception
+     * @throws Exception
+     * @throws TypeError
      */
     protected function persistSegmentMetadata(SegmentMetadataStruct $metadataStruct): void
     {
@@ -400,7 +402,8 @@ class SegmentStorageService
     /**
      * Validate and persist segment metadata if the struct has valid key/value.
      *
-     * @throws \Exception
+     * @throws Exception
+     * @throws TypeError
      */
     protected function saveSegmentMetadata(int $id_segment, ?SegmentMetadataStruct $metadataStruct = null): void
     {

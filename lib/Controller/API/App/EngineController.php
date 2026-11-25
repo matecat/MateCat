@@ -32,9 +32,13 @@ use Utils\Engines\Validators\GoogleTranslateEngineValidator;
 use Utils\Engines\Validators\IntentoEngineValidator;
 use Utils\Engines\Validators\LaraEngineValidator;
 use Utils\Engines\Validators\MMTEngineValidator;
+use Utils\Validation\UserSuppliedName;
 
 class EngineController extends KleinController
 {
+    /** `engines`.`name` is a varchar(200). */
+    private const int ENGINE_NAME_MAX_LENGTH = 200;
+
 
     protected function registerValidators(): void
     {
@@ -301,7 +305,13 @@ class EngineController extends KleinController
     private function validateTheRequest(): array
     {
         $id = filter_var($this->request->param('id'), FILTER_SANITIZE_SPECIAL_CHARS);
-        $name = filter_var($this->request->param('name'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
+        // Stored as typed and escaped by each output. `engines`.`name` is a varchar(200) and had
+        // no cap at all, so a longer name was silently truncated by MySQL or refused by it.
+        $rawName = $this->request->param('name');
+        $name = UserSuppliedName::normalizeAndTruncate(
+            is_string($rawName) ? $rawName : null,
+            self::ENGINE_NAME_MAX_LENGTH
+        );
         $data = filter_var($this->request->param('data'), FILTER_SANITIZE_FULL_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES]);
         $provider = filter_var($this->request->param('provider'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW]);
 

@@ -174,16 +174,6 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
       formatMessage.setup({
         locale: config.target_code.split('-')[0],
       })
-      console.log(
-        'message',
-        formatMessage(
-          textUtils.removeWhitespacePlaceholders(
-            transformTagsToText(removeTagsFromText(segment.translation)),
-          ),
-          valuesNew,
-        ),
-        valuesNew,
-      )
       return formatMessage(
         textUtils.removeWhitespacePlaceholders(
           transformTagsToText(removeTagsFromText(segment.translation)),
@@ -226,7 +216,7 @@ const SegmentFooterTabIcu = ({segment, active_class, tab_class}) => {
             {analyzeICU.hasPlural && (
               <div className="segment-footer-icu-plurals-section">
                 <div>
-                  <h3>Plural Rules</h3>
+                  <h3>Plural rules</h3>
                 </div>
                 <div>{pluralRulesForLocale?.cardinal.map(renderRule)}</div>
               </div>

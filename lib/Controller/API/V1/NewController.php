@@ -7,6 +7,7 @@ use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ScanDirectoryForConvertedFiles;
 use Controller\Traits\ValidatesDialectStrictTrait;
+use Controller\Traits\ValidatesPretranslateMatchTrait;
 use DomainException;
 use Exception;
 use InvalidArgumentException;
@@ -45,15 +46,16 @@ use Model\Teams\TeamStruct;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserStruct;
+use Model\Xliff\DTO\XliffRulesModel;
 use Model\Xliff\XliffConfigTemplateDao;
 use Plugins\Features\ProjectCompletion;
 use ReflectionException;
-use RuntimeException;
 use TypeError;
 use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
 use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
 use Utils\Constants\TmKeyPermissions;
+use Utils\Constants\TranslationStatus;
 use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\Lara;
@@ -70,6 +72,7 @@ use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\TMS\TMSService;
 use Utils\Tools\CatUtils;
+use Utils\Tools\InstructionsSanitizer;
 use Utils\Tools\Utils;
 use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
@@ -79,6 +82,7 @@ class NewController extends KleinController
 
     use ScanDirectoryForConvertedFiles;
     use ValidatesDialectStrictTrait;
+    use ValidatesPretranslateMatchTrait;
 
     const int MAX_NUM_KEYS = 15;
 
@@ -177,12 +181,6 @@ class NewController extends KleinController
 
         ProjectQueue::sendProject($projectStructure);
 
-        $errors = $projectStructure->result['errors'];
-
-        if (!empty($errors)) {
-            throw new RuntimeException('Project Creation Failure');
-        }
-
         $this->response->json([
             'status' => 'OK',
             'message' => 'Success',
@@ -238,6 +236,10 @@ class NewController extends KleinController
         $projectStructure->public_tm_penalty = $request['public_tm_penalty'];
         $projectStructure->pretranslate_100 = (int)!!$request['pretranslate_100'];
         $projectStructure->pretranslate_101 = isset($request['pretranslate_101']) ? (int)$request['pretranslate_101'] : 1;
+        $projectStructure->pretranslate_101_lock = $request['pretranslate_101_lock'];
+        $projectStructure->pretranslate_100_lock = $request['pretranslate_100_lock'];
+        $projectStructure->pretranslate_101_status = $request['pretranslate_101_status'];
+        $projectStructure->pretranslate_100_status = $request['pretranslate_100_status'];
 
         //default gets all public matches from TM
         $projectStructure->only_private = (int)(isset($request['get_public_matches']) && !$request['get_public_matches']);
@@ -354,14 +356,25 @@ class NewController extends KleinController
 
         $mt_qe_workflow_payable_rate_template_id = filter_var($this->request->param('mt_qe_workflow_payable_rate_template_id'), FILTER_SANITIZE_NUMBER_INT) ?: null; // QE workflow parameters
         $payable_rate_template_id = filter_var($this->request->param('payable_rate_template_id'), FILTER_SANITIZE_NUMBER_INT);
-        $payable_rate_template_name = filter_var($this->request->param('payable_rate_template_name'), FILTER_SANITIZE_SPECIAL_CHARS);
         $public_tm_penalty = filter_var($this->request->param('public_tm_penalty'), FILTER_SANITIZE_NUMBER_INT);
         $pretranslate_100 = filter_var($this->request->param('pretranslate_100'), FILTER_VALIDATE_BOOLEAN);
-        $pretranslate_101 = filter_var($this->request->param('pretranslate_101'), FILTER_VALIDATE_BOOLEAN);
+        $pretranslate_101 = filter_var($this->request->param('pretranslate_101') ?? true, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+        if ($pretranslate_101 === null) {
+            throw new InvalidArgumentException("Invalid pretranslate_101 value", -6);
+        }
+        ['lock' => $pretranslate_101_lock, 'status' => $pretranslate_101_status] = $this->validatePretranslateMatchParams(
+            '101',
+            $this->request->param('pretranslate_101_lock'),
+            $this->request->param('pretranslate_101_status')
+        );
+        ['lock' => $pretranslate_100_lock, 'status' => $pretranslate_100_status] = $this->validatePretranslateMatchParams(
+            '100',
+            $this->request->param('pretranslate_100_lock'),
+            $this->request->param('pretranslate_100_status')
+        );
         $private_tm_key = filter_var($this->request->param('private_tm_key'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $private_tm_key_json = filter_var($this->request->param('private_tm_key_json'), FILTER_SANITIZE_FULL_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES]);
         $project_completion = filter_var($this->request->param('project_completion'), FILTER_VALIDATE_BOOLEAN);
-        $qa_model_template_id = filter_var($this->request->param('qa_model_template_id'), FILTER_SANITIZE_NUMBER_INT);
         $segmentation_rule = filter_var($this->request->param('segmentation_rule'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
         $source_lang = filter_var($this->request->param('source_lang'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
         $subject = filter_var($this->request->param('subject'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW]);
@@ -412,7 +425,7 @@ class NewController extends KleinController
             [
                 'flags' => FILTER_REQUIRE_ARRAY,
                 'options' => function ($value) {
-                    $value = Utils::stripTagsPreservingHrefs($value);
+                    $value = InstructionsSanitizer::sanitize($value);
                     /**
                      * Uber plugin callback
                      */
@@ -425,7 +438,7 @@ class NewController extends KleinController
         ) ?: null;
 
         if ($this->request->files()->isEmpty()) {
-            throw new InvalidArgumentException("Missing file. Not Sent.");
+            throw new InvalidArgumentException("Missing file. Not sent.");
         }
 
         $lang_handler = Languages::getInstance();
@@ -453,10 +466,7 @@ class NewController extends KleinController
         );
         $team = $this->validateTeam($id_team ?: null);
         $qaModelTemplate = $this->validateQaModelTemplate($id_qa_model_template ?: null);
-        $payableRateModelTemplate = $this->validatePayableRateTemplate(
-            $payable_rate_template_name,
-            $payable_rate_template_id
-        );
+        $payableRateModelTemplate = $this->validatePayableRateTemplate($payable_rate_template_id);
         $qaModel = $this->validateQaModel($id_qa_model ?: null);
         $mmt_glossaries = $this->validateMMTGlossaries($mmt_glossaries);
 
@@ -542,6 +552,7 @@ class NewController extends KleinController
         $metadata[ProjectsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value] = $mt_quality_value_in_editor;
 
         if ($mt_evaluation) {
+            $this->validateMtEvaluationLicense($engineStruct);
             $metadata[ProjectsMetadataMarshaller::MT_EVALUATION->value] = true;
         }
 
@@ -555,6 +566,10 @@ class NewController extends KleinController
             'public_tm_penalty' => $public_tm_penalty,
             'pretranslate_100' => $pretranslate_100,
             'pretranslate_101' => $pretranslate_101,
+            'pretranslate_101_lock' => $pretranslate_101_lock,
+            'pretranslate_100_lock' => $pretranslate_100_lock,
+            'pretranslate_101_status' => $pretranslate_101_status,
+            'pretranslate_100_status' => $pretranslate_100_status,
             'id_team' => $id_team,
             'team' => $team,
             'enable_mt_analysis' => $enable_mt_analysis,
@@ -575,7 +590,6 @@ class NewController extends KleinController
             'filters_extraction_parameters' => $filters_extraction_parameters,
             'xliff_parameters' => $xliff_parameters,
             'filters_extraction_parameters_template_id' => $filters_extraction_parameters_template_id,
-            'qa_model_template_id' => $qa_model_template_id,
             'payable_rate_template_id' => $payable_rate_template_id,
             'tms_engine' => $tms_engine,
             'mt_engine' => $mt_engine,
@@ -619,7 +633,7 @@ class NewController extends KleinController
     {
         if (!empty($metadata)) {
             if (strlen($metadata) > 2048) {
-                throw new InvalidArgumentException('metadata string is too long');
+                throw new InvalidArgumentException('Metadata string is too long');
             }
 
             $metadata = html_entity_decode($metadata);
@@ -629,7 +643,7 @@ class NewController extends KleinController
 
             if (!$validator->isValid()) {
                 throw new InvalidArgumentException(
-                    'Invalid Metadata. ' . implode(
+                    'Invalid metadata. ' . implode(
                         "",
                         array_map(
                             function ($exception) {
@@ -693,13 +707,13 @@ class NewController extends KleinController
     private function validateEngines(int $tms_engine, int $mt_engine): array
     {
         if ($tms_engine > 1) {
-            throw new InvalidArgumentException("Invalid TM Engine.", -21);
+            throw new InvalidArgumentException("Invalid TM engine.", -21);
         }
 
         $engineStruct = null;
         if ($mt_engine > 1) {
             if (!$this->userIsLogged) {
-                throw new InvalidArgumentException("Invalid MT Engine.", -2);
+                throw new InvalidArgumentException("Invalid MT engine.", -2);
             }
 
             try {
@@ -711,6 +725,33 @@ class NewController extends KleinController
         }
 
         return [$tms_engine, $engineStruct];
+    }
+
+    /**
+     * Refuses MT evaluation, which the QE workflow turns on too, when nothing can score the MT
+     * matches: the engine computes no score of its own and its owner has no active Lara engine.
+     * An active Lara MT engine scores with its own license.
+     *
+     * Example: $this->validateMtEvaluationLicense($engineStruct); // throws for a DeepL engine of a user without Lara
+     *
+     * @throws InvalidArgumentException
+     * @throws Exception
+     */
+    private function validateMtEvaluationLicense(?AbstractEngine $mtEngine): void
+    {
+        if ($mtEngine === null || $mtEngine->hasBuiltInQualityEstimation() || $mtEngine instanceof Lara) {
+            return;
+        }
+
+        $laraEngine = EnginesFactory::getActiveInstanceByUserAndClass(
+            $mtEngine->getEngineRecord()->uid,
+            $this->getDatabase(),
+            Lara::class
+        );
+
+        if ($laraEngine === null) {
+            throw new InvalidArgumentException('MT evaluation requires an active Lara license', -2);
+        }
     }
 
     /**
@@ -824,7 +865,7 @@ class NewController extends KleinController
      *
      * @return array<int, mixed>
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     protected function validateTmAndKeys(string $private_tm_key = "", string $private_tm_key_json = ""): array
     {
@@ -969,8 +1010,8 @@ class NewController extends KleinController
      * @param array<string, mixed> $elem
      *
      * @return array<string, mixed>
-     * @throws \DomainException
-     * @throws \TypeError
+     * @throws DomainException
+     * @throws TypeError
      */
     private static function sanitizeTmKeyArr(array $elem): array
     {
@@ -1022,9 +1063,7 @@ class NewController extends KleinController
 
             // check if qa_model template exists
             if (null === $qaModelTemplate) {
-                throw new InvalidArgumentException(
-                    'This QA Model template does not exists or does not belongs to the logged in user'
-                );
+                throw new InvalidArgumentException('This QA model template does not exist or does not belong to the logged-in user');
             }
 
             return $qaModelTemplate;
@@ -1034,42 +1073,26 @@ class NewController extends KleinController
     }
 
     /**
-     * @param string|false|null $payable_rate_template_name
+     * The template is resolved from its id alone, scoped to the calling user. A
+     * `payable_rate_template_name` sent by older integrations is ignored.
+     *
      * @param string|false|null $payable_rate_template_id
      *
      * @return CustomPayableRateStruct|null
      * @throws Exception
      * @throws TypeError
      */
-    private function validatePayableRateTemplate(
-        string|false|null $payable_rate_template_name = null,
-        string|false|null $payable_rate_template_id = null
-    ): ?CustomPayableRateStruct {
-        $payableRateModelTemplate = null;
-
-        if (!empty($payable_rate_template_name)) {
-            if (empty($payable_rate_template_id)) {
-                throw new InvalidArgumentException('`payable_rate_template_id` param is missing');
-            }
+    private function validatePayableRateTemplate(string|false|null $payable_rate_template_id = null): ?CustomPayableRateStruct
+    {
+        if (empty($payable_rate_template_id)) {
+            return null;
         }
 
-        if (!empty($payable_rate_template_id)) {
-            if (empty($payable_rate_template_name)) {
-                throw new InvalidArgumentException('`payable_rate_template_name` param is missing');
-            }
-        }
+        $userId = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
+        $payableRateModelTemplate = (new CustomPayableRateDao($this->getDatabase()))->getByIdAndUser((int)$payable_rate_template_id, $userId);
 
-        if (!empty($payable_rate_template_name) and !empty($payable_rate_template_id)) {
-            $userId = $this->getUser()->uid ?? throw new TypeError('User not authenticated');
-            $payableRateModelTemplate = (new CustomPayableRateDao($this->getDatabase()))->getByIdAndUser((int)$payable_rate_template_id, $userId);
-
-            if (null === $payableRateModelTemplate) {
-                throw new InvalidArgumentException('Payable rate model id not valid');
-            }
-
-            if ($payableRateModelTemplate->name !== $payable_rate_template_name) {
-                throw new InvalidArgumentException('Payable rate model name not matching');
-            }
+        if (null === $payableRateModelTemplate) {
+            throw new InvalidArgumentException('Payable rate model id not valid');
         }
 
         return $payableRateModelTemplate;
@@ -1090,7 +1113,7 @@ class NewController extends KleinController
 
             // check if qa_model exists
             if (null === $qaModel) {
-                throw new InvalidArgumentException('This QA Model does not exists');
+                throw new InvalidArgumentException('This QA model does not exist');
             }
 
             // check featureSet
@@ -1098,7 +1121,7 @@ class NewController extends KleinController
             $featureSetCodes = $this->getFeatureSet()->getCodes();
 
             if ($qaModelLabel !== 'default' and !in_array($qaModelLabel, $featureSetCodes)) {
-                throw new InvalidArgumentException('This QA Model does not belong to the authenticated user');
+                throw new InvalidArgumentException('This QA model does not belong to the authenticated user');
             }
 
             return $qaModel;
@@ -1291,7 +1314,13 @@ class NewController extends KleinController
             $validator = new JSONValidator('xliff_parameters_rules_content.json', true);
             $validator->validate($validatorObject);
 
-            return $validatorObject->getValue(true);
+            $rules = $validatorObject->getValue(true);
+
+            // the schema can not see the rules that are invalid together (a locked draft, a state in two rules):
+            // building the model here refuses them with a 400, before the project is queued
+            XliffRulesModel::fromArray($rules);
+
+            return $rules;
         }
 
         if (!empty($xliff_parameters_template_id)) {

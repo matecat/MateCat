@@ -8,7 +8,10 @@ use Model\Comments\CommentDao;
 use Model\Comments\CommentStruct;
 use Model\Comments\OpenThreadsStruct;
 use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\Jobs\JobStruct;
+use PDO;
+use PDOException;
 use PDOStatement;
 use PHPUnit\Framework\Attributes\Test;
 use Utils\Registry\AppConfig;
@@ -64,6 +67,35 @@ class CommentDaoTest extends AbstractTest
 
         $this->assertIsArray($results);
         $this->assertEmpty($results);
+    }
+
+    /**
+     * The project ids must be bound, so the derived cache key names the projects. Written into the
+     * SQL, every project shared one Redis hash that never expired.
+     */
+    #[Test]
+    public function getOpenThreadsForProjectsBindsTheProjectIds(): void
+    {
+        $stmt = $this->createMock(PDOStatement::class);
+        $stmt->queryString = '';
+        $stmt->expects($this->once())->method('execute')->with($this->identicalTo([1, 2]));
+        $stmt->method('fetchAll')->willReturn([]);
+
+        $pdo = $this->createMock(PDO::class);
+        $pdo->expects($this->once())->method('prepare')
+            ->with($this->stringContains('projects.id IN ( ?,? )'))
+            ->willReturn($stmt);
+
+        $database = $this->createStub(IDatabase::class);
+        $database->method('getConnection')->willReturn($pdo);
+
+        $this->assertSame([], (new CommentDao($database))->getOpenThreadsForProjects([1, 2]));
+    }
+
+    #[Test]
+    public function getOpenThreadsForProjectsReturnsEmptyArrayForNoProjects(): void
+    {
+        $this->assertSame([], (new CommentDao(obtainTestDatabase()))->getOpenThreadsForProjects([]));
     }
 
     // ─── deleteComment() ───
@@ -287,6 +319,9 @@ class CommentDaoTest extends AbstractTest
         $dbMock->method('getConnection')->willReturn($this->pdoStub);
         $dbMock->method('insert')->willReturn('1');
         $dbMock->method('last_insert')->willReturn('99');
+        // resolveThread() runs its write inside a scope; unconfigured, transaction() would return
+        // null without calling the closure and the saved comment would never come back.
+        $dbMock->method('transaction')->willReturnCallback(static fn(callable $work) => $work());
 
         $this->setDatabaseInstance($dbMock);
 
@@ -306,6 +341,39 @@ class CommentDaoTest extends AbstractTest
 
         $this->assertSame(CommentDao::TYPE_RESOLVE, $result->message_type);
         $this->assertNotNull($result->resolve_date);
+    }
+
+    #[Test]
+    public function resolveThreadReportsAFailedResolveInsteadOfReturningTheStruct(): void
+    {
+        // It used to catch the failure and hand the caller back the same struct with no thread_id,
+        // so CommentController::resolve() went on to push a socket message, send the notification
+        // mails and answer 200 for a thread that was never resolved.
+        $failure = new PDOException('comment write failed');
+
+        $dbMock = $this->createStub(Database::class);
+        $dbMock->method('getConnection')->willReturn($this->pdoStub);
+        $dbMock->method('transaction')->willThrowException($failure);
+
+        $this->setDatabaseInstance($dbMock);
+
+        $obj = new CommentStruct();
+        $obj->id_job = 1;
+        $obj->id_segment = 100;
+        $obj->email = 'test@test.com';
+        $obj->full_name = 'Test User';
+        $obj->uid = 5;
+        $obj->source_page = 1;
+        $obj->message = 'Resolved';
+
+        $dao = new CommentDao(obtainTestDatabase());
+
+        try {
+            $dao->resolveThread($obj);
+            self::fail('resolveThread() should have re-thrown the failure');
+        } catch (PDOException $e) {
+            self::assertSame($failure, $e);
+        }
     }
 
     // ─── placeholdContent() ───

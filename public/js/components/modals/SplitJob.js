@@ -2,14 +2,13 @@ import React, {useState, useEffect, useRef} from 'react'
 import {checkSplitRequest} from '../../api/checkSplitRequest'
 import {confirmSplitRequest} from '../../api/confirmSplitRequest'
 import CommonUtils from '../../utils/commonUtils'
+import {getApiErrorMessage} from '../../utils/getApiErrorMessage'
 import ModalsActions from '../../actions/ModalsActions'
-import {
-  Button,
-  BUTTON_MODE,
-  BUTTON_SIZE,
-  BUTTON_TYPE,
-} from '../common/Button/Button'
+import {Button, BUTTON_MODE, BUTTON_TYPE} from '../common/Button/Button'
 import Tooltip from '../common/Tooltip'
+import {SpinnerLoader} from '../common/SpinnerLoader'
+import {Checkbox, CHECKBOX_STATE} from '../common/Checkbox'
+import {NumericStepper} from '../common/NumericStepper/NumericStepper'
 
 const SplitJobModal = ({job, project, callback}) => {
   const [numSplit, setNumSplit] = useState(2)
@@ -25,8 +24,9 @@ const SplitJobModal = ({job, project, callback}) => {
   )
   const [splitData, setSplitData] = useState()
   const [jobSplttable, setJobSplittable] = useState(true)
+  const [isConfirming, setIsConfirming] = useState(false)
 
-  const splitSelectRef = useRef(null)
+  const isConfirmingRef = useRef(false)
   const tooltipRef = useRef()
 
   useEffect(() => {
@@ -36,6 +36,37 @@ const SplitJobModal = ({job, project, callback}) => {
   useEffect(() => {
     checkSplitData()
   }, [splitData, splitRawWord])
+
+  const calculateSplitComputation = (numSplit) => {
+    let numWords,
+      array = []
+    let totalInt = Math.round(total)
+
+    let wordsXjob = Math.floor(totalInt / numSplit)
+    let diff = totalInt - wordsXjob * numSplit
+    for (let i = 0; i < numSplit; i++) {
+      numWords = wordsXjob
+      if (i < diff) {
+        numWords++
+      }
+
+      array.push(numWords)
+    }
+    return array
+  }
+
+  // Only runs when the stepper's value is committed (+/-, blur, Enter), not on
+  // every keystroke — mirrors the old <select onChange> firing only on an
+  // actual selection. Recomputing on every `total`/`showLoader` change (as a
+  // useEffect watching them would) reset splitChecked right back to false the
+  // moment checkSplitData() had just set it to true.
+  const changeSplitNumber = (newNumSplit) => {
+    const arraySplitNew = calculateSplitComputation(newNumSplit)
+    setNumSplit(newNumSplit)
+    setWordsArray(arraySplitNew)
+    setSplitChecked(false)
+    setShowLoader(false)
+  }
 
   const checkSplitData = () => {
     let arrayChunks = []
@@ -102,34 +133,6 @@ const SplitJobModal = ({job, project, callback}) => {
     ModalsActions.onCloseModal()
   }
 
-  const changeSplitNumber = () => {
-    const arraySplitNew = calculateSplitComputation(
-      splitSelectRef.current.value,
-    )
-    setNumSplit(splitSelectRef.current.value)
-    setWordsArray(arraySplitNew)
-    setSplitChecked(false)
-    setShowLoader(false)
-  }
-
-  const calculateSplitComputation = (numSplit) => {
-    let numWords,
-      array = []
-    let totalInt = Math.round(total)
-
-    let wordsXjob = Math.floor(totalInt / numSplit)
-    let diff = totalInt - wordsXjob * numSplit
-    for (let i = 0; i < numSplit; i++) {
-      numWords = wordsXjob
-      if (i < diff) {
-        numWords++
-      }
-
-      array.push(numWords)
-    }
-    return array
-  }
-
   const changeInputWordsCount = (indexChanged, e) => {
     let value = e.target.value !== '' ? parseInt(e.target.value) : 0
     setWordsArray((prevValue) =>
@@ -178,7 +181,16 @@ const SplitJobModal = ({job, project, callback}) => {
       })
   }
 
+  const releaseConfirm = () => {
+    isConfirmingRef.current = false
+    setIsConfirming(false)
+    setShowLoader(false)
+  }
+
   const confirmSplitJob = () => {
+    if (isConfirmingRef.current) return
+    isConfirmingRef.current = true
+    setIsConfirming(true)
     setShowLoader(true)
     let array = wordsArray.filter((item) => item > 0)
 
@@ -189,31 +201,37 @@ const SplitJobModal = ({job, project, callback}) => {
       array,
       splitRawWord,
     )
-      .then((d) => {
-        if (d.data && d.data.chunks) {
-          callback()
-          ModalsActions.onCloseModal()
-        }
-      })
-      .catch((errors) => {
-        if (typeof errors !== 'undefined' && errors.length) {
-          setErrorMsg(errors[0].message)
-          setShowError(true)
-          setShowLoader(false)
-          setSplitChecked(false)
-        }
-      })
+      // Two-argument then: an error thrown by callback() after a successful split must not
+      // reach the failure handler, which would enable Confirm again on a job already split.
+      .then(
+        (d) => {
+          if (d.data && d.data.chunks) {
+            callback()
+            ModalsActions.onCloseModal()
+          } else {
+            releaseConfirm()
+          }
+        },
+        // Show the server's message, for example a 409 when another request is changing this job.
+        (rejection) => {
+          if (rejection?.errors) {
+            setErrorMsg(getApiErrorMessage(rejection))
+            setShowError(true)
+            setShowLoader(false)
+            setSplitChecked(false)
+          }
+          releaseConfirm()
+        },
+      )
   }
 
   const getJobParts = () => {
     if (!jobSplttable) {
-      return <div className="ui segment" style={{height: '126px'}}></div>
+      return <div className="split-loader" style={{height: '126px'}}></div>
     } else if (!wordsArray) {
       return (
-        <div className="ui segment" style={{height: '126px'}}>
-          <div className="ui active inverted dimmer">
-            <div className="ui text loader">Loading</div>
-          </div>
+        <div className="split-loader" style={{height: '126px'}}>
+          <SpinnerLoader />
         </div>
       )
     }
@@ -273,12 +291,15 @@ const SplitJobModal = ({job, project, callback}) => {
           </div>
           <div>
             <div className="split-checkbox">
-              <span>Split based on raw word count</span>
               {splitData && parseInt(splitData.eq_word_count) !== 0 ? (
-                <input
-                  type="checkbox"
-                  checked={splitRawWord}
-                  onChange={(e) => setSplitRawWords(e.target.checked)}
+                <Checkbox
+                  label="Split based on raw word count"
+                  value={
+                    splitRawWord
+                      ? CHECKBOX_STATE.CHECKED
+                      : CHECKBOX_STATE.UNCHECKED
+                  }
+                  onChange={(checked) => setSplitRawWords(checked)}
                 />
               ) : (
                 <Tooltip
@@ -286,30 +307,28 @@ const SplitJobModal = ({job, project, callback}) => {
                     'The weighted word count for this job is 0, splitting is only available based on raw word count.'
                   }
                 >
-                  <input
-                    ref={tooltipRef}
-                    type="checkbox"
-                    checked="false"
-                    disabled="true"
-                  />
+                  <div ref={tooltipRef}>
+                    <Checkbox
+                      label="Split based on raw word count"
+                      value={CHECKBOX_STATE.UNCHECKED}
+                      onChange={() => {}}
+                      disabled
+                    />
+                  </div>
                 </Tooltip>
               )}
             </div>
-            <div className="container-split-select">
+            <div className="container-split-numeric-stepper">
               <div className="label left">Split job in:</div>
-              <select
-                name="popup-splitselect"
-                className="splitselect left"
-                ref={splitSelectRef}
-                onChange={changeSplitNumber}
+              <NumericStepper
+                value={numSplit}
+                onChange={setNumSplit}
+                onChangeCommitted={changeSplitNumber}
+                minimumValue={2}
+                maximumValue={50}
+                stepValue={1}
                 disabled={!jobSplttable}
-              >
-                {Array.from({length: 49}, (_, i) => (
-                  <option key={i + 2} value={i + 2}>
-                    {i + 2}
-                  </option>
-                ))}
-              </select>
+              />
               <div className="label left">Chunks</div>
             </div>
           </div>
@@ -345,18 +364,14 @@ const SplitJobModal = ({job, project, callback}) => {
             </div>
           )}
           {showLoader && <div className="button-loader show" />}
-          <Button
-            mode={BUTTON_MODE.OUTLINE}
-            size={BUTTON_SIZE.MEDIUM}
-            onClick={closeModal}
-          >
+          <Button mode={BUTTON_MODE.OUTLINE} onClick={closeModal}>
             Cancel
           </Button>
           {!showSplitDiffError && splitChecked && (
             <Button
               type={BUTTON_TYPE.PRIMARY}
-              size={BUTTON_SIZE.MEDIUM}
               onClick={confirmSplitJob}
+              disabled={isConfirming}
             >
               Confirm
             </Button>
@@ -364,7 +379,6 @@ const SplitJobModal = ({job, project, callback}) => {
           {!splitChecked && !showStartLoader && (
             <Button
               type={BUTTON_TYPE.PRIMARY}
-              size={BUTTON_SIZE.MEDIUM}
               onClick={checkSplitJob}
               disabled={!jobSplttable}
             >

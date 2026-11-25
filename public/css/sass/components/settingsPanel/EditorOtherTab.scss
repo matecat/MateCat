@@ -1,4 +1,5 @@
-@use '../../commons/colors';
+@use '../../tokens/colors';
+@use 'commons/variables';
 
 .options-box {
   display: flex;
@@ -15,7 +16,7 @@
   cursor: help;
   font-weight: bold;
   text-decoration: underline;
-  color: #000;
+  color: colors.$black;
   cursor: pointer;
   margin-left: 6px;
 }
@@ -33,18 +34,16 @@
     overflow: unset;
     text-overflow: unset;
   }
-
-  .custom-dropdown {
-    padding-top: 0;
-  }
 }
 .option-dropdown-with-descrition-select-content {
   display: flex;
   flex-direction: column;
   text-align: left;
+  line-height: 1;
+  font-size: variables.$font-size-xsmall;
 
   > p {
     font-weight: normal;
-    color: colors.$grey6;
+    color: colors.$grey700;
   }
 }

@@ -27,6 +27,7 @@ use ReflectionException;
 use Throwable;
 use Utils\Constants\Teams;
 use Utils\Redis\RedisHandler;
+use Utils\Validation\UserSuppliedName;
 use View\API\V2\Json\Team;
 
 class TeamsController extends KleinController
@@ -35,6 +36,9 @@ class TeamsController extends KleinController
     use TeamInvitationRateLimitTrait;
 
     private const int NAME_MAX_LENGTH = 100;
+
+    /** `teams`.`name` is a varchar(255), and the name is stored as it was typed. */
+    private const int NAME_MAX_STORED_LENGTH = 255;
 
     private ?ClientInterface $redis = null;
 
@@ -50,64 +54,20 @@ class TeamsController extends KleinController
     }
 
     /**
-     * Normalise a team name on the way in.
+     * Normalise a team name on the way in, and refuse one that reads as a link.
      *
-     * The name is no longer entity-encoded before it is stored, so the two things that
-     * encoding used to take care of have to be done explicitly. Control and format
-     * characters are removed: a name is a single line of text, and CR/LF in particular would
-     * otherwise travel into the Subject header of the membership emails. Runs of whitespace
-     * collapse so a name cannot be padded out to look like separate lines.
-     *
-     * Everything else is preserved verbatim; making the value safe for a given output is
-     * that output's job.
-     */
-    private function sanitizeTeamName(?string $raw): string
-    {
-        $name = preg_replace('/[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]+/u', ' ', $raw ?? '') ?? '';
-        $name = preg_replace('/\s+/u', ' ', $name) ?? $name;
-
-        return trim($name);
-    }
-
-    /**
-     * Reject a team name that reads as a link.
-     *
-     * The name is quoted back in the invitation email MateCat sends, on the team owner's
-     * behalf, to any address that owner types in. Mail clients auto-link bare URLs and
-     * bare hostnames, so a name like "verify at example.com" needs no markup to become a
-     * clickable link in a message carrying MateCat's domain and signature. Holding names
-     * to plain text keeps that transactional email from carrying someone else's URL.
+     * Both halves live in {@see UserSuppliedName}, which every hand-typed name in MateCat now goes
+     * through — the rules a team name needed turned out to be the rules all of them needed, and
+     * there were five incompatible sanitizers doing the job before. The team name is the one that
+     * gets the URL rule: it is quoted back in the invitation email MateCat sends, on the team
+     * owner's behalf, to any address that owner types in, so it carries someone else's URL into a
+     * message wearing MateCat's domain and signature.
      *
      * @throws InvalidArgumentException
      */
-    private function assertNameIsPlainText(string $name): void
+    private function validateTeamName(?string $raw): string
     {
-        if (mb_strlen($name) > self::NAME_MAX_LENGTH) {
-            throw new InvalidArgumentException(
-                "Wrong parameter: name must be at most " . self::NAME_MAX_LENGTH . " characters",
-                400
-            );
-        }
-
-        // Check what the reader will end up seeing, not what was typed. The email templates
-        // escape with double_encode: false so that names stored before names were kept as
-        // typed still render correctly, which means entity text passes through to the
-        // recipient and is turned back into characters by the mail client's HTML parser.
-        // Without decoding first, "evil&#46;com" would satisfy the rules below and still
-        // arrive as a clickable "evil.com".
-        $decoded = html_entity_decode($name, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-
-        // a scheme ("https://", "javascript:") or a "www." prefix
-        $hasUrlPrefix = preg_match('~[a-z][a-z0-9+.-]*://|\bwww\.~i', $decoded) === 1;
-        // a bare hostname: one or more dot-separated labels ending in a letters-only TLD
-        $hasHostname = preg_match('~(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}~i', $decoded) === 1;
-
-        if ($hasUrlPrefix || $hasHostname) {
-            throw new InvalidArgumentException(
-                "Wrong parameter: name cannot contain a URL or a domain name",
-                400
-            );
-        }
+        return UserSuppliedName::validatedForEmailQuote($raw, 'name', self::NAME_MAX_STORED_LENGTH, self::NAME_MAX_LENGTH);
     }
 
     protected function registerValidators(): void
@@ -146,13 +106,7 @@ class TeamsController extends KleinController
             ]
         ]);
 
-        $params['name'] = $this->sanitizeTeamName(is_string($params['name']) ? $params['name'] : null);
-
-        if (empty($params['name'])) {
-            throw new InvalidArgumentException("Wrong parameter: name is empty", 400);
-        }
-
-        $this->assertNameIsPlainText($params['name']);
+        $params['name'] = $this->validateTeamName(is_string($params['name']) ? $params['name'] : null);
 
         if (empty($params['type'])) {
             throw new InvalidArgumentException("Wrong parameter: type is empty", 400);
@@ -170,16 +124,19 @@ class TeamsController extends KleinController
 
         $userDao = new UserDao($this->getDatabase());
         $model = new TeamModel($teamStruct, $userDao, new TeamDao($this->getDatabase()));
-        $memberEmails = is_array($params['members']) ? $params['members'] : [];
+        $memberEmails = array_values(
+            array_filter(
+                is_array($params['members']) ? $params['members'] : [],
+                'is_string'
+            )
+        );
         foreach ($memberEmails as $email) {
-            if (is_string($email)) {
-                $model->addMemberEmail($email);
-            }
+            $model->addMemberEmail($email);
         }
         $model->setUser($this->user);
 
         // creating a team also invites every member passed with it
-        if ($this->isOverInvitationRateLimit($this->response, $this->user, '/api/v2/teams')) {
+        if ($this->isOverInvitationRateLimit($this->response, $this->user, '/api/v2/teams', count($memberEmails))) {
             return;
         }
 
@@ -217,20 +174,14 @@ class TeamsController extends KleinController
 
         $org = new TeamStruct();
         $org->id = $teamId;
-        $name = $this->sanitizeTeamName(is_string($params['name']) ? $params['name'] : null);
+        $name = $this->validateTeamName(is_string($params['name']) ? $params['name'] : null);
         $org->name = $name;
-
-        if (empty($org->name)) {
-            throw new InvalidArgumentException("Wrong parameter: name is empty", 400);
-        }
-
-        $this->assertNameIsPlainText($org->name);
 
         $membershipDao = new MembershipDao($this->getDatabase());
         $org = $membershipDao->findTeamByIdAndUser($teamId, $this->user);
 
         if (empty($org)) {
-            throw new AuthorizationError("Not Authorized", 401);
+            throw new AuthorizationError("Not authorized", 401);
         }
 
         $org->name = $name;

@@ -1,29 +1,28 @@
-@use '../../commons/colors';
+@use '../../tokens/colors';
+@use '../../commons/variables';
+
+$dropdown-top-bottom-margin: 4px;
+$padding-top-and-bottom: 8px;
 
 // General dropdown
 .custom-dropdown {
   position: relative;
-  margin-top: 0px;
-  border-radius: 4px;
-  box-shadow: 0 0 16px rgba(colors.$grey6, 0.4);
+  margin-top: $dropdown-top-bottom-margin;
+  border-radius: variables.$border-radius-default;
+  box-shadow: 0 5px 20px rgba(102, 102, 102, 0.4);
   width: 100%;
   height: auto;
-  background-color: colors.$grey5;
+  padding: $padding-top-and-bottom 0;
+  background-color: colors.$white;
+  font-size: variables.$font-size-small;
+
+  transition: opacity 0.2s ease-in;
+  opacity: 0;
 }
-/*.custom-dropdown::before {
-  content: '';
-  display: block;
-  position: absolute;
-  top: -6px;
-  left: 50%;
-  margin-left: -8px;
-  width: 0;
-  height: 0;
-}*/
 .custom-dropdown::before {
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
-  border-bottom: 6px solid colors.$grey5;
+  border-bottom: 6px solid colors.$grey50;
 }
 
 .select__dropdown--setting-position {
@@ -32,8 +31,10 @@
 
 // Reversed state
 .select__dropdown--is-reversed .custom-dropdown {
-  margin-top: 0;
-  margin-bottom: 16px;
+  margin-top: calc(
+    ($dropdown-top-bottom-margin + $padding-top-and-bottom) * -1
+  );
+  box-shadow: 0 -5px 20px rgba(102, 102, 102, 0.4);
 }
 
 .select__dropdown--is-reversed .custom-dropdown::before {
@@ -42,22 +43,22 @@
 }
 .select__dropdown--is-reversed .custom-dropdown::before {
   margin-top: auto;
-  border-top: 6px solid colors.$grey5;
+  border-top: 6px solid colors.$grey50;
   border-bottom: none;
 }
 
 // Search bar
 .dropdown__search-bar {
   position: relative;
-  background-color: colors.$grey5;
-  box-shadow: none;
-  padding: 0;
-  input + svg {
+  border-radius: variables.$border-radius-default;
+  margin: 0 8px 8px;
+
+  svg {
     position: absolute;
-    right: 12px;
+    left: 12px;
     top: 50%;
     transform: translateY(-50%);
-    color: colors.$grey;
+    color: colors.$grey600;
     cursor: pointer;
     pointer-events: none;
   }
@@ -65,23 +66,34 @@
     color: colors.$white;
   }
 }
-.dropdown__search-bar input,
-.dropdown__search-bar input:hover,
-.dropdown__search-bar input:focus {
-  background-color: colors.$grey5;
-  border: none !important;
-  box-shadow: none;
+
+.dropdown__search-bar input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 8px 8px 8px 40px !important;
+  background-color: colors.$grey75;
+  border: 1px solid colors.$grey200;
+  border-radius: variables.$border-radius-default;
+  outline-color: colors.$grey400;
+
+  &:hover {
+    border-color: colors.$grey400;
+  }
+  &:focus,
+  &:focus-visible {
+    border-color: colors.$grey400;
+  }
 }
 .dropdown__search-bar button {
   color: colors.$white;
 }
 
 .dropdown__search-bar-input::placeholder {
-  color: colors.$grey;
+  color: colors.$grey400;
 }
 
 .dropdown__search-bar-input--highlighted {
-  background-color: colors.$grey4 !important;
+  background-color: colors.$grey100 !important;
 }
 
 // Most popular options
@@ -104,15 +116,23 @@
 }
 .dropdown__most-popular::before {
   left: 0;
-  background-image: linear-gradient(to right, colors.$black, rgba(colors.$black, 0));
+  background-image: linear-gradient(
+    to right,
+    colors.$black,
+    rgba(colors.$black, 0)
+  );
 }
 .dropdown__most-popular::after {
   right: 0;
-  background-image: linear-gradient(to right, rgba(colors.$black, 0), colors.$black);
+  background-image: linear-gradient(
+    to right,
+    rgba(colors.$black, 0),
+    colors.$black
+  );
 }
 
 .dropdown__most-popular-option {
-  color: colors.$translatedBlue;
+  color: colors.$blue500;
   cursor: pointer;
 
   &:hover,
@@ -138,7 +158,9 @@
   z-index: 2;
   margin-top: 14px;
 
-  &[aria-label] {
+  // Out-rank the global [aria-label] rule, which sets position: relative and
+  // would put the tooltip in the flow, pushing the list down while it shows.
+  &[aria-label]:not(.react-datepicker__navigation) {
     position: absolute;
 
     &::after,
@@ -149,18 +171,19 @@
 }
 
 .dropdown__tooltip-right {
-  right: 0;
+  right: 10px;
 }
 
 .container__dropdown__list {
-  transition: height 0.2s ease;
+  transition: height 0.2s ease-out;
   height: 0;
-  overflow: hidden;
+  overflow: clip;
 }
 
 // Options list
 .dropdown__list {
   margin: 0;
+  padding: 0 8px;
   overflow-y: auto;
 }
 
@@ -169,12 +192,16 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 0 0 1px;
-  border-radius: 2px;
-  padding: 4px 8px;
+  border-radius: variables.$border-radius-default;
+  padding: 6px 12px;
   background-color: transparent;
   cursor: pointer;
   color: colors.$black;
+
+  &:not(:last-child) {
+    margin: 0 0 3px;
+  }
+
   & span {
     white-space: nowrap;
     overflow: hidden;
@@ -192,28 +219,33 @@
   .code-badge {
     display: block;
     text-align: center;
-    background-color: colors.$grey7;
+    background-color: colors.$grey400;
     border-radius: 4px;
     padding: 2px 4px;
     color: colors.$white;
-    font-size: 14px;
+    font-size: variables.$font-size-xsmall;
     white-space: nowrap;
     font-weight: normal !important;
     a {
-        color: colors.$white;
+      color: colors.$white;
     }
   }
 }
 
 .dropdown__option--is-highlighted-option,
 .dropdown__option:hover {
-  background-color: colors.$grey4;
+  background-color: colors.$grey50;
+}
+
+.dropdown__option--is-active-option {
+  gap: 4px;
 }
 
 .dropdown__option--is-active-option,
 .dropdown__option.dropdown__option--is-active-option:hover {
-  color: colors.$grey6;
-  background-color: colors.$grey8;
+  color: colors.$black;
+  font-weight: bold;
+  background-color: colors.$grey100;
 
   svg {
     opacity: 1;
@@ -223,8 +255,7 @@
 
 .dropdown__option--is-no-results-found,
 .dropdown__option.dropdown__option--is-no-results-found:hover {
-  color: colors.$grey2;
-  background-color: colors.$grey5;
+  color: colors.$grey400;
   cursor: default;
 
   svg {
@@ -312,7 +343,7 @@
   align-items: center;
   height: 72px;
   padding: 0 40px;
-  box-shadow: inset 0 1px 0 0 colors.$grey6;
+  box-shadow: inset 0 1px 0 0 colors.$grey700;
 }
 
 .dropdown__footer-copy {

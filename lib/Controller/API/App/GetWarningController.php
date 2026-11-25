@@ -17,13 +17,14 @@ use Model\Exceptions\ValidationError;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
+use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentMetadataDao;
 use Model\Segments\SegmentMetadataMarshaller;
 use Model\Segments\SegmentOriginalDataDao;
 use Model\Translations\SegmentTranslationDao;
 use Model\Translations\WarningDao;
-use Utils\LQA\ICUSourceSegmentChecker;
+use Utils\LQA\ICUSourceSegmentDetector;
 use Utils\LQA\QA;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
@@ -33,8 +34,6 @@ use View\API\V2\Json\QALocalWarning;
 
 class GetWarningController extends KleinController
 {
-
-    use ICUSourceSegmentChecker;
 
     protected function registerValidators(): void
     {
@@ -55,27 +54,25 @@ class GetWarningController extends KleinController
         $id_job = $request['id_job'];
         $password = $request['password'];
 
-        try {
-            $chunk = $this->getChunkAndLoadProjectFeatures($id_job, $password);
-            $warnings = (new WarningDao($this->getDatabase()))->getWarningsByJobIdAndPassword((int) $id_job, $password);
-            $tMismatch = (new SegmentDao($this->getDatabase()))->setCacheTTL(10 * 60 /* 10-minute cache */)->getTranslationsMismatches((int) $id_job, $password);
+        // No catch-all here: an empty payload reads as "this job has no warnings", which is
+        // the one answer a caller (OMP flags jobs for PMs off it) must never get by mistake.
+        // A wrong password is a 404, anything else an error the client can see.
+        $this->getChunkAndLoadProjectFeatures($id_job, $password);
+        // Cached, but evicted by every write that changes a warning, a status or a translation of the job.
+        $warnings = (new WarningDao($this->getDatabase()))->setCacheTTL(WarningDao::WARNINGS_CACHE_TTL)->getWarningsByJobIdAndPassword((int) $id_job, $password);
+        $tMismatch = (new SegmentDao($this->getDatabase()))->setCacheTTL(WarningDao::WARNINGS_CACHE_TTL)->getTranslationsMismatches((int) $id_job, $password);
 
-            $qa = new QAGlobalWarning($warnings, $tMismatch);
+        $qa = new QAGlobalWarning($warnings, $tMismatch);
 
-            $result = array_merge(
-                [
-                    'data' => [],
-                    'errors' => [],
-                ],
-                $qa->render()
-            );
+        $result = array_merge(
+            [
+                'data' => [],
+                'errors' => [],
+            ],
+            $qa->render()
+        );
 
-            $this->response->json($result);
-        } catch (Exception) {
-            $this->response->json([
-                'details' => []
-            ]);
-        }
+        $this->response->json($result);
     }
 
     /**
@@ -123,9 +120,15 @@ class GetWarningController extends KleinController
         $metadata = new MetadataDao($this->getDatabase());
         $dataRefMap = (!empty($id)) ? (new SegmentOriginalDataDao($this->getDatabase()))->getSegmentDataRefMap($id) : [];
 
-        // Check if ICU MessageFormat support is enabled for this project (cached for 24 hours)
-        // Detect if the translation content contains ICU MessageFormat syntax
-        $this->sourceContainsIcu($chunk->getProject(new ProjectDao($this->getDatabase())), $chunk, $src_content, $this->getDatabase());
+        // The source decides: ICU has to be enabled for the project AND the stored source has to
+        // parse as ICU, otherwise the ordinary handlers apply.
+        $sourceValidator = new MessagePatternValidator($chunk->source, $src_content);
+        $sourceContainsIcu = ICUSourceSegmentDetector::sourceContainsIcu(
+            $sourceValidator,
+            (new ProjectMetadataDao($this->getDatabase()))->isIcuEnabled(
+                (int)$chunk->getProject(new ProjectDao($this->getDatabase()))->id
+            )
+        );
 
         $chunkId = $chunk->id ?? throw new \RuntimeException('Job id is null');
 
@@ -136,13 +139,11 @@ class GetWarningController extends KleinController
             $chunk->target,
             $dataRefMap,
             $metadata->getSubfilteringCustomHandlers($chunkId, $password),
-            $this->sourceContainsIcu
+            $sourceContainsIcu
         );
 
         $src_content = $Filter->fromLayer2ToLayer1($src_content);
         $trg_content = $Filter->fromLayer2ToLayer1($trg_content);
-
-        $sourceValidator = $this->icuSourcePatternValidator ?? throw new \RuntimeException('ICU source pattern validator not initialized');
 
         $QA = new QA(
             $src_content,
@@ -156,14 +157,14 @@ class GetWarningController extends KleinController
                 )
             ),
             // ICU syntax is enabled for this project, and the translation content must contain valid ICU syntax
-            $this->sourceContainsIcu
+            $sourceContainsIcu
         );
         $QA->setFeatureSet($featureSet);
         $QA->setChunk($chunk);
         $QA->setSourceSegLang($chunk->source);
         $QA->setTargetSegLang($chunk->target);
 
-        if (!$this->sourceContainsIcu && isset($characters_counter)) {
+        if (!$sourceContainsIcu && isset($characters_counter)) {
             $QA->setCharactersCount((int) $characters_counter, (new SegmentMetadataDao($this->getDatabase()))->get($id, SegmentMetadataMarshaller::SIZE_RESTRICTION->value));
         }
 

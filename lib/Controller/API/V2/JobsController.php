@@ -133,7 +133,7 @@ class JobsController extends KleinController
             $this->project = $Validator->getChunk()->getProject(new ProjectDao($this->getDatabase()), 60 * 10);
             $this->jobDao = new JobDao($this->getDatabase());
             $this->segmentTranslationDao = new SegmentTranslationDao($this->getDatabase());
-            $this->appendValidator(new ProjectAccessValidator($this, $this->project));
+            $this->appendValidator(new ProjectAccessValidator($this, $this->project, $this->getUser()));
         });
         $this->appendValidator($Validator);
     }

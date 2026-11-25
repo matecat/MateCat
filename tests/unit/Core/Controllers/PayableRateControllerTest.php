@@ -257,7 +257,7 @@ class PayableRateControllerTest extends AbstractTest
         $this->setRequest(['id' => '42'], self::VALID_JSON, 'text/html');
 
         $response = $this->responseMock();
-        $response->expects(self::once())->method('json')->with(['error' => 'Bad Get']);
+        $response->expects(self::once())->method('json')->with(['error' => 'Bad get']);
 
         $this->controller->edit();
     }

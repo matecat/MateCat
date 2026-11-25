@@ -6,14 +6,13 @@ import {
   EmailsBadge,
   SPECIALS_SEPARATORS,
 } from '../common/EmailsBadge/EmailsBadge'
-import IconSearch from '../icons/IconSearch'
-import IconClose from '../icons/IconClose'
+import IconSearch from '../../../img/icons/IconSearch'
+import IconClose from '../../../img/icons/IconClose'
 import ManageActions from '../../actions/ManageActions'
 import {getApiErrorMessage} from '../../utils/getApiErrorMessage'
 import ModalsActions from '../../actions/ModalsActions'
-import IconEdit from '../icons/IconEdit'
+import IconEdit from '../../../img/icons/IconEdit'
 import Checkmark from '../../../img/icons/Checkmark'
-import Close from '../../../img/icons/Close'
 import {EMAIL_PATTERN} from '../../constants/Constants'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import UserConstants from '../../constants/UserConstants'
@@ -36,6 +35,7 @@ export const ModifyTeam = ({team}) => {
   const [searchMember, setSearchMember] = useState('')
   const [removeUserId, setRemoveUserId] = useState()
   const [resendInvitesCollection, setResendInvitesCollection] = useState([])
+  const [inviteError, setInviteError] = useState(null)
 
   useEffect(() => {
     const updateTeam = (teamUpdated) => {
@@ -99,13 +99,15 @@ export const ModifyTeam = ({team}) => {
             <li className="member-item" key={index}>
               {!shouldShowMessage && (
                 <>
-                  {userMetadata ? (
+                  {userMetadata?.get('gplus_picture') ? (
                     <img
                       className="member-avatar"
                       src={userMetadata.get('gplus_picture')}
                     />
                   ) : (
-                    <span>{CommonUtils.getUserShortName(user)}</span>
+                    <span className="ui-user-top-image user-avatar">
+                      {CommonUtils.getUserShortName(user.toJS())}
+                    </span>
                   )}
                   <div className="member-info">
                     {(user.get('first_name') || user.get('last_name')) && (
@@ -129,28 +131,32 @@ export const ModifyTeam = ({team}) => {
 
               {removeUserId === user.get('uid') ? (
                 <div className="container-confirm-form">
-                  <button
-                    className="ui primary button confirm-button"
+                  <Button
+                    type={BUTTON_TYPE.PRIMARY}
+                    size={BUTTON_SIZE.SMALL}
                     onClick={() => removeUser(user)}
                   >
-                    <Checkmark size={12} />
+                    <Checkmark size={16} />
                     Confirm
-                  </button>
+                  </Button>
 
-                  <button
-                    className="ui button orange close-button"
+                  <Button
+                    type={BUTTON_TYPE.WARNING}
+                    size={BUTTON_SIZE.SMALL}
                     onClick={() => setRemoveUserId()}
                   >
-                    <Close size={18} />
-                  </button>
+                    <IconClose size={16} />
+                  </Button>
                 </div>
               ) : (
-                <div
-                  className="mini ui button button-remove"
+                <Button
+                  size={BUTTON_SIZE.SMALL}
+                  mode={BUTTON_MODE.OUTLINE}
+                  className="remove-user-button"
                   onClick={() => confirmRemoveMember(user.get('uid'))}
                 >
                   Remove
-                </div>
+                </Button>
               )}
             </li>
           )
@@ -187,12 +193,13 @@ export const ModifyTeam = ({team}) => {
                 ) : (
                   <>
                     <span>Pending user</span>
-                    <div
-                      className="mini ui button"
+                    <Button
+                      mode={BUTTON_MODE.OUTLINE}
+                      size={BUTTON_SIZE.SMALL}
                       onClick={() => resendInvite(email)}
                     >
-                      Resend Invite
-                    </div>
+                      Resend invite
+                    </Button>
                   </>
                 )}
               </div>
@@ -221,19 +228,30 @@ export const ModifyTeam = ({team}) => {
     setSearchMember(event.target.value)
   }
 
-  const onChangeAddMembers = useCallback(
-    (emails) => setEmailsCollection(emails),
-    [],
-  )
+  const onChangeAddMembers = useCallback((emails) => {
+    setInviteError(null)
+    setEmailsCollection(emails)
+  }, [])
 
+  // The server refuses the whole request when one address is not a plain email address. Keep
+  // the addresses on a rejection so the reason shows next to them and the wrong one can be
+  // removed, instead of the field emptying as if the invitations had gone out.
   const inviteMembers = () => {
+    setInviteError(null)
     ManageActions.addUserToTeam(teamState, emailsCollection)
-    setEmailsCollection([])
+      .then(() => setEmailsCollection([]))
+      .catch((rejection) => setInviteError(getApiErrorMessage(rejection)))
   }
 
   const resendInvite = (email) => {
-    ManageActions.addUserToTeam(teamState, email)
+    setInviteError(null)
     setResendInvitesCollection((prevState) => [...prevState, email])
+    ManageActions.addUserToTeam(teamState, email).catch((rejection) => {
+      setResendInvitesCollection((prevState) =>
+        prevState.filter((resendEmail) => resendEmail !== email),
+      )
+      setInviteError(getApiErrorMessage(rejection))
+    })
   }
 
   const userlist = getUserList()
@@ -257,7 +275,7 @@ export const ModifyTeam = ({team}) => {
   return (
     <div className="team-modal" tabIndex={1} onKeyDown={handleEnterKey}>
       <div>
-        <h2>Change Team Name</h2>
+        <h5>Change team name</h5>
         <div className="team-name-container">
           {isModifyingName ? (
             <div className="container-input">
@@ -272,11 +290,8 @@ export const ModifyTeam = ({team}) => {
                 autoFocus
                 onKeyDown={handleEnterKeyConfirmName}
               />
-              <Button
-                type={BUTTON_TYPE.PRIMARY}
-                size={BUTTON_SIZE.MEDIUM}
-                onClick={saveTeamName}
-              >
+              <Button type={BUTTON_TYPE.PRIMARY} onClick={saveTeamName}>
+                <Checkmark size={18} />
                 Confirm
               </Button>
               <Button
@@ -288,7 +303,7 @@ export const ModifyTeam = ({team}) => {
                   setTeamName(teamState.get('name'))
                 }}
               >
-                <IconClose />
+                <IconClose size={18} />
               </Button>
             </div>
           ) : (
@@ -297,7 +312,7 @@ export const ModifyTeam = ({team}) => {
               <Button
                 className="button-edit"
                 mode={BUTTON_MODE.GHOST}
-                size={BUTTON_SIZE.ICON_SMALL}
+                size={BUTTON_SIZE.ICON_XSMALL}
                 onClick={() => setIsModifyingName(true)}
               >
                 <IconEdit size={18} />
@@ -313,7 +328,7 @@ export const ModifyTeam = ({team}) => {
       </div>
       {teamState.get('type') !== 'personal' && (
         <div>
-          <h2>Manage Members</h2>
+          <h5>Manage members</h5>
           <EmailsBadge
             name="team"
             value={emailsCollection}
@@ -321,13 +336,21 @@ export const ModifyTeam = ({team}) => {
             onChange={onChangeAddMembers}
             placeholder="Add new members by entering their email addresses"
           />
-          <button
-            className="create-team ui primary button open button-invite"
-            onClick={inviteMembers}
-            disabled={!isValidEmails}
-          >
-            Invite members
-          </button>
+          {inviteError && (
+            <p className="team-invite-error" role="alert">
+              {inviteError}
+            </p>
+          )}
+          <div className="modal-buttons">
+            <Button
+              type={BUTTON_TYPE.PRIMARY}
+              className="button-invite"
+              onClick={inviteMembers}
+              disabled={!isValidEmails}
+            >
+              Invite members
+            </Button>
+          </div>
         </div>
       )}
 
@@ -335,8 +358,9 @@ export const ModifyTeam = ({team}) => {
         <div className="search-members">
           <IconSearch />
           <input
+            type="text"
             name="search_member"
-            placeholder="Search Member"
+            placeholder="Search member"
             value={searchMember}
             onChange={onChangeSearchMember}
           />
@@ -346,7 +370,7 @@ export const ModifyTeam = ({team}) => {
             }`}
             onClick={() => setSearchMember('')}
           >
-            <IconClose />
+            <IconClose size={20} />
           </div>
         </div>
         <div className="members-list">
@@ -354,12 +378,13 @@ export const ModifyTeam = ({team}) => {
           {userlist}
         </div>
       </div>
-      <button
-        className="create-team ui primary button open button-close"
+      <Button
+        className="submit-team-button"
+        type={BUTTON_TYPE.PRIMARY}
         onClick={() => ModalsActions.onCloseModal()}
       >
         Close
-      </button>
+      </Button>
     </div>
   )
 }

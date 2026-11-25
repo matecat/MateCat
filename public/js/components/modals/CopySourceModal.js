@@ -1,34 +1,15 @@
-import React from 'react'
+import React, {useState} from 'react'
 import Cookies from 'js-cookie'
 import ModalsActions from '../../actions/ModalsActions'
-import {
-  Button,
-  BUTTON_MODE,
-  BUTTON_SIZE,
-  BUTTON_TYPE,
-} from '../common/Button/Button'
+import {Button, BUTTON_MODE, BUTTON_TYPE} from '../common/Button/Button'
 import {COPY_SOURCE_COOKIE} from '../../constants/ModalKeys'
+import {Checkbox, CHECKBOX_SIZE, CHECKBOX_STATE} from '../common/Checkbox'
 
-class CopySourceModal extends React.Component {
-  constructor(props) {
-    super(props)
-  }
+const CopySourceModal = ({confirmCopyAllSources, abortCopyAllSources}) => {
+  const [dontShowAgain, setDontShowAgain] = useState(false)
 
-  copyAllSources() {
-    this.props.confirmCopyAllSources()
-    this.checkCheckbox()
-    ModalsActions.onCloseModal()
-  }
-
-  copySegmentOnly() {
-    this.props.abortCopyAllSources()
-    this.checkCheckbox()
-    ModalsActions.onCloseModal()
-  }
-
-  checkCheckbox() {
-    const checked = this.checkbox.checked
-    if (checked) {
+  const checkCheckbox = () => {
+    if (dontShowAgain) {
       sessionStorage.setItem(COPY_SOURCE_COOKIE, 0)
       Cookies.set(
         COPY_SOURCE_COOKIE,
@@ -41,48 +22,57 @@ class CopySourceModal extends React.Component {
     }
   }
 
-  render() {
-    return (
-      <div className="copy-source-modal">
-        <h3 className="text-container-top">
+  const copyAllSources = () => {
+    confirmCopyAllSources()
+    checkCheckbox()
+    ModalsActions.onCloseModal()
+  }
+
+  const copySegmentOnly = () => {
+    abortCopyAllSources()
+    checkCheckbox()
+    ModalsActions.onCloseModal()
+  }
+
+  return (
+    <div className="copy-source-modal">
+      <div className="modal-grid">
+        <div className="modal-grid__body">
           Do you really want to copy source to target for all new segments?
           <br />
           This action cannot be undone.
-        </h3>
+          <br />
+          <br />
+          Copy source to target for:
+        </div>
 
-        <div className="buttons-popup-container">
-          <label>Copy source to target for:</label>
-          <Button
-            mode={BUTTON_MODE.OUTLINE}
-            size={BUTTON_SIZE.BIG}
-            onClick={this.copyAllSources.bind(this)}
-          >
+        <div className="modal-grid__footer">
+          <Button mode={BUTTON_MODE.OUTLINE} onClick={copyAllSources}>
             ALL new segments
           </Button>
           <Button
             type={BUTTON_TYPE.PRIMARY}
-            size={BUTTON_SIZE.BIG}
             className="btn-ok"
-            onClick={this.copySegmentOnly.bind(this)}
+            onClick={copySegmentOnly}
           >
             This segment only
           </Button>
           <div className="notes-action"></div>
         </div>
-        <div className="boxed">
-          <input
+        <div className="modal-grid__body">
+          <Checkbox
             id="copy_s2t_dont_show"
-            type="checkbox"
-            className="dont_show"
-            ref={(checkbox) => (this.checkbox = checkbox)}
+            label="Don't show this dialog again for the current job"
+            value={
+              dontShowAgain ? CHECKBOX_STATE.CHECKED : CHECKBOX_STATE.UNCHECKED
+            }
+            size={CHECKBOX_SIZE.SMALL}
+            onChange={(isChecked) => setDontShowAgain(isChecked)}
           />
-          <label htmlFor="copy_s2t_dont_show">
-            {` Don't show this dialog again for the current job`}
-          </label>
         </div>
       </div>
-    )
-  }
+    </div>
+  )
 }
 
 export default CopySourceModal

@@ -1,0 +1,164 @@
+@use '../../tokens/colors';
+@use 'commons/variables';
+
+.error a {
+  display: block !important;
+}
+
+.error {
+  font-size: variables.$font-size-small;
+}
+.warnings,
+.text .alternatives {
+  clear: left;
+  color: colors.$red400;
+  float: left;
+  margin-left: -10px;
+  font-size: variables.$font-size-xsmall;
+  max-width: 50%;
+  margin-top: 12px;
+  display: none;
+  margin-bottom: 0;
+}
+
+.warnings,
+section.opened .warnings:empty {
+  display: none;
+}
+
+section.opened .warnings {
+  display: block;
+}
+
+.warnings,
+section.opened .warnings:empty {
+  display: none;
+}
+
+section.opened .warnings {
+  display: block;
+}
+
+.warnings:last-child {
+  margin-bottom: 25px;
+}
+
+.text .alternatives {
+  max-width: 300px;
+}
+
+.alternatives a {
+  color: colors.$black !important;
+}
+section .text .warning {
+  background: colors.$orange200;
+  padding: 2px 7px;
+  text-align: center;
+  border: 1px solid colors.$grey1300;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  -moz-box-shadow: 0 1px 3px colors.$grey300;
+  -webkit-box-shadow: 0 1px 3px colors.$grey300;
+  display: block;
+  position: absolute;
+  bottom: -30px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+section.opened {
+  // .segment-body-content is an ancestor of .target, not a descendant, so this
+  // rule must stay outside the .target scope — nesting it there stops it
+  // matching and the base `display: none` below keeps the warnings hidden.
+  .segment-body-content {
+    .warnings-block {
+      display: inline-block;
+    }
+  }
+}
+
+/* Child of .target.item, so it spans that column's content box — same left edge
+   as the editarea and the target toolbar, same right edge as the status button. */
+section .segment-body-content .warnings-block {
+  display: none;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 10px;
+  font-size: variables.$font-size-xsmall;
+}
+
+section .segment-body-content .warnings-block {
+  .alert-block {
+    display: inline-block;
+    width: 48%;
+    margin: 0 1%;
+    color: colors.$grey700;
+    min-height: 41px;
+    &.error-alert {
+      background: colors.$red50;
+      .icon-column {
+        background-color: colors.$red100;
+        color: colors.$red500;
+      }
+    }
+    &.warning-alert {
+      background: colors.$orange50;
+      .icon-column {
+        background-color: colors.$orange100;
+        color: colors.$orange200;
+      }
+    }
+    &.info-alert {
+      background: colors.$grey150;
+      .icon-column {
+        background-color: colors.$grey300;
+        color: colors.$grey500;
+      }
+    }
+    .icon {
+      padding: 8px 8px 10px 8px;
+      font-size: variables.$font-size-base;
+      margin: 0;
+    }
+  }
+  ul {
+    width: 100%;
+    display: table;
+    min-height: 41px;
+    li {
+      display: table-cell;
+      height: 100%;
+    }
+    .icon-column {
+      width: 12%;
+      position: relative;
+      vertical-align: middle;
+      text-align: center;
+      padding: 4px;
+      // The icon is an svg, which is a block box: text-align only centres
+      // inline content, so without auto margins it sits against the left edge.
+      svg {
+        margin: 0 auto;
+      }
+    }
+    .content-column {
+      width: 90%;
+      position: relative;
+      padding: 5px 8px;
+      vertical-align: middle;
+      p:first-child {
+        margin-top: 0em;
+        margin-bottom: 0;
+        line-height: 13px;
+      }
+      p:last-child {
+        margin-bottom: 0em;
+        line-height: 13px;
+      }
+      .error-solution {
+        margin-top: 5px;
+        font-size: 96%;
+      }
+    }
+  }
+}

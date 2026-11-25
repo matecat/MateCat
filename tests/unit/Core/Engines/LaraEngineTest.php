@@ -15,6 +15,7 @@ use Lara\Memories;
 use Lara\Memory;
 use Lara\TextBlock;
 use Lara\TextResult;
+use Lara\TranslateOptions;
 use Matecat\TestHelpers\AbstractTest;
 use Model\Engines\Structs\EngineStruct;
 use Model\TmKeyManagement\MemoryKeyStruct;
@@ -24,6 +25,7 @@ use ReflectionProperty;
 use RuntimeException;
 use stdClass;
 use Throwable;
+use Utils\Constants\Constants;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\Lara;
 use Utils\Engines\Lara\HeaderField;
@@ -31,7 +33,6 @@ use Utils\Engines\Lara\Headers;
 use Utils\Engines\Lara\HttpClientInterface;
 use Utils\Engines\Lara\LaraClient;
 use Utils\Engines\MMT;
-use Utils\Engines\MMT\MMTServiceApiException;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
@@ -151,6 +152,172 @@ class LaraEngineTest extends AbstractTest
         self::assertSame('glossary translation', $response->matches[0]->raw_translation);
     }
     /**
+     * Builds a LaraClient mock that captures the TranslateOptions handed to translate(),
+     * so a test can assert on what was actually sent to Lara.
+     *
+     * @param TranslateOptions|null $captured Filled in with the options of the single translate() call.
+     */
+    private function mockClientCapturingOptions(?TranslateOptions &$captured, string $translation): LaraClient
+    {
+        $client = $this->createMock(LaraClient::class);
+        $client->method('getHttpClient')->willReturn(new TestHttpClient());
+        $client->expects(self::once())
+            ->method('translate')
+            ->willReturnCallback(
+                function ($text, $source, $target, $options) use (&$captured, $translation): TextResult {
+                    $captured = $options;
+
+                    return new TextResult('application/xliff+xml', 'en-US', [
+                        new TextBlock($translation, true),
+                    ]);
+                }
+            );
+
+        return $client;
+    }
+    /**
+     * Runs get() against a project whose segmentation_rule metadata is $segmentationRule
+     * (null means: no metadata row at all) and returns the multiline flag actually sent to Lara.
+     *
+     * @throws LaraException
+     * @throws Exception
+     */
+    private function multilineSentForSegmentationRule(?string $segmentationRule, bool $withIdProject = true): ?bool
+    {
+        $idProject = 1;
+        $key = ProjectsMetadataMarshaller::SEGMENTATION_RULE->value;
+
+        $metadataDao = new MetadataDao(obtainTestDatabase());
+        // set()/delete() both destroy the metadata cache, so the setCacheTTL(86400) read
+        // inside get() cannot serve a value seeded by a sibling test.
+        $metadataDao->delete($idProject, $key);
+        if ($segmentationRule !== null) {
+            $metadataDao->set($idProject, $key, $segmentationRule);
+            self::assertSame($segmentationRule, $metadataDao->getValue($idProject, $key));
+        }
+
+        $captured = null;
+        $this->engine->setMockClient($this->mockClientCapturingOptions($captured, 'translated segment'));
+
+        $config = [
+            'segment' => 'source segment',
+            'source' => 'en-US',
+            'target' => 'it-IT',
+            'keys' => ['k1'],
+            'context_list_before' => [],
+            'context_list_after' => [],
+        ];
+
+        if ($withIdProject) {
+            $config['id_project'] = $idProject;
+        }
+
+        try {
+            $response = $this->engine->get($config);
+        } finally {
+            // Keep project 1 metadata clean so sibling suites are unaffected.
+            $metadataDao->delete($idProject, $key);
+        }
+
+        self::assertSame(200, $response->responseStatus);
+        self::assertSame('translated segment', $response->matches[0]->raw_translation);
+        self::assertInstanceOf(TranslateOptions::class, $captured);
+
+        return $captured->isMultiline();
+    }
+    /**
+     * Paragraph segmentation produces one segment per paragraph, so Lara receives large
+     * multi-sentence blocks. Lara is not trained to split such a block itself, and quality
+     * drops when it is asked to: multiline must be enabled for these projects.
+     *
+     * @throws LaraException
+     * @throws Exception
+     */
+    #[Test]
+    public function getSendsMultilineTrueWhenProjectSegmentationRuleIsParagraph(): void
+    {
+        self::assertTrue($this->multilineSentForSegmentationRule(Constants::SEG_RULE_PARAGRAPH));
+    }
+    /**
+     * Only 'paragraph' flips the flag: 'patent' still segments by sentence.
+     *
+     * @throws LaraException
+     * @throws Exception
+     */
+    #[Test]
+    public function getSendsMultilineFalseWhenProjectSegmentationRuleIsPatent(): void
+    {
+        self::assertFalse($this->multilineSentForSegmentationRule(Constants::SEG_RULE_PATENT));
+    }
+    /**
+     * 'standard'/'General' is normalized to null by Constants::validateSegmentationRules() and
+     * therefore never stored, exactly like every project created before this feature existed.
+     * No row must mean multiline = false.
+     *
+     * @throws LaraException
+     * @throws Exception
+     */
+    #[Test]
+    public function getSendsMultilineFalseWhenProjectHasNoSegmentationRuleMetadata(): void
+    {
+        self::assertFalse($this->multilineSentForSegmentationRule(null));
+    }
+    /**
+     * Callers that do not provide id_project (no project context) cannot be resolved to a
+     * segmentation rule and must default to false rather than reading metadata for project 0.
+     *
+     * @throws LaraException
+     * @throws Exception
+     */
+    #[Test]
+    public function getSendsMultilineFalseWhenIdProjectIsMissing(): void
+    {
+        self::assertFalse(
+            $this->multilineSentForSegmentationRule(Constants::SEG_RULE_PARAGRAPH, false)
+        );
+    }
+    /**
+     * Regression test: $multiline used to be computed inside the non-Think branch only, while the
+     * "Lara Think" branch (translation already produced by the browser) logs it too. That raised
+     * "Warning: Undefined variable $multiline" on every Think contribution. phpunit.xml does not
+     * enable failOnWarning, so this test installs its own handler to turn the warning into a failure.
+     *
+     * @throws LaraException
+     * @throws Exception
+     */
+    #[Test]
+    public function getLaraThinkRequestDoesNotEmitUndefinedVariableWarning(): void
+    {
+        $idProject = 1;
+        $key = ProjectsMetadataMarshaller::SEGMENTATION_RULE->value;
+
+        $metadataDao = new MetadataDao(obtainTestDatabase());
+        $metadataDao->delete($idProject, $key);
+        $metadataDao->set($idProject, $key, Constants::SEG_RULE_PARAGRAPH);
+
+        set_error_handler(static function (int $severity, string $message): bool {
+            throw new RuntimeException($message);
+        }, E_WARNING);
+
+        try {
+            $response = $this->engine->get([
+                'segment' => 'source segment',
+                'source' => 'en-US',
+                'target' => 'it-IT',
+                'id_project' => $idProject,
+                'translation' => 'already translated',
+                'reasoning' => false,
+                'lara_model' => 'think',
+            ]);
+        } finally {
+            restore_error_handler();
+            $metadataDao->delete($idProject, $key);
+        }
+
+        self::assertSame(200, $response->responseStatus);
+        self::assertSame('already translated', $response->matches[0]->raw_translation);
+    }
+    /**
      * @throws LaraException
      * @throws Exception
      */
@@ -167,12 +334,6 @@ class LaraEngineTest extends AbstractTest
                 new TextBlock('advanced translation', true),
             ]));
         $this->engine->setMockClient($client);
-        $fallback = $this->createMock(MMT::class);
-        $fallback->expects(self::once())
-            ->method('getQualityEstimation')
-            ->with('en-US', 'it-IT', 'source segment', 'advanced translation', '2')
-            ->willReturn(0.88);
-        $this->engine->setMmtFallback($fallback);
         $response = $this->engine->get([
             'segment' => 'source segment',
             'source' => 'en-US',
@@ -187,6 +348,7 @@ class LaraEngineTest extends AbstractTest
         ]);
         self::assertSame(200, $response->responseStatus);
         self::assertSame('advanced translation', $response->matches[0]->raw_translation);
+        self::assertNull($response->matches[0]->score);
         self::assertSame('ext_my_k1', $httpClient->capturedHeaders[Headers::LARA_MEMORIES_IDS] ?? null);
     }
     /**
@@ -258,23 +420,18 @@ class LaraEngineTest extends AbstractTest
      * @throws Exception
      */
     #[Test]
-    public function getErrorFromLaraReturnsFallbackErrorResponse(): void
+    public function getErrorFromLaraFallsBackToGoogleTranslate(): void
     {
         $httpClient = new TestHttpClient();
         $client = $this->createStub(LaraClient::class);
         $client->method('getHttpClient')->willReturn($httpClient);
         $client->method('translate')->willThrowException(new LaraException('failure', 500));
         $this->engine->setMockClient($client);
-        $fallback = $this->createMock(MMT::class);
-        $fallbackResponse = new GetMemoryResponse([
+        $this->engine->googleFallbackResponse = new GetMemoryResponse([
             'responseStatus' => 500,
             'responseDetails' => 'fallback failed',
             'matches' => [],
         ]);
-        $fallback->expects(self::once())
-            ->method('get')
-            ->willReturn($fallbackResponse);
-        $this->engine->setMmtFallback($fallback);
         $response = $this->engine->get([
             'segment' => 'source segment',
             'source' => 'en-US',
@@ -285,6 +442,10 @@ class LaraEngineTest extends AbstractTest
             'context_list_after' => [],
         ]);
         self::assertSame(500, $response->responseStatus);
+        self::assertCount(1, $this->engine->googleFallbackConfigs);
+        self::assertSame('source segment', $this->engine->googleFallbackConfigs[0]['segment']);
+        self::assertSame('en-US', $this->engine->googleFallbackConfigs[0]['source']);
+        self::assertSame('it-IT', $this->engine->googleFallbackConfigs[0]['target']);
     }
     /**
      * @throws LaraException
@@ -298,9 +459,6 @@ class LaraEngineTest extends AbstractTest
         $client->method('getHttpClient')->willReturn($httpClient);
         $client->method('translate')->willThrowException(new LaraException("\xB1\x31", 429));
         $this->engine->setMockClient($client);
-        $fallback = $this->createMock(MMT::class);
-        $fallback->expects(self::never())->method('get');
-        $this->engine->setMmtFallback($fallback);
         $response = $this->engine->get([
             'segment' => 'source segment',
             'source' => 'en-US',
@@ -313,29 +471,7 @@ class LaraEngineTest extends AbstractTest
         self::assertInstanceOf(GetMemoryResponse::class, $response);
         self::assertSame(200, $response->responseStatus);
         self::assertSame([], $response->matches);
-    }
-    #[Test]
-    public function getQualityEstimationSuccessReturnsFloat(): void
-    {
-        $fallback = $this->createMock(MMT::class);
-        $fallback->expects(self::once())
-            ->method('getQualityEstimation')
-            ->with('en-US', 'it-IT', 'source', 'translation', '2')
-            ->willReturn(0.91);
-        $this->engine->setMmtFallback($fallback);
-        $result = $this->engine->getQualityEstimation('en-US', 'it-IT', 'source', 'translation');
-        self::assertSame(0.91, $result);
-    }
-    #[Test]
-    public function getQualityEstimationErrorReturnsNull(): void
-    {
-        $fallback = $this->createMock(MMT::class);
-        $fallback->expects(self::once())
-            ->method('getQualityEstimation')
-            ->willThrowException(new MMTServiceApiException('Error', 500, 'failed'));
-        $this->engine->setMmtFallback($fallback);
-        $result = $this->engine->getQualityEstimation('en-US', 'it-IT', 'source', 'translation');
-        self::assertNull($result);
+        self::assertSame([], $this->engine->googleFallbackConfigs);
     }
     /**
      * @throws LaraException
@@ -380,53 +516,6 @@ class LaraEngineTest extends AbstractTest
      * @throws Exception
      */
     #[Test]
-    public function getWithProvidedTranslationAndScoreUsesQualityEstimationPath(): void
-    {
-        $fallback = $this->createMock(MMT::class);
-        $fallback->expects(self::once())
-            ->method('getQualityEstimation')
-            ->with('en-US', 'it-IT', 'source segment', 'browser translation', '2')
-            ->willReturn(0.77);
-        $this->engine->setMmtFallback($fallback);
-        $response = $this->engine->get([
-            'segment' => 'source segment',
-            'translation' => 'browser translation',
-            'reasoning' => false,
-            'source' => 'en-US',
-            'target' => 'it-IT',
-            'include_score' => true,
-            'mt_qe_engine_id' => '2',
-        ]);
-        self::assertSame(0.77, $response->matches[0]->score);
-    }
-    /**
-     * @throws LaraException
-     * @throws Exception
-     */
-    #[Test]
-    public function getWithProvidedTranslationAndScoreUsesDefaultQeEngineIdWhenMissing(): void
-    {
-        $fallback = $this->createMock(MMT::class);
-        $fallback->expects(self::once())
-            ->method('getQualityEstimation')
-            ->with('en-US', 'it-IT', 'source segment', 'browser translation', '2')
-            ->willReturn(0.66);
-        $this->engine->setMmtFallback($fallback);
-        $response = $this->engine->get([
-            'segment' => 'source segment',
-            'translation' => 'browser translation',
-            'reasoning' => false,
-            'source' => 'en-US',
-            'target' => 'it-IT',
-            'include_score' => true,
-        ]);
-        self::assertSame(0.66, $response->matches[0]->score);
-    }
-    /**
-     * @throws LaraException
-     * @throws Exception
-     */
-    #[Test]
     public function getWithInvalidCredentialsExceptionCodeReThrowsDomainMessage(): void
     {
         $httpClient = new TestHttpClient();
@@ -434,16 +523,20 @@ class LaraEngineTest extends AbstractTest
         $client->method('getHttpClient')->willReturn($httpClient);
         $client->method('translate')->willThrowException(new LaraException('auth failed', 401));
         $this->engine->setMockClient($client);
-        $this->expectException(LaraException::class);
-        $this->expectExceptionMessage('Lara credentials not valid');
-        $this->engine->get([
-            'segment' => 'source segment',
-            'source' => 'en-US',
-            'target' => 'it-IT',
-            'keys' => ['k1'],
-            'context_list_before' => [],
-            'context_list_after' => [],
-        ]);
+        try {
+            $this->engine->get([
+                'segment' => 'source segment',
+                'source' => 'en-US',
+                'target' => 'it-IT',
+                'keys' => ['k1'],
+                'context_list_before' => [],
+                'context_list_after' => [],
+            ]);
+            self::fail('A 401 from Lara must be re-thrown');
+        } catch (LaraException $exception) {
+            self::assertStringContainsString('Lara credentials not valid', $exception->getMessage());
+        }
+        self::assertSame([], $this->engine->googleFallbackConfigs);
     }
     #[Test]
     public function reMapKeyListPrefixesKeysWithExtMy(): void
@@ -614,6 +707,15 @@ class LaraEngineTest extends AbstractTest
         $client->method('getHttpClient')->willReturn($httpClient);
         $this->engine->setMockClient($client);
         self::assertSame($httpClient, $this->engine->getInternalClient());
+    }
+
+    #[Test]
+    public function getLaraClientReturnsTheClientTheEngineTranslatesWith(): void
+    {
+        $client = $this->createStub(LaraClient::class);
+        $this->engine->setMockClient($client);
+
+        self::assertSame($client, $this->engine->getLaraClient());
     }
     /**
      * @throws Exception
@@ -1067,6 +1169,12 @@ class LaraEngineTest extends AbstractTest
         $this->expectException(InvalidArgumentException::class);
         Lara::validateLaraStyle('invalid-style');
     }
+
+    #[Test]
+    public function hasBuiltInQualityEstimationIsFalse(): void
+    {
+        self::assertFalse($this->engine->hasBuiltInQualityEstimation());
+    }
 }
 class TestHttpClient extends HttpClient implements HttpClientInterface
 {
@@ -1092,11 +1200,18 @@ class TestLara extends Lara
     {
         $this->mockClient = $mockClient;
     }
-    public function setMmtFallback(MMT $fallback): void
+
+    /** @var list<array<string, mixed>> */
+    public array $googleFallbackConfigs = [];
+    public ?GetMemoryResponse $googleFallbackResponse = null;
+
+    protected function GoogleTranslateFallback(array $_config): GetMemoryResponse
     {
-        $prop = new ReflectionProperty(Lara::class, 'mmt_GET_Fallback');
-        $prop->setValue($this, $fallback);
+        $this->googleFallbackConfigs[] = $_config;
+
+        return $this->googleFallbackResponse ?? new GetMemoryResponse(null);
     }
+
     public function setMmtPrivateLicense(MMT $private): void
     {
         $prop = new ReflectionProperty(Lara::class, 'mmt_SET_PrivateLicense');

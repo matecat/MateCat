@@ -1,9 +1,11 @@
 import React, {useContext, useEffect, useState} from 'react'
 import SegmentActions from '../../../actions/SegmentActions'
 import {SegmentedControl} from '../../common/SegmentedControl'
-import IconClose from '../../icons/IconClose'
-import IconSearch from '../../icons/IconSearch'
+import IconClose from '../../../../img/icons/IconClose'
+import IconSearch from '../../../../img/icons/IconSearch'
 import {TabGlossaryContext} from './TabGlossaryContext'
+import IconAdd from '../../../../img/icons/IconAdd'
+import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../../common/Button/Button'
 
 export const SearchTerms = () => {
   const {
@@ -83,7 +85,7 @@ export const SearchTerms = () => {
           }`}
           onClick={() => setSearchTerm('')}
         >
-          <IconClose />
+          <IconClose size={18} />
         </div>
         <SegmentedControl
           name="search"
@@ -101,13 +103,15 @@ export const SearchTerms = () => {
         />
       </div>
       <div className="glossary__button-add-container">
-        <button
-          className="glossary__button-add"
+        <Button
+          type={BUTTON_TYPE.PRIMARY}
+          size={BUTTON_SIZE.SMALL}
           onClick={openForm}
           disabled={isLoading}
         >
-          + Add Term
-        </button>
+          <IconAdd size={18} />
+          Add term
+        </Button>
       </div>
     </div>
   )

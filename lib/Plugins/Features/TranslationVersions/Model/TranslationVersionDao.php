@@ -7,6 +7,7 @@ use Model\DataAccess\AbstractDao;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Jobs\JobStruct;
+use Model\QualityReport\HistoryElementStruct;
 use Model\QualityReport\SegmentEventsStruct;
 use Model\Translations\SegmentTranslationStruct;
 use PDO;
@@ -249,6 +250,93 @@ class TranslationVersionDao extends AbstractDao
     }
 
     /**
+     * One history row per translation event for the quality report panel, plus the version-0 row.
+     *
+     * The first branch carries version 0 on its own because no event points at it: a
+     * `segment_translation_versions` row holds the translation *before* the change
+     * (TranslationVersionsHandler::saveVersion() builds it from the old translation), while an
+     * event carries the version number *after* it. Version 0 is therefore the pre-first-edit text,
+     * and it is emitted with a null id, source_page, status and create_date because none of those
+     * exist for a version nobody acted on.
+     *
+     * The event branch emits one row per event. Grouping by version and step collapsed every
+     * confirmation that did not change the text, such as a second R2 approve, which keeps the
+     * version number, into one row with an arbitrary date. Its date is the event's own
+     * create_date. creation_date is null there on purpose: a versions row is written when its text
+     * is *replaced*, so its creation_date is the time of the next save, not of this one.
+     *
+     * The event branch is scoped by id_job everywhere — join included. Jobs of the same project
+     * share their segment ids (JobCreationService::linkFilesToJob() links every project file to
+     * every target-language job), so id_segment alone lets another language's events through.
+     *
+     * The inner UNION can produce two rows for one version, which happens when
+     * ReviewExtended\TranslationIssueModel::saveDiff() has written a versions row for the version
+     * still current in segment_translations. That row carries a null translation, so the aggregate
+     * has to be MAX() rather than a bare column: MAX() skips nulls and
+     * HistoryElementStruct::$translation is a non-nullable string that a null would fatal on.
+     * saveDiff() can write that null-translation row at version 0 too, before the translator has
+     * saved anything, which is why the first branch skips it: there is no first version to show.
+     *
+     * Rows come back per segment in the order they happened: version 0 first, then the events by
+     * id, which is the order they were written.
+     *
+     * @param array<int|string> $segments_id
+     * @param int $job_id
+     * @return array<HistoryElementStruct>
+     * @throws PDOException
+     */
+    public function historyEvents(array $segments_id, int $job_id): array
+    {
+        $conn = $this->database->getConnection();
+        $prepare_str_segments_id = implode(', ', array_fill(0, count($segments_id), '?'));
+
+        $query = "SELECT * FROM (
+            SELECT
+                null AS id,
+                id_segment,
+                first_sv.version_number,
+                null AS source_page,
+                null AS status,
+                null AS create_date,
+                first_sv.creation_date,
+                first_sv.translation
+            FROM segment_translation_versions first_sv
+            WHERE id_segment IN ( $prepare_str_segments_id ) AND id_job = ? AND version_number = 0 AND first_sv.translation IS NOT NULL
+            UNION
+            SELECT
+                ste.id,
+                ste.id_segment,
+                ste.version_number,
+                ste.source_page,
+                ste.status,
+                ste.create_date,
+                null AS creation_date,
+                MAX(stv.translation) AS translation
+            FROM segment_translation_events ste
+            INNER JOIN (
+                SELECT id_segment, translation, version_number, id_job
+                FROM segment_translation_versions
+                WHERE id_segment IN ( $prepare_str_segments_id )
+                  AND id_job = ?
+                UNION
+                SELECT id_segment, translation, version_number, id_job
+                FROM segment_translations
+                WHERE id_segment IN ( $prepare_str_segments_id )
+                  AND id_job = ?
+            ) AS stv ON stv.version_number = ste.version_number AND stv.id_segment = ste.id_segment AND stv.id_job = ste.id_job
+            WHERE ste.id_segment IN ( $prepare_str_segments_id ) AND ste.id_job = ?
+            GROUP BY ste.id
+        ) AS history
+        ORDER BY id_segment, id IS NOT NULL, id;";
+
+        $stmt = $conn->prepare($query);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, HistoryElementStruct::class);
+        $stmt->execute(array_merge($segments_id, [$job_id], $segments_id, [$job_id], $segments_id, [$job_id], $segments_id, [$job_id]));
+
+        return $stmt->fetchAll();
+    }
+
+    /**
      * @param list<int> $segments_id
      * @param int $job_id
      *
@@ -279,7 +367,7 @@ class TranslationVersionDao extends AbstractDao
                    AND id_job = ?
             ) AS stv
             RIGHT JOIN (
-                   SELECT MAX(version_number) AS version_number, ste.id_segment, ste.source_page
+                   SELECT MAX(version_number) AS version_number, ste.id, ste.id_segment, ste.source_page
                    FROM segment_translation_events ste
                    WHERE id_segment IN ( $prepare_str_segments_id )
                      AND ste.id_job = ?

@@ -10,9 +10,13 @@ namespace Model\QualityReport;
 
 use DivisionByZeroError;
 use Exception;
+use Matecat\ICU\MessagePatternComparator;
+use Matecat\ICU\MessagePatternValidator;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
+use Model\DataAccess\ShapelessConcreteStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Utils\LQA\QA;
@@ -43,8 +47,6 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
     public ?string $translation = null;
 
     public ?int $version; //unix timestamp of the last translation
-
-    public bool $ice_locked;
 
     public string $status;
 
@@ -107,6 +109,11 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
     protected string $tm_analysis_status;
 
     /**
+     * @var array<mixed>
+     */
+    public array $history = [];
+
+    /**
      * @return string
      */
     public function getTmAnalysisStatus(): string
@@ -132,7 +139,7 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
 
     public function isICE(): bool
     {
-        return ($this->match_type == 'ICE' && $this->locked);
+        return $this->match_type == InternalMatchesConstants::TM_ICE;
     }
 
     /**
@@ -169,11 +176,14 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
     }
 
     /**
+     * @param bool $sourceContainsIcu Whether ICU is enabled for the project and the source parses as ICU.
+     *                                The Filter must have been built with the same flag.
+     *
      * @return array<string, mixed>
      * @throws Exception
      * @throws \TypeError
      */
-    public function getLocalWarning(FeatureSet $featureSet, JobStruct $chunk, MateCatFilter $Filter): array
+    public function getLocalWarning(FeatureSet $featureSet, JobStruct $chunk, MateCatFilter $Filter, bool $sourceContainsIcu = false): array
     {
         // When the query for segments is performed, a condition is added to get NULL instead of the translation when the status is NEW
         // so that the local warning check is not displayed/needed
@@ -184,7 +194,17 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
         $src_content = $Filter->fromLayer0ToLayer2($this->segment);
         $trg_content = $Filter->fromLayer0ToLayer2($this->translation);
 
-        $QA = new QA($src_content, $trg_content);
+        // An ICU segment is checked for plural-form consistency only, as the editor does in
+        // GetWarningController: the tag checks would report the ICU arguments as mismatched tags.
+        $QA = new QA(
+            $src_content,
+            $trg_content,
+            $sourceContainsIcu ? MessagePatternComparator::fromValidators(
+                new MessagePatternValidator($chunk->source, $this->segment),
+                new MessagePatternValidator($chunk->target, $this->translation)
+            ) : null,
+            $sourceContainsIcu
+        );
         $QA->setSourceSegLang($chunk->source);
         $QA->setTargetSegLang($chunk->target);
         $QA->setChunk($chunk);

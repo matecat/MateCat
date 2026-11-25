@@ -1,10 +1,9 @@
-import React, {useContext, useEffect, useRef, useState} from 'react'
+import React from 'react'
 import Switch from '../../../../common/Switch'
-import {SegmentedControl} from '../../../../common/SegmentedControl'
-import {WordsBadge} from '../../../../common/WordsBadge/WordsBadge'
-import {FiltersParamsContext} from './FiltersParamsContext'
-import {Controller, useForm} from 'react-hook-form'
-import {isEqual} from 'lodash'
+import {KeysBadge} from '../../../../common/KeysBadge/KeysBadge'
+import {Controller} from 'react-hook-form'
+import {TranslatableKeysField} from './TranslatableKeysField'
+import {useTranslatableKeysSection} from './useTranslatableKeysSection'
 import {Select} from '../../../../common/Select'
 
 const SEGMENTED_CONTROL_OPTIONS = [
@@ -12,105 +11,15 @@ const SEGMENTED_CONTROL_OPTIONS = [
   {id: 'do_not_translate_keys', name: 'Non-translatable'},
 ]
 
-const INNER_CONTENT_TYPE_OPTIONS = [{id: 'text/html', name: 'HTML'}]
+const INNER_CONTENT_TYPE_OPTIONS = [
+  {id: 'text/plain', name: 'Plain text'},
+  {id: 'text/html', name: 'HTML'},
+]
 
 export const Json = () => {
-  const {
-    currentTemplate,
-    currentProjectTemplateChanged,
-    modifyingCurrentTemplate,
-  } = useContext(FiltersParamsContext)
-
-  const {control, watch, setValue} = useForm()
-
-  const [formData, setFormData] = useState()
-
-  const json = useRef()
-  json.current = currentTemplate.json
-
-  const temporaryFormData = watch()
-  const previousData = useRef()
-
-  useEffect(() => {
-    if (!isEqual(temporaryFormData, previousData.current))
-      setFormData(temporaryFormData)
-
-    previousData.current = temporaryFormData
-  }, [temporaryFormData])
-
-  useEffect(() => {
-    if (typeof formData === 'undefined') return
-
-    const {segmentedControl, ...propsValue} = formData
-
-    const restPropsValue = Object.entries(propsValue).reduce(
-      (acc, [key, value]) => ({
-        ...acc,
-        ...(SEGMENTED_CONTROL_OPTIONS.every(
-          ({id}) => id !== key || id === segmentedControl,
-        ) && {[key]: value}),
-      }),
-      {},
-    )
-
-    if (
-      !isEqual(json.current, restPropsValue) &&
-      Object.keys(restPropsValue).length
-    ) {
-      modifyingCurrentTemplate((prevTemplate) => ({
-        ...prevTemplate,
-        json: restPropsValue,
-      }))
-    }
-  }, [formData, modifyingCurrentTemplate, setValue])
-
-  // set default values for current template
-  useEffect(() => {
-    SEGMENTED_CONTROL_OPTIONS.forEach(({id}) => setValue(id, undefined))
-
-    Object.entries(json.current).forEach(([key, value]) => setValue(key, value))
-
-    setValue(
-      'segmentedControl',
-      SEGMENTED_CONTROL_OPTIONS.find(
-        ({id}) => typeof json.current[id] !== 'undefined',
-      )?.id,
-    )
-  }, [currentTemplate.id, currentProjectTemplateChanged, setValue])
-
-  const {segmentedControl} = formData ?? {}
-
-  useEffect(() => {
-    if (formData?.segmentedControl) {
-      setValue(
-        SEGMENTED_CONTROL_OPTIONS.find(
-          ({id}) => id !== formData.segmentedControl,
-        ).id,
-        formData[formData.segmentedControl],
-      )
-    }
-  }, [formData, setValue])
-
-  const renderActiveSegmentedController = (
-    <>
-      {SEGMENTED_CONTROL_OPTIONS.filter(({id}) => id === segmentedControl).map(
-        ({id}) => (
-          <Controller
-            key={id}
-            control={control}
-            name={id}
-            render={({field: {onChange, value, name}}) => (
-              <WordsBadge
-                name={name}
-                value={value}
-                onChange={onChange}
-                placeholder={''}
-              />
-            )}
-          />
-        ),
-      )}
-    </>
+  const {control, formData} = useTranslatableKeysSection(
+    'json',
+    SEGMENTED_CONTROL_OPTIONS,
   )
 
   return (
@@ -146,39 +55,27 @@ export const Json = () => {
         />
       </div>
 
-      <div className="filters-params-option">
-        <div>
-          <h3>Translatable keys</h3>
-          <p>
+      <TranslatableKeysField
+        control={control}
+        formData={formData}
+        options={SEGMENTED_CONTROL_OPTIONS}
+        title="Translatable keys"
+        description={
+          <>
             Choose which keys should be translated. If left empty, all keys in
             the file will be extracted as translatable.
             <br />
             Key names are case sensitive.
             <br />
-            If the toggle is set to "Translatable", only the keys entered will
-            be extracted as translatable.
+            If the toggle is set to &quot;Translatable&quot;, only the keys
+            entered will be extracted as translatable.
             <br />
-            If the toggle is set to "Non-translatable", all the keys in the file{' '}
-            <b>except</b> those entered will be extracted as translatable.
-          </p>
-        </div>
-        <div className="container-segmented-control">
-          <Controller
-            control={control}
-            name="segmentedControl"
-            render={({field: {onChange, value, name}}) => (
-              <SegmentedControl
-                name={name}
-                className="custom-segmented-control"
-                options={SEGMENTED_CONTROL_OPTIONS}
-                selectedId={value}
-                onChange={onChange}
-              />
-            )}
-          />
-          {renderActiveSegmentedController}
-        </div>
-      </div>
+            If the toggle is set to &quot;Non-translatable&quot;, all the keys
+            in the file <b>except</b> those entered will be extracted as
+            translatable.
+          </>
+        }
+      />
 
       <div className="filters-params-option">
         <div>
@@ -197,7 +94,7 @@ export const Json = () => {
           control={control}
           name="context_keys"
           render={({field: {onChange, value, name}}) => (
-            <WordsBadge
+            <KeysBadge
               name={name}
               value={value}
               onChange={onChange}
@@ -219,14 +116,14 @@ export const Json = () => {
             Character limits will be applied to translatable keys in the same
             object.
             <br />
-            Keys with a character limit won't be segmented.
+            Keys with a character limit won&apos;t be segmented.
           </p>
         </div>
         <Controller
           control={control}
           name="character_limit"
           render={({field: {onChange, value, name}}) => (
-            <WordsBadge
+            <KeysBadge
               name={name}
               value={value}
               onChange={onChange}
@@ -251,12 +148,12 @@ export const Json = () => {
             <Select
               name={name}
               placeholder="Select inner content type"
+              isPortalDropdown={true}
               options={INNER_CONTENT_TYPE_OPTIONS}
               activeOption={INNER_CONTENT_TYPE_OPTIONS?.find(
                 ({id}) => id === value,
               )}
               onSelect={(option) => onChange(option.id)}
-              maxHeightDroplist={260}
             />
           )}
         />

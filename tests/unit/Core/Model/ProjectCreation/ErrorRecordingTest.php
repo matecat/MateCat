@@ -24,12 +24,12 @@ class ErrorRecordingTest extends AbstractTest
     public function testAddErrorAppendsToResultErrors(): void
     {
         $ps = new ProjectStructure();
-        $ps->addError(-19, 'Invalid Upload Token.');
+        $ps->addError(-19, 'Invalid upload token.');
 
         $errors = $ps->result['errors'];
         $this->assertCount(1, $errors);
         $this->assertEquals(-19, $errors[0]['code']);
-        $this->assertEquals('Invalid Upload Token.', $errors[0]['message']);
+        $this->assertEquals('Invalid upload token.', $errors[0]['message']);
     }
 
     #[Test]
@@ -53,7 +53,7 @@ class ErrorRecordingTest extends AbstractTest
     public function testErrorEntryHasCodeAndMessageKeys(): void
     {
         $ps = new ProjectStructure();
-        $ps->addError(-19, 'Invalid Upload Token.');
+        $ps->addError(-19, 'Invalid upload token.');
 
         $error = $ps->result['errors'][0];
 
@@ -69,7 +69,7 @@ class ErrorRecordingTest extends AbstractTest
         $ps = new ProjectStructure();
 
         // First error via addError()
-        $ps->addError(-19, 'Invalid Upload Token.');
+        $ps->addError(-19, 'Invalid upload token.');
 
         // Second error appended manually (legacy callers may still do this)
         $ps->result['errors'][] = ['code' => -999, 'message' => 'Second error'];

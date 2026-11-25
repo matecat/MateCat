@@ -4,21 +4,24 @@ namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
-use Controller\Traits\APISourcePageGuesserTrait;
 use DomainException;
 use Exception;
 use InvalidArgumentException;
-use Model\Exceptions\NotFoundException;
+use JsonException;
 use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
 use ReflectionException;
 use TypeError;
+use Utils\Constants\SourcePages;
 use Utils\TmKeyManagement\ClientTmKeyStruct;
 use Utils\TmKeyManagement\Filter;
 use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\TMS\TMSService;
 use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
 use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
 use Utils\Validator\JSONSchema\JSONValidator;
@@ -26,12 +29,29 @@ use Utils\Validator\JSONSchema\JSONValidatorObject;
 
 class UpdateJobKeysController extends KleinController
 {
-
-    use APISourcePageGuesserTrait;
+    protected JobStruct $chunk;
 
     protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
+
+        // Resolve the job and its revision phase from the presented credential (password), not from a
+        // spoofable Referer. ChunkPasswordValidator stamps source_page onto the chunk from whichever
+        // password (translate or review) matched.
+        $chunkValidator = new ChunkPasswordValidator($this);
+        $chunkValidator->onSuccess(function () use ($chunkValidator) {
+            $this->chunk = $chunkValidator->getChunk();
+        });
+        $this->appendValidator($chunkValidator);
+    }
+
+    /**
+     * The revision phase is derived from the credential-resolved source_page stamped on the chunk
+     * (see registerValidators), never from the request Referer.
+     */
+    private function isRevision(): bool
+    {
+        return ($this->chunk->getSourcePage() ?: SourcePages::SOURCE_PAGE_TRANSLATE) !== SourcePages::SOURCE_PAGE_TRANSLATE;
     }
 
     /**
@@ -44,9 +64,10 @@ class UpdateJobKeysController extends KleinController
     {
         $request = $this->validateTheRequest();
 
-        // moved here because self::isRevision() in constructor
-        // generates an infinite loop
-        if ($this->user->email == $request['jobData']['owner']) {
+        // Credential-resolved job (ChunkPasswordValidator, see registerValidators).
+        $jobData = $this->chunk;
+
+        if ($this->user->email == $jobData['owner']) {
             $userRole = Filter::OWNER;
         } elseif ($this->isRevision()) {
             $userRole = Filter::ROLE_REVISOR;
@@ -81,7 +102,7 @@ class UpdateJobKeysController extends KleinController
          *                           [tm] => 1
          *                           [glos] => 1
          *                           [owner] => 0
-         *                           [key] => 952681baffb9c147b346
+         *                           [key] => 00000000000000000006
          *                           [name] => cgjhkmfgdcjkfh
          *                           [r] => 1
          *                           [w] => 1
@@ -108,7 +129,7 @@ class UpdateJobKeysController extends KleinController
          *
          */
         $tm_keys = json_decode($request['tm_keys'], true);
-        $clientKeys = $request['jobData']->getClientKeys($this->user, $userRole, $this->getDatabase());
+        $clientKeys = $jobData->getClientKeys($this->user, $userRole, $this->getDatabase());
 
         /*
          * sanitize owner role key type
@@ -129,14 +150,15 @@ class UpdateJobKeysController extends KleinController
         $tm_keys = array_merge($tm_keys['ownergroup'], $tm_keys['mine'], $tm_keys['anonymous']);
         $tm_keys = json_encode($tm_keys);
 
+        $this->assertNewKeysAreValid((string)$tm_keys, $jobData['tm_keys']);
 
-        $totalTmKeys = TmKeyManager::mergeJsonKeys((string)$tm_keys, $request['jobData']['tm_keys'], $this->getDatabase(), $userRole, $this->user->uid);
+        $totalTmKeys = TmKeyManager::mergeJsonKeys((string)$tm_keys, $jobData['tm_keys'], $this->getDatabase(), $userRole, $this->user->uid);
 
-        $this->logger->debug('Before: ' . $request['jobData']['tm_keys']);
+        $this->logger->debug('Before: ' . $jobData['tm_keys']);
         $this->logger->debug('After: ' . json_encode($totalTmKeys));
 
-        if ($this->jobOwnerIsMe($request['jobData']['owner'])) {
-            $request['jobData']['only_private_tm'] = $request['only_private'];
+        if ($this->jobOwnerIsMe($jobData['owner'])) {
+            $jobData['only_private_tm'] = $request['only_private'];
         }
 
         /** @var TmKeyStruct $totalTmKey */
@@ -144,18 +166,18 @@ class UpdateJobKeysController extends KleinController
             $totalTmKey->complete_format = true;
         }
 
-        $request['jobData']->tm_keys = json_encode($totalTmKeys);
-        $request['jobData']->last_update = date("Y-m-d H:i:s");
+        $jobData->tm_keys = (string)json_encode($totalTmKeys);
+        $jobData->last_update = date("Y-m-d H:i:s");
 
         $jobDao = new JobDao($this->getDatabase());
-        $jobDao->updateStruct($request['jobData'], ['fields' => ['only_private_tm', 'tm_keys', 'last_update']]);
-        $jobDao->destroyCacheByIdAndPassword($request['jobData']);
+        $jobDao->updateStruct($jobData, ['fields' => ['only_private_tm', 'tm_keys', 'last_update']]);
+        $jobDao->destroyCache($jobData);
 
         $jobsMetadataDao = new MetadataDao($this->getDatabase());
 
         // update character_counter_mode job metadata
         if ($request['public_tm_penalty'] !== null) {
-            $jobsMetadataDao->set($request['job_id'], $request['job_pass'], JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value, $request['public_tm_penalty']);
+            $jobsMetadataDao->set((int)$jobData->id, (string)$jobData->password, JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value, $request['public_tm_penalty']);
         }
 
         $this->response->json([
@@ -165,8 +187,6 @@ class UpdateJobKeysController extends KleinController
 
     /**
      * @return array<string, mixed>
-     * @throws ReflectionException
-     * @throws NotFoundException
      * @throws InvalidArgumentException
      * @throws DomainException
      * @throws Exception
@@ -175,26 +195,12 @@ class UpdateJobKeysController extends KleinController
     private function validateTheRequest(): array
     {
         $public_tm_penalty = ($this->request->param('public_tm_penalty') !== null) ? filter_var($this->request->param('public_tm_penalty'), FILTER_VALIDATE_INT) : null;
-        $job_id = filter_var($this->request->param('job_id'), FILTER_SANITIZE_NUMBER_INT);
-        $job_pass = filter_var($this->request->param('job_pass'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
-        $current_password = filter_var($this->request->param('current_password'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
         $get_public_matches = filter_var($this->request->param('get_public_matches'), FILTER_VALIDATE_BOOLEAN);
         $tm_keys = filter_var($this->request->param('data'), FILTER_UNSAFE_RAW, ['flags' => FILTER_FLAG_STRIP_LOW]);
-
-        if (empty($job_id)) {
-            throw new InvalidArgumentException("Job id missing", -1);
-        }
-
-        if (empty($job_pass)) {
-            throw new InvalidArgumentException("Job password missing", -2);
-        }
 
         if ($public_tm_penalty < 0 || $public_tm_penalty > 100) {
             throw new InvalidArgumentException("Invalid public_tm_penalty value (must be between 0 and 100)", -6);
         }
-
-        // Get Job Info, we need only a row of job
-        $jobData = (new JobDao($this->getDatabase()))->getByIdAndPasswordOrFail((int)$job_id, (string)$job_pass);
 
         // validate $tm_keys
         try {
@@ -203,14 +209,7 @@ class UpdateJobKeysController extends KleinController
             throw new DomainException($exception->getMessage());
         }
 
-        $this->id_job = (int)$job_id;
-        $this->request_password = (string)$current_password;
-
         return [
-            'job_id' => $job_id,
-            'job_pass' => $job_pass,
-            'jobData' => $jobData,
-            'current_password' => $current_password,
             'public_tm_penalty' => $public_tm_penalty,
             'get_public_matches' => $get_public_matches,
             'tm_keys' => $tm_keys, // this will be filtered inside the TmKeyManagement class
@@ -226,6 +225,47 @@ class UpdateJobKeysController extends KleinController
     private function jobOwnerIsMe(?string $owner): bool
     {
         return $this->userIsLogged && $owner == $this->user->email;
+    }
+
+    /**
+     * The MyMemory service new keys are checked with. Tests replace it.
+     *
+     * @throws Exception
+     */
+    protected function getTmService(): TMSService
+    {
+        return new TMSService($this->getDatabase());
+    }
+
+    /**
+     * Checks every key that is new to the job with MyMemory, as project creation does, before
+     * the merge writes it into the job and into the user's keyring.
+     *
+     * A key MyMemory does not accept refuses the whole request; a MyMemory error is not caught,
+     * so the request fails and nothing changes. The check also refreshes the key's TTL on MyMemory.
+     *
+     * Example: the job has key `aaa1`, the client sends `aaa1` and `bbb2` → only `bbb2` is checked.
+     *
+     * @throws InvalidArgumentException when MyMemory does not accept a new key
+     * @throws JsonException
+     * @throws DomainException
+     * @throws Exception when MyMemory cannot be reached
+     */
+    private function assertNewKeysAreValid(string $Json_clientKeys, string $Json_jobKeys): void
+    {
+        $newKeys = TmKeyManager::getNewKeys($Json_clientKeys, $Json_jobKeys);
+
+        if (empty($newKeys)) {
+            return;
+        }
+
+        $tmService = $this->getTmService();
+
+        foreach ($newKeys as $newKey) {
+            if ($tmService->checkCorrectKey($newKey) !== true) {
+                throw new InvalidArgumentException('One of the TM keys you added is not valid. Please check it and try again.', -7);
+            }
+        }
     }
 
     /**

@@ -1,6 +1,9 @@
-@use '../commons/colors';
-.upload-files-container {
-  border: 1px dashed #ccc;
+@use '../tokens/colors';
+@use 'commons/variables';
+.upload-files-container,
+.upload-box-not-logged,
+.upload-waiting-logged {
+  border: 1px dashed colors.$grey200;
   min-height: 200px;
   border-radius: 4px;
   padding: 24px;
@@ -16,7 +19,7 @@
     align-items: flex-start;
   }
   &.isDragging {
-    background-color: colors.$grey7;
+    background-color: colors.$grey400;
   }
   .upload-files-start {
     display: flex;
@@ -25,56 +28,58 @@
     width: 100%;
     height: 100%;
     p {
-      font-size: 35px;
+      font-size: 28px;
       line-height: 50px;
       font-weight: bold;
       margin: 2px 0 0 0;
     }
     span {
       font-size: 24px;
-      color: colors.$grey1
+      color: colors.$grey500;
     }
   }
   .upload-files-list {
     display: flex;
     flex-direction: column;
     width: 100%;
+    // Keep the action buttons and the Analyze button in reach with many files
+    max-height: clamp(200px, calc(100vh - 540px), 408px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    // Room between the scrollbar and the delete buttons
+    padding: 0 12px;
+    box-sizing: border-box;
     .file-item {
       display: grid;
-      grid-template-columns: 2fr 1fr 24px;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) 24px;
+      column-gap: 16px;
       align-items: center;
       padding: 8px;
-      border-bottom: 1px dashed #ccc;
+      border-bottom: 1px dashed colors.$grey200;
       &.zip-folder {
         padding-left: 40px;
       }
-      .file-item-name, .file-item-error {
+      .file-item-name,
+      .file-item-error {
         display: flex;
         align-items: center;
         gap: 8px;
       }
       .file-item-name {
-        font-size: 16px;
+        font-size: variables.$font-size-small;
         max-width: 80%;
       }
-      .file-icon {
-        height: 30px;
-        min-width: 30px;
-        display: block;
-        background-size: 25px !important;
-        margin-bottom: 4px;
-      }
       .file-item-error {
-        color: colors.$redDefault;
+        color: colors.$red500;
       }
       .file-item-warning {
-        color: colors.$orangeDefault;
+        color: colors.$orange200;
       }
       .file-item-success {
-        color: colors.$greenDefault;
+        color: colors.$green500;
       }
       .file-item-info {
-        display:flex;
+        display: flex;
         gap: 16px;
       }
     }
@@ -83,10 +88,10 @@
     }
     .importing-progress {
       .progress {
-        background-color: colors.$approvedGreen;
+        background-color: colors.$green800;
       }
       .progress-wrapper {
-        background-color: rgba(colors.$approvedGreen, 0.24);
+        background-color: rgba(colors.$green800, 0.24);
       }
     }
   }
@@ -97,6 +102,15 @@
     align-items: center;
     gap: 8px;
     padding-top: 16px;
-    align-self: flex-start;
+    align-self: stretch;
+    .upload-files-counter {
+      margin-left: auto;
+      font-size: variables.$font-size-small;
+      color: colors.$grey500;
+      white-space: nowrap;
+    }
+    .upload-files-counter-errors {
+      color: colors.$red500;
+    }
   }
 }

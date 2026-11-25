@@ -3,10 +3,12 @@
 namespace Model\Projects;
 
 use Controller\API\Commons\Exceptions\AuthorizationError;
+use DomainException;
 use Exception;
 use Model\DataAccess\IDatabase;
 use Model\Exceptions\ValidationError;
 use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
 use Model\Teams\MembershipDao;
 use Model\Teams\MembershipStruct;
 use Model\Teams\TeamDao;
@@ -16,7 +18,10 @@ use Model\Users\UserStruct;
 use PDOException;
 use ReflectionException;
 use Utils\Constants\Teams;
+use Utils\Email\AbstractEmail;
 use Utils\Email\ProjectAssignedEmail;
+use Utils\Tools\CatUtils;
+use Utils\Validation\UserSuppliedName;
 
 /**
  * Class ProjectModel
@@ -131,19 +136,52 @@ class ProjectModel
                 return;
             }
             $jobs = (new JobDao($this->database))->getNotDeletedByProjectId((int) $this->project_struct->id);
-            $email = new ProjectAssignedEmail($this->database, $this->user, $this->project_struct, $assignee, $jobs);
-            $email->send();
+            $this->assignedEmail($assignee, $jobs)->send();
         }
     }
 
     /**
+     * The email that tells the new assignee about the project. A method of its own so a test can
+     * replace it with one that does not reach the mail queue.
+     *
+     * @param JobStruct[] $jobs
+     *
+     * @throws DomainException
+     */
+    protected function assignedEmail(UserStruct $assignee, array $jobs): AbstractEmail
+    {
+        return new ProjectAssignedEmail($this->database, $this->user, $this->project_struct, $assignee, $jobs);
+    }
+
+    /**
+     * Normalise the new project name, and refuse one that is empty or will not fit.
+     *
+     * This is the only guard on `PUT /api/v2/teams/{id_team}/projects/{id_project}`, which writes
+     * `projects`.`name` straight out of the request. It had no sanitisation of any kind — not even
+     * the allowlist the three other project-name paths ran — so a name carrying CR/LF, zero-width
+     * characters or two hundred more characters than the column holds went in as typed.
+     *
+     * Normalising here rather than in the controller keeps it true for both callers of update().
+     *
      * @throws ValidationError
      */
     private function checkName(): void
     {
-        if (empty($this->willChange['name'])) {
+        $name = UserSuppliedName::normalize(
+            is_string($this->willChange['name']) ? $this->willChange['name'] : null
+        );
+
+        if ($name === '') {
             throw new ValidationError('Project name cannot be empty');
         }
+
+        if (mb_strlen($name) > CatUtils::PROJECT_NAME_MAX_LENGTH) {
+            throw new ValidationError(
+                'Project name must be at most ' . CatUtils::PROJECT_NAME_MAX_LENGTH . ' characters'
+            );
+        }
+
+        $this->willChange['name'] = $name;
     }
 
     /**
@@ -159,7 +197,7 @@ class ProjectModel
             throw new ValidationError('Team not found');
         }
         if ($team->type == Teams::PERSONAL) {
-            throw new ValidationError('Can\'t change the Assignee of a personal project.');
+            throw new ValidationError('Can\'t change the assignee of a personal project.');
         }
     }
 
@@ -203,7 +241,7 @@ class ProjectModel
         });
 
         if (empty($found)) {
-            throw new AuthorizationError("Not Authorized", 403);
+            throw new AuthorizationError("Not authorized", 403);
         }
 
         $uid = $this->user->uid ?? throw new AuthorizationError("User UID must not be null", 403);
@@ -253,7 +291,7 @@ class ProjectModel
             if ($teamInCacheToClean === null) {
                 continue;
             }
-            $teamDao->destroyCacheAssignee($teamInCacheToClean);
+            $teamDao->destroyCacheAssigneeWithProjectsByTeam($teamInCacheToClean);
         }
     }
 
@@ -268,7 +306,7 @@ class ProjectModel
             return;
         }
         $projectDao = new ProjectDao($this->database);
-        $projectDao->destroyFetchByIdCache($id, ProjectStruct::class);
+        $projectDao->destroyCache((int)$id);
     }
 
 }

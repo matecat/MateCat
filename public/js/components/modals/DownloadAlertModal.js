@@ -13,10 +13,10 @@ export const DownloadAlertModal = ({
   cancelCallback,
 }) => {
   return (
-    <div className="message-modal">
+    <div className="message-modal download-alert-modal">
       <div className="matecat-modal-middle">
-        <div className={'ui one column grid '}>
-          <div className="column left aligned" style={{fontSize: '18px'}}>
+        <div className={'modal-grid'}>
+          <div className="modal-grid__body" style={{fontSize: '18px'}}>
             The translation has issues (e.g. missing tags or over‑length text)
             that may cause failed downloads, missing placeholders, or lost
             formatting.
@@ -25,9 +25,8 @@ export const DownloadAlertModal = ({
             You can:
             <ul
               style={{
-                'list-style': 'decimal',
+                'list-style': 'disc',
                 'margin-left': '40px',
-                'padding-top': '20px',
               }}
             >
               <li>
@@ -46,7 +45,7 @@ export const DownloadAlertModal = ({
             </ul>
             <br />
           </div>
-          <div className="matecat-modal-buttons">
+          <div className="modal-buttons">
             <Button
               type={BUTTON_TYPE.DEFAULT}
               mode={BUTTON_MODE.OUTLINE}
@@ -58,29 +57,31 @@ export const DownloadAlertModal = ({
             >
               Fix issues
             </Button>
-            {config.ownerIsMe && (
+            <div>
+              {config.ownerIsMe && (
+                <Button
+                  type={BUTTON_TYPE.PRIMARY}
+                  size={BUTTON_SIZE.MEDIUM}
+                  onClick={() => {
+                    ModalsActions.onCloseModal()
+                    successCallbackWithoutErrors()
+                  }}
+                >
+                  Download
+                </Button>
+              )}
+
               <Button
                 type={BUTTON_TYPE.PRIMARY}
                 size={BUTTON_SIZE.MEDIUM}
                 onClick={() => {
                   ModalsActions.onCloseModal()
-                  successCallbackWithoutErrors()
+                  successCallback()
                 }}
               >
-                Download
+                Download with markers
               </Button>
-            )}
-
-            <Button
-              type={BUTTON_TYPE.PRIMARY}
-              size={BUTTON_SIZE.MEDIUM}
-              onClick={() => {
-                ModalsActions.onCloseModal()
-                successCallback()
-              }}
-            >
-              Download with markers
-            </Button>
+            </div>
           </div>
         </div>
       </div>

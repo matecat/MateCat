@@ -14,8 +14,10 @@ global.ResizeObserver = class ResizeObserver {
 }
 
 // react-virtual needs a scrollable parent with measurable size
+let capturedScrollToFn
 jest.mock('react-virtual', () => ({
-  useVirtual: ({size, estimateSize}) => {
+  useVirtual: ({size, estimateSize, scrollToFn}) => {
+    capturedScrollToFn = scrollToFn
     const virtualItems = Array.from({length: size}, (_, i) => ({
       index: i,
       start: i * 50,
@@ -146,6 +148,74 @@ describe('VirtualList', () => {
         renderVirtualList({scrollToIndex: {value: 2, align: 'start'}}),
       ).not.toThrow()
     })
+
+    it('does not crash when scrollToIndex has an offset', () => {
+      expect(() =>
+        renderVirtualList({
+          scrollToIndex: {value: 2, align: 'start', offset: 56},
+        }),
+      ).not.toThrow()
+    })
+  })
+
+  describe('scrollToIndex offset correction (scrollToFn passed to react-virtual)', () => {
+    beforeEach(() => {
+      jest.useFakeTimers()
+    })
+
+    afterEach(() => {
+      jest.useRealTimers()
+    })
+
+    it('passes a stable scrollToFn to react-virtual', () => {
+      const {rerender, ref} = renderVirtualList()
+      const first = capturedScrollToFn
+      rerender(<VirtualList {...defaultProps} ref={ref} />)
+      expect(capturedScrollToFn).toBe(first)
+    })
+
+    it('leaves the offset through unchanged before any scrollToIndex resolves', () => {
+      renderVirtualList()
+      const defaultScrollToFn = jest.fn()
+      capturedScrollToFn(500, defaultScrollToFn)
+      expect(defaultScrollToFn).toHaveBeenCalledWith(500)
+    })
+
+    it('subtracts the offset once a start-aligned scrollToIndex resolves', () => {
+      renderVirtualList({scrollToIndex: {value: 2, align: 'start', offset: 56}})
+      act(() => jest.advanceTimersByTime(100))
+
+      const defaultScrollToFn = jest.fn()
+      capturedScrollToFn(200, defaultScrollToFn)
+      expect(defaultScrollToFn).toHaveBeenCalledWith(144)
+    })
+
+    it('clamps the corrected offset at 0', () => {
+      renderVirtualList({scrollToIndex: {value: 0, align: 'start', offset: 56}})
+      act(() => jest.advanceTimersByTime(100))
+
+      const defaultScrollToFn = jest.fn()
+      capturedScrollToFn(10, defaultScrollToFn)
+      expect(defaultScrollToFn).toHaveBeenCalledWith(0)
+    })
+
+    it('does not apply the offset when align is not start', () => {
+      renderVirtualList({scrollToIndex: {value: 2, align: 'auto', offset: 56}})
+      act(() => jest.advanceTimersByTime(100))
+
+      const defaultScrollToFn = jest.fn()
+      capturedScrollToFn(200, defaultScrollToFn)
+      expect(defaultScrollToFn).toHaveBeenCalledWith(200)
+    })
+
+    it('treats a missing align the same as start', () => {
+      renderVirtualList({scrollToIndex: {value: 2, offset: 56}})
+      act(() => jest.advanceTimersByTime(100))
+
+      const defaultScrollToFn = jest.fn()
+      capturedScrollToFn(200, defaultScrollToFn)
+      expect(defaultScrollToFn).toHaveBeenCalledWith(144)
+    })
   })
 
   describe('onRender', () => {
@@ -163,6 +233,34 @@ describe('VirtualList', () => {
       renderVirtualList({renderedRange})
       expect(renderedRange).toHaveBeenCalledWith(
         expect.arrayContaining([expect.any(Number)]),
+      )
+    })
+  })
+
+  describe('findFirstVisibleRow', () => {
+    it('uses the default lookup when findFirstVisibleRow is not provided', () => {
+      const items = createItems(5)
+      const setFirstRowIdVisible = jest.fn()
+      renderVirtualList({items, setFirstRowIdVisible})
+      expect(setFirstRowIdVisible).toHaveBeenCalledWith('item-0')
+    })
+
+    it('uses a custom findFirstVisibleRow to pick a later row', () => {
+      const items = createItems(5)
+      const setFirstRowIdVisible = jest.fn()
+      const findFirstVisibleRow = (item, scrollOffset) =>
+        item.end > scrollOffset + 60
+      renderVirtualList({items, setFirstRowIdVisible, findFirstVisibleRow})
+      expect(setFirstRowIdVisible).toHaveBeenCalledWith('item-1')
+    })
+
+    it('calls findFirstVisibleRow with the virtual item and current scroll offset', () => {
+      const items = createItems(3)
+      const findFirstVisibleRow = jest.fn(() => true)
+      renderVirtualList({items, findFirstVisibleRow})
+      expect(findFirstVisibleRow).toHaveBeenCalledWith(
+        expect.objectContaining({index: 0, end: 50}),
+        0,
       )
     })
   })

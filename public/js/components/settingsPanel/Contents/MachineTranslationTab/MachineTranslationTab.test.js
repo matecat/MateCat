@@ -1,5 +1,5 @@
 import React, {useEffect, useRef} from 'react'
-import {act, render, screen, within} from '@testing-library/react'
+import {render, screen, within} from '@testing-library/react'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {MachineTranslationTab} from './MachineTranslationTab'
 import {mswServer} from '../../../../../mocks/mswServer'
@@ -12,6 +12,12 @@ import {
 } from '../../../../../mocks/mtEnginesMock'
 import userEvent from '@testing-library/user-event'
 import ModalsActions from '../../../../actions/ModalsActions'
+
+global.ResizeObserver = class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
 
 beforeEach(() => {
   global.config = {
@@ -57,35 +63,6 @@ const WrapperComponent = (contextProps) => {
     </SettingsPanelContext.Provider>
   )
 }
-
-xtest('Render Machine translation tab - not logged', async () => {
-  global.config.isLoggedIn = false
-  const values = {
-    mtEngines: mtEnginesMock,
-    setMtEngines: () => {},
-    openLoginModal: jest.fn(),
-    modifyingCurrentTemplate: () => {},
-    currentProjectTemplate: projectTemplatesMock.items[0],
-    projectTemplates: projectTemplatesMock.items,
-  }
-  render(
-    <SettingsPanelContext.Provider value={values}>
-      <MachineTranslationTab />
-    </SettingsPanelContext.Provider>,
-  )
-  const loginButton = screen.getByTestId('login-button')
-  expect(loginButton).toBeInTheDocument()
-  await userEvent.click(loginButton)
-  expect(values.openLoginModal.mock.calls).toHaveLength(1)
-
-  expect(screen.queryByTitle('Add MT engine')).not.toBeInTheDocument()
-
-  const mtName = screen.getByText('MyMemory')
-  expect(mtName).toBeInTheDocument()
-
-  const checkboxMtActive = screen.getByTestId('checkbox-mt-active-MyMemory')
-  expect(checkboxMtActive).toBeChecked()
-})
 
 test('Render Machine translation tab - logged', async () => {
   global.config.isLoggedIn = true
@@ -138,11 +115,36 @@ test('Add MT', async () => {
   const select = screen.getByPlaceholderText('Choose provider')
   expect(select).toBeInTheDocument()
   await userEvent.click(select)
-  const container = screen.getByTestId('add-mt-provider')
   engineListMock.forEach((en) => {
-    const mtName = within(container).getAllByText(en.name)[0]
+    const mtName = screen.getAllByText(en.name)[0]
     expect(mtName).toBeInTheDocument()
   })
+})
+
+test('Add MT provider dropdown renders through a portal', async () => {
+  global.config.isLoggedIn = true
+  const values = {
+    mtEngines: mtEnginesMock,
+    setMtEngines: () => {},
+    openLoginModal: jest.fn(),
+    modifyingCurrentTemplate: () => {},
+    currentProjectTemplate: projectTemplatesMock.items[0],
+    projectTemplates: projectTemplatesMock.items,
+  }
+  render(
+    <SettingsPanelContext.Provider value={values}>
+      <MachineTranslationTab />
+    </SettingsPanelContext.Provider>,
+  )
+  await userEvent.click(screen.getByTitle('Add MT engine'))
+  await userEvent.click(screen.getByPlaceholderText('Choose provider'))
+
+  const engineName = 'Google Translate'
+  const providerWrapper = screen.getByTestId('add-mt-provider')
+  expect(
+    within(providerWrapper).queryByText(engineName),
+  ).not.toBeInTheDocument()
+  expect(screen.getByText(engineName)).toBeInTheDocument()
 })
 
 test('In cattool', async () => {
@@ -207,6 +209,12 @@ test('Delete MT Confirm', async () => {
   const user = userEvent.setup()
   global.config.isLoggedIn = true
 
+  mswServer.use(
+    http.post(`${config.basepath}api/app/disable-engine`, () => {
+      return HttpResponse.json({})
+    }),
+  )
+
   const values = {
     mtEngines: mtEnginesMock,
     setMtEngines: () => {},
@@ -235,6 +243,7 @@ test('Modern MT and glossary', async () => {
   const user = userEvent.setup()
 
   global.config.isLoggedIn = true
+  global.config.ownerIsMe = true
   config.is_cattool = false
 
   const projectTemplates = [
@@ -335,6 +344,7 @@ test('DeepL and glossary', async () => {
   const user = userEvent.setup()
 
   global.config.isLoggedIn = true
+  global.config.ownerIsMe = true
   config.is_cattool = false
 
   const projectTemplates = [

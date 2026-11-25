@@ -6,6 +6,7 @@ use Controller\Services\RateLimiterService;
 use Controller\Traits\TeamInvitationRateLimitTrait;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
+use Model\Teams\TeamModel;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\Test;
 
@@ -22,14 +23,14 @@ class InvitationRateLimitHost
         $this->invitationRateLimiter = $limiter;
     }
 
-    public function isOverLimit(Response $response, ?UserStruct $user, string $route): bool
+    public function isOverLimit(Response $response, ?UserStruct $user, string $route, int $emailCount = 1): bool
     {
-        return $this->isOverInvitationRateLimit($response, $user, $route);
+        return $this->isOverInvitationRateLimit($response, $user, $route, $emailCount);
     }
 
-    public static function maxRequests(): int
+    public static function maxEmails(): int
     {
-        return self::MAX_INVITATION_REQUESTS;
+        return self::MAX_INVITATION_EMAILS;
     }
 }
 
@@ -80,12 +81,59 @@ class TeamInvitationRateLimitTraitTest extends AbstractTest
                 $this->isInstanceOf(Response::class),
                 'owner@example.org',
                 '/api/v2/teams/members',
-                InvitationRateLimitHost::maxRequests()
+                InvitationRateLimitHost::maxEmails(),
+                1
             )
             ->willReturn(null);
 
         $host = new InvitationRateLimitHost($limiter);
         $host->isOverLimit(new Response(), $this->userWithEmail('owner@example.org'), '/api/v2/teams/members');
+    }
+
+    /**
+     * The budget is spent in emails, so a request carrying fifty addresses has to cost fifty and
+     * not one. Counting calls made the real ceiling ten requests times fifty addresses.
+     */
+    #[Test]
+    public function chargesTheWindowOnceForEveryEmailTheRequestWillSend(): void
+    {
+        $limiter = $this->createMock(RateLimiterService::class);
+        $limiter->expects($this->once())
+            ->method('checkAndIncrement')
+            ->with(
+                $this->isInstanceOf(Response::class),
+                'owner@example.org',
+                '/api/v2/teams/members',
+                InvitationRateLimitHost::maxEmails(),
+                50
+            )
+            ->willReturn(null);
+
+        $host = new InvitationRateLimitHost($limiter);
+        $host->isOverLimit(new Response(), $this->userWithEmail('owner@example.org'), '/api/v2/teams/members', 50);
+    }
+
+    /**
+     * A request that invites nobody still costs one, so the number of calls stays bounded as it
+     * was before the budget became an email budget.
+     */
+    #[Test]
+    public function aRequestThatSendsNothingStillCostsOne(): void
+    {
+        $limiter = $this->createMock(RateLimiterService::class);
+        $limiter->expects($this->once())
+            ->method('checkAndIncrement')
+            ->with(
+                $this->isInstanceOf(Response::class),
+                'owner@example.org',
+                '/route',
+                InvitationRateLimitHost::maxEmails(),
+                0
+            )
+            ->willReturn(null);
+
+        $host = new InvitationRateLimitHost($limiter);
+        $host->isOverLimit(new Response(), $this->userWithEmail('owner@example.org'), '/route', 0);
     }
 
     /**
@@ -102,7 +150,8 @@ class TeamInvitationRateLimitTraitTest extends AbstractTest
                 $this->isInstanceOf(Response::class),
                 $this->logicalAnd($this->isString(), $this->logicalNot($this->equalTo(''))),
                 '/route',
-                InvitationRateLimitHost::maxRequests()
+                InvitationRateLimitHost::maxEmails(),
+                1
             )
             ->willReturn(null);
 
@@ -113,8 +162,10 @@ class TeamInvitationRateLimitTraitTest extends AbstractTest
     #[Test]
     public function theLimitIsSmallEnoughToBeUselessAsAMailingVolume(): void
     {
-        $this->assertLessThanOrEqual(20, InvitationRateLimitHost::maxRequests());
-        $this->assertGreaterThan(1, InvitationRateLimitHost::maxRequests());
+        // one hand-built team must always fit in a window, and a few of them must not add up to
+        // a mailing: the old ceiling was ten requests of fifty addresses, five hundred messages
+        $this->assertGreaterThanOrEqual(TeamModel::MAX_MEMBER_EMAILS, InvitationRateLimitHost::maxEmails());
+        $this->assertLessThanOrEqual(TeamModel::MAX_MEMBER_EMAILS * 2, InvitationRateLimitHost::maxEmails());
     }
 
 }

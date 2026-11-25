@@ -17,9 +17,19 @@ const VirtualList = forwardRef(
       itemStyle = () => ({}),
       onScroll = () => {},
       renderedRange = () => {},
+      findFirstVisibleRow,
     },
     ref,
   ) => {
+    const scrollOffsetOverrideRef = useRef(0)
+    const scrollToFn = useCallback(
+      (offset, defaultScrollToFn) =>
+        defaultScrollToFn(
+          Math.max(0, offset - scrollOffsetOverrideRef.current),
+        ),
+      [],
+    )
+
     const {
       virtualItems,
       totalSize,
@@ -29,6 +39,7 @@ const VirtualList = forwardRef(
       parentRef: ref,
       estimateSize: useCallback((index) => items[index].height, [items]),
       overscan,
+      scrollToFn,
     })
 
     const getFirstVisibleIndex = () => {
@@ -36,7 +47,11 @@ const VirtualList = forwardRef(
 
       const scrollOffset = parent?.scrollTop ?? 0
 
-      const firstVisible = virtualItems.find((item) => item.end > scrollOffset)
+      const firstVisible = virtualItems.find((item) =>
+        typeof findFirstVisibleRow === 'function'
+          ? findFirstVisibleRow(item, scrollOffset)
+          : item.end > scrollOffset,
+      )
 
       return firstVisible?.index ?? null
     }
@@ -51,13 +66,19 @@ const VirtualList = forwardRef(
       clearTimeout(scrollToIndexDebounceTmOut.current)
 
       if (scrollToIndex.value >= 0) {
-        scrollToIndexDebounceTmOut.current = setTimeout(
-          () =>
-            fnScrollToIndex(scrollToIndex.value, {align: scrollToIndex?.align}),
-          100,
-        )
+        scrollToIndexDebounceTmOut.current = setTimeout(() => {
+          const align = scrollToIndex?.align
+          scrollOffsetOverrideRef.current =
+            !align || align === 'start' ? (scrollToIndex?.offset ?? 0) : 0
+          fnScrollToIndex(scrollToIndex.value, {align})
+        }, 100)
       }
-    }, [scrollToIndex?.value, scrollToIndex?.align, fnScrollToIndex])
+    }, [
+      scrollToIndex?.value,
+      scrollToIndex?.align,
+      scrollToIndex?.offset,
+      fnScrollToIndex,
+    ])
 
     // rendered indexes
     useEffect(() => {
@@ -126,6 +147,7 @@ VirtualList.propTypes = {
   scrollToIndex: PropTypes.exact({
     value: PropTypes.number,
     align: PropTypes.string,
+    offset: PropTypes.number,
   }),
   onRender: PropTypes.func.isRequired,
   setFirstRowIdVisible: PropTypes.func.isRequired,
@@ -133,6 +155,7 @@ VirtualList.propTypes = {
   itemStyle: PropTypes.func,
   onScroll: PropTypes.func,
   renderedRange: PropTypes.func,
+  findFirstVisibleRow: PropTypes.func,
 }
 
 VirtualList.displayName = 'VirtualList'

@@ -1,13 +1,9 @@
 import React, {useCallback, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
-import {
-  Button,
-  BUTTON_MODE,
-  BUTTON_SIZE,
-  BUTTON_TYPE,
-} from '../../../common/Button/Button'
+import {Button, BUTTON_MODE, BUTTON_TYPE} from '../../../common/Button/Button'
 import ChevronDown from '../../../../../img/icons/ChevronDown'
-import IconClose from '../../../icons/IconClose'
+import IconClose from '../../../../../img/icons/IconClose'
+import {NumericStepper} from '../../../common/NumericStepper/NumericStepper'
 
 export const DataSampleDropdown = ({
   onChange,
@@ -84,7 +80,6 @@ export const DataSampleDropdown = ({
     >
       <Button
         type={BUTTON_TYPE.BASIC}
-        size={BUTTON_SIZE.MEDIUM}
         mode={BUTTON_MODE.OUTLINE}
         onClick={toggleDropdown}
         disabled={isDisabled}
@@ -93,56 +88,55 @@ export const DataSampleDropdown = ({
         {!isDisabled && samplingType ? (
           <>
             <div
+              className="trigger-button-icon-reset"
               onClick={(e) => {
                 e.stopPropagation()
                 resetFunction()
               }}
             >
-              <IconClose size={8} />
+              <IconClose size={12} />
             </div>
-            {samplingTypeMap.find((item) => item.value === samplingType)
-              ?.label + ` - ${samplingSize}%`}
+            <span>
+              {samplingTypeMap.find((item) => item.value === samplingType)
+                ?.label + ` - ${samplingSize}%`}
+            </span>
           </>
         ) : (
-          'Data Sample'
+          <span className="trigger-button-placeholder">Data sample</span>
         )}
         <ChevronDown />
       </Button>
-      <div className={`dropdown${isDropdownVisible ? ' open' : ''}`}>
-        <ul>
-          <li className="sample-size-item">
-            <div className="sample-size-container">
-              <span>
-                Sample size <b>(%)</b>
-              </span>
-              <input
-                type="number"
-                placeholder="n°"
-                value={samplingSizeValue}
-                onChange={(event) => {
-                  let value = parseInt(event.target.value, 10)
-                  if (value > 0 && value <= 100) {
-                    setSamplingSizeValue(value)
-                    onChangeSampleSize(value)
-                  }
-                }}
-              />
-            </div>
-            <div className="divider" />
-          </li>
-          {samplingTypeMap.map((item) => (
-            <li
-              className={item.value === samplingType ? 'active' : ''}
-              key={item.value}
-              onClick={() => {
-                onChange(item.value)
-              }}
-            >
-              <div className="type-item">{item.label}</div>
+      {isDropdownVisible && (
+        <div className="dropdown open">
+          <ul>
+            <li className="sample-size-item">
+              <div className="sample-size-container">
+                <span>Sample size (%)</span>
+                <NumericStepper
+                  value={samplingSizeValue}
+                  valuePlaceholder={`${samplingSizeValue}%`}
+                  onChange={(value) => setSamplingSizeValue(value)}
+                  onChangeCommitted={(value) => onChangeSampleSize(value)}
+                  minimumValue={1}
+                  maximumValue={100}
+                  stepValue={1}
+                />
+              </div>
             </li>
-          ))}
-        </ul>
-      </div>
+            {samplingTypeMap.map((item) => (
+              <li
+                className={item.value === samplingType ? 'active' : ''}
+                key={item.value}
+                onClick={() => {
+                  onChange(item.value)
+                }}
+              >
+                <div className="type-item">{item.label}</div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   )
 }

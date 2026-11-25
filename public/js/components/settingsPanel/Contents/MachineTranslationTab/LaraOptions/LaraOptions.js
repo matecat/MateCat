@@ -117,7 +117,6 @@ export const LaraOptions = ({isCattoolPage}) => {
         <Controller
           control={control}
           name="lara_style"
-          disabled={isCattoolPage}
           render={({field: {onChange, value, name, disabled}}) => (
             <Select
               name={name}
@@ -148,29 +147,21 @@ export const LaraOptions = ({isCattoolPage}) => {
           <div>
             <h3>Style guide</h3>
             <p>
-              Select a style guide to be applied to Lara's translations
+              Select a style guide to be applied to Lara&apos;s translations
               (activates Lara Prose for the project).
             </p>
           </div>
           <Controller
             control={control}
             name="lara_style_guideline_id"
-            disabled={isCattoolPage || styleGuidesOptions.length === 0}
+            disabled={styleGuidesOptions.length === 0}
             render={({field: {onChange, value, name, disabled}}) => (
               <Select
                 name={name}
                 placeholder="Select a style guide"
                 isPortalDropdown={true}
                 dropdownClassName="select-dropdown__wrapper-portal option-dropdown-with-descrition"
-                options={styleGuidesOptions.map((option) => ({
-                  ...option,
-                  name: (
-                    <div className="option-dropdown-with-descrition-select-content">
-                      {option.name}
-                      <p>{option.description}</p>
-                    </div>
-                  ),
-                }))}
+                options={styleGuidesOptions}
                 activeOption={styleGuidesOptions.find(({id}) => id === value)}
                 checkSpaceToReverse={true}
                 onSelect={(option) => onChange(option.id)}
@@ -181,7 +172,7 @@ export const LaraOptions = ({isCattoolPage}) => {
           />
         </div>
       )}
-      <h2>Glossaries</h2>
+      {/* LaraGlossary renders its own title, hidden on the editor page when empty */}
       <LaraGlossary
         id={currentProjectTemplate.mt.id}
         {...{setGlossaries, isCattoolPage}}

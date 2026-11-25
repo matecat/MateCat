@@ -313,33 +313,4 @@ class MetadataDaoTest extends AbstractTest
 
         self::assertIsBool($result);
     }
-
-    #[Test]
-    public function testDestroyGetCacheReturnsBoolWithoutFilePartsId(): void
-    {
-        $this->dao->insert(self::FIXTURE_PROJECT_ID, self::FIXTURE_FILE_ID, 'instructions', 'Some note.');
-
-        $result = $this->dao->destroyGetCache(
-            self::FIXTURE_PROJECT_ID,
-            self::FIXTURE_FILE_ID,
-            'instructions'
-        );
-
-        self::assertIsBool($result);
-    }
-
-    #[Test]
-    public function testDestroyGetCacheReturnsBoolWithFilePartsId(): void
-    {
-        $this->dao->insert(self::FIXTURE_PROJECT_ID, self::FIXTURE_FILE_ID, 'instructions', 'Parted note.', 3);
-
-        $result = $this->dao->destroyGetCache(
-            self::FIXTURE_PROJECT_ID,
-            self::FIXTURE_FILE_ID,
-            'instructions',
-            3
-        );
-
-        self::assertIsBool($result);
-    }
 }

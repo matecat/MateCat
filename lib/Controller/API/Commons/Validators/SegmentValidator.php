@@ -40,7 +40,7 @@ class SegmentValidator extends Base
         );
 
         if (!$segment) {
-            throw new NotFoundException("Segment Not Found.", 404);
+            throw new NotFoundException("Segment not found.", 404);
         }
     }
 

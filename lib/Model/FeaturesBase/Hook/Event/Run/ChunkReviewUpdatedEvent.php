@@ -10,8 +10,10 @@ use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
 
 /**
- * @see \Plugins\Features\ReviewExtended\ChunkReviewModel::_updatePassFailResult() — dispatch site
- * @see \Plugins\Features\ReviewExtended\ChunkReviewModel::recountAndUpdatePassFailResult() — dispatch site
+ * Dispatched after the commit of the transaction that updated the chunk review, once per row, with
+ * the committed row.
+ *
+ * @see \Plugins\Features\ReviewExtended\ChunkReviewModel::publishUpdated() — dispatch site
  */
 final class ChunkReviewUpdatedEvent extends RunEvent
 {

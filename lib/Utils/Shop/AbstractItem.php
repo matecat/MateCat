@@ -124,7 +124,7 @@ abstract class AbstractItem extends ArrayObject
     public function offsetSet(mixed $key, mixed $value): void
     {
         if (empty($key)) {
-            throw new LogicException("Can not assign a value to an EMPTY key.");
+            throw new LogicException("Can not assign a value to an empty key.");
         }
 
         if (!array_key_exists($key, $this->__storage)) {

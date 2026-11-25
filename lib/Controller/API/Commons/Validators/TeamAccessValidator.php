@@ -48,7 +48,7 @@ class TeamAccessValidator extends Base
         );
 
         if (empty($this->team)) {
-            throw new AuthorizationError("Not Authorized", 401);
+            throw new AuthorizationError("Not authorized", 401);
         }
 
         if (method_exists($this->controller, 'setTeam')) {

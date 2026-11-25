@@ -109,15 +109,24 @@ class JsonTest extends AbstractTest
     }
 
     #[Test]
+    public function setInnerContentTypeAcceptsPlainText(): void
+    {
+        $dto = new Json();
+        $dto->setInnerContentType('text/plain');
+        $this->assertSame('text/plain', $dto->jsonSerialize()['inner_content_type']);
+    }
+
+    #[Test]
     public function setInnerContentTypeThrowsOnInvalidMimeType(): void
     {
         $this->expectException(DomainException::class);
         $dto = new Json();
-        $dto->setInnerContentType('text/plain');
+        $dto->setInnerContentType('application/pdf');
     }
 
     /**
-     * text/html is the only mime type allowed for JSON; the wider YAML allow-list must not leak in.
+     * text/html and text/plain are the only mime types allowed for JSON; the wider YAML
+     * allow-list must not leak in.
      */
     #[Test]
     public function setInnerContentTypeRejectsYamlOnlyMimeTypes(): void
@@ -149,5 +158,30 @@ class JsonTest extends AbstractTest
         $this->expectException(DomainException::class);
         $dto = new Json();
         $dto->fromArray(['inner_content_type' => 'invalid/type']);
+    }
+
+    #[Test]
+    public function keysKeepTheirLeadingAndTrailingSpaces(): void
+    {
+        // a JSON object key is an arbitrary string, so " label " is a legitimate key
+        // distinct from "label" and must survive untouched
+        $dto = new Json();
+        $dto->setTranslateKeys([' label ']);
+        $dto->setContextKeys(['  note']);
+        $dto->setCharacterLimit(['limit  ']);
+
+        $result = $dto->jsonSerialize();
+        $this->assertSame([' label '], $result['translate_keys']);
+        $this->assertSame(['  note'], $result['context_keys']);
+        $this->assertSame(['limit  '], $result['character_limit']);
+    }
+
+    #[Test]
+    public function fromArrayKeepsKeyPadding(): void
+    {
+        $dto = new Json();
+        $dto->fromArray(['do_not_translate_keys' => [' label ', '   ']]);
+
+        $this->assertSame([' label ', '   '], $dto->jsonSerialize()['do_not_translate_keys']);
     }
 }

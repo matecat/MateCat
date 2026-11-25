@@ -3,8 +3,9 @@ import React, {useState} from 'react'
 import PropTypes from 'prop-types'
 
 import {Button, BUTTON_MODE, BUTTON_SIZE} from '../Button/Button'
-import Hide from '../../icons/Hide'
-import Show from '../../icons/Show'
+import Hide from '../../../../img/icons/Hide'
+import Show from '../../../../img/icons/Show'
+import styles from './Input.module.scss'
 
 export const INPUT_SIZE = {
   DEFAULT: 'default',
@@ -42,13 +43,9 @@ export const Input = React.forwardRef(
     const [isPasswordVisible, setPasswordVisibility] = useState(false)
     const togglePassword = () => setPasswordVisibility(!isPasswordVisible)
 
-    const containerClassName = `input-component ${
-      size === INPUT_SIZE.COMPRESSED ? 'isCompressed' : ''
-    } ${className}`
-    const wrapperClassName = `input-component-wrapper ${icon ? 'withIcon' : ''}`
-    const inputClassName = `${type === INPUT_TYPE.PASSWORD ? 'isPassword' : ''} ${
-      size === INPUT_SIZE.COMPRESSED ? 'isCompressed' : ''
-    } ${error ? 'hasError' : ''}`
+    const containerClassName = [styles['input-component'], size === INPUT_SIZE.COMPRESSED && styles.isCompressed, className].filter(Boolean).join(' ')
+    const wrapperClassName = [styles['input-component-wrapper'], icon && styles.withIcon].filter(Boolean).join(' ')
+    const inputClassName = [type === INPUT_TYPE.PASSWORD && styles.isPassword, size === INPUT_SIZE.COMPRESSED && styles.isCompressed, error && styles.hasError].filter(Boolean).join(' ')
 
     return (
       <div className={containerClassName}>
@@ -79,9 +76,9 @@ export const Input = React.forwardRef(
           {type === INPUT_TYPE.PASSWORD && (
             <Button
               mode={BUTTON_MODE.GHOST}
-              size={BUTTON_SIZE.ICON_SMALL}
+              size={BUTTON_SIZE.ICON_XSMALL}
               active={isPasswordVisible}
-              className="input-component-togglePwdButton"
+              className={styles['input-component-togglePwdButton']}
               onClick={togglePassword}
               tooltip="Show/hide password"
             >
@@ -90,7 +87,7 @@ export const Input = React.forwardRef(
           )}
         </div>
         {error && error.message && (
-          <span className="input-component-errorMessage">{error.message}</span>
+          <span className={styles['input-component-errorMessage']}>{error.message}</span>
         )}
       </div>
     )

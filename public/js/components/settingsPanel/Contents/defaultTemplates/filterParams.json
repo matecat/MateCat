@@ -8,10 +8,11 @@
     "translate_attributes": []
   },
   "yaml": {
+    "force_double_quoting": false,
     "translate_keys": [],
     "character_limit": [],
     "context_keys": [],
-    "inner_content_type": null
+    "inner_content_type": "text/plain"
   },
   "json": {
     "extract_arrays": true,
@@ -19,7 +20,7 @@
     "translate_keys": [],
     "context_keys": [],
     "character_limit": [],
-    "inner_content_type": null
+    "inner_content_type": "text/plain"
   },
   "ms_word": {
     "extract_doc_properties": false,
@@ -45,6 +46,10 @@
   },
   "dita": {
     "do_not_translate_elements": []
+  },
+  "markdown": {
+    "extract_frontmatter": false,
+    "translate_frontmatter_keys": []
   },
   "created_at": "2024-09-12 14:55:59",
   "modified_at": "2024-09-12 14:55:59"

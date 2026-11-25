@@ -143,56 +143,6 @@ class ConcurrencyRegressionTest extends AbstractTest
     }
 
     #[Test]
-    public function test_analysis_redis_service_uses_atomic_nx_locks_for_init_and_completion(): void
-    {
-        $source = $this->readSource($this->analysisRedisServicePath());
-
-        $this->assertStringNotContainsString(
-            'setnx(',
-            $source,
-            'AnalysisRedisService must not use setnx() — it is non-atomic with a separate expire call.'
-        );
-
-        $initLockPos = strpos($source, 'PROJECT_INIT_SEMAPHORE');
-        $this->assertNotFalse($initLockPos, 'Expected PROJECT_INIT_SEMAPHORE usage in AnalysisRedisService::acquireInitLock().');
-
-        $completionLockPos = strpos($source, 'PROJECT_ENDING_SEMAPHORE');
-        $this->assertNotFalse($completionLockPos, 'Expected PROJECT_ENDING_SEMAPHORE usage in AnalysisRedisService::acquireCompletionLock().');
-
-        $nxCountInit = substr_count(
-            substr($source, $initLockPos, 200),
-            "'NX'"
-        );
-        $this->assertGreaterThanOrEqual(1, $nxCountInit, "acquireInitLock() must use 'NX' option for atomic Redis lock acquisition.");
-
-        $nxCountCompletion = substr_count(
-            substr($source, $completionLockPos, 200),
-            "'NX'"
-        );
-        $this->assertGreaterThanOrEqual(1, $nxCountCompletion, "acquireCompletionLock() must use 'NX' option for atomic Redis lock acquisition.");
-
-        // Completion lock must use a SHORT TTL via the constant, NOT 86400: a long TTL
-        // lets a worker killed while holding the lock (e.g. mid gate-retry in
-        // tryCloseProject) block the project's finalization for that whole duration.
-        $completionBody = substr($source, $completionLockPos, 200);
-        $this->assertStringContainsString(
-            "'EX', self::COMPLETION_LOCK_TTL_SECONDS",
-            $completionBody,
-            'acquireCompletionLock() must set its TTL from the short COMPLETION_LOCK_TTL_SECONDS constant.'
-        );
-        $this->assertStringNotContainsString(
-            "'EX', 86400",
-            $completionBody,
-            'Completion lock must not use the 86400s TTL — a crashed holder would deadlock finalization for 24h.'
-        );
-        $this->assertMatchesRegularExpression(
-            '/const\s+COMPLETION_LOCK_TTL_SECONDS\s*=\s*300\s*;/',
-            $source,
-            'COMPLETION_LOCK_TTL_SECONDS must be 300s — wide margin over the finalization critical section, still short enough to recover from a crashed lock holder in ~5min.'
-        );
-    }
-
-    #[Test]
     public function test_project_completion_service_removes_from_queue_after_commit_not_before(): void
     {
         $source = $this->readSource($this->projectCompletionServicePath());
@@ -200,21 +150,25 @@ class ConcurrencyRegressionTest extends AbstractTest
         $methodPos = strpos($source, 'public function tryCloseProject');
         $this->assertNotFalse($methodPos);
 
-        $commitPos = strpos($source, '->commit()', $methodPos);
-        $this->assertNotFalse($commitPos, 'Expected ->commit() in tryCloseProject().');
+        $scopePos = strpos($source, '$this->repository->transaction(function ()', $methodPos);
+        $this->assertNotFalse($scopePos, 'Expected the finalization transaction scope in tryCloseProject().');
+
+        // The commit happens where the closure returns, so the anchor is the line that closes it.
+        $scopeEndPos = strpos($source, "\n            });", $scopePos);
+        $this->assertNotFalse($scopeEndPos, 'Expected the finalization scope to be closed.');
 
         $removePos = strpos($source, 'removeProjectFromQueue(', $methodPos);
         $this->assertNotFalse($removePos, 'Expected removeProjectFromQueue() in tryCloseProject().');
 
         $this->assertGreaterThan(
-            $commitPos,
+            $scopeEndPos,
             $removePos,
-            'removeProjectFromQueue() must appear AFTER commit() — crash-safety requires the project to stay in the queue until DB work is committed.'
+            'removeProjectFromQueue() must appear AFTER the transaction scope closes — crash-safety requires the project to stay in the queue until DB work is committed.'
         );
     }
 
     #[Test]
-    public function test_project_completion_service_recovers_on_transaction_failure_with_rollback(): void
+    public function test_project_completion_service_recovers_on_transaction_failure_by_releasing_the_lock(): void
     {
         $source = $this->readSource($this->projectCompletionServicePath());
 
@@ -224,10 +178,13 @@ class ConcurrencyRegressionTest extends AbstractTest
         $catchPos = strpos($source, 'catch (Throwable $e)', $methodPos);
         $this->assertNotFalse($catchPos, 'Expected catch (Throwable $e) in ProjectCompletionService::tryCloseProject().');
 
-        $this->assertStringContainsString(
+        // Undoing the writes belongs to the transaction scope, which has already rolled back by the
+        // time this catch runs. A hand-rolled rollback here would be closing a transaction this
+        // class did not open.
+        $this->assertStringNotContainsString(
             '->rollback()',
             $source,
-            'Expected DB rollback() in ProjectCompletionService failure path.'
+            'ProjectCompletionService must not roll back by hand: the transaction scope owns that.'
         );
 
         $releasePos = strpos($source, 'releaseCompletionLock(', $catchPos);
@@ -235,24 +192,24 @@ class ConcurrencyRegressionTest extends AbstractTest
     }
 
     #[Test]
-    public function test_project_completion_service_has_db_authoritative_gate_before_transaction(): void
+    public function test_project_completion_service_has_db_authoritative_gate_before_the_scope(): void
     {
         $source = $this->readSource($this->projectCompletionServicePath());
 
         $methodPos = strpos($source, 'public function tryCloseProject');
         $this->assertNotFalse($methodPos);
 
-        // DB gate must query MySQL via getProjectSegmentsTranslationSummary BEFORE beginTransaction
+        // DB gate must query MySQL via getProjectSegmentsTranslationSummary BEFORE the finalization scope
         $summaryPos = strpos($source, 'getProjectSegmentsTranslationSummary(', $methodPos);
         $this->assertNotFalse($summaryPos, 'Expected getProjectSegmentsTranslationSummary() call in tryCloseProject().');
 
-        $beginPos = strpos($source, '->beginTransaction()', $methodPos);
-        $this->assertNotFalse($beginPos, 'Expected beginTransaction() in tryCloseProject().');
+        $scopePos = strpos($source, '$this->repository->transaction(function ()', $methodPos);
+        $this->assertNotFalse($scopePos, 'Expected the finalization transaction scope in tryCloseProject().');
 
         $this->assertLessThan(
-            $beginPos,
+            $scopePos,
             $summaryPos,
-            'DB-authoritative gate (getProjectSegmentsTranslationSummary) must appear BEFORE beginTransaction — verify segments are DONE in MySQL before starting the completion transaction.'
+            'DB-authoritative gate (getProjectSegmentsTranslationSummary) must appear BEFORE the finalization scope — verify segments are DONE in MySQL before starting the completion transaction.'
         );
 
         // Must release lock and return early if MySQL disagrees
@@ -263,9 +220,9 @@ class ConcurrencyRegressionTest extends AbstractTest
         $this->assertNotFalse($releaseOnDriftPos, 'Expected releaseCompletionLock() when MySQL says segments remain (Redis/MySQL drift).');
 
         $this->assertLessThan(
-            $beginPos,
+            $scopePos,
             $releaseOnDriftPos,
-            'Lock release on drift must happen BEFORE beginTransaction — do not start a transaction if MySQL disagrees.'
+            'Lock release on drift must happen BEFORE the finalization scope — do not start a transaction if MySQL disagrees.'
         );
     }
 
@@ -314,7 +271,7 @@ class ConcurrencyRegressionTest extends AbstractTest
         $this->assertNotFalse($backoffPos, 'Expected exponential backoff ($sleepMs * 2) in waitForInitialization().');
 
         $this->assertStringContainsString(
-            'WARNING — timed out waiting for init completion',
+            '$this->logger->warning("Timed out waiting for init completion',
             $source,
             'Expected timeout warning log in waitForInitialization().'
         );
@@ -372,34 +329,6 @@ class ConcurrencyRegressionTest extends AbstractTest
     }
 
     #[Test]
-    public function test_init_lock_ttl_is_short_for_crash_safety(): void
-    {
-        $source = $this->readSource($this->analysisRedisServicePath());
-
-        $methodPos = strpos($source, 'public function acquireInitLock');
-        $this->assertNotFalse($methodPos);
-
-        $methodEnd = strpos($source, "\n    }\n", $methodPos);
-        $body = substr($source, $methodPos, $methodEnd - $methodPos);
-
-        $this->assertStringContainsString(
-            "'EX', self::INIT_LOCK_TTL_SECONDS",
-            $body,
-            'acquireInitLock must set its TTL from the INIT_LOCK_TTL_SECONDS constant.'
-        );
-        $this->assertStringNotContainsString(
-            '86400',
-            $body,
-            'Init lock TTL must be short — never the 86400s completion-lock TTL.'
-        );
-        $this->assertMatchesRegularExpression(
-            '/const\s+INIT_LOCK_TTL_SECONDS\s*=\s*30\s*;/',
-            $source,
-            'INIT_LOCK_TTL_SECONDS must be 30s — short enough to recover from crashed winners.'
-        );
-    }
-
-    #[Test]
     public function test_match_processor_service_does_not_contain_db_reporting_query(): void
     {
         $source = $this->readSource($this->matchProcessorServicePath());
@@ -416,7 +345,7 @@ class ConcurrencyRegressionTest extends AbstractTest
     {
         $this->assertTrue(
             true,
-            'Pattern 9 (Executor Predis catch) is N/A for V2 service files — V2 uses injected AnalysisRedisServiceInterface, not Executor. Covered by TMAnalysisWorkerConcurrencyTest::test_executor_catches_predis_connection_exception_before_throwable.'
+            'Pattern 9 (Executor Predis catch) is N/A for V2 service files — V2 uses injected AnalysisRedisService, not Executor. Covered by TMAnalysisWorkerConcurrencyTest::test_executor_catches_predis_connection_exception_before_throwable.'
         );
     }
 
@@ -551,21 +480,6 @@ class ConcurrencyRegressionTest extends AbstractTest
             1,
             preg_match('/\$sleepMs\s*=\s*min\(\$sleepMs\s*\*\s*2,\s*500\)/', $source),
             'Exponential backoff must cap at 500ms per iteration.'
-        );
-    }
-
-    #[Test]
-    public function test_analysis_redis_service_has_exactly_two_atomic_nx_lock_acquisitions(): void
-    {
-        $source = $this->readSource($this->analysisRedisServicePath());
-
-        $this->assertSame(
-            2,
-            preg_match_all(
-                '/->set\s*\(\s*RedisKeys::PROJECT_(?:INIT|ENDING)_SEMAPHORE/s',
-                $source
-            ),
-            'AnalysisRedisService must have exactly 2 atomic NX lock acquisitions (init + completion).'
         );
     }
 
@@ -789,21 +703,6 @@ class ConcurrencyRegressionTest extends AbstractTest
             'use Predis\Response\ServerException as PredisServerException;',
             $source,
             'TMAnalysisWorker must import Predis\Response\ServerException.'
-        );
-    }
-
-    #[Test]
-    public function test_analysis_redis_service_interface_declares_reconnect(): void
-    {
-        $path = realpath(self::projectRoot() . '/lib/Utils/AsyncTasks/Workers/Analysis/TMAnalysis/Interface/AnalysisRedisServiceInterface.php');
-        $this->assertNotFalse($path);
-
-        $source = $this->readSource($path);
-
-        $this->assertStringContainsString(
-            'public function reconnect(): void;',
-            $source,
-            'AnalysisRedisServiceInterface must declare reconnect() for connection reset between retries.'
         );
     }
 

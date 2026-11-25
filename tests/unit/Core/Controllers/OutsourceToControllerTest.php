@@ -252,7 +252,7 @@ class OutsourceToControllerTest extends AbstractTest
         ]);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('No project Password Provided');
+        $this->expectExceptionMessage('No project password provided');
 
         $this->callValidateTheRequest();
     }
@@ -269,7 +269,7 @@ class OutsourceToControllerTest extends AbstractTest
         ]);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('No job list Provided');
+        $this->expectExceptionMessage('No job list provided');
 
         $this->callValidateTheRequest();
     }

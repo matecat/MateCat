@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Matecat\Core\DAO\TestJobDAO;
 
+use Controller\API\Commons\Exceptions\ConflictError;
 use Matecat\TestHelpers\AbstractTest;
 use Model\DataAccess\IDatabase;
 use Model\DataAccess\ShapelessConcreteStruct;
@@ -38,7 +39,9 @@ class JobDaoTest extends AbstractTest
 
         $this->dbStub = $this->createStub(IDatabase::class);
         $this->dbStub->method('getConnection')->willReturn($this->pdoStub);
-        $this->dbStub->method('begin')->willReturn($this->pdoStub);
+        // Unconfigured, transaction() returns null without calling its argument, so the body of
+        // every method that runs through a scope would silently not execute.
+        $this->dbStub->method('transaction')->willReturnCallback(static fn(callable $callback) => $callback());
     }
 
     protected function tearDown(): void
@@ -99,9 +102,9 @@ class JobDaoTest extends AbstractTest
         $this->stmtStub->method('fetchAll')->willReturn([]);
 
         $dao = new JobDao($this->dbStub);
-        $dao->destroyCacheByIdAndPassword($job);
+        $dao->destroyCache($job);
 
-        $this->assertIsBool($dao->destroyCacheByIdAndPassword($job));
+        $this->assertNull($dao->destroyCache($job));
     }
 
     public function testDestroyCacheByProjectIdDoesNotThrow(): void
@@ -155,11 +158,43 @@ class JobDaoTest extends AbstractTest
 
         $this->stmtStub->method('execute')->willReturn(true);
         $this->stmtStub->method('fetchAll')->willReturn([]);
+        $this->stmtStub->method('rowCount')->willReturn(1);
 
         $dao = new JobDao($this->dbStub);
         $result = $dao->changePassword($job, 'newpass');
 
         $this->assertSame('newpass', $result->password);
+    }
+
+    public function testChangePasswordRefusesAChunkNoLongerCarryingTheOldPassword(): void
+    {
+        $job = $this->makeJobStruct();
+        $oldPassword = $job->password;
+
+        $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('rowCount')->willReturn(0);
+
+        $dao = new JobDao($this->dbStub);
+
+        try {
+            $dao->changePassword($job, 'newpass');
+            $this->fail('a rotation that renames nothing must be refused');
+        } catch (ConflictError) {
+        }
+
+        $this->assertSame($oldPassword, $job->password, 'the struct keeps the password it was read with');
+    }
+
+    public function testChangePasswordToTheSamePasswordWritesNothing(): void
+    {
+        $job = $this->makeJobStruct();
+
+        $pdo = $this->createMock(PDO::class);
+        $pdo->expects($this->never())->method('prepare');
+        $db = $this->createStub(IDatabase::class);
+        $db->method('getConnection')->willReturn($pdo);
+
+        $this->assertSame($job, (new JobDao($db))->changePassword($job, (string)$job->password));
     }
 
     public function testChangePasswordThrowsWhenEmpty(): void
@@ -266,7 +301,7 @@ class JobDaoTest extends AbstractTest
         $this->stmtStub->method('rowCount')->willReturn(1);
 
         $dao = new JobDao($this->dbStub);
-        $result = $dao->updateStdWcAndTotalWc(1, 500, 600);
+        $result = $dao->updateStdWcAndTotalWc(1, 'pw', 500, 600);
 
         $this->assertSame(1, $result);
     }
@@ -517,26 +552,14 @@ class JobDaoTest extends AbstractTest
         $this->assertSame($originalPassword, $result->password);
     }
 
-    public function testInstanceDeleteOnMergeReturnsTrue(): void
+    public function testInstanceDeleteChunkReturnsTheDeletedRows(): void
     {
         $this->stmtStub->method('execute')->willReturn(true);
+        $this->stmtStub->method('rowCount')->willReturn(1);
 
-        $job = $this->makeJobStruct();
         $dao = new JobDao($this->dbStub);
-        $result = $dao->deleteOnMerge($job);
 
-        $this->assertTrue($result);
-    }
-
-    public function testInstanceDeleteOnMergeReturnsFalse(): void
-    {
-        $this->stmtStub->method('execute')->willReturn(false);
-
-        $job = $this->makeJobStruct();
-        $dao = new JobDao($this->dbStub);
-        $result = $dao->deleteOnMerge($job);
-
-        $this->assertFalse($result);
+        $this->assertSame(1, $dao->deleteChunk($this->makeJobStruct()));
     }
 
     public function testInstanceGetFilesInfoInJobReturnsArray(): void
@@ -633,6 +656,32 @@ class JobDaoTest extends AbstractTest
         $result = $dao->getSegmentTranslationsCount([1, 2]);
 
         $this->assertNull($result);
+    }
+
+    public function testInstanceGetSegmentTranslationsCountBindsTheJobIds(): void
+    {
+        $struct = new ShapelessConcreteStruct();
+        $struct->total = '7';
+
+        $stmt = $this->createMock(PDOStatement::class);
+        $stmt->queryString = '';
+        $stmt->expects($this->once())->method('execute')->with($this->identicalTo([1, 2]));
+        $stmt->method('fetchAll')->willReturn([$struct]);
+
+        $pdo = $this->createMock(PDO::class);
+        $pdo->expects($this->once())->method('prepare')
+            ->with($this->stringContains('id_job IN ( ?,? )'))
+            ->willReturn($stmt);
+
+        $database = $this->createStub(IDatabase::class);
+        $database->method('getConnection')->willReturn($pdo);
+
+        $this->assertSame(7, (new JobDao($database))->getSegmentTranslationsCount([1, 2]));
+    }
+
+    public function testInstanceGetSegmentTranslationsCountReturnsNullForNoJobs(): void
+    {
+        $this->assertNull((new JobDao($this->dbStub))->getSegmentTranslationsCount([]));
     }
 
     public function testInstanceGetSegmentTranslationsCountReturnsNullWhenTotalEmpty(): void

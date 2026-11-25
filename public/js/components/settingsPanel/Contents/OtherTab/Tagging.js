@@ -1,6 +1,5 @@
 import React, {useCallback, useContext, useMemo, useRef} from 'react'
 import {Select} from '../../../common/Select'
-import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import SegmentActions from '../../../../actions/SegmentActions'
 import CatToolActions from '../../../../actions/CatToolActions'
@@ -16,6 +15,12 @@ export const taggingTypes = [
     name: 'Double square brackets',
     code: '[[text]]',
     default: true,
+  },
+  {
+    id: 'single_square',
+    name: 'Single square brackets',
+    code: '[text]',
+    default: false,
   },
   {
     id: 'dollar_curly',
@@ -44,21 +49,20 @@ export const taggingTypes = [
   {
     id: 'square_sprintf',
     name: 'Square bracket Sprintf',
-    code: '<a target="_blank" href="https://guides.matecat.com/settings#square-bracket-sprintf">See guides page</a>',
+    code: '<a target="_blank" href="https://guides.matecat.com/settings#square-bracket-sprintf">See details</a>',
     html: true,
     default: false,
   },
   {
     id: 'sprintf',
     name: 'Sprintf',
-    code: '<a target="_blank" href="https://guides.matecat.com/settings#sprintf">See guides page</a>',
+    code: '<a target="_blank" href="https://guides.matecat.com/settings#sprintf">See details</a>',
     html: true,
     default: false,
   },
 ]
 
 export const Tagging = () => {
-  const {SELECT_HEIGHT} = useContext(CreateProjectContext)
   const {currentProjectTemplate, modifyingCurrentTemplate} =
     useContext(SettingsPanelContext)
 
@@ -118,12 +122,6 @@ export const Tagging = () => {
           (valueB) => value === valueB,
         ),
       )
-    console.log(
-      'shouldUpdateRender',
-      shouldUpdateRender,
-      currentProjectTemplate?.subfilteringHandlers,
-      previousSubfilteringHandlers.current,
-    )
     if (config.is_cattool && shouldUpdateRender) {
       SegmentActions.removeAllSegments()
       CatToolActions.onRender({
@@ -150,13 +148,13 @@ export const Tagging = () => {
           name={'project-tagging'}
           isPortalDropdown={true}
           dropdownClassName="select-dropdown__wrapper-portal"
-          maxHeightDroplist={SELECT_HEIGHT}
           showSearchBar={true}
           options={taggingTypes}
           activeOptions={activeOptions}
           checkSpaceToReverse={true}
           onToggleOption={toggleOption}
           multipleSelect={'dropdown'}
+          isActiveOptionCheckmarkVisible={false}
           onCloseSelect={() => onClose()}
         >
           {({name, code, html}) => ({
@@ -170,7 +168,7 @@ export const Tagging = () => {
                   />
                 ) : (
                   <div className="codes-container">
-                    {code.split(',').map((code) => (
+                    {code?.split(',').map((code) => (
                       <div key={code} className="code-badge">
                         {code}
                       </div>

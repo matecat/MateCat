@@ -20,7 +20,6 @@ use Model\DataAccess\IDaoStruct;
  */
 class SegmentEventsStruct extends AbstractDaoObjectStruct implements IDaoStruct
 {
-
     /**
      * @var int
      */
@@ -37,5 +36,4 @@ class SegmentEventsStruct extends AbstractDaoObjectStruct implements IDaoStruct
      * @var int
      */
     protected int $source_page;
-
 }

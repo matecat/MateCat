@@ -1,7 +1,11 @@
 import {renderHook, act, waitFor} from '@testing-library/react'
 import projectTemplatesMock from '../../mocks/projectTemplateMock'
 import tmKeysMock from '../../mocks/tmKeysMock'
-import useProjectTemplates, {STANDARD_TEMPLATE} from './useProjectTemplates'
+import useProjectTemplates, {
+  STANDARD_TEMPLATE,
+  UseProjectTemplateInterface,
+  useProjectTemplateInterface,
+} from './useProjectTemplates'
 import {mswServer} from '../../mocks/mswServer'
 import {HttpResponse, http} from 'msw'
 
@@ -129,7 +133,10 @@ test('Check is modified specific property', async () => {
   act(() =>
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,
-      pretranslate100: true,
+      pretranslate: {
+        ...prevTemplate.pretranslate,
+        match_100: {...prevTemplate.pretranslate.match_100, enabled: true},
+      },
     })),
   )
 
@@ -137,9 +144,7 @@ test('Check is modified specific property', async () => {
     checkSpecificTemplatePropsAreModified(['get_public_matches']),
   ).toBeFalsy()
 
-  expect(
-    checkSpecificTemplatePropsAreModified(['pretranslate_100']),
-  ).toBeTruthy()
+  expect(checkSpecificTemplatePropsAreModified(['pretranslate'])).toBeTruthy()
 })
 
 test('Cattool page', async () => {
@@ -160,4 +165,38 @@ test('Cattool page', async () => {
 
 test('STANDARD_TEMPLATE defaults icu_enabled to true', () => {
   expect(STANDARD_TEMPLATE.icu_enabled).toBe(true)
+})
+
+// uber and airbnb assign over the member on this singleton from their upload
+// extension. It is imported by name above, so dropping the export breaks this
+// whole file rather than failing silently in the browser.
+describe('useProjectTemplateInterface', () => {
+  afterEach(() => {
+    delete useProjectTemplateInterface.getCharacterCounterMode
+    UseProjectTemplateInterface.prototype.getCharacterCounterMode =
+      function () {}
+  })
+
+  test('core sets no counter mode', () => {
+    expect(
+      useProjectTemplateInterface.getCharacterCounterMode(),
+    ).toBeUndefined()
+  })
+
+  test('a plugin assigning on the object is seen', () => {
+    useProjectTemplateInterface.getCharacterCounterMode = () => 'all_one'
+
+    expect(useProjectTemplateInterface.getCharacterCounterMode()).toBe(
+      'all_one',
+    )
+  })
+
+  test('a plugin patching the prototype is still seen', () => {
+    UseProjectTemplateInterface.prototype.getCharacterCounterMode = () =>
+      'exclude_cjk'
+
+    expect(useProjectTemplateInterface.getCharacterCounterMode()).toBe(
+      'exclude_cjk',
+    )
+  })
 })

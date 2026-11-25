@@ -22,19 +22,19 @@ const ChunkAnalyzeHeader = ({
           : ''
       }`}
     >
-      {showFiles && <div className={`chunk-analyze-info-background`} />}
       <div>
         <div className={`chunk-analyze-info-header ${showFiles ? 'open' : ''}`}>
           <div>
             <span className={'chunk-analyze-info-index'}>
-              {chunksSize > 1 ? '#' + index : ''}
+              {chunksSize > 1 ? index : ''}
             </span>
             <span>Raw</span>
           </div>
           <div>
             <div className={'chunk-analyze-info-files'} onClick={showFilesFn}>
               <ChevronDown size={10} />
-              File ({jobInfo.files.length})
+              {jobInfo.files.length === 1 ? 'File' : 'Files'} (
+              {jobInfo.files.length})
             </div>
             <span>Weighted</span>
           </div>
@@ -118,19 +118,19 @@ const ChunkAnalyzeHeader = ({
     </div>
   ) : workflowType === ANALYSIS_WORKFLOW_TYPES.MTQE ? (
     <div className={`chunk-analyze-info mtqe`}>
-      {showFiles && <div className={`chunk-analyze-info-background`} />}
       <div>
         <div className={`chunk-analyze-info-header ${showFiles ? 'open' : ''}`}>
           <div>
             <span className={'chunk-analyze-info-index'}>
-              {chunksSize > 1 ? '#' + index : ''}
+              {chunksSize > 1 ? index : ''}
             </span>
             <span>Raw</span>
           </div>
           <div>
             <div className={'chunk-analyze-info-files'} onClick={showFilesFn}>
               <ChevronDown size={10} />
-              File ({jobInfo.files.length})
+              {jobInfo.files.length === 1 ? 'File' : 'Files'} (
+              {jobInfo.files.length})
             </div>
             <span>Weighted</span>
           </div>

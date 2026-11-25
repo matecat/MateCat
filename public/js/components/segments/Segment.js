@@ -1,4 +1,4 @@
-import {forEach, isUndefined} from 'lodash'
+import {forEach, isUndefined, union} from 'lodash'
 import React, {
   useState,
   useRef,
@@ -6,7 +6,6 @@ import React, {
   useEffect,
   useCallback,
 } from 'react'
-import {union} from 'lodash/array'
 import $ from 'jquery'
 import SegmentCommentsContainer from './SegmentCommentsContainer'
 import SegmentsCommentsIcon from './SegmentsCommentsIcon'
@@ -34,6 +33,17 @@ import {ApplicationWrapperContext} from '../common/ApplicationWrapper/Applicatio
 import {Shortcuts} from '../../utils/shortcuts'
 import SearchUtils from '../header/cattol/search/searchUtils'
 import {SegmentQAIcon} from './SegmentQAIcon'
+import IconUnlock from '../../../img/icons/IconUnlock'
+import IconLock from '../../../img/icons/IconLock'
+import IconSplit from '../../../img/icons/IconSplit'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../common/Button/Button'
+import {TOOLTIP_POSITION} from '../common/Tooltip'
+import {Checkbox, CHECKBOX_SIZE, CHECKBOX_STATE} from '../common/Checkbox'
 
 const SegmentComponent = ({
   segment,
@@ -48,7 +58,6 @@ const SegmentComponent = ({
   files,
   speech2textEnabledFn,
   multiMatchLangs,
-  setBulkSelection,
   setLastSelectedSegment,
 }) => {
   const {userInfo} = useContext(ApplicationWrapperContext)
@@ -309,8 +318,8 @@ const SegmentComponent = ({
     const seg = segmentRef.current
     if (
       parseInt(data.sid) === parseInt(seg.sid) &&
-      (!SegmentUtils.isIceSegment(seg) ||
-        (SegmentUtils.isIceSegment(seg) && seg.unlocked))
+      (!SegmentUtils.isLockedSegment(seg) ||
+        (SegmentUtils.isLockedSegment(seg) && seg.unlocked))
     ) {
       setSelectedTextObj(data.selection)
     } else {
@@ -494,7 +503,10 @@ const SegmentComponent = ({
 
     if (readonly) classes.push('readonly')
 
-    if ((SegmentUtils.isIceSegment(segment) && !readonly) || secondPassLocked) {
+    if (
+      (SegmentUtils.isLockedSegment(segment) && !readonly) ||
+      secondPassLocked
+    ) {
       if (segment.unlocked) {
         classes.push('ice-unlocked')
       } else {
@@ -533,6 +545,7 @@ const SegmentComponent = ({
     if (sideOpen) classes.push('slide-right')
     if (segment.openSplit) classes.push('split-action')
     if (segment.selected) classes.push('segment-selected')
+    if (segment.openComments) classes.push('comments-open')
 
     return classes
   }
@@ -570,7 +583,6 @@ const SegmentComponent = ({
 
   const getTranslationIssues = () => {
     if (
-      ((sideOpen && (!segment.opened || !segment.openIssues)) || !sideOpen) &&
       !segment.readonly &&
       (!isSplitted() || (isSplitted() && isFirstOfSplit())) &&
       segment.sid
@@ -606,18 +618,16 @@ const SegmentComponent = ({
     SegmentActions.setSegmentLocked(segment, fid, !segment.unlocked)
   }
 
-  const handleChangeBulk = (event) => {
-    event.stopPropagation()
-    if (event.shiftKey) {
-      setBulkSelection(segment.sid, fid)
-    } else {
-      SegmentActions.toggleSegmentOnBulk(segment.sid, fid)
-      setLastSelectedSegment(segment.sid, fid)
-    }
+  const handleChangeBulk = () => {
+    SegmentActions.toggleSegmentOnBulk(segment.sid, fid)
+    setLastSelectedSegment(segment.sid, fid)
   }
 
   const onClickEvent = () => {
-    if (readonly || (!segment.unlocked && SegmentUtils.isIceSegment(segment))) {
+    if (
+      readonly ||
+      (!segment.unlocked && SegmentUtils.isLockedSegment(segment))
+    ) {
       SegmentActions.handleClickOnReadOnly(segment)
     } else if (segment.muted) {
       return
@@ -633,7 +643,7 @@ const SegmentComponent = ({
   // Render
   // ------------------------------------------------------------------
 
-  const showLockIcon = SegmentUtils.isIceSegment(segment) || secondPassLocked
+  const showLockIcon = SegmentUtils.isLockedSegment(segment) || secondPassLocked
   const segment_classes = checkSegmentClasses()
   const split_group = segment.split_group || []
   const autoPropagable = segment.repetitions_in_chunk !== 1
@@ -641,7 +651,7 @@ const SegmentComponent = ({
   const translationIssues = getTranslationIssues()
   const locked =
     !segment.unlocked &&
-    (SegmentUtils.isIceSegment(segment) || secondPassLocked)
+    (SegmentUtils.isLockedSegment(segment) || secondPassLocked)
   const segmentHasIssues = SegmentStore.segmentHasIssues(segment)
 
   const contextValue = {
@@ -681,48 +691,70 @@ const SegmentComponent = ({
           {showLockIcon ? (
             !readonly ? (
               segment.unlocked ? (
-                <div className="ice-locked-icon" onClick={lockUnlockSegment}>
-                  <button className="unlock-button unlocked icon-unlocked3" />
+                <div className="ice-locked-icon">
+                  <Button
+                    type={BUTTON_TYPE.ICON}
+                    mode={BUTTON_MODE.GHOST}
+                    size={BUTTON_SIZE.ICON_STANDARD}
+                    onClick={lockUnlockSegment}
+                  >
+                    <IconUnlock />
+                  </Button>
                 </div>
               ) : (
-                <div className="ice-locked-icon" onClick={lockUnlockSegment}>
-                  <button className="icon-lock unlock-button locked" />
+                <div className="ice-locked-icon">
+                  <Button
+                    type={BUTTON_TYPE.ICON}
+                    mode={BUTTON_MODE.GHOST}
+                    size={BUTTON_SIZE.ICON_STANDARD}
+                    onClick={lockUnlockSegment}
+                  >
+                    <IconLock />
+                  </Button>
                 </div>
               )
             ) : null
           ) : null}
 
           <div className="txt segment-add-inBulk">
-            <input
-              type="checkbox"
-              checked={segment.inBulk}
-              onClick={handleChangeBulk}
+            <Checkbox
+              value={
+                segment.inBulk
+                  ? CHECKBOX_STATE.CHECKED
+                  : CHECKBOX_STATE.UNCHECKED
+              }
+              size={CHECKBOX_SIZE.SMALL}
+              onChange={handleChangeBulk}
             />
           </div>
 
-          {!segment.ice_locked &&
-          config.splitSegmentEnabled &&
-          segment.opened ? (
+          {!segment.locked && config.splitSegmentEnabled && segment.opened ? (
             !segment.openSplit ? (
               <div className="actions">
-                <button
-                  className="split"
-                  title={`Click to split segment (${Shortcuts.cattol.events.splitSegment.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase()})`}
+                <Button
+                  type={BUTTON_TYPE.ICON}
+                  mode={BUTTON_MODE.GHOST}
+                  size={BUTTON_SIZE.ICON_STANDARD}
+                  tooltip={`Click to split segment (${Shortcuts.cattol.events.splitSegment.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase()})`}
+                  tooltipPosition={TOOLTIP_POSITION.RIGHT}
                   onClick={() => SegmentActions.openSplitSegment(segment.sid)}
                 >
-                  <i className="icon-split" />
-                </button>
+                  <IconSplit />
+                </Button>
                 <p className="split-shortcut">CTRL + S</p>
               </div>
             ) : (
               <div className="actions">
-                <button
-                  className="split cancel"
-                  title="Click to close split segment"
+                <Button
+                  type={BUTTON_TYPE.ICON}
+                  mode={BUTTON_MODE.GHOST}
+                  size={BUTTON_SIZE.ICON_STANDARD}
+                  tooltip="Click to close split segment"
+                  tooltipPosition={TOOLTIP_POSITION.RIGHT}
                   onClick={() => SegmentActions.closeSplitSegment()}
                 >
-                  <i className="icon-split" />
-                </button>
+                  <IconSplit />
+                </Button>
               </div>
             )
           ) : null}
@@ -748,10 +780,7 @@ const SegmentComponent = ({
         </div>
 
         <div className="segment-side-buttons">
-          {config.comments_enabled &&
-          (!segment.openComments || !segment.opened) ? (
-            <SegmentsCommentsIcon />
-          ) : null}
+          {config.comments_enabled ? <SegmentsCommentsIcon /> : null}
           <SegmentQAIcon sid={segment.sid} />
 
           {isReview && (

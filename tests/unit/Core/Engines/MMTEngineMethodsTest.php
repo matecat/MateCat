@@ -221,6 +221,54 @@ class MMTEngineMethodsTest extends AbstractTest
     }
 
     #[Test]
+    public function getWithAnEmptyJobGlossaryListOmitsTheGlossaryParameters(): void
+    {
+        // The job scope stores `[]` to shadow a project that has glossaries. It is an answer, not an
+        // absence, so the resolver must not fall back to the project row and the engine must send
+        // no `glossaries` at all rather than an empty string.
+        $pid = 910002;
+        $jobId = 910003;
+        $password = 'glossaryless';
+
+        (new ProjectsMetadataDao(obtainTestDatabase()))->set($pid, 'mmt_glossaries', '["g1","g2"]');
+        (new ProjectsMetadataDao(obtainTestDatabase()))->set($pid, 'mmt_ignore_glossary_case', '1');
+        (new JobsMetadataDao(obtainTestDatabase()))->set($jobId, $password, 'mmt_glossaries', '[]');
+
+        $client = $this->createMock(MMTServiceApi::class);
+        $client->expects(self::once())
+            ->method('translate')
+            ->with(
+                'en-US',
+                'fr-FR',
+                'Hello',
+                null,
+                ['x_mm-k1'],
+                $jobId,
+                MMT::GET_REQUEST_TIMEOUT,
+                'normal',
+                null,
+                null,
+                null,
+                null,
+                '2'
+            )
+            ->willReturn(['translation' => 'Bonjour']);
+
+        $engine = $this->createEngineWithClient($client);
+        $response = $engine->get([
+            'id_project' => $pid,
+            'job_id' => $jobId,
+            'job_password' => $password,
+            'source' => 'en-US',
+            'target' => 'fr-FR',
+            'segment' => 'Hello',
+            'keys' => ['k1'],
+        ]);
+
+        self::assertCount(1, $response->matches);
+    }
+
+    #[Test]
     public function setSuccessReturnsTrue(): void
     {
         $client = $this->createMock(MMTServiceApi::class);
@@ -541,24 +589,6 @@ class MMTEngineMethodsTest extends AbstractTest
     }
 
     #[Test]
-    public function getQualityEstimationHandlesSuccessAndNullCases(): void
-    {
-        $client = $this->createMock(MMTServiceApi::class);
-        $client->expects(self::exactly(3))
-            ->method('qualityEstimation')
-            ->willReturnOnConsecutiveCalls(
-                ['score' => 0.77],
-                null,
-                ['foo' => 'bar']
-            );
-
-        $engine = $this->createEngineWithClient($client);
-        self::assertSame(0.77, $engine->getQualityEstimation('en-US', 'it-IT', 's', 't'));
-        self::assertNull($engine->getQualityEstimation('en-US', 'it-IT', 's', 't'));
-        self::assertNull($engine->getQualityEstimation('en-US', 'it-IT', 's', 't'));
-    }
-
-    #[Test]
     public function getAvailableLanguagesDelegatesToClient(): void
     {
         $client = $this->createMock(MMTServiceApi::class);
@@ -598,7 +628,7 @@ class MMTEngineMethodsTest extends AbstractTest
 
         self::assertSame(['x_mm-k1', 'x_mm-k2'], $normal['keys']);
         self::assertSame('normal', $normal['priority']);
-        self::assertArrayHasKey('secret_key', $normal);
+        self::assertArrayNotHasKey('secret_key', $normal);
 
         $engine->setAnalysis(true);
         $analysis = $this->invokeConfigureContribution($engine, [
@@ -726,58 +756,37 @@ class MMTEngineMethodsTest extends AbstractTest
     }
 
     #[Test]
-    public function syncMemoriesRollsBackWhenTransactionFails(): void
+    public function syncMemoriesSwallowsAFailedContextWriteWithoutClosingTheTransactionItself(): void
     {
-        // Regression guard for the transaction-safety fix (§6.1): a failure between begin() and
-        // commit() must call database->rollback(). Previously the catch only logged, leaving the
-        // transaction open on the shared connection (a known innodb_lock_wait cascade trigger).
+        // Regression guard for the transaction-safety fix (§6.1): a failure inside the context write
+        // must not leave a transaction open on the shared connection (a known innodb_lock_wait
+        // cascade trigger), and must not be closed by hand here either. The scope owns the undo; what
+        // this method still owns is swallowing the failure rather than failing the whole sync.
         $pid = 920600;
         (new ProjectsMetadataDao(obtainTestDatabase()))->set($pid, 'mmt_activate_context_analyzer', '1');
 
-        // Context-vector map so getContext() is non-null and the begin()/commit() block is entered.
+        // Context-vector map so getContext() is non-null and the scope is entered.
         $client = $this->createStub(MMTServiceApi::class);
         $client->method('getContextVectorFromFile')->willReturn(['vectors' => ['it-IT' => '1:0.5']]);
         $engine = $this->createEngineWithClient($client);
 
-        // DB double: reads go through the real connection, but begin() fails inside the try block,
-        // so the catch → rollback() path (the fix) is exercised. The once() expectation asserts it.
+        // DB double: reads go through the real connection, but the scope throws, so the catch is
+        // exercised.
         $faultyDb = $this->createMock(IDatabase::class);
         $faultyDb->method('getConnection')->willReturn(obtainTestDatabase()->getConnection());
-        $faultyDb->method('begin')->willThrowException(new RuntimeException('begin failed'));
-        $faultyDb->expects(self::once())->method('rollback');
+        $faultyDb->expects($this->once())
+            ->method('transaction')
+            ->willThrowException(new RuntimeException('scope failed'));
 
         $ref = new ReflectionProperty($engine, 'database');
         $ref->setAccessible(true);
         $ref->setValue($engine, $faultyDb);
 
-        // syncMemories() swallows the failure after rolling back; the rollback() expectation verifies it.
+        // Returns rather than throwing: the failure is logged and the rest of the sync continues.
         $engine->syncMemories(
             ['id' => $pid, 'id_customer' => 'nobody@example.invalid'],
             [['source' => 'en-US', 'target' => '111222:it-IT', 'segment' => 'hello world']]
         );
-    }
-
-    #[Test]
-    public function getG2FallbackSecretKeyReturnsNullWhenFileMissingAndReadsIniWhenPresent(): void
-    {
-        $originalRoot = AppConfig::$ROOT ?? null;
-
-        $tmpRoot = sys_get_temp_dir() . '/mmt-fallback-' . uniqid('', true);
-        mkdir($tmpRoot . '/inc', 0777, true);
-
-        AppConfig::$ROOT = $tmpRoot;
-        self::assertNull(MMT::getG2FallbackSecretKey());
-
-        file_put_contents($tmpRoot . '/inc/mmt_fallback_key.ini', "secret_key = \"s3cr3t\"\n");
-        self::assertSame('s3cr3t', MMT::getG2FallbackSecretKey());
-
-        @unlink($tmpRoot . '/inc/mmt_fallback_key.ini');
-        @rmdir($tmpRoot . '/inc');
-        @rmdir($tmpRoot);
-
-        if ($originalRoot !== null) {
-            AppConfig::$ROOT = $originalRoot;
-        }
     }
 
     #[Test]
@@ -793,6 +802,14 @@ class MMTEngineMethodsTest extends AbstractTest
         self::assertInstanceOf(MMTServiceApi::class, $client);
 
         AppConfig::$BUILD_NUMBER = $originalBuild;
+    }
+
+    #[Test]
+    public function hasBuiltInQualityEstimationIsTrue(): void
+    {
+        $engine = new MMT($this->createEngineStruct(), obtainTestDatabase());
+
+        self::assertTrue($engine->hasBuiltInQualityEstimation());
     }
 }
 

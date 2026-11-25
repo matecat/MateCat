@@ -36,28 +36,18 @@ class MTQEWorkflowTemplateDaoTest extends AbstractTest
         $conn->exec("DELETE FROM mt_qe_templates WHERE uid = {$this->uid}");
     }
 
-    private function ensureParamsColumn(): void
-    {
-        $conn = obtainTestDatabase()->getConnection();
-        $columns = $conn->query("SHOW COLUMNS FROM mt_qe_templates LIKE 'params'")->fetchAll();
-        if (empty($columns)) {
-            $conn->exec("ALTER TABLE mt_qe_templates CHANGE `rules` `params` varchar(2048) NOT NULL");
-        }
-    }
-
     private function insertTemplate(string $name = 'Test MTQE Template'): int
     {
-        $this->ensureParamsColumn();
         $conn = obtainTestDatabase()->getConnection();
         $params = json_encode(['params' => ['mt_quality_value_in_editor' => 85]]);
         $now = date('Y-m-d H:i:s');
         $stmt = $conn->prepare(
-            "INSERT INTO mt_qe_templates (uid, name, params, created_at) VALUES (:uid, :name, :params, :now)"
+            "INSERT INTO mt_qe_templates (uid, name, rules, created_at) VALUES (:uid, :name, :rules, :now)"
         );
         $stmt->execute([
             'uid' => $this->uid,
             'name' => $name . ' ' . uniqid(),
-            'params' => $params,
+            'rules' => $params,
             'now' => $now,
         ]);
 

@@ -1,0 +1,133 @@
+@use 'tokens/colors';
+@use 'commons/variables';
+
+.input-component {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  label {
+    color: colors.$grey700;
+    cursor: pointer;
+    // body carries a legacy `text-align: center`, so the label has to opt out
+    text-align: left;
+  }
+
+  &.isCompressed {
+    gap: 8px;
+
+    label {
+      font-size: 14px;
+    }
+  }
+}
+
+.input-component-wrapper {
+  position: relative;
+
+  input {
+    box-sizing: border-box;
+    width: 100%;
+    height: 40px;
+    color: colors.$black;
+    border: 1px solid colors.$grey200;
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 400;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-radius: variables.$border-radius-default;
+    padding: 8px 12px;
+    outline-offset: 0;
+
+    &:autofill,
+    &:-webkit-autofill {
+      border: none !important;
+    }
+    &::placeholder {
+      color: colors.$grey400;
+      opacity: 1;
+    }
+    &:not(:disabled) {
+      &:hover {
+        border-color: colors.$grey400;
+      }
+      &:focus,
+      &:active {
+        border-color: colors.$grey400;
+        outline: 1px solid colors.$grey400;
+      }
+    }
+    &.isCompressed {
+      padding: 10px;
+      font-size: 14px;
+    }
+    &.isPassword {
+      padding-right: 46px;
+
+      &.isCompressed {
+        padding-right: 40px;
+      }
+    }
+    &.hasError,
+    &.hasError:hover,
+    &.hasError:focus {
+      border-color: colors.$red500 !important;
+    }
+    &:disabled {
+      background-color: colors.$grey75;
+      color: colors.$grey400;
+      cursor: not-allowed;
+
+      &::placeholder {
+        color: colors.$grey400;
+      }
+    }
+  }
+  &.withIcon input {
+    padding-left: 46px;
+  }
+  &.withIcon input.isCompressed {
+    padding-left: 40px;
+  }
+
+  input + svg {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    color: colors.$grey200;
+    cursor: pointer;
+    pointer-events: none;
+  }
+  input.isCompressed + svg {
+    top: 10px;
+    left: 10px;
+  }
+  input:disabled + svg {
+    color: colors.$grey200 !important;
+  }
+}
+
+.input-component-togglePwdButton {
+  position: absolute !important;
+  top: 10px;
+  right: 10px;
+
+  .isCompressed + & {
+    top: 8px;
+    right: 8px;
+  }
+
+  :autofill + &,
+  :-webkit-autofill + & {
+    color: fieldtext !important;
+  }
+}
+
+.input-component-errorMessage {
+  font-size: 12px;
+  color: colors.$red500;
+  text-align: left;
+  padding-left: 2px;
+}

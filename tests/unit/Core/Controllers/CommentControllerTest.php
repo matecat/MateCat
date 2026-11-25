@@ -20,8 +20,12 @@ use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
 use ReflectionException;
 use Stomp\Client;
+use Stomp\Exception\ConnectionException;
 use Stomp\StatefulStomp;
+use Stomp\Transport\Message;
 use Utils\ActiveMQ\AMQHandler;
+use Utils\Constants\SourcePages;
+use Utils\Registry\AppConfig;
 
 class TestableCommentController extends CommentController
 {
@@ -51,6 +55,11 @@ class FakeJobStructForTeamMentions extends JobStruct
 #[AllowMockObjectsWithoutExpectations]
 class CommentControllerTest extends AbstractTest
 {
+    private const string UNREACHABLE_BROKER_MESSAGE = 'Stubbed broker is unreachable.';
+
+    /** @var list<string> */
+    private array $sentDestinations = [];
+
     private ReflectionClass $reflector;
     private TestableCommentController $controller;
     private Request $requestStub;
@@ -106,6 +115,25 @@ class CommentControllerTest extends AbstractTest
             "INSERT IGNORE INTO jobs (id, password, id_project, job_first_segment, job_last_segment, tm_keys, source, target, create_date, disabled, owner)
              VALUES (1886428342, '92c5e0ce9316', 1886428330, 1, 4, '[]', 'en-GB', 'es-ES', '2024-01-01 00:00:00', 0, 'foo@example.org')"
         );
+
+        $this->setChunkFromCredential();
+    }
+
+    /**
+     * Stands in for ChunkPasswordValidator: the chunk is the job the presented password matched,
+     * stamped with the phase that password belongs to.
+     *
+     * @throws ReflectionException
+     */
+    private function setChunkFromCredential(int $sourcePage = SourcePages::SOURCE_PAGE_TRANSLATE): void
+    {
+        $chunk = (new JobDao(obtainTestDatabase()))->getByIdAndPassword(1886428338, 'a90acf203402', 60 * 60 * 24);
+        $this->assertInstanceOf(JobStruct::class, $chunk);
+
+        $chunk->setSourcePage($sourcePage);
+        $chunk->setIsReview($sourcePage !== SourcePages::SOURCE_PAGE_TRANSLATE);
+
+        $this->reflector->getProperty('chunk')->setValue($this->controller, $chunk);
     }
 
     public function tearDown(): void
@@ -156,9 +184,7 @@ class CommentControllerTest extends AbstractTest
             'username' => 'John Doe',
             'id_job' => '1886428338',
             'id_segment' => '1',
-            'source_page' => '1',
             'is_anonymous' => '0',
-            'revision_number' => '0',
             'first_seg' => '1',
             'last_seg' => '4',
             'id_comment' => null,
@@ -201,7 +227,6 @@ class CommentControllerTest extends AbstractTest
             'id_comment' => (string)$idComment,
             'id_job' => '1886428338',
             'id_segment' => '1',
-            'source_page' => '1',
             'message' => 'delete me',
             'password' => 'a90acf203402',
         ], $overrides));
@@ -222,12 +247,50 @@ class CommentControllerTest extends AbstractTest
         $this->controller->fakeQueueHandler = new AMQHandler(preconfiguredStomp: $stompStub);
     }
 
+    /**
+     * Installs a fake AMQHandler whose transport fails the way an unreachable broker does,
+     * and records the destination of every send attempt.
+     * Example: enqueueComment() throws ConnectionException("Stubbed broker is unreachable.").
+     */
+    private function installUnreachableQueueHandler(): void
+    {
+        $stompStub = $this->createStub(StatefulStomp::class);
+        $stompStub->method('send')->willReturnCallback(
+            function (string $destination, Message $message): never {
+                $this->sentDestinations[] = $destination;
+                throw new ConnectionException(self::UNREACHABLE_BROKER_MESSAGE);
+            }
+        );
+        // AMQHandler::__destruct() disconnects through the client
+        $stompStub->method('getClient')->willReturn($this->createStub(Client::class));
+
+        $this->controller->fakeQueueHandler = new AMQHandler(preconfiguredStomp: $stompStub);
+    }
+
+    /**
+     * Runs $call and checks that it fails on the stubbed broker, after exactly one send
+     * to the socket notifications queue. Any other error is not caught and fails the test.
+     */
+    private function assertFailsOnUnreachableBroker(callable $call): void
+    {
+        try {
+            $call();
+        } catch (ConnectionException $e) {
+            $this->assertSame(self::UNREACHABLE_BROKER_MESSAGE, $e->getMessage());
+            $this->assertSame([AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME], $this->sentDestinations);
+
+            return;
+        }
+
+        $this->fail('Expected the enqueue to fail on the unreachable broker.');
+    }
+
     #[Test]
     public function validateTheRequest_valid_payload_returns_expected_data(): void
     {
+        $this->setChunkFromCredential(SourcePages::SOURCE_PAGE_REVISION_2);
         $this->setupRequestParams($this->validRequest([
             'message' => '<b>ciao</b> & test',
-            'revision_number' => '2',
             'is_anonymous' => '1',
         ]));
 
@@ -238,27 +301,27 @@ class CommentControllerTest extends AbstractTest
         $this->assertSame('1886428338', $result['id_job']);
         $this->assertSame('1', $result['id_segment']);
         $this->assertSame('&lt;b&gt;ciao&lt;/b&gt; &amp; test', $result['message']);
-        $this->assertSame(2, $result['revision_number']);
         $this->assertTrue($result['is_anonymous']);
         $this->assertInstanceOf(JobStruct::class, $result['job']);
         $this->assertSame(1886428338, $result['job']->id);
+
+        // phase taken from the credential, not from the payload
+        $this->assertSame(SourcePages::SOURCE_PAGE_REVISION_2, $result['source_page']);
+        $this->assertSame(2, $result['revision_number']);
     }
 
     #[Test]
-    public function validateTheRequest_empty_job_throws_wrong_password_with_code_minus10(): void
+    public function validateTheRequest_ignores_a_client_declared_phase(): void
     {
         $this->setupRequestParams($this->validRequest([
-            'id_job' => '999999999',
-            'password' => 'not-valid',
+            'source_page' => '3',
+            'revision_number' => '2',
         ]));
 
-        try {
-            $this->invokePrivate('validateTheRequest');
-            $this->fail('Expected InvalidArgumentException was not thrown');
-        } catch (InvalidArgumentException $e) {
-            $this->assertSame('wrong password', $e->getMessage());
-            $this->assertSame(-10, $e->getCode());
-        }
+        $result = $this->invokePrivate('validateTheRequest');
+
+        $this->assertSame(SourcePages::SOURCE_PAGE_TRANSLATE, $result['source_page']);
+        $this->assertSame(0, $result['revision_number']);
     }
 
     #[Test]
@@ -530,13 +593,11 @@ class CommentControllerTest extends AbstractTest
     #[Test]
     public function delete_with_source_page_mismatch_throws_minus207(): void
     {
-        $_SERVER['HTTP_REFERER'] = 'http://localhost/translate/project/en-it/1886428338-a90acf203402';
-
+        // a translate credential (source_page 1) cannot delete a revision comment
         $segment = 990004;
         $this->createCommentRecord(1886428338, $segment, 1886472134, 2, 'source page mismatch first');
         $idComment = $this->createCommentRecord(1886428338, $segment, 1886472134, 2, 'source page mismatch last');
         $this->setupRequestParams($this->baseCommentRequestForDelete($idComment, [
-            'source_page' => '1',
             'id_segment' => (string)$segment,
         ]));
 
@@ -743,15 +804,21 @@ class CommentControllerTest extends AbstractTest
         $comment->timestamp = time();
         $comment->create_date = date('Y-m-d H:i:s');
 
-        $this->expectException(\Throwable::class);
-        $this->invokePrivate('enqueueComment', [$comment, 1886428330, '1886428338', 'client-test']);
+        $this->installUnreachableQueueHandler();
+
+        $this->assertFailsOnUnreachableBroker(
+            fn() => $this->invokePrivate('enqueueComment', [$comment, 1886428330, '1886428338', 'client-test'])
+        );
     }
 
     #[Test]
     public function enqueueDeleteCommentMessage_throws_when_broker_is_unavailable(): void
     {
-        $this->expectException(\Throwable::class);
-        $this->invokePrivate('enqueueDeleteCommentMessage', ['1886428338', 'client-test', 1886428330, 7, 1, '1']);
+        $this->installUnreachableQueueHandler();
+
+        $this->assertFailsOnUnreachableBroker(
+            fn() => $this->invokePrivate('enqueueDeleteCommentMessage', ['1886428338', 'client-test', 1886428330, 7, 1, '1'])
+        );
     }
 
     #[Test]
@@ -781,9 +848,9 @@ class CommentControllerTest extends AbstractTest
             'revision_number' => '0',
             'is_anonymous' => '0',
         ]));
+        $this->installUnreachableQueueHandler();
 
-        $this->expectException(\Throwable::class);
-        $this->controller->create();
+        $this->assertFailsOnUnreachableBroker(fn() => $this->controller->create());
     }
 
     #[Test]
@@ -796,9 +863,9 @@ class CommentControllerTest extends AbstractTest
             'revision_number' => '0',
             'is_anonymous' => '0',
         ]));
+        $this->installUnreachableQueueHandler();
 
-        $this->expectException(\Throwable::class);
-        $this->controller->resolve();
+        $this->assertFailsOnUnreachableBroker(fn() => $this->controller->resolve());
     }
 
     #[Test]
@@ -941,20 +1008,17 @@ class CommentControllerTest extends AbstractTest
     }
 
     #[Test]
-    public function delete_with_source_page_3_from_referer_allows_revision_source_page(): void
+    public function delete_with_a_second_pass_credential_allows_revision_source_page(): void
     {
-        // A /revise2/ referer maps to sourcePage 3, which appends SOURCE_PAGE_REVISION (2)
-        // to the allowed list. Comment's real source_page is 2 while the request's
-        // source_page param is 1, so only the referer-derived allowance lets it pass.
-        $_SERVER['HTTP_REFERER'] = 'http://localhost/translate/project/en-it/revise2/1886428338-a90acf203402';
-
+        // An R2 credential (source_page 3) also allows SOURCE_PAGE_REVISION (2), because
+        // comments written from the R2 phase were historically saved with source_page = 2.
+        $this->setChunkFromCredential(SourcePages::SOURCE_PAGE_REVISION_2);
         $this->installFakeQueueHandler();
 
         $segment = 990012;
         $idComment = $this->createCommentRecord(1886428338, $segment, 1886472134, 2, 'revision comment');
         $this->setupRequestParams($this->baseCommentRequestForDelete($idComment, [
             'id_segment' => (string)$segment,
-            'source_page' => '1',
         ]));
 
         $this->responseMock->expects($this->once())->method('json')->with(
@@ -964,8 +1028,26 @@ class CommentControllerTest extends AbstractTest
         )->willReturnSelf();
 
         $this->controller->delete();
+    }
 
-        unset($_SERVER['HTTP_REFERER']);
+    #[Test]
+    public function delete_with_a_first_pass_credential_cannot_delete_a_second_pass_comment(): void
+    {
+        // The R2 allowance is one-way: an R1 credential must not reach an R2 comment.
+        $this->setChunkFromCredential(SourcePages::SOURCE_PAGE_REVISION);
+
+        $segment = 990014;
+        $idComment = $this->createCommentRecord(1886428338, $segment, 1886472134, 3, 'second pass comment');
+        $this->setupRequestParams($this->baseCommentRequestForDelete($idComment, [
+            'id_segment' => (string)$segment,
+        ]));
+
+        try {
+            $this->controller->delete();
+            $this->fail('Expected InvalidArgumentException was not thrown');
+        } catch (InvalidArgumentException $e) {
+            $this->assertSame(-207, $e->getCode());
+        }
     }
 
     #[Test]

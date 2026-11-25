@@ -9,8 +9,8 @@
 namespace Utils\Email;
 
 
-use Exception;
 use Model\Users\UserStruct;
+use Throwable;
 
 class WelcomeEmail extends AbstractEmail
 {
@@ -20,7 +20,7 @@ class WelcomeEmail extends AbstractEmail
      */
     protected UserStruct $user;
 
-    protected ?string $title = 'Welcome to Matecat! Get Started with Your First Project Today';
+    protected ?string $title = 'Welcome to Matecat! Get started with your first project today';
 
     public function __construct(UserStruct $user)
     {
@@ -43,28 +43,20 @@ class WelcomeEmail extends AbstractEmail
     /**
      * @return array<string, mixed>
      */
-    protected function _getLayoutVariables($messageBody = null): array
+    protected function _getLayoutVariables(): array
     {
         $vars = parent::_getLayoutVariables();
-        $vars['title'] = $this->title;
         $vars['closingLine'] = 'Happy translating!';
 
         return $vars;
     }
 
     /**
-     * @throws Exception
+     * @throws Throwable
      */
     public function send(): void
     {
-        $recipient = [$this->user->email, $this->user->fullName()];
-
-        $this->doSend(
-            $recipient,
-            $this->title,
-            $this->_buildHTMLMessage(),
-            $this->_buildTxtMessage($this->_buildMessageContent())
-        );
+        $this->sendTo($this->user->email, $this->user->fullName());
     }
 
     /**

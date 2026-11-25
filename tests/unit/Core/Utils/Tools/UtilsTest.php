@@ -5,40 +5,21 @@ namespace Matecat\Core\Utils\Tools;
 use Exception;
 use InvalidArgumentException;
 use Matecat\TestHelpers\AbstractTest;
+use Matecat\TestHelpers\CapturesNamedLogs;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use Stomp\Transport\Message;
+use Utils\ActiveMQ\AMQHandler;
+use Utils\ActiveMQ\WorkerClient;
+use Utils\AsyncTasks\Workers\ErrMailWorker;
+use Utils\Registry\AppConfig;
+use Utils\TaskRunner\Commons\Context;
 use Utils\Tools\Utils;
 
 class UtilsTest extends AbstractTest
 {
-    // =========================================================================
-    // Tests for getSourcePage() and getSourcePageFromReferer()
-    // =========================================================================
-
-    #[Test]
-    public function testGetSourcePageReturnsTranslateWhenNoRequestUri(): void
-    {
-        unset($_SERVER['REQUEST_URI']);
-        $result = Utils::getSourcePage();
-        $this->assertEquals(1, $result); // SOURCE_PAGE_TRANSLATE = 1
-    }
-
-    #[Test]
-    public function testGetSourcePageReturnsTranslateForTranslatePath(): void
-    {
-        $_SERVER['REQUEST_URI'] = '/translate/project/1-2/en-US-it-IT';
-        $result = Utils::getSourcePage();
-        $this->assertEquals(1, $result);
-    }
-
-    #[Test]
-    public function testGetSourcePageFromRefererReturnsTranslateWhenNoReferer(): void
-    {
-        unset($_SERVER['HTTP_REFERER']);
-        $result = Utils::getSourcePageFromReferer();
-        $this->assertEquals(1, $result);
-    }
+    use CapturesNamedLogs;
 
     // =========================================================================
     // Tests for getBrowser()
@@ -951,6 +932,12 @@ class UtilsTest extends AbstractTest
         $this->assertFalse(Utils::isTokenValid('a1b2c3d4-e5f6-7890-abcd'));
     }
 
+    #[Test]
+    public function testIsTokenValidReturnsFalseForTrailingNewline(): void
+    {
+        $this->assertFalse(Utils::isTokenValid("a1b2c3d4-e5f6-7890-abcd-ef1234567890\n"));
+    }
+
     // =========================================================================
     // Tests for fixFileName()
     // =========================================================================
@@ -1502,7 +1489,7 @@ class UtilsTest extends AbstractTest
     #[Test]
     public function testUploadDirFromSessionCookieReturnsCorrectPath(): void
     {
-        $guid = 'test-guid-123';
+        $guid = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890';
         $result = Utils::uploadDirFromSessionCookie($guid);
         $this->assertStringContainsString($guid, $result);
     }
@@ -1510,11 +1497,29 @@ class UtilsTest extends AbstractTest
     #[Test]
     public function testUploadDirFromSessionCookieIncludesFileName(): void
     {
-        $guid = 'test-guid-123';
+        $guid = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890';
         $fileName = 'test.txt';
         $result = Utils::uploadDirFromSessionCookie($guid, $fileName);
         $this->assertStringContainsString($fileName, $result);
         $this->assertStringContainsString($guid, $result);
+    }
+
+    #[Test]
+    #[DataProvider('invalidUploadGuidProvider')]
+    public function testUploadDirFromSessionCookieThrowsForAnInvalidGuid(string $guid): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        Utils::uploadDirFromSessionCookie($guid);
+    }
+
+    public static function invalidUploadGuidProvider(): array
+    {
+        return [
+            'traversal'        => ['../../inc'],
+            'empty'            => [''],
+            'trailing newline' => ["a1b2c3d4-e5f6-7890-abcd-ef1234567890\n"],
+        ];
     }
 
     // =========================================================================
@@ -1746,32 +1751,6 @@ class UtilsTest extends AbstractTest
         $result = Utils::getBrowser($noVersionAgent);
 
         $this->assertEquals('?', $result['version']);
-    }
-
-    #[Test]
-    public function testGetSourcePageForRevisePath(): void
-    {
-        $_SERVER['REQUEST_URI'] = '/revise/project/1-2/en-US-it-IT';
-        $result = Utils::getSourcePage();
-        // SOURCE_PAGE_REVISION = 2
-        $this->assertEquals(2, $result);
-    }
-
-    #[Test]
-    public function testGetSourcePageForRevise2Path(): void
-    {
-        $_SERVER['REQUEST_URI'] = '/revise2/project/1-2/en-US-it-IT';
-        $result = Utils::getSourcePage();
-        // revise2 should return SOURCE_PAGE_REVISION + 1 = 3
-        $this->assertEquals(3, $result);
-    }
-
-    #[Test]
-    public function testGetSourcePageFromRefererForRevisePath(): void
-    {
-        $_SERVER['HTTP_REFERER'] = 'https://example.com/revise/project/1-2/en-US-it-IT';
-        $result = Utils::getSourcePageFromReferer();
-        $this->assertEquals(2, $result);
     }
 
     #[Test]
@@ -2369,6 +2348,185 @@ class UtilsTest extends AbstractTest
         }
         // 500 * 62 draws: every base62 symbol should appear (probability of a gap ≈ 0).
         self::assertCount(62, $seen);
+    }
+
+    // =========================================================================
+    // Tests for errMailBody()
+    // =========================================================================
+
+    /**
+     * The error report is the one email body built by hand, so the escaping it does is its own and
+     * has to be asserted here rather than through the template tests.
+     */
+    #[Test]
+    public function errMailBodyDeliversAPayloadAsText(): void
+    {
+        $body = Utils::errMailBody('<img src=x onerror=alert(1)> & "quoted" \'apostrophe\'');
+
+        self::assertStringNotContainsString('<img', $body);
+        self::assertStringContainsString('&lt;img src=x onerror=alert(1)&gt;', $body);
+        self::assertStringContainsString('&amp;', $body);
+        self::assertStringContainsString('&quot;quoted&quot;', $body);
+        self::assertStringContainsString('&apos;apostrophe&apos;', $body);
+    }
+
+    /**
+     * Only the wrapper is markup. A body that escaped everything, brackets included, would arrive as
+     * one unreadable line, and a body that escaped nothing is what this method exists to prevent.
+     */
+    #[Test]
+    public function errMailBodyKeepsItsOwnMarkupAndNoOther(): void
+    {
+        $body = Utils::errMailBody('plain text');
+
+        self::assertStringStartsWith('<pre>', $body);
+        self::assertStringEndsWith('</pre>', $body);
+        self::assertStringContainsString('<br />', $body);
+        self::assertSame(1, substr_count($body, '<br />'), 'the break separates trace from content');
+        self::assertSame(3, preg_match_all('~<[a-z/]~i', $body), 'no tag beyond <pre>, <br /> and </pre>');
+    }
+
+    /**
+     * A multi-line dump is what the callers actually pass — `print_r($_REQUEST, true)` — and the
+     * `<pre>` is what makes it readable, so the newlines have to survive the escaping while the
+     * markup inside them does not.
+     */
+    #[Test]
+    public function errMailBodyEscapesAMultiLineDumpWithoutFlatteningIt(): void
+    {
+        $body = Utils::errMailBody(print_r(['name' => '<b>bold</b>', 'url' => 'a&b'], true));
+
+        self::assertStringNotContainsString('<b>', $body);
+        self::assertStringContainsString('&lt;b&gt;bold&lt;/b&gt;', $body);
+        self::assertStringContainsString('a&amp;b', $body);
+        self::assertStringContainsString("\n", $body, 'the <pre> renders the newlines');
+    }
+
+    // =========================================================================
+    // Tests for sendErrMailReport()
+    // =========================================================================
+
+    /**
+     * The report is queued for the mail worker, never sent from here, so a mocked AMQ handler
+     * is enough to reach the log line and no mail leaves the machine.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function sendErrMailReportQueuesTheMailAndLogsIt(): void
+    {
+        $originalFlag = AppConfig::$SEND_ERR_MAIL_REPORT;
+        $originalQueues = WorkerClient::$_QUEUES;
+        $originalHandler = WorkerClient::$_HANDLER;
+
+        $log = $this->captureLog('mail');
+
+        $amq = $this->getMockBuilder(AMQHandler::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['publishToQueues', 'close'])
+            ->getMock();
+        // The queued element names the mail worker and carries the subject, with the host name added.
+        $amq->expects(self::once())->method('publishToQueues')->with(
+            '/queue/test_mail',
+            self::callback(function (Message $message): bool {
+                $element = json_decode($message->getBody(), true);
+                self::assertSame(ErrMailWorker::class, $element['classLoad']);
+                self::assertSame('Test alert ' . php_uname('n'), $element['params']['subject']);
+
+                return true;
+            })
+        )->willReturn(true);
+
+        WorkerClient::$_HANDLER = $amq;
+        WorkerClient::$_QUEUES = ['MAIL' => Context::buildFromArray(['queue_name' => '/queue/test_mail', 'max_executors' => 1])];
+        AppConfig::$SEND_ERR_MAIL_REPORT = true;
+
+        try {
+            Utils::sendErrMailReport('something broke', 'Test alert');
+        } finally {
+            AppConfig::$SEND_ERR_MAIL_REPORT = $originalFlag;
+            WorkerClient::$_QUEUES = $originalQueues;
+            WorkerClient::$_HANDLER = $originalHandler;
+        }
+
+        self::assertTrue($log->hasInfoThatContains('Message has been sent'));
+    }
+
+    // =========================================================================
+    // Tests for deleteDir() when a file cannot be deleted
+    // =========================================================================
+
+    /**
+     * A file permission does not stop root (CI runs as root), so the failing delete comes from a
+     * small stream wrapper instead: it shows one directory holding one file, and refuses unlink().
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function deleteDirLogsAFileItFailsToDelete(): void
+    {
+        $wrapper = new class {
+            /** @var resource|null set by PHP for every stream wrapper */
+            public $context;
+
+            /** @var list<string> entries left to read from the fake directory */
+            private array $entries = [];
+
+            public function dir_opendir(string $path, int $options): bool
+            {
+                return $this->dir_rewinddir();
+            }
+
+            public function dir_readdir(): string|false
+            {
+                return array_shift($this->entries) ?? false;
+            }
+
+            public function dir_rewinddir(): bool
+            {
+                $this->entries = ['.', '..', 'locked.txt'];
+
+                return true;
+            }
+
+            public function dir_closedir(): bool
+            {
+                return true;
+            }
+
+            /**
+             * @return array<string, int>|false
+             */
+            public function url_stat(string $path, int $flags): array|false
+            {
+                return match ($path) {
+                    'faildelete://dir' => ['mode' => 0040755],
+                    'faildelete://dir/locked.txt' => ['mode' => 0100644],
+                    default => false,
+                };
+            }
+
+            public function unlink(string $path): bool
+            {
+                return false;
+            }
+
+            public function rmdir(string $path, int $options): bool
+            {
+                return true;
+            }
+        };
+
+        $log = $this->captureLog('files');
+        stream_wrapper_register('faildelete', $wrapper::class);
+
+        try {
+            Utils::deleteDir('faildelete://dir');
+        } finally {
+            stream_wrapper_unregister('faildelete');
+        }
+
+        self::assertTrue($log->hasWarningThatContains('fail deleting faildelete://dir/locked.txt'));
     }
 
 }

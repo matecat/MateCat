@@ -136,7 +136,7 @@ class ProjectValidator extends Base
         }
 
         if ($this->project === null) {
-            throw new RuntimeException('project must be set before calling inProjectScope()');
+            throw new RuntimeException('Project must be set before calling inProjectScope()');
         }
 
         return $this->user->email == $this->project->id_customer;

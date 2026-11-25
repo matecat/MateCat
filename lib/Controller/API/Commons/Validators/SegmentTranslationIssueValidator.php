@@ -63,9 +63,10 @@ class SegmentTranslationIssueValidator extends Base
             $this->__ensureIssueIsInScope();
         }
 
-        if ($this->request->httpMethod('post') && $this->request->param('revision_number')) {
-            $this->__ensureSegmentRevisionIsCompatibleWithIssueRevisionNumber();
-        } elseif ($this->request->httpMethod('delete')) {
+        // The segment-state check is not run here: only the endpoints that write an issue need it,
+        // and they invoke ensureSegmentRevisionMatchesCredentialPhase() themselves. Inferring it
+        // from the HTTP verb would also apply it to comment creation, which does not write a phase.
+        if ($this->request->httpMethod('delete')) {
             $this->__ensureRevisionPasswordAllowsDeleteForIssue();
         }
     }
@@ -76,7 +77,7 @@ class SegmentTranslationIssueValidator extends Base
     protected function __ensureRevisionPasswordAllowsDeleteForIssue(): void
     {
         if ($this->issue === null) {
-            throw new ValidationError('issue not found');
+            throw new ValidationError('Issue not found');
         }
 
         if ($this->issue->source_page > $this->chunkReview->source_page) {
@@ -85,30 +86,36 @@ class SegmentTranslationIssueValidator extends Base
     }
 
     /**
+     * A segment may only receive an issue for the phase it currently sits in, and that phase is the
+     * one the presented password resolved to.
      *
      * @throws Exception
      * @throws ValidationError
      */
-    protected function __ensureSegmentRevisionIsCompatibleWithIssueRevisionNumber(): void
+    public function ensureSegmentRevisionMatchesCredentialPhase(): void
     {
         $latestSegmentEvent = (new TranslationEventDao($this->controller->getDatabase()))->getLatestEventForSegment($this->chunkReview->id_job, $this->translation->id_segment);
 
         if (!$latestSegmentEvent) {
-            if ($this->translation->isICE() || $this->translation->isPreTranslated()) {
-                throw new ValidationError('Cannot set issues on unmodified ICE.', -2000);
+            if ($this->translation->isLocked() || $this->translation->isPreTranslated()) {
+                throw new ValidationError('Cannot set issues on unmodified locked or pre-translated segment.', -2000);
             }
 
             // Can latest event be missing here? Actually yes, for example in case we are setting an issue on
-            // a locked ice match, which never received a submit from the UI. How do we handle that case?
+            // a segment that never received a submit from the UI. How do we handle that case?
             // No reviewed words yet an issue. That's not possible, we need to ensure the reviewed words
             // are set, and reviewed words are set during setTranslation triggered callbacks.
             throw new Exception('Unable to find the current state of this segment. Please report this issue to support.');
         }
 
-        if ($latestSegmentEvent->source_page != ReviewUtils::revisionNumberToSourcePage($this->request->param('revision_number'))) {
+        // The phase to compare against is the one the presented password resolved to, not one the
+        // client declared: a caller holding one phase's review password must not be able to act on
+        // another phase's segments (GHSA-7q94-2fmr-3p42).
+        if ($latestSegmentEvent->source_page != $this->chunkReview->source_page) {
             throw new ValidationError(
                 "Trying access segment issue for revision number " .
-                $this->request->param('revision_number') . " but segment is not in same revision state."
+                ReviewUtils::sourcePageToRevisionNumber($this->chunkReview->source_page) .
+                " but segment is not in same revision state."
             );
         }
     }
@@ -126,11 +133,11 @@ class SegmentTranslationIssueValidator extends Base
         $this->issue = (new EntryDao($this->controller->getDatabase()))->findById($this->request->param('id_issue'));
 
         if (!$this->issue) {
-            throw new ValidationError('issue not found');
+            throw new ValidationError('Issue not found');
         }
 
         if ($this->issue->id_segment != $this->translation->id_segment) {
-            throw new ValidationError('issue not found');
+            throw new ValidationError('Issue not found');
         }
 
         $this->issue->ensureValid(new EntryValidator($this->issue, database: $this->controller->getDatabase()));

@@ -139,7 +139,7 @@ class InstructionsAndAssignmentTest extends AbstractTest
         $this->pm->setProjectStructureValue('uid', null);
 
         $teamDao = $this->createMock(TeamDao::class);
-        $teamDao->expects($this->never())->method('destroyCacheAssignee');
+        $teamDao->expects($this->never())->method('destroyCacheAssigneeWithProjectsByTeam');
         $this->pm->setTeamDao($teamDao);
 
         $this->pm->callCheckForProjectAssignment();
@@ -154,7 +154,7 @@ class InstructionsAndAssignmentTest extends AbstractTest
         $this->pm->setProjectStructureValue('uid', 0);
 
         $teamDao = $this->createMock(TeamDao::class);
-        $teamDao->expects($this->never())->method('destroyCacheAssignee');
+        $teamDao->expects($this->never())->method('destroyCacheAssigneeWithProjectsByTeam');
         $this->pm->setTeamDao($teamDao);
 
         $this->pm->callCheckForProjectAssignment();
@@ -234,7 +234,7 @@ class InstructionsAndAssignmentTest extends AbstractTest
 
         $teamDao = $this->createMock(TeamDao::class);
         $teamDao->expects($this->once())
-            ->method('destroyCacheAssignee')
+            ->method('destroyCacheAssigneeWithProjectsByTeam')
             ->with($this->callback(function (TeamStruct $t) {
                 return $t->id === 3;
             }));

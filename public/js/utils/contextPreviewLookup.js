@@ -153,6 +153,44 @@ const normalizedLevenshtein = (a, b) => {
   return row[m] / n  // n = max length (longer string)
 }
 
+/**
+ * Returns the smallest element in `container` (itself included) whose text
+ * holds `normSource` as whole words, or null. On equal length the descendant
+ * wins over its ancestor.
+ *
+ * Segmentation splits a paragraph into sentences, so each segment is only part
+ * of the block that renders it and no block's full text equals any of them.
+ *
+ * Returns null when the text sits in two blocks that are not nested in each
+ * other: a short source such as "Learn more" would otherwise land on whichever
+ * unrelated block happens to be shorter.
+ */
+const findSmallestBlockContaining = (container, normSource) => {
+  const needle = normSource.replace(/\s+/g, ' ').trim().toLowerCase()
+  if (!needle) return null
+  const escaped = needle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const pattern = new RegExp(
+    `(?<![\\p{L}\\p{N}_])${escaped}(?![\\p{L}\\p{N}_])`,
+    'u',
+  )
+  const matches = []
+  let best = null
+  let bestLength = Infinity
+  for (const el of [container, ...container.querySelectorAll(BLOCK_SELECTOR)]) {
+    const text = el.textContent.replace(/\s+/g, ' ').trim().toLowerCase()
+    if (!pattern.test(text)) continue
+    matches.push(el)
+    if (
+      text.length < bestLength ||
+      (text.length === bestLength && best.contains(el))
+    ) {
+      best = el
+      bestLength = text.length
+    }
+  }
+  return matches.every((el) => el.contains(best)) ? best : null
+}
+
 export class AemContainerTextMatchStrategy {
   execute(rootContainer, path, normSource) {
     if (!path || !normSource) return null
@@ -171,10 +209,19 @@ export class AemContainerTextMatchStrategy {
     // Using normalized Levenshtein (threshold 0.25) handles minor differences
     // from HTML entities, typographic quotes, trailing punctuation, etc., while
     // soundly rejecting unrelated text (e.g. "requires login" vs "GET STARTED").
-    if (aemContainer.querySelectorAll(BLOCK_SELECTOR).length > 1) return null
-    const containerText = aemContainer.textContent.replace(/\s+/g, ' ').trim().toLowerCase()
-    const needle = normSource.replace(/\s+/g, ' ').trim().toLowerCase()
-    return normalizedLevenshtein(containerText, needle) <= 0.25 ? aemContainer : null
+    if (aemContainer.querySelectorAll(BLOCK_SELECTOR).length <= 1) {
+      const containerText = aemContainer.textContent
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toLowerCase()
+      const needle = normSource.replace(/\s+/g, ' ').trim().toLowerCase()
+      if (normalizedLevenshtein(containerText, needle) <= 0.25) {
+        return aemContainer
+      }
+    }
+    // A segment that is one sentence of a block lands on that block; every
+    // other sentence of it lands there too.
+    return findSmallestBlockContaining(aemContainer, normSource)
   }
 }
 

@@ -26,7 +26,7 @@ class TeamProjectValidator extends Base
     public function _validate(): void
     {
         if (empty($this->project) || empty($this->project->id)) {
-            throw new NotFoundException("Not Found", 404);
+            throw new NotFoundException("Not found", 404);
         }
     }
 

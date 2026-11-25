@@ -25,7 +25,7 @@ class InternalUserValidator extends LoginValidator
     public function _validate(): void
     {
         parent::_validate();
-        $email = $this->controller->getUser()->email ?? throw new AuthenticationError("Invalid Login.", 401);
+        $email = $this->controller->getUser()->email ?? throw new AuthenticationError("Invalid login.", 401);
         $event = $this->controller->getFeatureSet()->dispatch(new IsAnInternalUserEvent($email));
         $event->isInternal() ?: throw new AuthorizationError('Forbidden, please contact support for generating a valid API key');
     }

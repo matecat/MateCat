@@ -10,6 +10,7 @@ namespace Model\QualityReport;
 
 use DivisionByZeroError;
 use Exception;
+use Matecat\ICU\MessagePatternValidator;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Comments\BaseCommentStruct;
 use Model\Comments\CommentDao;
@@ -18,6 +19,7 @@ use Model\DataAccess\ShapelessConcreteStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Jobs\MetadataDao;
+use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\LQA\CategoryDao;
 use Model\LQA\CategoryStruct;
@@ -33,6 +35,7 @@ use RuntimeException;
 use TypeError;
 use Utils\Constants\SourcePages;
 use Utils\Constants\TranslationStatus;
+use Utils\LQA\ICUSourceSegmentDetector;
 use Utils\Tools\CatUtils;
 
 class QualityReportSegmentModel
@@ -127,9 +130,15 @@ class QualityReportSegmentModel
      * @throws DivisionByZeroError
      * @throws TypeError
      */
-    protected function _commonSegmentAssignments(QualityReportSegmentStruct $seg, MateCatFilter $Filter, FeatureSet $featureSet, JobStruct $chunk, bool $isForUI = false): void
-    {
-        $seg->warnings = $seg->getLocalWarning($featureSet, $chunk, $Filter);
+    protected function _commonSegmentAssignments(
+        QualityReportSegmentStruct $seg,
+        MateCatFilter $Filter,
+        FeatureSet $featureSet,
+        JobStruct $chunk,
+        bool $isForUI = false,
+        bool $sourceContainsIcu = false
+    ): void {
+        $seg->warnings = $seg->getLocalWarning($featureSet, $chunk, $Filter, $sourceContainsIcu);
         $seg->pee = $seg->getPEE();
         $seg->ice_modified = $seg->isICEModified();
         $seg->secs_per_word = round($seg->getSecsPerWord());
@@ -204,7 +213,8 @@ class QualityReportSegmentModel
 
         $featureSet = new FeatureSet($this->database);
 
-        $featureSet->loadForProject($this->chunk->getProject(new ProjectDao($this->database)));
+        $project = $this->chunk->getProject(new ProjectDao($this->database));
+        $featureSet->loadForProject($project);
         $issue_comments = [];
 
          $issues = $this->qualityReportDao->getIssuesBySegments($segmentIds, $chunkId);
@@ -220,12 +230,22 @@ class QualityReportSegmentModel
 
         $translationVersionDao = new TranslationVersionDao($this->database);
         $all_events = $translationVersionDao->getAllRelevantEvents($segmentIds, $chunkId);
+        $history_events = $translationVersionDao->historyEvents($segment_ids, $chunkId);
 
         $segments = [];
 
+        $subfilteringHandlers = (new MetadataDao($this->database))->getSubfilteringCustomHandlers($chunkId, $chunkPassword);
+        $icuEnabled = (new ProjectMetadataDao($this->database))->isIcuEnabled((int)$project->id);
+
         foreach ($data as $index => $seg) {
             $dataRefMap = (new SegmentOriginalDataDao($this->database))->getSegmentDataRefMap($seg->sid);
-            $metadataDao = new MetadataDao($this->database);
+
+            // The source decides, as in the editor: with ICU enabled and an ICU source, only the
+            // ICU-compliant handlers may run, or single_curly_brackets locks the ICU arguments.
+            $sourceContainsIcu = $icuEnabled && ICUSourceSegmentDetector::sourceContainsIcu(
+                new MessagePatternValidator($this->chunk->source, $seg->segment),
+                $icuEnabled
+            );
 
             /** @var MateCatFilter $Filter */
             $Filter = MateCatFilter::getInstance(
@@ -233,15 +253,17 @@ class QualityReportSegmentModel
                 $this->chunk->source,
                 $this->chunk->target,
                 $dataRefMap,
-                $metadataDao->getSubfilteringCustomHandlers($chunkId, $chunkPassword)
+                $subfilteringHandlers,
+                $sourceContainsIcu
             );
 
             $seg->dataRefMap = $dataRefMap;
 
-            $this->_commonSegmentAssignments($seg, $Filter, $featureSet, $this->chunk, $isForUI);
+            $this->_commonSegmentAssignments($seg, $Filter, $featureSet, $this->chunk, $isForUI, $sourceContainsIcu);
             $this->_assignIssues($seg, $issues, $issue_comments);
             $this->_assignComments($seg, $comments);
-            $this->_populateLastTranslationAndRevision($seg, $Filter, $all_events, $isForUI);
+            $this->_populateLastTranslationAndRevision($seg, $Filter, $all_events,  $isForUI);
+            $this->_populateHistory($seg, $Filter, $history_events, $issues, $isForUI);
 
             $seg->pee_translation_revise = $seg->getPEEBwtTranslationRevise();
             $seg->pee_translation_suggestion = $seg->getPEEBwtTranslationSuggestion();
@@ -250,6 +272,69 @@ class QualityReportSegmentModel
         }
 
         return $segments;
+    }
+
+    /**
+     * Populates the history for a given quality report segment by organizing events and associated issues.
+     *
+     * @param QualityReportSegmentStruct $seg The segment structure where the history will be populated.
+     * @param MateCatFilter $Filter The filter used to process translations for UI rendering.
+     * @param HistoryElementStruct[] $events An array of SegmentEventsStruct objects representing the events related to the segment.
+     * @param ShapelessConcreteStruct[] $issues An array of issue objects to associate with the events, filtered by segment and version.
+     * @param bool $isForUI Indicates whether the translation should be processed for UI display purposes.
+     *
+     * @throws Exception
+     *
+     * @return void
+     */
+    protected function _populateHistory(
+        QualityReportSegmentStruct $seg,
+        MateCatFilter $Filter,
+        array $events = [],
+        array $issues = [],
+        bool $isForUI = false
+    ): void
+    {
+        $elements = [];
+
+        $eventsForThisSegment = array_filter($events, function (HistoryElementStruct $event) use ($seg) {
+            return $event->id_segment == $seg->sid;
+        });
+
+        // A version keeps its number through every confirmation that does not change the text, so
+        // one (version, step) pair can hold several events — a second R2 approve, for one. Its
+        // issues belong to that version once, so they go on the last of those events only.
+        $lastEventOfVersionAndStep = [];
+        foreach ($eventsForThisSegment as $index => $event) {
+            $lastEventOfVersionAndStep[$event->version_number . '-' . $event->source_page] = $index;
+        }
+
+        /** @var HistoryElementStruct $event */
+        foreach ($eventsForThisSegment as $index => $event) {
+            $translation = ($isForUI) ? $Filter->fromLayer0ToLayer2($event->translation) : $event->translation;
+            $ownsTheIssues = $lastEventOfVersionAndStep[$event->version_number . '-' . $event->source_page] === $index;
+
+            $elements[] = [
+                'status' => $event->status,
+                // The event's own time. creation_date is set only on the version-0 row, which has no
+                // event; a versions row's creation_date is when its text was replaced, not saved.
+                'date' => $event->create_date ?? $event->creation_date,
+                'revision_number' => ReviewUtils::sourcePageToRevisionNumber($event->source_page),
+                'source_page' => $event->source_page,
+                'version_number' => $event->version_number,
+                'translation' => $translation,
+                'issues' => !$ownsTheIssues ? [] : array_values(array_filter($issues, function ($issue) use ($event) {
+                    return
+                        $issue->deleted_at === null &&
+                        $event->id_segment == $issue->segment_id &&
+                        $event->version_number == $issue->translation_version &&
+                        $event->source_page == $issue->source_page
+                    ;
+                }))
+            ];
+        }
+
+        $seg->history = $elements;
     }
 
     /**

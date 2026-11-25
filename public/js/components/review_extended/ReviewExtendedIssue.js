@@ -1,6 +1,5 @@
 import {isUndefined} from 'lodash'
 import React, {useContext, useEffect, useRef, useState} from 'react'
-import $ from 'jquery'
 import CatToolActions from '../../actions/CatToolActions'
 import SegmentActions from '../../actions/SegmentActions'
 import CommonUtils from '../../utils/commonUtils'
@@ -8,10 +7,18 @@ import moment from 'moment'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
 import classNames from 'classnames'
-import IconEdit from '../icons/IconEdit'
+import IconEdit from '../../../img/icons/IconEdit'
 import ReviewExtendedIssuePanel from './ReviewExtendedIssuePanel'
 import Trash from '../../../img/icons/Trash'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../common/Button/Button'
+import CommentsSquareIconFilled from '../../../img/icons/CommentsSquareIconFilled'
+import CommentsSquareIcon from '../../../img/icons/CommentsSquareIcon'
 
 export const ReviewExtendedIssue = ({
   sid,
@@ -75,42 +82,46 @@ export const ReviewExtendedIssue = ({
     if (issue.id === issueEditing?.id) setIssueEditing(undefined)
 
     CatToolActions.removeAllNotifications()
-    const notification = {
+
+    // The issue is deleted on the server only when this notification closes,
+    // so Undo has to stop that before clearing the notifications.
+    let isUndone = false
+    const undo = (event) => {
+      event.preventDefault()
+      isUndone = true
+      window.onbeforeunload = null
+      setVisible(true)
+      changeVisibility(issue.id, true)
+      CatToolActions.removeAllNotifications()
+      CatToolActions.addNotification({
+        title: 'Issue deleted',
+        text: 'The issue has been restored.',
+        type: 'warning',
+        position: 'bl',
+        timer: 5000,
+      })
+    }
+
+    CatToolActions.addNotification({
       title: 'Issue deleted',
-      text:
-        'The selected issue has been deleted. <a class="undo-issue-deleted undo-issue-deleted-' +
-        issue.id +
-        '">Undo</a>',
+      text: (
+        <>
+          The selected issue has been deleted.{' '}
+          <a href="#" onClick={undo}>
+            Undo
+          </a>
+        </>
+      ),
       type: 'warning',
       position: 'bl',
-      allowHtml: true,
       timer: 10000,
-      closeCallback: function () {
-        SegmentActions.deleteIssue(issue, sid)
+      closeCallback: () => {
+        if (!isUndone) SegmentActions.deleteIssue(issue, sid)
       },
-    }
-    CatToolActions.addNotification(notification)
+    })
     window.onbeforeunload = function () {
       SegmentActions.deleteIssue(issue, sid)
     }
-    setTimeout(function () {
-      const $button = $('.undo-issue-deleted-' + issue.id)
-      $button.off('click')
-      $button.on('click', function () {
-        setVisible(true)
-        changeVisibility(issue.id, true)
-        CatToolActions.removeAllNotifications()
-        const notification = {
-          title: 'Issue deleted',
-          text: 'The issue has been restored.',
-          type: 'warning',
-          position: 'bl',
-          timer: 5000,
-        }
-        CatToolActions.addNotification(notification)
-        window.onbeforeunload = null
-      })
-    }, 500)
   }
 
   const setCommentViewCallback = (event) => {
@@ -119,10 +130,7 @@ export const ReviewExtendedIssue = ({
 
     if (!commentView) {
       setTimeout(() => {
-        const input =
-          containerRef.current &&
-          $(containerRef.current).find('.re-comment-input')
-        input && input.length && input[0].focus()
+        containerRef.current?.querySelector('.re-comment-input')?.focus()
       }, 100)
     }
     setCommentView((prevState) => !prevState)
@@ -141,9 +149,9 @@ export const ReviewExtendedIssue = ({
       return
     }
 
+    // No source_page: the server attributes the comment to the phase the password resolves to.
     const data = {
       message: commentText,
-      source_page: config.isReview ? config.revisionNumber + 1 : 1, // TODO: move this to UI property
     }
 
     SegmentActions.submitIssueComment(sid, issue.id, data)
@@ -242,15 +250,6 @@ export const ReviewExtendedIssue = ({
     const category = getCategory()
     const severity = getSeverity()
 
-    let commentViewButtonClass = commentView ? 're-active' : ''
-    commentViewButtonClass =
-      issue.comments.length > 0 || issue.target_text
-        ? +' re-message'
-        : commentViewButtonClass
-    let iconCommentClass =
-      issue.comments.length > 0 || issue.target_text
-        ? 'icon-uniE96B icon'
-        : 'icon-uniE96E icon'
     //START comments html section
     let htmlCommentLines = generateHtmlCommentLines()
 
@@ -280,7 +279,7 @@ export const ReviewExtendedIssue = ({
       <div className="comments-view shadow-1">
         {renderHtmlCommentLines}
         <div className="re-add-comment">
-          <form className="ui form" onSubmit={addComment}>
+          <form onSubmit={addComment}>
             <div className="field">
               <input
                 className="re-comment-input"
@@ -317,34 +316,42 @@ export const ReviewExtendedIssue = ({
           <div className="issue-activity-icon">
             {actions && (
               <div className="icon-buttons">
-                <button
-                  className={
-                    'ui icon basic tiny button issue-note ' +
-                    commentViewButtonClass
-                  }
+                <Button
+                  mode={BUTTON_MODE.OUTLINE}
+                  type={BUTTON_TYPE.ICON}
+                  size={BUTTON_SIZE.ICON_SMALL}
                   onClick={setCommentViewCallback}
                   title="Comments"
                 >
-                  <i className={iconCommentClass} />
-                </button>
+                  {issue.comments.length > 0 || issue.target_text ? (
+                    <CommentsSquareIconFilled size={18} />
+                  ) : (
+                    <CommentsSquareIcon size={18} />
+                  )}
+                </Button>
                 {isReview &&
                   issue.revision_number <= currentReview &&
                   isUserAuthorizedToEditIssue && (
                     <>
-                      <button
-                        className={`ui icon basic tiny button issue-delete ${issueEditing?.id === issue.id ? 'active' : ''}`}
+                      <Button
+                        mode={BUTTON_MODE.OUTLINE}
+                        type={BUTTON_TYPE.ICON}
+                        size={BUTTON_SIZE.ICON_SMALL}
                         onClick={editIssue}
                         title="Edit issue card"
+                        active={issueEditing?.id === issue.id}
                       >
-                        <IconEdit size={14} />
-                      </button>
-                      <button
-                        className="ui icon basic tiny button issue-delete"
+                        <IconEdit size={18} />
+                      </Button>
+                      <Button
+                        mode={BUTTON_MODE.OUTLINE}
+                        type={BUTTON_TYPE.ICON}
+                        size={BUTTON_SIZE.ICON_SMALL}
                         onClick={deleteIssue}
                         title="Delete issue card"
                       >
                         <Trash size={18} />
-                      </button>
+                      </Button>
                     </>
                   )}
               </div>

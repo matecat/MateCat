@@ -3,6 +3,7 @@
 namespace Utils\Engines;
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\ValidationError as ControllerValidationError;
 use Exception;
 use Model\DataAccess\IDatabase;
 use Model\Analysis\Constants\InternalMatchesConstants;
@@ -48,6 +49,17 @@ use Utils\TaskRunner\Exceptions\ReQueueException;
  */
 class MyMemory extends AbstractEngine
 {
+    /**
+     * Calls that write to the TM. A non-JSON answer to one of them is turned into a 502 error,
+     * so the caller requeues the write instead of losing it.
+     */
+    private const array WRITE_FUNCTIONS = ['update_relative_url', 'contribute_relative_url'];
+
+    /**
+     * How much of an invalid body is kept in the error message.
+     */
+    private const int RAW_BODY_EXCERPT_LENGTH = 200;
+
 
     /**
      * @inheritdoc
@@ -78,6 +90,7 @@ class MyMemory extends AbstractEngine
         'prop' => null,
         'get_mt' => 1,
         'id_user' => null,
+        'mt_key' => null,
         'num_result' => 3,
         'mt_only' => false,
         'isConcordance' => false,
@@ -115,6 +128,24 @@ class MyMemory extends AbstractEngine
             $decoded = json_decode($rawValue, true);
         } else {
             $decoded = $rawValue; // already decoded in case of error
+        }
+
+        if (!is_array($decoded) && in_array($functionName, self::WRITE_FUNCTIONS, true)) {
+            /*
+             * A write answered with a body that is not a JSON object (e.g. HTTP 200 with the plain text
+             * "Failed to connect to broker", or an HTML page from a proxy) is a server-side failure:
+             * report it as a 502, so callers like SetContributionWorker requeue instead of crashing.
+             * The start of the raw body is kept, so the log still shows what MyMemory answered.
+             */
+            $rawBody = is_string($rawValue) ? $rawValue : var_export($rawValue, true);
+            $decoded = [
+                'error' => [
+                    'code' => -502,
+                    'message' => " Invalid response from MyMemory, the body is not a JSON object: "
+                        . mb_substr($rawBody, 0, self::RAW_BODY_EXCERPT_LENGTH)
+                ],
+                'responseStatus' => 502
+            ];
         }
 
         $dataRefMap = $this->_config['dataRefMap'] ?? [];
@@ -223,10 +254,10 @@ class MyMemory extends AbstractEngine
       *
       * @return GetMemoryResponse
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       * @throws AuthenticationError
       * @throws NotFoundException
       * @throws ValidationError
+      * @throws ControllerValidationError
       * @throws EndQueueException
       * @throws ReQueueException
       */
@@ -269,12 +300,7 @@ class MyMemory extends AbstractEngine
             $parameters['context_before'] = $_config['context_before'] ?? '';
         }
 
-        if (!empty($_config['id_user'])) {
-            if (!is_array($_config['id_user'])) {
-                $_config['id_user'] = [$_config['id_user']];
-            }
-            $parameters['key'] = implode(",", $_config['id_user']);
-        }
+        $this->addKeyParameters($parameters, $_config);
 
         // Here we pass the subfiltering configuration to the API.
         // This value can be an array or null, if null, no filters will be loaded, if the array is empty, the default filters list will be loaded.
@@ -299,7 +325,6 @@ class MyMemory extends AbstractEngine
       *
       * @return SetContributionResponse|null
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
      public function set($_config): ?SetContributionResponse
      {
@@ -376,14 +401,28 @@ class MyMemory extends AbstractEngine
             $parameters['context_before'] = $config['context_before'] ?? '';
         }
 
-        if (!empty($config['id_user'])) {
-            if (!is_array($config['id_user'])) {
-                $config['id_user'] = [$config['id_user']];
-            }
-            $parameters['key'] = implode(",", $config['id_user']);
-        }
+        $this->addKeyParameters($parameters, $config);
 
         return $parameters;
+    }
+
+    /**
+     * Add the TM key parameters to a MyMemory request.
+     *
+     * `key` holds every key the current user can use on the job: the owner's keys and the user's own.
+     * `mt_key` holds only the keys the job owner linked to the job, so MyMemory can tell them apart.
+     * Both are comma-separated lists and are left out when empty.
+     *
+     * @param array<string, mixed> $parameters
+     * @param array<string, mixed> $config
+     */
+    private function addKeyParameters(array &$parameters, array $config): void
+    {
+        foreach (['key' => 'id_user', 'mt_key' => 'mt_key'] as $parameter => $configKey) {
+            if (!empty($config[$configKey])) {
+                $parameters[$parameter] = implode(",", (array)$config[$configKey]);
+            }
+        }
     }
 
     /**
@@ -410,12 +449,7 @@ class MyMemory extends AbstractEngine
             $parameters['context_before'] = $_config['context_before'] ?? '';
         }
 
-        if (!empty($_config['id_user'])) {
-            if (!is_array($_config['id_user'])) {
-                $_config['id_user'] = [$_config['id_user']];
-            }
-            $parameters['key'] = implode(",", $_config['id_user']);
-        }
+        $this->addKeyParameters($parameters, $_config);
 
         $this->call("update_relative_url", $parameters, true);
 
@@ -428,7 +462,6 @@ class MyMemory extends AbstractEngine
       *
       * @return bool
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
      public function delete($_config): bool
      {
@@ -469,9 +502,9 @@ class MyMemory extends AbstractEngine
       *
       * @param string $uuid
       *
-      * @return FileImportAndStatusResponse
+      * @return TMSAbstractResponse
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
+      * @throws Exception
       */
      public function entryStatus(string $uuid): TMSAbstractResponse
      {
@@ -481,7 +514,12 @@ class MyMemory extends AbstractEngine
             ]
         );
 
-        $this->call("entry_status_relative_url", ['uuid' => $uuid]);
+        $this->call("glossary_entry_status_relative_url", ['uuid' => $uuid]);
+
+        // call() leaves a plain array in $this->result when the engine record has no such url
+        if (!$this->result instanceof TMSAbstractResponse) {
+            throw new Exception("MyMemory entry status url is not configured");
+        }
 
         return $this->result;
     }
@@ -498,7 +536,6 @@ class MyMemory extends AbstractEngine
       *
       * @return FileImportAndStatusResponse
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
      public function glossaryImport(string $file, string $key, string $name = ''): FileImportAndStatusResponse
      {
@@ -528,7 +565,6 @@ class MyMemory extends AbstractEngine
       *
       * @return ExportResponse
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
      public function glossaryExport(string $key, string $keyName, string $userEmail, string $userName): ExportResponse
      {
@@ -551,7 +587,6 @@ class MyMemory extends AbstractEngine
       *
       * @return CheckGlossaryResponse
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
      public function glossaryCheck(string $source, string $target, string $sourceLanguage, string $targetLanguage, ?array $keys = []): CheckGlossaryResponse
      {
@@ -573,7 +608,6 @@ class MyMemory extends AbstractEngine
       *
       * @return DomainsResponse
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
      public function glossaryDomains(?array $keys = []): DomainsResponse
      {
@@ -594,7 +628,6 @@ class MyMemory extends AbstractEngine
       *
       * @return DeleteGlossaryResponse
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
      public function glossaryDelete(string $idSegment, string $idJob, string $password, array $term): DeleteGlossaryResponse
      {
@@ -620,7 +653,6 @@ class MyMemory extends AbstractEngine
       *
       * @return GetGlossaryResponse
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
      public function glossaryGet(string $id_job, string $id_segment, string $source, string $sourceLanguage, string $targetLanguage, ?array $keys = []): GetGlossaryResponse
      {
@@ -647,7 +679,6 @@ class MyMemory extends AbstractEngine
       *
       * @return SearchGlossaryResponse
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
      public function glossarySearch(string $source, string $sourceLanguage, string $targetLanguage, ?array $keys = []): SearchGlossaryResponse
      {
@@ -671,7 +702,6 @@ class MyMemory extends AbstractEngine
       *
       * @return KeysGlossaryResponse
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
      public function glossaryKeys(string $sourceLanguage, string $targetLanguage, ?array $keys = []): KeysGlossaryResponse
      {
@@ -694,7 +724,6 @@ class MyMemory extends AbstractEngine
       *
       * @return SetGlossaryResponse
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
      public function glossarySet(string $idSegment, string $idJob, string $password, array $term): SetGlossaryResponse
      {
@@ -719,7 +748,6 @@ class MyMemory extends AbstractEngine
       *
       * @return UpdateGlossaryResponse
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
      public function glossaryUpdate(string $idSegment, string $idJob, string $password, array $term): UpdateGlossaryResponse
      {
@@ -740,16 +768,19 @@ class MyMemory extends AbstractEngine
       * @param string $filePath
       * @param string $memoryKey
       * @param UserStruct $user * Not used
+      * @param bool $mtImport true asks MyMemory to also import the TMX into Lara with its own license.
+      *                       Example: `true` → `mt_import=true`.
       *
       * @return FileImportAndStatusResponse
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
-     public function importMemory(string $filePath, string $memoryKey, UserStruct $user): FileImportAndStatusResponse
+     public function importMemory(string $filePath, string $memoryKey, UserStruct $user, bool $mtImport = false): FileImportAndStatusResponse
      {
         $postFields = [
-            'tmx' => $this->getCurlFile($filePath),
-            'key' => trim($memoryKey)
+            'tmx'       => $this->getCurlFile($filePath),
+            'key'       => trim($memoryKey),
+            // MyMemory expects the literal strings: a bool in multipart becomes "1" or "".
+            'mt_import' => $mtImport ? 'true' : 'false',
         ];
 
         $this->call("tmx_import_relative_url", $postFields, true);
@@ -762,7 +793,6 @@ class MyMemory extends AbstractEngine
       *
       * @return FileImportAndStatusResponse
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
      public function getImportStatus(string $uuid): FileImportAndStatusResponse
      {
@@ -852,8 +882,9 @@ class MyMemory extends AbstractEngine
 
         $this->call('api_key_check_auth_url', $postFields);
 
-        if (!$this->result->responseStatus == 200) {
-            $this->logger->debug("Error: The check for MyMemory private key correctness failed: " . $this->result['error']['message'] . " ErrNum: " . $this->result['error']['code']);
+        if ($this->result->responseStatus != 200) {
+            $error = is_array($this->result->responseData) ? ($this->result->responseData['error'] ?? []) : [];
+            $this->logger->debug("Error: The check for MyMemory private key correctness failed: " . ($error['message'] ?? '') . " ErrNum: " . ($error['code'] ?? ''));
             throw new Exception("Error: The private TM key you entered ($apiKey) appears to be invalid. Please check that the key is correct.", -2);
         }
 
@@ -897,7 +928,6 @@ class MyMemory extends AbstractEngine
      * @throws RuntimeException
      * @throws TypeError
      * @throws Exception
-     * @throws \Psr\Log\InvalidArgumentException
      */
     private function callAnalyzeUrl(array $segments): void
     {
@@ -924,7 +954,6 @@ class MyMemory extends AbstractEngine
       *
       * @return TagProjectionResponse
       * @throws RuntimeException
-      * @throws \Psr\Log\InvalidArgumentException
       */
      public function getTagProjection(array $config): TagProjectionResponse
      {

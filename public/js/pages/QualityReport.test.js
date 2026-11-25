@@ -1,4 +1,3 @@
-import {createRoot} from 'react-dom/client'
 import {act, render, screen, waitFor} from '@testing-library/react'
 import {http, HttpResponse} from 'msw'
 
@@ -7,8 +6,14 @@ import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper
 import userMock from '../../mocks/userMock'
 import React from 'react'
 import {QualityReport} from './QualityReport'
+import AppDispatcher from '../stores/AppDispatcher'
+import QualityReportConstants from '../constants/QualityReportConstants'
+import {showReleaseAnnouncement} from '../components/releaseAnnouncements/releaseAnnouncements'
 
 jest.mock('../sse/SocketListener', () => () => null)
+jest.mock('../components/releaseAnnouncements/releaseAnnouncements', () => ({
+  showReleaseAnnouncement: jest.fn(),
+}))
 
 jest.setTimeout(30000)
 global.config = {
@@ -79,7 +84,6 @@ test('renders properly', async () => {
               last_translation: null,
               locked: '0',
               match_type: 'MT',
-              parsed_time_to_edit: ['00', '00', '00', '00'],
               pee: 0,
               pee_translation_revise: 0,
               pee_translation_suggestion: 0,
@@ -129,7 +133,6 @@ test('renders properly', async () => {
               last_translation: null,
               locked: '0',
               match_type: 'MT',
-              parsed_time_to_edit: ['00', '00', '00', '00'],
               pee: 25,
               pee_translation_revise: 0,
               pee_translation_suggestion: 0,
@@ -179,7 +182,6 @@ test('renders properly', async () => {
               last_translation: 'Zoolab',
               locked: '0',
               match_type: 'MT',
-              parsed_time_to_edit: ['00', '00', '00', '00'],
               pee: 0,
               pee_translation_revise: 0,
               pee_translation_suggestion: 0,
@@ -229,7 +231,6 @@ test('renders properly', async () => {
               last_translation: null,
               locked: '0',
               match_type: 'MT',
-              parsed_time_to_edit: ['00', '00', '02', 703],
               pee: 0,
               pee_translation_revise: 0,
               pee_translation_suggestion: 0,
@@ -280,7 +281,6 @@ test('renders properly', async () => {
                 'Morbi sem mauris, laoreet ut, rhoncus aliquet, pulvinar sed, nisl.&nbsp;',
               locked: '0',
               match_type: 'MT',
-              parsed_time_to_edit: ['00', '00', '03', 248],
               pee: 0,
               pee_translation_revise: 0,
               pee_translation_suggestion: 7,
@@ -333,7 +333,6 @@ test('renders properly', async () => {
               last_translation: null,
               locked: '0',
               match_type: 'MT',
-              parsed_time_to_edit: ['00', '00', '00', '00'],
               pee: 0,
               pee_translation_revise: 0,
               pee_translation_suggestion: 0,
@@ -383,7 +382,6 @@ test('renders properly', async () => {
               last_translation: null,
               locked: '0',
               match_type: 'MT',
-              parsed_time_to_edit: ['00', '00', '00', '00'],
               pee: 0,
               pee_translation_revise: 0,
               pee_translation_suggestion: 0,
@@ -433,7 +431,6 @@ test('renders properly', async () => {
               last_translation: null,
               locked: '0',
               match_type: 'MT',
-              parsed_time_to_edit: ['00', '00', '00', '00'],
               pee: 8,
               pee_translation_revise: 0,
               pee_translation_suggestion: 0,
@@ -486,7 +483,6 @@ test('renders properly', async () => {
               last_translation: null,
               locked: '0',
               match_type: 'MT',
-              parsed_time_to_edit: ['00', '00', '00', '00'],
               pee: 0,
               pee_translation_revise: 0,
               pee_translation_suggestion: 0,
@@ -536,7 +532,6 @@ test('renders properly', async () => {
               last_translation: null,
               locked: '0',
               match_type: 'MT',
-              parsed_time_to_edit: ['00', '00', '00', '00'],
               pee: 0,
               pee_translation_revise: 0,
               pee_translation_suggestion: 0,
@@ -586,7 +581,6 @@ test('renders properly', async () => {
               last_translation: null,
               locked: '0',
               match_type: 'MT',
-              parsed_time_to_edit: ['00', '00', '00', '00'],
               pee: 0,
               pee_translation_revise: 0,
               pee_translation_suggestion: 0,
@@ -636,7 +630,6 @@ test('renders properly', async () => {
               last_translation: null,
               locked: '0',
               match_type: 'MT',
-              parsed_time_to_edit: ['00', '00', '00', '00'],
               pee: 0,
               pee_translation_revise: 0,
               pee_translation_suggestion: 0,
@@ -686,7 +679,6 @@ test('renders properly', async () => {
               last_translation: null,
               locked: '0',
               match_type: 'MT',
-              parsed_time_to_edit: ['00', '00', '00', '00'],
               pee: 0,
               pee_translation_revise: 0,
               pee_translation_suggestion: 0,
@@ -736,7 +728,6 @@ test('renders properly', async () => {
               last_translation: null,
               locked: '0',
               match_type: 'MT',
-              parsed_time_to_edit: ['00', '00', '00', '00'],
               pee: 0,
               pee_translation_revise: 0,
               pee_translation_suggestion: 0,
@@ -786,7 +777,6 @@ test('renders properly', async () => {
               last_translation: null,
               locked: '0',
               match_type: 'MT',
-              parsed_time_to_edit: ['00', '00', '00', '00'],
               pee: 0,
               pee_translation_revise: 0,
               pee_translation_suggestion: 0,
@@ -836,7 +826,6 @@ test('renders properly', async () => {
               last_translation: null,
               locked: '0',
               match_type: 'MT',
-              parsed_time_to_edit: ['00', '00', '00', '00'],
               pee: 25,
               pee_translation_revise: 0,
               pee_translation_suggestion: 0,
@@ -886,7 +875,6 @@ test('renders properly', async () => {
               last_translation: null,
               locked: '0',
               match_type: 'MT',
-              parsed_time_to_edit: ['00', '00', '00', '00'],
               pee: 0,
               pee_translation_revise: 0,
               pee_translation_suggestion: 0,
@@ -936,7 +924,6 @@ test('renders properly', async () => {
               last_translation: null,
               locked: '0',
               match_type: 'MT',
-              parsed_time_to_edit: ['00', '00', '00', '00'],
               pee: 7,
               pee_translation_revise: 0,
               pee_translation_suggestion: 0,
@@ -989,7 +976,6 @@ test('renders properly', async () => {
               last_translation: null,
               locked: '0',
               match_type: '100%_PUBLIC',
-              parsed_time_to_edit: ['00', '00', '00', '00'],
               pee: 0,
               pee_translation_revise: 0,
               pee_translation_suggestion: 0,
@@ -1039,7 +1025,6 @@ test('renders properly', async () => {
               last_translation: null,
               locked: '0',
               match_type: 'MT',
-              parsed_time_to_edit: ['00', '00', '00', '00'],
               pee: 0,
               pee_translation_revise: 0,
               pee_translation_suggestion: 0,
@@ -1336,6 +1321,18 @@ test('renders properly', async () => {
   // expect(screen.getByText('Loading')).toBeVisible()
 
   await waitFor(() => {
-    expect(screen.getByText('QR Job summary')).toBeVisible()
+    expect(screen.getByText('Quality report')).toBeVisible()
+  })
+
+  expect(showReleaseAnnouncement).toHaveBeenCalledTimes(1)
+  expect(showReleaseAnnouncement.mock.calls[0][0]).toBe('qualityReport')
+
+  act(() => {
+    AppDispatcher.dispatch({
+      actionType: QualityReportConstants.NO_MORE_SEGMENTS,
+    })
+    AppDispatcher.dispatch({
+      actionType: QualityReportConstants.LOADING_MORE_SEGMENTS,
+    })
   })
 })

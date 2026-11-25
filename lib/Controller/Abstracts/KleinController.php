@@ -100,6 +100,20 @@ abstract class KleinController implements IController
     }
 
     /**
+     * Every JSON endpoint in this app is namespaced under `/api/`; every page route is not.
+     * router.php's 404 handler uses this as a fallback for a URL that matched no route at all,
+     * where no controller ever ran to set {@see isView()} from an actual instance.
+     *
+     * @param string $pathname
+     *
+     * @return bool
+     */
+    public static function isApiPath(string $pathname): bool
+    {
+        return str_starts_with($pathname, '/api/');
+    }
+
+    /**
      * @param Request $request
      * @param Response $response
      * @param ?ServiceProvider $service
@@ -229,7 +243,6 @@ abstract class KleinController implements IController
     }
 
     /**
-     * @throws \Psr\Log\InvalidArgumentException
      * @throws InvalidArgumentException
      */
     protected function _logWithTime(): void
@@ -252,7 +265,7 @@ abstract class KleinController implements IController
     /**
      * @return array{id_segment: string, split_num: string|null}
      */
-    protected function parseIdSegment(string $id_segment): array
+    public function parseIdSegment(string $id_segment): array
     {
         $parsedSegment = explode("-", $id_segment);
 

@@ -9,8 +9,6 @@
 namespace Plugins\Features\TranslationEvents;
 
 use Exception;
-use Model\DataAccess\IDatabase;
-use Model\DataAccess\TransactionalTrait;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
@@ -20,19 +18,13 @@ use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use Plugins\Features\TranslationEvents\Model\TranslationEventStruct;
 use ReflectionException;
+use Throwable;
 use TypeError;
 use Utils\Constants\SourcePages;
 use Utils\Constants\TranslationStatus;
 
 class TranslationEventsHandler
 {
-
-    use TransactionalTrait;
-
-    protected function getTransactionalDatabase(): IDatabase
-    {
-        return $this->translationEventDao->getDatabaseHandler();
-    }
 
     /**
      * @var TranslationEvent[]
@@ -204,12 +196,12 @@ class TranslationEventsHandler
      *
      * @throws Exception
      * @throws TypeError
+     * @throws Throwable the write runs inside a transaction scope, which aborts the transaction on
+     *                   any throw and re-throws the original, whatever its type
      */
     public function save(BatchReviewProcessor $batchReviewProcessor): void
     {
-        $this->openTransaction();
-
-        try {
+        $this->translationEventDao->getDatabaseHandler()->transaction(function () use ($batchReviewProcessor): void {
             foreach ($this->_events as $event) {
                 $this->prepareEventStruct($event);
             }
@@ -222,12 +214,7 @@ class TranslationEventsHandler
                 $this->removeOldFinalRevisionFlag($event);
                 $this->saveEvent($event);
             }
-        } catch (Exception $e) {
-            $this->rollbackTransaction();
-            throw $e;
-        } finally {
-            $this->commitTransaction();
-        }
+        });
     }
 
     /**

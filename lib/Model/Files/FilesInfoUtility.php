@@ -11,6 +11,7 @@ use PDOException;
 use ReflectionException;
 use RuntimeException;
 use View\API\V3\Json\FilesInfo;
+use TypeError;
 
 class FilesInfoUtility
 {
@@ -149,6 +150,7 @@ class FilesInfoUtility
      * @throws ReflectionException
      * @throws PDOException
      * @throws Exception
+     * @throws TypeError
      */
     public function setInstructions(int $id_file, string $instructions): bool
     {

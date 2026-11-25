@@ -1,9 +1,0 @@
-User-agent: *
-Disallow: /translate/
-Disallow: /revise/
-Disallow: /manage/
-Disallow: /analyze/
-Disallow: /jobanalysis/
-Disallow: /editlog/
-Disallow: /revise-summary/
-

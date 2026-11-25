@@ -8,10 +8,12 @@ use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
 use Model\Propagation\PropagationTotalStruct;
 use Model\Translations\SegmentTranslationStruct;
+use Model\Translations\WarningDao;
 use PDOException;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
 use ReflectionException;
 use Utils\ActiveMQ\AMQHandler;
+use Utils\Logger\MatecatLogger;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\Params;
@@ -28,9 +30,10 @@ class PropagationWorker extends AbstractWorker
     public function __construct(
         AMQHandler $queueHandler,
         IDatabase $database,
-        ?TranslationVersionDao $translationVersionsDao = null
+        ?TranslationVersionDao $translationVersionsDao = null,
+        ?MatecatLogger $logger = null,
     ) {
-        parent::__construct($queueHandler, $database);
+        parent::__construct($queueHandler, $database, $logger);
         $this->translationVersionsDao = $translationVersionsDao ?? new TranslationVersionDao($this->database);
     }
 
@@ -163,6 +166,9 @@ class PropagationWorker extends AbstractWorker
                     . var_export($propagationTotalStruct->getPropagatedIds(), true)
                 );
             }
+
+            // Propagation copies `warning` and `status` onto other segments of the job.
+            (new WarningDao($this->database))->destroyCachesByJobId((int)$propagatorSegment['id_job']);
         }
     }
 

@@ -4,7 +4,6 @@
  * @author ostico domenico@translated.net / ostico@gmail.com
  * Date: 14/06/19
  * Time: 9.45
- *
  */
 
 namespace Model\WordCount;
@@ -63,7 +62,7 @@ class WordCounterDao extends AbstractDao
             $stmt = $db->getConnection()->prepare($query);
             $stmt->execute($bind_keys);
         } catch (PDOException $e) {
-            LoggerFactory::doJsonLog($e->getMessage());
+            LoggerFactory::getLogger('dao')->error($e->getMessage());
 
             return $e->getCode() * -1;
         }
@@ -98,7 +97,7 @@ class WordCounterDao extends AbstractDao
         try {
             $db->update('jobs', $data, $where);
         } catch (PDOException $e) {
-            LoggerFactory::doJsonLog($e->getMessage());
+            LoggerFactory::getLogger('dao')->error($e->getMessage());
 
             return $e->getCode() * -1;
         }
@@ -126,7 +125,7 @@ class WordCounterDao extends AbstractDao
          *
          * In the segment_translations table we always have the correct value for eq_word_count, such value is taken by multiplying the raw word count value by the payable rate discount ( / 100 )
          *
-         * In the case of pre-translation, the rows in this table are marked as ICEs, set as locked = 0,  and the equivalent word count is set as previous described.
+         * In the case of pre-translation, the rows in this table are marked as ICEs, locked only when the matching XLIFF rule asks for it, and the equivalent word count is set as previous described.
          *
          * But the pre-translations must be shown in the UI as part of the TOTAL ( this does not apply to the true ICEs because they will set everytime as equivalent even if their values is Zero ).
          *
@@ -134,7 +133,6 @@ class WordCounterDao extends AbstractDao
          * - match_type is ICE
          * - suggestion_match IS NULL ( since those segments are not sent to the TM analysis )
          * - equivalent_word_count = 0 ( case to disambiguate ) and raw_word_count != 0 ( this means that the payable rate is Zero )
-         *
          */
         $query = "
                 SELECT

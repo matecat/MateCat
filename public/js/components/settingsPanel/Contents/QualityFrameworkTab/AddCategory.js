@@ -11,7 +11,7 @@ import {
   Button,
 } from '../../../common/Button/Button'
 import {QualityFrameworkTabContext} from './QualityFrameworkTabContext'
-import IconAdd from '../../../icons/IconAdd'
+import IconAdd from '../../../../../img/icons/IconAdd'
 import Checkmark from '../../../../../img/icons/Checkmark'
 import {
   getCodeFromLabel,
@@ -98,10 +98,11 @@ export const AddCategory = () => {
     >
       <Popover
         title="Add category"
+        contentClassName="quality-framework-add-popover"
         toggleButtonProps={{
           type: BUTTON_TYPE.PRIMARY,
           mode: BUTTON_MODE.BASIC,
-          size: BUTTON_SIZE.MEDIUM,
+          size: BUTTON_SIZE.STANDARD,
           disabled: isDisabled,
           ...(isDisabled && {
             tooltip: `You have reached the limit of ${MAX_ENTRY} categories\nallowed in a quality framework`,
@@ -116,11 +117,10 @@ export const AddCategory = () => {
         confirmButtonProps={{
           ref: confirmRef,
           type: BUTTON_TYPE.PRIMARY,
-          size: BUTTON_SIZE.MEDIUM,
           disabled: !name || typeof error === 'string',
           children: (
             <>
-              <Checkmark size={14} />
+              <Checkmark size={18} />
               Confirm
             </>
           ),
@@ -128,7 +128,6 @@ export const AddCategory = () => {
         }}
         cancelButtonProps={{
           mode: BUTTON_MODE.OUTLINE,
-          size: BUTTON_SIZE.MEDIUM,
           children: 'Cancel',
         }}
         align={POPOVER_ALIGN.RIGHT}
@@ -141,6 +140,7 @@ export const AddCategory = () => {
           onKeyUp={confirmWithKeyboard}
         >
           <input
+            type="text"
             className={`quality-framework-input input${error ? ' quality-framework-input-error' : ''}`}
             placeholder="Name"
             value={name}
@@ -157,10 +157,11 @@ export const AddCategory = () => {
               size={BUTTON_SIZE.SMALL}
               onClick={() => setIsVisibleDescriptionInput(true)}
             >
-              <IconAdd size={20} /> Add description
+              <IconAdd size={22} /> Add description
             </Button>
           ) : (
             <input
+              type="text"
               className="quality-framework-input input"
               placeholder="Description"
               value={description}

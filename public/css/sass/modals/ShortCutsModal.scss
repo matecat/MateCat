@@ -1,0 +1,311 @@
+@use '../tokens/colors';
+
+.shortcuts-modal .matecat-modal-top {
+  padding: 15px 25px;
+}
+
+.shortcuts-modal .matecat-modal-middle {
+  padding: 10px 15px;
+  max-height: 530px;
+  overflow: auto;
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list:not(:first-of-type) {
+  padding-top: 10px;
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list h2 {
+  padding-left: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid colors.$grey100;
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item {
+  padding: 7px 0 7px 10px;
+  margin: 3px 0;
+}
+
+.shortcuts-modal
+  .matecat-modal-middle
+  .shortcut-list
+  .shortcut-item-list
+  .shortcut-item:first-child {
+  margin-top: 10px;
+}
+
+.shortcuts-modal
+  .matecat-modal-middle
+  .shortcut-list
+  .shortcut-item-list
+  .shortcut-item:hover {
+  background: colors.$grey75;
+}
+
+.shortcuts-modal
+  .matecat-modal-middle
+  .shortcut-list
+  .shortcut-item-list
+  .shortcut-item
+  .shortcut-title,
+.shortcuts-modal
+  .matecat-modal-middle
+  .shortcut-list
+  .shortcut-item-list
+  .shortcut-item
+  .shortcut-keys {
+  display: inline-block;
+  width: 50%;
+}
+
+.shortcuts-modal
+  .matecat-modal-middle
+  .shortcut-list
+  .shortcut-item-list
+  .shortcut-item
+  .shortcut-keys
+  .shortcuts {
+  text-align: right;
+  color: colors.$blue200;
+}
+
+.shortcuts-modal
+  .matecat-modal-middle
+  .shortcut-list
+  .shortcut-item-list
+  .shortcut-item
+  .shortcut-keys
+  .mac
+  .keys,
+.shortcuts-modal
+  .matecat-modal-middle
+  .shortcut-list
+  .shortcut-item-list
+  .shortcut-item
+  .shortcut-keys
+  .standard
+  .keys {
+  content: '';
+  font-family: 'Courier New';
+  display: inline-block;
+  margin-left: 5px;
+  margin-right: 5px;
+  background: colors.$grey400;
+  padding: 0 5px;
+  line-height: 20px;
+  font-size: 12px;
+  color: colors.$white;
+  border-radius: 2px;
+}
+
+.shortcuts-modal
+  .matecat-modal-middle
+  .shortcut-list
+  .shortcut-item-list
+  .shortcut-item
+  .shortcut-keys
+  .mac
+  .keys:first-child,
+.shortcuts-modal
+  .matecat-modal-middle
+  .shortcut-list
+  .shortcut-item-list
+  .shortcut-item
+  .shortcut-keys
+  .standard
+  .keys:first-child {
+  margin-left: 0px !important;
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.ctrl:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.ctrl:after {
+  content: 'Ctrl';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.Meta:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.Meta:after {
+  content: 'Cmd';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.shift:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.shift:after {
+  content: 'Shift';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.return:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.return:after {
+  content: 'Enter';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.meta:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.meta:after {
+  content: 'Cmd';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.alt:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.alt:after {
+  content: 'Alt';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.option:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.option:after {
+  content: 'Option';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.\31 :after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.\31 :after {
+  content: '1';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.\32 :after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.\32 :after {
+  content: '2';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.\33 :after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.\33 :after {
+  content: '3';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.a:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.a:after {
+  content: 'A';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.c:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.c:after {
+  content: 'C';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.h:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.h:after {
+  content: 'H';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.i:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.i:after {
+  content: 'I';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.l:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.l:after {
+  content: 'L';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.n:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.n:after {
+  content: 'N';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.p:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.p:after {
+  content: 'P';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.z:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.z:after {
+  content: 'Z';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.f:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.f:after {
+  content: 'F';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.k:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.k:after {
+  content: 'K';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.y:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.y:after {
+  content: 'Y';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.s:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.s:after {
+  content: 'S';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.t:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.t:after {
+  content: 'T';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.q:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.q:after {
+  content: 'Q';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.up:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.up:after {
+  content: 'Arrow up';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.right:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.right:after {
+  content: 'Arrow right';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.left:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.left:after {
+  content: 'Arrow left';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.down:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.down:after {
+  content: 'Arrow down';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.pagedown:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.pagedown:after {
+  content: 'Page Down';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.pageup:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.pageup:after {
+  content: 'Page Up';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.previous:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.previous:after {
+  content: '<';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.next:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.next:after {
+  content: '>';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.home:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.home:after {
+  content: 'Home';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.arrows:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.arrows:after {
+  content: 'Arrows';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.arrows-enter:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.arrows-enter:after {
+  content: 'Arrows/Enter';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.space:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.space:after {
+  content: 'Space';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.bracketLeft:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.bracketLeft:after {
+  content: '[';
+}
+
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .mac .keys.bracketRight:after,
+.shortcuts-modal .matecat-modal-middle .shortcut-list .shortcut-item-list .shortcut-item .shortcut-keys .standard .keys.bracketRight:after {
+  content: ']';
+}
+
+.shortcuts-modal .matecat-modal-bottom {
+  padding: 15px 25px;
+}

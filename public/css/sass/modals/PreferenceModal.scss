@@ -1,12 +1,26 @@
-@use "../commons/colors";
+@use '../tokens/colors';
+@use 'commons/variables';
 
 .preferences-modal .user-info-form {
-  font-size: 18px;
+  font-size: variables.$font-size-base;
   line-height: 30px;
   margin-bottom: 30px;
   background-color: white;
   //border-bottom: 1px solid #ccc;
   padding: 35px 20px 20px 50px;
+}
+
+.preferences-modal .user-generic {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid colors.$blue500;
+  color: colors.$blue500;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  float: left;
 }
 
 .preferences-modal .user-gdrive {
@@ -22,7 +36,7 @@
 
   > label {
     font-size: 15px;
-    color: colors.$grey1;
+    color: colors.$grey700;
   }
 }
 
@@ -55,7 +69,7 @@
       font-size: 15px;
       text-align: left;
       word-wrap: break-word;
-      color: colors.$grey1;
+      color: colors.$grey700;
       white-space: nowrap;
       width: 100%;
       border: none;
@@ -81,43 +95,78 @@
   .user-api-message {
     order: 3;
     flex: 1 100%;
-    line-height: 40px;
+    line-height: 20px;
     margin-top: 13px;
-    border: 1px solid colors.$greenDefault;
-    background-color: #f7fdf7;
+    border: 1px solid colors.$green500;
+    background-color: colors.$white;
     border-radius: 4px;
     display: flex;
-    justify-content: center;
+    align-items: flex-start;
+    gap: 10px;
     flex-flow: row;
-    padding: 10px;
+    padding: 12px 16px;
+
+    > svg {
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
 
     i {
-      color: colors.$greenDefault;
-      margin-top: 8px;
-      margin-left: 20px;
+      color: colors.$green500;
     }
 
     .user-api-message-content {
-      margin-left: 10px;
-      line-height: 30px;
+      line-height: 20px;
     }
   }
 
   &.user-api-created {
-    align-items: baseline;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 16px;
 
     .user-api-text {
+      flex: 1 100%;
+      min-width: 0;
       display: flex;
       flex-direction: row;
+      gap: 12px;
 
-      > div input {
-        height: 38px;
-        border-radius: 2px;
-      }
+      > div {
+        flex: 1;
+        min-width: 0;
 
-      > :last-child {
-        margin-left: 3px;
+        label {
+          margin-bottom: 4px;
+        }
+
+        input {
+          width: 100%;
+          height: 40px;
+          padding: 0 10px;
+          box-sizing: border-box;
+          border: 1px solid colors.$grey200;
+          border-radius: 4px;
+          background-color: colors.$grey50;
+          font-family: monospace;
+          font-size: variables.$font-size-small;
+          color: colors.$black;
+
+          &:focus {
+            outline: none;
+            border-color: colors.$blue500;
+          }
+        }
       }
+    }
+
+    .user-api-buttons {
+      flex-shrink: 0;
+      margin-left: auto;
+    }
+
+    .user-api-message {
+      margin-top: 0;
     }
   }
 
@@ -132,7 +181,7 @@
   line-height: 25px;
   .user-info-icon-update {
     cursor: pointer;
-    color: colors.$grey;
+    color: colors.$grey600;
     &:hover {
       color: colors.$black;
     }
@@ -177,10 +226,10 @@
   line-height: 50px;
   text-align: center;
   font-size: 21px;
-  color: #fff;
+  color: colors.$white;
   padding: 0;
-  background: #b7b7b7;
-  border: 1px solid #ccc;
+  background: colors.$grey400;
+  border: 1px solid colors.$grey200;
   -moz-border-radius: 50px;
   -webkit-border-radius: 50px;
   border-radius: 50px;
@@ -193,12 +242,12 @@
 .preferences-modal .user-info-form label {
   float: left;
   margin-top: 7px;
-  font-size: 16px;
+  font-size: variables.$font-size-small;
 }
 
 .preferences-modal .user-reset-password label {
   float: left;
-  font-size: 18px;
+  font-size: variables.$font-size-base;
   margin-top: 25px;
 }
 
@@ -206,14 +255,14 @@
   .button {
     font-family: Calibri, Arial, Helvetica, sans-serif;
     vertical-align: top;
-    border: 1px solid #797979;
+    border: 1px solid colors.$grey600;
     border-radius: 2px;
-    font-size: 16px;
+    font-size: variables.$font-size-small;
     margin-bottom: 15px;
     margin-left: 80%;
-    background-color: colors.$translatedBlue;
+    background-color: colors.$blue500;
     transition: 0.3s ease;
-    color: #ffffff;
+    color: colors.$white;
     text-shadow: none;
     background-image: none;
     cursor: pointer;
@@ -228,9 +277,9 @@
     text-decoration: none;
     user-select: none;
     &:hover {
-      background-color: #08b3de;
+      background-color: colors.$blue200;
       box-shadow:
-        0 0 0 #e0e0e0,
+        0 0 0 colors.$grey200,
         0 0 2px rgba(0, 0, 0, 0.12),
         0 2px 4px rgba(0, 0, 0, 0.24) !important;
     }
@@ -238,6 +287,74 @@
 }
 
 .user-info-form .grey-txt {
-  color: colors.$grey1;
+  color: colors.$grey700;
 }
 
+#logoutlink,
+.reset-password {
+  margin-bottom: 10px;
+  text-decoration: underline;
+  float: left;
+  cursor: pointer;
+  color: colors.$blue700;
+
+  &:hover {
+    text-decoration: none;
+    color: colors.$blue400;
+  }
+}
+
+.user-info-form,
+.user-reset-password,
+.user-gdrive {
+  margin: 0 auto;
+  width: 100%;
+  float: left;
+  position: relative;
+}
+
+.user-reset-password {
+  width: 100%;
+}
+
+.user-info-form input {
+  margin-top: 5px;
+  font-size: variables.$font-size-xsmall;
+  width: 100%;
+  padding: 0.7em 0.6em;
+  display: inline-block;
+  border: 1px solid colors.$grey200;
+  border-radius: variables.$border-radius-default;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  color: colors.$grey1300;
+}
+
+.user-info-form input {
+  margin-top: 5px;
+  width: 100%;
+  color: colors.$black;
+}
+
+.preference-modal-message {
+  box-shadow: 0 2px 2px colors.$grey100;
+  border-radius: 2px;
+  border: 1px solid colors.$grey200;
+  line-height: 20px;
+  padding: 10px 15px;
+  background: rgb(195, 224, 195);
+  /*margin-top: 20px;*/
+  margin-bottom: 10px;
+}
+
+.user-link {
+  float: left;
+  clear: both;
+  font-size: variables.$font-size-small;
+  margin-left: 66px;
+  height: 20px;
+  margin-top: 12px;
+  display: flex;
+  gap: 16px;
+}

@@ -135,10 +135,10 @@ export const Xml = () => {
             <br />
             Element names are case sensitive.
             <br />
-            If the toggle is set to "Translatable", only the elements entered
+            If the toggle is set to &quot;Translatable&quot;, only the elements entered
             will be extracted as translatable.
             <br />
-            If the toggle is set to "Non-translatable", all the elements in the
+            If the toggle is set to &quot;Non-translatable&quot;, all the elements in the
             file <b>except</b> those entered will be extracted as translatable.
           </p>
         </div>

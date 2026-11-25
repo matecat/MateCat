@@ -5,7 +5,6 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  *
  * @param {Object} options
  * @param {string} [options.idJob=config.id_job]
- * @param {string} [options.password=config.password]
  * @param {string} [options.currentPassword=config.currentPassword]
  * @param {string} options.getPublicMatches
  * @param {string} options.dataTm
@@ -13,7 +12,6 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  */
 export const updateJobKeys = async ({
   idJob = config.id_job,
-  password = config.password,
   currentPassword = config.currentPassword,
   getPublicMatches,
   publicTmPenalty,
@@ -21,12 +19,11 @@ export const updateJobKeys = async ({
 }) => {
   const paramsData = Object.entries({
     action: 'updateJobKeys',
-    job_id: idJob,
-    job_pass: password,
+    id_job: idJob,
+    password: currentPassword,
     get_public_matches: getPublicMatches,
     public_tm_penalty: publicTmPenalty,
     data: dataTm,
-    current_password: currentPassword,
   })
     .filter(([, value]) => typeof value !== 'undefined')
     .reduce((acc, [key, value]) => ({...acc, [key]: value}), {})

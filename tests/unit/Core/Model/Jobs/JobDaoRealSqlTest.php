@@ -6,10 +6,13 @@ use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\RealSqlDaoTestTrait;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Jobs\JobDao;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\JobStruct;
+use Model\Jobs\MetadataDao;
 use Model\Projects\ProjectStruct;
 use Model\Translations\SegmentTranslationStruct;
 use Model\Users\UserStruct;
+use PDO;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
@@ -36,6 +39,7 @@ class JobDaoRealSqlTest extends AbstractTest
         'files_job',
         'files_parts',
         'job_custom_payable_rates',
+        'job_metadata',
         'jobs',
         'segment_translation_events',
         'segment_translations',
@@ -108,13 +112,56 @@ class JobDaoRealSqlTest extends AbstractTest
         self::assertSame([], $this->dao->read($job));
     }
 
-    public function testDestroyCacheByIdAndPassword(): void
+    public function testDestroyCacheClearsTheCredentialEntry(): void
     {
         $job = $this->seedJob();
         // Prime the cache (ttl>0 so the entry is actually stored), then destroy it.
         $this->dao->getByIdAndPassword($job->id, $job->password, 3600);
 
-        self::assertTrue($this->dao->destroyCacheByIdAndPassword($job));
+        $this->dao->destroyCache($job);
+    }
+
+    public function testDestroyCacheEvictsTheCredentialShapeWhenReadCachedLast(): void
+    {
+        $job = $this->seedJob();
+
+        // The comment endpoints cache the credential check for a day and the outsource quote page
+        // caches the same row through read(). The two shapes are found under one key each, and when
+        // they shared it the last one written owned it: a rotation deleted that one and left the
+        // other answering for the password it had just replaced.
+        self::assertInstanceOf(JobStruct::class, $this->dao->getByIdAndPassword($job->id, $job->password, 86400));
+        self::assertCount(1, $this->dao->setCacheTTL(3600)->read($job));
+
+        $this->rotatePasswordInTheDatabase($job, 'jd_b1_rotated_pwd');
+
+        // Nothing has been evicted yet, so the replaced password is still answered from the cache.
+        self::assertInstanceOf(JobStruct::class, $this->dao->getByIdAndPassword($job->id, $job->password, 86400));
+
+        $this->dao->destroyCache($job);
+
+        self::assertNull(
+            $this->dao->getByIdAndPassword($job->id, $job->password, 86400),
+            'the credential check has to reach the database, where the replaced password is gone'
+        );
+        self::assertSame(
+            [],
+            $this->dao->setCacheTTL(3600)->read($job),
+            'the shape the quote page reads goes with it'
+        );
+    }
+
+    private function rotatePasswordInTheDatabase(JobStruct $job, string $newPassword): void
+    {
+        $statement = $this->realSqlDb()->getConnection()->prepare(
+            'UPDATE jobs SET password = :new_password WHERE id = :id AND password = :old_password'
+        );
+        $statement->execute([
+            'new_password' => $newPassword,
+            'id' => $job->id,
+            'old_password' => $job->password,
+        ]);
+
+        self::assertSame(1, $statement->rowCount());
     }
 
     public function testDestroyCacheByProjectId(): void
@@ -128,6 +175,63 @@ class JobDaoRealSqlTest extends AbstractTest
     // ---------------------------------------------------------------------------------------
     // getByIdAndPassword / OrFail / getNotDeleted* / getByIdProjectAndIdJob
     // ---------------------------------------------------------------------------------------
+
+    /**
+     * A rotation replaces jobs.password, and the entry keyed on the password it replaced still holds
+     * the row. A request presenting the retired credential hits that entry, resolves to a job and is
+     * served for the rest of the TTL - the rotation buys nothing until the entry is gone. The struct
+     * handed to the door carries only the new password, so the old one has to be named.
+     */
+    public function testDestroyCacheEvictsTheRetiredPassword(): void
+    {
+        $job = $this->seedJob();
+        $idJob = (int)$job->id;
+        $retired = (string)$job->password;
+        $rotated = $retired . 'x';
+
+        // getByIdAndPassword() resets the TTL from its own argument, so the entry exists only when the
+        // read asks for it.
+        self::assertInstanceOf(JobStruct::class, $this->dao->getByIdAndPassword($idJob, $retired, 60));
+
+        $this->rotatePasswordInTheDatabase($job, $rotated);
+
+        $job->password = $rotated;
+        $this->dao->destroyCache($job, $retired);
+
+        self::assertNull(
+            $this->dao->getByIdAndPassword($idJob, $retired, 60),
+            'the replaced credential must stop resolving to a job'
+        );
+    }
+
+    /**
+     * The retired password is not decorative. A cache key is the query and its bind values, so the
+     * entry of a password nobody names is not reachable from the struct that replaced it: the door
+     * clears what it is given and cannot derive the rest. This pins that, so a later door that drops
+     * the parameter has to fail here rather than quietly leave the credential live.
+     */
+    public function testDestroyCacheLeavesAPasswordItWasNotGiven(): void
+    {
+        $job = $this->seedJob();
+        $idJob = (int)$job->id;
+        $retired = (string)$job->password;
+        $rotated = $retired . 'x';
+
+        // getByIdAndPassword() resets the TTL from its own argument, so the entry exists only when the
+        // read asks for it.
+        self::assertInstanceOf(JobStruct::class, $this->dao->getByIdAndPassword($idJob, $retired, 60));
+
+        $this->rotatePasswordInTheDatabase($job, $rotated);
+
+        $job->password = $rotated;
+        $this->dao->destroyCache($job);
+
+        self::assertInstanceOf(
+            JobStruct::class,
+            $this->dao->getByIdAndPassword($idJob, $retired, 60),
+            'unnamed, the retired entry is out of the door\'s reach'
+        );
+    }
 
     public function testGetByIdAndPasswordRoundTrips(): void
     {
@@ -249,6 +353,170 @@ class JobDaoRealSqlTest extends AbstractTest
         $this->dao->changePassword($job, '');
     }
 
+    /**
+     * job_metadata is keyed by (id_job, password, key), so renaming the credential without carrying
+     * the rows over leaves every setting the job has at an address nothing resolves any more:
+     * dialect_strict, mandatory_issues, the character counter, the subfiltering handlers. The move
+     * belongs to the rename, because ChangePasswordController, TranslatorsModel::changeJobPassword()
+     * and updateForMerge() all rotate through here and the last one dispatches no event to hang a
+     * listener on.
+     */
+    public function testChangePasswordCarriesTheJobMetadataOntoTheNewPassword(): void
+    {
+        $job = $this->seedJob();
+        $oldPassword = (string)$job->password;
+        $newPassword = 'rotated_' . bin2hex(random_bytes(4));
+
+        $metadataDao = new MetadataDao($this->realSqlDb());
+        $stored = [
+            JobsMetadataMarshaller::DIALECT_STRICT->value   => '1',
+            JobsMetadataMarshaller::MANDATORY_ISSUES->value => '["r1"]',
+        ];
+
+        foreach ($stored as $key => $value) {
+            $metadataDao->set((int)$job->id, $oldPassword, $key, $value);
+            $this->fixtures->trackExisting('job_metadata', [
+                'id_job'   => $job->id,
+                'password' => $newPassword,
+                'key'      => $key,
+            ]);
+        }
+
+        $this->dao->changePassword($job, $newPassword);
+
+        self::assertSame([], $metadataDao->getRawMapByJobIdAndPassword((int)$job->id, $oldPassword));
+        self::assertSame($stored, $metadataDao->getRawMapByJobIdAndPassword((int)$job->id, $newPassword));
+    }
+
+    /**
+     * The MT context is stored under the empty password and read by (id_job, key) alone, so it is
+     * not the rotated credential's to carry.
+     */
+    public function testChangePasswordLeavesThePasswordLessMetadataRowWhereItIs(): void
+    {
+        $job = $this->seedJob();
+        $newPassword = 'rotated_' . bin2hex(random_bytes(4));
+
+        $metadataDao = new MetadataDao($this->realSqlDb());
+        $metadataDao->set((int)$job->id, '', 'mt_context', 'ctx-1');
+        $this->fixtures->trackExisting('job_metadata', [
+            'id_job'   => $job->id,
+            'password' => '',
+            'key'      => 'mt_context',
+        ]);
+
+        $this->dao->changePassword($job, $newPassword);
+
+        self::assertSame(['mt_context' => 'ctx-1'], $metadataDao->getRawMapByJobIdAndPassword((int)$job->id, ''));
+        self::assertSame([], $metadataDao->getRawMapByJobIdAndPassword((int)$job->id, $newPassword));
+    }
+
+    public function testChangePasswordLeavesTheEvictionToTheCaller(): void
+    {
+        $job = $this->seedJob();
+        $oldPassword = $job->password;
+        $newPassword = 'newpw_' . bin2hex(random_bytes(4));
+
+        // Evicting here would be undone: every caller rotates inside a transaction, and while it is
+        // open another connection still reads the pre-rotation row and caches the replaced password as
+        // valid again, behind whatever was just deleted. The sweep is the caller's, once it has
+        // committed — see JobCredentialCacheInvalidator::sweepAfterJobPasswordRotation().
+        self::assertInstanceOf(JobStruct::class, $this->dao->getByIdAndPassword($job->id, $oldPassword, 86400));
+
+        $this->dao->changePassword($job, $newPassword);
+
+        self::assertInstanceOf(JobStruct::class, $this->dao->getByIdAndPassword($job->id, $oldPassword, 86400));
+    }
+
+    /**
+     * Register the (id_job, password, key) rows the metadata DAO INSERTed so the whole-table residue
+     * gate over job_metadata returns to its baseline.
+     *
+     * @param list<string> $keys
+     */
+    private function trackJobMetadata(int $idJob, string $password, array $keys): void
+    {
+        foreach ($keys as $key) {
+            $this->fixtures->trackExisting('job_metadata', [
+                'id_job'   => $idJob,
+                'password' => $password,
+                'key'      => $key,
+            ]);
+        }
+    }
+
+    public function testChangePasswordMovesJobMetadataOntoTheNewPassword(): void
+    {
+        $job = $this->seedJob();
+        $oldPassword = (string)$job->password;
+        $newPassword = 'newpw_' . bin2hex(random_bytes(4));
+
+        $metadataDao = new MetadataDao($this->realSqlDb());
+        $metadataDao->bulkSet((int)$job->id, $oldPassword, [
+            JobsMetadataMarshaller::DEEPL_FORMALITY->value => 'prefer_more',
+            JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value => '90',
+        ]);
+
+        $this->dao->changePassword($job, $newPassword);
+
+        // Registered under the NEW password: that is where the rotation has just moved them, so that
+        // is where cleanup has to look to bring job_metadata back to its baseline row count.
+        $this->trackJobMetadata((int)$job->id, $newPassword, [
+            JobsMetadataMarshaller::DEEPL_FORMALITY->value,
+            JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value,
+        ]);
+
+        // The password is half the natural key: without the migration the rows are stranded under a
+        // credential nothing resolves any more and the chunk silently loses every stored setting,
+        // falling back to the project value — or to no value at all for a project created after the
+        // MT settings moved to the job.
+        self::assertSame(
+            'prefer_more',
+            $metadataDao->get((int)$job->id, $newPassword, JobsMetadataMarshaller::DEEPL_FORMALITY->value)?->value
+        );
+        self::assertSame(
+            '90',
+            $metadataDao->get((int)$job->id, $newPassword, JobsMetadataMarshaller::MT_QUALITY_VALUE_IN_EDITOR->value)?->value
+        );
+
+        self::assertNull(
+            $metadataDao->get((int)$job->id, $oldPassword, JobsMetadataMarshaller::DEEPL_FORMALITY->value),
+            'the rows must move, not be copied: two answers for one setting is worse than none'
+        );
+    }
+
+    public function testChangePasswordLeavesAnotherChunkMetadataAlone(): void
+    {
+        $job = $this->seedJob();
+        $oldPassword = (string)$job->password;
+        $newPassword = 'newpw_' . bin2hex(random_bytes(4));
+        $siblingPassword = 'sibling_' . bin2hex(random_bytes(4));
+
+        $metadataDao = new MetadataDao($this->realSqlDb());
+        $metadataDao->bulkSet((int)$job->id, $oldPassword, [
+            JobsMetadataMarshaller::LARA_STYLE->value => 'creative',
+        ]);
+        // A split leaves several chunks sharing one id_job, told apart only by the password.
+        $metadataDao->bulkSet((int)$job->id, $siblingPassword, [
+            JobsMetadataMarshaller::LARA_STYLE->value => 'faithful',
+        ]);
+
+        $this->dao->changePassword($job, $newPassword);
+
+        $this->trackJobMetadata((int)$job->id, $newPassword, [JobsMetadataMarshaller::LARA_STYLE->value]);
+        $this->trackJobMetadata((int)$job->id, $siblingPassword, [JobsMetadataMarshaller::LARA_STYLE->value]);
+
+        self::assertSame(
+            'faithful',
+            $metadataDao->get((int)$job->id, $siblingPassword, JobsMetadataMarshaller::LARA_STYLE->value)?->value,
+            'rotating one chunk credential must not touch the rows of its siblings'
+        );
+        self::assertSame(
+            'creative',
+            $metadataDao->get((int)$job->id, $newPassword, JobsMetadataMarshaller::LARA_STYLE->value)?->value
+        );
+    }
+
     // ---------------------------------------------------------------------------------------
     // status mutations: setJobComplete / updateJobStatus / updateAllJobsStatusesByProjectId
     // ---------------------------------------------------------------------------------------
@@ -295,12 +563,46 @@ class JobDaoRealSqlTest extends AbstractTest
     {
         $job = $this->seedJob();
 
-        $affected = $this->dao->updateStdWcAndTotalWc($job->id, 111, 222);
+        $affected = $this->dao->updateStdWcAndTotalWc($job->id, $job->password, 111, 222);
 
         self::assertSame(1, $affected);
         $reloaded = $this->dao->getByIdAndPassword($job->id, $job->password);
         self::assertSame(111, $reloaded->standard_analysis_wc);
         self::assertSame(222, $reloaded->total_raw_wc);
+    }
+
+    public function testUpdateStdWcAndTotalWcLeavesTheOtherChunksAlone(): void
+    {
+        $job = $this->seedJob();
+        $sibling = $this->seedSiblingChunk($job, 'sibling_chunk_pw');
+
+        $affected = $this->dao->updateStdWcAndTotalWc($job->id, $job->password, 111, 222);
+
+        self::assertSame(1, $affected);
+        $reloadedSibling = $this->dao->getByIdAndPassword($sibling->id, $sibling->password);
+        self::assertSame($sibling->standard_analysis_wc, $reloadedSibling->standard_analysis_wc);
+        self::assertSame($sibling->total_raw_wc, $reloadedSibling->total_raw_wc);
+    }
+
+    /**
+     * A second chunk of $job: the same row under another password, the way a split stores it.
+     */
+    private function seedSiblingChunk(JobStruct $job, string $password): JobStruct
+    {
+        $conn = $this->realSqlDb()->getConnection();
+        $select = $conn->prepare('SELECT * FROM jobs WHERE id = ? AND password = ?');
+        $select->execute([$job->id, $job->password]);
+        $row = $select->fetch(\PDO::FETCH_ASSOC);
+        $row['password'] = $password;
+        $row['standard_analysis_wc'] = 7;
+        $row['total_raw_wc'] = 8;
+
+        $columns = array_keys($row);
+        $conn->prepare(
+            'INSERT INTO jobs (`' . implode('`, `', $columns) . '`) VALUES (' . implode(', ', array_fill(0, count($columns), '?')) . ')'
+        )->execute(array_values($row));
+
+        return $this->dao->getByIdAndPassword($job->id, $password);
     }
 
     public function testUpdateJobWeightedPeeAndTTE(): void
@@ -309,11 +611,30 @@ class JobDaoRealSqlTest extends AbstractTest
         $job->avg_post_editing_effort = 12.5;
         $job->total_time_to_edit = 9999;
 
-        $this->dao->updateJobWeightedPeeAndTTE($job);
+        self::assertSame(1, $this->dao->updateJobWeightedPeeAndTTE($job));
 
         $reloaded = $this->dao->getByIdAndPassword($job->id, $job->password);
         self::assertEqualsWithDelta(12.5, $reloaded->avg_post_editing_effort, 0.001);
         self::assertSame(9999, $reloaded->total_time_to_edit);
+    }
+
+    /**
+     * The frame was queued before a re-split moved the chunk's range: its totals must not land on
+     * the chunk as it is now, which keeps the same id and password.
+     */
+    public function testUpdateJobWeightedPeeAndTTESkipsAChunkWhoseRangeMoved(): void
+    {
+        $job = $this->seedJob();
+        $queued = clone $job;
+        $queued->avg_post_editing_effort = 12.5;
+        $queued->total_time_to_edit = 9999;
+        $queued->job_last_segment = $job->job_last_segment + 1;
+
+        self::assertSame(0, $this->dao->updateJobWeightedPeeAndTTE($queued));
+
+        $reloaded = $this->dao->getByIdAndPassword($job->id, $job->password);
+        self::assertEqualsWithDelta((float)$job->avg_post_editing_effort, $reloaded->avg_post_editing_effort, 0.001);
+        self::assertSame($job->total_time_to_edit, $reloaded->total_time_to_edit);
     }
 
     // ---------------------------------------------------------------------------------------
@@ -553,7 +874,7 @@ class JobDaoRealSqlTest extends AbstractTest
     }
 
     // ---------------------------------------------------------------------------------------
-    // updateForMerge / deleteOnMerge (merge lifecycle)
+    // updateForMerge / deleteChunk (merge lifecycle)
     // ---------------------------------------------------------------------------------------
 
     public function testUpdateForMergeChangesPassword(): void
@@ -581,21 +902,48 @@ class JobDaoRealSqlTest extends AbstractTest
         self::assertInstanceOf(JobStruct::class, $this->dao->getByIdAndPassword($job->id, $original));
     }
 
-    public function testDeleteOnMergeRemovesOtherPasswordRow(): void
+    public function testDeleteChunkRemovesOnlyThatChunk(): void
     {
-        // Create a second job in the same project with a DIFFERENT password; deleteOnMerge
-        // removes the row matching id but NOT the "first_job_password".
-        $job = $this->seedJob();
-        $firstJobPassword = 'kept_' . bin2hex(random_bytes(4));
+        $first = $this->seedJob();
+        $second = $this->seedSecondChunk($first);
 
-        $merge = new JobStruct();
-        $merge->id = $job->id;
-        $merge->password = $firstJobPassword; // the surviving password
+        self::assertSame(1, $this->dao->deleteChunk($second));
 
-        $result = $this->dao->deleteOnMerge($merge);
+        self::assertNull($this->dao->getByIdAndPassword($second->id, $second->password));
+        self::assertInstanceOf(JobStruct::class, $this->dao->getByIdAndPassword($first->id, $first->password));
+    }
 
-        self::assertTrue($result);
-        // the original (different-password) row is gone
-        self::assertNull($this->dao->getByIdAndPassword($job->id, $job->password));
+    public function testDeleteChunkOfAChunkAlreadyGoneDeletesNothing(): void
+    {
+        $first = $this->seedJob();
+        $gone = clone $first;
+        $gone->password = 'gone_' . bin2hex(random_bytes(4));
+
+        self::assertSame(0, $this->dao->deleteChunk($gone));
+        self::assertInstanceOf(JobStruct::class, $this->dao->getByIdAndPassword($first->id, $first->password));
+    }
+
+    /**
+     * A second chunk of $job: the same row under another password, as a split leaves it. Cleaned up
+     * with $job, since the fixture tracks the job by id.
+     */
+    private function seedSecondChunk(JobStruct $job): JobStruct
+    {
+        $conn = $this->realSqlDb()->getConnection();
+        $select = $conn->prepare('SELECT * FROM jobs WHERE id = ? AND password = ?');
+        $select->execute([$job->id, $job->password]);
+        $row = $select->fetch(PDO::FETCH_ASSOC);
+        self::assertIsArray($row);
+
+        $row['password'] = 'chunk2_' . bin2hex(random_bytes(4));
+        $columns = array_keys($row);
+        $conn->prepare(
+            'INSERT INTO jobs (`' . implode('`,`', $columns) . '`) VALUES (' . implode(',', array_fill(0, count($columns), '?')) . ')'
+        )->execute(array_values($row));
+
+        $loaded = $this->dao->getByIdAndPassword($job->id, $row['password']);
+        self::assertInstanceOf(JobStruct::class, $loaded);
+
+        return $loaded;
     }
 }

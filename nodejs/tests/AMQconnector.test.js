@@ -1,30 +1,33 @@
-jest.mock('@stomp/stompjs', () => ({
-  Client: jest.fn().mockImplementation(() => ({
-    activate: jest.fn(),
-    subscribe: jest.fn(),
-    onConnect: null,
-    onWebSocketError: null,
-    onWebSocketClose: null,
-    onStompError: null,
-  })),
+import {describe, test, expect, beforeEach, vi} from 'vitest';
+import {Reader} from '../src/amq/AMQconnector.js';
+import {logger} from '../src/utils.js';
+
+vi.mock('@stomp/stompjs', () => ({
+  Client: vi.fn(function () {
+    return {
+      activate: vi.fn(),
+      subscribe: vi.fn(),
+      onConnect: null,
+      onWebSocketError: null,
+      onWebSocketClose: null,
+      onStompError: null,
+    };
+  }),
 }));
 
-jest.mock('../src/utils', () => ({
+vi.mock('../src/utils.js', () => ({
   logger: {
-    info: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
+    info: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
   },
 }));
-
-const {Reader} = require('../src/amq/AMQconnector');
-const {logger} = require('../src/utils');
 
 function mockMessage(body) {
   return {
     body: typeof body === 'string' ? body : JSON.stringify(body),
-    ack: jest.fn(),
-    nack: jest.fn(),
+    ack: vi.fn(),
+    nack: vi.fn(),
   };
 }
 
@@ -32,9 +35,9 @@ describe('Reader.subscribe', () => {
   let reader, handler;
 
   beforeEach(() => {
-    handler = jest.fn();
+    handler = vi.fn();
     reader = new Reader('test-queue', {brokerURL: 'ws://localhost:61614'}, handler);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('acks after successful handler call', () => {
@@ -67,8 +70,8 @@ describe('Reader.onConnect', () => {
   let reader;
 
   beforeEach(() => {
-    reader = new Reader('test-queue', {brokerURL: 'ws://localhost:61614'}, jest.fn());
-    jest.clearAllMocks();
+    reader = new Reader('test-queue', {brokerURL: 'ws://localhost:61614'}, vi.fn());
+    vi.clearAllMocks();
   });
 
   test('logs connection and subscribes to queue', () => {
@@ -86,8 +89,8 @@ describe('Reader.onWebSocketError', () => {
   let reader;
 
   beforeEach(() => {
-    reader = new Reader('test-queue', {brokerURL: 'ws://localhost:61614'}, jest.fn());
-    jest.clearAllMocks();
+    reader = new Reader('test-queue', {brokerURL: 'ws://localhost:61614'}, vi.fn());
+    vi.clearAllMocks();
   });
 
   test('logs websocket error event', () => {
@@ -101,8 +104,8 @@ describe('Reader.onWebSocketClose', () => {
   let reader;
 
   beforeEach(() => {
-    reader = new Reader('test-queue', {brokerURL: 'ws://localhost:61614'}, jest.fn());
-    jest.clearAllMocks();
+    reader = new Reader('test-queue', {brokerURL: 'ws://localhost:61614'}, vi.fn());
+    vi.clearAllMocks();
   });
 
   test('logs close code', () => {
@@ -115,8 +118,8 @@ describe('Reader.onStompError', () => {
   let reader;
 
   beforeEach(() => {
-    reader = new Reader('test-queue', {brokerURL: 'ws://localhost:61614'}, jest.fn());
-    jest.clearAllMocks();
+    reader = new Reader('test-queue', {brokerURL: 'ws://localhost:61614'}, vi.fn());
+    vi.clearAllMocks();
   });
 
   test('logs broker error message and body', () => {

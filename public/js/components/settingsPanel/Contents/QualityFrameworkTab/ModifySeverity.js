@@ -1,16 +1,12 @@
 import React, {useContext, useEffect, useRef, useState} from 'react'
-import {
-  BUTTON_MODE,
-  BUTTON_SIZE,
-  BUTTON_TYPE,
-  Button,
-} from '../../../common/Button/Button'
+import {BUTTON_MODE, BUTTON_TYPE, Button} from '../../../common/Button/Button'
 import PropTypes from 'prop-types'
 import Checkmark from '../../../../../img/icons/Checkmark'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import usePortal from '../../../../hooks/usePortal'
 import {QualityFrameworkTabContext} from './QualityFrameworkTabContext'
 import {getCodeFromLabel} from './CategoriesSeveritiesTableUtils'
+import stylesPopover from '../../../common/Popover/Popover.module.scss'
 
 export const ModifySeverity = ({
   target,
@@ -97,6 +93,7 @@ export const ModifySeverity = ({
       onKeyUp={confirmWithKeyboard}
     >
       <input
+        type="text"
         className={`quality-framework-input input${error ? ' quality-framework-input-error' : ''}`}
         placeholder="Name"
         value={labelState}
@@ -115,15 +112,17 @@ export const ModifySeverity = ({
     <Portal>
       <div
         ref={ref}
-        className="popover-component-popover quality-framework-modify-severity"
+        className={`${stylesPopover['popover-component-popover']} quality-framework-modify-severity`}
         style={{top: `${rect.top}px`, left: `${rect.left}px`}}
         data-testid="qf-modify-severity"
       >
-        <div className="popover-component-header">
-          <span className="popover-component-title">Rename severity</span>
+        <div className={`${stylesPopover['popover-component-header']}`}>
+          <span className={`${stylesPopover['popover-component-title']}`}>
+            Rename severity
+          </span>
         </div>
         <div
-          className="popover-component-body"
+          className={`${stylesPopover['popover-component-body']} quality-framework-add-popover`}
           onKeyDown={(event) => {
             if (event.key === 'Escape') {
               cancel()
@@ -133,22 +132,17 @@ export const ModifySeverity = ({
         >
           {content}
         </div>
-        <div className="popover-component-actions">
-          <Button
-            mode={BUTTON_MODE.OUTLINE}
-            size={BUTTON_SIZE.MEDIUM}
-            onClick={cancel}
-          >
+        <div className={`${stylesPopover['popover-component-actions']}`}>
+          <Button mode={BUTTON_MODE.OUTLINE} onClick={cancel}>
             Cancel
           </Button>
           <Button
             ref={confirmRef}
             type={BUTTON_TYPE.PRIMARY}
-            size={BUTTON_SIZE.MEDIUM}
             onClick={updateLabel}
             disabled={!labelState || typeof error === 'string'}
           >
-            <Checkmark size={14} />
+            <Checkmark size={18} />
             Confirm
           </Button>
         </div>

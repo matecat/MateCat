@@ -1,14 +1,9 @@
 import {getQueryStringFromNestedProps} from '../../utils/queryString'
 
-export const getFilteredSegments = async (
-  idJob,
-  password,
-  filter,
-  revisionNumber,
-) => {
+export const getFilteredSegments = async (idJob, password, filter) => {
+  // No revision_number: the filter is applied to the phase the password in the URL resolves to.
   const params = getQueryStringFromNestedProps({
     filter: filter,
-    revision_number: revisionNumber,
   })
 
   const response = await fetch(

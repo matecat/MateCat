@@ -1,6 +1,11 @@
 import React, {useContext} from 'react'
-import {Button, BUTTON_SIZE} from '../common/Button/Button'
+import {Button, BUTTON_SIZE, BUTTON_TYPE, BUTTON_MODE} from '../common/Button/Button'
 import {OnBoardingContext, socialUrls} from './OnBoardingContext'
+import Google from '../../../img/icons/social/Google'
+import LinkedIn from '../../../img/icons/social/LinkedIn'
+import Github from '../../../img/icons/social/Github'
+import Microsoft from '../../../img/icons/social/Microsoft'
+import Meta from '../../../img/icons/social/Meta'
 const SocialButtons = () => {
   const {socialLogin} = useContext(OnBoardingContext)
 
@@ -9,44 +14,51 @@ const SocialButtons = () => {
       {socialUrls.googleUrl && (
         <Button
           size={BUTTON_SIZE.ICON_STANDARD}
+          type={BUTTON_TYPE.ICON}
+          mode={BUTTON_MODE.OUTLINE}
           onClick={() => socialLogin(socialUrls.googleUrl)}
         >
-          <img alt="Google login" src="/public/img/icons/social/google.svg" />
+          <Google size={24} />
         </Button>
       )}
       {socialUrls.linkedIn && (
         <Button
           size={BUTTON_SIZE.ICON_STANDARD}
+          type={BUTTON_TYPE.ICON}
+          mode={BUTTON_MODE.OUTLINE}
           onClick={() => socialLogin(socialUrls.linkedIn)}
         >
-          <img alt="Google login" src="/public/img/icons/social/linkedIn.svg" />
+          <LinkedIn size={24} />
         </Button>
       )}
       {socialUrls.microsoft && (
         <Button
           size={BUTTON_SIZE.ICON_STANDARD}
+          type={BUTTON_TYPE.ICON}
+          mode={BUTTON_MODE.OUTLINE}
           onClick={() => socialLogin(socialUrls.microsoft)}
         >
-          <img
-            alt="Google login"
-            src="/public/img/icons/social/microsoft.svg"
-          />
+          <Microsoft size={24} />
         </Button>
       )}
       {socialUrls.github && (
         <Button
           size={BUTTON_SIZE.ICON_STANDARD}
+          type={BUTTON_TYPE.ICON}
+          mode={BUTTON_MODE.OUTLINE}
           onClick={() => socialLogin(socialUrls.github)}
         >
-          <img alt="Google login" src="/public/img/icons/social/github.svg" />
+          <Github size={24} />
         </Button>
       )}
       {socialUrls.meta && (
         <Button
           size={BUTTON_SIZE.ICON_STANDARD}
+          type={BUTTON_TYPE.ICON}
+          mode={BUTTON_MODE.OUTLINE}
           onClick={() => socialLogin(socialUrls.meta)}
         >
-          <img alt="Google login" src="/public/img/icons/social/meta.svg" />
+          <Meta size={24} />
         </Button>
       )}
     </div>

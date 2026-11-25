@@ -252,9 +252,8 @@ class AuthCookie
             return;
         }
 
-        // Read the age from iat, which a parsed instance keeps as issued. Deliberately NOT
-        // getExpireDate(): for a parsed instance :172-174 loads the absolute exp into timeToLive,
-        // so it returns iat + exp. Pre-existing bug, avoided rather than relied on.
+        // Read the age from iat, which a parsed instance keeps as issued. Renewal is decided by how
+        // long ago the cookie was minted, so iat is the claim to read here rather than the expiry.
         $issuedAt = $jwt['iat'] ?? null;
 
         if (!is_int($issuedAt) || (time() - $issuedAt) <= $this->renewAfterSeconds()) {
@@ -310,7 +309,9 @@ class AuthCookie
         }
 
         // Collect fields left behind by devices that stopped renewing. Runs here rather than on the
-        // hot path: this is once per renewal interval per device, not once per request.
+        // hot path: this is once per renewal interval per device, not once per request. The store
+        // judges a field by its issue time; the callback is asked only about fields written before
+        // the store kept one, which hold the cookie itself.
         $this->tokenStore->pruneExpiredLoginTokens($userId, static function (string $token): bool {
             try {
                 SimpleJWT::getValidatedInstanceFromString($token, AppConfig::$AUTHSECRET);

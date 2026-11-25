@@ -14,10 +14,9 @@ use PDO;
 use PDOException;
 use ReflectionException;
 use RuntimeException;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\ProjectCompletionRepositoryInterface;
-use Utils\Logger\LoggerFactory;
+use Throwable;
 
-class ProjectCompletionRepository implements ProjectCompletionRepositoryInterface
+class ProjectCompletionRepository
 {
     public function __construct(
         private IDatabase $db,
@@ -29,27 +28,23 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
     }
 
     /**
-     * @throws PDOException
+     * Run a callback inside a database transaction.
+     *
+     * The repository keeps owning its connection; what it does not own is the decision about when a
+     * transaction opens and closes. Handing out begin/commit/rollback instead made this class a
+     * second place transaction control lives, invisible to every reader and to static analysis.
+     *
+     * @template T
+     *
+     * @param callable(): T $work
+     *
+     * @return T The value returned by the callback
+     *
+     * @throws Throwable Re-throws the original exception after the transaction is aborted
      */
-    public function beginTransaction(): void
+    public function transaction(callable $work): mixed
     {
-        $this->db->begin();
-    }
-
-    /**
-     * @throws PDOException
-     */
-    public function commit(): void
-    {
-        $this->db->commit();
-    }
-
-    /**
-     * @throws PDOException
-     */
-    public function rollback(): void
-    {
-        $this->db->rollback();
+        return $this->db->transaction($work);
     }
 
     /**
@@ -82,8 +77,6 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
 
             return $stmt->fetchAll();
         } catch (PDOException $e) {
-            LoggerFactory::doJsonLog($e->getMessage());
-
             throw new RuntimeException($e->getMessage(), 0, $e);
         }
     }
@@ -136,7 +129,7 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
     }
 
     /**
-     * @throws \PDOException
+     * @throws PDOException
      */
     public function initializeJobWordCount(int $jobId, string $password): void
     {
@@ -149,7 +142,7 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
      */
     public function destroyProjectAndJobCaches(int $pid): void
     {
-        $this->projectDao->destroyFetchByIdCache($pid, ProjectStruct::class);
+        $this->projectDao->destroyCache($pid);
         $this->jobDao->destroyCacheByProjectId($pid);
     }
 
@@ -159,9 +152,8 @@ class ProjectCompletionRepository implements ProjectCompletionRepositoryInterfac
      */
     public function destroyAllCaches(int $pid, string $projectPassword): void
     {
-        $this->projectDao->destroyFetchByIdCache($pid, ProjectStruct::class);
+        $this->projectDao->destroyCache($pid, $projectPassword);
         $this->jobDao->destroyCacheByProjectId($pid);
-        $this->projectDao->destroyProjectPasswordCache($pid, $projectPassword);
-        $this->analysisDao->destroyAnalysisProjectCache($pid);
+        $this->analysisDao->destroyCacheProjectStatsVolumeAnalysis($pid);
     }
 }

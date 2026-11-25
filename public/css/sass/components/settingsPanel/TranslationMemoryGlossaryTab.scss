@@ -1,4 +1,5 @@
-@use '../../commons/colors';
+@use '../../tokens/colors';
+@use '../../commons/variables';
 
 .translation-memory-glossary-tab {
   display: flex;
@@ -6,7 +7,7 @@
 
   .confirm-button {
     height: 26px;
-    font-size: 14px !important;
+    font-size: variables.$font-size-xsmall !important;
     min-width: unset;
     gap: 5px !important;
     margin: 0 !important;
@@ -28,28 +29,152 @@
   }
 }
 
-.translation-memory-glossary-checkbox-container {
+.translation-memory-glossary-subtabs {
+  display: flex;
+  gap: 28px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid colors.$grey150;
+}
+
+.translation-memory-glossary-subtab {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 2px 10px;
+  margin-bottom: -1px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: none;
+  font-family: inherit;
+  font-size: variables.$font-size-small;
+  font-weight: normal;
+  color: colors.$grey700;
+  cursor: pointer;
+
+  &:hover {
+    color: colors.$blue900;
+  }
+}
+
+.translation-memory-glossary-subtab-active {
+  color: colors.$blue900;
+  border-bottom-color: colors.$blue500;
+}
+
+.translation-memory-glossary-advanced {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  border-radius: 4px;
-  border: 1px dashed colors.$grey8;
-  padding: 10px;
-  margin-bottom: 20px;
+  gap: 32px;
+  text-align: left;
+}
+
+.translation-memory-glossary-advanced-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.translation-memory-glossary-advanced
+  .translation-memory-glossary-advanced-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  h2 {
+    margin: 0;
+    padding: 0;
+    font-size: variables.$font-size-big;
+    line-height: 24px;
+  }
+
+  p {
+    margin: 0;
+    font-size: variables.$font-size-small;
+    line-height: 24px;
+    color: colors.$grey700;
+  }
+}
+
+.translation-memory-glossary-pretranslate-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.translation-memory-glossary-pretranslate-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-radius: variables.$border-radius-default;
+  border: 1px solid colors.$grey150;
+  padding: 16px;
   background: colors.$white;
 }
 
-.translation-memory-glossary-checkbox-item {
+.translation-memory-glossary-pretranslate-toggle {
   display: flex;
   align-items: center;
+  gap: 12px;
+  font-size: variables.$font-size-small;
+  font-weight: bold;
+}
+
+.translation-memory-glossary-pretranslate-status {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
+}
+
+.translation-memory-glossary-variant-matching {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: variables.$font-size-small;
+    line-height: 24px;
+    color: #2d2d30;
+    cursor: pointer;
+  }
+
+  input {
+    appearance: none;
+    flex: none;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    border: 1px solid rgba(1, 1, 24, 0.26);
+    border-radius: 50%;
+    background: rgba(56, 56, 56, 0.04);
+    cursor: pointer;
+
+    &:checked {
+      border-color: #2985ec;
+      background: radial-gradient(circle, colors.$white 0 5px, #2985ec 5px);
+    }
+
+    &:focus-visible {
+      outline: 2px solid #2985ec;
+      outline-offset: 2px;
+    }
+  }
+}
+
+.translation-memory-glossary-subtab-panel {
+  display: flex;
+  flex-direction: column;
+
+  &[hidden] {
+    display: none;
+  }
 }
 
 .translation-memory-glossary-tab-table-title {
   display: flex;
   align-items: center;
   font-size: 24px;
-  font-weight: bold;
   justify-content: space-between;
   margin-bottom: 10px;
 
@@ -60,10 +185,9 @@
 }
 
 .translation-memory-glossary-tab-input-text {
-  border-radius: 2px;
-  border: 1px solid colors.$grey8;
-  padding: 6px;
+  padding: 6px 12px !important;
   width: 350px;
+  font-size: variables.$font-size-xsmall;
 }
 
 .translation-memory-glossary-tab {
@@ -77,16 +201,18 @@
     padding: 0 20px;
   }
 
-  .settings-panel-table-rowHeading,
+  .settings-panel-table-rowHeading {
+    grid-template-columns: 8% 5% minmax(0, 1fr) 20% 5% 14% 146px;
+  }
   .settings-panel-row-content {
-    grid-template-columns: 8% 5% minmax(0, 1fr) 20% 5% 14% 18%;
+    grid-template-columns: 8% 5% minmax(0, 1fr) 20% 5% 14% auto;
   }
 
   .settings-panel-row {
     border: unset;
 
     .row-content-default-memory {
-      grid-template-columns: 8% 5% minmax(0, 1fr) 5% 14% 18%;
+      grid-template-columns: 8% 5% minmax(0, 1fr) 5% 14% 144px;
       padding: 0 10px !important;
       background-color: transparent;
 
@@ -101,10 +227,9 @@
       > form {
         padding: 0 !important;
         background-color: unset;
-
-        > :last-child {
-          grid-column: 7;
-        }
+      }
+      > form > :last-child {
+        grid-column: 7;
       }
     }
   }
@@ -119,7 +244,7 @@
 
   .settings-panel-row-active {
     padding: 10px;
-    background-color: colors.$transparentBlue;
+    background-color: colors.$blue50;
   }
 
   .settings-panel-table-rowHeading-column {
@@ -170,14 +295,16 @@
 
 .tm-key-row-name {
   width: 100%;
-  padding: 4px;
   background-color: unset;
-  border: 1px solid colors.$grey8;
-  border-radius: 3px;
+  padding: 4px 8px !important;
 
   &:focus,
   &:hover {
     background-color: white;
+  }
+
+  &:disabled {
+    background-color: transparent !important;
   }
 }
 
@@ -186,15 +313,18 @@
 }
 
 .tm-key-row-name-disabled {
-  border: unset;
+  border: none !important;
+  background-color: unset !important;
+  color: colors.$black !important;
+
   &:focus,
   &:hover {
-    background-color: unset;
+    background-color: unset !important;
   }
 }
 
 .tm-key-row-button-item {
-  color: colors.$grey6;
+  color: colors.$grey700;
 
   > :first-child {
     display: flex;
@@ -204,84 +334,95 @@
 }
 
 .tm-key-row-menu-button {
-  .menu-button-wrapper {
-    > :first-child {
-      min-width: 140px;
-      border-radius: 2px;
-      height: 28px;
-    }
-
-    > :last-child {
-      border: none;
-      background-color: unset;
-      color: colors.$grey6;
-    }
-  }
+  justify-content: unset;
 
   .just-button-import-tmx {
     min-width: 140px;
     border-radius: 2px;
-    font-size: 16px;
-    color: #000;
-    background: colors.$grey4;
+    font-size: variables.$font-size-small;
+    color: colors.$black;
+    background: colors.$grey100;
     padding: 4px 8px;
     text-align: center;
-    border: 1px solid colors.$grey7;
+    border: 1px solid colors.$grey400;
 
     &:hover {
-      background-color: colors.$grey5;
+      background-color: colors.$grey50;
     }
   }
 }
 
-.tm-key-row-menu-button-dropdown {
-  margin-left: -10px;
+.tm-key-row-options-menu-container,
+.translation-memory-glossary-tab-buttons-group {
+  display: flex;
+  gap: 8px;
 }
 
 .tm-key-row-icons {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: colors.$grey;
+  color: colors.$grey600;
 }
 
-.translation-memory-glossary-tab-buttons-group {
-  display: flex;
-  gap: 8px;
-  justify-content: end;
+.translation-memory-glossary-tab-create-row {
+  button[type='submit'] {
+    width: 96px;
+  }
 }
 
 .tm-key-create-resource-row-input {
   width: 100%;
-  padding: 4px;
-  border-radius: 3px;
-  border: solid 1px colors.$grey3;
+  padding: 4px 8px !important;
+  border-radius: variables.$border-radius-default;
+  border: solid 1px colors.$grey150;
+  background-color: colors.$white !important;
 
   &.error {
-    border: solid 1px colors.$redDefault;
+    border: solid 1px colors.$red500;
   }
 }
 
 .translation-memory-glossary-tab-import,
 .translation-memory-glossary-tab-export,
+.translation-memory-glossary-tab-share,
 .translation-memory-glossary-tab-delete {
   display: flex;
   flex-direction: column;
-  padding: 10px;
+  padding: 10px 10px 10px 40px;
   min-height: 50px;
+
+  .message-share-tmx-email {
+    font-weight: bold;
+    cursor: pointer;
+  }
 
   .action-form {
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    .translation-memory-glossary-tab-label {
-      gap: 220px !important;
-    }
     > :first-child {
       display: flex;
+      justify-content: space-between;
+      flex-grow: 1;
       gap: 10px;
       align-items: center;
+      margin-right: 20px;
+    }
+
+    input[type='file']::file-selector-button {
+      color: #000;
+      background: colors.$grey100;
+      padding: 4px 8px;
+      text-align: center;
+      border: 1px solid colors.$grey300;
+      border-radius: variables.$border-radius-default;
+      margin-right: 10px;
+
+      &:hover {
+        background-color: colors.$grey50;
+      }
     }
   }
 
@@ -301,7 +442,7 @@
   }
   .action-form-error {
     input {
-      color: colors.$redDefault;
+      color: colors.$red500;
     }
   }
 
@@ -318,22 +459,20 @@
         align-items: center;
         justify-content: space-between;
         width: 100%;
-
-        .filename {
-          font-weight: bold;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          max-width: 60%;
-        }
-
-        .filename-error {
-          color: colors.$redDefault;
-        }
+      }
+      > li .filename {
+        font-weight: bold;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 60%;
+      }
+      > li .filename-error {
+        color: colors.$red500;
       }
 
       > li:nth-child(even) {
-        background-color: colors.$grey4;
+        background-color: colors.$grey100;
       }
     }
 
@@ -341,24 +480,24 @@
       width: 260px;
       height: 6px;
       border-radius: 4px;
-      background-color: colors.$grey8;
+      background-color: colors.$grey200;
 
       > :first-child {
-        background-color: colors.$approvedGreen;
+        background-color: colors.$green800;
         height: 100%;
         border-radius: 4px;
       }
     }
 
     .import-completed {
-      color: colors.$approvedGreenHover;
+      color: colors.$green600;
     }
 
     .message-error {
       display: flex;
       align-items: center;
       gap: 8px;
-      color: colors.$redDefault;
+      color: colors.$red500;
 
       > button {
         padding: 4px;
@@ -373,20 +512,26 @@
     margin-top: 6px;
 
     > :last-child {
-      color: colors.$approvedGreenHover;
+      color: colors.$green600;
     }
+  }
+}
+
+.translation-memory-glossary-tab-share {
+  .translation-memory-glossary-tab-input-text {
+    width: 260px;
   }
 }
 
 .translation-memory-glossary-tab-export {
   .translation-memory-glossary-tab-input-text {
-    width: 300px;
+    width: 260px;
   }
 }
 
 .translation-memory-glossary-tab-delete {
-  border-top: 3px solid #ffcc01;
-  background-color: colors.$orangeDefaultTransparent2;
+  border-top: 3px solid colors.$orange200;
+  background-color: colors.$orange50;
 }
 
 .translation-memory-glossary-tab-active-table {
@@ -406,8 +551,8 @@
         .settings-panel-row-dragover-half-bottom
       ) {
       .settings-panel-row-active {
-        border-bottom-left-radius: 8px;
-        border-bottom-right-radius: 8px;
+        border-bottom-left-radius: variables.$border-radius-default;
+        border-bottom-right-radius: variables.$border-radius-default;
       }
     }
   }
@@ -418,9 +563,9 @@
     justify-content: space-between;
     height: 56px;
     padding: 20px;
-    background-color: colors.$grey3;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
+    background-color: colors.$grey150;
+    border-top-left-radius: variables.$border-radius-default;
+    border-top-right-radius: variables.$border-radius-default;
   }
 
   .tm-prioritization-text-content {
@@ -430,45 +575,44 @@
 
     h4 {
       margin: 0;
-      font-size: 16px;
+      font-size: variables.$font-size-small;
     }
 
     span {
-      color: colors.$grey6;
+      color: colors.$grey700;
     }
   }
 
-  .switch-container-outer {
-    width: 155px;
+  div[class*='switch-container-outer'] {
+    width: 150px;
   }
 }
 
+.tm-key-row-menu-button,
 .tm-row-penalty {
-  .tm-row-penalty-button,
-  .penalty-numeric-stepper-close-button {
-    border-radius: 2px;
-    font-size: 16px;
-    color: #000 !important;
-    background: colors.$grey4 !important;
-    padding: 4px 8px;
-    text-align: center;
-    border: 1px solid colors.$grey7 !important;
-    font-size: 16px !important;
-
-    &:hover {
-      background-color: colors.$grey5 !important;
-    }
-  }
-
+  // Same width and position as the "Add penalty" button it replaces, so the field
+  // starts at the button's left edge and the × ends at its right edge
   .tm-row-penalty-numeric-stepper {
     display: flex;
-    gap: 5px;
+    gap: 2px;
+    width: 104px;
+    margin: 0 auto;
+
+    > :first-child {
+      flex: 1;
+      min-width: 0;
+
+      input {
+        flex: 1;
+        min-width: 0;
+      }
+    }
   }
 
   .penalty-numeric-stepper-close-button {
     width: 28px !important;
     height: 28px !important;
-    color: colors.$grey6 !important;
+    color: colors.$grey700 !important;
   }
 }
 
@@ -480,4 +624,8 @@
     display: flex;
     gap: 5px;
   }
+}
+
+.tm-key-row-last-column-empty {
+  width: 144px;
 }

@@ -70,4 +70,25 @@ class XmlTest extends AbstractTest
         $dto->fromArray(['unknown' => true]);
         $this->assertFalse($dto->jsonSerialize()['preserve_whitespace']);
     }
+
+    #[Test]
+    public function settersTrimNamesAndDropTheEmptyOnes(): void
+    {
+        $dto = new Xml();
+        $dto->setTranslateElements([' p ', "span\t", '  ', '']);
+        $dto->setTranslateAttributes(["  div@alt\n", ' ']);
+
+        $result = $dto->jsonSerialize();
+        $this->assertSame(['p', 'span'], $result['translate_elements']);
+        $this->assertSame(['div@alt'], $result['translate_attributes']);
+    }
+
+    #[Test]
+    public function fromArrayTrimsNames(): void
+    {
+        $dto = new Xml();
+        $dto->fromArray(['do_not_translate_elements' => [' script ', '   ']]);
+
+        $this->assertSame(['script'], $dto->jsonSerialize()['do_not_translate_elements']);
+    }
 }

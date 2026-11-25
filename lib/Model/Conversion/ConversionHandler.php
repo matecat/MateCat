@@ -176,7 +176,7 @@ class ConversionHandler
         }
         if ($ocrCheck->thereIsWarning($file_path)) {
             $this->result->setErrorCode(ConversionHandlerStatus::OCR_WARNING);
-            $this->result->setErrorMessage("File uploaded successfully. Before translating, download the Preview to check the conversion. OCR support for non-latin scripts is experimental.");
+            $this->result->setErrorMessage("File uploaded successfully. Before translating, download the preview to check the conversion. OCR support for non-latin scripts is experimental.");
         }
 
         if (str_contains($this->target_lang, ',')) {
@@ -340,6 +340,11 @@ class ConversionHandler
                         $params = $this->filters_extraction_parameters->dita;
                     }
                     break;
+                case "md":
+                    if (isset($this->filters_extraction_parameters->markdown)) {
+                        $params = $this->filters_extraction_parameters->markdown;
+                    }
+                    break;
             }
         }
 
@@ -450,7 +455,7 @@ class ConversionHandler
             }
 
             $this->result->setErrorCode($code);
-            $this->result->setErrorMessage("Zip error: " . $e->getMessage());
+            $this->result->setErrorMessage("ZIP error: " . $e->getMessage());
 
             return [];
         }

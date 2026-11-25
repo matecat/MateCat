@@ -8,6 +8,7 @@ use Matecat\TestHelpers\Factory\User;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
 use Model\Exceptions\ValidationError;
+use Model\Jobs\JobStruct;
 use Model\Projects\ProjectModel;
 use Model\Projects\ProjectStruct;
 use Model\Teams\TeamDao;
@@ -18,23 +19,27 @@ use PHPUnit\Framework\Attributes\Test;
 use ReflectionMethod;
 use ReflectionProperty;
 use Utils\Constants\Teams;
+use Utils\Email\AbstractEmail;
+use Utils\Email\ProjectAssignedEmail;
+use Utils\Tools\CatUtils;
 
-class FakeProjectAssignedEmail
+/**
+ * Stands in for ProjectAssignedEmail through {@see TestableProjectModel::assignedEmail()}, so the
+ * tests count the emails instead of queueing them.
+ */
+class FakeProjectAssignedEmail extends AbstractEmail
 {
     public static int $sent = 0;
-
-    public function __construct(...$args)
-    {
-    }
 
     public function send(): void
     {
         self::$sent++;
     }
-}
 
-if (!class_exists(\Utils\Email\ProjectAssignedEmail::class, false)) {
-    class_alias(FakeProjectAssignedEmail::class, \Utils\Email\ProjectAssignedEmail::class);
+    protected function _getTemplateVariables(): array
+    {
+        return [];
+    }
 }
 
 class ProjectModelTest extends AbstractTest
@@ -153,6 +158,92 @@ class ProjectModelTest extends AbstractTest
     }
 
     #[Test]
+    public function checkNameThrowsForANameWiderThanTheColumn(): void
+    {
+        // `projects`.`name` is a varchar(200), and this endpoint used to write the request straight
+        // into it — over-length went in as typed and MySQL decided what survived.
+        $model = new TestableProjectModel($this->db, new ProjectStruct());
+        $model->prepareUpdate('name', str_repeat('a', CatUtils::PROJECT_NAME_MAX_LENGTH + 1));
+
+        $this->expectException(ValidationError::class);
+        $this->expectExceptionMessage('Project name must be at most 200 characters');
+
+        $model->invokeCheckName();
+    }
+
+    #[Test]
+    public function checkNameAcceptsANameThatExactlyFillsTheColumn(): void
+    {
+        // The boundary itself is not over-length. A cap that refuses the last character it can store
+        // is as wrong as one that refuses nothing.
+        $exactly = str_repeat('a', CatUtils::PROJECT_NAME_MAX_LENGTH);
+        $model = new TestableProjectModel($this->db, new ProjectStruct());
+        $model->prepareUpdate('name', $exactly);
+
+        $model->invokeCheckName();
+
+        $property = new ReflectionProperty(ProjectModel::class, 'willChange');
+        $this->assertSame(['name' => $exactly], $property->getValue($model));
+    }
+
+    #[Test]
+    public function checkNameThrowsWhenTheNameIsNotAString(): void
+    {
+        // This endpoint writes whatever the request body carried. A number or an array is not a name,
+        // and reaching the column with it is worse than answering 400.
+        $model = new TestableProjectModel($this->db, new ProjectStruct());
+        $model->prepareUpdate('name', ['not', 'a', 'name']);
+
+        $this->expectException(ValidationError::class);
+        $this->expectExceptionMessage('Project name cannot be empty');
+
+        $model->invokeCheckName();
+    }
+
+    #[Test]
+    public function checkNameThrowsForANameOfNothingButControlCharacters(): void
+    {
+        // Not caught by an `empty()` check, which is what used to guard this: the string is not
+        // empty until it has been normalised.
+        $model = new TestableProjectModel($this->db, new ProjectStruct());
+        $model->prepareUpdate('name', "\r\n\t ");
+
+        $this->expectException(ValidationError::class);
+        $this->expectExceptionMessage('Project name cannot be empty');
+
+        $model->invokeCheckName();
+    }
+
+    #[Test]
+    public function checkNameWritesTheNormalisedNameBackSoTheColumnGetsIt(): void
+    {
+        // The point of normalising in the model rather than the controller: what gets stored is the
+        // normalised form, for both callers of update(). A CR here would otherwise travel into the
+        // Subject header of the assignment email this same update sends.
+        $model = new TestableProjectModel($this->db, new ProjectStruct());
+        $model->prepareUpdate('name', "Acme\r\nProject   \u{200B}2024 ");
+
+        $model->invokeCheckName();
+
+        $property = new ReflectionProperty(ProjectModel::class, 'willChange');
+        $this->assertSame(['name' => 'Acme Project 2024'], $property->getValue($model));
+    }
+
+    #[Test]
+    public function checkNameComposesTheUnicodeFormItStores(): void
+    {
+        // "Équipe" written as E + U+0301 and as a precomposed É are the same name to a reader, and
+        // one spelling has to reach the column.
+        $model = new TestableProjectModel($this->db, new ProjectStruct());
+        $model->prepareUpdate('name', "E\u{0301}quipe");
+
+        $model->invokeCheckName();
+
+        $property = new ReflectionProperty(ProjectModel::class, 'willChange');
+        $this->assertSame(['name' => "\u{00C9}quipe"], $property->getValue($model));
+    }
+
+    #[Test]
     public function checkAssigneeChangeInPersonalTeamThrowsValidationError(): void
     {
         $owner = $this->createUser();
@@ -161,7 +252,7 @@ class ProjectModelTest extends AbstractTest
         $model = new TestableProjectModel($this->db, new ProjectStruct());
 
         $this->expectException(ValidationError::class);
-        $this->expectExceptionMessage('Can\'t change the Assignee of a personal project.');
+        $this->expectExceptionMessage('Can\'t change the assignee of a personal project.');
 
         $model->invokeCheckAssigneeChangeInPersonalTeam((int)$personalTeam->id);
     }
@@ -200,7 +291,7 @@ class ProjectModelTest extends AbstractTest
         $model->prepareUpdate('id_team', (int)$team->id);
 
         $this->expectException(AuthorizationError::class);
-        $this->expectExceptionMessage('Not Authorized');
+        $this->expectExceptionMessage('Not authorized');
 
         $model->invokeCheckIdTeam();
     }
@@ -228,6 +319,36 @@ class ProjectModelTest extends AbstractTest
         $cacheTeams = $model->getCacheTeamsToCleanForTest();
         $this->assertContains((int)$personalTeam->id, $cacheTeams);
         $this->assertContains((int)$oldTeam->id, $cacheTeams);
+    }
+
+    /**
+     * The other tests replace the email with a fake, so this one checks the real email the model
+     * builds: a ProjectAssignedEmail for the new assignee and the project's jobs. It is built, not
+     * sent.
+     */
+    #[Test]
+    public function theAssignmentEmailIsAProjectAssignedEmailForTheNewAssignee(): void
+    {
+        $owner = new UserStruct();
+        $owner->uid = 1;
+        $owner->email = 'owner@example.org';
+
+        $assignee = new UserStruct();
+        $assignee->uid = 2;
+        $assignee->email = 'assignee@example.org';
+
+        $job = new JobStruct();
+        $job->id = 10;
+
+        $model = new ProjectModel($this->db, new ProjectStruct());
+        $model->setUser($owner);
+
+        $email = (new ReflectionMethod($model, 'assignedEmail'))->invoke($model, $assignee, [$job]);
+
+        $this->assertInstanceOf(ProjectAssignedEmail::class, $email);
+        $this->assertSame($assignee, (new ReflectionProperty($email, 'assignee'))->getValue($email));
+        $this->assertSame($owner, (new ReflectionProperty($email, 'user'))->getValue($email));
+        $this->assertSame([$job], (new ReflectionProperty($email, 'jobs'))->getValue($email));
     }
 
     #[Test]
@@ -374,7 +495,7 @@ class ProjectModelTest extends AbstractTest
         $team = $this->createGeneralTeamWithMembers($owner, [$assignee->email]);
         $project = $this->createProject((int)$team->id, null, 'Combined Update');
 
-        $model = new ProjectModel($this->db, $project);
+        $model = new TestableProjectModel($this->db, $project);
         $model->setUser($owner);
         $model->prepareUpdate('id_team', (int)$team->id);
         $model->prepareUpdate('id_assignee', (int)$assignee->uid);
@@ -502,6 +623,11 @@ class ProjectModelTest extends AbstractTest
 
 class TestableProjectModel extends ProjectModel
 {
+    protected function assignedEmail(UserStruct $assignee, array $jobs): AbstractEmail
+    {
+        return new FakeProjectAssignedEmail();
+    }
+
     public function invokeCheckName(): void
     {
         $this->invokePrivate('checkName');

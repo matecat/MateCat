@@ -2,13 +2,17 @@ import React from 'react'
 import {fireEvent, render, screen} from '@testing-library/react'
 import {Select} from './Select'
 
+// Controlled by individual tests to drive the portal dropdown's max-height
+// effect in Select.js.
+const mockSetListMaxHeight = jest.fn()
+
 jest.mock('./Dropdown', () => {
   const {forwardRef, useImperativeHandle} = require('react')
   return {
     Dropdown: forwardRef(({options, onSelect}, ref) => {
       useImperativeHandle(ref, () => ({
-        getListRef: () => ({getBoundingClientRect: () => ({top: 0, height: 0})}),
-        setListMaxHeight: jest.fn(),
+        getListRef: () => null,
+        setListMaxHeight: mockSetListMaxHeight,
       }))
       return (
         <div data-testid="dropdown">
@@ -36,7 +40,7 @@ jest.mock('../../hooks/usePortal', () =>
   ),
 )
 jest.mock('../../../img/icons/ChevronDown', () => () => null)
-jest.mock('../icons/IconClose', () => () => null)
+jest.mock('../../../img/icons/IconClose', () => () => null)
 jest.mock('../../utils/textUtils', () => ({
   __esModule: true,
   default: {isContentTextEllipsis: jest.fn(() => false)},
@@ -49,13 +53,7 @@ const OPTIONS = [
 ]
 
 const renderSelect = (props = {}) =>
-  render(
-    <Select
-      name="test-select"
-      options={OPTIONS}
-      {...props}
-    />,
-  )
+  render(<Select name="test-select" options={OPTIONS} {...props} />)
 
 describe('Select', () => {
   describe('rendering', () => {
@@ -120,7 +118,9 @@ describe('Select', () => {
   describe('CSS classes', () => {
     test('has select--is-placeholder when no activeOption', () => {
       const {container} = renderSelect()
-      expect(container.querySelector('.select--is-placeholder')).toBeInTheDocument()
+      expect(
+        container.querySelector('.select--is-placeholder'),
+      ).toBeInTheDocument()
     })
 
     test('does not have select--is-placeholder when activeOption is set', () => {
@@ -132,7 +132,9 @@ describe('Select', () => {
 
     test('has select--is-disabled when isDisabled is true', () => {
       const {container} = renderSelect({isDisabled: true})
-      expect(container.querySelector('.select--is-disabled')).toBeInTheDocument()
+      expect(
+        container.querySelector('.select--is-disabled'),
+      ).toBeInTheDocument()
     })
 
     test('has select--is-invalid when showValidation=true and isValid=false', () => {
@@ -149,7 +151,9 @@ describe('Select', () => {
 
     test('has select--is-multiple when multipleSelect is not "off"', () => {
       const {container} = renderSelect({multipleSelect: 'dropdown'})
-      expect(container.querySelector('.select--is-multiple')).toBeInTheDocument()
+      expect(
+        container.querySelector('.select--is-multiple'),
+      ).toBeInTheDocument()
     })
 
     test('has select--is-focused when dropdown is open', () => {
@@ -245,7 +249,11 @@ describe('Select', () => {
       const {container, rerender} = renderSelect({activeOption: OPTIONS[0]})
       expect(container.querySelector('input[type="text"]').value).toBe('a')
       rerender(
-        <Select name="test-select" options={OPTIONS} activeOption={OPTIONS[2]} />,
+        <Select
+          name="test-select"
+          options={OPTIONS}
+          activeOption={OPTIONS[2]}
+        />,
       )
       expect(container.querySelector('input[type="text"]').value).toBe('c')
     })
@@ -289,6 +297,310 @@ describe('Select', () => {
       })
       fireEvent.click(container.querySelector('.icon-reset'))
       expect(screen.queryByTestId('dropdown')).not.toBeInTheDocument()
+    })
+  })
+
+  // Select's trigger and its portal dropdown wrapper carry no accessible
+  // role or testid, so these lookups can only be done by selector. Keeping
+  // the rule exemption in one place instead of scattered across the tests.
+  /* eslint-disable testing-library/no-container, testing-library/no-node-access */
+  const clickTrigger = (container) =>
+    fireEvent.click(container.querySelector('.select'))
+  const isDropdownReversed = (container) =>
+    !!container.querySelector('.select__dropdown--is-reversed')
+  const getDropdownWrapper = (container) =>
+    container.querySelector('.select__dropdown-wrapper')
+  /* eslint-enable testing-library/no-container, testing-library/no-node-access */
+
+  describe('portal dropdown (isPortalDropdown)', () => {
+    let elementRects
+
+    beforeEach(() => {
+      elementRects = {}
+      mockSetListMaxHeight.mockClear()
+
+      // wrapperRef is a real DOM node in jsdom — keyed by class so each test
+      // controls just the rect it cares about.
+      jest
+        .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+        .mockImplementation(function () {
+          for (const className of Object.keys(elementRects)) {
+            if (this.classList.contains(className)) {
+              return elementRects[className]
+            }
+          }
+          return {top: 0, bottom: 0, left: 0, right: 0, width: 0, height: 0}
+        })
+    })
+
+    afterEach(() => {
+      jest.restoreAllMocks()
+    })
+
+    describe('max-height calculation', () => {
+      test('uses maxHeightDroplist when there is enough space below the wrapper', () => {
+        elementRects['select-with-label__wrapper'] = {
+          top: 50,
+          bottom: 100,
+          y: 50,
+          height: 50,
+        }
+        const {container} = renderSelect({
+          isPortalDropdown: true,
+          maxHeightDroplist: 128,
+        })
+        clickTrigger(container)
+
+        expect(mockSetListMaxHeight).toHaveBeenCalledWith(128)
+        expect(isDropdownReversed(container)).toBe(false)
+      })
+
+      test('reverses and clamps maxHeight when there is not enough space below the wrapper', () => {
+        elementRects['select-with-label__wrapper'] = {
+          top: 700,
+          bottom: 760,
+          y: 700,
+          height: 60,
+        }
+        const {container} = renderSelect({
+          isPortalDropdown: true,
+          maxHeightDroplist: 128,
+        })
+        clickTrigger(container)
+
+        expect(isDropdownReversed(container)).toBe(true)
+        expect(mockSetListMaxHeight).toHaveBeenCalledWith(128)
+      })
+
+      test('does not reverse when checkSpaceToReverse is false, but still clamps maxHeight', () => {
+        elementRects['select-with-label__wrapper'] = {
+          top: 700,
+          bottom: 760,
+          y: 700,
+          height: 60,
+        }
+        const {container} = renderSelect({
+          isPortalDropdown: true,
+          maxHeightDroplist: 128,
+          checkSpaceToReverse: false,
+        })
+        clickTrigger(container)
+
+        expect(isDropdownReversed(container)).toBe(false)
+        expect(mockSetListMaxHeight).toHaveBeenCalledWith(128)
+      })
+
+      test('without an explicit cap, measures against the space actually occupied (below) when checkSpaceToReverse is false', () => {
+        // Same cramped wrapper as the explicit-cap case above, but with no
+        // maxHeightDroplist: the dropdown never reverses (checkSpaceToReverse
+        // is false) and stays anchored below the trigger, so it must be
+        // sized against the real space below it — not against the space
+        // above, which it never occupies and which can be unrelated to how
+        // much room is actually left on screen underneath it.
+        elementRects['select-with-label__wrapper'] = {
+          top: 700,
+          bottom: 760,
+          y: 700,
+          height: 60,
+        }
+        const {container} = renderSelect({
+          isPortalDropdown: true,
+          checkSpaceToReverse: false,
+        })
+        clickTrigger(container)
+
+        // availableHeightBelow = |700 + 60 + 24 - window.innerHeight(768)| = 16
+        expect(isDropdownReversed(container)).toBe(false)
+        expect(mockSetListMaxHeight).toHaveBeenCalledWith(16)
+      })
+
+      test("uses offsetParent's rect instead of the viewport when provided", () => {
+        elementRects['select-with-label__wrapper'] = {
+          top: 380,
+          bottom: 390,
+          y: 380,
+          height: 10,
+        }
+        const offsetParent = {
+          getBoundingClientRect: () => ({top: 200, bottom: 400}),
+        }
+        const {container} = renderSelect({
+          isPortalDropdown: true,
+          maxHeightDroplist: 128,
+          offsetParent,
+        })
+        clickTrigger(container)
+
+        expect(isDropdownReversed(container)).toBe(true)
+        expect(mockSetListMaxHeight).toHaveBeenCalledWith(128)
+      })
+
+      test('reduces the reversed-clamp height by label and search-bar heights', () => {
+        elementRects['select-with-label__wrapper'] = {
+          top: 700,
+          bottom: 760,
+          y: 700,
+          height: 60,
+        }
+        const {container} = renderSelect({
+          isPortalDropdown: true,
+          maxHeightDroplist: 1000,
+          label: 'My label',
+          showSearchBar: true,
+        })
+        clickTrigger(container)
+
+        // availableHeightAbove = wrapperRect.y(700) - (MARGIN_DROPDOWN(4) + 20) -
+        // SEARCH_BAR_HEIGHT(56) - labelHeight(0, unmocked) - referenceRect.top(0) = 620
+        expect(mockSetListMaxHeight).toHaveBeenCalledWith(620)
+      })
+
+      test('uses the real available space below when maxHeightDroplist is not passed', () => {
+        elementRects['select-with-label__wrapper'] = {
+          top: 50,
+          bottom: 100,
+          y: 50,
+          height: 50,
+        }
+        const {container} = renderSelect({isPortalDropdown: true})
+        clickTrigger(container)
+
+        // availableHeightBelow = |wrapperRect.y(50) + wrapperRect.height(50) +
+        // (MARGIN_DROPDOWN(4) + 20) - referenceRect.bottom(window.innerHeight, 768)| = 644
+        // — well past the 420 flip threshold, and not clamped to it.
+        expect(mockSetListMaxHeight).toHaveBeenCalledWith(644)
+        expect(isDropdownReversed(container)).toBe(false)
+      })
+
+      test('reverses and uses the real available space above when maxHeightDroplist is not passed', () => {
+        elementRects['select-with-label__wrapper'] = {
+          top: 700,
+          bottom: 760,
+          y: 700,
+          height: 60,
+        }
+        const {container} = renderSelect({isPortalDropdown: true})
+        clickTrigger(container)
+
+        // availableHeightAbove = wrapperRect.y(700) - (MARGIN_DROPDOWN(4) + 20) -
+        // labelHeight(0, unmocked) - referenceRect.top(0) = 676 — not clamped to
+        // the 420 flip threshold used to decide to reverse in the first place.
+        expect(isDropdownReversed(container)).toBe(true)
+        expect(mockSetListMaxHeight).toHaveBeenCalledWith(676)
+      })
+
+      test('recalculates max-height when the window is resized while the dropdown stays open', () => {
+        jest
+          .spyOn(window, 'requestAnimationFrame')
+          .mockImplementation((callback) => {
+            callback()
+            return 0
+          })
+
+        elementRects['select-with-label__wrapper'] = {
+          top: 50,
+          bottom: 100,
+          y: 50,
+          height: 50,
+        }
+        const {container} = renderSelect({isPortalDropdown: true})
+        clickTrigger(container)
+
+        // Same 644 as the "uses the real available space below" case above.
+        expect(mockSetListMaxHeight).toHaveBeenLastCalledWith(644)
+        expect(isDropdownReversed(container)).toBe(false)
+
+        const originalInnerHeight = window.innerHeight
+        Object.defineProperty(window, 'innerHeight', {
+          configurable: true,
+          value: 200,
+        })
+        fireEvent(window, new Event('resize'))
+
+        // availableHeightBelow = |124 - 200| = 76, under the 420 flip
+        // threshold — the shrunk window now forces a reverse, and the
+        // max-height applied is recomputed instead of staying stale at 644
+        // (which would have overflowed off the shorter screen).
+        // availableHeightAbove = wrapperRect.y(50) - (MARGIN_DROPDOWN(4) + 20) = 26
+        expect(isDropdownReversed(container)).toBe(true)
+        expect(mockSetListMaxHeight).toHaveBeenLastCalledWith(26)
+
+        Object.defineProperty(window, 'innerHeight', {
+          configurable: true,
+          value: originalInnerHeight,
+        })
+      })
+    })
+
+    describe('positioning', () => {
+      test('translates the portal wrapper below the trigger when not reversed', () => {
+        elementRects['select-with-label__wrapper'] = {
+          x: 10,
+          y: 20,
+          left: 10,
+          top: 20,
+          width: 200,
+          height: 50,
+          bottom: 70,
+        }
+
+        const {container} = renderSelect({isPortalDropdown: true})
+        clickTrigger(container)
+
+        expect(getDropdownWrapper(container)).toHaveStyle({
+          transform: 'translate(10px,70px)',
+          bottom: 'auto',
+          width: '200px',
+        })
+      })
+
+      test('anchors the portal wrapper to the trigger via a document-relative bottom when reversed', () => {
+        // Not enough space below the wrapper (availableHeightBelow =
+        // innerHeight(900) - wrapper.bottom(500) - margins(16) = 384,
+        // under maxHeightDroplist's 400 default) forces reversed mode.
+        elementRects['select-with-label__wrapper'] = {
+          x: 10,
+          y: 440,
+          left: 10,
+          top: 440,
+          width: 200,
+          height: 60,
+          bottom: 500,
+        }
+        // The anchor point is wrapperRef's last DOM child, read via
+        // getBoundingClientRect() — in jsdom that resolves to the dropdown
+        // wrapper itself (portals don't detach the same way jsdom renders
+        // them as in a real browser), so this is keyed by its own class.
+        elementRects['select__dropdown-wrapper'] = {
+          x: 10,
+          y: 448,
+          left: 10,
+          top: 448,
+          width: 200,
+          height: 32,
+          bottom: 480,
+        }
+        const originalInnerHeight = window.innerHeight
+        Object.defineProperty(window, 'innerHeight', {
+          configurable: true,
+          value: 900,
+        })
+
+        const {container} = renderSelect({isPortalDropdown: true})
+        clickTrigger(container)
+
+        // bottom = innerHeight(900) - anchor.y(448) + gap(4) = 456
+        expect(getDropdownWrapper(container)).toHaveStyle({
+          transform: 'translateX(10px)',
+          top: 'auto',
+          bottom: '456px',
+        })
+
+        Object.defineProperty(window, 'innerHeight', {
+          configurable: true,
+          value: originalInnerHeight,
+        })
+      })
     })
   })
 })

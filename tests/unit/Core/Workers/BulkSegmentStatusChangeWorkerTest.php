@@ -20,6 +20,7 @@ use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use Plugins\Features\TranslationEvents\TranslationEventsHandler;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\BulkSegmentStatusChangeWorker;
+use Utils\Constants\SourcePages;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\Params;
 use Utils\TaskRunner\Commons\QueueElement;
@@ -70,6 +71,9 @@ class BulkSegmentStatusChangeWorkerTest extends AbstractTest
 
         $dbMock = $this->createStub(IDatabase::class);
         $dbMock->method('getConnection')->willReturn($this->pdoStub);
+        // process() does its work inside a scope; unconfigured, transaction() would return null
+        // without ever running the body and every assertion here would pass against nothing.
+        $dbMock->method('transaction')->willReturnCallback(static fn(callable $work) => $work());
 
         $chunk = $chunk ?? $this->createChunkWithProject();
 
@@ -78,7 +82,7 @@ class BulkSegmentStatusChangeWorkerTest extends AbstractTest
         $worker = $this->getMockBuilder(BulkSegmentStatusChangeWorker::class)
             ->setConstructorArgs([$amq, $dbMock, $userDao])
             ->onlyMethods([
-                '_checkDatabaseConnection', '_doLog', 'publishToNodeJsClients',
+                '_checkDatabaseConnection', 'publishToNodeJsClients',
                 'createJobStruct', 'createTranslationEventsHandler',
                 'createTranslationEvent'
             ])
@@ -97,7 +101,7 @@ class BulkSegmentStatusChangeWorkerTest extends AbstractTest
         $params->destination_status = 'TRANSLATED';
         $params->client_id = $clientId;
         $params->id_user = 5;
-        $params->revision_number = null;
+        $params->source_page = SourcePages::SOURCE_PAGE_TRANSLATE;
         $params->segment_ids = [10, 20, 30];
 
         $queueElement = new QueueElement();
@@ -125,15 +129,6 @@ class BulkSegmentStatusChangeWorkerTest extends AbstractTest
             [$metadataRow],    // loadForProject metadata query
             $segmentRows       // getAllSegmentsByIdListAndJobId
         );
-    }
-
-    #[Test]
-    public function getLoggerNameReturnsExpected(): void
-    {
-        $amq = $this->createStub(AMQHandler::class);
-        $worker = new BulkSegmentStatusChangeWorker($amq, obtainTestDatabase());
-
-        $this->assertSame('bulk_segment_status_change.log', $worker->getLoggerName());
     }
 
     #[Test]
@@ -224,6 +219,24 @@ class BulkSegmentStatusChangeWorkerTest extends AbstractTest
         $this->expectException(EndQueueException::class);
         $this->expectExceptionMessage('Cannot resolve the user 5 that enqueued this bulk status change');
         $worker->process($this->createQueueElement());
+    }
+
+    /**
+     * A message published before the phase travelled in the payload carries no source_page at all.
+     * Assuming the translate page there would book its revision events to the wrong phase, so the
+     * message has to fail.
+     */
+    #[Test]
+    public function processThrowsEndQueueWhenTheSourcePageIsMissingFromThePayload(): void
+    {
+        $worker = $this->createWorker();
+
+        $queueElement = $this->createQueueElement();
+        unset($queueElement->params->source_page);
+
+        $this->expectException(EndQueueException::class);
+        $this->expectExceptionMessage('Missing the source_page of this bulk status change');
+        $worker->process($queueElement);
     }
 
     #[Test]

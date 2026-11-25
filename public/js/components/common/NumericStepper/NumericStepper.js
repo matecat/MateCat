@@ -2,11 +2,13 @@ import React, {useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {Button, BUTTON_SIZE} from '../Button/Button'
 import {debounce} from 'lodash'
-import IconDown from '../../icons/IconDown'
+import IconDown from '../../../../img/icons/IconDown'
+import styles from './NumericStepper.module.scss'
 
 export const NumericStepper = ({
   value,
   onChange,
+  onChangeCommitted = () => false,
   minimumValue,
   maximumValue,
   name,
@@ -32,10 +34,12 @@ export const NumericStepper = ({
   const increase = () => {
     const newValue = value + stepValue
     onChange(newValue <= maximumValue ? newValue : maximumValue)
+    onChangeCommitted(newValue)
   }
   const decrease = () => {
     const newValue = value - stepValue
     onChange(newValue >= minimumValue ? newValue : minimumValue)
+    onChangeCommitted(newValue)
   }
   const onChageInput = ({currentTarget: {value}}) => {
     if (/^\d+$/g.test(value)) {
@@ -47,24 +51,26 @@ export const NumericStepper = ({
   }
 
   const handlerBlur = () => {
-    const newValue = parseInt(value)
-    onChange(
-      newValue > maximumValue
+    const newValueRaw = parseInt(value)
+    const newValue =
+      newValueRaw > maximumValue
         ? maximumValue
-        : newValue < minimumValue
+        : newValueRaw < minimumValue
           ? minimumValue
-          : newValue,
-    )
+          : newValueRaw
+
+    onChange(newValue)
+    onChangeCommitted(newValue)
     setIsInFocus(false)
   }
 
   const debounceSelectAll = debounce((event) => event.target.select(), 100)
 
   return (
-    <div className="numeric-stepper-component">
+    <div className={styles['numeric-stepper-component']}>
       <input
         ref={ref}
-        type="string"
+        type="text"
         name={name}
         value={valueInput}
         disabled={disabled}
@@ -76,16 +82,16 @@ export const NumericStepper = ({
         onBlur={handlerBlur}
         onKeyUp={({key}) => key === 'Enter' && ref.current.blur()}
       />
-      <div className="container-controls">
+      <div className={styles['container-controls']}>
         <Button
-          size={BUTTON_SIZE.ICON_SMALL}
+          size={BUTTON_SIZE.ICON_XSMALL}
           disabled={disabled}
           onClick={increase}
         >
           <IconDown size={16} />
         </Button>
         <Button
-          size={BUTTON_SIZE.ICON_SMALL}
+          size={BUTTON_SIZE.ICON_XSMALL}
           disabled={disabled}
           onClick={decrease}
         >
@@ -99,6 +105,7 @@ export const NumericStepper = ({
 NumericStepper.propTypes = {
   value: PropTypes.number.isRequired,
   onChange: PropTypes.func.isRequired,
+  onChangeCommitted: PropTypes.func,
   minimumValue: PropTypes.number.isRequired,
   maximumValue: PropTypes.number.isRequired,
   name: PropTypes.string,

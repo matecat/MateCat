@@ -11,14 +11,17 @@ namespace Controller\Views;
 
 use Controller\Abstracts\BaseKleinViewController;
 use Controller\Abstracts\IController;
+use Controller\API\Commons\Validators\ProjectAccessValidator;
 use Controller\API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use Exception;
 use Model\ActivityLog\Activity;
 use Model\ActivityLog\ActivityLogStruct;
 use Model\Analysis\Status;
 use Model\FeaturesBase\Hook\Event\Filter\AppendInitialTemplateVarsEvent;
+use Model\FeaturesBase\Hook\Event\Filter\IsAnInternalUserEvent;
 use Model\Jobs\JobDao;
 use Model\Projects\ProjectDao;
+use Throwable;
 use Utils\AsyncTasks\Workers\Analysis\Health;
 use Utils\Registry\AppConfig;
 use Utils\Templating\PHPTalBoolean;
@@ -96,13 +99,17 @@ class AnalyzeController extends BaseKleinViewController implements IController
         if (!empty($jid)) {
             // we are looking for a chunk
             $chunkStruct = (new JobDao($this->getDatabase()))->getByIdAndPassword($jid, $pass);
-            if (empty($chunkStruct) || $chunkStruct->isDeleted()) {
+            // The job password authorizes this job only: the job must also belong to the project
+            // in the URL, or the page would render that project's password-derived access token.
+            if (empty($chunkStruct) || $chunkStruct->isDeleted() || $chunkStruct->id_project !== (int)$projectStruct->id) {
                 $this->setView("job_not_found.html", [], 404);
                 $this->render();
             }
 
             $this->setView("jobAnalysis.html", [
-                'jid' => $jid,
+                'id_job' => $jid,
+                // The page distinguishes itself from the project-wide analyze view by this flag alone.
+                'jobAnalysis' => new PHPTalBoolean(true),
                 'job_password' => $chunkStruct->password,
                 'project_access_token' => sha1($projectStruct->id . $projectStruct->password),
             ]);
@@ -119,7 +126,7 @@ class AnalyzeController extends BaseKleinViewController implements IController
             }
 
             $this->setView("analyze.html", [
-                'project_password' => $projectStruct->password,
+                'password' => $projectStruct->password,
             ]);
         }
 
@@ -133,17 +140,43 @@ class AnalyzeController extends BaseKleinViewController implements IController
         $appendInitialTemplateVarsEvent = new AppendInitialTemplateVarsEvent($this->featureSet->getCodes());
         $this->featureSet->dispatch($appendInitialTemplateVarsEvent);
 
+        // Two separate questions reach the page, and conflating them is what the naming avoids:
+        // split_feature_available says the split affordance exists in this UI at all, while split_enabled
+        // is the button state — whether this caller may click it.
+        //
+        // Grey out the split button for a caller the split endpoints would refuse. This mirrors
+        // SplitJobController's authorization exactly — same internal-user exemption, same validator — and
+        // that is the point: a button offering an action the API answers 403 to is its own bug report.
+        // The mirror is not the enforcement, only its reflection; the endpoints check independently, so
+        // getting this wrong shows the wrong button rather than granting anything.
+        //
+        // Failure is swallowed on purpose. The question asked is "would the API allow this?", and every
+        // way of answering no — not the owner, not in the team, or the lookup itself failing — resolves
+        // to hiding the button. A page that renders without the button beats a page that does not render.
+        $split_enabled = true;
+        $event = $this->getFeatureSet()->dispatch(new IsAnInternalUserEvent($this->getUser()->email ?? ''));
+        if (!$event->isInternal()) {
+            try {
+                (new ProjectAccessValidator($this, $projectStruct, $this->getUser()))->validate();
+            } catch (Throwable) {
+                $split_enabled = false;
+            }
+        }
+
         $this->addParamsToView([
-            'pid' => $projectStruct->id,
-            'project_status' => $projectStruct->status_analysis,
+            'id_project' => $projectStruct->id,
+            'status' => $projectStruct->status_analysis,
             'outsource_service_login' => $this->_outsource_login_API,
             'showModalBoxLogin' => new PHPTalBoolean(!$this->isLoggedIn()),
             'project_plugins' => new PHPTalMap($appendInitialTemplateVarsEvent->getCodes()),
-            'num_segments' => $model->getSummary()->getTotalSegments(),
-            'num_segments_analyzed' => $model->getSummary()->getSegmentsAnalyzed(),
-            'daemon_misconfiguration' => new PHPTalBoolean(Health::thereIsAMisconfiguration()),
-            'json_jobs' => json_encode($model),
-            'split_enabled' => new PHPTalBoolean(true),
+            'totalSegments' => $model->getSummary()->getTotalSegments(),
+            'totalAnalyzed' => $model->getSummary()->getSegmentsAnalyzed(),
+            'daemon_warning' => new PHPTalBoolean(Health::thereIsAMisconfiguration()),
+            // Handed over unencoded: the page configuration is serialised once, as a whole, so a
+            // pre-encoded string here would reach the page as a quoted string instead of an object.
+            'jobs' => $model,
+            'splitEnabled' => new PHPTalBoolean($split_enabled),
+            'splitFeatureAvailable' => new PHPTalBoolean(true),
             'enable_outsource' => new PHPTalBoolean(AppConfig::$ENABLE_OUTSOURCE),
         ]);
 

@@ -3,23 +3,28 @@
 namespace Matecat\Core\Controllers;
 
 use Controller\API\App\UpdateJobKeysController;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use DomainException;
+use Exception;
 use InvalidArgumentException;
 use Klein\Request;
 use Klein\Response;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
 use Model\DataAccess\Database;
-use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\FeatureSet;
-use Model\Jobs\JobStruct;
+use Model\Jobs\JobDao;
 use Model\Users\UserStruct;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use ReflectionException;
+use Utils\Constants\SourcePages;
 use Utils\Logger\MatecatLogger;
+use Utils\TMS\TMSService;
+use Utils\TmKeyManagement\TmKeyStruct;
 
 /**
  * Real-DB suite for UpdateJobKeysController.
@@ -30,8 +35,16 @@ use Utils\Logger\MatecatLogger;
  */
 class TestableUpdateJobKeysController extends UpdateJobKeysController
 {
+    /** The MyMemory service the controller checks new keys with; each test sets its answer. */
+    public TMSService $tmService;
+
     public function __construct()
     {
+    }
+
+    protected function getTmService(): TMSService
+    {
+        return $this->tmService;
     }
 
     protected function registerValidators(): void
@@ -47,6 +60,8 @@ class UpdateJobKeysControllerTest extends AbstractTest
     private const int BASE = 9_005_000;
     private const string JOB_PASSWORD = 'jobpw';
     private const string OWNED_KEY = 'ctrltestkey9005000';
+    private const string NEW_KEY = 'ctrlnewkey9005000aa';
+    private const string INVALID_KEY_MESSAGE = 'One of the TM keys you added is not valid. Please check it and try again.';
 
     /** @var ReflectionClass<UpdateJobKeysController> */
     private ReflectionClass $reflector;
@@ -87,6 +102,8 @@ class UpdateJobKeysControllerTest extends AbstractTest
         $this->setProp('userIsLogged', true);
         $this->setProp('logger', $this->createMock(MatecatLogger::class));
         $this->setProp('featureSet', new FeatureSet($this->createStub(\Model\DataAccess\IDatabase::class)));
+
+        $this->controller->tmService = $this->createMock(TMSService::class);
     }
 
     protected function tearDown(): void
@@ -123,6 +140,21 @@ class UpdateJobKeysControllerTest extends AbstractTest
         $serverParams      = ['REQUEST_URI' => '/api/app/jobs/update', 'REQUEST_METHOD' => 'POST'];
         $this->requestStub = new Request([], $params, [], $serverParams);
         $this->setProp('request', $this->requestStub);
+    }
+
+    /**
+     * ChunkPasswordValidator runs before the action in production; these tests call update()
+     * directly, so seed the credential-resolved chunk the controller now reads instead of
+     * fetching by password inside validateTheRequest.
+     *
+     * @throws ReflectionException
+     */
+    private function seedChunk(int $sourcePage = SourcePages::SOURCE_PAGE_TRANSLATE): void
+    {
+        $chunk = (new JobDao(obtainTestDatabase()))->getByIdAndPassword($this->jobId(self::BASE), self::JOB_PASSWORD);
+        self::assertNotNull($chunk);
+        $chunk->setSourcePage($sourcePage);
+        $this->setProp('chunk', $chunk);
     }
 
     /**
@@ -170,7 +202,8 @@ class UpdateJobKeysControllerTest extends AbstractTest
         /** @var array<int,mixed> $validators */
         $validators = $validatorsProp->getValue($controller);
 
-        $this->assertCount(1, $validators);
+        $this->assertCount(2, $validators);
+        $this->assertInstanceOf(ChunkPasswordValidator::class, $validators[1]);
     }
 
     // ─── validateTheRequest happy path ───
@@ -190,10 +223,11 @@ class UpdateJobKeysControllerTest extends AbstractTest
         $result = $this->invokePrivate('validateTheRequest');
 
         $this->assertIsArray($result);
-        $this->assertSame((string) $this->jobId(self::BASE), $result['job_id']);
-        $this->assertSame(self::JOB_PASSWORD, $result['job_pass']);
-        $this->assertInstanceOf(JobStruct::class, $result['jobData']);
-        $this->assertSame($this->jobId(self::BASE), $result['jobData']->id);
+        // job_id/job_pass/jobData are no longer parsed here: ChunkPasswordValidator resolves the
+        // credential and the job is read from the credential-resolved chunk in update().
+        $this->assertArrayNotHasKey('job_id', $result);
+        $this->assertArrayNotHasKey('job_pass', $result);
+        $this->assertArrayNotHasKey('jobData', $result);
         $this->assertNull($result['public_tm_penalty']);
         $this->assertFalse($result['get_public_matches']);
         $this->assertTrue($result['only_private']);
@@ -242,40 +276,6 @@ class UpdateJobKeysControllerTest extends AbstractTest
      * @throws \Throwable
      */
     #[Test]
-    public function validateTheRequest_throws_when_job_id_missing(): void
-    {
-        $this->setRequestParams([
-            'job_pass' => self::JOB_PASSWORD,
-            'data'     => $this->validTmKeysJson(),
-        ]);
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionCode(-1);
-
-        $this->invokePrivate('validateTheRequest');
-    }
-
-    /**
-     * @throws \Throwable
-     */
-    #[Test]
-    public function validateTheRequest_throws_when_job_pass_missing(): void
-    {
-        $this->setRequestParams([
-            'job_id' => (string) $this->jobId(self::BASE),
-            'data'   => $this->validTmKeysJson(),
-        ]);
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionCode(-2);
-
-        $this->invokePrivate('validateTheRequest');
-    }
-
-    /**
-     * @throws \Throwable
-     */
-    #[Test]
     public function validateTheRequest_throws_when_penalty_out_of_range(): void
     {
         $this->setRequestParams([
@@ -287,23 +287,6 @@ class UpdateJobKeysControllerTest extends AbstractTest
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionCode(-6);
-
-        $this->invokePrivate('validateTheRequest');
-    }
-
-    /**
-     * @throws \Throwable
-     */
-    #[Test]
-    public function validateTheRequest_throws_not_found_for_wrong_password(): void
-    {
-        $this->setRequestParams([
-            'job_id'   => (string) $this->jobId(self::BASE),
-            'job_pass' => 'wrongpass',
-            'data'     => $this->validTmKeysJson(),
-        ]);
-
-        $this->expectException(NotFoundException::class);
 
         $this->invokePrivate('validateTheRequest');
     }
@@ -399,10 +382,9 @@ class UpdateJobKeysControllerTest extends AbstractTest
     #[Test]
     public function update_returns_ok_payload_for_owner_with_empty_keys(): void
     {
+        $this->seedChunk();
         $this->setRequestParams([
-            'job_id'   => (string) $this->jobId(self::BASE),
-            'job_pass' => self::JOB_PASSWORD,
-            'data'     => $this->validTmKeysJson(),
+            'data' => $this->validTmKeysJson(),
         ]);
 
         $this->responseMock->expects($this->once())
@@ -422,12 +404,10 @@ class UpdateJobKeysControllerTest extends AbstractTest
     #[Test]
     public function update_sets_public_tm_penalty_metadata_when_provided(): void
     {
+        $this->seedChunk();
         $this->setRequestParams([
-            'job_id'            => (string) $this->jobId(self::BASE),
-            'job_pass'          => self::JOB_PASSWORD,
             'data'              => $this->validTmKeysJson(),
             'public_tm_penalty' => '25',
-            'job_pass_meta'     => self::JOB_PASSWORD,
         ]);
 
         $this->responseMock->expects($this->once())
@@ -456,10 +436,9 @@ class UpdateJobKeysControllerTest extends AbstractTest
         $this->setProp('user', $user);
         $this->setProp('userIsLogged', true);
 
+        $this->seedChunk();
         $this->setRequestParams([
-            'job_id'   => (string) $this->jobId(self::BASE),
-            'job_pass' => self::JOB_PASSWORD,
-            'data'     => $this->validTmKeysJson(),
+            'data' => $this->validTmKeysJson(),
         ]);
 
         $this->responseMock->expects($this->once())
@@ -468,25 +447,6 @@ class UpdateJobKeysControllerTest extends AbstractTest
                 $this->assertSame('OK', $data['data']);
                 return true;
             }));
-
-        $this->controller->update();
-    }
-
-    // ─── update() failure propagation ───
-
-    /**
-     * @throws \Throwable
-     */
-    #[Test]
-    public function update_propagates_invalid_argument_when_job_id_missing(): void
-    {
-        $this->setRequestParams([
-            'job_pass' => self::JOB_PASSWORD,
-            'data'     => $this->validTmKeysJson(),
-        ]);
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionCode(-1);
 
         $this->controller->update();
     }
@@ -502,7 +462,7 @@ class UpdateJobKeysControllerTest extends AbstractTest
     #[Test]
     public function update_returns_ok_for_revisor_role(): void
     {
-        $this->seedChunkReview(self::BASE, self::JOB_PASSWORD, 'revpw_' . self::BASE, 3);
+        $this->seedChunk(SourcePages::SOURCE_PAGE_REVISION);
 
         $user             = new UserStruct();
         $user->uid        = $this->userId(self::BASE);
@@ -513,10 +473,7 @@ class UpdateJobKeysControllerTest extends AbstractTest
         $this->setProp('userIsLogged', true);
 
         $this->setRequestParams([
-            'job_id'           => (string) $this->jobId(self::BASE),
-            'job_pass'         => self::JOB_PASSWORD,
-            'current_password' => 'revpw_' . self::BASE,
-            'data'             => $this->validTmKeysJson(),
+            'data' => $this->validTmKeysJson(),
         ]);
 
         $this->responseMock->expects($this->once())
@@ -588,6 +545,8 @@ class UpdateJobKeysControllerTest extends AbstractTest
                 . ' WHERE id = ' . $this->jobId(self::BASE)
             );
 
+            $this->seedChunk();
+
             $data = (string) json_encode([
                 'mine' => [[
                     'name' => 'Owned', 'key' => $ownedKey,
@@ -599,9 +558,7 @@ class UpdateJobKeysControllerTest extends AbstractTest
             ]);
 
             $this->setRequestParams([
-                'job_id'   => (string) $this->jobId(self::BASE),
-                'job_pass' => self::JOB_PASSWORD,
-                'data'     => $data,
+                'data' => $data,
             ]);
 
             $this->responseMock->expects($this->once())
@@ -615,5 +572,227 @@ class UpdateJobKeysControllerTest extends AbstractTest
         } finally {
             $this->seedConnection()->exec('DELETE FROM memory_keys WHERE uid = ' . $keyUid);
         }
+    }
+
+    /**
+     * A client key entry, as the TM panel sends it in `mine`.
+     *
+     * @return array<string, mixed>
+     */
+    private function clientKey(string $key, string $name = 'New', bool $owner = true): array
+    {
+        return ['name' => $name, 'key' => $key, 'glos' => true, 'tm' => true, 'owner' => $owner, 'r' => true, 'w' => true];
+    }
+
+    /**
+     * @param list<array<string, mixed>> $mine
+     * @param list<array<string, mixed>> $anonymous
+     *
+     * @throws ReflectionException
+     */
+    private function sendKeys(array $mine, array $anonymous = []): void
+    {
+        $this->setRequestParams([
+            'data' => (string) json_encode(['mine' => $mine, 'ownergroup' => [], 'anonymous' => $anonymous]),
+        ]);
+    }
+
+    private function storedJobTmKeys(): string
+    {
+        return (string) $this->seedConnection()->query('SELECT tm_keys FROM jobs WHERE id = ' . $this->jobId(self::BASE))->fetchColumn();
+    }
+
+    /**
+     * A refused request leaves the job without keys and writes nothing into the keyring.
+     */
+    private function assertJobAndKeyringUnchanged(): void
+    {
+        $this->assertSame('[]', $this->storedJobTmKeys());
+        $this->assertSame(0, (int) $this->seedConnection()->query("SELECT COUNT(*) FROM memory_keys WHERE key_value = '" . self::NEW_KEY . "'")->fetchColumn());
+    }
+
+    /**
+     * Puts self::OWNED_KEY in the job, as update_tags_mine_key_ownership_and_completes_merged_keys does.
+     */
+    private function seedJobWithOwnedKey(): void
+    {
+        $jobTmKeys = json_encode([[
+            'tm' => true, 'glos' => true, 'owner' => true,
+            'uid_transl' => null, 'uid_rev' => null,
+            'name' => 'Owned', 'key' => self::OWNED_KEY,
+            'r' => true, 'w' => true, 'r_transl' => true, 'w_transl' => true,
+            'r_rev' => true, 'w_rev' => true,
+        ]]);
+        $this->seedConnection()->exec(
+            'UPDATE jobs SET tm_keys = ' . $this->seedConnection()->quote((string) $jobTmKeys)
+            . ' WHERE id = ' . $this->jobId(self::BASE)
+        );
+    }
+
+    private function expectOkResponse(): void
+    {
+        $this->responseMock->expects($this->once())
+            ->method('json')
+            ->with($this->callback(function (array $data): bool {
+                $this->assertSame('OK', $data['data']);
+                return true;
+            }));
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    #[Test]
+    #[TestWith([false])]
+    #[TestWith([null])]
+    public function update_refuses_a_new_key_that_mymemory_does_not_accept(?bool $answer): void
+    {
+        $this->seedChunk();
+        $this->controller->tmService->expects($this->once())
+            ->method('checkCorrectKey')
+            ->with(self::NEW_KEY)
+            ->willReturn($answer);
+        $this->sendKeys([$this->clientKey(self::NEW_KEY)]);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionCode(-7);
+        $this->expectExceptionMessage(self::INVALID_KEY_MESSAGE);
+
+        try {
+            $this->controller->update();
+        } finally {
+            $this->assertJobAndKeyringUnchanged();
+        }
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    #[Test]
+    public function update_adds_a_new_key_that_mymemory_accepts(): void
+    {
+        $this->seedChunk();
+        $this->controller->tmService->expects($this->once())
+            ->method('checkCorrectKey')
+            ->with(self::NEW_KEY)
+            ->willReturn(true);
+        $this->sendKeys([$this->clientKey(self::NEW_KEY)]);
+        $this->expectOkResponse();
+
+        $this->controller->update();
+
+        $this->assertStringContainsString(self::NEW_KEY, $this->storedJobTmKeys());
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    #[Test]
+    public function update_does_not_check_a_key_already_in_the_job(): void
+    {
+        $this->seedJobWithOwnedKey();
+        $this->seedChunk();
+        $this->controller->tmService->expects($this->never())->method('checkCorrectKey');
+        $this->sendKeys([$this->clientKey(self::OWNED_KEY, 'Owned')]);
+        $this->expectOkResponse();
+
+        $this->controller->update();
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    #[Test]
+    public function update_does_not_send_a_masked_key_to_mymemory(): void
+    {
+        $this->seedJobWithOwnedKey();
+        $this->seedChunk();
+        $this->controller->tmService->expects($this->never())->method('checkCorrectKey');
+        $maskedKey = (new TmKeyStruct(['key' => self::OWNED_KEY]))->getCrypt();
+        $this->sendKeys([], [$this->clientKey($maskedKey, 'Owned', false)]);
+        $this->expectOkResponse();
+
+        $this->controller->update();
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    #[Test]
+    public function update_checks_a_new_key_added_by_a_translator(): void
+    {
+        $user             = new UserStruct();
+        $user->uid        = $this->userId(self::BASE);
+        $user->email      = 'not-the-owner_' . self::BASE . '@example.org';
+        $user->first_name = 'Other';
+        $user->last_name  = 'User';
+        $this->setProp('user', $user);
+        $this->setProp('userIsLogged', true);
+
+        $this->seedChunk();
+        $this->controller->tmService->expects($this->once())
+            ->method('checkCorrectKey')
+            ->with(self::NEW_KEY)
+            ->willReturn(false);
+        $this->sendKeys([$this->clientKey(self::NEW_KEY)]);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionCode(-7);
+        $this->expectExceptionMessage(self::INVALID_KEY_MESSAGE);
+
+        try {
+            $this->controller->update();
+        } finally {
+            $this->assertJobAndKeyringUnchanged();
+        }
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    #[Test]
+    public function update_keeps_the_job_unchanged_when_mymemory_fails(): void
+    {
+        $this->seedChunk();
+        $this->controller->tmService->expects($this->once())
+            ->method('checkCorrectKey')
+            ->with(self::NEW_KEY)
+            ->willThrowException(new Exception('MyMemory down', -2));
+        $this->sendKeys([$this->clientKey(self::NEW_KEY)]);
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionCode(-2);
+        $this->expectExceptionMessage('MyMemory down');
+
+        try {
+            $this->controller->update();
+        } finally {
+            $this->assertJobAndKeyringUnchanged();
+        }
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    #[Test]
+    public function update_checks_every_new_key_once(): void
+    {
+        $this->seedChunk();
+        $checkedKeys = [];
+        $this->controller->tmService->expects($this->exactly(2))
+            ->method('checkCorrectKey')
+            ->willReturnCallback(function (string $key) use (&$checkedKeys): bool {
+                $checkedKeys[] = $key;
+                return true;
+            });
+        $this->sendKeys([$this->clientKey(self::NEW_KEY), $this->clientKey('ctrlnewkey9005000bb', 'New B')]);
+        $this->expectOkResponse();
+
+        $this->controller->update();
+
+        $storedTmKeys = $this->storedJobTmKeys();
+        $this->assertStringContainsString(self::NEW_KEY, $storedTmKeys);
+        $this->assertStringContainsString('ctrlnewkey9005000bb', $storedTmKeys);
+        $this->assertSame([self::NEW_KEY, 'ctrlnewkey9005000bb'], $checkedKeys);
     }
 }

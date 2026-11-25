@@ -11,13 +11,11 @@ use InvalidArgumentException;
 use Model\DataAccess\IDatabase;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
-use Plugins\Features\ReviewExtended\ReviewUtils as ReviewUtils;
 use Random\RandomException;
 use Transliterator;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\ErrMailWorker;
 use Utils\Constants\Constants;
-use Utils\Constants\SourcePages;
 use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\TmKeyManager;
@@ -25,55 +23,6 @@ use Utils\TmKeyManagement\TmKeyStruct;
 
 class Utils
 {
-
-    public static function getSourcePageFromReferer(): int
-    {
-        $parsed = parse_url($_SERVER['HTTP_REFERER'] ?? '');
-
-        return self::returnSourcePageAsInt(is_array($parsed) ? $parsed : []);
-    }
-
-
-    /**
-     * @return int
-     */
-    public static function getSourcePage(): int
-    {
-        $parsed = parse_url($_SERVER['REQUEST_URI'] ?? '');
-
-        return self::returnSourcePageAsInt(is_array($parsed) ? $parsed : []);
-    }
-
-    /**
-     * @param array<string, int|string> $url
-     *
-     * @return int
-     */
-    private static function returnSourcePageAsInt(array $url): int
-    {
-        $sourcePage = SourcePages::SOURCE_PAGE_TRANSLATE;
-
-        if (!isset($url['path'])) {
-            return $sourcePage;
-        }
-
-        if (!is_string($url['path'])) {
-            return $sourcePage;
-        }
-
-        // this regex matches /revise /revise[2-9]
-        preg_match('/revise([2-9]|\'\')?\//', $url['path'], $matches);
-
-        if (count($matches) === 1) { // [0] => revise/
-            $sourcePage = ReviewUtils::revisionNumberToSourcePage(SourcePages::SOURCE_PAGE_TRANSLATE);
-        }
-
-        if (count($matches) > 1) { // [0] => revise2/ [1] => 2
-            $sourcePage = ReviewUtils::revisionNumberToSourcePage((int)$matches[1]);
-        }
-
-        return $sourcePage;
-    }
 
     /**
      * @param string|null $agent
@@ -467,11 +416,38 @@ class Utils
 
         $queue_element = array_merge([], $mailConf);
         $queue_element['subject'] = $subject;
-        $queue_element['body'] = '<pre>' . self::_getBackTrace() . "<br />" . $htmlContent . '</pre>';
+        $queue_element['body'] = self::errMailBody($htmlContent);
 
         WorkerClient::enqueue('MAIL', ErrMailWorker::class, $queue_element, ['persistent' => WorkerClient::$_HANDLER->persistent]);
 
-        LoggerFactory::doJsonLog('Message has been sent');
+        LoggerFactory::getLogger('mail', 'mail.log')->info('Message has been sent');
+    }
+
+    /**
+     * The one email body assembled by hand rather than through a template, so it is the one place
+     * `EmailValue` cannot escape for us. Every caller passes plain text — an exception message, a
+     * `print_r()` of `$_REQUEST`, a conversion dump — and some of that text is user-controlled: a
+     * project or file name reaches a stack trace, and the request dump is whatever was posted. The
+     * `<pre>` and the break are the only markup this body is entitled to; the rest is escaped so a
+     * payload arrives as characters the reader can see rather than as tags their client renders.
+     *
+     * The backtrace is escaped on the same footing, though nothing in it is reachable today: it is
+     * built from class, function and line names plus a date and an IP that {@see getRealIpAddr()}
+     * has already put through `FILTER_VALIDATE_IP`. Escaping both halves means the rule is "this
+     * body escapes its content" rather than a list of which halves are currently safe.
+     *
+     * Split out from {@see sendErrMailReport()} because that method's other half enqueues to
+     * ActiveMQ, and the escaping is worth testing without a broker.
+     */
+    public static function errMailBody(string $htmlContent): string
+    {
+        $escape = static fn(string $text): string => htmlspecialchars(
+            $text,
+            ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5,
+            'UTF-8'
+        );
+
+        return '<pre>' . $escape(self::_getBackTrace()) . '<br />' . $escape($htmlContent) . '</pre>';
     }
 
     protected static function _getBackTrace(): string
@@ -523,7 +499,7 @@ class Utils
      */
     public static function isTokenValid(?string $token = null): bool
     {
-        if (empty($token) || !preg_match('|^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$|', $token)) {
+        if (empty($token) || !preg_match('|^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$|D', $token)) {
             return false;
         }
 
@@ -727,7 +703,7 @@ class Utils
                     }
                     $outcome = unlink($fileInfo->getPathname());
                     if (!$outcome) {
-                        LoggerFactory::doJsonLog("fail deleting " . $fileInfo->getPathname());
+                        LoggerFactory::getLogger('files')->warning("fail deleting " . $fileInfo->getPathname());
                     }
                 }
             }
@@ -762,13 +738,21 @@ class Utils
     /**
      * uploadDirFromSessionCookie
      *
+     * The guid comes from the upload token cookie, so it is checked here, where it becomes a path:
+     * anything but a UUID could point outside the upload repository.
+     *
      * @param string $guid
      * @param $file_name string|null optional file name to append to the upload path
      *
      * @return string
+     * @throws InvalidArgumentException when the guid is not a valid upload token
      */
     public static function uploadDirFromSessionCookie(string $guid, string $file_name = null): string
     {
+        if (!self::isTokenValid($guid)) {
+            throw new InvalidArgumentException('Invalid upload token.');
+        }
+
         return AppConfig::$UPLOAD_REPOSITORY . "/" .
             $guid . '/' .
             $file_name;

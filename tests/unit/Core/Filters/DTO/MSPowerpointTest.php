@@ -70,4 +70,15 @@ class MSPowerpointTest extends AbstractTest
         $dto->fromArray(['unknown' => true]);
         $this->assertFalse($dto->jsonSerialize()['extract_doc_properties']);
     }
+
+    #[Test]
+    public function setterKeepsTheSlideNumbersAsTheyArrive(): void
+    {
+        // the frontend converts the pills to integers before it saves, so the stored type
+        // has to survive untouched
+        $dto = new MSPowerpoint();
+        $dto->setTranslateSlides([1, 3, 5]);
+
+        $this->assertSame([1, 3, 5], $dto->jsonSerialize()['translate_slides']);
+    }
 }

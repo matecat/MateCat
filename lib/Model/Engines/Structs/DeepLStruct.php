@@ -14,7 +14,7 @@ class DeepLStruct extends EngineStruct
     /**
      * @var ?string
      */
-    public ?string $description = "DeepL - Accurate translations for individuals and Teams.";
+    public ?string $description = "DeepL - Accurate translations for individuals and teams.";
 
     /**
      * @var ?string

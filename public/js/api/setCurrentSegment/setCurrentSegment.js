@@ -1,14 +1,9 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 
-export const setCurrentSegment = async ({
-  password,
-  revision_number,
-  id_segment,
-  id_job,
-}) => {
+export const setCurrentSegment = async ({password, id_segment, id_job}) => {
+  // No revision_number: the phase is derived server side from this password.
   const paramsData = {
     password,
-    revision_number,
     id_segment,
     id_job,
   }

@@ -54,7 +54,7 @@ const Speech2Text = {
     Speech2Text.recognition.onerror = Speech2Text.onRecognitionError
     Speech2Text.recognition.onend = Speech2Text.onRecognitionEnd
     Speech2Text.recognition.onresult = Speech2Text.onRecognitionResult
-    Speech2Text.recognition.lang = config.target_rfc
+    Speech2Text.recognition.lang = config.target_code
   },
   enableMicrophone: function (segment) {
     Speech2Text.microphone = segment.find('.micSpeech')
@@ -111,7 +111,13 @@ const Speech2Text = {
     Speech2Text.interimTranscript = ''
 
     if (!Speech2Text.recognizing) {
-      Speech2Text.recognition.start()
+      try {
+        Speech2Text.recognition.start()
+      } catch (e) {
+        // `recognizing` only flips in the async onstart handler, so a second
+        // start() can land before it: recognition is already running.
+        if (e?.name !== 'InvalidStateError') throw e
+      }
       Speech2Text.showMatches()
     }
   },

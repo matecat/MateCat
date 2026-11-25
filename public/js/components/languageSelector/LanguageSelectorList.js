@@ -1,113 +1,31 @@
-import React from 'react'
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react'
 import TEXT_UTILS from '../../utils/textUtils'
 
-class LanguageSelectorList extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      position: 0,
-    }
-  }
+const LanguageSelectorList = forwardRef((props, ref) => {
+  const {
+    querySearch,
+    selectedLanguages,
+    languagesList,
+    onToggleLanguage,
+    onResetResults,
+  } = props
+  const [position, setPosition] = useState(0)
 
-  currentSelectedElementRef = null
-  wrapperScrollRef = null
+  const currentSelectedElementRef = useRef(null)
+  const wrapperScrollRef = useRef(null)
 
-  componentDidUpdate(prevProps) {
-    const {scrollIfTagNavigationIsOverflow} = this
-    scrollIfTagNavigationIsOverflow()
-
-    if (prevProps.querySearch !== this.props.querySearch) {
-      this.setState({
-        position: 0,
-      })
-    }
-  }
-
-  render() {
-    let counterItem = -1
-    const languages = this.getLanguagesInColumns()
-    const {onClickElement} = this
-    const {querySearch, selectedLanguages} = this.props
-    const {position} = this.state
-    this.currentSelectedElementRef = null
-
-    return (
-      <div
-        className="languages-columns"
-        ref={(el) => {
-          this.wrapperScrollRef = el
-        }}
-      >
-        {languages.map((languagesColumn, key) => {
-          return (
-            <ul key={key} className={'dropdown__list'}>
-              {languagesColumn.map((e) => {
-                counterItem++
-                let elementClass = ''
-                const isHover = querySearch && counterItem === position
-                if (
-                  selectedLanguages &&
-                  selectedLanguages.map((e) => e.code).indexOf(e.code) > -1
-                ) {
-                  elementClass = `selected ${isHover ? 'hover' : ''}`
-                } else if (isHover) {
-                  elementClass = 'hover'
-                }
-                return (
-                  <li
-                    key={`${counterItem}`}
-                    ref={(el) => {
-                      if (isHover) {
-                        this.currentSelectedElementRef = el
-                      }
-                    }}
-                    className={`lang-item ${elementClass}`}
-                    onClick={onClickElement(e)}
-                  >
-                    <div className="language-dropdown-item-container">
-                      <div className="code-badge">
-                        <span className={`code-badge-${elementClass}`}>
-                          {e.code}
-                        </span>
-                      </div>
-                      <span>{e.name}</span>
-                    </div>
-                    <span className={'check'}>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="12"
-                        viewBox="0 0 16 12"
-                      >
-                        <path
-                          fill="#FFF"
-                          fillRule="evenodd"
-                          stroke="none"
-                          strokeWidth="1"
-                          d="M15.735.265a.798.798 0 00-1.13 0L5.04 9.831 1.363 6.154a.798.798 0 00-1.13 1.13l4.242 4.24a.799.799 0 001.13 0l10.13-10.13a.798.798 0 000-1.129z"
-                          transform="translate(-266 -10) translate(266 8) translate(0 2)"
-                        >
-                          {' '}
-                        </path>
-                      </svg>
-                    </span>
-                  </li>
-                )
-              })}
-            </ul>
-          )
-        })}
-      </div>
-    )
-  }
-
-  onClickElement = (language) => () => {
-    const {onToggleLanguage} = this.props
+  const onClickElement = (language) => () => {
     onToggleLanguage(language)
   }
 
-  getFilteredLanguages = () => {
-    const {languagesList, querySearch} = this.props
+  const getFilteredLanguages = () => {
     // const querySplitted = TEXT_UTILS.escapeRegExp(querySearch)
     //   .split(' ')
     //   .join('|')
@@ -157,9 +75,7 @@ class LanguageSelectorList extends React.Component {
     return sortInputFirst(querySearch, langs)
   }
 
-  getLanguagesInColumns = () => {
-    const {getFilteredLanguages} = this
-    const {languagesList} = this.props
+  const getLanguagesInColumns = () => {
     const languagesPerColumn = Math.ceil(languagesList.length / 4)
     const filteredLanguagesInColumns = chunk(
       getFilteredLanguages(),
@@ -176,35 +92,66 @@ class LanguageSelectorList extends React.Component {
       )
     }
   }
-  scrollIfTagNavigationIsOverflow = () => {
-    const {currentSelectedElementRef, wrapperScrollRef} = this
 
-    if (currentSelectedElementRef) {
+  const scrollIfTagNavigationIsOverflow = () => {
+    if (currentSelectedElementRef.current) {
       const relativePositionOfTag =
-        currentSelectedElementRef.offsetTop -
-        wrapperScrollRef.offsetTop +
-        currentSelectedElementRef.clientHeight
+        currentSelectedElementRef.current.offsetTop -
+        wrapperScrollRef.current.offsetTop +
+        currentSelectedElementRef.current.clientHeight
       const bottomPositionOfWrapper =
-        wrapperScrollRef.clientHeight + wrapperScrollRef.scrollTop
+        wrapperScrollRef.current.clientHeight +
+        wrapperScrollRef.current.scrollTop
       if (relativePositionOfTag > bottomPositionOfWrapper) {
         //check if element is overflowBottom of parent
-        wrapperScrollRef.scrollTop =
-          relativePositionOfTag + 10 - wrapperScrollRef.clientHeight
+        wrapperScrollRef.current.scrollTop =
+          relativePositionOfTag + 10 - wrapperScrollRef.current.clientHeight
       } else if (
-        wrapperScrollRef.scrollTop >
-        relativePositionOfTag - currentSelectedElementRef.clientHeight
+        wrapperScrollRef.current.scrollTop >
+        relativePositionOfTag - currentSelectedElementRef.current.clientHeight
       ) {
         //check if element is overflowTop of parent
-        wrapperScrollRef.scrollTop =
-          relativePositionOfTag - currentSelectedElementRef.clientHeight - 10
+        wrapperScrollRef.current.scrollTop =
+          relativePositionOfTag -
+          currentSelectedElementRef.current.clientHeight -
+          10
       }
     }
   }
 
-  navigateLanguagesList = (event) => {
-    const {getFilteredLanguages} = this
-    const {position} = this.state
-    const {querySearch, onToggleLanguage, onResetResults} = this.props
+  const isFirstRender = useRef(true)
+  const prevQuerySearchRef = useRef(querySearch)
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      prevQuerySearchRef.current = querySearch
+      return
+    }
+    scrollIfTagNavigationIsOverflow()
+    if (prevQuerySearchRef.current !== querySearch) {
+      setPosition(0)
+    }
+    prevQuerySearchRef.current = querySearch
+  })
+
+  const latestRef = useRef(null)
+  latestRef.current = {
+    position,
+    querySearch,
+    onToggleLanguage,
+    onResetResults,
+    getFilteredLanguages,
+  }
+
+  const navigateLanguagesList = useCallback((event) => {
+    const {
+      position,
+      querySearch,
+      onToggleLanguage,
+      onResetResults,
+      getFilteredLanguages,
+    } = latestRef.current
     const keyCode = event.keyCode
     if (keyCode === 38 || keyCode === 40) {
       event.preventDefault()
@@ -215,16 +162,12 @@ class LanguageSelectorList extends React.Component {
       if (keyCode === 38) {
         // up key
         if (position !== 0) {
-          this.setState({
-            position: position - 1,
-          })
+          setPosition(position - 1)
         }
       } else if (keyCode === 40) {
         // down key
         if (position + 1 < filteredLanguages.length) {
-          this.setState({
-            position: position + 1,
-          })
+          setPosition(position + 1)
         }
       } else if (keyCode === 13 && filteredLanguages.length) {
         //enter with 1 language filtered
@@ -233,8 +176,82 @@ class LanguageSelectorList extends React.Component {
         event.stopPropagation()
       }
     }
-  }
-}
+  }, [])
+
+  useImperativeHandle(ref, () => ({navigateLanguagesList}), [
+    navigateLanguagesList,
+  ])
+
+  let counterItem = -1
+  const languages = getLanguagesInColumns()
+  currentSelectedElementRef.current = null
+
+  return (
+    <div className="languages-columns" ref={wrapperScrollRef}>
+      {languages.map((languagesColumn, key) => {
+        return (
+          <ul key={key} className={'dropdown__list'}>
+            {languagesColumn.map((e) => {
+              counterItem++
+              let elementClass = ''
+              const isHover = querySearch && counterItem === position
+              if (
+                selectedLanguages &&
+                selectedLanguages.map((e) => e.code).indexOf(e.code) > -1
+              ) {
+                elementClass = `selected ${isHover ? 'hover' : ''}`
+              } else if (isHover) {
+                elementClass = 'hover'
+              }
+              return (
+                <li
+                  key={`${counterItem}`}
+                  ref={(el) => {
+                    if (isHover) {
+                      currentSelectedElementRef.current = el
+                    }
+                  }}
+                  className={`lang-item ${elementClass}`}
+                  onClick={onClickElement(e)}
+                >
+                  <div className="language-dropdown-item-container">
+                    <div className="code-badge">
+                      <span className={`code-badge-${elementClass}`}>
+                        {e.code}
+                      </span>
+                    </div>
+                    <span>{e.name}</span>
+                  </div>
+                  <span className={'check'}>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="12"
+                      viewBox="0 0 16 12"
+                    >
+                      <path
+                        fill="#FFF"
+                        fillRule="evenodd"
+                        stroke="none"
+                        strokeWidth="1"
+                        d="M15.735.265a.798.798 0 00-1.13 0L5.04 9.831 1.363 6.154a.798.798 0 00-1.13 1.13l4.242 4.24a.799.799 0 001.13 0l10.13-10.13a.798.798 0 000-1.129z"
+                        transform="translate(-266 -10) translate(266 8) translate(0 2)"
+                      >
+                        {' '}
+                      </path>
+                    </svg>
+                  </span>
+                </li>
+              )
+            })}
+          </ul>
+        )
+      })}
+    </div>
+  )
+})
+
+LanguageSelectorList.displayName = 'LanguageSelectorList'
 
 LanguageSelectorList.defaultProps = {
   selectedLanguages: false,

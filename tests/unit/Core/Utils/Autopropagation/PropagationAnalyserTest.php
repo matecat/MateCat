@@ -36,7 +36,7 @@ class PropagationAnalyserTest extends AbstractTest
 
         $this->assertInstanceOf(PropagationTotalStruct::class, $result);
         $this->assertCount(2, $result->getPropagatedIds());
-        $this->assertSame(2, $analyser->getPropagatedCount());
+        $this->assertCount(2, $result->getSegmentsForPropagation()['propagated']['not_ice']['id']);
     }
 
     #[Test]
@@ -49,7 +49,7 @@ class PropagationAnalyserTest extends AbstractTest
         $result = $analyser->analyse($parent, [$iceChild]);
 
         $this->assertEmpty($result->getPropagatedIds());
-        $this->assertSame(1, $analyser->getNotPropagatedIceCount());
+        $this->assertCount(1, $result->getSegmentsForPropagation()['not_propagated']['ice']['id']);
     }
 
     #[Test]
@@ -62,7 +62,7 @@ class PropagationAnalyserTest extends AbstractTest
         $result = $analyser->analyse($parent, [$matchingIce]);
 
         $this->assertCount(1, $result->getPropagatedIds());
-        $this->assertSame(1, $analyser->getPropagatedIceCount());
+        $this->assertCount(1, $result->getSegmentsForPropagation()['propagated']['ice']['id']);
     }
 
     #[Test]
@@ -75,7 +75,49 @@ class PropagationAnalyserTest extends AbstractTest
         $result = $analyser->analyse($parent, [$nonMatching]);
 
         $this->assertEmpty($result->getPropagatedIds());
-        $this->assertSame(1, $analyser->getNotPropagatedCount());
+        $this->assertCount(1, $result->getSegmentsForPropagation()['not_propagated']['not_ice']['id']);
+    }
+
+    #[Test]
+    public function analyseUnlockedParentDoesNotPropagateToLockedNonIce(): void
+    {
+        $analyser = new PropagationAnalyser();
+        $parent = $this->makeSegment(['match_type' => 'REPETITIONS', 'locked' => 0]);
+        $lockedChild = $this->makeSegment(['id_segment' => 2, 'match_type' => '100%', 'locked' => 1]);
+
+        $result = $analyser->analyse($parent, [$lockedChild]);
+
+        $this->assertEmpty($result->getPropagatedIds());
+        $this->assertCount(1, $result->getSegmentsForPropagation()['not_propagated']['ice']['id']);
+    }
+
+    #[Test]
+    public function analyseLockedNonIceParentPropagatesOnlyToMatchingLocked(): void
+    {
+        $analyser = new PropagationAnalyser();
+        $parent = $this->makeSegment(['match_type' => '100%', 'locked' => 1, 'segment_hash' => 'hash1']);
+        $matchingLocked = $this->makeSegment(['id_segment' => 2, 'match_type' => '100%', 'locked' => 1, 'segment_hash' => 'hash1']);
+        $unlocked = $this->makeSegment(['id_segment' => 3, 'match_type' => 'REPETITIONS', 'locked' => 0, 'segment_hash' => 'hash1']);
+
+        $result = $analyser->analyse($parent, [$matchingLocked, $unlocked]);
+
+        $this->assertSame(['2'], $result->getPropagatedIds());
+        $this->assertCount(1, $result->getSegmentsForPropagation()['propagated']['ice']['id']);
+        $this->assertCount(1, $result->getSegmentsForPropagation()['not_propagated']['not_ice']['id']);
+    }
+
+    #[Test]
+    public function analyseUnlockedIceParentPropagatesLikeAnyUnlockedSegment(): void
+    {
+        $analyser = new PropagationAnalyser();
+        $parent = $this->makeSegment(['match_type' => 'ICE', 'locked' => 0]);
+        $unlockedChild = $this->makeSegment(['id_segment' => 2, 'match_type' => 'REPETITIONS', 'locked' => 0]);
+        $unlockedIceChild = $this->makeSegment(['id_segment' => 3, 'match_type' => 'ICE', 'locked' => 0]);
+
+        $result = $analyser->analyse($parent, [$unlockedChild, $unlockedIceChild]);
+
+        $this->assertSame(['2', '3'], $result->getPropagatedIds());
+        $this->assertCount(2, $result->getSegmentsForPropagation()['propagated']['not_ice']['id']);
     }
 
     #[Test]

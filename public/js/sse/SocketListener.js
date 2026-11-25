@@ -1,9 +1,10 @@
-import {useContext, useEffect} from 'react'
+import React, {useContext, useEffect} from 'react'
 import useSocketLayer, {ConnectionStates} from '../hooks/useSocketLayer'
 import CatToolActions from '../actions/CatToolActions'
 import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
 import CommonUtils from '../utils/commonUtils'
+import TranslationMatches from '../components/segments/utils/translationMatches'
 import CommentsActions from '../actions/CommentsActions'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
 import UserActions from '../actions/UserActions'
@@ -14,9 +15,14 @@ const SocketListener = ({isAuthenticated, userId}) => {
   const {forceLogout} = useContext(ApplicationWrapperContext)
   const eventHandlers = {
     disconnected: () => {
+      // Results sent while the stream is down are lost: stop waiting for them.
+      TranslationMatches.clearAllPendingContributions()
+      SegmentActions.clearAllPendingGlossaryRequests()
       CatToolActions.clientConnected(false)
     },
     reconnected: () => {
+      TranslationMatches.clearAllPendingContributions()
+      SegmentActions.clearAllPendingGlossaryRequests()
       CatToolActions.clientReconnect()
     },
     ack: ({clientId, serverVersion}) => {
@@ -25,13 +31,23 @@ const SocketListener = ({isAuthenticated, userId}) => {
       if (serverVersion !== config.build_number) {
         const notification = {
           title: 'New update available!',
-          text:
-            'We’ve just released an update with improvements and bug fixes.<br/>' +
-            'To ensure all changes are applied correctly, we recommend refreshing the page.<br/><br/>' +
-            'Click Refresh or press <strong>Ctrl+R</strong> (Windows) / <strong>Cmd+R</strong> (Mac).<br/><br/>' +
-            'Thank you for using Matecat!',
+          text: (
+            <>
+              We&rsquo;ve just released an update with improvements and bug
+              fixes.
+              <br />
+              To ensure all changes are applied correctly, we recommend
+              refreshing the page.
+              <br />
+              <br />
+              Click Refresh or press <strong>Ctrl+R</strong> (Windows) /{' '}
+              <strong>Cmd+R</strong> (Mac).
+              <br />
+              <br />
+              Thank you for using Matecat!
+            </>
+          ),
           type: 'warning',
-          allowHtml: true,
         }
         CatToolActions.addNotification(notification)
       }
@@ -60,8 +76,8 @@ const SocketListener = ({isAuthenticated, userId}) => {
     segment_enabled: (data) => {
       SegmentActions.updateSegmentDisabledState(data.id_segment, false)
       CatToolActions.addNotification({
-        title: 'Segment enabled',
-        text: 'A segment has been re-enabled by the project owner and can be translated again.',
+        title: 'Segment translation enabled',
+        text: 'The project owner has re-enabled editing for one or more segments. They are no longer read-only and can be edited again.',
         type: 'info',
         uid: 'translation_enabled',
         timer: 15000,
@@ -150,6 +166,7 @@ const SocketListener = ({isAuthenticated, userId}) => {
       CommentsActions.updateCommentsFromSse(data)
     },
     contribution: (data) => {
+      TranslationMatches.clearPendingContribution(data.id_segment)
       if (config.translation_matches_enabled) {
         const segment = SegmentStore.getSegmentByIdToJS(data.id_segment)
         if (segment && segment.splitted) {
@@ -220,7 +237,10 @@ const SocketListener = ({isAuthenticated, userId}) => {
           autoDismiss: false,
           position: 'bl',
           allowHtml: true,
-          closeCallback: function () {
+          // Only the X hides it for good: other notifications clearing the
+          // whole list must not count as the user having read it.
+          closeCallback: function (closedByUser) {
+            if (!closedByUser) return
             const expireDate = new Date(message.expire)
             Cookies.set('msg-' + message.token, '', {
               expires: expireDate,

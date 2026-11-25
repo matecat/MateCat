@@ -5,6 +5,103 @@ import {render, screen, within} from '@testing-library/react'
 import projectTemplatesMock from '../../../../../mocks/projectTemplateMock'
 import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
 import mockLanguages from '../../../../../mocks/languagesMock'
+import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper/ApplicationWrapperContext'
+import LXQ from '../../../../utils/lxq.main'
+import {getLexiqaSupportedLocales} from '../../../../api/getLexiqaSupportedLocales/getLexiqaSupportedLocales'
+
+jest.mock('../../../../api/getLexiqaSupportedLocales/getLexiqaSupportedLocales', () => ({
+  getLexiqaSupportedLocales: jest.fn(),
+}))
+
+// lexiQA no longer reads config.lexiqa_languages — it fetches its supported
+// locales from the lexiQA server at runtime, so the test mocks that API call.
+const mockLexiqaSupportedLocales = [
+  'af-ZA',
+  'sq-AL',
+  'ar-SA',
+  'hy-AM',
+  'as-IN',
+  'az-AZ',
+  'fr-BE',
+  'bn-IN',
+  'be-BY',
+  'bs-BA',
+  'bg-BG',
+  'my-MM',
+  'ca-ES',
+  'zh-CN',
+  'zh-TW',
+  'zh-HK',
+  'hr-HR',
+  'cs-CZ',
+  'da-DK',
+  'nl-NL',
+  'en-GB',
+  'en-US',
+  'en-AU',
+  'en-CA',
+  'en-IN',
+  'en-IE',
+  'en-NZ',
+  'en-SG',
+  'et-EE',
+  'fi-FI',
+  'fr-FR',
+  'fr-CA',
+  'fr-CH',
+  'de-DE',
+  'ka-GE',
+  'el-GR',
+  'gu-IN',
+  'hi-IN',
+  'hu-HU',
+  'id-ID',
+  'it-IT',
+  'ja-JP',
+  'jv-ID',
+  'ha-NG',
+  'he-IL',
+  'ht-HT',
+  'kk-KZ',
+  'rn-BI',
+  'ko-KR',
+  'ky-KG',
+  'lv-LV',
+  'lt-LT',
+  'mk-MK',
+  'ms-MY',
+  'mr-IN',
+  'ne-NP',
+  'nb-NO',
+  'fa-IR',
+  'pl-PL',
+  'pt-PT',
+  'pt-BR',
+  'ro-RO',
+  'ru-RU',
+  'sr-Latn-RS',
+  'sr-Cyrl-RS',
+  'si-LK',
+  'sk-SK',
+  'sl-SI',
+  'es-ES',
+  'es-CO',
+  'es-MX',
+  'es-US',
+  'es-419',
+  'sw-KE',
+  'sv-SE',
+  'de-CH',
+  'tl-PH',
+  'ta-LK',
+  'ta-IN',
+  'th-TH',
+  'tr-TR',
+  'uk-UA',
+  'ur-PK',
+  'uz-UZ',
+  'vi-VN',
+]
 
 global.config = {
   basepath: 'http://localhost/',
@@ -68,93 +165,6 @@ global.config = {
     'sv-da': 'Swedish - Danish',
     'cs-de': 'Czech - German',
   },
-  lexiqa_languages: [
-    'af-ZA',
-    'sq-AL',
-    'ar-SA',
-    'hy-AM',
-    'as-IN',
-    'az-AZ',
-    'fr-BE',
-    'bn-IN',
-    'be-BY',
-    'bs-BA',
-    'bg-BG',
-    'my-MM',
-    'ca-ES',
-    'zh-CN',
-    'zh-TW',
-    'zh-HK',
-    'hr-HR',
-    'cs-CZ',
-    'da-DK',
-    'nl-NL',
-    'en-GB',
-    'en-US',
-    'en-AU',
-    'en-CA',
-    'en-IN',
-    'en-IE',
-    'en-NZ',
-    'en-SG',
-    'et-EE',
-    'fi-FI',
-    'fr-FR',
-    'fr-CA',
-    'fr-CH',
-    'de-DE',
-    'ka-GE',
-    'el-GR',
-    'gu-IN',
-    'hi-IN',
-    'hu-HU',
-    'id-ID',
-    'it-IT',
-    'ja-JP',
-    'jv-ID',
-    'ha-NG',
-    'he-IL',
-    'ht-HT',
-    'kk-KZ',
-    'rn-BI',
-    'ko-KR',
-    'ky-KG',
-    'lv-LV',
-    'lt-LT',
-    'mk-MK',
-    'ms-MY',
-    'mr-IN',
-    'ne-NP',
-    'nb-NO',
-    'fa-IR',
-    'pl-PL',
-    'pt-PT',
-    'pt-BR',
-    'ro-RO',
-    'ru-RU',
-    'sr-Latn-RS',
-    'sr-Cyrl-RS',
-    'si-LK',
-    'sk-SK',
-    'sl-SI',
-    'es-ES',
-    'es-CO',
-    'es-MX',
-    'es-US',
-    'es-419',
-    'sw-KE',
-    'sv-SE',
-    'de-CH',
-    'tl-PH',
-    'ta-LK',
-    'ta-IN',
-    'th-TH',
-    'tr-TR',
-    'uk-UA',
-    'ur-PK',
-    'uz-UZ',
-    'vi-VN',
-  ],
   lxq_license: 'P0A3Ol5Me44PMBC5skeA56BcMDkRrapomJF5pEu5',
 }
 
@@ -168,8 +178,12 @@ global.UI = {
   currentSegmentId: '',
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   config.show_tag_projection = 1
+  // lxq.main is not mocked here, so give it the list of lexiQA-supported
+  // locales it would otherwise fetch from the (mocked) lexiQA server.
+  getLexiqaSupportedLocales.mockResolvedValue(mockLexiqaSupportedLocales)
+  LXQ._supportedLocales = await getLexiqaSupportedLocales()
 })
 
 afterAll(() => (global.UI = originalUI))
@@ -198,26 +212,34 @@ const contextValues = {
   ],
 }
 
-test.skip('Render properly', () => {
+// EditorSettingsTab's children read the logged-in user's metadata (and the
+// setter used to persist it) from ApplicationWrapperContext, not from
+// SettingsPanelContext.
+const applicationWrapperContextValue = {
+  userInfo: {
+    metadata: {
+      guess_tags: 1,
+      lexiqa: 1,
+      cross_language_matches: {
+        primary: 'fr-FR',
+        secondary: 'el-GR',
+      },
+    },
+  },
+  setUserMetadataKey: jest.fn(() => Promise.resolve()),
+}
+
+const renderWithContext = (settingsPanelContextValue = contextValues) =>
   render(
-    <SettingsPanelContext.Provider
-      value={{
-        ...contextValues,
-        currentProjectTemplate: {
-          ...contextValues.currentProjectTemplate,
-          speech2text: false,
-          tagProjection: true,
-          lexica: true,
-          crossLanguageMatches: {
-            primary: 'fr-FR',
-            secondary: 'el-GR',
-          },
-        },
-      }}
-    >
-      <EditorSettingsTab />
-    </SettingsPanelContext.Provider>,
+    <ApplicationWrapperContext.Provider value={applicationWrapperContextValue}>
+      <SettingsPanelContext.Provider value={settingsPanelContextValue}>
+        <EditorSettingsTab />
+      </SettingsPanelContext.Provider>
+    </ApplicationWrapperContext.Provider>,
   )
+
+test('Render properly', () => {
+  renderWithContext()
 
   expect(screen.getByTestId('switch-speechtotext')).not.toBeChecked()
   expect(screen.getByTestId('switch-guesstag')).toBeChecked()
@@ -230,75 +252,62 @@ test.skip('Render properly', () => {
   expect(crossLanguagesMatches.getByText('Greek')).toBeInTheDocument()
 })
 
-test.skip('Not showing guess tag', () => {
+test('Not showing guess tag', () => {
   config.show_tag_projection = 0
-  render(
-    <SettingsPanelContext.Provider value={contextValues}>
-      <EditorSettingsTab />
-    </SettingsPanelContext.Provider>,
-  )
+  renderWithContext()
 
   expect(screen.queryByTestId('switch-guesstag')).not.toBeInTheDocument()
 })
 
-test.skip('Guess tag not available for...', () => {
-  render(
-    <SettingsPanelContext.Provider
-      value={{
-        ...contextValues,
-        sourceLang: {
-          code: 'af-ZA',
-          name: 'Afrikaans',
-          direction: 'ltr',
-          id: 'af-ZA',
-        },
-      }}
-    >
-      <EditorSettingsTab />
-    </SettingsPanelContext.Provider>,
-  )
+test('Guess tag not available for...', () => {
+  renderWithContext({
+    ...contextValues,
+    sourceLang: {
+      code: 'af-ZA',
+      name: 'Afrikaans',
+      direction: 'ltr',
+      id: 'af-ZA',
+    },
+  })
 
   expect(screen.getByTestId('switch-guesstag')).not.toBeChecked()
 })
 
-test.skip('Lexiqa not available for...', () => {
-  render(
-    <SettingsPanelContext.Provider
-      value={{
-        ...contextValues,
-        sourceLang: {
-          code: 'ace-ID',
-          name: 'Acehnese',
-          direction: 'ltr',
-          id: 'ace-ID',
-        },
-      }}
-    >
-      <EditorSettingsTab />
-    </SettingsPanelContext.Provider>,
-  )
+test('Lexiqa not available for...', () => {
+  renderWithContext({
+    ...contextValues,
+    sourceLang: {
+      code: 'ace-ID',
+      name: 'Acehnese',
+      direction: 'ltr',
+      id: 'ace-ID',
+    },
+  })
 
   expect(screen.getByTestId('switch-lexiqa')).not.toBeChecked()
 })
 
-test.skip('Lexiqa not available for... (target lang)', () => {
-  render(
-    <SettingsPanelContext.Provider
-      value={{
-        ...contextValues,
-        targetLangs: [
-          {
-            code: 'ln-LIN',
-            name: 'Lingala',
-            direction: 'ltr',
-            id: 'ln-LIN',
-          },
-        ],
-      }}
-    >
-      <EditorSettingsTab />
-    </SettingsPanelContext.Provider>,
-  )
+test('Lexiqa not available for... (target lang)', () => {
+  renderWithContext({
+    ...contextValues,
+    targetLangs: [
+      {
+        code: 'ln-LIN',
+        name: 'Lingala',
+        direction: 'ltr',
+        id: 'ln-LIN',
+      },
+    ],
+  })
 
   expect(screen.getByTestId('switch-lexiqa')).not.toBeChecked()
+})
+
+test('shows AiAssistant only when isOpenAiEnabled is set', () => {
+  config.isOpenAiEnabled = true
+  renderWithContext()
+
+  expect(screen.getByTestId('switch-ai-assistant')).toBeInTheDocument()
+
+  config.isOpenAiEnabled = false
 })

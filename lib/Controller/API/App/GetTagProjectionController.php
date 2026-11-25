@@ -100,27 +100,27 @@ class GetTagProjectionController extends KleinController
         $target_lang = filter_var($this->request->param('target_lang'), FILTER_SANITIZE_SPECIAL_CHARS, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH]);
 
         if (empty($source)) {
-            throw new InvalidArgumentException("missing source segment", -1);
+            throw new InvalidArgumentException("Missing source segment", -1);
         }
 
         if (empty($target)) {
-            throw new InvalidArgumentException("missing target segment", -2);
+            throw new InvalidArgumentException("Missing target segment", -2);
         }
 
         if (empty($source_lang)) {
-            throw new InvalidArgumentException("missing source lang", -3);
+            throw new InvalidArgumentException("Missing source lang", -3);
         }
 
         if (empty($target_lang)) {
-            throw new InvalidArgumentException("missing target lang", -4);
+            throw new InvalidArgumentException("Missing target lang", -4);
         }
 
         if (empty($password)) {
-            throw new InvalidArgumentException("missing job password", -5);
+            throw new InvalidArgumentException("Missing job password", -5);
         }
 
         if (empty($id_segment)) {
-            throw new InvalidArgumentException("missing id segment", -6);
+            throw new InvalidArgumentException("Missing id segment", -6);
         }
 
         if (empty($id_job)) {

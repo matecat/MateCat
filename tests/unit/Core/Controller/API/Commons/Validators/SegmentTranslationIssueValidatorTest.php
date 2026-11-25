@@ -14,6 +14,7 @@ use Matecat\TestHelpers\ControllerSeedFragments;
 use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\LQA\ChunkReviewStruct;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
 
@@ -103,20 +104,19 @@ class SegmentTranslationIssueValidatorTest extends AbstractTest
 
     /**
      * Insert the segment_translations row the SegmentTranslation validator requires.
-     * $iceLocked seeds a locked ICE (match_type=ICE, locked=1, tm_analysis_status not SKIPPED)
-     * so SegmentTranslationStruct::isICE() returns true.
+     * $locked and $tmAnalysisStatus drive the out-of-scope guard: a locked row, or one with
+     * tm_analysis_status SKIPPED (pre-translated), cannot receive an issue while unmodified.
      */
-    private function seedTranslation(bool $iceLocked = false): void
+    private function seedTranslation(string $match = 'TM', bool $locked = false, string $tmAnalysisStatus = 'DONE'): void
     {
         $segmentId = $this->segmentId(self::BASE);
         $jobId     = $this->jobId(self::BASE);
         $hash      = 'ctrltest_hash_' . self::BASE;
-        $match     = $iceLocked ? 'ICE' : 'TM';
-        $locked    = $iceLocked ? 1 : 0;
+        $lockedInt = $locked ? 1 : 0;
         $this->seedConnection()->exec(
             'INSERT IGNORE INTO segment_translations '
-            . '(id_segment, id_job, segment_hash, translation, status, version_number, match_type, locked, translation_date) '
-            . "VALUES ($segmentId, $jobId, '$hash', 'Ciao mondo', 'TRANSLATED', 0, '$match', $locked, NOW())"
+            . '(id_segment, id_job, segment_hash, translation, status, version_number, match_type, locked, tm_analysis_status, translation_date) '
+            . "VALUES ($segmentId, $jobId, '$hash', 'Ciao mondo', 'TRANSLATED', 0, '$match', $lockedInt, '$tmAnalysisStatus', NOW())"
         );
     }
 
@@ -236,7 +236,7 @@ class SegmentTranslationIssueValidatorTest extends AbstractTest
         $this->setRequest($this->baseParams(['id_issue' => (string) self::QA_ENTRY_ID]));
 
         $this->expectException(ValidationError::class);
-        $this->expectExceptionMessage('issue not found');
+        $this->expectExceptionMessage('Issue not found');
         $this->makeValidator()->_validate();
     }
 
@@ -258,7 +258,7 @@ class SegmentTranslationIssueValidatorTest extends AbstractTest
         $this->setRequest($this->baseParams(['id_issue' => (string) self::QA_ENTRY_ID]));
 
         $this->expectException(ValidationError::class);
-        $this->expectExceptionMessage('issue not found');
+        $this->expectExceptionMessage('Issue not found');
         $this->makeValidator()->_validate();
     }
 
@@ -280,21 +280,58 @@ class SegmentTranslationIssueValidatorTest extends AbstractTest
 
     // ─── __ensureSegmentRevisionIsCompatibleWithIssueRevisionNumber (POST) ───
 
-    #[Test]
-    public function throws_validation_error_minus_2000_on_unmodified_ice(): void
+    /**
+     * @return array<string, array{string, bool, string}>
+     */
+    public static function outOfScopeUnmodifiedSegments(): array
     {
-        $this->seedTranslation(true); // locked ICE, no segment event
-        $this->setRequest($this->baseParams(['revision_number' => '1']), 'POST');
+        return [
+            'locked ICE'                   => ['ICE', true, 'DONE'],
+            'locked non-ICE (100%)'        => ['100%', true, 'DONE'],
+            'unlocked pre-translated'      => ['ICE', false, 'SKIPPED'],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('outOfScopeUnmodifiedSegments')]
+    public function throws_validation_error_minus_2000_on_unmodified_out_of_scope_segment(
+        string $match,
+        bool $locked,
+        string $tmAnalysisStatus
+    ): void {
+        $this->seedTranslation($match, $locked, $tmAnalysisStatus); // no segment event
+        $this->setRequest($this->baseParams(), 'POST');
 
         $validator = $this->makeValidator();
         $validator->setChunkReview($this->makeChunkReview(2));
+        $validator->_validate();
 
         try {
-            $validator->_validate();
+            $validator->ensureSegmentRevisionMatchesCredentialPhase();
             $this->fail('Expected ValidationError');
         } catch (ValidationError $e) {
             $this->assertSame(-2000, $e->getCode());
-            $this->assertStringContainsString('unmodified ICE', $e->getMessage());
+            $this->assertSame('Cannot set issues on unmodified locked or pre-translated segment.', $e->getMessage());
+        }
+    }
+
+    #[Test]
+    public function unlocked_ice_is_not_blocked_by_the_out_of_scope_guard(): void
+    {
+        $this->seedTranslation('ICE', false, 'DONE'); // unlocked ICE, no segment event
+        $this->setRequest($this->baseParams(), 'POST');
+
+        $validator = $this->makeValidator();
+        $validator->setChunkReview($this->makeChunkReview(2));
+        $validator->_validate();
+
+        try {
+            $validator->ensureSegmentRevisionMatchesCredentialPhase();
+            $this->fail('Expected Exception');
+        } catch (ValidationError $e) {
+            $this->fail('Unlocked ICE must not hit the out-of-scope guard: ' . $e->getMessage());
+        } catch (Exception $e) {
+            $this->assertStringContainsString('Unable to find the current state of this segment', $e->getMessage());
         }
     }
 
@@ -302,29 +339,31 @@ class SegmentTranslationIssueValidatorTest extends AbstractTest
     public function throws_validation_error_on_revision_state_mismatch(): void
     {
         $this->seedTranslation();
-        // event source_page (3) != revisionNumberToSourcePage(1) == 2
+        // the segment sits in R2 (source_page 3) while the presented password resolved to R1 (2)
         $this->seedSegmentEvent(3);
-        $this->setRequest($this->baseParams(['revision_number' => '1']), 'POST');
+        $this->setRequest($this->baseParams(), 'POST');
 
         $validator = $this->makeValidator();
         $validator->setChunkReview($this->makeChunkReview(2));
+        $validator->_validate();
 
         $this->expectException(ValidationError::class);
         $this->expectExceptionMessage('not in same revision state');
-        $validator->_validate();
+        $validator->ensureSegmentRevisionMatchesCredentialPhase();
     }
 
     #[Test]
     public function validates_post_revision_when_state_matches(): void
     {
         $this->seedTranslation();
-        // revisionNumberToSourcePage(1) == 2, so event source_page must be 2
+        // the password resolved to R1 (source_page 2), so the segment must sit in that same phase
         $this->seedSegmentEvent(2);
-        $this->setRequest($this->baseParams(['revision_number' => '1']), 'POST');
+        $this->setRequest($this->baseParams(), 'POST');
 
         $validator = $this->makeValidator();
         $validator->setChunkReview($this->makeChunkReview(2));
         $validator->_validate();
+        $validator->ensureSegmentRevisionMatchesCredentialPhase();
 
         $this->assertSame($this->segmentId(self::BASE), $validator->translation->id_segment);
     }
@@ -358,5 +397,23 @@ class SegmentTranslationIssueValidatorTest extends AbstractTest
         $validator->_validate();
 
         $this->assertSame(self::QA_ENTRY_ID, $validator->issue->id);
+    }
+
+    /**
+     * Without an id_issue param __ensureIssueIsInScope() never runs, so the issue is still null by
+     * the time the DELETE branch checks it. setChunkReview() is deliberately not called: the guard
+     * throws before $this->chunkReview is dereferenced.
+     */
+    #[Test]
+    public function throws_validation_error_when_delete_has_no_issue_in_scope(): void
+    {
+        $this->seedTranslation();
+        $this->setRequest($this->baseParams(), 'DELETE');
+
+        $validator = $this->makeValidator();
+
+        $this->expectException(ValidationError::class);
+        $this->expectExceptionMessage('Issue not found');
+        $validator->_validate();
     }
 }

@@ -1,14 +1,10 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 
-export const sendRevisionFeedback = async (
-  idJob,
-  revisionNumber,
-  password,
-  text,
-) => {
+export const sendRevisionFeedback = async (idJob, password, text) => {
+  // No revision_number: the revision phase the feedback belongs to is derived server side from
+  // this password, which must be the current password of the phase being reviewed.
   const params = {
     id_job: idJob,
-    revision_number: revisionNumber,
     password: password,
     feedback: text,
   }

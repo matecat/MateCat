@@ -2,23 +2,17 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 /**
  * Change the password for the job
  * @param job
- * @param password
- * @param revision_number
+ * @param password the current password of the resource being changed: the translate password to
+ *        change the job password, or the current password of a revision step to change that one
  * @param undo
  * @param old_pass
  */
-export const changeJobPassword = async (
-  job,
-  password,
-  revision_number,
-  undo,
-  old_pass,
-) => {
+export const changeJobPassword = async (job, password, undo, old_pass) => {
+  // No revision_number: the password sent above is what decides which password gets rotated.
   const params = {
     id: job.id,
     password: password,
     new_password: old_pass,
-    revision_number,
     undo: undo,
   }
   const formData = new FormData()

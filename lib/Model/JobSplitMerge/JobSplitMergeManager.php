@@ -11,6 +11,7 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Projects\ProjectStruct;
+use Throwable;
 use Utils\Logger\LoggerFactory;
 use Model\Users\UserStruct;
 use Utils\Session\SessionStore;
@@ -52,9 +53,9 @@ class JobSplitMergeManager
     /**
      * @param UserStruct $actingUser Who is running the split or merge. Carried onto the
      *                               PostJobSplitted / PostJobMerged events so listeners attribute
-     *                               the resulting chunk-review updates without reading the session.
-     *                               Distinct from SplitMergeProjectData::$uid, which also drives
-     *                               translator re-invitation and is left untouched here.
+     *                               the resulting chunk-review updates without reading the session,
+     *                               and used as the inviter when a split moves the link its
+     *                               translator holds.
      *
      * @throws Exception
      */
@@ -109,10 +110,12 @@ class JobSplitMergeManager
      *
      * @throws Exception
      * @throws \TypeError
+     * @throws Throwable the split runs inside a transaction scope, which aborts the transaction on
+     *                   any throw and re-throws the original, whatever its type
      */
     public function applySplit(SplitMergeProjectData $data): void
     {
-        $this->getJobSplitMergeService()->applySplit($data, $this->actingUser, $data->uid);
+        $this->getJobSplitMergeService()->applySplit($data, $this->actingUser);
     }
 
     /**
@@ -124,6 +127,8 @@ class JobSplitMergeManager
      *
      * @throws Exception
      * @throws \TypeError
+     * @throws Throwable the merge runs inside a transaction scope, which aborts the transaction on
+     *                   any throw and re-throws the original, whatever its type
      */
     public function mergeALL(SplitMergeProjectData $data, array $jobStructs): void
     {

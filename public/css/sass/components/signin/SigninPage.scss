@@ -1,4 +1,4 @@
-@use '../../commons/colors';
+@use '../../tokens/colors';
 
 .signin-overlay {
   position: fixed;
@@ -39,6 +39,9 @@
   fieldset {
     padding: 0;
     border: none;
+  }
+  label {
+    color: colors.$grey700;
   }
 
   button.link-underline {

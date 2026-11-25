@@ -12,12 +12,22 @@ import Trash from '../../../../../../img/icons/Trash'
 import {MTGlossaryStatus} from './MTGlossaryConstants'
 import {importMemoryGlossary} from '../../../../../api/importMemoryGlossary/importMemoryGlossary'
 import {updateMemoryGlossary} from '../../../../../api/updateMemoryGlossary/updateMemoryGlossary'
-import IconEdit from '../../../../icons/IconEdit'
+import IconEdit from '../../../../../../img/icons/IconEdit'
 import Checkmark from '../../../../../../img/icons/Checkmark'
-import Close from '../../../../../../img/icons/Close'
 import LabelWithTooltip from '../../../../common/LabelWithTooltip'
 import CatToolActions from '../../../../../actions/CatToolActions'
 import {SettingsPanelContext} from '../../../SettingsPanelContext'
+import {
+  Button,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../../../../common/Button/Button'
+import IconClose from '../../../../../../img/icons/IconClose'
+import {
+  Checkbox,
+  CHECKBOX_SIZE,
+  CHECKBOX_STATE,
+} from '../../../../common/Checkbox'
 
 export const MTGlossaryRow = ({
   engineId,
@@ -51,7 +61,6 @@ export const MTGlossaryRow = ({
         type: 'success',
         text: `Glossary file ${file.name} imported successfully`,
         position: 'br',
-        allowHtml: true,
         timer: 5000,
       })
       setIsWaitingResult(false)
@@ -62,7 +71,6 @@ export const MTGlossaryRow = ({
         type: 'error',
         text: `Glossary file ${file.name} import error`,
         position: 'br',
-        allowHtml: true,
         timer: 5000,
       })
       setIsWaitingResult(false)
@@ -94,8 +102,8 @@ export const MTGlossaryRow = ({
     inputNameRef.current.focus()
   }, [isEditingName])
 
-  const onChangeIsActive = (e) => {
-    const isActive = e.currentTarget.checked
+  const onChangeIsActive = (isChecked) => {
+    const isActive = isChecked
     setIsActive(isActive)
     setRows((prevState) =>
       prevState.map((glossary) =>
@@ -138,28 +146,36 @@ export const MTGlossaryRow = ({
   }
 
   const editingNameButtons = !isEditingName ? (
-    <button className="grey-button" onClick={() => setIsEditingName(true)}>
+    <Button
+      className="settings-panel-grey-button"
+      type={BUTTON_TYPE.ICON}
+      size={BUTTON_SIZE.ICON_SMALL}
+      onClick={() => setIsEditingName(true)}
+    >
       <IconEdit size={16} />
-    </button>
+    </Button>
   ) : (
     <div className="editing-buttons">
-      <button
-        className="ui primary button settings-panel-button-icon confirm-button"
+      <Button
+        type={BUTTON_TYPE.PRIMARY}
+        size={BUTTON_SIZE.SMALL}
         disabled={!name}
         onClick={updateKeyName}
       >
-        <Checkmark size={12} />
+        <Checkmark size={16} />
         Confirm
-      </button>
-      <button
-        className="ui button orange close-button"
+      </Button>
+
+      <Button
+        type={BUTTON_TYPE.WARNING}
+        size={BUTTON_SIZE.ICON_SMALL}
         onClick={() => {
           setIsEditingName(false)
           setName(row.name)
         }}
       >
-        <Close size={18} />
-      </button>
+        <IconClose size={16} />
+      </Button>
     </div>
   )
 
@@ -178,18 +194,19 @@ export const MTGlossaryRow = ({
   return (
     <Fragment>
       <div>
-        <input
-          checked={isActive}
+        <Checkbox
+          value={isActive ? CHECKBOX_STATE.CHECKED : CHECKBOX_STATE.UNCHECKED}
+          size={CHECKBOX_SIZE.SMALL}
           onChange={onChangeIsActive}
-          type="checkbox"
-          disabled={isWaitingResult || isReadOnly}
-          data-testid={`mtglossary-active-${row.id}`}
+          disabled={isWaitingResult}
+          testId={`mtglossary-active-${row.id}`}
         />
       </div>
       <div className="glossary-row-name">
         {setInputNameContainer(
           <input
             ref={inputNameRef}
+            type="text"
             className={`glossary-row-name-input${
               isEditingName ? ' active' : ''
             }`}
@@ -217,14 +234,16 @@ export const MTGlossaryRow = ({
             </label>
           </div>
           <div className="glossary-row-delete">
-            <button
-              className="grey-button"
+            <Button
+              className="settings-panel-grey-button"
+              type={BUTTON_TYPE.ICON}
+              size={BUTTON_SIZE.ICON_SMALL}
               disabled={isWaitingResult}
               onClick={() => deleteGlossaryConfirm(row)}
-              data-testid={`delete-mtglossary-${row.id}`}
+              testId={`delete-mtglossary-${row.id}`}
             >
               <Trash size={16} />
-            </button>
+            </Button>
           </div>
           {isWaitingResult && <div className="spinner"></div>}
         </>

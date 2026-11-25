@@ -54,7 +54,7 @@ class XliffRulesModel implements JsonSerializable
     }
 
     /**
-     * @param array<string, array<int, array{states: string[], analysis: string, editor?: string|null, match_category?: string|null}>> $structure
+     * @param array<string, array<int, array{states: string[], analysis: string, editor?: string|null, match_category?: string|null, lock?: bool}>> $structure
      *
      * @return self
      * @throws Exception
@@ -68,7 +68,7 @@ class XliffRulesModel implements JsonSerializable
             } elseif ($ruleType == self::XLIFF_20) {
                 $ruleClass = Xliff20Rule::class;
             } else {
-                throw new DomainException("Invalid Rule: " . $ruleType, 400);
+                throw new DomainException("Invalid rule: " . $ruleType, 400);
             }
 
             foreach ($ruleSet as $rule) {
@@ -92,7 +92,7 @@ class XliffRulesModel implements JsonSerializable
         } elseif ($versionNumber == 2) {
             return $this->ruleSets[static::XLIFF_20];
         } else {
-            throw new DomainException("Invalid Version: " . $versionNumber, 400);
+            throw new DomainException("Invalid version: " . $versionNumber, 400);
         }
     }
 
@@ -106,6 +106,8 @@ class XliffRulesModel implements JsonSerializable
      */
     public function getMatchingRule(int $versionNumber, string $state = null, string $stateQualifier = null): XliffRuleInterface
     {
+        $noStateRule = null;
+
         // here we must analyze and check only for editor status
         foreach ($this->getRulesForVersion($versionNumber) as $rule) {
             if ($stateQualifier !== null && in_array(strtolower($stateQualifier), $rule->getStates('state-qualifiers'))) {
@@ -115,6 +117,15 @@ class XliffRulesModel implements JsonSerializable
             if ($state !== null && in_array(strtolower($state), $rule->getStates('states'))) {
                 return $rule;
             }
+
+            if ($rule->isNoStateRule()) {
+                $noStateRule = $rule;
+            }
+        }
+
+        // the no-state rule covers the segments without state/state-qualifier and every state not matched above
+        if ($noStateRule !== null) {
+            return $noStateRule;
         }
 
         return new DefaultRule(array_filter([$state, $stateQualifier]), AbstractXliffRule::_ANALYSIS_PRE_TRANSLATED, null, null);

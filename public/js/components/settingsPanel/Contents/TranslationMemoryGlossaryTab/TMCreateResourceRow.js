@@ -9,8 +9,19 @@ import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {getInfoTmKey} from '../../../../api/getInfoTmKey'
 
 import Checkmark from '../../../../../img/icons/Checkmark'
-import Close from '../../../../../img/icons/Close'
 import CatToolActions from '../../../../actions/CatToolActions'
+import {
+  Button,
+  BUTTON_HTML_TYPE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../../../common/Button/Button'
+import IconClose from '../../../../../img/icons/IconClose'
+import {
+  Checkbox,
+  CHECKBOX_SIZE,
+  CHECKBOX_STATE,
+} from '../../../common/Checkbox'
 
 export const TMCreateResourceRow = ({row}) => {
   const {tmKeys, setTmKeys, modifyingCurrentTemplate} =
@@ -28,14 +39,14 @@ export const TMCreateResourceRow = ({row}) => {
     nameRef.current.focus()
   }, [])
 
-  const onChangeIsLookup = (e) => {
-    const isLookup = e.currentTarget.checked
+  const onChangeIsLookup = (isChecked) => {
+    const isLookup = isChecked
     setIsLookup(isLookup)
     updateRow({isUpdating, isLookup, name})
   }
 
-  const onChangeIsUpdating = (e) => {
-    const isUpdating = e.currentTarget.checked
+  const onChangeIsUpdating = (isChecked) => {
+    const isUpdating = isChecked
     setIsUpdating(isUpdating)
     updateRow({isUpdating, isLookup, name})
   }
@@ -95,7 +106,6 @@ export const TMCreateResourceRow = ({row}) => {
       CatToolActions.addNotification({
         ...message,
         position: 'br',
-        allowHtml: true,
         timer: 5000,
       })
       return
@@ -169,9 +179,12 @@ export const TMCreateResourceRow = ({row}) => {
           CatToolActions.addNotification({
             title: 'Resource created ',
             type: 'success',
-            text: `Resource <b>${name}</b> created successfully`,
+            text: (
+              <>
+                Resource <b>{name}</b> created successfully
+              </>
+            ),
             position: 'br',
-            allowHtml: true,
             timer: 5000,
           })
         })
@@ -295,7 +308,6 @@ export const TMCreateResourceRow = ({row}) => {
           title: 'Invalid key',
           type: 'error',
           text: message,
-          allowHtml: true,
           position: 'br',
           timer: 5000,
         })
@@ -315,18 +327,25 @@ export const TMCreateResourceRow = ({row}) => {
   return (
     <form className="settings-panel-row-content" onSubmit={onSubmit}>
       <div className="tm-key-lookup align-center">
-        <input checked={isLookup} onChange={onChangeIsLookup} type="checkbox" />
+        <Checkbox
+          value={isLookup ? CHECKBOX_STATE.CHECKED : CHECKBOX_STATE.UNCHECKED}
+          size={CHECKBOX_SIZE.SMALL}
+          onChange={onChangeIsLookup}
+          testId={`tmkey-create-lookup-${row.id}`}
+        />
       </div>
       <div className="tm-key-update align-center">
-        <input
-          checked={isUpdating}
+        <Checkbox
+          value={isUpdating ? CHECKBOX_STATE.CHECKED : CHECKBOX_STATE.UNCHECKED}
+          size={CHECKBOX_SIZE.SMALL}
           onChange={onChangeIsUpdating}
-          type="checkbox"
+          testId={`tmkey-create-update-${row.id}`}
         />
       </div>
       <div>
         <input
           ref={nameRef}
+          type="text"
           placeholder="Please insert a name for the resource"
           className={inputNameClasses}
           value={name}
@@ -337,6 +356,7 @@ export const TMCreateResourceRow = ({row}) => {
       <div className="tm-key-add-shared-resource align-center">
         {row.id === SPECIAL_ROWS_ID.addSharedResource && (
           <input
+            type="text"
             placeholder="Add the shared key here"
             className={inputKeyCodeClasses}
             value={keyCode}
@@ -346,23 +366,26 @@ export const TMCreateResourceRow = ({row}) => {
         )}
       </div>
       <div />
-      <div className="translation-memory-glossary-tab-buttons-group">
-        <button
-          className="ui primary button settings-panel-button-icon confirm-button"
-          type="submit"
+      <div className="translation-memory-glossary-tab-buttons-group translation-memory-glossary-tab-create-row">
+        <Button
+          type={BUTTON_TYPE.PRIMARY}
+          size={BUTTON_SIZE.SMALL}
           disabled={!isFormFilled}
-          data-testid="create-tmkey-confirm"
+          htmlType={BUTTON_HTML_TYPE.SUBMIT}
+          testId="create-tmkey-confirm"
         >
-          <Checkmark size={12} />
+          <Checkmark size={16} />
           Confirm
-        </button>
-        <button
-          className="ui button orange close-button"
+        </Button>
+
+        <Button
+          type={BUTTON_TYPE.WARNING}
+          size={BUTTON_SIZE.ICON_SMALL}
+          htmlType={BUTTON_HTML_TYPE.RESET}
           onClick={onReset}
-          type="reset"
         >
-          <Close size={18} />
-        </button>
+          <IconClose size={16} />
+        </Button>
       </div>
     </form>
   )

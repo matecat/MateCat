@@ -12,6 +12,7 @@ use Stomp\Transport\Message;
 use TypeError;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\Registry\AppConfig;
+use Utils\Session\PhpSession;
 use Utils\Session\PhpSessionStore;
 use Utils\Session\SessionStore;
 use Utils\Session\StatelessSessionStore;
@@ -25,8 +26,6 @@ use Utils\Session\StatelessSessionStore;
  */
 trait AuthenticationTrait
 {
-
-    use SessionStarter;
 
     /**
      * Provided by the host class (KleinController).
@@ -83,7 +82,7 @@ trait AuthenticationTrait
      *
      * Overridable seam for tests.
      *
-     * @throws Exception from sessionStart()
+     * @throws Exception from PhpSession::start()
      */
     protected function buildSessionStore(bool $useSession): SessionStore
     {
@@ -92,7 +91,7 @@ trait AuthenticationTrait
         }
 
         //Warning, sessions enabled, disable them after check, $_SESSION is in read-only mode after disabled
-        static::sessionStart();
+        PhpSession::start();
 
         return new PhpSessionStore();
     }

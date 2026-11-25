@@ -60,9 +60,9 @@ let CatToolActions = {
       container: 'search',
     })
   },
-  togglePhTagsCompressed: function () {
+  toggleTagsCompressed: function () {
     AppDispatcher.dispatch({
-      actionType: CatToolConstants.TOGGLE_PH_TAGS_COMPRESSED,
+      actionType: CatToolConstants.TOGGLE_TAGS_COMPRESSED,
     })
   },
   storeSearchResults: function (data) {
@@ -135,12 +135,7 @@ let CatToolActions = {
     )
   },
   sendRevisionFeedback: function (text) {
-    return sendRevisionFeedback(
-      config.id_job,
-      config.revisionNumber,
-      config.review_password,
-      text,
-    )
+    return sendRevisionFeedback(config.id_job, config.currentPassword, text)
   },
   reloadQualityReport: function () {
     AppDispatcher.dispatch({
@@ -264,18 +259,18 @@ let CatToolActions = {
     })
   },
   getJobMetadata: ({idJob, password}) => {
-    if (!CatToolStore.jobMetadata) {
+    if (!CatToolStore.getJobMetadata()) {
       getJobMetadata(idJob, password).then((jobMetadata) => {
+        CatToolStore.setJobMetadata(jobMetadata)
         AppDispatcher.dispatch({
           actionType: CatToolConstants.GET_JOB_METADATA,
-          jobMetadata,
+          jobMetadata: CatToolStore.getJobMetadata(),
         })
-        CatToolStore.jobMetadata = jobMetadata
       })
     } else {
       AppDispatcher.dispatch({
         actionType: CatToolConstants.GET_JOB_METADATA,
-        jobMetadata: CatToolStore.jobMetadata,
+        jobMetadata: CatToolStore.getJobMetadata(),
       })
     }
   },

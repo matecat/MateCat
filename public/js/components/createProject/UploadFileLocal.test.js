@@ -29,7 +29,7 @@ jest.mock('../../actions/CreateProjectActions', () => ({
 }))
 
 jest.mock('../../utils/commonUtils', () => ({
-  getIconClass: jest.fn(() => 'extdoc'),
+  getFileIcon: jest.fn(() => null),
   dispatchCustomEvent: jest.fn(),
 }))
 
@@ -141,7 +141,7 @@ describe('UploadFileLocal', () => {
       renderWithContext()
       const input = document.getElementById('fileInput')
       expect(input).toBeInTheDocument()
-      expect(input.style.display).toBe('none')
+      expect(input).toHaveStyle({display: 'none'})
     })
   })
 
@@ -237,6 +237,25 @@ describe('UploadFileLocal', () => {
       })
 
       expect(screen.getByText('test.docx')).toBeInTheDocument()
+    })
+
+    test('upload response without a file entry does not crash', async () => {
+      fileUpload.mockImplementation((file, onProgress, onSuccess) => {
+        onProgress(100)
+        onSuccess(JSON.stringify([]))
+      })
+      renderWithContext()
+
+      const input = document.getElementById('fileInput')
+      const file = createMockFile('test.docx')
+
+      await act(async () => {
+        fireEvent.change(input, {target: {files: [file]}})
+      })
+
+      expect(
+        screen.getByText('Error during upload. Please try again.'),
+      ).toBeInTheDocument()
     })
 
     test('conversion error shows error message', async () => {
@@ -622,7 +641,7 @@ describe('UploadFileLocal', () => {
   })
 
   describe('Max files limit', () => {
-    test('shows error when file limit is exceeded', async () => {
+    test('lists the excess file first with its error and explains the disabled add button', async () => {
       const originalMax = config.maxNumberFiles
       config.maxNumberFiles = 2
       simulateUploadSuccess()
@@ -640,7 +659,24 @@ describe('UploadFileLocal', () => {
         jest.advanceTimersByTime(200)
       })
 
-      expect(CreateProjectActions.showError).toHaveBeenCalled()
+      expect(CreateProjectActions.showError).not.toHaveBeenCalled()
+      const names = screen
+        .getAllByText(/^file\d\.docx$/)
+        .map((el) => el.textContent)
+      expect(names).toEqual(['file3.docx', 'file1.docx', 'file2.docx'])
+      expect(
+        screen.getByText(
+          'Too many files uploaded. Please remove this file to continue.',
+        ),
+      ).toBeInTheDocument()
+      expect(screen.getByText('Files uploaded: 3 / 2')).toBeInTheDocument()
+      expect(screen.getByText('· 1 with error')).toBeInTheDocument()
+      const addButton = screen.getByRole('button', {name: /files per project/})
+      expect(addButton).toBeDisabled()
+      expect(addButton).toHaveAttribute(
+        'aria-label',
+        'The limit of 2 files per project has been hit. You cannot add additional files.',
+      )
       config.maxNumberFiles = originalMax
     })
   })

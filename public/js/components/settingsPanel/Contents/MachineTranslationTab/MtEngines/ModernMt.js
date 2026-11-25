@@ -7,7 +7,7 @@ import {
   BUTTON_SIZE,
   BUTTON_TYPE,
 } from '../../../../common/Button/Button'
-import IconClose from '../../../../icons/IconClose'
+import IconClose from '../../../../../../img/icons/IconClose'
 import ExternalLink from '../../../../../../img/icons/ExternalLink'
 
 export const ModernMt = ({
@@ -86,18 +86,18 @@ export const ModernMt = ({
           <div className="provider-field container-actions">
             <Button
               type={BUTTON_TYPE.WARNING}
+              size={BUTTON_SIZE.ICON_STANDARD}
               onClick={() => setAddMTVisible(false)}
             >
-              <IconClose size={11} />
+              <IconClose size={18} />
             </Button>
             <Button
               type={BUTTON_TYPE.PRIMARY}
               mode={BUTTON_MODE.BASIC}
-              size={BUTTON_SIZE.MEDIUM}
               disabled={isRequestInProgress}
               onClick={handleSubmit(onSubmit)}
             >
-              <Checkmark size={12} />
+              <Checkmark size={18} />
               Confirm
             </Button>
           </div>

@@ -1,4 +1,4 @@
-import {EditorState, ContentState} from 'draft-js'
+import {EditorState, ContentState, SelectionState, Modifier} from 'draft-js'
 
 import transformLexiqaPoints from './transformLexiqaPoints'
 
@@ -29,4 +29,32 @@ test('rebases the offsets relative to the block that contains the warning', () =
   const result = transformLexiqaPoints(editorState, 12, 19)
 
   expect(result).toEqual({start: 0, end: 7})
+})
+
+test('shifts the offsets back by 2 for each non-lexiqa entity preceding the warning', () => {
+  let contentState = ContentState.createFromText('ABtagCDEF')
+  contentState = contentState.createEntity('TAG', 'IMMUTABLE', {name: 'g'})
+  const entityKey = contentState.getLastCreatedEntityKey()
+  const blockKey = contentState.getFirstBlock().getKey()
+  contentState = Modifier.applyEntity(
+    contentState,
+    SelectionState.createEmpty(blockKey).merge({
+      anchorOffset: 2,
+      focusOffset: 5,
+    }),
+    entityKey,
+  )
+  const editorState = EditorState.createWithContent(contentState)
+
+  const result = transformLexiqaPoints(editorState, 6, 8)
+
+  expect(result).toEqual({start: 4, end: 6})
+})
+
+test('adjusts a warning that starts on the newline joining two blocks', () => {
+  const editorState = editorStateFromText('ab\ncd')
+
+  const result = transformLexiqaPoints(editorState, 2, 3)
+
+  expect(result).toEqual({start: 0, end: 0})
 })

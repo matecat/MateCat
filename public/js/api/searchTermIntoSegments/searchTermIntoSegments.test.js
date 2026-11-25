@@ -41,7 +41,8 @@ test('posts search with job credentials from config and returns data', async () 
   expect(form.get('replace')).toBe('world')
   expect(form.get('status')).toBe('all')
   expect(form.get('inCurrentChunkOnly')).toBe('true')
-  expect(form.get('revision_number')).toBe('2')
+  // the phase is resolved from the password, so no revision number is sent
+  expect(form.get('revision_number')).toBeNull()
 })
 
 test('prefers explicit idJob and password over config defaults', async () => {

@@ -3,8 +3,15 @@ import PropTypes from 'prop-types'
 import useExport, {EXPORT_TYPE} from './hooks/useExport'
 
 import Checkmark from '../../../../../img/icons/Checkmark'
-import Close from '../../../../../img/icons/Close'
 import CatToolActions from '../../../../actions/CatToolActions'
+import {
+  Button,
+  BUTTON_HTML_TYPE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../../../common/Button/Button'
+import IconClose from '../../../../../img/icons/IconClose'
+import {Checkbox, CHECKBOX_SIZE, CHECKBOX_STATE} from '../../../common/Checkbox'
 
 export const ExportTMX = ({row, onClose}) => {
   const {email, status, onSubmit, onReset} = useExport({
@@ -26,7 +33,6 @@ export const ExportTMX = ({row, onClose}) => {
         text: `You will receive the link at ${email}`,
         type: 'success',
         position: 'br',
-        allowHtml: true,
         timer: 5000,
       }
       CatToolActions.addNotification(notification)
@@ -46,31 +52,37 @@ export const ExportTMX = ({row, onClose}) => {
             We will send a link to download the exported TM to your email.
           </span>
           <div className="translation-memory-glossary-tab-checkbox">
-            Export TM without tags
-            <input
+            <Checkbox
               name="tags"
-              type="checkbox"
-              onChange={(e) => setStripTags(e.currentTarget.checked)}
-            ></input>
+              label="Export TM without tags"
+              size={CHECKBOX_SIZE.SMALL}
+              value={
+                stripTags ? CHECKBOX_STATE.CHECKED : CHECKBOX_STATE.UNCHECKED
+              }
+              onChange={(isChecked) => setStripTags(isChecked)}
+              testId="export-tmx-strip-tags"
+            />
           </div>
         </div>
         <div className="translation-memory-glossary-tab-buttons-group align-center">
-          <button
-            type="submit"
-            className="ui primary button settings-panel-button-icon confirm-button"
+          <Button
+            type={BUTTON_TYPE.PRIMARY}
+            size={BUTTON_SIZE.SMALL}
+            htmlType={BUTTON_HTML_TYPE.SUBMIT}
             disabled={isFormDisabled || isErrorExport}
           >
-            <Checkmark size={12} />
+            <Checkmark size={16} />
             Confirm
-          </button>
+          </Button>
 
-          <button
-            type="reset"
-            className="ui button orange close-button"
+          <Button
+            type={BUTTON_TYPE.WARNING}
+            size={BUTTON_SIZE.ICON_SMALL}
+            htmlType={BUTTON_HTML_TYPE.RESET}
             disabled={isFormDisabled}
           >
-            <Close size={18} />
-          </button>
+            <IconClose size={16} />
+          </Button>
         </div>
       </form>
     </div>

@@ -3,12 +3,10 @@ import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../../SettingsPanelContext'
 import {useEffect} from 'react'
 import {SettingsPanelTable} from '../../../SettingsPanelTable'
-import IconAdd from '../../../../icons/IconAdd'
+import IconAdd from '../../../../../../img/icons/IconAdd'
 import {getDeepLGlosssaries} from '../../../../../api/getDeepLGlosssaries/getDeepLGlosssaries'
 import {DeepLGlossaryRow} from './DeepLGlossaryRow'
 import {DeepLGlossaryCreateRow} from './DeepLGlossaryCreateRow'
-import CatToolStore from '../../../../../stores/CatToolStore'
-import CatToolConstants from '../../../../../constants/CatToolConstants'
 import CatToolActions from '../../../../../actions/CatToolActions'
 import {DeleteResource} from '../DeleteResource'
 import {deleteDeepLGlossary} from '../../../../../api/deleteDeepLGlossary'
@@ -17,6 +15,11 @@ import ModalsActions from '../../../../../actions/ModalsActions'
 import {ConfirmDeleteResourceProjectTemplates} from '../../../../modals/ConfirmDeleteResourceProjectTemplates'
 import {SCHEMA_KEYS} from '../../../../../hooks/useProjectTemplates'
 import {DeepLGlossaryNoneRow} from './DeepLGlossaryNoneRow'
+import {
+  Button,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../../../../common/Button/Button'
 import {DEEPL_GLOSSARY_CREATE_ROW_ID} from './DeepLGlossaryConstants'
 
 const COLUMNS_TABLE = [
@@ -25,7 +28,6 @@ const COLUMNS_TABLE = [
   {name: ''},
   {name: ''},
 ]
-
 
 export const DEEPL_GLOSSARY_ROW_NONE = ''
 
@@ -73,9 +75,13 @@ export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
           CatToolActions.addNotification({
             title: 'Glossary deleted',
             type: 'success',
-            text: `The glossary (<b>${glossary.name}</b>) has been successfully deleted`,
+            text: (
+              <>
+                The glossary (<b>{glossary.name}</b>) has been successfully
+                deleted
+              </>
+            ),
             position: 'br',
-            allowHtml: true,
             timer: 5000,
           })
           CreateProjectActions.updateProjectTemplates({
@@ -92,7 +98,6 @@ export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
           type: 'error',
           text: 'Error deleting glossary',
           position: 'br',
-          allowHtml: true,
           timer: 5000,
         })
       })
@@ -151,15 +156,11 @@ export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
         )
         return [
           ...(createRow ? [createRow] : []),
-          ...(!isCattoolPage
-            ? [
-                {
-                  id: DEEPL_GLOSSARY_ROW_NONE,
-                  name: 'None',
-                  isActive: newValueFiltered.every(({isActive}) => !isActive),
-                },
-              ]
-            : []),
+          {
+            id: DEEPL_GLOSSARY_ROW_NONE,
+            name: 'None',
+            isActive: newValueFiltered.every(({isActive}) => !isActive),
+          },
           ...newValueFiltered,
         ].map((row) => ({
           ...row,
@@ -206,82 +207,53 @@ export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
     let wasCleanup = false
 
     const glossaryId = activeGlossaryRef.current
-    let glossariesFromJobMetadata = []
-    const getJobMetadata = ({jobMetadata: {project} = {}}) => {
-      const rows = glossariesFromJobMetadata.filter(
-        ({glossary_id}) => project.mt_extra.deepl_id_glossary === glossary_id,
-      )
-
-      updateRowsState(
-        rows.map(({glossary_id: id, name}) => ({id, name, isActive: true})),
-      )
-    }
 
     getDeepLGlosssaries({engineId: id}).then(({glossaries}) => {
       const items = [...glossaries].reverse()
       if (!wasCleanup) {
-        if (!isCattoolPage) {
-          updateRowsState(
-            items.map(({name, glossary_id: idRow}) => {
-              const isActive =
-                typeof glossaryId !== 'undefined' ? idRow === glossaryId : false
+        updateRowsState(
+          items.map(({name, glossary_id: idRow}) => {
+            const isActive =
+              typeof glossaryId !== 'undefined' ? idRow === glossaryId : false
 
-              return {
-                id: idRow,
-                name,
-                isActive,
-              }
-            }),
-          )
-        } else {
-          glossariesFromJobMetadata = items
-          CatToolStore.addListener(
-            CatToolConstants.GET_JOB_METADATA,
-            getJobMetadata,
-          )
-          CatToolActions.getJobMetadata({
-            idJob: config.id_job,
-            password: config.password,
-          })
-        }
+            return {
+              id: idRow,
+              name,
+              isActive,
+            }
+          }),
+        )
       }
     })
 
     return () => {
       wasCleanup = true
-      CatToolStore.removeListener(
-        CatToolConstants.GET_JOB_METADATA,
-        getJobMetadata,
-      )
     }
-  }, [id, isCattoolPage, updateRowsState])
+  }, [id, updateRowsState])
 
   useEffect(() => {
-    if (!isCattoolPage) {
-      const deeplIdGlossary = activeGlossaryRef.current
+    const deeplIdGlossary = activeGlossaryRef.current
 
-      updateRowsState((prevState) =>
-        Array.isArray(prevState)
-          ? prevState.map(({name, id: idRow}) => {
-              const isActive =
-                typeof deeplIdGlossary !== 'undefined'
-                  ? idRow === deeplIdGlossary
-                  : false
+    updateRowsState((prevState) =>
+      Array.isArray(prevState)
+        ? prevState.map(({name, id: idRow}) => {
+            const isActive =
+              typeof deeplIdGlossary !== 'undefined'
+                ? idRow === deeplIdGlossary
+                : false
 
-              return {
-                id: idRow,
-                name,
-                isActive,
-              }
-            })
-          : prevState,
-      )
-    }
-  }, [currentProjectTemplate.id, isCattoolPage, updateRowsState])
+            return {
+              id: idRow,
+              name,
+              isActive,
+            }
+          })
+        : prevState,
+    )
+  }, [currentProjectTemplate.id, updateRowsState])
 
   useEffect(() => {
     if (
-      isCattoolPage ||
       !rows ||
       (rows.length === 1 &&
         rows.some(({id}) => id === DEEPL_GLOSSARY_CREATE_ROW_ID))
@@ -291,7 +263,7 @@ export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
     const activeRow = rows.find(({isActive}) => isActive)
 
     if (typeof activeRow?.id !== 'undefined') setGlossaries(activeRow.id)
-  }, [rows, isCattoolPage, setGlossaries])
+  }, [rows, setGlossaries])
 
   const addGlossary = () => {
     const row = {
@@ -312,44 +284,50 @@ export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
   )
 
   return (
-    <div className="mt-glossary">
-      {haveRecords && (
-        <SettingsPanelTable
-          columns={COLUMNS_TABLE}
-          rows={rows}
-          className="mt-glossary-table"
-        />
+    <>
+      {(!isCattoolPage || (isCattoolPage && haveRecords)) && (
+        <h2>Glossaries</h2>
       )}
+      <div className="mt-glossary">
+        {haveRecords && (
+          <SettingsPanelTable
+            columns={COLUMNS_TABLE}
+            rows={rows}
+            className="mt-glossary-table"
+          />
+        )}
 
-      {!isCattoolPage &&
-        (haveRecords ? (
-          <div className="main-buttons-container">
-            {!shouldHideNewButton && (
-              <button
-                className="ui primary button settings-panel-button-icon confirm-button create-glossary-button"
+        {!isCattoolPage &&
+          (haveRecords ? (
+            <div className="main-buttons-container">
+              {!shouldHideNewButton && (
+                <Button
+                  type={BUTTON_TYPE.PRIMARY}
+                  size={BUTTON_SIZE.SMALL}
+                  onClick={addGlossary}
+                  title="Add glossary"
+                >
+                  <IconAdd size={18} />
+                  New glossary
+                </Button>
+              )}
+            </div>
+          ) : Array.isArray(rows) ? (
+            <div className="empty-list-mode">
+              <p>Start using DeepL&apos;s glossary feature</p>
+              <Button
+                className="settings-panel-grey-button"
                 onClick={addGlossary}
-                title="Add glossary"
               >
-                <IconAdd size={18} />
+                <IconAdd size={22} />
                 New glossary
-              </button>
-            )}
-          </div>
-        ) : Array.isArray(rows) ? (
-          <div className="empty-list-mode">
-            <p>Start using DeepL's glossary feature</p>
-            <button
-              className="grey-button create-glossary-button"
-              onClick={addGlossary}
-            >
-              <IconAdd size={18} />
-              New glossary
-            </button>
-          </div>
-        ) : (
-          <p className="loading-list-mode">Loading...</p>
-        ))}
-    </div>
+              </Button>
+            </div>
+          ) : (
+            <p className="loading-list-mode">Loading...</p>
+          ))}
+      </div>
+    </>
   )
 }
 

@@ -61,7 +61,7 @@ export const SegmentFooterTabLaraStyles = ({
         SegmentUtils.getSegmentContext(sid)
 
       const jobMetadata = CatToolStore.getJobMetadata()
-      const glossaries = jobMetadata?.project?.mt_extra?.lara_glossaries || []
+      const glossaries = jobMetadata?.mt_extra?.lara_glossaries || []
       const decodedSource = decodePlaceholdersToPlainText(
         currentSegment.segment,
       )
@@ -108,7 +108,7 @@ export const SegmentFooterTabLaraStyles = ({
               setTranslationStyles({
                 error: (
                   <>
-                    Lara couldn't generate translations in different styles for
+                    Lara couldn&apos;t generate translations in different styles for
                     this segment. Please try again in a moment.
                   </>
                 ),
@@ -149,26 +149,10 @@ export const SegmentFooterTabLaraStyles = ({
       contextListAfter,
       laraStyle: style.id,
       reasoning: false,
+    }).catch((errors) => {
+      CatToolActions.processErrors(errors, 'getContribution')
+      TranslationMatches.renderContributionErrors(errors, segment.sid)
     })
-      .then(() => {
-        // Remove from waiting list
-        if (
-          TranslationMatches.segmentsWaitingForContributions.indexOf(
-            segment.sid,
-          ) > -1
-        ) {
-          TranslationMatches.segmentsWaitingForContributions.splice(
-            TranslationMatches.segmentsWaitingForContributions.indexOf(
-              segment.sid,
-            ),
-            1,
-          )
-        }
-      })
-      .catch((errors) => {
-        CatToolActions.processErrors(errors, 'getContribution')
-        TranslationMatches.renderContributionErrors(errors, segment.sid)
-      })
   }
 
   const allowHTML = (string) => {

@@ -15,6 +15,7 @@ use PDOStatement;
 use RecursiveArrayIterator;
 use RecursiveIteratorIterator;
 use RuntimeException;
+use Throwable;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
@@ -36,6 +37,8 @@ class ProjectManagerModel
      * internally.
      *
      * @throws Exception
+     * @throws Throwable the write runs inside a transaction scope, which aborts the transaction on
+     *                   any throw and re-throws the original, whatever its type
      */
     public function createProjectRecord(ProjectStructure $projectStructure, ?int $idTeam, string $status, ?int $idAssignee): ProjectStruct
     {
@@ -53,17 +56,17 @@ class ProjectManagerModel
         $data['instance_id'] = $projectStructure->instance_id ?: AppConfig::$INSTANCE_ID;
         $data['due_date'] = $projectStructure->due_date;
 
-        $this->dbHandler->begin();
-
-        try {
+        [$projectId, $project] = $this->dbHandler->transaction(function () use ($data): array {
             $projectId = $this->dbHandler->insert('projects', $data);
-            $project = (new ProjectDao($this->dbHandler))->findById((int)$projectId);
-            $this->dbHandler->commit();
-        } catch (Exception $e) {
-            $this->dbHandler->rollback();
-            throw $e;
-        }
 
+            // Read back inside the scope: the row it names is only visible to this connection until
+            // the commit.
+            return [$projectId, (new ProjectDao($this->dbHandler))->findById((int)$projectId)];
+        });
+
+        // Outside the scope, where the commit used to put it: the row is already durable, and
+        // rolling the insert back because the read came up empty would turn a failed read into a
+        // failed write.
         if ($project === null) {
             throw new RuntimeException("Failed to retrieve project after insert (id: $projectId)");
         }
@@ -72,7 +75,7 @@ class ProjectManagerModel
     }
 
     /**
-     * @throws Exception
+     * @throws PDOException
      */
     public function insertFile(int $idProject, string $sourceLanguage, string $file_name, string $fileExtension, string $fileDateSha1Path): string
     {
@@ -84,20 +87,13 @@ class ProjectManagerModel
         $data['sha1_original_file'] = $fileDateSha1Path;
         $data['is_converted'] = 0;
 
-        try {
-            $idFile = $this->dbHandler->insert('files', $data);
-        } catch (PDOException $e) {
-            $this->log("Database insert error: {$e->getMessage()} ", $e);
-            throw new Exception("Database insert file error: {$e->getMessage()} ", -$e->getCode());
-        }
-
-        return $idFile;
+        return $this->dbHandler->insert('files', $data);
     }
 
     /**
      * @param list<array<string, mixed>> $query_translations_values
+     * @throws ProjectCreationException
      * @throws PDOException
-     * @throws \Psr\Log\InvalidArgumentException
      */
     public function insertPreTranslations(array $query_translations_values): void
     {
@@ -124,7 +120,7 @@ class ProjectManagerModel
 
         $tupleMarks = "( ?, ?, ?, ?, ?, ?, NOW(), 'SKIPPED', ?, ?, ?, ?, ?, ?, ?, ? )";
 
-        $this->executeBulkInsert($baseQuery, $tupleMarks, $query_translations_values, 100, 'Pre-Translations', ProjectCreationError::BULK_INSERT_PRE_TRANSLATIONS->value);
+        $this->executeBulkInsert($baseQuery, $tupleMarks, $query_translations_values, 100, 'Pre-Translations', ProjectCreationError::BULK_INSERT_PRE_TRANSLATIONS);
     }
 
     /**
@@ -136,10 +132,10 @@ class ProjectManagerModel
      * @param list<array<int|string, mixed>> $insertValues Rows — each element is a flat tuple of column values
      * @param positive-int $chunkSize Max rows per INSERT statement
      * @param string $label Human-readable label for logging/errors
-     * @param int $errorCode Code to attach to re-thrown PDOException
+     * @param ProjectCreationError $error Code to attach to the re-thrown ProjectCreationException
      *
+     * @throws ProjectCreationException
      * @throws PDOException
-     * @throws \Psr\Log\InvalidArgumentException
      */
     private function executeBulkInsert(
         string $insertTemplate,
@@ -147,7 +143,7 @@ class ProjectManagerModel
         array $insertValues,
         int $chunkSize,
         string $label,
-        int $errorCode
+        ProjectCreationError $error
     ): void {
         $this->log("$label: Total Rows to insert: " . count($insertValues));
 
@@ -174,7 +170,8 @@ class ProjectManagerModel
                 $this->log("$label import - Statement: " . ($stmt instanceof PDOStatement ? $stmt->queryString : 'N/A'));
                 $this->log("$label Chunk Dump: " . var_export($chunk, true));
                 $this->log("$label Flattened Values Dump: " . var_export($flattenedValues, true));
-                throw new PDOException("$label import - DB Error: " . $e->getMessage(), $errorCode, $e);
+                // The DB message is logged above and kept as the previous: the user is shown this one.
+                throw new ProjectCreationException($error, "Failed to save " . strtolower($label) . ".", $e);
             }
         }
     }
@@ -188,8 +185,8 @@ class ProjectManagerModel
      *
      * @param array<int|string, array<string, mixed>> $notes
      *
+     * @throws ProjectCreationException
      * @throws PDOException
-     * @throws \Psr\Log\InvalidArgumentException
      */
     public function bulkInsertSegmentNotesAndMetadata(array $notes): void
     {
@@ -246,11 +243,11 @@ class ProjectManagerModel
         }
 
         if ($noteValues !== []) {
-            $this->executeBulkInsert($noteTemplate, $noteTupleMarks, $noteValues, 30, 'Notes', ProjectCreationError::BULK_INSERT_NOTES->value);
+            $this->executeBulkInsert($noteTemplate, $noteTupleMarks, $noteValues, 30, 'Notes', ProjectCreationError::BULK_INSERT_NOTES);
         }
 
         if ($metaValues !== []) {
-            $this->executeBulkInsert($metaTemplate, $metaTupleMarks, $metaValues, 30, 'Segment Metadata', ProjectCreationError::BULK_INSERT_SEGMENT_METADATA->value);
+            $this->executeBulkInsert($metaTemplate, $metaTupleMarks, $metaValues, 30, 'Segment Metadata', ProjectCreationError::BULK_INSERT_SEGMENT_METADATA);
         }
     }
 
@@ -266,8 +263,8 @@ class ProjectManagerModel
     /**
      * @param array<int|string, array<string, mixed>> $contextGroups
      *
+     * @throws ProjectCreationException
      * @throws PDOException
-     * @throws \Psr\Log\InvalidArgumentException
      */
     public function bulkInsertContextsGroups(int $idProject, array $contextGroups): void
     {
@@ -285,7 +282,20 @@ class ProjectManagerModel
             }
         }
 
-        $this->executeBulkInsert($template, $tupleMarks, $insert_values, 30, 'Context Groups', ProjectCreationError::BULK_INSERT_CONTEXT_GROUPS->value);
+        $this->executeBulkInsert($template, $tupleMarks, $insert_values, 30, 'Context Groups', ProjectCreationError::BULK_INSERT_CONTEXT_GROUPS);
+    }
+
+    /**
+     * Read from the database, never from cache.
+     *
+     * @throws PDOException
+     */
+    public function projectExists(int $idProject): bool
+    {
+        $stmt = $this->dbHandler->getConnection()->prepare("SELECT 1 FROM projects WHERE id = :id_project");
+        $stmt->execute(['id_project' => $idProject]);
+
+        return $stmt->fetchColumn() !== false;
     }
 
     /**
@@ -304,7 +314,7 @@ class ProjectManagerModel
      *   segments (batched)
      *
      * Phase 3 — File/project-scoped + root records:
-     *   files_parts, files, file_references, file_metadata,
+     *   files_parts, files, file_metadata,
      *   context_groups, project_metadata, projects, jobs
      *
      * @param int $idProject
@@ -446,7 +456,7 @@ class ProjectManagerModel
      * rows and prevent row-lock spikes.  A subquery scopes the DELETE to
      * only rows belonging to this project's files.
      *
-     * Tables: files_parts, files, file_references, file_metadata,
+     * Tables: files_parts, files, file_metadata,
      * context_groups, project_metadata, projects, jobs.
      *
      * @param PDO $conn
@@ -482,9 +492,6 @@ class ProjectManagerModel
         }
 
         $stmt = $conn->prepare("DELETE FROM files WHERE id_project = :id_project");
-        $stmt->execute(['id_project' => $idProject]);
-
-        $stmt = $conn->prepare("DELETE FROM file_references WHERE id_project = :id_project");
         $stmt->execute(['id_project' => $idProject]);
 
         $stmt = $conn->prepare("DELETE FROM file_metadata WHERE id_project = :id_project");

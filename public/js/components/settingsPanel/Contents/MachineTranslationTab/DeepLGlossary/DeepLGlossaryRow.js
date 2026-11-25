@@ -1,6 +1,12 @@
 import React, {Fragment, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import Trash from '../../../../../../img/icons/Trash'
+import {
+  Button,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../../../../common/Button/Button'
+import {Radio, RADIO_SIZE} from '../../../../common/Radio/Radio'
 
 export const DeepLGlossaryRow = ({
   engineId,
@@ -16,8 +22,8 @@ export const DeepLGlossaryRow = ({
     setIsActive(row.isActive)
   }, [row.isActive])
 
-  const onChangeIsActive = (e) => {
-    const isActive = e.currentTarget.checked
+  const onChangeIsActive = (checked) => {
+    const isActive = checked
     setRows((prevState) =>
       prevState.map((glossary) => ({
         ...glossary,
@@ -29,13 +35,13 @@ export const DeepLGlossaryRow = ({
   return (
     <Fragment>
       <div>
-        <input
+        <Radio
           name="active"
+          size={RADIO_SIZE.SMALL}
           checked={isActive}
           onChange={onChangeIsActive}
-          type="radio"
-          disabled={isWaitingResult || isReadOnly}
-          data-testid={`deeplglossary-active-${row.id}`}
+          disabled={isWaitingResult}
+          testId={`deeplglossary-active-${row.id}`}
         />
       </div>
       <div className="glossary-row-name">
@@ -49,14 +55,16 @@ export const DeepLGlossaryRow = ({
         <>
           <div className="glossary-row-import-button" />
           <div className="glossary-row-delete">
-            <button
-              className="grey-button"
+            <Button
+              className="settings-panel-grey-button"
+              type={BUTTON_TYPE.ICON}
+              size={BUTTON_SIZE.ICON_SMALL}
               disabled={isWaitingResult}
               onClick={() => deleteGlossaryConfirm(row)}
-              data-testid={`delete-deeplglossary-${row.id}`}
+              testId={`delete-deeplglossary-${row.id}`}
             >
               <Trash size={16} />
-            </button>
+            </Button>
           </div>
           {isWaitingResult && <div className="spinner"></div>}
         </>

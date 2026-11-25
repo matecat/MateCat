@@ -1,4 +1,6 @@
 import React, {
+  lazy,
+  Suspense,
   useCallback,
   useContext,
   useEffect,
@@ -20,8 +22,10 @@ import useSegmentsLoader from '../hooks/useSegmentsLoader'
 import LXQ from '../utils/lxq.main'
 import {getTmKeysUser} from '../api/getTmKeysUser'
 import {getMTEngines as getMtEnginesApi} from '../api/getMTEngines'
-import {SETTINGS_PANEL_TABS, SettingsPanel} from '../components/settingsPanel'
-import {DEFAULT_ENGINE_MEMORY} from '../components/settingsPanel/SettingsPanelConstants'
+import {
+  DEFAULT_ENGINE_MEMORY,
+  SETTINGS_PANEL_TABS,
+} from '../components/settingsPanel/SettingsPanelConstants'
 import {getTmKeysJob} from '../api/getTmKeysJob'
 import {getSupportedLanguages} from '../api/getSupportedLanguages'
 import ApplicationStore from '../stores/ApplicationStore'
@@ -42,25 +46,34 @@ import {
   CHARS_SIZE_COUNTER_TYPES,
   charsSizeCounter,
 } from '../utils/charsSizeCounterUtil'
-import {CatToolInterface} from './CatToolInterface'
+import catToolInterface from './CatToolInterface'
 import CommentsActions from '../actions/CommentsActions'
 import ModalsActions from '../actions/ModalsActions'
 import FatalErrorModal from '../components/modals/FatalErrorModal'
 import ContextPreviewChannel from '../utils/contextPreviewChannel'
 import {extractSegmentContextFields} from '../utils/contextPreviewUtils'
 import useResizable from '../hooks/useResizable'
-import IconRedirect from '../components/icons/IconRedirect'
-import IconDown from '../components/icons/IconDown'
+import IconRedirect from '../../img/icons/IconRedirect'
+import IconDown from '../../img/icons/IconDown'
 import {
   Button,
   BUTTON_MODE,
   BUTTON_SIZE,
 } from '../components/common/Button/Button'
+import UserStore from '../stores/UserStore'
+
+// Share of the window height the context preview panel takes when it opens.
+const CONTEXT_PREVIEW_HEIGHT_RATIO = 0.4
+
+// The settings panel opens on demand and is the largest piece of the cattool; load it when first opened.
+const SettingsPanel = lazy(() =>
+  import('../components/settingsPanel/SettingsPanel').then((module) => ({
+    default: module.SettingsPanel,
+  })),
+)
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
-
-const cattoolInterface = new CatToolInterface()
 
 function CatTool() {
   useHotkeys(
@@ -90,7 +103,7 @@ function CatTool() {
     height: contextPreviewHeight,
     isDragging: isResizing,
     handleMouseDown: onResizeMouseDown,
-  } = useResizable({initialHeight: 500, minHeight: 100})
+  } = useResizable({initialRatio: CONTEXT_PREVIEW_HEIGHT_RATIO, minHeight: 100})
 
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const [segmentHasPreview, setSegmentHasPreview] = useState(false)
@@ -98,8 +111,13 @@ function CatTool() {
   const contextPreviewUrl = `${window.origin}/context-preview/${config.id_job}/${config.password}?source_code=${encodeURIComponent(config.source_code)}&target_code=${encodeURIComponent(config.target_code)}`
   const popupWindowRef = useRef(null)
   const previewDesiredOpenRef = useRef(false)
+  const isJobmetadataParsedOnInit = useRef(false)
+  // Open the panel by itself on the first segment that has a preview, once per page load.
+  // Any manual open, close or pop-out cancels it.
+  const autoOpenPendingRef = useRef(true)
 
   const togglePreview = useCallback(() => {
+    autoOpenPendingRef.current = false
     setIsPreviewOpen((prev) => {
       const next = !prev
       previewDesiredOpenRef.current = next
@@ -121,6 +139,7 @@ function CatTool() {
   )
 
   const openPreviewInNewWindow = useCallback(() => {
+    autoOpenPendingRef.current = false
     if (popupWindowRef.current && !popupWindowRef.current.closed) {
       popupWindowRef.current.focus()
     } else {
@@ -139,6 +158,7 @@ function CatTool() {
   }, [contextPreviewUrl])
 
   const closePopupAndOpenInline = useCallback(() => {
+    autoOpenPendingRef.current = false
     if (popupWindowRef.current && !popupWindowRef.current.closed) {
       popupWindowRef.current.close()
     }
@@ -364,6 +384,10 @@ function CatTool() {
       setSegmentHasPreview(hasContent)
       if (hasContent) {
         if (!popupWindowRef.current || popupWindowRef.current.closed) {
+          if (autoOpenPendingRef.current) {
+            autoOpenPendingRef.current = false
+            previewDesiredOpenRef.current = true
+          }
           setIsPreviewOpen(previewDesiredOpenRef.current)
         }
       } else {
@@ -393,10 +417,10 @@ function CatTool() {
           {
             text: (
               <span>
-                Access to the editor page is forbidden until the project's
+                Access to the editor page is forbidden until the project&apos;s
                 analysis is complete.
                 <br />
-                To follow the analysis' progress,{' '}
+                To follow the analysis&apos; progress,{' '}
                 <a
                   rel="noreferrer"
                   href={`/jobanalysis/${config.id_project}-${config.id_job}-${config.password}`}
@@ -595,7 +619,8 @@ function CatTool() {
     if (metadata) {
       if (Speech2Text.enabled(metadata)) Speech2Text.init()
       initTagSignature(metadata)
-      if (LXQ.enabled(metadata)) LXQ.init()
+
+      if (config.lxq_license) LXQ.retrieveSupportedLocales(metadata)
     }
   }, [userInfo?.metadata])
 
@@ -624,42 +649,43 @@ function CatTool() {
     Array.isArray(temporaryFakeTemplate.tm)
 
   useEffect(() => {
-    if (isFakeCurrentTemplateReady && typeof jobMetadata?.job !== 'undefined') {
+    if (
+      isFakeCurrentTemplateReady &&
+      typeof jobMetadata?.job !== 'undefined' &&
+      !isJobmetadataParsedOnInit.current
+    ) {
       const isValidPresetCharacterMode = Object.values(
         CHARS_SIZE_COUNTER_TYPES,
-      ).some((value) => value === cattoolInterface.getCharacterCounterMode())
+      ).some((value) => value === catToolInterface.getCharacterCounterMode())
 
       modifyingCurrentTemplate((prevTemplate) => ({
         ...prevTemplate,
-        tmPrioritization: jobMetadata?.job?.tm_prioritization ?? false,
+        tmPrioritization: jobMetadata?.tm_prioritization ?? false,
         characterCounterCountTags:
-          jobMetadata?.job?.character_counter_count_tags ?? false,
+          jobMetadata?.character_counter_count_tags ?? false,
         characterCounterMode:
-          typeof jobMetadata?.job?.character_counter_mode === 'string'
-            ? jobMetadata?.job?.character_counter_mode
+          typeof jobMetadata?.character_counter_mode === 'string'
+            ? jobMetadata?.character_counter_mode
             : isValidPresetCharacterMode
-              ? cattoolInterface.getCharacterCounterMode()
+              ? catToolInterface.getCharacterCounterMode()
               : undefined,
-        subfilteringHandlers: jobMetadata.job.subfiltering_handlers,
-        mtQualityValueInEditor: jobMetadata.project.mt_quality_value_in_editor,
+        subfilteringHandlers: jobMetadata.subfiltering_handlers,
+        mtQualityValueInEditor: jobMetadata.mt_quality_value_in_editor,
         mt: {
           ...prevTemplate.mt,
           extra: {
-            ...(jobMetadata.project.mt_extra ?? {}),
+            ...(jobMetadata.mt_extra ?? {}),
           },
         },
-        icuEnabled: !!jobMetadata.project.icu_enabled ?? false,
-        mandatoryIssues: Array.isArray(jobMetadata.job.mandatory_issues)
-          ? jobMetadata.job.mandatory_issues
+        icuEnabled: !!jobMetadata.icu_enabled ?? false,
+        mandatoryIssues: Array.isArray(jobMetadata.mandatory_issues)
+          ? jobMetadata.mandatory_issues
           : ['r1', 'r2'],
       }))
+
+      isJobmetadataParsedOnInit.current = true
     }
-  }, [
-    jobMetadata?.job,
-    jobMetadata?.project,
-    isFakeCurrentTemplateReady,
-    modifyingCurrentTemplate,
-  ])
+  }, [jobMetadata, isFakeCurrentTemplateReady, modifyingCurrentTemplate])
 
   return (
     <>
@@ -668,15 +694,14 @@ function CatTool() {
         jid={config.id_job}
         password={config.password}
         reviewPassword={config.review_password}
-        source_code={config.source_rfc}
-        target_code={config.target_rfc}
+        source_code={config.source_code}
+        target_code={config.target_code}
         isReview={config.isReview}
         revisionNumber={config.revisionNumber}
         userLogged={isUserLogged}
         projectName={config.project_name}
         projectCompletionEnabled={config.project_completion_feature_enabled}
         secondRevisionsCount={config.secondRevisionsCount}
-        overallQualityClass={config.overall_quality_class}
         qualityReportHref={config.quality_report_href}
         allowLinkToAnalysis={config.allow_link_to_analysis}
         analysisEnabled={config.analysis_enabled}
@@ -704,12 +729,12 @@ function CatTool() {
           }
         >
           {isUserLogged ? (
-            <article id="file" className="loading mbc-commenting-closed">
+            <article id="file" className="loading comment-closed">
               <div className="article-segments-container">
                 <SegmentsContainer
                   isReview={config.isReview}
                   startSegmentId={startSegmentIdRef.current}
-                  firstJobSegment={config.first_job_segment}
+                  firstJobSegment={config.first_job_segment?.toString()}
                   languages={supportedLanguages}
                 />
               </div>
@@ -795,42 +820,44 @@ function CatTool() {
       </div>
 
       {isUserLogged && openSettings.isOpen && isFakeCurrentTemplateReady && (
-        <SettingsPanel
-          {...{
-            onClose: closeSettings,
-            isOpened: openSettings.isOpen,
-            tabOpen: openSettings.tab,
-            tmKeys,
-            setTmKeys,
-            mtEngines,
-            setMtEngines,
-            sourceLang: {
-              name: ApplicationStore.getLanguageNameFromLocale(
-                config.source_rfc,
-              ),
-              code: config.source_rfc,
-            },
-            targetLangs: [
-              {
+        <Suspense fallback={null}>
+          <SettingsPanel
+            {...{
+              onClose: closeSettings,
+              isOpened: openSettings.isOpen,
+              tabOpen: openSettings.tab,
+              tmKeys,
+              setTmKeys,
+              mtEngines,
+              setMtEngines,
+              sourceLang: {
                 name: ApplicationStore.getLanguageNameFromLocale(
-                  config.target_rfc,
+                  config.source_code,
                 ),
-                code: config.target_rfc,
+                code: config.source_code,
               },
-            ],
-            projectTemplates,
-            currentProjectTemplate,
-            modifyingCurrentTemplate,
-          }}
-        />
+              targetLangs: [
+                {
+                  name: ApplicationStore.getLanguageNameFromLocale(
+                    config.target_code,
+                  ),
+                  code: config.target_code,
+                },
+              ],
+              projectTemplates,
+              currentProjectTemplate,
+              modifyingCurrentTemplate,
+            }}
+          />
+        </Suspense>
       )}
       {isUserLogged && (
         <CattoolFooter
           idProject={config.id_project}
           idJob={config.id_job}
           password={config.password}
-          source={config.source_rfc}
-          target={config.target_rfc}
+          source={config.source_code}
+          target={config.target_code}
           isReview={config.isReview}
           isCJK={config.isCJK}
           languagesArray={supportedLanguages}

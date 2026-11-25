@@ -7,6 +7,7 @@ use Exception;
 use Model\DataAccess\IDatabase;
 use Model\FilesStorage\AbstractFilesStorage;
 use ReflectionException;
+use TypeError;
 use Utils\TMS\TMSService;
 use View\API\Commons\ZipContentObject;
 use ZipArchive;
@@ -32,8 +33,6 @@ class DownloadOmegaTOutputDecorator
      * Factory seam for the TM/MT export service, overridable in tests.
      *
      * @throws Exception
-     *
-     * @codeCoverageIgnore
      */
     protected function getTMSService(IDatabase $database): TMSService
     {
@@ -99,18 +98,20 @@ class DownloadOmegaTOutputDecorator
     }
 
     /**
-     * @param array<array{document_content: string, output_filename?: mixed}> $output_content
+     * @param array<array{document_content?: string|null, input_filename?: string|null, output_filename?: mixed}> $output_content
      *
      * @throws ReflectionException
      * @throws Exception
-     * @throws \TypeError
+     * @throws TypeError
      */
     public function createOmegaTZip(array $output_content): void
     {
-        $file = tempnam("/tmp", "zipmatecat");
+        $file = $this->controller->getWorkDir() . DIRECTORY_SEPARATOR . 'omegat.zip';
 
         $zip = new ZipArchive();
-        $zip->open($file, ZipArchive::OVERWRITE);
+        if ($zip->open($file, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+            throw new Exception('Unable to create the zip file ' . $file);
+        }
 
         $zip_baseDir = $this->controller->getJob()->id . "/";
         $zip_fileDir = $zip_baseDir . "inbox/";
@@ -157,14 +158,18 @@ class DownloadOmegaTOutputDecorator
                 $path = $zip_fileDir;
             }
 
-            $zip->addFromString($path . $fName, $f['document_content']);
+            $entry = new ZipContentObject([
+                'output_filename' => $outputFilename,
+                'input_filename' => $f['input_filename'] ?? null,
+                'document_content' => $f['document_content'] ?? null,
+            ]);
+            $entry->addToZip($zip, $path . $fName);
         }
 
         $zip_prjFile = $this->getOmegatProjectFile($this->controller->getJob()->source, $this->controller->getJob()->target);
         $zip->addFromString($zip_baseDir . "omegat.project", $zip_prjFile);
 
-        // Close and send to users
-        $zip->close();
+        AbstractDownloadController::closeZip($zip, $file);
         $zip_content = new ZipContentObject();
         $zip_content->input_filename = $file;
 

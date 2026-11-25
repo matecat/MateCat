@@ -457,7 +457,7 @@ class SegmentDaoTest extends AbstractTest
         $this->stmtStub->method('execute')->willThrowException(new \PDOException('Connection lost'));
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessage("Segment import - DB Error: Connection lost");
+        $this->expectExceptionMessage("Segment import - DB error: Connection lost");
 
         $dao = new SegmentDao($this->dbStub);
         $dao->createList([$seg]);
@@ -575,20 +575,6 @@ class SegmentDaoTest extends AbstractTest
         $result = $dao->getSegmentsDownload($job, 1);
 
         $this->assertSame([], $result);
-    }
-
-
-    public function testDestroyCacheForGlobalTranslationMismatchesReturnsBoolean(): void
-    {
-        $job = $this->makeJobStruct();
-
-        $this->stmtStub->method('execute')->willReturn(true);
-        $this->stmtStub->method('fetchAll')->willReturn([]);
-
-        $dao = new SegmentDao($this->dbStub);
-        $result = $dao->destroyCacheForGlobalTranslationMismatches($job);
-
-        $this->assertIsBool($result);
     }
 
 

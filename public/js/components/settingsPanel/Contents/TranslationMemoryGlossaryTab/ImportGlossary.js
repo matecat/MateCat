@@ -3,7 +3,13 @@ import PropTypes from 'prop-types'
 import useImport, {IMPORT_TYPE} from './hooks/useImport'
 
 import Checkmark from '../../../../../img/icons/Checkmark'
-import Close from '../../../../../img/icons/Close'
+import {
+  Button,
+  BUTTON_HTML_TYPE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../../../common/Button/Button'
+import IconClose from '../../../../../img/icons/IconClose'
 
 export const ImportGlossary = ({row, onClose}) => {
   const {files, uuids, status, onSubmit, onReset, onChangeFiles} = useImport({
@@ -40,12 +46,14 @@ export const ImportGlossary = ({row, onClose}) => {
         ) : (
           <div className="message-error">
             <span>{errors[0].message}</span>
-            <button
-              className="ui button red"
+
+            <Button
+              type={BUTTON_TYPE.CRITICAL}
+              size={BUTTON_SIZE.ICON_SMALL}
               onClick={() => formRef.current.reset()}
             >
-              <Close size={16} />
-            </button>
+              <IconClose size={16} />
+            </Button>
           </div>
         )}
       </li>
@@ -81,23 +89,25 @@ export const ImportGlossary = ({row, onClose}) => {
         </div>
         <div className="translation-memory-glossary-tab-buttons-group align-center">
           {files.length > 0 && (
-            <button
-              type="submit"
-              className="ui primary button settings-panel-button-icon confirm-button"
+            <Button
+              type={BUTTON_TYPE.PRIMARY}
+              size={BUTTON_SIZE.SMALL}
+              htmlType={BUTTON_HTML_TYPE.SUBMIT}
               disabled={isFormDisabled || isErrorUpload}
             >
-              <Checkmark size={12} />
+              <Checkmark size={16} />
               Confirm
-            </button>
+            </Button>
           )}
 
-          <button
-            type="reset"
-            className="ui button orange close-button"
+          <Button
+            type={BUTTON_TYPE.WARNING}
+            size={BUTTON_SIZE.ICON_SMALL}
+            htmlType={BUTTON_HTML_TYPE.RESET}
             disabled={isFormDisabled}
           >
-            <Close size={18} />
-          </button>
+            <IconClose size={16} />
+          </Button>
         </div>
       </form>
       {uuids?.length > 0 && (

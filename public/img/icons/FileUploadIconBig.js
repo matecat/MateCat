@@ -1,12 +1,11 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 
-const FileUploadIconBig = ({}) => {
+const FileUploadIconBig = () => {
   return (
     <svg
       version="1.1"
-      width="45px"
-      height="45px"
+      width="40px"
+      height="40px"
       id="Livello_1"
       xmlns="http://www.w3.org/2000/svg"
       x="0px"

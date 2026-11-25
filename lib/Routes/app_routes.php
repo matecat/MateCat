@@ -54,7 +54,7 @@ $klein->with('/api/app/jobs/[:id_job]/[:password]', function () {
     route('/completion-events/[:id_event]', 'DELETE', ['Controller\API\App\CompletionEventController', 'delete']);
 
     // Metadata
-    route('/metadata', 'GET', ['\Controller\API\V3\MetaDataController', 'index']);
+    route('/metadata', 'GET', ['\Controller\API\V3\MetaDataController', 'indexForUi']);
     route('/metadata', 'POST', ['\Controller\API\App\JobMetadataController', 'save']);
     route('/metadata/[:key]', 'DELETE', ['\Controller\API\App\JobMetadataController', 'delete']);
 

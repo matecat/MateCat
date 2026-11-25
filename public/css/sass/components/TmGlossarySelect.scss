@@ -1,0 +1,10 @@
+.select-without-private-keys {
+  .dropdown__option--is-no-results-found {
+    display: none;
+  }
+
+  .no-private-keys-message {
+    padding: 10px 15px;
+    display: block;
+  }
+}

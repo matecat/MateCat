@@ -226,7 +226,7 @@ class UploadPageViewControllerTest extends AbstractTest
 
     /** @throws ReflectionException */
     #[Test]
-    public function renderViewSkipsUploadDirAndLxqParamsWhenNoGuidAndNoLicense(): void
+    public function renderViewSkipsUploadDirAndDefaultsLxqParamsWhenNoGuidAndNoLicense(): void
     {
         $_COOKIE[GDriveController::GDRIVE_LIST_COOKIE_NAME] = '1';
 
@@ -241,9 +241,17 @@ class UploadPageViewControllerTest extends AbstractTest
         } catch (RenderTerminatedException) {
             $this->assertSame('upload.html', $this->controller->lastTemplate);
             $this->assertArrayHasKey('formats_number', $this->controller->lastViewData);
-            $this->assertArrayHasKey('subjects', $this->controller->lastViewData);
+            $this->assertArrayHasKey('subject_array', $this->controller->lastViewData);
             $this->assertSame(200, $this->controller->lastViewCode);
-            $this->assertSame(0, $this->controller->addParamsCallCount);
+
+            // The three LexiQA keys are supplied even with no licence: the page is built from the
+            // variables the view holds, so an unset variable is a key the page never receives.
+            $this->assertSame(1, $this->controller->addParamsCallCount);
+            $this->assertSame('', $this->controller->addedParams['lxq_license']);
+            $this->assertSame('', $this->controller->addedParams['lxq_partnerid']);
+            $this->assertSame('', $this->controller->addedParams['lexiqaServer']);
+            // The accepted languages come from lexiqaServer now, not from a static list on the page.
+            $this->assertArrayNotHasKey('lexiqa_languages', $this->controller->addedParams);
         } finally {
             AppConfig::$LXQ_LICENSE = $previousLicense;
             $restoreCache();
@@ -275,6 +283,7 @@ class UploadPageViewControllerTest extends AbstractTest
             $this->assertSame('test-license', $this->controller->addedParams['lxq_license']);
             $this->assertSame('test-partner', $this->controller->addedParams['lxq_partnerid']);
             $this->assertSame('https://example.test', $this->controller->addedParams['lexiqaServer']);
+            $this->assertArrayNotHasKey('lexiqa_languages', $this->controller->addedParams);
         } finally {
             AppConfig::$LXQ_LICENSE = $previousLicense;
             AppConfig::$LXQ_PARTNERID = $previousPartnerId;

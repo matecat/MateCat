@@ -6,9 +6,8 @@ namespace Matecat\Core\Workers\TMAnalysisV2;
 use Matecat\TestHelpers\AbstractTest;
 use Model\FeaturesBase\FeatureSet;
 use PHPUnit\Framework\Attributes\Test;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\AnalysisRedisServiceInterface;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\ProjectCompletionRepositoryInterface;
-use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Interface\ProjectCompletionServiceInterface;
+use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\AnalysisRedisService;
+use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\ProjectCompletionRepository;
 use Utils\AsyncTasks\Workers\Analysis\TMAnalysis\Service\ProjectCompletionService;
 
 class ProjectCompletionServiceTest extends AbstractTest
@@ -46,27 +45,16 @@ class ProjectCompletionServiceTest extends AbstractTest
         return $source;
     }
 
-    private function makeRedisService(): AnalysisRedisServiceInterface
+    private function makeRedisService(): AnalysisRedisService
     {
-        return $this->createMock(AnalysisRedisServiceInterface::class);
+        return $this->createMock(AnalysisRedisService::class);
     }
 
-    private function makeService(?AnalysisRedisServiceInterface $redisService = null): ProjectCompletionService
+    private function makeService(?AnalysisRedisService $redisService = null): ProjectCompletionService
     {
-        $redisService ??= $this->createStub(AnalysisRedisServiceInterface::class);
+        $redisService ??= $this->createStub(AnalysisRedisService::class);
 
-        return new ProjectCompletionService($redisService, $this->createStub(ProjectCompletionRepositoryInterface::class));
-    }
-
-    #[Test]
-    public function test_service_implements_project_completion_service_interface(): void
-    {
-        $source = $this->readSource();
-        $this->assertStringContainsString(
-            'implements ProjectCompletionServiceInterface',
-            $source,
-            'ProjectCompletionService must declare implements ProjectCompletionServiceInterface.'
-        );
+        return new ProjectCompletionService($redisService, $this->createStub(ProjectCompletionRepository::class));
     }
 
     #[Test]
@@ -81,71 +69,51 @@ class ProjectCompletionServiceTest extends AbstractTest
     }
 
     #[Test]
-    public function test_rollback_is_called_inside_throwable_catch(): void
+    public function test_the_throwable_catch_closes_no_transaction_by_hand(): void
     {
         $source = $this->readSource();
 
         $catchPos = strpos($source, 'catch (Throwable $e)');
-        $this->assertNotFalse($catchPos, 'Expected catch (\Throwable $e) block in tryCloseProject.');
+        $this->assertNotFalse($catchPos, 'Expected a catch (Throwable $e) in ProjectCompletionService.');
 
-        $rollbackPos = strpos($source, '->rollback()', $catchPos);
+        // The transaction scope has already rolled back by the time this catch runs, so a rollback
+        // here would be closing a transaction this class did not open. What the catch still owns is
+        // releasing the completion lock.
+        $this->assertStringNotContainsString(
+            '->rollback()',
+            $source,
+            'ProjectCompletionService must not roll back by hand: the transaction scope owns that.'
+        );
+
         $this->assertNotFalse(
-            $rollbackPos,
-            'Expected ->rollback() call inside the \Throwable catch block.'
+            strpos($source, 'releaseCompletionLock(', $catchPos),
+            'Expected releaseCompletionLock() in the catch block.'
         );
     }
 
     #[Test]
-    public function test_release_completion_lock_is_called_inside_throwable_catch(): void
-    {
-        $source = $this->readSource();
-
-        $catchPos = strpos($source, 'catch (Throwable $e)');
-        $this->assertNotFalse($catchPos, 'Expected catch (\Throwable $e) block in tryCloseProject.');
-
-        $releasePos = strpos($source, 'releaseCompletionLock(', $catchPos);
-        $this->assertNotFalse(
-            $releasePos,
-            'Expected releaseCompletionLock() call inside the \Throwable catch block.'
-        );
-    }
-
-    #[Test]
-    public function test_remove_project_from_queue_appears_after_commit(): void
+    public function test_remove_project_from_queue_appears_after_the_scope_closes(): void
     {
         $source = $this->readSource();
 
         $methodPos = strpos($source, 'public function tryCloseProject');
         $this->assertNotFalse($methodPos);
 
-        $commitPos = strpos($source, '->commit()', $methodPos);
-        $this->assertNotFalse($commitPos, 'Expected ->commit() call in tryCloseProject.');
+        $scopePos = strpos($source, '$this->repository->transaction(function ()', $methodPos);
+        $this->assertNotFalse($scopePos, 'Expected the finalization transaction scope in tryCloseProject.');
+
+        // The commit happens where the closure returns, so the anchor is the line that closes it.
+        $scopeEndPos = strpos($source, "\n            });", $scopePos);
+        $this->assertNotFalse($scopeEndPos, 'Expected the finalization scope to be closed.');
 
         $removePos = strpos($source, 'removeProjectFromQueue(', $methodPos);
         $this->assertNotFalse($removePos, 'Expected removeProjectFromQueue() call in tryCloseProject.');
 
         $this->assertGreaterThan(
-            $commitPos,
+            $scopeEndPos,
             $removePos,
-            'removeProjectFromQueue() must appear AFTER commit() — if the worker crashes before commit, the project must remain in the queue for retry.'
+            'removeProjectFromQueue() must appear AFTER the transaction scope closes — if the worker crashes before commit, the project must remain in the queue for retry.'
         );
-    }
-
-    #[Test]
-    public function test_rollback_appears_before_release_in_catch(): void
-    {
-        $source = $this->readSource();
-
-        $catchPos = strpos($source, 'catch (Throwable $e)');
-        $this->assertNotFalse($catchPos);
-
-        $rollbackPos  = strpos($source, '->rollback()', $catchPos);
-        $releasePos   = strpos($source, 'releaseCompletionLock(', $catchPos);
-
-        $this->assertNotFalse($rollbackPos, 'Expected ->rollback() in catch block.');
-        $this->assertNotFalse($releasePos, 'Expected releaseCompletionLock() in catch block.');
-
-        $this->assertLessThan($releasePos, $rollbackPos, 'rollback() must appear before releaseCompletionLock().');
     }
 
     #[Test]
@@ -252,7 +220,7 @@ class ProjectCompletionServiceTest extends AbstractTest
             ->willReturn(['project_segments' => 5, 'num_analyzed' => 5]);
 
         $redisService->method('acquireCompletionLock')
-            ->willReturn(false);
+            ->willReturn(null);
 
         $redisService->expects($this->never())
             ->method('removeProjectFromQueue');
@@ -261,13 +229,6 @@ class ProjectCompletionServiceTest extends AbstractTest
         $service    = $this->makeService($redisService);
 
         $service->tryCloseProject(99, 'pwd', 'q', $featureSet);
-    }
-
-    #[Test]
-    public function test_service_can_be_instantiated_and_implements_interface(): void
-    {
-        $service = $this->makeService();
-        $this->assertInstanceOf(ProjectCompletionServiceInterface::class, $service);
     }
 
     #[Test]
@@ -280,16 +241,17 @@ class ProjectCompletionServiceTest extends AbstractTest
         // can block completion — the counter-lifecycle other half of the mid-run-reset fix.
         $pid = 42;
 
-        $redisService = $this->createMock(AnalysisRedisServiceInterface::class);
+        $redisService = $this->createMock(AnalysisRedisService::class);
         $redisService->method('getProjectWordCounts')->willReturn([
             'project_segments' => '3039',
             'num_analyzed'     => '3039',
             'eq_wc'            => 10.0,
             'st_wc'            => 8.0,
         ]);
-        $redisService->method('acquireCompletionLock')->willReturn(true);
+        $redisService->method('acquireCompletionLock')->willReturn('completion-token');
 
-        $repository = $this->createStub(ProjectCompletionRepositoryInterface::class);
+        $repository = $this->createStub(ProjectCompletionRepository::class);
+        $repository->method('transaction')->willReturnCallback(static fn(callable $work) => $work());
         // Single ROLLUP totals row → array_pop() yields it; dbRemaining = 3039 - 3039 = 0 → finalize.
         $repository->method('getProjectSegmentsTranslationSummary')->willReturn([
             ['project_segments' => 3039, 'num_analyzed' => 3039, 'eq_wc' => 10.0, 'st_wc' => 8.0],
@@ -302,7 +264,7 @@ class ProjectCompletionServiceTest extends AbstractTest
 
         // gateRetrySleepMicros = 0: the first DB-gate check already confirms completion, so no
         // sleep is needed, but pass 0 defensively to keep the test fast.
-        $service = new ProjectCompletionService($redisService, $repository, null, 6, 0);
+        $service = new ProjectCompletionService($redisService, $repository, gateRetrySleepMicros: 0);
 
         $service->tryCloseProject($pid, 'ppwd', 'queue_key', $this->createStub(FeatureSet::class));
     }

@@ -8,9 +8,11 @@
 
 namespace Utils\Email;
 
+use Closure;
 use DomainException;
 use Exception;
 use InvalidArgumentException;
+use Throwable;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\MailWorker;
 use Utils\Logger\LoggerFactory;
@@ -69,12 +71,9 @@ abstract class AbstractEmail
             ['persistent' => WorkerClient::$_HANDLER->persistent]
         );
 
-        LoggerFactory::doJsonLog('Message has been sent');
+        LoggerFactory::getLogger('mail', 'mail.log')->info('Message has been sent');
     }
 
-    /**
-     * @return string
-     */
     /**
      * Make a value safe to place in a mail header.
      *
@@ -89,39 +88,112 @@ abstract class AbstractEmail
         return trim($collapsed ?? '');
     }
 
+    /**
+     * The one place email template variables are escaped.
+     *
+     * Doing it here rather than in each `<?=` is the whole point: eighty of the eighty-seven
+     * interpolations across `lib/View/Emails` were raw when this was written, which is what a rule
+     * applied by hand converges on. {@see EmailValue::escapeAll()} escapes every value before the
+     * template runs, so a template writes a value and gets a safe one without knowing to ask.
+     * @throws Throwable
+     */
     protected function _buildMessageContent(): string
     {
-        ob_start();
-        extract($this->_getTemplateVariables());
-        include($this->_template_path);
-
-        return ob_get_clean() ?: '';
+        return $this->capture(function (): void {
+            extract(EmailValue::escapeAll($this->_getTemplateVariables(), $this->verbatimKeys()));
+            include($this->_template_path);
+        });
     }
 
     /**
-     * @param string|null $messageContent
+     * The template values a reader must receive exactly as given: the links the email exists to
+     * offer, and the addresses it is about. Everything else is defanged — {@see LinkDefanger}.
      *
-     * @return string
+     * Listed by key name rather than detected by shape, so no attacker-written value can exempt
+     * itself by imitating a link or an address. Matched at any depth, which is what covers the
+     * `email` inside a `user`, `sender` or `commenter` array.
+     *
+     * A subclass carrying its own link adds it here. Forgetting to is a broken button in the next
+     * render of that email rather than a silent gap, which is the failure mode this list is
+     * arranged to have.
+     *
+     * @return list<string>
      */
-    protected function _buildHTMLMessage(?string $messageContent = null): string
+    protected function verbatimKeys(): array
     {
+        return [
+            'signup_url',
+            'url',
+            'password_reset_url',
+            'activation_url',
+            'manageUrl',
+            'project_url',
+            'segmentUrl',
+            'email',
+        ];
+    }
+
+    /**
+     * Wraps the message, rendered by {@see _buildMessageContent()}, in the layout.
+     *
+     * It takes the content already rendered: rendering runs `_getTemplateVariables()`, queries
+     * included, and a second render can differ from the first (a token in a link is generated again).
+     *
+     * @throws Throwable
+     */
+    protected function _buildHTMLMessage(string $messageContent): string
+    {
+        return $this->capture(function () use ($messageContent): void {
+            // EXTR_SKIP: a layout variable must not replace $messageContent.
+            extract(EmailValue::escapeAll($this->_getLayoutVariables(), $this->verbatimKeys()), EXTR_SKIP);
+
+            // Set after escaping: the body is markup, already rendered from escaped values.
+            // Escaping it again would show the reader the tags of their own email.
+            $messageBody = $messageContent;
+
+            include($this->_layout_path);
+        });
+    }
+
+    /**
+     * Runs a template render and returns what it printed.
+     *
+     * When the render throws, the half-written output is dropped before the exception goes on. Left
+     * in the buffer, it would reach the browser in front of the response of the request that sent
+     * the email, such as a segment save.
+     *
+     * @param Closure(): void $render
+     *
+     * @throws Throwable
+     */
+    private function capture(Closure $render): string
+    {
+        $level = ob_get_level();
         ob_start();
-        extract($this->_getLayoutVariables($messageContent));
-        include($this->_layout_path);
+
+        try {
+            $render();
+        } catch (Throwable $e) {
+            // Down to the level found on entry: the template may have opened buffers of its own.
+            while (ob_get_level() > $level) {
+                ob_end_clean();
+            }
+
+            throw $e;
+        }
 
         return ob_get_clean() ?: '';
     }
 
     /**
-     * @param string|null $messageBody
+     * The layout's own variables. {@see _buildHTMLMessage()} adds the message body.
      *
      * @return array<string, mixed>
      */
-    protected function _getLayoutVariables(?string $messageBody = null): array
+    protected function _getLayoutVariables(): array
     {
         return [
             'title' => $this->title ?? 'Matecat',
-            'messageBody' => (!empty($messageBody) ? $messageBody : $this->_buildMessageContent()),
             'closingLine' => "Kind regards, ",
             'showTitle' => false
         ];
@@ -147,17 +219,20 @@ abstract class AbstractEmail
     }
 
     /**
-     * @throws Exception
+     * Renders the message once and queues it for one recipient.
+     *
+     * @throws Throwable
      */
-    protected function sendTo(string $address, string $name): void
+    protected function sendTo(?string $address, ?string $name = null): void
     {
-        $recipient = [$address, $name];
+        $content = $this->_buildMessageContent();
 
         $this->doSend(
-            $recipient,
+            // MailWorker reads both: a missing name was an undefined index there.
+            [$address, $name ?? ''],
             $this->title ?? 'Matecat',
-            $this->_buildHTMLMessage(),
-            $this->_buildTxtMessage($this->_buildMessageContent())
+            $this->_buildHTMLMessage($content),
+            $this->_buildTxtMessage($content)
         );
     }
 
@@ -193,9 +268,19 @@ abstract class AbstractEmail
         $messageBody = preg_replace("#<[/]*(ol|ul|li)[^>]*>#i", "\t", $messageBody) ?? '';
         $messageBody = preg_replace("#<[/]*(p)[^>]*>#i", "", $messageBody) ?? '';
         $messageBody = preg_replace("#<a.*?href=[\"'](.*)[\"'][^>]*>(.*?)</a>#i", "$2 $1", $messageBody) ?? '';
-        $messageBody = html_entity_decode($messageBody);
+        $messageBody = preg_replace("#<br[^>]*>#i", "\r\n", $messageBody) ?? '';
 
-        return preg_replace("#<br[^>]*>#i", "\r\n", $messageBody) ?? '';
+        // Decoded last, and with the flags the values were escaped with.
+        //
+        // The flags have to match {@see EmailValue}: it escapes as HTML5, where an apostrophe
+        // becomes `&apos;`, and the default decoding is HTML 4.01, which has no such entity — so
+        // "O'Brien" reached the reader as "O&apos;Brien". Nothing else in this method notices,
+        // because everything it rewrites is a tag.
+        //
+        // Decoding after the tags have been handled rather than before keeps a value that merely
+        // contains markup from becoming markup: text a user typed as `&lt;br&gt;` stays the four
+        // characters they wrote instead of turning into a line break.
+        return html_entity_decode($messageBody, ENT_QUOTES | ENT_HTML5, 'UTF-8');
     }
 
 }

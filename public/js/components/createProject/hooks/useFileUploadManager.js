@@ -1,4 +1,4 @@
-import {useState, useRef, useCallback, useMemo, useEffect} from 'react'
+import {useState, useRef, useCallback, useEffect} from 'react'
 import {isEqual} from 'lodash'
 import {fileUpload} from '../../../api/fileUpload'
 import {convertFileRequest} from '../../../api/convertFileRequest'
@@ -273,8 +273,13 @@ export function useFileUploadManager({
 
         const onSuccess = (responseText) => {
           const fileResponse = JSON.parse(responseText)[0]
-          const fileError = getFileErrorMessage(fileResponse)
-          if (fileResponse.error || fileError) {
+          // /fileupload/ answers 200 with an empty array when PHP receives the
+          // request without the file (empty $_FILES), so there is not always an
+          // entry to read here.
+          const fileError = fileResponse
+            ? getFileErrorMessage(fileResponse)
+            : 'Error during upload. Please try again.'
+          if (fileError || fileResponse?.error) {
             setFiles((prevFiles) =>
               prevFiles.map((f) =>
                 f.file === file
@@ -531,17 +536,6 @@ export function useFileUploadManager({
       files.some((f) => !f.uploaded || !f.converted || f.error) ||
       !files.some((f) => f.ext !== EXTENSIONS.tmx)
     CreateProjectActions.enableAnalyzeButton(!hasIncompleteFiles)
-    if (files.length === config.maxNumberFiles) {
-      CreateProjectActions.showError(
-        'No more files can be loaded (the limit of ' +
-          config.maxNumberFiles +
-          ' has been exceeded).',
-      )
-    } else if (files.length > config.maxNumberFiles) {
-      CreateProjectActions.showError(
-        `Maximum ${config.maxNumberFiles} files allowed. Please remove all files with errors from the list below.`,
-      )
-    }
   }, [files])
 
   return {

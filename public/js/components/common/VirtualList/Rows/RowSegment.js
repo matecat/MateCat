@@ -7,14 +7,15 @@ import JobMetadataModal from '../../../modals/JobMetadataModal'
 import CatToolStore from '../../../../stores/CatToolStore'
 import ModalsActions from '../../../../actions/ModalsActions'
 import SegmentUtils from '../../../../utils/segmentUtils'
+import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../../Button/Button'
 
 const BLINK_ANIMATION_DURATION = 3600
 
 const LinkIcon = () => {
   return (
     <svg
-      width="15"
-      height="15"
+      width="12"
+      height="12"
       viewBox="0 0 17 17"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -223,7 +224,7 @@ export const ProjectBar = ({
   }
   previousScrollTopRef.current = listRef?.scrollTop
 
-  if (isSticky) previousOpenedFileIdRef.current = currentSegment.id_file
+  if (isSticky) previousOpenedFileIdRef.current = idFileSegment
 
   return (
     <div
@@ -236,10 +237,8 @@ export const ProjectBar = ({
           className={`projectbar-filename ${isBlinkingState ? 'project-bar-blink' : ''}`}
           onAnimationEnd={() => setIsBlinkingState(false)}
         >
-          <span
-            title={currentSegment.filename}
-            className={'fileFormat ' + CommonUtils.getIconClass(fileType)}
-          >
+          {CommonUtils.getFileIcon(fileType?.[0])}
+          <span className="fileFormat" title={segment.filename}>
             {file.file_name}
           </span>
         </div>
@@ -253,15 +252,17 @@ export const ProjectBar = ({
           </span>
         </div>
       ) : null}
-      {CommonUtils.fileHasInstructions(file) ? (
-        <div
-          className={'button-notes'}
+      {CommonUtils.fileHasInstructions(file) && (
+        <Button
+          size={BUTTON_SIZE.SMALL}
+          type={BUTTON_TYPE.PRIMARY}
+          className="button-notes"
           onClick={() => openInstructionsModal(idFileSegment)}
         >
           <LinkIcon />
-          <span>View notes</span>
-        </div>
-      ) : null}
+          View notes
+        </Button>
+      )}
     </div>
   )
 }

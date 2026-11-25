@@ -61,7 +61,6 @@ export const DeepLOptions = ({isCattoolPage}) => {
         <Controller
           control={control}
           name="deepl_formality"
-          disabled={isCattoolPage}
           render={({field: {onChange, value, name, disabled}}) => (
             <Select
               name={name}
@@ -89,7 +88,6 @@ export const DeepLOptions = ({isCattoolPage}) => {
         <Controller
           control={control}
           name="deepl_engine_type"
-          disabled={isCattoolPage}
           render={({field: {onChange, value, name, disabled}}) => (
             <Select
               name={name}
@@ -104,7 +102,6 @@ export const DeepLOptions = ({isCattoolPage}) => {
           )}
         />
       </div>
-      <h2>Glossaries</h2>
       <DeepLGlossary
         id={currentProjectTemplate.mt.id}
         {...{setGlossaries, isCattoolPage}}

@@ -1,0 +1,391 @@
+@use '../../tokens/colors';
+@use 'commons/variables';
+
+// --- Muted segments (filtered-out segments in editor) ---
+body section.muted {
+  background: colors.$grey50;
+  cursor: not-allowed;
+}
+
+body section.muted .body .text {
+  opacity: 0.5;
+}
+
+body section.muted .body .text .wrap .target .editarea {
+  border: none !important;
+  &:hover {
+    border: none !important;
+  }
+}
+
+body section.muted .body .text .status-container .status {
+  opacity: 0.2;
+}
+
+section.muted .segment-side-buttons {
+  zoom: 0.8;
+}
+
+// --- Main filter container ---
+#header-bars-wrapper {
+  background-color: colors.$grey50;
+}
+
+// Each slot (the search/filter/QA panel group, and independently the bulk-selection bar)
+// animates its own height closed. Height is driven imperatively (SubHeaderContainer.js
+// measures the slot's mounted content via ResizeObserver and sets this element's inline
+// height), not by a class toggle: that's what lets switching directly between Search and
+// Filters animate smoothly between their two heights, not just the open (0 -> content) /
+// close (content -> 0) transitions. The two slots animate independently so one can stay
+// open while the other closes, and vice versa.
+#header-bars-wrapper .header-bars-slot {
+  height: 0;
+  overflow: hidden;
+  transition: height 300ms ease;
+}
+
+#header-bars-wrapper .filter-wrapper {
+  position: relative;
+  width: 100%;
+  float: left;
+  margin-top: 1px;
+}
+
+#header-bars-wrapper .filter-container {
+  background-color: colors.$white;
+  height: 50px;
+  border-radius: 0 0 2px 2px;
+  display: block;
+  color: colors.$grey700;
+}
+
+#header-bars-wrapper .filter-container-inside {
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 0 6.5% 0 5%;
+  align-items: center;
+}
+
+// --- Filter list ---
+#header-bars-wrapper .filter-list {
+  display: flex;
+  flex-grow: 3;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+#header-bars-wrapper .filter-dropdown {
+  display: flex;
+  align-items: center;
+}
+
+#header-bars-wrapper .filter-dropdown div[class*='switch-container-outer'] {
+  padding: 0 10px;
+}
+
+#header-bars-wrapper
+  .filter-dropdown
+  div[class*='switch-container']
+  input:checked
+  + span {
+  background-color: colors.$grey400;
+}
+
+#header-bars-wrapper .filter-dropdown:nth-child(2) {
+  margin-left: 15px;
+}
+
+// --- Filter activities disabled state ---
+#header-bars-wrapper .filter-dropdown .filter-activities.disabled {
+  background: unset;
+  opacity: 0.5 !important;
+  box-shadow: unset;
+  border: none;
+  pointer-events: none;
+}
+
+// --- Status color dots ---
+#header-bars-wrapper .filter-status .status-dot {
+  &.new-color {
+    box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
+    background: colors.$white;
+  }
+  &.draft-color {
+    background: colors.$grey500;
+  }
+  &.translated-color,
+  &.post-edited-color {
+    background: colors.$blue500;
+  }
+  &.approved-color {
+    background: colors.$green800;
+  }
+  &.approved-2ndpass-color {
+    background: colors.$purple500;
+  }
+  &.rejected-color {
+    background: colors.$orange600;
+  }
+}
+
+// --- Clear filter / select all ---
+#header-bars-wrapper .clear-filter-element {
+  margin-left: 13px;
+  border-left: 1px solid colors.$grey200;
+  padding-left: 13px;
+  color: colors.$black;
+  display: flex;
+  justify-content: space-between;
+}
+
+#header-bars-wrapper .clear-filter,
+#header-bars-wrapper .select-all-filter {
+  margin-right: 20px;
+  display: inline;
+  min-width: 65px;
+}
+
+#header-bars-wrapper .clear-filter button,
+#header-bars-wrapper .select-all-filter button {
+  background: none;
+  color: grey;
+  text-decoration: underline;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+  outline: none;
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+// --- Filter navigator ---
+#header-bars-wrapper .filter-navigator {
+  display: flex;
+  flex-grow: 1;
+  align-items: center;
+}
+
+#header-bars-wrapper .filter-actions {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+#header-bars-wrapper .filter-arrows {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  align-items: center;
+}
+
+#header-bars-wrapper .label-filters {
+  display: inline-block;
+
+  &.labl {
+    margin-right: 10px;
+    position: relative;
+  }
+}
+
+#header-bars-wrapper .label-filters .loader {
+  width: 20px;
+  height: 20px;
+  background: url(/public/img/loading.gif) 0 0 no-repeat !important;
+  position: absolute;
+  bottom: 0px;
+  display: block;
+  left: 85px;
+  background-size: 20px 20px !important;
+}
+
+// --- Data sample dropdown ---
+.data-sample-dropdown-container {
+  position: relative;
+}
+
+.data-sample-dropdown-container .dropdown {
+  position: absolute;
+  visibility: hidden;
+  z-index: 1;
+  background-color: colors.$white;
+  min-width: 250px;
+  right: 0;
+  max-height: 450px;
+  overflow: auto;
+  left: 0;
+
+  margin-top: 10px;
+  border-radius: variables.$border-radius-default;
+  box-shadow: 0 5px 20px rgba(102, 102, 102, 0.4);
+  width: 100%;
+  height: auto;
+  padding: 8px;
+  background-color: colors.$white;
+  font-size: variables.$font-size-small;
+
+  transition: opacity 0.2s ease-in;
+  opacity: 0;
+}
+
+.data-sample-dropdown-container .dropdown .divider {
+  width: 90%;
+  position: absolute;
+  background-color: lightgray;
+  height: 1px;
+  bottom: 0;
+}
+
+.data-sample-dropdown-container .dropdown.open {
+  visibility: visible;
+  opacity: 1;
+}
+
+.data-sample-dropdown-container .dropdown ul {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.data-sample-dropdown-container .dropdown ul > li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: variables.$border-radius-default;
+  padding: 6px 12px;
+  background-color: transparent;
+  cursor: pointer;
+  color: colors.$black;
+
+  &:not(:last-child) {
+    margin: 0 0 3px;
+  }
+
+  &:hover {
+    background-color: colors.$grey50;
+  }
+  &.active {
+    color: colors.$black;
+    font-weight: bold;
+    background-color: colors.$grey100;
+  }
+}
+
+.data-sample-dropdown-container .trigger-button {
+  position: relative;
+  transition: padding 0.2s ease-out;
+
+  display: flex;
+  align-items: center;
+  margin: 0;
+  border: 1px solid colors.$grey200;
+  border-radius: variables.$border-radius-default;
+  padding: 8px 28px 8px 12px !important;
+  outline: none;
+  font-size: variables.$font-size-small;
+  line-height: variables.$line-height-small;
+  min-height: 40px;
+  width: 100%;
+  background-color: colors.$white;
+  white-space: nowrap;
+  color: colors.$grey1300;
+  box-shadow: unset !important;
+
+  &:not(:disabled):hover {
+    border-color: colors.$grey400;
+    color: colors.$grey1300 !important;
+  }
+
+  &:has(.trigger-button-icon-reset) {
+    > span {
+      padding-right: 25px;
+    }
+  }
+
+  .trigger-button-icon-reset {
+    position: absolute;
+    top: 50%;
+    right: 30px;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: colors.$grey100;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+
+    &:hover {
+      background-color: colors.$grey200;
+    }
+  }
+
+  .trigger-button-placeholder {
+    color: colors.$grey400;
+  }
+
+  > svg {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    pointer-events: none;
+    right: 12px;
+    color: colors.$grey600;
+  }
+}
+
+.data-sample-dropdown-container .trigger-button:disabled {
+  box-shadow: unset !important;
+  border: 1px solid colors.$grey200;
+  color: colors.$grey700 !important;
+  opacity: 0.5;
+}
+
+.data-sample-dropdown-container .trigger-button:disabled svg {
+  color: colors.$grey700 !important;
+  opacity: 0.5;
+}
+
+// --- Sample size ---
+.sample-size-item:hover {
+  background-color: unset !important;
+  cursor: default !important;
+}
+
+.sample-size-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 12px;
+  justify-content: space-around;
+  border-bottom: 1px solid colors.$grey100;
+  padding-bottom: 10px;
+}
+
+.sample-size-container span {
+  width: 100px;
+  font-weight: bold;
+}
+
+.sample-size-container span:first-of-type {
+  white-space: nowrap;
+}
+
+.sample-size-container input[type='number'] {
+  width: 70px;
+  padding: 8px;
+}
+
+.segment-filter-other-select-portal {
+  .custom-dropdown {
+    width: max-content;
+  }
+}

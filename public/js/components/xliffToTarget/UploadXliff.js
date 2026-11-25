@@ -3,7 +3,7 @@ import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
 import {DeleteIcon} from '../segments/SegmentFooterTabGlossary/GlossaryConstants'
 import FileUploadIconBig from '../../../img/icons/FileUploadIconBig'
 import CommonUtils from '../../utils/commonUtils'
-import IconClose from '../icons/IconClose'
+import IconClose from '../../../img/icons/IconClose'
 import {PROGRESS_BAR_SIZE, ProgressBar} from '../common/ProgressBar'
 import {xliffToTargetUpload} from '../../api/xliffToTargetUpload'
 import {getPrintableFileSize} from '../createProject/UploadFileUtils'
@@ -203,9 +203,7 @@ export const UploadXliff = () => {
           {files.map((f, idx) => (
             <div key={idx} className="file-item">
               <div className="file-item-name">
-                <span
-                  className={`file-icon ${CommonUtils.getIconClass(f.ext)}`}
-                />
+                {CommonUtils.getFileIcon(f.ext)}
                 {f.name}
               </div>
               {f.error && (
@@ -236,7 +234,7 @@ export const UploadXliff = () => {
                 </div>
               )}
               <Button
-                size={BUTTON_SIZE.ICON_SMALL}
+                size={BUTTON_SIZE.ICON_XSMALL}
                 onClick={() => deleteFile(f.name)}
                 style={{marginLeft: 'auto'}}
                 tooltip={'Remove file'}

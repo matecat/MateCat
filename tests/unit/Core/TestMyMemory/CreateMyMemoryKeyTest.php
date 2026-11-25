@@ -42,7 +42,7 @@ class CreateMyMemoryKeyTest extends AbstractTest
 
         $url_mock_param = "https://api.mymemory.translated.net/createranduser?";
         $mock_json_return = <<<'T'
-{"key":"8dd91ebad29bb0ad0b08","error":"","code":200,"id":"MyMemory_0837f645849e069fd481","pass":"1f8fae3dca"}
+{"key":"00000000000000000004","error":"","code":200,"id":"MyMemory_0837f645849e069fd481","pass":"1f8fae3dca"}
 T;
 
 
@@ -69,7 +69,7 @@ T;
          * check on the values of TMS object returned
          */
         $this->assertTrue($result instanceof CreateUserResponse);
-        $this->assertEquals("8dd91ebad29bb0ad0b08", $result->key);
+        $this->assertEquals("00000000000000000004", $result->key);
         $this->assertEquals("MyMemory_0837f645849e069fd481", $result->id);
         $this->assertEquals("1f8fae3dca", $result->pass);
         $this->assertFalse(isset($result->responseStatus));

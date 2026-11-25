@@ -28,8 +28,8 @@ export const laraTranslate = async ({
   ]
   return await lara.translate(
     textBlocks,
-    config.source_rfc,
-    config.target_rfc,
+    config.source_code,
+    config.target_code,
     {
       multiline,
       contentType: 'application/xliff+xml',

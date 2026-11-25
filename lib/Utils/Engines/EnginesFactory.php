@@ -51,7 +51,7 @@ class EnginesFactory
         $engine = new $className($engineRecord, $database);
 
         if ($engineClass !== null and !is_a($engine, $engineClass, true)) {
-            throw new NotFoundException("Engine Id " . $id . " is not the expected $engineClass engine instance");
+            throw new NotFoundException("Engine ID " . $id . " is not the expected $engineClass engine instance");
         }
 
         return $engine;
@@ -85,7 +85,7 @@ class EnginesFactory
         $className = 'Utils\Engines\\' . $_className; // guess for backward compatibility
         if (!class_exists($className)) {
             if (!class_exists($_className)) {
-                throw new NotFoundException("Engine Class $className not Found");
+                throw new NotFoundException("Engine class $className not found");
             }
             $className = $_className; // use the class name as is
         }
@@ -117,6 +117,35 @@ class EnginesFactory
         }
 
         return $engine;
+    }
+
+    /**
+     * Returns an active engine of the given class owned by the user, or null; an engine with no
+     * owner (uid null or 0) has none. When the user owns several, which one comes back is not defined.
+     *
+     * Example: $lara = EnginesFactory::getActiveInstanceByUserAndClass($uid, $database, Lara::class);
+     *
+     * @template T of AbstractEngine
+     *
+     * @param class-string<T> $engineClass
+     *
+     * @return T|null
+     * @throws Exception
+     */
+    public static function getActiveInstanceByUserAndClass(?int $uid, IDatabase $database, string $engineClass): ?AbstractEngine
+    {
+        if ($uid === null) {
+            return null;
+        }
+
+        $engineStruct = EngineStruct::getStruct();
+        $engineStruct->uid = $uid;
+        $engineStruct->class_load = $engineClass;
+        $engineStruct->active = true;
+
+        $engineRecord = (new EngineDAO($database))->setCacheTTL(60 * 5)->read($engineStruct)[0] ?? null;
+
+        return $engineRecord === null ? null : new $engineClass($engineRecord, $database);
     }
 
 }

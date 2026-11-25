@@ -4,6 +4,7 @@ namespace Utils\Engines;
 
 use Exception;
 use Model\DataAccess\IDatabase;
+use RuntimeException;
 use TypeError;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
@@ -55,7 +56,9 @@ class GoogleTranslate extends AbstractEngine
                 return $this->_composeMTResponseAsMatch($all_args[1]['text'], $decoded);
             } else {
                 $engineResponse = json_decode($decoded['error']['response'], true);
-                throw new Exception($engineResponse['error']['message'], $engineResponse['error']['code']);
+                $errorMessage = $engineResponse['error']['message'] ?? 'Unknown error';
+                $errorCode = $engineResponse['error']['code'] ?? 500;
+                throw new Exception($errorMessage, $errorCode);
             }
         } else {
             throw new Exception($rawValue['error']['message'], 500);  // already decoded in case of error
@@ -65,8 +68,7 @@ class GoogleTranslate extends AbstractEngine
     /**
      * @param array<string, mixed> $_config
      * @throws TypeError
-     * @throws \Psr\Log\InvalidArgumentException
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
     public function get(array $_config): GetMemoryResponse
     {

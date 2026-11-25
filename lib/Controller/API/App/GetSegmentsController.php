@@ -5,6 +5,7 @@ namespace Controller\API\App;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\API\Commons\Exceptions\ValidationError as ControllerValidationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use DomainException;
 use Exception;
@@ -13,6 +14,7 @@ use Matecat\ICU\MessagePatternValidator;
 use Matecat\Locales\Languages;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Conversion\ZipArchiveHandler;
+use Model\Exceptions\NotFoundException as ModelNotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\Hook\Event\Filter\FilterGetSegmentsResultEvent;
 use Model\FeaturesBase\Hook\Event\Filter\PrepareNotesForRenderingEvent;
@@ -54,7 +56,7 @@ class GetSegmentsController extends KleinController
      * @throws AuthenticationError
      * @throws ReQueueException
      * @throws ValidationError
-     * @throws \Model\Exceptions\NotFoundException
+     * @throws ModelNotFoundException
      * @throws EndQueueException
      * @throws ReflectionException
      * @throws NotFoundException
@@ -139,10 +141,12 @@ class GetSegmentsController extends KleinController
                 $res[$id_file]['target_code'] = $job->target;
                 $res[$id_file]['segments'] = [];
 
-                $fileContextUrls[$id_file] = $filesMetadataDao->setCacheTTL(60 * 60 * 24)->get(
+                $fileContextUrls[$id_file] = $filesMetadataDao->get(
                     $projectId,
                     $id_file,
-                    FilesMetadataMarshaller::CONTEXT_URL->value
+                    FilesMetadataMarshaller::CONTEXT_URL->value,
+                    null,
+                    60 * 60 * 24
                 )?->value;
             }
 
@@ -273,7 +277,8 @@ class GetSegmentsController extends KleinController
      * @throws EndQueueException
      * @throws ReQueueException
      * @throws ValidationError
-     * @throws \Model\Exceptions\NotFoundException
+     * @throws ControllerValidationError
+     * @throws ModelNotFoundException
      * @throws DomainException
      */
     private function attachNotes(SegmentUIStruct &$segment, array $segment_notes): void

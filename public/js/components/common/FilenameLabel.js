@@ -1,5 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import styles from './FilenameLabel.module.scss'
 
 export const FilenameLabel = ({children, maxWidth, cssClassName = ''}) => {
   const [name, extension] =
@@ -10,15 +11,14 @@ export const FilenameLabel = ({children, maxWidth, cssClassName = ''}) => {
         ]
       : [children, '']
 
-  const className = `${cssClassName ? cssClassName + ' ' : ''}`
 
   return (
-    <span className="filename-label" data-testid="filename-label">
-      <span className={`${className}name`} style={maxWidth && {maxWidth}}>
+    <span className={styles['filename-label']} data-testid="filename-label">
+      <span className={[styles.name, cssClassName].filter(Boolean).join(' ')} style={maxWidth && {maxWidth}}>
         {name}
       </span>
       {extension && (
-        <span className={`${className}extension`}>{extension}</span>
+        <span className={cssClassName || undefined}>{extension}</span>
       )}
     </span>
   )

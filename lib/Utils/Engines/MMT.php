@@ -6,6 +6,8 @@ use DomainException;
 use Exception;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDatabase;
+use Model\Jobs\JobSettingsResolver;
+use Model\Jobs\JobsMetadataMarshaller;
 use Model\Jobs\MetadataDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Jobs\JobDao;
@@ -13,10 +15,10 @@ use Model\Projects\ProjectDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
-use Psr\Log\InvalidArgumentException;
 use ReflectionException;
 use RuntimeException;
 use SplFileObject;
+use Throwable;
 use TypeError;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\MMT\MMTServiceApi;
@@ -99,7 +101,6 @@ class MMT extends AbstractEngine
      *
      * @return array<string, mixed>|null
      * @throws MMTServiceApiException
-     * @throws InvalidArgumentException
      * @throws RuntimeException
      */
     public function getAvailableLanguages(): ?array
@@ -124,22 +125,27 @@ class MMT extends AbstractEngine
         }
 
         $client = $this->_getClient();
-        $metadataDao = new ProjectsMetadataDao($this->database);
 
-        $glossaries = null;
+        // Glossary settings are overridable per job so the project owner can change them after
+        // creation, falling back to the project's creation-time value where they were not. Both keys
+        // are resolved in one pass because this runs once per segment on the MT path.
+        $settings = (new JobSettingsResolver($this->database))->resolveManyFromEngineConfig(
+            $_config,
+            [
+                JobsMetadataMarshaller::MMT_GLOSSARIES->value,
+                JobsMetadataMarshaller::MMT_IGNORE_GLOSSARY_CASE->value,
+            ]
+        );
 
-        if (!empty($_config['id_project'])) {
-            $glossaries = $metadataDao->setCacheTTL(86400)->getValue($_config['id_project'], 'mmt_glossaries');
-        }
+        $glossaries = $settings[JobsMetadataMarshaller::MMT_GLOSSARIES->value] ?? null;
 
-        if ($glossaries !== null) {
-            $mmtGlossariesArray = json_decode($glossaries, true);
-            $ignore_glossary_case = $metadataDao->setCacheTTL(86400)->getValue(
-                $_config['id_project'],
-                'mmt_ignore_glossary_case'
-            );
+        // An empty list is not "no setting": the job stores one to shadow a project that has
+        // glossaries, and the parameter has to be omitted rather than sent empty. The same guard
+        // covers a legacy row the marshaller could not decode, which arrives as null.
+        if (is_array($glossaries) && $glossaries !== []) {
+            $ignore_glossary_case = $settings[JobsMetadataMarshaller::MMT_IGNORE_GLOSSARY_CASE->value] ?? null;
 
-            $_config['glossaries'] = implode(",", $mmtGlossariesArray);
+            $_config['glossaries'] = implode(",", $glossaries);
 
             if ($ignore_glossary_case !== null) {
                 $_config['ignore_glossary_case'] = $ignore_glossary_case;
@@ -218,7 +224,6 @@ class MMT extends AbstractEngine
     /**
      * @param array<string, mixed> $_config
      * @return bool
-     * @throws \Psr\Log\InvalidArgumentException
      */
     public function set($_config): bool
     {
@@ -285,7 +290,6 @@ class MMT extends AbstractEngine
 
     /**
      * @throws MMTServiceApiException
-     * @throws InvalidArgumentException
      * @throws RuntimeException
      */
     public function memoryExists(MemoryKeyStruct $memoryKey): ?array
@@ -343,6 +347,8 @@ class MMT extends AbstractEngine
 
     /**
      * @throws Exception
+     * @throws Throwable the metadata write runs inside a transaction scope, which aborts the
+     *                   transaction on any throw and re-throws the original, whatever its type
      */
     public function syncMemories(array $projectRow, ?array $segments = []): void
     {
@@ -387,25 +393,26 @@ class MMT extends AbstractEngine
 
                 $jMetadataDao = new MetadataDao($this->database);
 
-                $this->database->begin();
-                foreach ($result as $langPair => $context) {
-                    $jobId = array_search($langPair, $jobLanguages, true);
-                    if ($jobId === false) {
-                        continue;
-                    }
+                $this->database->transaction(function () use ($result, $jobLanguages, $jMetadataDao): void {
+                    foreach ($result as $langPair => $context) {
+                        $jobId = array_search($langPair, $jobLanguages, true);
+                        if ($jobId === false) {
+                            continue;
+                        }
 
-                    $jMetadataDao->setCacheTTL(60 * 60 * 24 * 30)->set(
-                        (int)$jobId,
-                        "",
-                        'mt_context',
-                        $context
-                    );
-                }
-                $this->database->commit();
+                        $jMetadataDao->set(
+                            (int)$jobId,
+                            "",
+                            'mt_context',
+                            $context
+                        );
+                    }
+                });
             } catch (Exception $e) {
+                // Swallowed as before: an MT context that fails to store is not worth failing the
+                // sync over. The scope has already undone the writes by the time this runs.
                 $this->logger->debug($e->getMessage());
                 $this->logger->debug($e->getTraceAsString());
-                $this->database->rollback();
             } finally {
                 unset($tmpFileObject);
                 @unlink($tmp_name);
@@ -599,7 +606,6 @@ class MMT extends AbstractEngine
      *
      * @return array<string, mixed>|null
      * @throws MMTServiceApiException
-     * @throws InvalidArgumentException
      * @throws RuntimeException
      */
     public function getAllMemories(): ?array
@@ -634,7 +640,6 @@ class MMT extends AbstractEngine
      * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
-     * @throws InvalidArgumentException
      * @throws RuntimeException
      */
     public function updateMemory(string $id, string $name): ?array
@@ -651,7 +656,6 @@ class MMT extends AbstractEngine
      * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
-     * @throws InvalidArgumentException
      * @throws RuntimeException
      */
     public function importGlossary(string $id, array $data): ?array
@@ -668,7 +672,6 @@ class MMT extends AbstractEngine
      * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
-     * @throws InvalidArgumentException
      * @throws RuntimeException
      */
     public function updateGlossary(string $id, array $data): ?array
@@ -684,7 +687,6 @@ class MMT extends AbstractEngine
      * @return array<string, mixed>|null
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
-     * @throws InvalidArgumentException
      * @throws RuntimeException
      */
     public function importJobStatus(string $uuid): ?array
@@ -715,31 +717,11 @@ class MMT extends AbstractEngine
     }
 
     /**
-     * @param string $source
-     * @param string $target
-     * @param string $sentence
-     * @param string $translation
-     * @param string $mt_qe_engine_id
-     *
-     * @return float|null
-     * @throws MMTServiceApiException
-     * @throws InvalidArgumentException
-     * @throws RuntimeException
+     * ModernMT computes the quality estimation score itself inside its translate call.
      */
-    public function getQualityEstimation(
-        string $source,
-        string $target,
-        string $sentence,
-        string $translation,
-        string $mt_qe_engine_id = '2'
-    ): ?float {
-        $client = $this->_getClient();
-        $qualityEstimation = $client->qualityEstimation($source, $target, $sentence, $translation, $mt_qe_engine_id);
-        if ($qualityEstimation === null || !isset($qualityEstimation['score'])) {
-            return null;
-        }
-
-        return $qualityEstimation['score'];
+    public function hasBuiltInQualityEstimation(): bool
+    {
+        return true;
     }
 
     /**
@@ -757,16 +739,13 @@ class MMT extends AbstractEngine
         // Common metadata loading
         if (!empty($id_job)) {
             $metadataDao = new MetadataDao($this->database);
-            $contextRs = $metadataDao->setCacheTTL($cacheTtl)->getByIdJob($id_job, 'mt_context');
+            $contextRs = $metadataDao->getByIdJob($id_job, 'mt_context', $cacheTtl);
 
             $mt_context = array_pop($contextRs);
             if (!empty($mt_context)) {
                 $config['mt_context'] = $mt_context->value;
             }
         }
-
-        // Common config values
-        $config['secret_key'] = self::getG2FallbackSecretKey();
 
         // Branch-specific values
         if ($id_job && $this->_isAnalysis) {
@@ -783,25 +762,6 @@ class MMT extends AbstractEngine
 
         return $config;
     }
-
-    /**
-     * @return string|null
-     */
-    public static function getG2FallbackSecretKey(): ?string
-    {
-        $configFilePath = realpath(AppConfig::$ROOT . '/inc/mmt_fallback_key.ini');
-        if ($configFilePath === false || !file_exists($configFilePath)) {
-            return null;
-        }
-
-        $secret_key = parse_ini_file($configFilePath);
-        if ($secret_key === false) {
-            return null;
-        }
-
-        return $secret_key['secret_key'] ?? null;
-    }
-
 
     /**
      * @inheritDoc

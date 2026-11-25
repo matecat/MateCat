@@ -1,6 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import usePortal from '../../hooks/usePortal'
+import styles from './Tooltip.module.scss'
 
 export const TOOLTIP_POSITION = {
   TOP: 'top',
@@ -104,11 +105,17 @@ const Tooltip = ({
     return {top, left}
   }
 
+  const tooltipClassName = [
+    styles['tooltip-container'],
+    styles[position],
+    className,
+    isInteractiveContent && styles['tooltip-container-interactive'],
+  ]
+    .filter(Boolean)
+    .join(' ')
+
   return mode === TOOLTIP_MODE.STATIC || !children ? (
-    <div
-      className={`tooltip-container ${position} ${className} ${isInteractiveContent ? 'tooltip-container-interactive' : ''}`}
-      style={style}
-    >
+    <div className={tooltipClassName} style={style}>
       {content}
     </div>
   ) : children ? (
@@ -125,7 +132,7 @@ const Tooltip = ({
         <Portal id="portal-root">
           <div
             ref={refContainer}
-            className={`tooltip-container ${position} ${className} ${isInteractiveContent ? 'tooltip-container-interactive' : ''}`}
+            className={tooltipClassName}
             style={{...style, ...coords}}
           >
             {content}

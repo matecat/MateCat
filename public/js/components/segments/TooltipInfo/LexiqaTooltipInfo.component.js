@@ -1,29 +1,36 @@
-import React, {Component} from 'react'
+import React from 'react'
 
 import LXQ from '../../../utils/lxq.main'
+import IconCloseCircle from '../../../../img/icons/IconCloseCircle'
+import {Button, BUTTON_MODE, BUTTON_SIZE} from '../../common/Button/Button'
 
-class LexiqaTooltipInfo extends Component {
-  ignoreError(message) {
+const LexiqaTooltipInfo = ({onReplaceWord, messages}) => {
+  const ignoreError = (message) => {
     if (message.error) {
       LXQ.ignoreError(message.error)
     }
   }
 
-  buildTooltipError = () => {
-    const {messages} = this.props
+  const replaceWord = ({newWord, start, end}) => {
+    onReplaceWord({newWord, start, end})
+    //LXQ.redoHighlighting(segmentId, false)
+  }
+
+  const buildTooltipError = () => {
     const suggestions = messages.filter((item) => item.type === 'suggestion')
     const errors = messages.filter((item) => item.type !== 'suggestion')
 
     const errorsHtml = errors.map((error, i) => (
       <div className="tooltip-error-container" key={i}>
         <span className="tooltip-error-category">{error.msg}</span>
-        <div
-          className="tooltip-error-ignore"
-          onClick={() => this.ignoreError(error)}
+        <Button
+          mode={BUTTON_MODE.GHOST}
+          size={BUTTON_SIZE.XSMALL}
+          onClick={() => ignoreError(error)}
         >
-          <span className="icon-cancel-circle" />
-          <span className="tooltip-error-ignore-text">Ignore</span>
-        </div>
+          <IconCloseCircle size={18} />
+          <span>Ignore</span>
+        </Button>
       </div>
     ))
 
@@ -31,7 +38,7 @@ class LexiqaTooltipInfo extends Component {
       <li
         key={i}
         onClick={() =>
-          this.replaceWord({
+          replaceWord({
             newWord: suggestion.msg,
             start: suggestion.start,
             end: suggestion.end,
@@ -56,19 +63,12 @@ class LexiqaTooltipInfo extends Component {
     )
   }
 
-  replaceWord = ({newWord, start, end}) => {
-    this.props.onReplaceWord({newWord, start, end})
-    //LXQ.redoHighlighting(segmentId, false)
-  }
-
-  render() {
-    const html = this.buildTooltipError()
-    return (
-      <div className="lexiqa-tooltip">
-        <div className="tooltip-error-wrapper">{html}</div>
-      </div>
-    )
-  }
+  const html = buildTooltipError()
+  return (
+    <div className="lexiqa-tooltip">
+      <div className="tooltip-error-wrapper">{html}</div>
+    </div>
+  )
 }
 
 export default LexiqaTooltipInfo

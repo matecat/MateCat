@@ -255,53 +255,78 @@ class SearchModelTest extends AbstractTest
 
     // ─── includeLocked ───
     //
-    // includeLocked is true by default, so the queries stay as they always were. When it is false the ICE
-    // segments drop out of the result set, which is what keeps a replace-all from touching them.
+    // includeLocked is true by default, so the queries stay as they always were. When it is false the locked
+    // segments drop out of the result set, which is what keeps a replace-all from touching them. Whether a
+    // segment is an ICE plays no part: locked is what takes a segment out of scope.
 
     #[Test]
-    public function testSearchInSourceExcludesIcesWhenLockedAreExcluded(): void
+    public function testSearchInSourceExcludesLockedSegmentsWhenLockedAreExcluded(): void
     {
-        $this->_assertIceIsExcludedWhenLockedAreExcluded(function (bool $includeLocked): array {
+        $this->_assertLockedIsExcludedWhenLockedAreExcluded(function (bool $includeLocked): array {
             return $this->_searchInSource('Hello', $includeLocked);
         });
     }
 
     #[Test]
-    public function testSearchInTargetExcludesIcesWhenLockedAreExcluded(): void
+    public function testSearchInTargetExcludesLockedSegmentsWhenLockedAreExcluded(): void
     {
-        $this->_assertIceIsExcludedWhenLockedAreExcluded(function (bool $includeLocked): array {
+        $this->_assertLockedIsExcludedWhenLockedAreExcluded(function (bool $includeLocked): array {
             return $this->_searchInTarget('Ciao', $includeLocked);
         });
     }
 
     #[Test]
-    public function testSearchStatusOnlyExcludesIcesWhenLockedAreExcluded(): void
+    public function testSearchStatusOnlyExcludesLockedSegmentsWhenLockedAreExcluded(): void
     {
-        $this->_assertIceIsExcludedWhenLockedAreExcluded(function (bool $includeLocked): array {
+        $this->_assertLockedIsExcludedWhenLockedAreExcluded(function (bool $includeLocked): array {
             return $this->_searchStatusOnly($includeLocked);
         });
     }
 
     #[Test]
-    public function testSearchInSourceKeepsSegmentsWithoutAMatchTypeWhenLockedAreExcluded(): void
+    public function testSearchInSourceKeepsUnlockedIcesWhenLockedAreExcluded(): void
     {
-        $this->_assertANullMatchTypeIsNotTreatedAsAnIce(function (bool $includeLocked): array {
+        $this->_assertUnlockedIceIsKeptWhenLockedAreExcluded(function (bool $includeLocked): array {
             return $this->_searchInSource('Hello', $includeLocked);
         });
     }
 
     #[Test]
-    public function testSearchInTargetKeepsSegmentsWithoutAMatchTypeWhenLockedAreExcluded(): void
+    public function testSearchInTargetKeepsUnlockedIcesWhenLockedAreExcluded(): void
     {
-        $this->_assertANullMatchTypeIsNotTreatedAsAnIce(function (bool $includeLocked): array {
+        $this->_assertUnlockedIceIsKeptWhenLockedAreExcluded(function (bool $includeLocked): array {
             return $this->_searchInTarget('Ciao', $includeLocked);
         });
     }
 
     #[Test]
-    public function testSearchStatusOnlyKeepsSegmentsWithoutAMatchTypeWhenLockedAreExcluded(): void
+    public function testSearchStatusOnlyKeepsUnlockedIcesWhenLockedAreExcluded(): void
     {
-        $this->_assertANullMatchTypeIsNotTreatedAsAnIce(function (bool $includeLocked): array {
+        $this->_assertUnlockedIceIsKeptWhenLockedAreExcluded(function (bool $includeLocked): array {
+            return $this->_searchStatusOnly($includeLocked);
+        });
+    }
+
+    #[Test]
+    public function testSearchInSourceKeepsSegmentsWithoutALockedFlagWhenLockedAreExcluded(): void
+    {
+        $this->_assertANullLockedIsNotTreatedAsLocked(function (bool $includeLocked): array {
+            return $this->_searchInSource('Hello', $includeLocked);
+        });
+    }
+
+    #[Test]
+    public function testSearchInTargetKeepsSegmentsWithoutALockedFlagWhenLockedAreExcluded(): void
+    {
+        $this->_assertANullLockedIsNotTreatedAsLocked(function (bool $includeLocked): array {
+            return $this->_searchInTarget('Ciao', $includeLocked);
+        });
+    }
+
+    #[Test]
+    public function testSearchStatusOnlyKeepsSegmentsWithoutALockedFlagWhenLockedAreExcluded(): void
+    {
+        $this->_assertANullLockedIsNotTreatedAsLocked(function (bool $includeLocked): array {
             return $this->_searchStatusOnly($includeLocked);
         });
     }
@@ -328,78 +353,104 @@ class SearchModelTest extends AbstractTest
 
     /**
      * Runs the given search twice: once as it normally happens, then again with the locked segments
-     * excluded, after turning one of the segments the first run returned into an ICE. That segment, and
-     * only that one, has to disappear from the second result set.
+     * excluded, after locking one of the segments the first run returned. Its match type is left as it
+     * was, so the fixture row is not an ICE. That segment, and only that one, has to disappear from the
+     * second result set.
      *
      * @param callable(bool): array{sid_list: list<string>, count: int} $search
      *
      * @throws Exception
      */
-    private function _assertIceIsExcludedWhenLockedAreExcluded(callable $search): void
+    private function _assertLockedIsExcludedWhenLockedAreExcluded(callable $search): void
+    {
+        $withLocked = $search(true);
+        $this->assertNotEmpty($withLocked['sid_list'], 'the fixture must return at least one segment');
+
+        $lockedSegmentId = (int)$withLocked['sid_list'][0];
+
+        $this->_withSegmentTranslationColumns($lockedSegmentId, ['locked' => 1], function () use ($search, $withLocked, $lockedSegmentId): void {
+            $withoutLocked = $search(false);
+
+            $this->assertNotContains((string)$lockedSegmentId, $withoutLocked['sid_list']);
+            $this->assertSame(count($withLocked['sid_list']) - 1, count($withoutLocked['sid_list']));
+        });
+    }
+
+    /**
+     * An ICE that is not locked is in scope, as an XLIFF pre-translation whose rule category is ICE is,
+     * and must survive the exclusion.
+     *
+     * @param callable(bool): array{sid_list: list<string>, count: int} $search
+     *
+     * @throws Exception
+     */
+    private function _assertUnlockedIceIsKeptWhenLockedAreExcluded(callable $search): void
     {
         $withLocked = $search(true);
         $this->assertNotEmpty($withLocked['sid_list'], 'the fixture must return at least one segment');
 
         $iceSegmentId = (int)$withLocked['sid_list'][0];
-        $conn = obtainTestDatabase()->getConnection();
 
-        $read = $conn->prepare("SELECT match_type FROM segment_translations WHERE id_job = :job AND id_segment = :id");
-        $read->execute(['job' => $this->jobId, 'id' => $iceSegmentId]);
-        $previousMatchType = $read->fetchColumn();
-
-        $write = $conn->prepare("UPDATE segment_translations SET match_type = :match_type WHERE id_job = :job AND id_segment = :id");
-        $write->execute(['match_type' => 'ICE', 'job' => $this->jobId, 'id' => $iceSegmentId]);
-
-        try {
+        $this->_withSegmentTranslationColumns($iceSegmentId, ['match_type' => 'ICE', 'locked' => 0], function () use ($search, $withLocked, $iceSegmentId): void {
             $withoutLocked = $search(false);
 
-            $this->assertNotContains((string)$iceSegmentId, $withoutLocked['sid_list']);
-            $this->assertSame(count($withLocked['sid_list']) - 1, count($withoutLocked['sid_list']));
-        } finally {
-            $write->execute([
-                'match_type' => $previousMatchType === false ? null : $previousMatchType,
-                'job' => $this->jobId,
-                'id' => $iceSegmentId,
-            ]);
-        }
+            $this->assertContains((string)$iceSegmentId, $withoutLocked['sid_list']);
+            $this->assertSame(count($withLocked['sid_list']), count($withoutLocked['sid_list']));
+        });
     }
 
     /**
-     * A NULL `match_type` is not an ICE and must survive the exclusion.
+     * A NULL `locked` is not locked and must survive the exclusion.
      *
-     * `segment_translations.match_type` is nullable, so `match_type != 'ICE'` evaluates to NULL — not
-     * true — for those rows, and SQL drops them from the result set. The fixture's rows all carry a
-     * concrete match type, which is why {@see _assertIceIsExcludedWhenLockedAreExcluded} cannot catch
-     * this: it needs a row that is neither an ICE nor comparable to one.
+     * `segment_translations.locked` is nullable, so `locked = 0` evaluates to NULL, not true, for those
+     * rows, and SQL would drop them from the result set.
+     *
+     * @param callable(bool): array{sid_list: list<string>, count: int} $search
      *
      * @throws Exception
      */
-    private function _assertANullMatchTypeIsNotTreatedAsAnIce(callable $search): void
+    private function _assertANullLockedIsNotTreatedAsLocked(callable $search): void
     {
         $withLocked = $search(true);
         $this->assertNotEmpty($withLocked['sid_list'], 'the fixture must return at least one segment');
 
-        $nullMatchTypeSegmentId = (int)$withLocked['sid_list'][0];
-        $conn = obtainTestDatabase()->getConnection();
+        $nullLockedSegmentId = (int)$withLocked['sid_list'][0];
 
-        $read = $conn->prepare("SELECT match_type FROM segment_translations WHERE id_job = :job AND id_segment = :id");
-        $read->execute(['job' => $this->jobId, 'id' => $nullMatchTypeSegmentId]);
-        $previousMatchType = $read->fetchColumn();
-
-        $write = $conn->prepare("UPDATE segment_translations SET match_type = :match_type WHERE id_job = :job AND id_segment = :id");
-        $write->execute(['match_type' => null, 'job' => $this->jobId, 'id' => $nullMatchTypeSegmentId]);
-
-        try {
+        $this->_withSegmentTranslationColumns($nullLockedSegmentId, ['locked' => null], function () use ($search, $withLocked, $nullLockedSegmentId): void {
             $withoutLocked = $search(false);
 
-            $this->assertContains((string)$nullMatchTypeSegmentId, $withoutLocked['sid_list']);
+            $this->assertContains((string)$nullLockedSegmentId, $withoutLocked['sid_list']);
             $this->assertSame(count($withLocked['sid_list']), count($withoutLocked['sid_list']));
+        });
+    }
+
+    /**
+     * Sets the given columns on one fixture row, runs the assertions, and puts the previous values back
+     * whatever the outcome.
+     *
+     * @param array<string, int|string|null> $columns
+     * @param callable(): void $assertions
+     *
+     * @throws Exception
+     */
+    private function _withSegmentTranslationColumns(int $segmentId, array $columns, callable $assertions): void
+    {
+        $conn = obtainTestDatabase()->getConnection();
+        $names = array_keys($columns);
+
+        $read = $conn->prepare("SELECT " . implode(', ', $names) . " FROM segment_translations WHERE id_job = :job AND id_segment = :id");
+        $read->execute(['job' => $this->jobId, 'id' => $segmentId]);
+        $previous = $read->fetch(\PDO::FETCH_ASSOC);
+        $this->assertIsArray($previous, 'the fixture row must exist');
+
+        $set = implode(', ', array_map(fn(string $name): string => "$name = :$name", $names));
+        $write = $conn->prepare("UPDATE segment_translations SET $set WHERE id_job = :job AND id_segment = :id");
+        $write->execute($columns + ['job' => $this->jobId, 'id' => $segmentId]);
+
+        try {
+            $assertions();
         } finally {
-            $write->execute([
-                'match_type' => $previousMatchType === false ? null : $previousMatchType,
-                'job' => $this->jobId,
-                'id' => $nullMatchTypeSegmentId,
-            ]);
+            $write->execute($previous + ['job' => $this->jobId, 'id' => $segmentId]);
         }
     }
 

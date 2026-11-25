@@ -2,12 +2,26 @@ import React, {useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import Upload from '../../../../../../img/icons/Upload'
 import Checkmark from '../../../../../../img/icons/Checkmark'
-import Close from '../../../../../../img/icons/Close'
-import {MTGlossaryStatus, MT_GLOSSARY_CREATE_ROW_ID} from './MTGlossaryConstants'
+import {
+  MTGlossaryStatus,
+  MT_GLOSSARY_CREATE_ROW_ID,
+} from './MTGlossaryConstants'
 import {createMemoryAndImportGlossary} from '../../../../../api/createMemoryAndImportGlossary/createMemoryAndImportGlossary'
 import LabelWithTooltip from '../../../../common/LabelWithTooltip'
 import CatToolActions from '../../../../../actions/CatToolActions'
 import {SettingsPanelContext} from '../../../SettingsPanelContext'
+import {
+  Button,
+  BUTTON_HTML_TYPE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../../../../common/Button/Button'
+import IconClose from '../../../../../../img/icons/IconClose'
+import {
+  Checkbox,
+  CHECKBOX_SIZE,
+  CHECKBOX_STATE,
+} from '../../../../common/Checkbox'
 
 export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
   const {portalTarget} = useContext(SettingsPanelContext)
@@ -27,8 +41,8 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
     return () => statusEntry.current.cancel()
   }, [])
 
-  const onChangeIsActive = (e) => {
-    setIsActive(e.currentTarget.checked)
+  const onChangeIsActive = (isChecked) => {
+    setIsActive(isChecked)
   }
 
   const onChangeName = (e) => {
@@ -87,7 +101,6 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
         type: 'error',
         text: !name ? 'Name mandatory' : 'File mandatory',
         position: 'br',
-        allowHtml: true,
         timer: 5000,
       })
       return false
@@ -108,7 +121,6 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
       type: 'success',
       text: 'Glossary created successfully',
       position: 'br',
-      allowHtml: true,
       timer: 5000,
     })
     setIsWaitingResult(false)
@@ -119,7 +131,6 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
       type: 'error',
       text: 'Error creating glossary',
       position: 'br',
-      allowHtml: true,
       timer: 5000,
     })
     setIsWaitingResult(false)
@@ -142,10 +153,10 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
           isWaitingResult ? ' row-content-create-glossary-waiting' : ''
         }`}
       >
-        <input
-          checked={isActive}
+        <Checkbox
+          value={isActive ? CHECKBOX_STATE.CHECKED : CHECKBOX_STATE.UNCHECKED}
+          size={CHECKBOX_SIZE.SMALL}
           onChange={onChangeIsActive}
-          type="checkbox"
           title=""
           disabled
         />
@@ -156,6 +167,7 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
         }`}
       >
         <input
+          type="text"
           className={inputNameClasses}
           placeholder="Please insert a name for the glossary"
           value={name}
@@ -191,25 +203,27 @@ export const MTGlossaryCreateRow = ({engineId, row, setRows}) => {
           isWaitingResult ? ' row-content-create-glossary-waiting' : ''
         }`}
       >
-        <button
-          className="ui primary button settings-panel-button-icon confirm-button"
-          type="submit"
+        <Button
+          type={BUTTON_TYPE.PRIMARY}
+          size={BUTTON_SIZE.SMALL}
           disabled={isWaitingResult || !isFormFilled}
-          data-testid="mtglossary-create-confirm"
+          htmlType={BUTTON_HTML_TYPE.SUBMIT}
+          testId="mtglossary-create-confirm"
         >
-          <Checkmark size={12} />
+          <Checkmark size={16} />
           Confirm
-        </button>
+        </Button>
       </div>
       <div className="glossary-row-delete">
-        <button
-          className="ui button orange close-button"
+        <Button
+          type={BUTTON_TYPE.WARNING}
+          size={BUTTON_SIZE.ICON_SMALL}
+          htmlType={BUTTON_HTML_TYPE.RESET}
           onClick={onReset}
-          type="reset"
           disabled={isWaitingResult}
         >
-          <Close size={18} />
-        </button>
+          <IconClose size={16} />
+        </Button>
       </div>
       {isWaitingResult && <div className="spinner"></div>}
     </form>

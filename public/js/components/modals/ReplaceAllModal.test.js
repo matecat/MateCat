@@ -1,5 +1,5 @@
 import React from 'react'
-import {render, screen, fireEvent, act} from '@testing-library/react'
+import {render, screen, fireEvent, act, waitFor} from '@testing-library/react'
 import {ReplaceAllModal} from './ReplaceAllModal'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentActions from '../../actions/SegmentActions'
@@ -19,6 +19,7 @@ jest.mock('../../actions/SegmentActions', () => ({
   __esModule: true,
   default: {
     removeAllSegments: jest.fn(),
+    unlockSegments: jest.fn(),
   },
 }))
 
@@ -138,6 +139,23 @@ describe('ReplaceAllModal', () => {
       firstLoad: false,
       segmentToOpen: '1-1',
     })
+    expect(SegmentActions.unlockSegments).not.toHaveBeenCalled()
+  })
+
+  test('unlocks the locked segments the replace rewrote before reloading', async () => {
+    SearchUtils.execReplaceAll.mockResolvedValue({
+      replaced_locked_segments: [123],
+    })
+    render(<ReplaceAllModal search={search} />)
+
+    fireEvent.click(screen.getByText('Replace all'))
+
+    await waitFor(() =>
+      expect(SegmentActions.unlockSegments).toHaveBeenCalledWith(['123']),
+    )
+    expect(
+      SegmentActions.unlockSegments.mock.invocationCallOrder[0],
+    ).toBeLessThan(CatToolActions.onRender.mock.invocationCallOrder[0])
   })
 
   test('shows the first error message when the replace fails', async () => {
@@ -151,7 +169,7 @@ describe('ReplaceAllModal', () => {
     expect(ModalsActions.showModalComponent).toHaveBeenCalledWith(
       AlertModal,
       {text: 'boom'},
-      'Replace All Alert',
+      'Replace all alert',
     )
   })
 
@@ -166,7 +184,7 @@ describe('ReplaceAllModal', () => {
     expect(ModalsActions.showModalComponent).toHaveBeenCalledWith(
       AlertModal,
       {text: 'We got an error, please contact support'},
-      'Replace All Alert',
+      'Replace all alert',
     )
   })
 })

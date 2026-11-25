@@ -7,6 +7,11 @@
       "matchUpdateTypes": ["minor", "patch"],
       "automerge": false,
       "minimumReleaseAge": "20 days"
+    },
+    {
+      "description": "@babel/eslint-parser 8 needs ESLint 9; hold it on 7 until ESLint is upgraded",
+      "matchPackageNames": ["@babel/eslint-parser"],
+      "allowedVersions": "<8"
     }
   ],
   "branchConcurrentLimit": 3,

@@ -5,6 +5,8 @@ namespace Model\Filters\DTO;
 class MSWord implements IDto
 {
 
+    use NormalizesNamesTrait;
+
     private bool $extract_doc_properties = false;
     private bool $extract_comments = false;
     private bool $extract_headers_footers = false;
@@ -45,7 +47,7 @@ class MSWord implements IDto
      */
     public function setExcludeStyles(array $exclude_styles): void
     {
-        $this->exclude_styles = $exclude_styles;
+        $this->exclude_styles = $this->normalizeNames($exclude_styles);
     }
 
     /**
@@ -53,7 +55,7 @@ class MSWord implements IDto
      */
     public function setExcludeHighlightColors(array $exclude_highlight_colors): void
     {
-        $this->exclude_highlight_colors = $exclude_highlight_colors;
+        $this->exclude_highlight_colors = $this->normalizeNames($exclude_highlight_colors);
     }
 
     /**

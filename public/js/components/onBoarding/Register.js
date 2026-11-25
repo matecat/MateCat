@@ -16,6 +16,7 @@ import Checkmark from '../../../img/icons/Checkmark'
 import {registerUser} from '../../api/registerUser'
 import CommonUtils from '../../utils/commonUtils'
 import {resendEmailConfirmation} from '../../api/resendEmailConfirmation/resendEmailConfirmation'
+import {Checkbox, CHECKBOX_STATE} from '../common/Checkbox'
 
 const Register = () => {
   const {setStep, redirectAfterLogin} = useContext(OnBoardingContext)
@@ -87,7 +88,7 @@ const Register = () => {
           size={BUTTON_SIZE.LINK_MEDIUM}
           onClick={resendEmail}
         >
-          Resend Email
+          Resend email
         </Button>
         {isEmailSentAgain && (
           <span className="email-sent-again">Email sent again</span>
@@ -144,9 +145,7 @@ const Register = () => {
               render={({
                 field: {name, onChange, value},
                 fieldState: {error},
-              }) => (
-                <Input placeholder="Name" {...{name, value, onChange, error}} />
-              )}
+              }) => <Input label="Name" {...{name, value, onChange, error}} />}
             />
           </fieldset>
           <fieldset>
@@ -161,10 +160,7 @@ const Register = () => {
                 field: {name, onChange, value},
                 fieldState: {error},
               }) => (
-                <Input
-                  placeholder="Surname"
-                  {...{name, value, onChange, error}}
-                />
+                <Input label="Surname" {...{name, value, onChange, error}} />
               )}
             />
           </fieldset>
@@ -186,7 +182,7 @@ const Register = () => {
               }) => (
                 <Input
                   type={INPUT_TYPE.EMAIL}
-                  placeholder="Email"
+                  label="Email"
                   {...{name, value, onChange, error}}
                 />
               )}
@@ -215,7 +211,7 @@ const Register = () => {
               }) => (
                 <Input
                   type={INPUT_TYPE.PASSWORD}
-                  placeholder="Password"
+                  label="Password"
                   {...{name, value, onChange, error}}
                 />
               )}
@@ -239,7 +235,7 @@ const Register = () => {
               }) => (
                 <Input
                   type={INPUT_TYPE.PASSWORD}
-                  placeholder="Confirm password"
+                  label="Confirm password"
                   {...{name, value, onChange, error}}
                 />
               )}
@@ -259,9 +255,14 @@ const Register = () => {
               }) => (
                 <div className="terms-and-conditions">
                   <div className="input-container">
-                    <input
-                      type="checkbox"
-                      {...{name, value, onChange, error}}
+                    <Checkbox
+                      name={name}
+                      value={
+                        value
+                          ? CHECKBOX_STATE.CHECKED
+                          : CHECKBOX_STATE.UNCHECKED
+                      }
+                      onChange={(isChecked) => onChange(isChecked)}
                     />
                     <span>
                       Accept{' '}

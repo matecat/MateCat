@@ -8,15 +8,18 @@ import {getMMTKeys} from '../../../../../api/getMMTKeys/getMMTKeys'
 import {getStatusMemoryGlossaryImport} from '../../../../../api/getStatusMemoryGlossaryImport/getStatusMemoryGlossaryImport'
 import {SettingsPanelContext} from '../../../SettingsPanelContext'
 import CatToolActions from '../../../../../actions/CatToolActions'
-import CatToolConstants from '../../../../../constants/CatToolConstants'
-import CatToolStore from '../../../../../stores/CatToolStore'
-import IconAdd from '../../../../icons/IconAdd'
+import IconAdd from '../../../../../../img/icons/IconAdd'
 import {DeleteResource} from '../DeleteResource'
 import {deleteMemoryGlossary} from '../../../../../api/deleteMemoryGlossary'
 import CreateProjectActions from '../../../../../actions/CreateProjectActions'
 import ModalsActions from '../../../../../actions/ModalsActions'
 import {ConfirmDeleteResourceProjectTemplates} from '../../../../modals/ConfirmDeleteResourceProjectTemplates'
 import {SCHEMA_KEYS} from '../../../../../hooks/useProjectTemplates'
+import {
+  Button,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../../../../common/Button/Button'
 
 const COLUMNS_TABLE = [
   {name: 'Active'},
@@ -111,9 +114,13 @@ export const MTGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
           CatToolActions.addNotification({
             title: 'Glossary deleted',
             type: 'success',
-            text: `The glossary (<b>${glossary.name}</b>) has been successfully deleted`,
+            text: (
+              <>
+                The glossary (<b>{glossary.name}</b>) has been successfully
+                deleted
+              </>
+            ),
             position: 'br',
-            allowHtml: true,
             timer: 5000,
           })
           CreateProjectActions.updateProjectTemplates({
@@ -130,7 +137,6 @@ export const MTGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
           type: 'error',
           text: 'Error deleting glossary',
           position: 'br',
-          allowHtml: true,
           timer: 5000,
         })
       })
@@ -224,81 +230,53 @@ export const MTGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
     let wasCleanup = false
 
     const glossaries = activeGlossariesRef.current
-    let memories = []
-    const getJobMetadata = ({jobMetadata: {project} = {}}) => {
-      const rows = memories.filter(({id}) =>
-        project.mt_extra.mmt_glossaries?.some((value) => value === id),
-      )
-      updateRowsState(rows.map(({id, name}) => ({id, name, isActive: true})))
-    }
 
-    if (config.ownerIsMe || !isCattoolPage) {
-      getMMTKeys({engineId: id}).then((data) => {
-        const items = [...data].reverse()
-        if (!wasCleanup) {
-          if (!isCattoolPage) {
-            updateRowsState(
-              items.map(({name, id: idRow}) => {
-                const isActive = Array.isArray(glossaries)
-                  ? glossaries.some((value) => value === idRow)
-                  : false
+    getMMTKeys({engineId: id}).then((data) => {
+      const items = [...data].reverse()
+      if (!wasCleanup) {
+        updateRowsState(
+          items.map(({name, id: idRow}) => {
+            const isActive = Array.isArray(glossaries)
+              ? glossaries.some((value) => value === idRow)
+              : false
 
-                return {
-                  id: idRow,
-                  name,
-                  isActive,
-                }
-              }),
-            )
-          } else {
-            memories = items
-            CatToolStore.addListener(
-              CatToolConstants.GET_JOB_METADATA,
-              getJobMetadata,
-            )
-            CatToolActions.getJobMetadata({
-              idJob: config.id_job,
-              password: config.password,
-            })
-          }
-        }
-      })
-    }
+            return {
+              id: idRow,
+              name,
+              isActive,
+            }
+          }),
+        )
+      }
+    })
 
     return () => {
       wasCleanup = true
-      CatToolStore.removeListener(
-        CatToolConstants.GET_JOB_METADATA,
-        getJobMetadata,
-      )
     }
-  }, [id, isCattoolPage, updateRowsState])
+  }, [id, updateRowsState])
 
   useEffect(() => {
-    if (!isCattoolPage) {
-      const glossaries = activeGlossariesRef.current
+    const glossaries = activeGlossariesRef.current
 
-      updateRowsState((prevState) =>
-        Array.isArray(prevState)
-          ? prevState.map(({name, id: idRow}) => {
-              const isActive = Array.isArray(glossaries)
-                ? glossaries.some((value) => value === idRow)
-                : false
+    updateRowsState((prevState) =>
+      Array.isArray(prevState)
+        ? prevState.map(({name, id: idRow}) => {
+            const isActive = Array.isArray(glossaries)
+              ? glossaries.some((value) => value === idRow)
+              : false
 
-              return {
-                id: idRow,
-                name,
-                isActive,
-              }
-            })
-          : prevState,
-      )
-    }
-  }, [currentProjectTemplate.id, isCattoolPage, updateRowsState])
+            return {
+              id: idRow,
+              name,
+              isActive,
+            }
+          })
+        : prevState,
+    )
+  }, [currentProjectTemplate.id, updateRowsState])
 
   useEffect(() => {
     if (
-      isCattoolPage ||
       !rows ||
       (rows.length === 1 &&
         rows.some(({id}) => id === MT_GLOSSARY_CREATE_ROW_ID))
@@ -308,7 +286,7 @@ export const MTGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
     const rowsActive = rows.filter(({isActive}) => isActive).map(({id}) => id)
 
     setGlossaries(rowsActive)
-  }, [rows, isCattoolPage, modifyingCurrentTemplate, setGlossaries])
+  }, [rows, modifyingCurrentTemplate, setGlossaries])
 
   const addGlossary = () => {
     const row = {
@@ -342,26 +320,28 @@ export const MTGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
         (haveRecords ? (
           <div className="main-buttons-container">
             {!shouldHideNewButton && (
-              <button
-                className="ui primary button settings-panel-button-icon confirm-button create-glossary-button"
+              <Button
+                type={BUTTON_TYPE.PRIMARY}
+                size={BUTTON_SIZE.SMALL}
                 onClick={addGlossary}
                 title="Add glossary"
               >
                 <IconAdd size={18} />
                 New glossary
-              </button>
+              </Button>
             )}
           </div>
         ) : Array.isArray(rows) ? (
           <div className="empty-list-mode">
             <p>Start using ModernMT’s glossary feature</p>
-            <button
-              className="grey-button create-glossary-button"
+            <Button
+              className="settings-panel-grey-button"
               onClick={addGlossary}
+              title="Add glossary"
             >
-              <IconAdd size={18} />
+              <IconAdd size={22} />
               New glossary
-            </button>
+            </Button>
           </div>
         ) : (
           <p className="loading-list-mode">Loading...</p>
