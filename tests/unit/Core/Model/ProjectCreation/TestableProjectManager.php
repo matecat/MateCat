@@ -29,6 +29,7 @@ use Model\Xliff\DTO\XliffRulesModel;
 use ReflectionClass;
 use ReflectionException;
 use Throwable;
+use TypeError;
 use Utils\Constants\ProjectStatus;
 use Utils\Logger\MatecatLogger;
 use Utils\TaskRunner\Exceptions\EndQueueException;
@@ -256,12 +257,9 @@ class TestableProjectManager extends ProjectManager
 
     /**
      * Public wrapper to invoke the protected _insertInstructions().
-     * @throws AuthenticationError
-     * @throws EndQueueException
-     * @throws NotFoundException
-     * @throws ReQueueException
+     * @throws Exception
      * @throws ReflectionException
-     * @throws ValidationError
+     * @throws TypeError
      */
     public function callInsertInstructions(int $fid, string $value): void
     {

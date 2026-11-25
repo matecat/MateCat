@@ -15,7 +15,6 @@ use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\FeatureSet;
-use Model\FeaturesBase\Hook\Event\Filter\DecodeInstructionsEvent;
 use Model\FeaturesBase\Hook\Event\Filter\HandleJsonNotesBeforeInsertEvent;
 use Model\FeaturesBase\Hook\Event\Run\BeforeProjectCreationEvent;
 use Model\FeaturesBase\Hook\Event\Run\PostProjectCreateEvent;
@@ -1128,24 +1127,13 @@ class ProjectManager
     }
 
     /**
-     * @param array<string, mixed>|string $value
-     *
-     * @throws AuthenticationError
-     * @throws EndQueueException
      * @throws Exception
-     * @throws NotFoundException
-     * @throws ReQueueException
      * @throws ReflectionException
-     * @throws ValidationError
      * @throws TypeError
      */
-    protected function insertInstructions(int $fid, array|string $value): void
+    protected function insertInstructions(int $fid, string $value): void
     {
-        $event = new DecodeInstructionsEvent($value);
-        $this->features->dispatch($event);
-        $value = $event->getValue();
-
-        $this->filesMetadataDao->insert((int)$this->projectStructure->id_project, $fid, 'instructions', (string)$value);
+        $this->filesMetadataDao->insert((int)$this->projectStructure->id_project, $fid, 'instructions', $value);
     }
 
     /**

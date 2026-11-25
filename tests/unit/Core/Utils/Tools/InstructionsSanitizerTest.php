@@ -443,26 +443,18 @@ Product: content sent to MTPE with Leverage + Translate en-US source';
     }
 
     /**
-     * The two write paths hand the sanitizer a differently prepared string and must still store the
-     * same value. `/api/v1/new` sanitizes first and Uber's htmlentities/html_entity_decode pair
-     * wraps that as a net identity; the v3 endpoint dispatches the decode hook *before* sanitizing,
-     * so the sanitizer sees an already decoded payload.
-     *
-     * They agree because sanitize() decodes to a fixed point on its own, which absorbs the extra
-     * decode. The equality holds only while that pair stays an identity: a plugin implementing just
-     * `encodeInstructions` would break it.
+     * sanitize() decodes entities to a fixed point on its own, so a payload a client already
+     * entity-decoded stores the same value as the raw one. Both write paths (`/api/v1/new` and the
+     * v3 file instructions endpoint) hand the sanitizer the request value unchanged.
      */
     #[Test]
     #[DataProvider('idempotencyProvider')]
-    public function theTwoWritePathsStoreTheSameValue(string $raw): void
+    public function aPreDecodedPayloadStoresTheSameValue(string $raw): void
     {
-        // POST /api/v1|v2/new — NewController sanitizes, then the encode/decode pair round trips.
-        $viaProjectCreation = html_entity_decode(htmlentities(InstructionsSanitizer::sanitize($raw)));
-
-        // POST /api/v3/jobs/{id}/{password}/file/{id_file}/instructions — decode hook, then sanitize.
-        $viaV3Endpoint = InstructionsSanitizer::sanitize(html_entity_decode($raw));
-
-        $this->assertEquals($viaProjectCreation, $viaV3Endpoint);
+        $this->assertEquals(
+            InstructionsSanitizer::sanitize($raw),
+            InstructionsSanitizer::sanitize(html_entity_decode($raw))
+        );
     }
 
     // ── Input the parser cannot turn into a document ─────────────────────────────────────

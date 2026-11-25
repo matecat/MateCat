@@ -19,7 +19,6 @@ use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\BasicFeatureStruct;
-use Model\FeaturesBase\Hook\Event\Filter\EncodeInstructionsEvent;
 use Model\FeaturesBase\Hook\Event\Filter\FilterCreateProjectFeaturesEvent;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\FilesStorageFactory;
@@ -424,16 +423,7 @@ class NewController extends KleinController
             FILTER_CALLBACK,
             [
                 'flags' => FILTER_REQUIRE_ARRAY,
-                'options' => function ($value) {
-                    $value = InstructionsSanitizer::sanitize($value);
-                    /**
-                     * Uber plugin callback
-                     */
-                    $encodeInstructionsEvent = new EncodeInstructionsEvent($value);
-                    $this->featureSet->dispatch($encodeInstructionsEvent);
-
-                    return $encodeInstructionsEvent->getValue();
-                }
+                'options' => fn($value) => InstructionsSanitizer::sanitize($value),
             ]
         ) ?: null;
 

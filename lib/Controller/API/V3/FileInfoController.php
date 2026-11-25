@@ -18,7 +18,6 @@ use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
 use InvalidArgumentException;
 use Model\Exceptions\ValidationError;
-use Model\FeaturesBase\Hook\Event\Filter\DecodeInstructionsEvent;
 use Model\Files\FilesInfoUtility;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
@@ -138,10 +137,7 @@ class FileInfoController extends KleinController
         $instructions = $this->request->param('instructions');
         $filesInfoUtility = $this->createFilesInfoUtility($this->chunk);
 
-        // Sanitize what the plugin hook returns, so that its output is sanitized too.
-        $decodeInstructionsEvent = new DecodeInstructionsEvent($instructions);
-        $this->featureSet->dispatch($decodeInstructionsEvent);
-        $instructions = InstructionsSanitizer::sanitize((string)$decodeInstructionsEvent->getValue());
+        $instructions = InstructionsSanitizer::sanitize((string)$instructions);
 
         if (empty($instructions)) {
             throw new InvalidArgumentException("Empty instructions provided");

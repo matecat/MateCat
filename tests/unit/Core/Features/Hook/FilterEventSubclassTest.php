@@ -14,8 +14,6 @@ use Model\FeaturesBase\Hook\Event\Filter\CheckTagMismatchEvent;
 use Model\FeaturesBase\Hook\Event\Filter\CheckTagPositionsEvent;
 use Model\FeaturesBase\Hook\Event\Filter\ContentSecurityPolicySourcesEvent;
 use Model\FeaturesBase\Hook\Event\Filter\CorrectTagErrorsEvent;
-use Model\FeaturesBase\Hook\Event\Filter\DecodeInstructionsEvent;
-use Model\FeaturesBase\Hook\Event\Filter\EncodeInstructionsEvent;
 use Model\FeaturesBase\Hook\Event\Filter\FilterActivityLogEntryEvent;
 use Model\FeaturesBase\Hook\Event\Filter\FilterContributionStructOnMTSetEvent;
 use Model\FeaturesBase\Hook\Event\Filter\FilterContributionStructOnSetTranslationEvent;
@@ -73,8 +71,6 @@ class FilterEventSubclassTest extends AbstractTest
             'CheckTagPositions' => [CheckTagPositionsEvent::class, 'checkTagPositions'],
             'ContentSecurityPolicySources' => [ContentSecurityPolicySourcesEvent::class, 'contentSecurityPolicySources'],
             'CorrectTagErrors' => [CorrectTagErrorsEvent::class, 'correctTagErrors'],
-            'DecodeInstructions' => [DecodeInstructionsEvent::class, 'decodeInstructions'],
-            'EncodeInstructions' => [EncodeInstructionsEvent::class, 'encodeInstructions'],
             'FilterActivityLogEntry' => [FilterActivityLogEntryEvent::class, 'filterActivityLogEntry'],
             'FilterContributionStructOnMTSet' => [FilterContributionStructOnMTSetEvent::class, 'filterContributionStructOnMTSet'],
             'FilterContributionStructOnSetTranslation' => [FilterContributionStructOnSetTranslationEvent::class, 'filterContributionStructOnSetTranslation'],
@@ -310,28 +306,6 @@ class FilterEventSubclassTest extends AbstractTest
 
         $event->setDefault(true);
         self::assertTrue($event->getDefault());
-    }
-
-    #[Test]
-    public function decodeInstructionsEventGetSet(): void
-    {
-        $event = new DecodeInstructionsEvent('raw_value');
-
-        self::assertSame('raw_value', $event->getValue());
-
-        $event->setValue(['decoded' => true]);
-        self::assertSame(['decoded' => true], $event->getValue());
-    }
-
-    #[Test]
-    public function encodeInstructionsEventGetSet(): void
-    {
-        $event = new EncodeInstructionsEvent(['key' => 'value']);
-
-        self::assertSame(['key' => 'value'], $event->getValue());
-
-        $event->setValue('encoded_string');
-        self::assertSame('encoded_string', $event->getValue());
     }
 
     #[Test]
