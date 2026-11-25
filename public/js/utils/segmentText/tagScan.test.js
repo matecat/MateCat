@@ -116,7 +116,7 @@ describe('findTagMatches', () => {
     setTagSignatureMiddleware('space', () => true)
     const bestTime = (text) => {
       let best = Infinity
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < 5; i++) {
         const start = performance.now()
         findTagMatches(text, 'space')
         best = Math.min(best, performance.now() - start)
@@ -124,10 +124,13 @@ describe('findTagMatches', () => {
       return best
     }
     const unit = 'a <g id="1"> b '
-    bestTime(unit.repeat(256))
-    const ratio = bestTime(unit.repeat(4096)) / bestTime(unit.repeat(1024))
+    bestTime(unit.repeat(512))
+    // Eight times the text: linear code takes about eight times as long, quadratic code about sixty-four. The
+    // limit sits well between the two, so the load of a full parallel run cannot fail it, and the sizes are large
+    // enough that the timings are not mostly noise.
+    const ratio = bestTime(unit.repeat(32768)) / bestTime(unit.repeat(4096))
 
-    expect(ratio).toBeLessThan(8)
+    expect(ratio).toBeLessThan(24)
   })
 })
 
