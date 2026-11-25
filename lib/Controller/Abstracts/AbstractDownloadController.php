@@ -454,20 +454,6 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
     }
 
     /**
-     * Removes characters that could break out of the quoted Content-Disposition
-     * filename value (double quote, backslash, CR, LF, NUL) — prevents header
-     * injection / disposition-parameter smuggling via user-controlled filenames.
-     *
-     * @param string $filename
-     *
-     * @return string
-     */
-    public static function sanitizeContentDispositionFilename(string $filename): string
-    {
-        return str_replace(['"', '\\', "\r", "\n", "\0"], '', $filename);
-    }
-
-    /**
      * @param string $filename
      *
      * @return string

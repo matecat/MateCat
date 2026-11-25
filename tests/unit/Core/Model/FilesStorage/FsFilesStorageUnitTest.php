@@ -71,6 +71,46 @@ class FsFilesStorageUnitTest extends AbstractTest
     }
 
     #[Test]
+    public function test_getOriginalZipPath_returns_the_hashed_zip_when_stored(): void
+    {
+        $this->withTempDir(function (string $tempDir): void {
+            $originalZip = AppConfig::$ZIP_REPOSITORY;
+            try {
+                AppConfig::$ZIP_REPOSITORY = $tempDir;
+                $zipDir = $tempDir . '/20240615/42';
+                mkdir($zipDir, 0755, true);
+                $stored = $zipDir . '/' . sha1('archive.zip') . '.zip';
+                file_put_contents($stored, 'zip');
+                file_put_contents($zipDir . '/archive.zip', 'legacy zip');
+
+                $fs = new FsFilesStorage();
+                $this->assertSame($stored, $fs->getOriginalZipPath('2024-06-15', '42', 'archive.zip'));
+            } finally {
+                AppConfig::$ZIP_REPOSITORY = $originalZip;
+            }
+        });
+    }
+
+    #[Test]
+    public function test_getOriginalZipPath_returns_the_legacy_zip_when_not_hashed(): void
+    {
+        $this->withTempDir(function (string $tempDir): void {
+            $originalZip = AppConfig::$ZIP_REPOSITORY;
+            try {
+                AppConfig::$ZIP_REPOSITORY = $tempDir;
+                $zipDir = $tempDir . '/20240615/42';
+                mkdir($zipDir, 0755, true);
+                file_put_contents($zipDir . '/архив.zip', 'legacy zip');
+
+                $fs = new FsFilesStorage();
+                $this->assertSame($zipDir . '/архив.zip', $fs->getOriginalZipPath('2024-06-15', '42', 'архив.zip'));
+            } finally {
+                AppConfig::$ZIP_REPOSITORY = $originalZip;
+            }
+        });
+    }
+
+    #[Test]
     public function test_getOriginalZipDir_returns_correct_path(): void
     {
         $fs = new FsFilesStorage();
@@ -331,6 +371,37 @@ class FsFilesStorageUnitTest extends AbstractTest
                 $fs = new FsFilesStorage();
                 $result = $fs->getXliffFromCache($hash, $lang);
                 $this->assertStringEndsWith('test.sdlxliff', $result);
+            } finally {
+                AppConfig::$CACHE_REPOSITORY = $originalCache;
+            }
+        });
+    }
+
+    /**
+     * A cache package written before the names were hashed, then written again: the content-hash objects win.
+     */
+    #[Test]
+    public function test_cache_readers_prefer_the_content_hash_objects(): void
+    {
+        $this->withTempDir(function (string $tempDir): void {
+            $originalCache = AppConfig::$CACHE_REPOSITORY;
+            try {
+                AppConfig::$CACHE_REPOSITORY = $tempDir;
+                $hash = 'abcdef1234567890abcdef1234567890abcdef12';
+                $lang = 'en-US';
+                $cacheTree = implode(DIRECTORY_SEPARATOR, FsFilesStorage::composeCachePath($hash));
+                $origDir = $tempDir . '/' . $cacheTree . '__' . $lang . '/package/orig';
+                $workDir = $tempDir . '/' . $cacheTree . '__' . $lang . '/package/work';
+                mkdir($origDir, 0755, true);
+                mkdir($workDir, 0755, true);
+                foreach (['0-legacy.docx', $hash . '.docx', 'zz-legacy.docx'] as $name) {
+                    file_put_contents($origDir . '/' . $name, 'content');
+                    file_put_contents($workDir . '/' . $name . '.sdlxliff', 'content');
+                }
+
+                $fs = new FsFilesStorage();
+                $this->assertSame($origDir . '/' . $hash . '.docx', $fs->getOriginalFromCache($hash, $lang));
+                $this->assertSame($workDir . '/' . $hash . '.docx.sdlxliff', $fs->getXliffFromCache($hash, $lang));
             } finally {
                 AppConfig::$CACHE_REPOSITORY = $originalCache;
             }
@@ -890,5 +961,72 @@ class FsFilesStorageUnitTest extends AbstractTest
                 AppConfig::$QUEUE_PROJECT_REPOSITORY = $originalQueue;
             }
         });
+    }
+
+    /**
+     * A package holding a legacy pair next to a hashed pair: the project links the hashed pair, the one the segments
+     * are read from, and not whichever pair is listed first.
+     */
+    #[Test]
+    public function test_moveFromCacheToFileDir_prefers_the_hashed_objects_of_a_mixed_package(): void
+    {
+        $this->withTempDir(function (string $tempDir): void {
+            $hash = 'abcdef1234567890abcdef1234567890abcdef12';
+            $originalCache = AppConfig::$CACHE_REPOSITORY;
+            $originalFiles = AppConfig::$FILES_REPOSITORY;
+            try {
+                AppConfig::$CACHE_REPOSITORY = $tempDir . '/cache';
+                AppConfig::$FILES_REPOSITORY = $tempDir . '/files';
+                $fs = new FsFilesStorage();
+
+                $package = $tempDir . '/cache/' . implode('/', FsFilesStorage::composeCachePath($hash)) . '__en-US/package';
+                mkdir($package . '/orig', 0755, true);
+                mkdir($package . '/work', 0755, true);
+                file_put_contents($package . '/orig/0-legacy.docx', 'legacy original');
+                file_put_contents($package . '/work/0-legacy.docx.sdlxliff', 'legacy xliff');
+                file_put_contents($package . '/orig/' . $hash . '.docx', 'original');
+                file_put_contents($package . '/work/' . $hash . '.docx.sdlxliff', 'xliff');
+
+                $this->assertTrue($fs->moveFromCacheToFileDir('20261111/' . $hash, 'en-US', '7', '0-legacy.docx'));
+
+                $fileDir = $tempDir . '/files/20261111/7';
+                $this->assertSame('original', file_get_contents($fileDir . '/orig/0-legacy.docx'));
+                $this->assertSame('xliff', file_get_contents($fileDir . '/xliff/0-legacy.docx.sdlxliff'));
+            } finally {
+                AppConfig::$CACHE_REPOSITORY = $originalCache;
+                AppConfig::$FILES_REPOSITORY = $originalFiles;
+            }
+        });
+    }
+
+    /**
+     * The listing order of a directory is not under the test's control, so the preference is asserted on the call:
+     * both the orig and the work lookups ask for the content-hash prefix.
+     */
+    #[Test]
+    public function test_moveFromCacheToFileDir_asks_for_the_hashed_objects_of_the_package(): void
+    {
+        $mockFs = $this->createStub(FilesystemAdapter::class);
+
+        $partialMock = $this->getMockBuilder(FsFilesStorage::class)
+            ->onlyMethods(['getSingleFileInPath'])
+            ->setConstructorArgs([$mockFs])
+            ->getMock();
+
+        $mockFs->method('isDir')->willReturn(true);
+        $mockFs->method('isFile')->willReturn(true);
+        $mockFs->method('link')->willReturn(true);
+
+        $hash = 'abcdef1234567890abcdef1234567890abcdef12';
+        $calls = [];
+        $partialMock->expects($this->exactly(2))->method('getSingleFileInPath')
+            ->willReturnCallback(function (string $path, ?string $prefix) use (&$calls, $hash): string {
+                $calls[] = [basename($path), $prefix];
+
+                return $path . '/' . $hash . (basename($path) === 'orig' ? '.docx' : '.docx.sdlxliff');
+            });
+
+        $this->assertTrue($partialMock->moveFromCacheToFileDir('20240101' . DIRECTORY_SEPARATOR . $hash, 'en-US', '42'));
+        $this->assertSame([['orig', $hash . '.'], ['work', $hash . '.']], $calls);
     }
 }

@@ -9,8 +9,8 @@
 namespace Controller\Traits;
 
 
-use Controller\Abstracts\AbstractDownloadController;
 use Klein\Response;
+use Utils\Tools\ContentDisposition;
 
 class KleinResponseFileStream
 {
@@ -42,10 +42,8 @@ class KleinResponseFileStream
         try {
             $this->noCache();
 
-            $filename = AbstractDownloadController::sanitizeContentDispositionFilename($filename);
-
             $this->header('Content-Type: ' . $mimeType);
-            $this->header('Content-Disposition: ' . $disposition . '; filename="' . $filename . '"');
+            $this->header('Content-Disposition: ' . ContentDisposition::build($filename, $disposition));
             $this->header('Expires: 0');
             $this->header('Connection: close');
 
