@@ -1,6 +1,6 @@
 import React, {forwardRef, useCallback, useEffect, useRef} from 'react'
 import PropTypes from 'prop-types'
-import {useVirtual} from 'react-virtual'
+import {useVirtualizer} from '@tanstack/react-virtual'
 
 const VirtualList = forwardRef(
   (
@@ -21,26 +21,27 @@ const VirtualList = forwardRef(
     },
     ref,
   ) => {
-    const scrollOffsetOverrideRef = useRef(0)
-    const scrollToFn = useCallback(
-      (offset, defaultScrollToFn) =>
-        defaultScrollToFn(
-          Math.max(0, offset - scrollOffsetOverrideRef.current),
-        ),
-      [],
-    )
+    // A start-aligned scroll to an index stops `offset` pixels short of the
+    // row (the sticky bar above the list covers that much); other alignments
+    // land exactly on it.
+    const scrollPaddingStart =
+      !scrollToIndex?.align || scrollToIndex.align === 'start'
+        ? (scrollToIndex?.offset ?? 0)
+        : 0
 
-    const {
-      virtualItems,
-      totalSize,
-      scrollToIndex: fnScrollToIndex,
-    } = useVirtual({
-      size: items.length,
-      parentRef: ref,
+    const virtualizer = useVirtualizer({
+      count: items.length,
+      getScrollElement: () => ref.current,
       estimateSize: useCallback((index) => items[index].height, [items]),
+      // a new key function on every change of the items makes the
+      // virtualizer lay the rows out again with their new heights
+      getItemKey: useCallback((index) => items[index].id ?? index, [items]),
       overscan,
-      scrollToFn,
+      scrollPaddingStart,
     })
+    const virtualItems = virtualizer.getVirtualItems()
+    const totalSize = virtualizer.getTotalSize()
+    const fnScrollToIndex = virtualizer.scrollToIndex
 
     const getFirstVisibleIndex = () => {
       const parent = ref.current
@@ -60,17 +61,15 @@ const VirtualList = forwardRef(
 
     const scrollToIndexDebounceTmOut = useRef()
 
-    // scroll to index
+    // scroll to index; asked again when the number of items changes, so a
+    // target requested before its rows arrived is still reached
     useEffect(() => {
       if (typeof scrollToIndex?.value !== 'number') return
       clearTimeout(scrollToIndexDebounceTmOut.current)
 
       if (scrollToIndex.value >= 0) {
         scrollToIndexDebounceTmOut.current = setTimeout(() => {
-          const align = scrollToIndex?.align
-          scrollOffsetOverrideRef.current =
-            !align || align === 'start' ? (scrollToIndex?.offset ?? 0) : 0
-          fnScrollToIndex(scrollToIndex.value, {align})
+          fnScrollToIndex(scrollToIndex.value, {align: scrollToIndex?.align})
         }, 100)
       }
     }, [
@@ -78,6 +77,7 @@ const VirtualList = forwardRef(
       scrollToIndex?.align,
       scrollToIndex?.offset,
       fnScrollToIndex,
+      items.length,
     ])
 
     // rendered indexes

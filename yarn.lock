@@ -2459,11 +2459,6 @@
   resolved "https://registry.yarnpkg.com/@radix-ui/rect/-/rect-1.1.3.tgz#5a58fbae3deefb7f8cfe6ea314287d699eb694a9"
   integrity sha512-JtyZR+mqgBibTo8xea3B6ZRmzZiM/YeVBtUkas6zMuXjAlfIFIW2FgqeM9eLyvEaYX66vr6DJMK+4U6LV0KhNw==
 
-"@reach/observe-rect@^1.1.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@reach/observe-rect/-/observe-rect-1.2.0.tgz#d7a6013b8aafcc64c778a0ccb83355a11204d3b2"
-  integrity sha512-Ba7HmkFgfQxZqqaeIWWkNK0rEhpxVQHIoVyW1YDSkGsGIXzcaW4deC8B0pZrNSSyLTdIk7y+5olKt5+g0GmFIQ==
-
 "@rolldown/binding-android-arm-eabi@1.2.19":
   version "1.2.19"
   resolved "https://registry.yarnpkg.com/@rolldown/binding-android-arm-eabi/-/binding-android-arm-eabi-1.2.19.tgz#9525a98bc24c66c98a2b8131aa0a3dc577f9c42c"
@@ -2700,6 +2695,18 @@
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/@socket.io/component-emitter/-/component-emitter-3.1.2.tgz#821f8442f4175d8f0467b9daf26e3a18e2d02af2"
   integrity sha512-9BCxFwvbGg/RsZK9tjXd8s4UcwR0MWeFQ1XEKIQVVvAGJyINdrqKMcTRyLoK8Rse1GjzLV9cwjWV1olXRWEXVA==
+
+"@tanstack/react-virtual@^3.14.28":
+  version "3.14.28"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-virtual/-/react-virtual-3.14.28.tgz#95fdfd4e6e3b79ef63138670e0a428cd2a246c02"
+  integrity sha512-zoM4eddIVUsOsunOe26ur+h6YJQbvdzU10a2tKzIovThu5P4SvEyQ+cRx0mbeKfgnR0Mz7KR/NwrZ3GzVnUF/g==
+  dependencies:
+    "@tanstack/virtual-core" "3.19.13"
+
+"@tanstack/virtual-core@3.19.13":
+  version "3.19.13"
+  resolved "https://registry.yarnpkg.com/@tanstack/virtual-core/-/virtual-core-3.19.13.tgz#1c83c19678549bea0b01fba48e385da049bd21e7"
+  integrity sha512-CyCvMm7m5JuvPW6eMPZkZBZk6diySrlUQNNRpQPiEnh2vakyghx82Hw3wW2THFUsl6xJ6uM4lSUaiA2T0oYW8w==
 
 "@testing-library/dom@^10.1.0":
   version "10.4.2"
@@ -7513,13 +7520,6 @@ react-transition-group@^4.2.2:
     dom-helpers "^5.0.1"
     loose-envify "^1.4.0"
     prop-types "^15.6.2"
-
-react-virtual@^2.10.4:
-  version "2.10.4"
-  resolved "https://registry.yarnpkg.com/react-virtual/-/react-virtual-2.10.4.tgz#08712f0acd79d7d6f7c4726f05651a13b24d8704"
-  integrity sha512-Ir6+oPQZTVHfa6+JL9M7cvMILstFZH/H3jqeYeKI4MSUX+rIruVwFC6nGVXw9wqAw8L0Kg2KvfXxI85OvYQdpQ==
-  dependencies:
-    "@reach/observe-rect" "^1.1.0"
 
 react@^18.0.0:
   version "18.3.1"
