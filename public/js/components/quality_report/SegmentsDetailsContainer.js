@@ -10,13 +10,20 @@ function SegmentsDetails(props) {
   const [filter, setFilter] = useState(null)
   const scrollDebounceFnRef = useRef(null)
 
+  // The revision filter decides which revision's issues each segment opens on;
+  // without it the page-level revision toggle does. The toggle never filters
+  // the segments themselves, so the full list stays reachable.
+  const revisionToOpen = filter?.issues_in_r
+    ? String(filter.issues_in_r)
+    : props.revisionToShow
+
   const getFiles = useCallback(() => {
     let files = []
     if (props.files) {
       props.files.forEach((fileObj) => {
         let file = (
           <FileDetails
-            revisionToShow={props.revisionToShow}
+            revisionToShow={revisionToOpen}
             key={fileObj.get('id')}
             file={fileObj}
             segments={props.segmentsFiles.get(fileObj.get('id').toString())}
@@ -30,7 +37,7 @@ function SegmentsDetails(props) {
     return files
   }, [
     props.files,
-    props.revisionToShow,
+    revisionToOpen,
     props.segmentsFiles,
     props.urls,
     props.secondPassReviewEnabled,

@@ -162,6 +162,16 @@ class SegmentDao extends AbstractDao
     }
 
     /**
+     * A quality report revision filter value as 1 or 2; anything else means "no revision".
+     */
+    private static function revisionFilterValue(mixed $value): ?int
+    {
+        $revision = filter_var($value, FILTER_VALIDATE_INT);
+
+        return $revision === 1 || $revision === 2 ? $revision : null;
+    }
+
+    /**
      * @param JobStruct $chunk
      * @param int $step
      * @param int $ref_segment
@@ -231,19 +241,27 @@ class SegmentDao extends AbstractDao
             $union_ice = "";
         }
 
-        // this filter allows to get only the segments with issues in R1 or R2
-        if (isset($options['filter']['issues_in_r'])) {
-            if($options['filter']['issues_in_r'] == 1 || $options['filter']['issues_in_r'] == 2){
-                $options_join_query .= " INNER JOIN qa_entries en ON en.id_segment = st.id_segment AND en.source_page = :source_page AND en.id_job = st.id_job AND en.deleted_at IS NULL ";
-                $options_conditions_values['source_page'] = $options['filter']['issues_in_r']+1;
-            }
+        $hasIssueFilter =
+            (isset($options['filter']['issue_category']) && $options['filter']['issue_category'] != '') ||
+            (isset($options['filter']['severity']) && $options['filter']['severity'] != '');
+
+        // issues_in_r keeps only the segments with issues in R1 or R2.
+        $issuesInRevision = self::revisionFilterValue($options['filter']['issues_in_r'] ?? null);
+
+        // Revision, category and severity must all hold on the same issue: a segment with a minor in R1 and a
+        // polish in R2 is not a "minor in R2". That needs one join, not one per condition.
+        if ($issuesInRevision !== null && !$hasIssueFilter) {
+            $options_join_query .= " INNER JOIN qa_entries en ON en.id_segment = st.id_segment AND en.source_page = :source_page AND en.id_job = st.id_job AND en.deleted_at IS NULL ";
+            $options_conditions_values['source_page'] = $issuesInRevision + 1;
         }
 
-        if (
-            (isset($options['filter']['issue_category']) && $options['filter']['issue_category'] != '') ||
-            (isset($options['filter']['severity']) && $options['filter']['severity'] != '')
-        ) {
+        if ($hasIssueFilter) {
             $options_join_query .= " LEFT JOIN qa_entries e ON e.id_segment = st.id_segment AND e.id_job = st.id_job AND e.deleted_at IS NULL ";
+
+            if ($issuesInRevision !== null) {
+                $options_conditions_query .= " AND e.source_page = :source_page ";
+                $options_conditions_values['source_page'] = $issuesInRevision + 1;
+            }
 
             if (
                 isset($options['filter']['issue_category']) &&
