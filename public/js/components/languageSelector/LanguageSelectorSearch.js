@@ -91,12 +91,4 @@ const LanguageSelectorSearch = ({
   )
 }
 
-LanguageSelectorSearch.defaultProps = {
-  selectedLanguages: false,
-  languagesList: true,
-  querySearch: true,
-  onDeleteLanguage: true,
-  onQueryChange: true,
-}
-
 export default LanguageSelectorSearch

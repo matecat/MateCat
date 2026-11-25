@@ -324,11 +324,4 @@ const LanguageSelector = (props) => {
   )
 }
 
-LanguageSelector.defaultProps = {
-  selectedLanguagesFromDropdown: false,
-  fromLanguage: true,
-  onClose: true,
-  onConfirm: true,
-}
-
 export default LanguageSelector
