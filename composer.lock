@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "726ca19b8b3a22b613ef2b675569e375",
+    "content-hash": "fa91a33712509e4c3b951bc34f548a86",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -2063,16 +2063,16 @@
         },
         {
             "name": "matecat/xliff-parser",
-            "version": "v3.0.8",
+            "version": "v3.0.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xliff-parser.git",
-                "reference": "08d5fd1eb06eb53509658c895d55eaa95ee0eef0"
+                "reference": "aaabc7338613b5f7a07405ed020ab3f69f734c5a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/08d5fd1eb06eb53509658c895d55eaa95ee0eef0",
-                "reference": "08d5fd1eb06eb53509658c895d55eaa95ee0eef0",
+                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/aaabc7338613b5f7a07405ed020ab3f69f734c5a",
+                "reference": "aaabc7338613b5f7a07405ed020ab3f69f734c5a",
                 "shasum": ""
             },
             "require": {
@@ -2123,9 +2123,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/xliff-parser/issues",
-                "source": "https://github.com/matecat/xliff-parser/tree/v3.0.8"
+                "source": "https://github.com/matecat/xliff-parser/tree/v3.0.9"
             },
-            "time": "2026-10-23T10:36:06+00:00"
+            "time": "2026-11-25T08:19:35+00:00"
         },
         {
             "name": "matecat/xml-dom-parser",
