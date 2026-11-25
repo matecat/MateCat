@@ -116,6 +116,7 @@ class QualityReportSegmentModelTest extends AbstractTest
             'id' => 1,
             'segment_id' => 10,
             'translation_version' => 1,
+            'source_page' => SourcePages::SOURCE_PAGE_REVISION,
             'deleted_at' => null,
         ], $overrides));
     }
@@ -171,23 +172,79 @@ class QualityReportSegmentModelTest extends AbstractTest
     }
 
     /**
-     * The version-0 row produced by TranslationVersionDao::historyEvents() carries creation_date
-     * and a null create_date, so the coalesce must prefer creation_date.
+     * An event is dated by its own create_date. A versions row is written when its text is
+     * replaced, so its creation_date is the time of the next save; only the version-0 row, which
+     * has no event and so no create_date, falls back to it.
      */
     #[Test]
-    public function PopulateHistoryPrefersCreationDateOverCreateDate(): void
+    public function PopulateHistoryDatesAnEventByItsCreateDate(): void
     {
         $model = new TestableQualityReportSegmentModel($this->createChunk(), obtainTestDatabase(), null);
         $segment = $this->createSegment(['sid' => 10]);
 
         $events = [
-            $this->createHistoryElement(['creation_date' => '2026-05-05 00:00:00']),
-            $this->createHistoryElement(['creation_date' => null, 'create_date' => '2026-06-06 00:00:00']),
+            $this->createHistoryElement([
+                'version_number' => 0,
+                'status' => null,
+                'source_page' => null,
+                'create_date' => null,
+                'creation_date' => '2026-05-05 00:00:00',
+            ]),
+            $this->createHistoryElement(['create_date' => '2026-06-06 00:00:00', 'creation_date' => '2026-07-07 00:00:00']),
         ];
 
         $model->invokeProtected('_populateHistory', [$segment, $this->createStub(MateCatFilter::class), $events, [], false]);
 
         $this->assertSame(['2026-05-05 00:00:00', '2026-06-06 00:00:00'], array_column($segment->history, 'date'));
+    }
+
+    /**
+     * A second approve without a change keeps the version number, so two events share a
+     * (version, step) pair. The version's issues are attached once, to the last of them, and an
+     * issue raised in another step on the same version is not attached at all.
+     */
+    #[Test]
+    public function PopulateHistoryAttachesAVersionIssuesToTheLastEventOfItsStepOnly(): void
+    {
+        $model = new TestableQualityReportSegmentModel($this->createChunk(), obtainTestDatabase(), null);
+        $segment = $this->createSegment(['sid' => 10]);
+
+        $events = [
+            $this->createHistoryElement(['version_number' => 4, 'source_page' => SourcePages::SOURCE_PAGE_REVISION_2, 'create_date' => '2026-10-20 12:14:12']),
+            $this->createHistoryElement(['version_number' => 4, 'source_page' => SourcePages::SOURCE_PAGE_REVISION_2, 'create_date' => '2026-10-20 12:14:23']),
+        ];
+        $issues = [
+            $this->createIssue(['id' => 1, 'translation_version' => 4, 'source_page' => SourcePages::SOURCE_PAGE_REVISION_2]),
+            $this->createIssue(['id' => 2, 'translation_version' => 4, 'source_page' => SourcePages::SOURCE_PAGE_REVISION]),
+        ];
+
+        $model->invokeProtected('_populateHistory', [$segment, $this->createStub(MateCatFilter::class), $events, $issues, false]);
+
+        $this->assertSame([], $segment->history[0]['issues']);
+        $this->assertCount(1, $segment->history[1]['issues']);
+        $this->assertSame(1, $segment->history[1]['issues'][0]->id);
+    }
+
+    /**
+     * array_filter() keeps keys, so an issue that was not the first in the list came out as a
+     * JSON object ({"1": {...}}) instead of a list.
+     */
+    #[Test]
+    public function PopulateHistoryReturnsTheIssuesAsAList(): void
+    {
+        $model = new TestableQualityReportSegmentModel($this->createChunk(), obtainTestDatabase(), null);
+        $segment = $this->createSegment(['sid' => 10]);
+
+        $events = [$this->createHistoryElement(['version_number' => 2])];
+        $issues = [
+            $this->createIssue(['id' => 1, 'translation_version' => 1]),
+            $this->createIssue(['id' => 2, 'translation_version' => 2]),
+        ];
+
+        $model->invokeProtected('_populateHistory', [$segment, $this->createStub(MateCatFilter::class), $events, $issues, false]);
+
+        $this->assertTrue(array_is_list($segment->history[0]['issues']));
+        $this->assertSame('[{', substr((string)json_encode($segment->history[0]['issues']), 0, 2));
     }
 
     /**
@@ -219,6 +276,7 @@ class QualityReportSegmentModelTest extends AbstractTest
             $this->createIssue(['id' => 2, 'deleted_at' => '2026-01-01 00:00:00']), // soft-deleted
             $this->createIssue(['id' => 3, 'translation_version' => 9]),          // other version
             $this->createIssue(['id' => 4, 'segment_id' => 777]),                 // other segment
+            $this->createIssue(['id' => 5, 'source_page' => SourcePages::SOURCE_PAGE_REVISION_2]), // other step
         ];
 
         $model->invokeProtected('_populateHistory', [$segment, $this->createStub(MateCatFilter::class), $events, $issues, false]);

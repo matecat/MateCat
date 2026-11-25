@@ -72,6 +72,17 @@ describe('Register', () => {
     expect(screen.getByLabelText('Confirm password')).toBeInTheDocument()
   })
 
+  test('clicking the terms checkbox visually checks it', () => {
+    renderWithContext()
+
+    const checkbox = screen.getByRole('checkbox')
+    expect(checkbox).not.toBeChecked()
+
+    fireEvent.click(checkbox)
+
+    expect(checkbox).toBeChecked()
+  })
+
   test('shows validation errors on empty submit, including unaccepted terms', async () => {
     renderWithContext()
     fireEvent.click(screen.getByRole('button', {name: 'Create account'}))

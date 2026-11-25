@@ -1,4 +1,4 @@
-import React, {useRef} from 'react'
+import React, {useState} from 'react'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentActions from '../../actions/SegmentActions'
 import ModalsActions from '../../actions/ModalsActions'
@@ -6,11 +6,12 @@ import SearchUtils from '../header/cattol/search/searchUtils'
 import CatToolActions from '../../actions/CatToolActions'
 import AlertModal from './AlertModal'
 import {Button, BUTTON_TYPE, BUTTON_MODE} from '../common/Button/Button'
+import {Checkbox, CHECKBOX_SIZE, CHECKBOX_STATE} from '../common/Checkbox'
 
 export const ReplaceAllModal = ({search}) => {
-  const checkbox = useRef()
+  const [includeLockedSegments, setIncludeLockedSegments] = useState(false)
   const successCallback = () => {
-    SearchUtils.execReplaceAll(search, checkbox.current.checked)
+    SearchUtils.execReplaceAll(search, includeLockedSegments)
       .then((response) => {
         // The unlock lives in localStorage; the reload below rebuilds
         // segment.unlocked from it, so it has to be written first.
@@ -59,15 +60,17 @@ export const ReplaceAllModal = ({search}) => {
             revert to <b>{config.isReview ? 'translated' : 'draft'}</b> status.
           </div>
           <div className="modal-grid__body">
-            <input
+            <Checkbox
               id="checkbox_unlock"
-              type="checkbox"
-              className=""
-              ref={checkbox}
+              label="Include locked segments"
+              value={
+                includeLockedSegments
+                  ? CHECKBOX_STATE.CHECKED
+                  : CHECKBOX_STATE.UNCHECKED
+              }
+              size={CHECKBOX_SIZE.SMALL}
+              onChange={(isChecked) => setIncludeLockedSegments(isChecked)}
             />
-            <label htmlFor="checkbox_unlock">
-              {` Include locked segments`}
-            </label>
           </div>
           <div className="modal-buttons">
             <Button
