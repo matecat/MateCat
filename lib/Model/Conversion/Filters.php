@@ -64,6 +64,9 @@ class Filters
 
             $url = rtrim(AppConfig::$FILTERS_ADDRESS, '/') . $endpoint;
             $logger->debug("Calling: " . $url);
+            if (isset($data['extractionParams']) && is_string($data['extractionParams'])) {
+                $logger->debug("Extraction params: " . $data['extractionParams']);
+            }
             $multiCurl->createResource($url, $options, $idStr);
             $multiCurl->setRequestHeader($idStr);
         }
@@ -195,7 +198,7 @@ class Filters
         ];
 
         // convert the extractionParams to an array, for further manipulations
-        $extractionParams = $extractionParams?->jsonSerialize() ?? [];
+        $extractionParams = self::withoutDefaultInnerContentType($extractionParams?->jsonSerialize() ?? []);
 
         // The legacy_icu option overrides any other extractionParams
         if ($legacy_icu === true) {
@@ -214,6 +217,25 @@ class Filters
         $filtersResponse = $this->sendToFilters([$data], self::SOURCE_TO_XLIFF_ENDPOINT);
 
         return $filtersResponse[0];
+    }
+
+    /**
+     * Plain text is how Filters reads extracted text when no inner_content_type is given, and it
+     * rejects both "text/plain" and null as a value. Templates still store "text/plain", which is
+     * what the settings panel shows as "Plain text", so the key is sent only for any other type.
+     *
+     * @param array<string, mixed> $extractionParams
+     *
+     * @return array<string, mixed>
+     */
+    private static function withoutDefaultInnerContentType(array $extractionParams): array
+    {
+        if (array_key_exists('inner_content_type', $extractionParams)
+            && in_array($extractionParams['inner_content_type'], [null, 'text/plain'], true)) {
+            unset($extractionParams['inner_content_type']);
+        }
+
+        return $extractionParams;
     }
 
     /**

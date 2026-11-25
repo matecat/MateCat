@@ -37,7 +37,8 @@
     "extract_diagrams": false,
     "extract_drawings": false,
     "extract_sheet_names": false,
-    "exclude_columns": []
+    "exclude_columns": [],
+    "inner_content_type": "text/plain"
   },
   "ms_powerpoint": {
     "extract_doc_properties": false,

@@ -7,7 +7,10 @@ use Exception;
 use Matecat\TestHelpers\AbstractTest;
 use Model\Conversion\Filters;
 use Model\Filters\DTO\IDto;
+use Model\Filters\DTO\Json;
 use Model\Filters\DTO\Markdown;
+use Model\Filters\DTO\MSExcel;
+use Model\Filters\DTO\Yaml;
 use Model\Jobs\JobStruct;
 use PDO;
 use PDOStatement;
@@ -375,6 +378,96 @@ class FiltersTest extends AbstractTest
 
             $data = $this->filters->sendToFiltersCalls[0]['dataGroups'][0];
             self::assertSame($expected, json_decode($data['extractionParams'], true));
+        } finally {
+            @unlink($tmpFile);
+        }
+    }
+
+    /**
+     * Plain text is the Filters default, and Filters rejects both "text/plain" and null as a value:
+     * the key goes out only for a real content type. Templates still store "text/plain", which the
+     * settings panel shows as "Plain text".
+     *
+     * @return array<string, array{class-string<IDto>, string, string|null, bool}>
+     */
+    public static function innerContentTypeProvider(): array
+    {
+        return [
+            'excel html is sent'           => [MSExcel::class, '.xlsx', 'text/html', true],
+            'excel plain text is omitted'  => [MSExcel::class, '.xlsx', 'text/plain', false],
+            'excel unset is omitted'       => [MSExcel::class, '.xlsx', null, false],
+            'json html is sent'            => [Json::class, '.json', 'text/html', true],
+            'json plain text is omitted'   => [Json::class, '.json', 'text/plain', false],
+            'json unset is omitted'        => [Json::class, '.json', null, false],
+            'yaml markdown is sent'        => [Yaml::class, '.yaml', 'text/markdown', true],
+            'yaml plain text is omitted'   => [Yaml::class, '.yaml', 'text/plain', false],
+            'yaml unset is omitted'        => [Yaml::class, '.yaml', null, false],
+        ];
+    }
+
+    /**
+     * @param class-string<IDto> $dtoClass
+     */
+    #[Test]
+    #[DataProvider('innerContentTypeProvider')]
+    public function sourceToXliffSendsInnerContentTypeOnlyWhenItIsNotPlainText(
+        string $dtoClass,
+        string $extension,
+        ?string $innerContentType,
+        bool $sent
+    ): void {
+        $tmpFile = tempnam(sys_get_temp_dir(), 'test-filter-') . $extension;
+        file_put_contents($tmpFile, 'content');
+
+        try {
+            $dto = new $dtoClass();
+            $dto->fromArray(['inner_content_type' => $innerContentType]);
+
+            $this->filters->stubbedResponse = [['successful' => true]];
+
+            $this->filters->sourceToXliff($tmpFile, 'en-US', 'it-IT', null, $dto);
+
+            $params = json_decode($this->filters->sendToFiltersCalls[0]['dataGroups'][0]['extractionParams'], true);
+            if ($sent) {
+                self::assertSame($innerContentType, $params['inner_content_type']);
+            } else {
+                self::assertArrayNotHasKey('inner_content_type', $params);
+            }
+            self::assertTrue($params['segment_icu']);
+        } finally {
+            @unlink($tmpFile);
+        }
+    }
+
+    /**
+     * Dropping the plain text default leaves every other Excel parameter on the wire.
+     */
+    #[Test]
+    public function sourceToXliffKeepsTheOtherExcelParamsWhenPlainTextIsDropped(): void
+    {
+        $tmpFile = tempnam(sys_get_temp_dir(), 'test-filter-') . '.xlsx';
+        file_put_contents($tmpFile, 'content');
+
+        try {
+            $dto = new MSExcel();
+            $dto->fromArray(['extract_hidden_cells' => true, 'exclude_columns' => ['1C'], 'inner_content_type' => 'text/plain']);
+
+            $this->filters->stubbedResponse = [['successful' => true]];
+
+            $this->filters->sourceToXliff($tmpFile, 'en-US', 'it-IT', null, $dto);
+
+            self::assertSame(
+                [
+                    'extract_doc_properties' => false,
+                    'extract_hidden_cells'   => true,
+                    'extract_diagrams'       => false,
+                    'extract_drawings'       => false,
+                    'extract_sheet_names'    => false,
+                    'exclude_columns'        => ['1C'],
+                    'segment_icu'            => true,
+                ],
+                json_decode($this->filters->sendToFiltersCalls[0]['dataGroups'][0]['extractionParams'], true)
+            );
         } finally {
             @unlink($tmpFile);
         }

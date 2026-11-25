@@ -238,6 +238,15 @@
         "exclude_columns": {
           "type": "array",
           "nullable": true
+        },
+        "inner_content_type": {
+          "type": ["null", "string"],
+          "enum": [
+            null,
+            "text/plain",
+            "text/html"
+          ],
+          "nullable": true
         }
       },
       "additionalProperties": false

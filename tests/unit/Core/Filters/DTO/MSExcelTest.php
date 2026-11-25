@@ -2,6 +2,7 @@
 
 namespace Matecat\Core\Filters\DTO;
 
+use DomainException;
 use Matecat\TestHelpers\AbstractTest;
 use Model\Filters\DTO\MSExcel;
 use PHPUnit\Framework\Attributes\Test;
@@ -20,6 +21,8 @@ class MSExcelTest extends AbstractTest
         $this->assertFalse($result['extract_drawings']);
         $this->assertFalse($result['extract_sheet_names']);
         $this->assertSame([], $result['exclude_columns']);
+        $this->assertArrayHasKey('inner_content_type', $result);
+        $this->assertNull($result['inner_content_type']);
     }
 
     #[Test]
@@ -88,5 +91,101 @@ class MSExcelTest extends AbstractTest
         $dto->fromArray(['exclude_columns' => [' AA ']]);
 
         $this->assertSame(['AA'], $dto->jsonSerialize()['exclude_columns']);
+    }
+
+    #[Test]
+    public function setInnerContentTypeAcceptsHtml(): void
+    {
+        $dto = new MSExcel();
+        $dto->setInnerContentType('text/html');
+        $this->assertSame('text/html', $dto->jsonSerialize()['inner_content_type']);
+    }
+
+    #[Test]
+    public function setInnerContentTypeAcceptsPlainText(): void
+    {
+        $dto = new MSExcel();
+        $dto->setInnerContentType('text/plain');
+        $this->assertSame('text/plain', $dto->jsonSerialize()['inner_content_type']);
+    }
+
+    #[Test]
+    public function setInnerContentTypeAcceptsNull(): void
+    {
+        $dto = new MSExcel();
+        $dto->setInnerContentType('text/html');
+        $dto->setInnerContentType(null);
+        $this->assertNull($dto->jsonSerialize()['inner_content_type']);
+    }
+
+    #[Test]
+    public function setInnerContentTypeThrowsOnInvalidMimeType(): void
+    {
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage("Excel inner content type not valid. Allowed values: ['text/plain', 'text/html']");
+        (new MSExcel())->setInnerContentType('application/pdf');
+    }
+
+    /**
+     * Only text/plain and text/html are allowed for Excel; the wider YAML allow-list must not leak in.
+     */
+    #[Test]
+    public function setInnerContentTypeRejectsYamlOnlyMimeTypes(): void
+    {
+        foreach (['text/xml', 'application/xml', 'text/csv', 'application/json', 'text/markdown', 'text/x-markdown'] as $type) {
+            try {
+                (new MSExcel())->setInnerContentType($type);
+                $this->fail("Expected DomainException for inner_content_type '$type'");
+            } catch (DomainException $e) {
+                $this->assertStringContainsString('text/html', $e->getMessage());
+            }
+        }
+    }
+
+    #[Test]
+    public function setInnerContentTypeIsCaseSensitive(): void
+    {
+        $this->expectException(DomainException::class);
+        (new MSExcel())->setInnerContentType('TEXT/HTML');
+    }
+
+    #[Test]
+    public function fromArrayHydratesInnerContentType(): void
+    {
+        $dto = new MSExcel();
+        $dto->fromArray(['inner_content_type' => 'text/html']);
+        $this->assertSame('text/html', $dto->jsonSerialize()['inner_content_type']);
+    }
+
+    #[Test]
+    public function fromArrayLeavesInnerContentTypeNullWhenMissingOrNull(): void
+    {
+        $dto = new MSExcel();
+        $dto->fromArray(['extract_sheet_names' => true]);
+        $this->assertNull($dto->jsonSerialize()['inner_content_type']);
+
+        $dto->fromArray(['inner_content_type' => null]);
+        $this->assertNull($dto->jsonSerialize()['inner_content_type']);
+    }
+
+    #[Test]
+    public function fromArrayThrowsOnInvalidInnerContentType(): void
+    {
+        $this->expectException(DomainException::class);
+        (new MSExcel())->fromArray(['inner_content_type' => 'invalid/type']);
+    }
+
+    #[Test]
+    public function jsonSerializeRoundTripsThroughFromArray(): void
+    {
+        $dto = new MSExcel();
+        $dto->setExtractHiddenCells(true);
+        $dto->setExcludeColumns(['1C']);
+        $dto->setInnerContentType('text/html');
+
+        $copy = new MSExcel();
+        $copy->fromArray($dto->jsonSerialize());
+
+        $this->assertSame($dto->jsonSerialize(), $copy->jsonSerialize());
     }
 }

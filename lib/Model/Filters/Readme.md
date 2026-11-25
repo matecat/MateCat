@@ -366,6 +366,20 @@ so an integer list stays an integer list.
   when it is `false`, so turning extraction back on restores them.
 - Templates saved before the `markdown` column existed return `"markdown": null`.
 
+### Translatable text content type
+
+`ms_excel.inner_content_type` and `json.inner_content_type` tell Filters how to read the translatable text:
+
+- `"text/plain"` reads it as plain text. The settings panel offers it as the default.
+- `"text/html"` reads it as HTML, so markup in a cell or value becomes tags instead of text.
+- `null` (or no key) means plain text too. Templates saved before the parameter existed return `null`.
+
+Any other value is rejected. `yaml.inner_content_type` accepts a wider list.
+
+Plain text is what Filters does when it receives no `inner_content_type`, and Filters rejects both
+`"text/plain"` and `null` as a value. So a template stores `"text/plain"` and returns it on read, but the
+conversion request carries `inner_content_type` only for any other type (`Filters::sourceToXliff()`).
+
 ### Schema
 
 This endpoint returns the JSON schema used to validate QAModels:
@@ -653,7 +667,8 @@ GET /api/v3/filters-config-template/default
     "extract_diagrams": false,
     "extract_drawings": false,
     "extract_sheet_names": false,
-    "exclude_columns": []
+    "exclude_columns": [],
+    "inner_content_type": null
   },
   "ms_powerpoint": {
     "extract_doc_properties": false,

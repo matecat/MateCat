@@ -4,6 +4,12 @@ import {FiltersParamsContext} from './FiltersParamsContext'
 import {Controller, useForm} from 'react-hook-form'
 import {isEqual} from 'lodash'
 import {WordsBadge} from '../../../../common/WordsBadge/WordsBadge'
+import {Select} from '../../../../common/Select'
+
+const INNER_CONTENT_TYPE_OPTIONS = [
+  {id: 'text/plain', name: 'Plain text'},
+  {id: 'text/html', name: 'HTML'},
+]
 
 export const MsExcel = () => {
   const {
@@ -144,6 +150,32 @@ export const MsExcel = () => {
               value={value}
               onChange={onChange}
               placeholder={''}
+            />
+          )}
+        />
+      </div>
+
+      <div className="filters-params-option">
+        <div>
+          <h3>Translatable text content type</h3>
+          <p>
+            Select the content type of the translatable text to optimize
+            segmentation and tags.
+          </p>
+        </div>
+        <Controller
+          control={control}
+          name="inner_content_type"
+          render={({field: {onChange, value, name}}) => (
+            <Select
+              name={name}
+              placeholder="Select inner content type"
+              isPortalDropdown={true}
+              options={INNER_CONTENT_TYPE_OPTIONS}
+              activeOption={INNER_CONTENT_TYPE_OPTIONS?.find(
+                ({id}) => id === value,
+              )}
+              onSelect={(option) => onChange(option.id)}
             />
           )}
         />

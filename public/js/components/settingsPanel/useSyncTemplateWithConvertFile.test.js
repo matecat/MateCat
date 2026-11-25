@@ -125,6 +125,46 @@ describe('useSyncTemplateWithConvertFile', () => {
       )
     })
 
+    test('normalizes a null ms_excel inner_content_type to Plain text', async () => {
+      const defaultTemplateWithContentType = {
+        id: 0,
+        name: 'default',
+        ms_excel: {inner_content_type: 'text/plain', extract_hidden_cells: false},
+      }
+      const items = [
+        {
+          id: 1,
+          name: 'saved before the parameter',
+          ms_excel: {inner_content_type: null, extract_hidden_cells: true},
+        },
+        {id: 2, name: 'html', ms_excel: {inner_content_type: 'text/html'}},
+      ]
+      const props = {
+        ...baseProps(),
+        isCattool: false,
+        defaultTemplate: defaultTemplateWithContentType,
+        getTemplates: jest.fn(() => Promise.resolve({items})),
+      }
+
+      renderHook(() => useSyncTemplateWithConvertFile(props))
+      await waitFor(() =>
+        expect(
+          props.setTemplates.mock.calls.some(([arg]) => Array.isArray(arg)),
+        ).toBe(true),
+      )
+
+      const normalized = props.setTemplates.mock.calls.find(([arg]) =>
+        Array.isArray(arg),
+      )[0]
+
+      const templateOne = normalized.find(({id}) => id === 1)
+      expect(templateOne.ms_excel.inner_content_type).toBe('text/plain')
+      expect(templateOne.ms_excel.extract_hidden_cells).toBe(true)
+      expect(
+        normalized.find(({id}) => id === 2).ms_excel.inner_content_type,
+      ).toBe('text/html')
+    })
+
     test('does not crash when a template has a null top-level prop', async () => {
       const items = [{id: 1, name: 'one', tm: null}]
       const props = {
