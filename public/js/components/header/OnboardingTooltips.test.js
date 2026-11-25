@@ -1,76 +1,97 @@
-import {render, screen} from '@testing-library/react'
+import {render, screen, waitFor} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import React from 'react'
 
 import {OnboardingTooltips, ONBOARDING_PAGE} from './OnboardingTooltips'
 
-jest.mock('react-joyride', () => {
-  const reactLib = require('react')
+// The tour runs on the real react-joyride, so its targets must be on the page.
+const addTarget = (attributes) => {
+  const target = document.createElement('div')
+  Object.entries(attributes).forEach(([name, value]) =>
+    target.setAttribute(name, value),
+  )
+  document.body.appendChild(target)
+}
 
-  return {
-    __esModule: true,
-    default: ({callback, run}) =>
-      reactLib.createElement(
-        'div',
-        {'data-testid': 'joyride-mock', 'data-run': run ? 'true' : 'false'},
-        reactLib.createElement(
-          'button',
-          {
-            'data-testid': 'joyride-finish',
-            onClick: () =>
-              callback({status: 'finished', type: 'tour:end', index: 0}),
-          },
-          'finish',
-        ),
-      ),
-    STATUS: {FINISHED: 'finished', SKIPPED: 'skipped'},
-  }
-})
+// The primary button and the close icon are both labelled "Close": either
+// ends the step.
+const closeStep = async (user) =>
+  user.click(screen.getAllByRole('button', {name: 'Close'})[0])
 
 beforeEach(() => {
   localStorage.clear()
+  addTarget({class: 'popover-component-container'})
+  addTarget({id: 'action-three-dots'})
+  addTarget({id: 'files-instructions'})
 })
 
-test('Renders the tour when it has not been dismissed yet', async () => {
+afterEach(() => {
+  document.body.innerHTML = ''
+})
+
+test('shows the home tour and remembers it once closed', async () => {
+  const user = userEvent.setup()
   render(<OnboardingTooltips show page={ONBOARDING_PAGE.HOME} />)
 
-  expect(await screen.findByTestId('joyride-mock')).toBeInTheDocument()
+  expect(await screen.findByText('Manage your projects')).toBeInTheDocument()
+
+  await closeStep(user)
+
+  await waitFor(() =>
+    expect(localStorage.getItem('onBoarding-tooltip-home')).toBe('1'),
+  )
+  expect(screen.queryByText('Manage your projects')).not.toBeInTheDocument()
 })
 
-test('Does not render the tour when it was already dismissed', () => {
+test('does not show a tour that was already closed', async () => {
   localStorage.setItem('onBoarding-tooltip-home', '1')
 
   render(<OnboardingTooltips show page={ONBOARDING_PAGE.HOME} />)
 
-  expect(screen.queryByTestId('joyride-mock')).not.toBeInTheDocument()
+  // give the lazily loaded library the time it would need to show up
+  await new Promise((resolve) => setTimeout(resolve, 50))
+  expect(screen.queryByText('Manage your projects')).not.toBeInTheDocument()
 })
 
-test('Does not run the tour until show becomes true', async () => {
+test('does not start the tour until show becomes true', async () => {
   const {rerender} = render(
     <OnboardingTooltips show={false} page={ONBOARDING_PAGE.HOME} />,
   )
-
-  expect(await screen.findByTestId('joyride-mock')).toHaveAttribute(
-    'data-run',
-    'false',
-  )
+  await new Promise((resolve) => setTimeout(resolve, 50))
+  expect(screen.queryByText('Manage your projects')).not.toBeInTheDocument()
 
   rerender(<OnboardingTooltips show page={ONBOARDING_PAGE.HOME} />)
 
-  expect(screen.getByTestId('joyride-mock')).toHaveAttribute('data-run', 'true')
+  expect(await screen.findByText('Manage your projects')).toBeInTheDocument()
 })
 
-test('Finishing the tour stores the dismissal and hides the tour', async () => {
-  render(<OnboardingTooltips show page={ONBOARDING_PAGE.HOME} />)
-
-  await userEvent.click(await screen.findByTestId('joyride-finish'))
-
-  expect(localStorage.getItem('onBoarding-tooltip-home')).toBe('1')
-  expect(screen.queryByTestId('joyride-mock')).not.toBeInTheDocument()
-})
-
-test('Renders the cattool tour page', async () => {
+test('walks the cattool tour step by step and remembers it after the last one', async () => {
+  const user = userEvent.setup()
   render(<OnboardingTooltips show page={ONBOARDING_PAGE.CATTOOL} />)
 
-  expect(await screen.findByTestId('joyride-mock')).toBeInTheDocument()
+  expect(
+    await screen.findByText('Easier tool navigation and new shortcuts'),
+  ).toBeInTheDocument()
+
+  await closeStep(user)
+
+  expect(
+    await screen.findByText('Instructions and references'),
+  ).toBeInTheDocument()
+  expect(localStorage.getItem('onBoarding-tooltip-cattool')).toBeNull()
+
+  await closeStep(user)
+
+  await waitFor(() =>
+    expect(localStorage.getItem('onBoarding-tooltip-cattool')).toBe('1'),
+  )
+})
+
+test('renders the tooltip inside the element OnBoardingTooltip.scss targets', async () => {
+  render(<OnboardingTooltips show page={ONBOARDING_PAGE.HOME} />)
+
+  const title = await screen.findByText('Manage your projects')
+  // the stylesheet hides the app-wide aria-label tooltip inside this element
+  // eslint-disable-next-line testing-library/no-node-access
+  expect(title.closest('.react-joyride__floater')).not.toBeNull()
 })

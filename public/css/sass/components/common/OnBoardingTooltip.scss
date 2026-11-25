@@ -1,4 +1,6 @@
-.__floater__open {
+// The tooltip of the onboarding tour (react-joyride): its buttons and the tooltip
+// itself carry aria-label, which must not show the app-wide aria-label tooltip.
+.react-joyride__floater {
   [aria-label]::after,[aria-label]::before {
     display: none
   }
