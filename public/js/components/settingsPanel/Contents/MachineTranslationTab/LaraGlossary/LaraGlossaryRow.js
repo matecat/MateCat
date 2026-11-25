@@ -2,6 +2,11 @@ import React, {Fragment, useContext, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import LabelWithTooltip from '../../../../common/LabelWithTooltip'
 import {SettingsPanelContext} from '../../../SettingsPanelContext'
+import {
+  Checkbox,
+  CHECKBOX_SIZE,
+  CHECKBOX_STATE,
+} from '../../../../common/Checkbox'
 
 export const LaraGlossaryRow = ({row, setRows, isReadOnly}) => {
   const {portalTarget} = useContext(SettingsPanelContext)
@@ -12,8 +17,8 @@ export const LaraGlossaryRow = ({row, setRows, isReadOnly}) => {
     setIsActive(row.isActive)
   }, [row.isActive])
 
-  const onChangeIsActive = (e) => {
-    const isActive = e.currentTarget.checked
+  const onChangeIsActive = (isChecked) => {
+    const isActive = isChecked
     setIsActive(isActive)
     setRows((prevState) =>
       prevState.map((glossary) =>
@@ -34,12 +39,12 @@ export const LaraGlossaryRow = ({row, setRows, isReadOnly}) => {
   return (
     <Fragment>
       <div>
-        <input
-          checked={isActive}
+        <Checkbox
+          value={isActive ? CHECKBOX_STATE.CHECKED : CHECKBOX_STATE.UNCHECKED}
+          size={CHECKBOX_SIZE.SMALL}
           onChange={onChangeIsActive}
-          type="checkbox"
           disabled={isReadOnly}
-          data-testid={`laraglossary-active-${row.id}`}
+          testId={`laraglossary-active-${row.id}`}
         />
       </div>
       <div className="glossary-row-name">

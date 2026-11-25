@@ -2,9 +2,13 @@ import React from 'react'
 import {render, screen, waitFor} from '@testing-library/react'
 import {EditorMachineTranslationTab} from './EditorMachineTranslationTab'
 import {SettingsPanelContext} from '../settingsPanel/SettingsPanelContext'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import {updateJobMetadata} from '../../api/updateJobMetadata'
 import CatToolStore from '../../stores/CatToolStore'
 import CatToolConstants from '../../constants/CatToolConstants'
+import SegmentActions from '../../actions/SegmentActions'
+import SegmentStore from '../../stores/SegmentStore'
+import {METADATA_KEY} from '../../constants/Constants'
 
 jest.mock('../../api/updateJobMetadata', () => ({
   updateJobMetadata: jest.fn(() => Promise.resolve({})),
@@ -14,6 +18,14 @@ jest.mock('../../stores/CatToolStore', () => ({
   getJobMetadata: jest.fn(),
   setJobMetadata: jest.fn(),
   emitChange: jest.fn(),
+}))
+
+jest.mock('../../actions/SegmentActions', () => ({
+  getContributions: jest.fn(),
+}))
+
+jest.mock('../../stores/SegmentStore', () => ({
+  getCurrentSegmentId: jest.fn(() => 42),
 }))
 
 jest.mock('../settingsPanel/Contents/MachineTranslationTab', () => ({
@@ -27,24 +39,31 @@ const baseTemplate = {
   mt: {extra: {}},
 }
 
+const crossLanguageMatches = {primary: 'en', secondary: 'it'}
+const userInfo = {metadata: {[METADATA_KEY]: crossLanguageMatches}}
+
 let modifyingCurrentTemplate
 
 const renderComponent = (template = baseTemplate, props = {}) =>
   render(
-    <SettingsPanelContext.Provider
-      value={{currentProjectTemplate: template, modifyingCurrentTemplate}}
-    >
-      <EditorMachineTranslationTab {...props} />
-    </SettingsPanelContext.Provider>,
+    <ApplicationWrapperContext.Provider value={{userInfo}}>
+      <SettingsPanelContext.Provider
+        value={{currentProjectTemplate: template, modifyingCurrentTemplate}}
+      >
+        <EditorMachineTranslationTab {...props} />
+      </SettingsPanelContext.Provider>
+    </ApplicationWrapperContext.Provider>,
   )
 
 const reRenderComponent = (rerender, template, props = {}) =>
   rerender(
-    <SettingsPanelContext.Provider
-      value={{currentProjectTemplate: template, modifyingCurrentTemplate}}
-    >
-      <EditorMachineTranslationTab {...props} />
-    </SettingsPanelContext.Provider>,
+    <ApplicationWrapperContext.Provider value={{userInfo}}>
+      <SettingsPanelContext.Provider
+        value={{currentProjectTemplate: template, modifyingCurrentTemplate}}
+      >
+        <EditorMachineTranslationTab {...props} />
+      </SettingsPanelContext.Provider>
+    </ApplicationWrapperContext.Provider>,
   )
 
 beforeEach(() => {
@@ -323,6 +342,61 @@ describe('EditorMachineTranslationTab', () => {
 
       expect(CatToolStore.setJobMetadata).not.toHaveBeenCalled()
       expect(CatToolStore.emitChange).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('contribution matches refresh', () => {
+    test('does not call getContributions on first render', () => {
+      renderComponent()
+      expect(SegmentActions.getContributions).not.toHaveBeenCalled()
+    })
+
+    test('calls getContributions for the current segment when mtQualityValueInEditor changes', () => {
+      const {rerender} = renderComponent()
+      reRenderComponent(rerender, {...baseTemplate, mtQualityValueInEditor: 90})
+
+      expect(SegmentActions.getContributions).toHaveBeenCalledTimes(1)
+      expect(SegmentActions.getContributions).toHaveBeenCalledWith(
+        SegmentStore.getCurrentSegmentId(),
+        crossLanguageMatches,
+        true,
+      )
+    })
+
+    test('calls getContributions when a tracked mt.extra value changes', () => {
+      const initialTemplate = {
+        ...baseTemplate,
+        mt: {extra: {lara_style: 'faithful'}},
+      }
+      const {rerender} = renderComponent(initialTemplate)
+      reRenderComponent(rerender, {
+        ...initialTemplate,
+        mt: {extra: {lara_style: 'creative'}},
+      })
+
+      expect(SegmentActions.getContributions).toHaveBeenCalledTimes(1)
+      expect(SegmentActions.getContributions).toHaveBeenCalledWith(
+        SegmentStore.getCurrentSegmentId(),
+        crossLanguageMatches,
+        true,
+      )
+    })
+
+    test('does not call getContributions again on an unchanged re-render', () => {
+      const {rerender} = renderComponent()
+      const changedTemplate = {...baseTemplate, mtQualityValueInEditor: 90}
+      reRenderComponent(rerender, changedTemplate)
+      reRenderComponent(rerender, changedTemplate)
+
+      expect(SegmentActions.getContributions).toHaveBeenCalledTimes(1)
+    })
+
+    test('does not call getContributions when is_cattool is false', () => {
+      global.config.is_cattool = false
+      const {rerender} = renderComponent()
+      reRenderComponent(rerender, {...baseTemplate, mtQualityValueInEditor: 90})
+
+      expect(SegmentActions.getContributions).not.toHaveBeenCalled()
     })
   })
 })

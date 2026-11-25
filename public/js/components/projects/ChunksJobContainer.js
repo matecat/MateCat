@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import React, {useEffect, useMemo, useRef, useState} from 'react'
 import {JobContainer} from './JobContainer'
-import {Checkbox, CHECKBOX_STATE} from '../common/Checkbox'
+import {Checkbox, CHECKBOX_SIZE, CHECKBOX_STATE} from '../common/Checkbox'
 import IconDown from '../../../img/icons/IconDown'
 import JobMenu from './JobMenu'
 import useShowMore from '../../hooks/useShowMore'
@@ -247,6 +247,7 @@ export const ChunksJobContainer = ({
       <div className="chunks-job-container-line">
         <div className="chunks-job-container-line-sx">
           <Checkbox
+            size={CHECKBOX_SIZE.SMALL}
             onChange={() => props.onCheckedJob(job.get('id'))}
             value={
               props.isChecked

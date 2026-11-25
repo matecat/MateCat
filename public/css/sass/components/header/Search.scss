@@ -166,10 +166,6 @@
   align-items: center;
   gap: 4px;
   line-height: 21px;
-
-  input[type='checkbox'] {
-    margin: 0;
-  }
 }
 
 .search-form
@@ -199,10 +195,6 @@
 
   &.disable {
     opacity: 0.5;
-  }
-
-  input[type='checkbox'] {
-    margin: 0;
   }
 }
 
