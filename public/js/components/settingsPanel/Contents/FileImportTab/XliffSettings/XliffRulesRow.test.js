@@ -46,6 +46,15 @@ const setup = (props = {}) => {
 }
 
 describe('XliffRulesRow', () => {
+  test.each([
+    ['pre-translated', preTranslatedRow],
+    ['new', newRow],
+  ])('does not report a change on mount for a %s row', (_, row) => {
+    const {onChange} = setup({value: row, currentXliffData: [row]})
+
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
   test('renders the row index', () => {
     setup()
 

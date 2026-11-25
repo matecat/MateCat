@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react'
+import React, {useEffect, useRef} from 'react'
 import PropTypes from 'prop-types'
 import {
   Button,
@@ -9,6 +9,7 @@ import Trash from '../../../../../../img/icons/Trash'
 import {Select} from '../../../../common/Select'
 import {Controller, useForm} from 'react-hook-form'
 import {isEqual} from 'lodash'
+import {useWatchedFormValues} from '../../../../../hooks/useWatchedFormValues'
 import {
   fromStatusLockId,
   getStatusLockOptions,
@@ -32,19 +33,10 @@ export const XliffRulesRow = ({
 }) => {
   const {control, watch, setValue} = useForm()
 
-  const [formData, setFormData] = useState()
-
-  const temporaryFormData = watch()
-  const previousData = useRef()
+  const formData = useWatchedFormValues(watch)
 
   const valueRef = useRef()
   valueRef.current = value
-
-  useEffect(() => {
-    if (!isEqual(temporaryFormData, previousData.current))
-      setFormData(temporaryFormData)
-    previousData.current = temporaryFormData
-  }, [temporaryFormData])
 
   useEffect(() => {
     if (typeof formData === 'undefined') return
@@ -121,7 +113,7 @@ export const XliffRulesRow = ({
       (option) =>
         option.id ===
         (id !== 'new'
-          ? getMatchCategoryExtendedId(formData.match_category)
+          ? getMatchCategoryExtendedId(formData?.match_category)
           : id),
     )
 
@@ -201,7 +193,7 @@ export const XliffRulesRow = ({
                 setValue('lock', lock)
               }}
               isDisabled={
-                typeof value === 'undefined' || formData.analysis === 'new'
+                typeof value === 'undefined' || formData?.analysis === 'new'
               }
             />
           )}

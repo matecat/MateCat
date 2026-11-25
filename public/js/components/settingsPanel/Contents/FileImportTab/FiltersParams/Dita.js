@@ -1,7 +1,8 @@
-import React, {useContext, useEffect, useRef, useState} from 'react'
+import React, {useContext, useEffect, useRef} from 'react'
 import {FiltersParamsContext} from './FiltersParamsContext'
 import {Controller, useForm} from 'react-hook-form'
 import {isEqual} from 'lodash'
+import {useWatchedFormValues} from '../../../../../hooks/useWatchedFormValues'
 import {WordsBadge} from '../../../../common/WordsBadge/WordsBadge'
 
 export const Dita = () => {
@@ -13,20 +14,10 @@ export const Dita = () => {
 
   const {control, watch, setValue} = useForm()
 
-  const [formData, setFormData] = useState()
-
   const dita = useRef()
   dita.current = currentTemplate.dita
 
-  const temporaryFormData = watch()
-  const previousData = useRef()
-
-  useEffect(() => {
-    if (!isEqual(temporaryFormData, previousData.current))
-      setFormData(temporaryFormData)
-
-    previousData.current = temporaryFormData
-  }, [temporaryFormData])
+  const formData = useWatchedFormValues(watch)
 
   useEffect(() => {
     if (typeof formData === 'undefined') return

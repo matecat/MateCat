@@ -1,10 +1,11 @@
-import React, {useContext, useEffect, useRef, useState} from 'react'
+import React, {useContext, useEffect, useRef} from 'react'
 import Switch from '../../../../common/Switch'
 import {SegmentedControl} from '../../../../common/SegmentedControl'
 import {WordsBadge} from '../../../../common/WordsBadge/WordsBadge'
 import {FiltersParamsContext} from './FiltersParamsContext'
 import {Controller, useForm} from 'react-hook-form'
 import {isEqual} from 'lodash'
+import {useWatchedFormValues} from '../../../../../hooks/useWatchedFormValues'
 
 const SEGMENTED_CONTROL_OPTIONS = [
   {id: 'translate_elements', name: 'Translatable'},
@@ -20,20 +21,10 @@ export const Xml = () => {
 
   const {control, watch, setValue} = useForm()
 
-  const [formData, setFormData] = useState()
-
   const xml = useRef()
   xml.current = currentTemplate.xml
 
-  const temporaryFormData = watch()
-  const previousData = useRef()
-
-  useEffect(() => {
-    if (!isEqual(temporaryFormData, previousData.current))
-      setFormData(temporaryFormData)
-
-    previousData.current = temporaryFormData
-  }, [temporaryFormData])
+  const formData = useWatchedFormValues(watch)
 
   useEffect(() => {
     if (typeof formData === 'undefined') return

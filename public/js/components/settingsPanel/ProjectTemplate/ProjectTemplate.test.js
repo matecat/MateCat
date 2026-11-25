@@ -267,6 +267,9 @@ test('Create, update and delete template', async () => {
   expect(saveAsChanges).toBeInTheDocument()
 
   await user.click(saveAsChanges)
+  await waitFor(() =>
+    expect(result.current.currentProjectTemplate.isTemporary).toBeFalsy(),
+  )
 
   projectTemplates = result.current.projectTemplates
   currentProjectTemplate = result.current.currentProjectTemplate
