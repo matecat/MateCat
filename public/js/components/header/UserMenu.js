@@ -36,6 +36,7 @@ export const UserMenu = () => {
           type: BUTTON_TYPE.PRIMARY,
           mode: BUTTON_MODE.GHOST,
           size: BUTTON_SIZE.ICON_BIG,
+          'data-onboarding': 'user-menu',
           children: avatarImg ? (
             <img
               className="user-menu-popover-avatar user-menu-popover"
