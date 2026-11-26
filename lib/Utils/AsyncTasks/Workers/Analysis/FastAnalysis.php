@@ -5,6 +5,7 @@ namespace Utils\AsyncTasks\Workers\Analysis;
 use DateTime;
 use Exception;
 use InvalidArgumentException;
+use LogicException;
 use Model\Analysis\AnalysisDao;
 use Model\Analysis\PayableRates as PayableRates;
 use Model\DataAccess\Database;
@@ -51,6 +52,7 @@ use Utils\Logger\LoggerFactory;
 use Utils\Redis\RedisLock;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractDaemon;
+use Utils\TaskRunner\Commons\Configuration;
 use Utils\TaskRunner\Commons\Context;
 use Utils\TaskRunner\Commons\Params;
 use Utils\TaskRunner\Commons\QueueElement;
@@ -321,64 +323,55 @@ class FastAnalysis extends AbstractDaemon
     const int PROCESSING_LOCK_TTL_SECONDS = 60 * 60 * 24;
 
     /**
-     * MD5 of the config file at the last check; '' when it could not be read; null before the first load.
-     * It lets each cycle skip the parse when the file did not change.
-     *
-     * Example: the file is untouched since the last check, so the next cycle returns at once.
+     * The queues of the projects that do not use an MT queue, in fallback order: a project whose queue is
+     * missing goes to the first one the config has. Every queue runs the same TM analysis worker.
      */
-    private ?string $configHash = null;
+    const array ANALYSIS_QUEUE_KEYS = ['P1', 'P2', 'P3'];
 
     /**
-     * Loads the queue settings from the task manager config: in the constructor, then in main() whenever the
-     * file changed, so a new cap or a queue drain needs no restart.
+     * Loads the queue settings from the task manager config: in the constructor, then in main() each time the
+     * file changed, so a new cap, a queue drain or a removed queue needs no restart. See
+     * _readChangedConfiguration() for when a version is used.
      *
-     * At start a file that cannot be read throws: the daemon has no queues and stops. A later reload that fails
-     * keeps the current settings and logs `fast_config_reload_failed` once per file version. It fails when the
-     * file cannot be read, has no queues, or lacks a queue the daemon already has. The last case guards against
-     * a half-written file: a project picked meanwhile would have no queue. So removing a queue needs a restart.
-     *
-     * Example: `P4[max_queued_segments]` changed from 25000 to 30000 is used from the next pick.
+     * Example: `P4[max_queued_segments]` changed from 25000 to 30000 is used from the pick after the save held
+     * still for one check.
      *
      * @throws Exception
      * @throws TypeError
      */
     protected function _updateConfiguration(): void
     {
-        // md5_file() gives false on an unreadable file: '' then counts as one more version, refused once
-        $hash = (string)@md5_file($this->_configFile);
-        if ($hash === $this->configHash) {
-            return;
-        }
-        $firstLoad = $this->configHash === null;
-        // Kept even when this version is refused, so its error is logged once and not on every cycle
-        $this->configHash = $hash;
-
-        // Start-up: nothing to compare with, and a bad file must stop the daemon (exception not caught on purpose)
-        if ($firstLoad) {
-            $this->_queueContextList = $this->getConfiguration()->getContextList();
-
+        $configuration = $this->_readChangedConfiguration();
+        if ($configuration === null) {
             return;
         }
 
-        try {
-            // An exception caught here should not stop the daemon, keep using the old configuration
-            $contextList = $this->getConfiguration()->getContextList();
-        } catch (Exception|TypeError $e) {
-            $this->logger->error('fast_config_reload_failed', ['file' => $this->_configFile, 'error' => $e->getMessage()]);
-
-            return;
-        }
-
-        $missingQueues = array_keys(array_diff_key($this->_queueContextList->list, $contextList->list));
-        if ($missingQueues !== []) {
-            $this->logger->error('fast_config_reload_failed', ['file' => $this->_configFile, 'missing_queues' => $missingQueues]);
-
-            return;
-        }
-
-        $this->_queueContextList = $contextList;
-        $this->logger->info('fast_config_reloaded', ['file' => $this->_configFile, 'queues' => array_keys($contextList->list)]);
+        $this->_queueContextList = $configuration->getContextList();
         $this->_logMtQueueSettings();
+
+        // Projects meant for a missing queue go to another one meanwhile, which is slower: whoever changed the file
+        // must see it
+        $missing = array_values(array_diff(self::ANALYSIS_QUEUE_KEYS, array_keys($this->_queueContextList->list)));
+        if ($missing !== []) {
+            $this->logger->error('analysis_queues_missing', ['queues' => $missing]);
+        }
+    }
+
+    /**
+     * Refuses a config with none of P1, P2 and P3: projects that do not use an MT queue would have nowhere to go.
+     * One of them is enough, as the others fall back to it.
+     *
+     * Example: a file with only P4 and P5 stops the daemon at start, and is skipped by a reload. The TaskManager
+     * still applies such a file and stops the P1 to P3 workers: the messages fast keeps sending there wait in
+     * the broker until the queue is back.
+     *
+     * @throws UnexpectedValueException
+     */
+    protected function _validateConfiguration(Configuration $configuration): void
+    {
+        if (array_intersect(self::ANALYSIS_QUEUE_KEYS, array_keys($configuration->getContextList()->list)) === []) {
+            throw new UnexpectedValueException('The config has none of the analysis queues P1, P2 and P3');
+        }
     }
 
     /**
@@ -450,8 +443,6 @@ class FastAnalysis extends AbstractDaemon
      */
     public function main(array $args = null): void
     {
-        $this->_logMtQueueSettings();
-
         do {
             if (!$this->requireQueueHandler()->getRedisClient()->sismember(RedisKeys::FAST_PID_SET, $this->myProcessPid . ":" . gethostname() . ":" . AppConfig::$INSTANCE_ID)) {
                 // suicide gracefully
@@ -1288,15 +1279,9 @@ class FastAnalysis extends AbstractDaemon
             $engine->syncMemories($this->actual_project_row, array_values($this->segments));
         }
 
-        $queueInfo = $this->_getQueueAddressesByPriority($totalSegmentsToAnalyze, $engine);
-
-        if ($queueInfo === null) {
-            $this->logger->debug("No queue address found for project $pid. Skipping enqueue.");
-
-            return $project_creation_success;
-        }
-
         if ($totalSegmentsToAnalyze) {
+            $queueInfo = $this->_getQueueAddressesByPriority($totalSegmentsToAnalyze, $engine);
+
             $this->logger->debug("Publish Segment Translations to the queue --> $queueInfo->queue_name: $totalSegmentsToAnalyze");
             $this->logger->debug("Elements: $totalSegmentsToAnalyze");
 
@@ -1729,6 +1714,7 @@ HD;
      * projects it reads nothing and never holds. It logs `mt_queues_full` when the queues fill up, then at most
      * once a minute while they stay full, and `mt_queues_open` once when a queue can take projects again. Every
      * change is logged at once, so queues that open and fill again on each published project log each change.
+     * With no MT queue in the config it holds too, and `mt_queues_full` says `reason: no_mt_queue`.
      *
      * Example: P4 and P5 both at their segment cap gives true.
      *
@@ -1737,6 +1723,14 @@ HD;
     protected function _mtQueuesHold(): bool
     {
         $wasHolding = $this->mtQueuesFullLoggedAt !== null;
+
+        // P4 and P5 both removed from the config: a Lara project picked now would have no queue, fail each of its
+        // attempts within seconds and be parked for good, so it waits in NEW until a queue is back
+        if ($this->_mtQueueContexts() === []) {
+            $this->_logMtQueuesFull(['queues' => [], 'reason' => 'no_mt_queue']);
+
+            return true;
+        }
 
         // With no limit set, no MT queue can be full: skip the load read and its Jolokia and Redis calls
         if (!$this->_mtQueueLimitsInUse()) {
@@ -1753,19 +1747,29 @@ HD;
         $hold  = MtQueueSelector::holds($loads);
 
         if ($hold) {
-            // Log when the queues fill up, then at most once a minute while they stay full
-            $now        = $this->_now();
-            $fullLogDue = !$wasHolding || $now - $this->mtQueuesFullLoggedAt >= self::MT_QUEUES_FULL_LOG_INTERVAL_SECONDS;
-            if ($fullLogDue) {
-                $this->logger->info('mt_queues_full', ['queues' => $this->_mtQueuesForLog($loads)]);
-                $this->mtQueuesFullLoggedAt = $now;
-            }
+            $this->_logMtQueuesFull(['queues' => $this->_mtQueuesForLog($loads)]);
         } elseif ($wasHolding) {
             $this->logger->info('mt_queues_open', ['queues' => $this->_mtQueuesForLog($loads)]);
             $this->mtQueuesFullLoggedAt = null;
         }
 
         return $hold;
+    }
+
+    /**
+     * Logs `mt_queues_full` when the hold starts, then at most once a minute while it lasts.
+     *
+     * Example: a hold seen at 1000, 1010 and 1060 logs at 1000 and 1060.
+     *
+     * @param array<string, mixed> $context
+     */
+    private function _logMtQueuesFull(array $context): void
+    {
+        $now = $this->_now();
+        if ($this->mtQueuesFullLoggedAt === null || $now - $this->mtQueuesFullLoggedAt >= self::MT_QUEUES_FULL_LOG_INTERVAL_SECONDS) {
+            $this->logger->info('mt_queues_full', $context);
+            $this->mtQueuesFullLoggedAt = $now;
+        }
     }
 
     /**
@@ -1837,13 +1841,14 @@ HD;
      * ['pid' => 301, 'queue' => 'P5', 'age_seconds' => 300, 'segments_to_publish' => 42, 'queues' => [...]].
      *
      * @throws RuntimeException
+     * @throws LogicException
      */
-    protected function _routeMtProject(int $segmentsToPublish): ?Context
+    protected function _routeMtProject(int $segmentsToPublish): Context
     {
         $contexts = $this->_mtQueueContexts();
         if ($contexts === []) {
-            // No MT queue in the config: null makes the caller skip the publish, as for any missing queue
-            return null;
+            // Never reached: _mtQueuesHold() keeps Lara projects in NEW while the config has no MT queue
+            throw new LogicException('No MT queue for a Lara project');
         }
 
         $pid = (int)$this->actual_project_row['id'];
@@ -1878,21 +1883,49 @@ HD;
      * Lara projects go to an MT queue, chosen by _routeMtProject(); other MT engines go to P3; projects with no
      * MT engine go to P1, or to P2 from 10000 segments.
      *
+     * When the config lacks P1, P2 or P3, the project goes to another of them (see _analysisQueue()).
+     *
      * Example: a DeepL project gives P3; a project with no engine and 20000 segments gives P2.
      *
      * @throws RuntimeException
+     * @throws LogicException
      */
-    protected function _getQueueAddressesByPriority(int $queueLen, AbstractEngine $mtEngine): ?Context
+    protected function _getQueueAddressesByPriority(int $queueLen, AbstractEngine $mtEngine): Context
     {
-        $contextList = $this->_queueContextList->list;
-
-        //use this kind of construct to easily add/remove queues and to disable feature by: comment rows or change the switch flag to false
         return match (true) {
             $this->_usesMtQueue($mtEngine) => $this->_routeMtProject($queueLen),
-            !$mtEngine instanceof MyMemory && !$mtEngine instanceof NONE => $contextList['P3'],
-            $queueLen >= 10000 => $contextList['P2'],
-            default => $contextList['P1'],
+            !$mtEngine instanceof MyMemory && !$mtEngine instanceof NONE => $this->_analysisQueue('P3'),
+            $queueLen >= 10000 => $this->_analysisQueue('P2'),
+            default => $this->_analysisQueue('P1'),
         };
+    }
+
+    /**
+     * The queue $wanted, or when the config lacks it, the first of P1, P2 and P3 it has, logged as
+     * `analysis_queue_fallback`. Any of them analyses the project, as they all run the same worker: only
+     * the workers that share the load change.
+     *
+     * Example: with no P3 in the config, a DeepL project goes to P1.
+     *
+     * @throws LogicException
+     */
+    private function _analysisQueue(string $wanted): Context
+    {
+        $contextList = $this->_queueContextList->list;
+        if (isset($contextList[$wanted])) {
+            return $contextList[$wanted];
+        }
+
+        foreach (self::ANALYSIS_QUEUE_KEYS as $key) {
+            if (isset($contextList[$key])) {
+                $this->logger->warning('analysis_queue_fallback', ['pid' => (int)$this->actual_project_row['id'], 'queue' => $wanted, 'used' => $key]);
+
+                return $contextList[$key];
+            }
+        }
+
+        // Never reached: _validateConfiguration() refuses a config with none of them
+        throw new LogicException('None of the analysis queues P1, P2 and P3 in the config');
     }
 
     /**

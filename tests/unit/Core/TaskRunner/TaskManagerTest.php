@@ -430,6 +430,41 @@ class TaskManagerTest extends AbstractTest
         $this->assertSame(1, $list->list['q1']->pid_list_len);
     }
 
+    #[Test]
+    public function test_updateConfiguration_waits_until_a_changed_file_holds_still_for_a_cycle(): void
+    {
+        $configFile = $this->writeTempConfig(['q1' => 2]);
+        $mgr = $this->makeManager(ContextList::get());
+        (new ReflectionClass(TaskManager::class))->getProperty('_configFile')->setValue($mgr, $configFile);
+        $update = new ReflectionMethod(TaskManager::class, '_updateConfiguration');
+        $update->invoke($mgr);
+
+        file_put_contents($configFile, "q2[queue_name] = \"q2\"\nq2[max_executors] = 3\n", FILE_APPEND);
+        $update->invoke($mgr);
+        $this->assertArrayNotHasKey('q2', $this->getContextList($mgr)->list, 'a file seen changed once may still be being written');
+
+        $update->invoke($mgr);
+        $this->assertSame(3, $this->getContextList($mgr)->list['q2']->max_executors);
+    }
+
+    #[Test]
+    public function test_updateConfiguration_keeps_its_queues_when_the_file_becomes_unusable(): void
+    {
+        $configFile = $this->writeTempConfig(['q1' => 2]);
+        $mgr = $this->makeManager(ContextList::get());
+        (new ReflectionClass(TaskManager::class))->getProperty('_configFile')->setValue($mgr, $configFile);
+        $update = new ReflectionMethod(TaskManager::class, '_updateConfiguration');
+        $update->invoke($mgr);
+
+        // Before, a bad file threw out of main() and stopped the TaskManager with all its workers
+        file_put_contents($configFile, "loggerName = \"test.log\"\n");
+        $update->invoke($mgr);
+        $update->invoke($mgr);
+
+        $this->assertSame(['q1'], array_keys($this->getContextList($mgr)->list));
+        $this->assertSame([], $this->getDestroyContext($mgr));
+    }
+
     // ─── _cleanContexts() tests ─────────────────────────────────────────────────
 
     #[Test]
