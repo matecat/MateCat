@@ -954,6 +954,59 @@ class FastAnalysisTest extends AbstractTest
         $this->assertTrue($reconnected, 'a failed probe must rebuild the connection');
     }
 
+    /**
+     * Instance ids the pick query must filter on, 0 included.
+     *
+     * @return array<string, array{int}>
+     */
+    public static function instanceIdProvider(): array
+    {
+        return [
+            'instance 0' => [0],
+            'instance 3' => [3],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('instanceIdProvider')]
+    public function lockProjectPicksOnlyTheProjectsOfItsOwnInstance(int $instanceId): void
+    {
+        // Each instance has its own Redis database, so its processing locks are invisible to the others.
+        // A daemon that picked another instance's projects could analyse them twice; instance 0 included.
+        $query  = null;
+        $params = null;
+
+        $stmt = $this->createStub(PDOStatement::class);
+        $stmt->method('execute')->willReturnCallback(function (array $bound) use (&$params) {
+            $params = $bound;
+
+            return true;
+        });
+        $stmt->method('fetchAll')->willReturn([]);
+
+        $pdo = $this->createStub(PDO::class);
+        $pdo->method('prepare')->willReturnCallback(function (string $sql) use (&$query, $stmt) {
+            $query = $sql;
+
+            return $stmt;
+        });
+
+        $db = $this->createStub(IDatabase::class);
+        $db->method('getConnection')->willReturn($pdo);
+        $db->method('transaction')->willReturnCallback(fn (callable $cb) => $cb());
+
+        $originalInstanceId    = AppConfig::$INSTANCE_ID;
+        AppConfig::$INSTANCE_ID = $instanceId;
+        try {
+            $this->invoke($this->daemonWithDb($db), '_getLockProjectForVolumeAnalysis');
+        } finally {
+            AppConfig::$INSTANCE_ID = $originalInstanceId;
+        }
+
+        $this->assertStringContainsString('AND instance_id = :instance_id', (string)$query);
+        $this->assertSame($instanceId, $params['instance_id'] ?? null);
+    }
+
     #[Test]
     public function lockProjectKeepsProjectInBatchWhenBusyUpdateSucceeds(): void
     {
