@@ -321,19 +321,64 @@ class FastAnalysis extends AbstractDaemon
     const int PROCESSING_LOCK_TTL_SECONDS = 60 * 60 * 24;
 
     /**
-     * Loads the queue settings from the task manager config; it runs once, in the constructor.
+     * MD5 of the config file at the last check; '' when it could not be read; null before the first load.
+     * It lets each cycle skip the parse when the file did not change.
      *
-     * Example: an ini with P1, P3 and P4 gives a context list with those three queues.
+     * Example: the file is untouched since the last check, so the next cycle returns at once.
+     */
+    private ?string $configHash = null;
+
+    /**
+     * Loads the queue settings from the task manager config: in the constructor, then in main() whenever the
+     * file changed, so a new cap or a queue drain needs no restart.
+     *
+     * At start a file that cannot be read throws: the daemon has no queues and stops. A later reload that fails
+     * keeps the current settings and logs `fast_config_reload_failed` once per file version. It fails when the
+     * file cannot be read, has no queues, or lacks a queue the daemon already has. The last case guards against
+     * a half-written file: a project picked meanwhile would have no queue. So removing a queue needs a restart.
+     *
+     * Example: `P4[max_queued_segments]` changed from 25000 to 30000 is used from the next pick.
      *
      * @throws Exception
      * @throws TypeError
      */
     protected function _updateConfiguration(): void
     {
-        $configuration = $this->getConfiguration();
+        // md5_file() gives false on an unreadable file: '' then counts as one more version, refused once
+        $hash = (string)@md5_file($this->_configFile);
+        if ($hash === $this->configHash) {
+            return;
+        }
+        $firstLoad = $this->configHash === null;
+        // Kept even when this version is refused, so its error is logged once and not on every cycle
+        $this->configHash = $hash;
 
-        //First Execution, load build object
-        $this->_queueContextList = $configuration->getContextList();
+        // Start-up: nothing to compare with, and a bad file must stop the daemon (exception not caught on purpose)
+        if ($firstLoad) {
+            $this->_queueContextList = $this->getConfiguration()->getContextList();
+
+            return;
+        }
+
+        try {
+            // An exception caught here should not stop the daemon, keep using the old configuration
+            $contextList = $this->getConfiguration()->getContextList();
+        } catch (Exception|TypeError $e) {
+            $this->logger->error('fast_config_reload_failed', ['file' => $this->_configFile, 'error' => $e->getMessage()]);
+
+            return;
+        }
+
+        $missingQueues = array_keys(array_diff_key($this->_queueContextList->list, $contextList->list));
+        if ($missingQueues !== []) {
+            $this->logger->error('fast_config_reload_failed', ['file' => $this->_configFile, 'missing_queues' => $missingQueues]);
+
+            return;
+        }
+
+        $this->_queueContextList = $contextList;
+        $this->logger->info('fast_config_reloaded', ['file' => $this->_configFile, 'queues' => array_keys($contextList->list)]);
+        $this->_logMtQueueSettings();
     }
 
     /**
@@ -413,6 +458,9 @@ class FastAnalysis extends AbstractDaemon
                 $this->RUNNING = false;
                 continue;
             }
+
+            // One md5 when the file is unchanged, so it runs at every cycle: a new cap or a drain applies to the next pick
+            $this->_updateConfiguration();
 
             try {
                 $this->_checkDatabaseConnection();
@@ -1622,7 +1670,7 @@ HD;
     }
 
     /**
-     * Logs the caps of the MT queues once at start, and each MT queue setting the config rejected.
+     * Logs the caps of the MT queues at start and after each config reload, plus each setting the config rejected.
      *
      * Example: `P5[max_queued_segments] = 25.000` logs `mt_queue_setting_invalid` and P5 runs with no segment cap.
      */
@@ -1688,15 +1736,22 @@ HD;
      */
     protected function _mtQueuesHold(): bool
     {
+        $wasHolding = $this->mtQueuesFullLoggedAt !== null;
+
         // With no limit set, no MT queue can be full: skip the load read and its Jolokia and Redis calls
         if (!$this->_mtQueueLimitsInUse()) {
+            // A config reload turned the limits off while the queues were full: the held projects go now
+            if ($wasHolding) {
+                $this->logger->info('mt_queues_open', ['queues' => [], 'reason' => 'limits_off']);
+                $this->mtQueuesFullLoggedAt = null;
+            }
+
             return false;
         }
 
         $loads = $this->_readMtQueueLoads();
         $hold  = MtQueueSelector::holds($loads);
 
-        $wasHolding = $this->mtQueuesFullLoggedAt !== null;
         if ($hold) {
             // Log when the queues fill up, then at most once a minute while they stay full
             $now        = $this->_now();

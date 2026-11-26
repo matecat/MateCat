@@ -99,6 +99,25 @@ class FastAnalysisTest extends AbstractTest
         (new ReflectionClass(FastAnalysis::class))->getProperty($name)->setValue($daemon, $value);
     }
 
+    /**
+     * Read a private/protected property of the daemon. Example: getProp($daemon, '_queueContextList')->list['P4'].
+     */
+    private function getProp(FastAnalysis $daemon, string $name): mixed
+    {
+        return (new ReflectionClass(FastAnalysis::class))->getProperty($name)->getValue($daemon);
+    }
+
+    /** @var list<string> config files written by the reload tests, deleted in tearDown */
+    private array $configFiles = [];
+
+    protected function tearDown(): void
+    {
+        foreach ($this->configFiles as $file) {
+            @unlink($file);
+        }
+        parent::tearDown();
+    }
+
     #[Test]
     public function dbReturnsTheSeededHandleWithoutHittingTheSingleton(): void
     {
@@ -1489,6 +1508,10 @@ class FastAnalysisTest extends AbstractTest
         $fa->getProperty('myProcessPid')->setValue($probe, 4242);
         $fa->getProperty('RUNNING')->setValue($probe, true);
         $fa->getProperty('_queueContextList')->setValue($probe, ContextList::get([]));
+        // A missing config file, its hash ('') already seen: main() never reloads and keeps the list set above
+        $fa->getProperty('_configFile')->setValue($probe, sys_get_temp_dir() . '/fast-analysis-no-config.ini');
+        $fa->getProperty('_contextIndex')->setValue($probe, null);
+        $fa->getProperty('configHash')->setValue($probe, '');
 
         $filesStorage = $this->createStub(AbstractFilesStorage::class);
         $fa->getProperty('files_storage')->setValue($probe, $filesStorage);
@@ -2541,7 +2564,7 @@ class FastAnalysisTest extends AbstractTest
 
         $context = $this->invoke($daemon, '_getQueueAddressesByPriority', $queueLen, self::engineOfClass($engineClass));
 
-        $contextList = (new ReflectionClass(FastAnalysis::class))->getProperty('_queueContextList')->getValue($daemon);
+        $contextList = $this->getProp($daemon, '_queueContextList');
         $this->assertSame($contextList->list[$expectedKey], $context);
         $this->assertSame([], $daemon->events, 'no MT queue load is read for another engine');
         $this->assertSame([], self::loggedContexts($logged, 'mt_project_routed'));
@@ -2671,7 +2694,7 @@ class FastAnalysisTest extends AbstractTest
 
         $this->assertSame($expectedKeys, array_keys($contexts));
         foreach ($contexts as $key => $context) {
-            $this->assertSame((new ReflectionClass(FastAnalysis::class))->getProperty('_queueContextList')->getValue($daemon)->list[$key], $context);
+            $this->assertSame($this->getProp($daemon, '_queueContextList')->list[$key], $context);
         }
     }
 
@@ -2726,7 +2749,7 @@ class FastAnalysisTest extends AbstractTest
     {
         $logged = [];
         [$daemon, $redis] = $this->mtQueueDaemon(self::mtQueueSettings(), [], $logged);
-        $contexts = (new ReflectionClass(FastAnalysis::class))->getProperty('_queueContextList')->getValue($daemon)->list;
+        $contexts = $this->getProp($daemon, '_queueContextList')->list;
 
         $this->invoke($daemon, '_registerOnMtQueue', 11, $contexts['P4']);
         $this->invoke($daemon, '_registerOnMtQueue', 12, $contexts['P1']);
@@ -2779,6 +2802,211 @@ class FastAnalysisTest extends AbstractTest
         $probe->main();
 
         $this->assertCount(1, self::loggedContexts($logged, 'mt_queue_settings'));
+    }
+
+    // ─── Live config reload ──────────────────────────────────────────────
+
+    /**
+     * Writes a task manager config with P1 and a P4 segment cap to a new temp file, and returns its path.
+     *
+     * Example: newConfigFile('25000') writes `P4[max_queued_segments] = 25000`.
+     */
+    private function newConfigFile(string $p4SegmentCap): string
+    {
+        $path = tempnam(sys_get_temp_dir(), 'fast-config-');
+        $this->assertNotFalse($path, 'a temp file for the config');
+        $this->configFiles[] = $path;
+        self::writeConfig($path, $p4SegmentCap);
+
+        return $path;
+    }
+
+    /**
+     * Rewrites $path with P1, and P4 capped at $p4SegmentCap segments. Example: writeConfig($path, '30000').
+     */
+    private static function writeConfig(string $path, string $p4SegmentCap): void
+    {
+        file_put_contents($path, implode("\n", [
+            'loggerName = "fastAnalysis.log"',
+            '[context_definitions]',
+            'P1[queue_name] = "analysis_queue_P1"',
+            'P1[max_executors] = 1',
+            'P4[queue_name] = "analysis_queue_P4"',
+            'P4[max_executors] = 30',
+            "P4[max_queued_segments] = $p4SegmentCap",
+            '',
+        ]));
+    }
+
+    /**
+     * A daemon that has loaded $path as the constructor does.
+     *
+     * @param list<array{level: string, message: mixed, context: array<mixed>}> $logged
+     */
+    private function daemonOnConfigFile(string $path, array &$logged): FastAnalysisMtQueueProbe
+    {
+        $daemon = (new ReflectionClass(FastAnalysisMtQueueProbe::class))->newInstanceWithoutConstructor();
+        $this->setProp($daemon, 'logger', $this->capturingStructuredLogger($logged));
+        $this->setProp($daemon, '_configFile', $path);
+        $this->setProp($daemon, '_contextIndex', null);
+        $this->invoke($daemon, '_updateConfiguration');
+
+        return $daemon;
+    }
+
+    private function p4SegmentCap(FastAnalysis $daemon): ?int
+    {
+        return ($this->getProp($daemon, '_queueContextList')->list['P4'] ?? null)?->max_queued_segments;
+    }
+
+    #[Test]
+    public function updateConfigurationReadsTheNewLimitsAndLogsThem(): void
+    {
+        $logged = [];
+        $path = $this->newConfigFile('25000');
+        $daemon = $this->daemonOnConfigFile($path, $logged);
+        self::writeConfig($path, '30000');
+
+        $this->invoke($daemon, '_updateConfiguration');
+
+        $this->assertSame(30000, $this->p4SegmentCap($daemon));
+        $this->assertSame([['file' => $path, 'queues' => ['P1', 'P4']]], self::loggedContexts($logged, 'fast_config_reloaded'));
+        $this->assertSame(
+            [['P4' => ['max_queued_segments' => 30000, 'max_queued_projects' => 0, 'accept_new_projects' => true, 'max_executors' => 30]]],
+            self::loggedContexts($logged, 'mt_queue_settings')
+        );
+    }
+
+    #[Test]
+    public function updateConfigurationDoesNothingWhileTheFileIsUnchanged(): void
+    {
+        $logged = [];
+        $daemon = $this->daemonOnConfigFile($this->newConfigFile('25000'), $logged);
+        $list = $this->getProp($daemon, '_queueContextList');
+
+        $this->invoke($daemon, '_updateConfiguration');
+
+        $this->assertSame($list, $this->getProp($daemon, '_queueContextList'), 'an unchanged file is not parsed again');
+        $this->assertSame([], $logged);
+    }
+
+    /**
+     * @return array<string, array{0: ?string, 1: array<string, mixed>}> new file content (null = file deleted) and the error logged
+     */
+    public static function refusedConfigProvider(): array
+    {
+        return [
+            'file deleted'                   => [null, ['error' => 'Wrong configuration file provided.']],
+            'no context_definitions section' => ["loggerName = \"fastAnalysis.log\"\n", ['error' => 'Wrong configuration file provided.']],
+            // What a half-written file looks like: cut before the P4 lines
+            'a queue dropped'                => [
+                "loggerName = \"fastAnalysis.log\"\n[context_definitions]\nP1[queue_name] = \"analysis_queue_P1\"\nP1[max_executors] = 1\n",
+                ['missing_queues' => ['P4']],
+            ],
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $error
+     */
+    #[Test]
+    #[DataProvider('refusedConfigProvider')]
+    public function updateConfigurationKeepsTheCurrentQueuesWhenTheNewFileIsRefused(?string $newContent, array $error): void
+    {
+        $logged = [];
+        $path = $this->newConfigFile('25000');
+        $daemon = $this->daemonOnConfigFile($path, $logged);
+
+        if ($newContent === null) {
+            unlink($path);
+        } else {
+            file_put_contents($path, $newContent);
+        }
+        $this->invoke($daemon, '_updateConfiguration');
+        $this->invoke($daemon, '_updateConfiguration');
+
+        $this->assertSame(25000, $this->p4SegmentCap($daemon), 'the daemon keeps the queues it had');
+        // One error per refused version of the file, not one per cycle
+        $this->assertSame([['level' => 'error', 'message' => 'fast_config_reload_failed', 'context' => ['file' => $path] + $error]], $logged);
+
+        // A fixed file is read on the next cycle
+        self::writeConfig($path, '30000');
+        $this->invoke($daemon, '_updateConfiguration');
+        $this->assertSame(30000, $this->p4SegmentCap($daemon));
+    }
+
+    #[Test]
+    public function updateConfigurationThrowsAtStartWhenTheFileCannotBeRead(): void
+    {
+        $logged = [];
+        $daemon = (new ReflectionClass(FastAnalysisMtQueueProbe::class))->newInstanceWithoutConstructor();
+        $this->setProp($daemon, 'logger', $this->capturingStructuredLogger($logged));
+        $this->setProp($daemon, '_configFile', sys_get_temp_dir() . '/fast-analysis-no-config.ini');
+        $this->setProp($daemon, '_contextIndex', null);
+
+        try {
+            $this->invoke($daemon, '_updateConfiguration');
+            $this->fail('a daemon with no queues must not start');
+        } catch (Exception $e) {
+            $this->assertSame('Wrong configuration file provided.', $e->getMessage());
+        }
+        $this->assertSame([], $logged, 'the constructor logs the failure');
+    }
+
+    #[Test]
+    public function updateConfigurationTakesANewQueue(): void
+    {
+        $logged = [];
+        $path = $this->newConfigFile('25000');
+        $daemon = $this->daemonOnConfigFile($path, $logged);
+        file_put_contents($path, "P5[queue_name] = \"analysis_queue_P5\"\nP5[max_executors] = 2\n", FILE_APPEND);
+
+        $this->invoke($daemon, '_updateConfiguration');
+
+        $this->assertSame(['P1', 'P4', 'P5'], array_keys($this->getProp($daemon, '_queueContextList')->list));
+    }
+
+    #[Test]
+    public function mainReloadsTheConfigurationBeforeEachPick(): void
+    {
+        [$probe, $redis] = $this->wireMainProbe();
+        $path = $this->newConfigFile('30000');
+        $this->setProp($probe, '_configFile', $path);
+        $redis->sismemberReturns = [true, true, false]; // two working cycles, then suicide
+        $probe->lockBatches      = [[$this->projectRow(1606)], [$this->projectRow(1607)]];
+        $probe->fetchScript      = [new AnalyzeResponse(['data' => []]), new AnalyzeResponse(['data' => []])];
+        $probe->insertResults    = [0, 0];
+        // The file changes while the first project is analysed
+        $probe->onPick = static fn () => self::writeConfig($path, '35000');
+
+        $this->runMain($probe);
+
+        $this->assertSame([30000, 35000], $probe->p4SegmentCapAtPick, 'each pick sees the limits written in the file before it');
+    }
+
+    #[Test]
+    public function mtQueuesHoldLogsTheReopeningWhenTheLimitsAreTurnedOffWhileHolding(): void
+    {
+        $p4 = ['queue_name' => 'analysis_queue_P4', 'max_executors' => 30, 'max_queued_segments' => 25000];
+        $logged = [];
+        [$daemon] = $this->mtQueueDaemon(['P4' => $p4], [], $logged);
+        $full = [self::mtLoad('P4', $p4, 25000)];
+        $daemon->loadsScript = [$full, $full];
+        $daemon->now = 1000;
+        $this->assertTrue($this->invoke($daemon, '_mtQueuesHold'));
+
+        // A reload turns every limit off
+        $this->setProp($daemon, '_queueContextList', ContextList::get(['P4' => ['queue_name' => 'analysis_queue_P4', 'max_executors' => 30]]));
+        $daemon->now = 1010;
+        $this->assertFalse($this->invoke($daemon, '_mtQueuesHold'));
+
+        // The cap comes back and the queue is still full: the full state is logged again at once
+        $this->setProp($daemon, '_queueContextList', ContextList::get(['P4' => $p4]));
+        $daemon->now = 1020;
+        $this->assertTrue($this->invoke($daemon, '_mtQueuesHold'));
+
+        $this->assertSame(['mt_queues_full', 'mt_queues_open', 'mt_queues_full'], array_column($logged, 'message'));
+        $this->assertSame(['queues' => [], 'reason' => 'limits_off'], self::loggedContexts($logged, 'mt_queues_open')[0], 'no load is read while the limits are off');
     }
 
     #[Test]
@@ -3025,6 +3253,12 @@ class FastAnalysisMainProbe extends FastAnalysis
 
     public int $rebuildCount = 0;
 
+    /** @var list<int|null> the P4 segment cap in the context list at each pick; null with no P4 */
+    public array $p4SegmentCapAtPick = [];
+
+    /** Runs after each pick, as if something happened while that project was analysed. */
+    public ?\Closure $onPick = null;
+
     protected function _checkDatabaseConnection(): void
     {
         if ($this->dbCheckThrows) {
@@ -3036,6 +3270,11 @@ class FastAnalysisMainProbe extends FastAnalysis
 
     protected function _lockNextProjectToAnalyze(): array
     {
+        $this->p4SegmentCapAtPick[] = ($this->_queueContextList->list['P4'] ?? null)?->max_queued_segments;
+        if ($this->onPick !== null) {
+            ($this->onPick)();
+        }
+
         $batch = array_shift($this->lockBatches) ?? [];
 
         // Store a token per project, as the real picker does, so the tests can assert main()'s releases.
