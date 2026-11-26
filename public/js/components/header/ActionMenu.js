@@ -268,6 +268,7 @@ export const ActionMenu = ({
       toggleButtonProps={{
         children: <Icon3Dots />,
         size: BUTTON_SIZE.ICON_STANDARD,
+        'data-onboarding': cattoolMenu ? 'cattool-actions-menu' : undefined,
       }}
       items={
         cattoolMenu ? getCattoolMenu() : qrMenu ? getQualityReportMenu() : null
