@@ -342,6 +342,58 @@ class UtilsActiveMQAMQHandlerTest extends AbstractTest
         $this->assertSame(0, $calls[0][1]);
     }
 
+    #[Test]
+    public function queueReadsFallBackToTheSubscribedQueue(): void
+    {
+        $this->stompStub->method('subscribe')->willReturn(1);
+        $calls = [];
+        $handler = $this->handlerAnswering(['value' => 5, 'status' => 200], $calls);
+        $handler->subscribe('analysis_queue_P4');
+
+        $this->assertSame(5, $handler->getQueueLength());
+        $this->assertSame(5, $handler->getConsumerCount());
+        $this->assertStringEndsWith(self::urlTail('analysis_queue_P4', 'QueueSize'), $calls[0][0]);
+        $this->assertStringEndsWith(self::urlTail('analysis_queue_P4', 'ConsumerCount'), $calls[1][0]);
+    }
+
+    /**
+     * Rows: total timeout in seconds passed to the read (0 sets none).
+     *
+     * @return array<string, array{int}>
+     */
+    public static function jolokiaTimeoutProvider(): array
+    {
+        return [
+            'with a total timeout' => [2],
+            'no total timeout'     => [0],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('jolokiaTimeoutProvider')]
+    public function jolokiaReadDecodesTheJsonItReceives(int $timeoutSeconds): void
+    {
+        $handler = new class ($this->stompStub) extends AMQHandler {
+            public function __construct(StatefulStomp $stomp)
+            {
+                parent::__construct(preconfiguredStomp: $stomp);
+            }
+
+            public function readUrl(string $url, int $timeoutSeconds): mixed
+            {
+                return $this->_jolokiaRead($url, $timeoutSeconds);
+            }
+        };
+        $answer = (string)tempnam(sys_get_temp_dir(), 'jolokia');
+        file_put_contents($answer, '{"value":7,"status":200}');
+
+        try {
+            $this->assertSame(['value' => 7, 'status' => 200], $handler->readUrl('file://' . $answer, $timeoutSeconds));
+        } finally {
+            unlink($answer);
+        }
+    }
+
     /**
      * End of the Jolokia URL of a queue attribute.
      *
