@@ -286,6 +286,27 @@ describe('SourceEditor layers', () => {
     expect(marks(container, '.glossaryItem')).toEqual(['Hello'])
   })
 
+  test('a search hit inside a tag label marks the chip, until the search ends (markSearch)', () => {
+    Object.assign(SearchUtils, {
+      searchMode: 'normal',
+      searchParams: {source: 'count'},
+      occurrencesList: ['10'],
+      featuredSearchResult: 5,
+      searchResultsDictionary: {10: {occurrences: []}},
+    })
+    const ph = `<ph id="mtc_1" ctype="x-html" equiv-text="base64:${btoa('{{count}}')}"/>`
+    const segment = makeSegment({segment: `Total ${ph} <g id="1">a</g>`})
+    const {container, update} = renderSource(segment)
+    const marked = () =>
+      [...container.querySelectorAll('.cm-content .tag.tag-search-match')].map(
+        (el) => el.textContent,
+      )
+    update({...segment, inSearch: true, searchParams: {source: 'count'}})
+    expect(marked()).toEqual(['{{count}}'])
+    update({...segment, inSearch: false, searchParams: {}})
+    expect(marked()).toEqual([])
+  })
+
   test('Lexiqa warnings on the source are highlighted', () => {
     mockGetRanges.mockReturnValue([
       {start: 6, end: 11, myClass: 'spelling s0', errorid: 'e', color: 'red'},
@@ -309,6 +330,47 @@ describe('SourceEditor layers', () => {
       makeSegment({sid: '11', segment: 'Hi {name}'}),
     )
     expect(marks(plainSegment, '.icuItem')).toEqual([])
+  })
+
+  test('in an ICU segment, a glossary, missing term or Lexiqa mark touching the ICU syntax is dropped whole', () => {
+    const text = '{gender, select, male {Lui ha} other {Lei ha}}'
+    const at = (word) => text.indexOf(word)
+    mockGetRanges.mockReturnValue(
+      ['{gender,', 'select,', 'male', 'Lui', '{Lei'].map((word) => ({
+        start: at(word),
+        end: at(word) + word.length,
+      })),
+    )
+    const segmentWith = (icu) =>
+      makeSegment({
+        segment: text,
+        icu,
+        glossary: [
+          {term_id: 1, matching_words: ['male']},
+          {term_id: 2, matching_words: ['ha']},
+          {term_id: 3, matching_words: ['other'], missingTerm: true},
+          {term_id: 4, matching_words: ['Lei'], missingTerm: true},
+        ],
+        lexiqa: {source: {spelling: [{}]}},
+        lxqDecodedSource: text,
+      })
+    const {container: icuSegment} = renderSource(segmentWith(true))
+    expect(marks(icuSegment, '.lexiqahighlight')).toEqual(['Lui'])
+    expect(marks(icuSegment, '.glossaryItem')).toEqual(['ha', 'ha'])
+    expect(marks(icuSegment, '.qaCheckGlossaryItem')).toEqual(['Lei'])
+
+    const {container: plainSegment} = renderSource({
+      ...segmentWith(false),
+      sid: '11',
+    })
+    expect(marks(plainSegment, '.lexiqahighlight')).toEqual([
+      '{gender,',
+      'select,',
+      'male',
+      'Lui',
+      '{Lei',
+    ])
+    expect(marks(plainSegment, '.glossaryItem')).toEqual(['male', 'ha', 'ha'])
   })
 })
 
