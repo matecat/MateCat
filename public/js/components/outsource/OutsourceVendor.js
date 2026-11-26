@@ -168,9 +168,13 @@ const OutsourceVendor = ({
   ])
 
   const openOutsourcePage = useCallback(() => {
-    const link = job.get('outsource')?.get('quote_review_link')
+    // The quote can report the job as outsourced before the job has its
+    // outsource data: its status link then leads to the same order
+    const link =
+      job.get('outsource')?.get('quote_review_link') ??
+      chunkQuote?.get('link_to_status')
     if (link) window.open(link, '_blank')
-  }, [job])
+  }, [job, chunkQuote])
 
   // --- Shared props for sub-components ---
   const orderBoxProps = {

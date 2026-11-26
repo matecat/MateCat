@@ -168,6 +168,29 @@ describe('ProjectsBulkActions selection', () => {
     expect(screen.getByTestId('jobs-bulk')).toHaveTextContent('3,2')
   })
 
+  test('shift-clicking a project with a split job selects up to its last job', () => {
+    // A split job repeats its id once per chunk
+    const splitProject = {
+      ...project1,
+      jobs: [job1, {...job1, password: 'pass1-chunk2'}, job2],
+    }
+    const errors = []
+    const onError = (event) => {
+      event.preventDefault()
+      errors.push(event.error)
+    }
+    window.addEventListener('error', onError)
+    renderComponent({projects: [splitProject, project2]})
+    fireEvent.click(screen.getByText('check-job-3'))
+    fireEvent.keyDown(document, {key: 'Shift'})
+    fireEvent.click(screen.getByText('check-project-100'))
+    fireEvent.keyUp(document, {key: 'Shift'})
+    window.removeEventListener('error', onError)
+
+    expect(errors).toEqual([])
+    expect(screen.getByTestId('jobs-bulk')).toHaveTextContent('3,2')
+  })
+
   test('checking a project selects every job belonging to it', () => {
     renderComponent()
     fireEvent.click(screen.getByText('check-project-100'))

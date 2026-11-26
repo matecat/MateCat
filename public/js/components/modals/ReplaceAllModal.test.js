@@ -188,7 +188,7 @@ describe('ReplaceAllModal', () => {
     )
   })
 
-  test('keeps the modal open and throws nothing when the replace is rejected by validation', () => {
+  test('leaves the validation alert open and keeps the search results when the replace is refused', () => {
     SearchUtils.execReplaceAll.mockReturnValue(false)
     const errors = []
     const onError = (event) => {

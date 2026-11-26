@@ -99,22 +99,27 @@ test('shows the "too few segments" message and disables split when the API retur
   expect(screen.getByText('Check split')).toBeDisabled()
 })
 
-test('does not leave an unhandled rejection when the API rejects without an errors list', async () => {
-  checkSplitRequest.mockRejectedValue({})
-  const unhandled = []
-  const onUnhandled = (reason) => unhandled.push(reason)
-  process.on('unhandledRejection', onUnhandled)
+test.each([
+  ['without an errors list', {response: {ok: false}}],
+  ['with no value', null],
+])(
+  'shows the fallback message and stops loading when the API rejects %s',
+  async (_, rejection) => {
+    checkSplitRequest.mockRejectedValue(rejection)
+    render(
+      <SplitJobModal
+        job={baseJob}
+        project={baseProject}
+        callback={jest.fn()}
+      />,
+    )
 
-  render(
-    <SplitJobModal job={baseJob} project={baseProject} callback={jest.fn()} />,
-  )
-  await act(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 50))
-  })
-  process.off('unhandledRejection', onUnhandled)
-
-  expect(unhandled).toEqual([])
-})
+    expect(
+      await screen.findByText('Something went wrong. Please try again.'),
+    ).toBeInTheDocument()
+    expect(screen.getByText('Check split')).toBeEnabled()
+  },
+)
 
 test('shows a generic error message for other API errors', async () => {
   checkSplitRequest.mockRejectedValue({

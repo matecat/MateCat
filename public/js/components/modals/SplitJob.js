@@ -113,19 +113,17 @@ const SplitJobModal = ({job, project, callback}) => {
       .then(({data}) => {
         setSplitData(data)
       })
-      .catch(({errors}) => {
-        if (errors?.length) {
-          if (errors[0].code === -7) {
-            setJobSplittable(false)
-            setErrorMsg('Split unsuccessful: the job has too few segments.')
-          } else {
-            setErrorMsg(errors[0].message)
-          }
-          setShowError(true)
-          setShowLoader(false)
-          setShowStartLoader(false)
-          setSplitChecked(false)
+      .catch((rejection) => {
+        if (rejection?.errors?.[0]?.code === -7) {
+          setJobSplittable(false)
+          setErrorMsg('Split unsuccessful: the job has too few segments.')
+        } else {
+          setErrorMsg(getApiErrorMessage(rejection))
         }
+        setShowError(true)
+        setShowLoader(false)
+        setShowStartLoader(false)
+        setSplitChecked(false)
       })
   }
 
@@ -171,13 +169,11 @@ const SplitJobModal = ({job, project, callback}) => {
       .then(({data}) => {
         setSplitData(data)
       })
-      .catch(({errors}) => {
-        if (typeof errors !== 'undefined' && errors.length) {
-          setErrorMsg(errors[0].message)
-          setShowError(true)
-          setShowLoader(false)
-          setSplitChecked(false)
-        }
+      .catch((rejection) => {
+        setErrorMsg(getApiErrorMessage(rejection))
+        setShowError(true)
+        setShowLoader(false)
+        setSplitChecked(false)
       })
   }
 
