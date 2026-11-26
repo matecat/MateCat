@@ -6,6 +6,8 @@ import styles from './PageErrorBoundary.module.scss'
 // they may be what failed.
 const PageErrorFallback = () => {
   const reloadRef = useRef(null)
+  // Each installation sets its own support contact, which may not be an address
+  const supportMail = window.config?.support_mail
 
   useEffect(() => {
     reloadRef.current?.focus()
@@ -25,10 +27,17 @@ const PageErrorFallback = () => {
             An unexpected error stopped this page. Reload it to continue;
             changes that were already saved are kept.
           </p>
-          <p>
-            If it keeps happening, write to{' '}
-            <a href="mailto:support@matecat.com">support@matecat.com</a>.
-          </p>
+          {supportMail && (
+            <p>
+              If it keeps happening, write to{' '}
+              {supportMail.includes('@') ? (
+                <a href={`mailto:${supportMail}`}>{supportMail}</a>
+              ) : (
+                supportMail
+              )}
+              .
+            </p>
+          )}
         </div>
         <Button
           ref={reloadRef}

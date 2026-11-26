@@ -32,15 +32,55 @@ test('a page that throws while rendering is replaced by the fallback', () => {
       'An unexpected error stopped this page. Reload it to continue; changes that were already saved are kept.',
     ),
   ).toBeInTheDocument()
-  expect(
-    screen.getByRole('link', {name: 'support@matecat.com'}),
-  ).toHaveAttribute('href', 'mailto:support@matecat.com')
   expect(screen.getByRole('link', {name: 'Matecat'})).toHaveAttribute(
     'href',
     '/',
   )
   expect(screen.getByRole('button', {name: 'Reload page'})).toHaveFocus()
   expect(screen.queryByText('page crashed')).not.toBeInTheDocument()
+})
+
+describe('the support line', () => {
+  const renderWithSupportMail = (supportMail) => {
+    window.config.support_mail = supportMail
+    render(
+      <PageErrorBoundary>
+        <Thrower />
+      </PageErrorBoundary>,
+    )
+  }
+
+  afterEach(() => {
+    delete window.config.support_mail
+  })
+
+  test('links the support address the installation sets', () => {
+    renderWithSupportMail('help@example.org')
+
+    expect(
+      screen.getByRole('link', {name: 'help@example.org'}),
+    ).toHaveAttribute('href', 'mailto:help@example.org')
+  })
+
+  test('shows a support contact that is not an address as text', () => {
+    renderWithSupportMail('your administrator')
+
+    expect(
+      screen.getByText('If it keeps happening, write to your administrator.'),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('link', {name: 'your administrator'}),
+    ).not.toBeInTheDocument()
+  })
+
+  test('is left out when the installation sets no support contact', () => {
+    renderWithSupportMail(undefined)
+
+    expect(screen.queryByText(/If it keeps happening/)).not.toBeInTheDocument()
+    expect(
+      screen.getByRole('button', {name: 'Reload page'}),
+    ).toBeInTheDocument()
+  })
 })
 
 test('the reload button reloads the page', () => {
