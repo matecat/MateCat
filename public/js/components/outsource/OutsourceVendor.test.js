@@ -246,6 +246,29 @@ describe('OutsourceVendor', () => {
     openSpy.mockRestore()
   })
 
+  test('does nothing when opening the review page of a job with no outsource data', () => {
+    const job = fromJS({outsource: null})
+    const openSpy = jest.spyOn(window, 'open').mockImplementation(() => {})
+    const chunkQuote = fromJS({price: '100', r_price: '20', t_words_total: 500})
+    useOutsourceQuote.mockReturnValue(
+      makeQuoteHook({outsource: true, chunkQuote}),
+    )
+    const errors = []
+    const onError = (event) => {
+      event.preventDefault()
+      errors.push(event.error)
+    }
+    window.addEventListener('error', onError)
+
+    render(<OutsourceVendor {...baseProps} job={job} />)
+    fireEvent.click(screen.getByText('open-outsource-page'))
+    window.removeEventListener('error', onError)
+
+    expect(errors).toEqual([])
+    expect(openSpy).not.toHaveBeenCalled()
+    openSpy.mockRestore()
+  })
+
   test('persists the chosen timezone to a cookie and updates the hook ref', () => {
     const updateTimezoneRef = jest.fn()
     const chunkQuote = fromJS({price: '100', r_price: '20', t_words_total: 500})

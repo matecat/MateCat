@@ -114,7 +114,7 @@ const SplitJobModal = ({job, project, callback}) => {
         setSplitData(data)
       })
       .catch(({errors}) => {
-        if (errors !== 'undefined' && errors.length) {
+        if (errors?.length) {
           if (errors[0].code === -7) {
             setJobSplittable(false)
             setErrorMsg('Split unsuccessful: the job has too few segments.')

@@ -187,4 +187,22 @@ describe('ReplaceAllModal', () => {
       'Replace all alert',
     )
   })
+
+  test('keeps the modal open and throws nothing when the replace is rejected by validation', () => {
+    SearchUtils.execReplaceAll.mockReturnValue(false)
+    const errors = []
+    const onError = (event) => {
+      event.preventDefault()
+      errors.push(event.error)
+    }
+    window.addEventListener('error', onError)
+    render(<ReplaceAllModal search={search} />)
+
+    fireEvent.click(screen.getByText('Replace all'))
+    window.removeEventListener('error', onError)
+
+    expect(errors).toEqual([])
+    expect(ModalsActions.onCloseModal).not.toHaveBeenCalled()
+    expect(CatToolActions.storeSearchResults).not.toHaveBeenCalled()
+  })
 })

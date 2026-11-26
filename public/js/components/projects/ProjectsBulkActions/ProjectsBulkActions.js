@@ -160,7 +160,9 @@ export const ProjectsBulkActions = ({
 
       let jobsInvolved = []
 
-      if (!shiftKeyRef.current.isPressed) {
+      // A shift-click with no previous click has no range start: treat it as
+      // a plain click
+      if (!shiftKeyRef.current.isPressed || !shiftKeyRef.current.startJob) {
         jobsInvolved = [currentJob]
       } else {
         const startIndexJob = allJobs.findIndex(
@@ -225,9 +227,9 @@ export const ProjectsBulkActions = ({
         [],
       )
 
-      if (shiftKeyRef.current.isPressed) {
+      if (shiftKeyRef.current.isPressed && shiftKeyRef.current.startJob) {
         const lastJobIdProject =
-          currentProjectJobs[currentProject.jobs.length - 1].id
+          currentProjectJobs[currentProjectJobs.length - 1].id
 
         onCheckedJob(
           shiftKeyRef.current.startJob.id > lastJobIdProject

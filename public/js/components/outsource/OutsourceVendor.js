@@ -168,7 +168,8 @@ const OutsourceVendor = ({
   ])
 
   const openOutsourcePage = useCallback(() => {
-    window.open(job.get('outsource').get('quote_review_link'), '_blank')
+    const link = job.get('outsource')?.get('quote_review_link')
+    if (link) window.open(link, '_blank')
   }, [job])
 
   // --- Shared props for sub-components ---

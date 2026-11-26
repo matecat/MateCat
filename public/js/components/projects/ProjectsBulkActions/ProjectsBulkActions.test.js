@@ -122,6 +122,42 @@ describe('ProjectsBulkActions selection', () => {
     expect(screen.getByTestId('jobs-bulk')).toHaveTextContent('1,2,3')
   })
 
+  test('shift-clicking a job with no previous click selects just that job', () => {
+    renderComponent()
+    const errors = []
+    const onError = (event) => {
+      event.preventDefault()
+      errors.push(event.error)
+    }
+    window.addEventListener('error', onError)
+
+    fireEvent.keyDown(document, {key: 'Shift'})
+    fireEvent.click(screen.getByText('check-job-2'))
+    fireEvent.keyUp(document, {key: 'Shift'})
+    window.removeEventListener('error', onError)
+
+    expect(errors).toEqual([])
+    expect(screen.getByTestId('jobs-bulk')).toHaveTextContent(/^2$/)
+  })
+
+  test('shift-clicking a project with no previous click selects just its jobs', () => {
+    renderComponent()
+    const errors = []
+    const onError = (event) => {
+      event.preventDefault()
+      errors.push(event.error)
+    }
+    window.addEventListener('error', onError)
+
+    fireEvent.keyDown(document, {key: 'Shift'})
+    fireEvent.click(screen.getByText('check-project-100'))
+    fireEvent.keyUp(document, {key: 'Shift'})
+    window.removeEventListener('error', onError)
+
+    expect(errors).toEqual([])
+    expect(screen.getByTestId('jobs-bulk')).toHaveTextContent(/^1,2$/)
+  })
+
   test('checking a project selects every job belonging to it', () => {
     renderComponent()
     fireEvent.click(screen.getByText('check-project-100'))

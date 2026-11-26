@@ -179,6 +179,9 @@ const Search = (props) => {
 
   const updateAfterReplace = (sid) => {
     let itemReplaced = find(searchResults, (item) => item.id === sid)
+    // The replaced segment is not always among the results any more: there is
+    // nothing to update then
+    if (!itemReplaced) return
     let newTotal = total
     newTotal--
     if (itemReplaced.occurrences.length === 1) {
