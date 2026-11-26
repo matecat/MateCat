@@ -4,6 +4,22 @@ import React, {lazy, Suspense, useEffect, useState} from 'react'
 const Joyride = lazy(() =>
   import('react-joyride').then(({Joyride}) => ({default: Joyride})),
 )
+// The tour is optional: if its code cannot be loaded (a chunk gone after a
+// deploy, a network failure) it is left out instead of taking the page down
+// to the page error card. The root's onCaughtError still reports the error.
+// Error boundaries can only be class components
+// eslint-disable-next-line no-restricted-syntax
+class TourErrorBoundary extends React.Component {
+  state = {failed: false}
+
+  static getDerivedStateFromError() {
+    return {failed: true}
+  }
+
+  render() {
+    return this.state.failed ? null : this.props.children
+  }
+}
 // react-joyride's STATUS.FINISHED and STATUS.SKIPPED, inlined so the library stays out of the page.
 const TOUR_DONE_STATUSES = ['finished', 'skipped']
 export const ONBOARDING_PAGE = {
@@ -82,26 +98,29 @@ export const OnboardingTooltips = ({show, page}) => {
   }, [show])
 
   return !localStorageItem ? (
-    <Suspense fallback={null}>
-      <Joyride
-        onEvent={closeCallback}
-        steps={steps[page]}
-        run={run}
-        // Text and overlay colours as react-joyride 2 drew them; with the
-        // target blocked, a click on the highlighted element closes the step
-        // instead of reaching it, as it did there too.
-        options={{
-          primaryColor: '#0099cc',
-          textColor: '#333',
-          overlayColor: 'rgba(0, 0, 0, 0.5)',
-          blockTargetInteraction: true,
-        }}
-        styles={{
-          tooltipContainer: {
-            textAlign: 'left',
-          },
-        }}
-      ></Joyride>
-    </Suspense>
+    <TourErrorBoundary>
+      <Suspense fallback={null}>
+        <Joyride
+          onEvent={closeCallback}
+          steps={steps[page]}
+          run={run}
+          // Text and overlay colours as react-joyride 2 drew them. With the
+          // target blocked, a click on the highlighted element is absorbed and
+          // does nothing, so the element cannot be used during the tour; only a
+          // click on the dark overlay around it closes the step.
+          options={{
+            primaryColor: '#0099cc',
+            textColor: '#333',
+            overlayColor: 'rgba(0, 0, 0, 0.5)',
+            blockTargetInteraction: true,
+          }}
+          styles={{
+            tooltipContainer: {
+              textAlign: 'left',
+            },
+          }}
+        ></Joyride>
+      </Suspense>
+    </TourErrorBoundary>
   ) : null
 }
