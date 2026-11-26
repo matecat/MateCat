@@ -1,5 +1,6 @@
 import React, {useEffect, useRef} from 'react'
 import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../Button/Button'
+import {ErrorBoundary} from '../ErrorBoundary'
 import styles from './PageErrorBoundary.module.scss'
 
 // Rendered when the page itself has crashed, so it reads no context or store:
@@ -53,19 +54,7 @@ const PageErrorFallback = () => {
   )
 }
 
-// Replaces a crashed page with the fallback instead of an empty root. The
-// error is reported by the root's onCaughtError (rootErrorOptions), so the
-// boundary only switches what is rendered.
-// Error boundaries can only be class components
-// eslint-disable-next-line no-restricted-syntax
-export class PageErrorBoundary extends React.Component {
-  state = {failed: false}
-
-  static getDerivedStateFromError() {
-    return {failed: true}
-  }
-
-  render() {
-    return this.state.failed ? <PageErrorFallback /> : this.props.children
-  }
-}
+// Replaces a crashed page with the fallback instead of an empty root
+export const PageErrorBoundary = ({children}) => (
+  <ErrorBoundary fallback={<PageErrorFallback />}>{children}</ErrorBoundary>
+)

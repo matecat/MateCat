@@ -85,9 +85,8 @@ const Tooltip = ({
 
   // RENDER
   const getCoords = () => {
-    // React 19 keeps the child's ref in props and warns when element.ref is
-    // read; React 18 only has element.ref.
-    const childRef = children?.props?.ref ?? children?.ref
+    // The child's ref is a plain prop: React warns when element.ref is read
+    const childRef = children?.props?.ref
     const boundingRect =
       childRef?.current && childRef.current.getBoundingClientRect()
     if (!boundingRect) return {}

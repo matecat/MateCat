@@ -34,7 +34,8 @@ const VirtualList = forwardRef(
       getScrollElement: () => ref.current,
       estimateSize: useCallback((index) => items[index].height, [items]),
       // a new key function on every change of the items makes the
-      // virtualizer lay the rows out again with their new heights
+      // virtualizer lay the rows out again with their new heights:
+      // @tanstack/virtual-core recomputes its measurements when getItemKey changes
       getItemKey: useCallback((index) => items[index].id ?? index, [items]),
       overscan,
       scrollPaddingStart,
@@ -118,7 +119,7 @@ const VirtualList = forwardRef(
           {overlapHeader && overlapHeader}
           {virtualItems.map((item) => (
             <div
-              key={items[item.index].id ? items[item.index].id : item.index}
+              key={item.key}
               style={{
                 position: 'absolute',
                 top: 0,

@@ -1,4 +1,5 @@
 import React, {lazy, Suspense, useEffect, useRef, useState} from 'react'
+import {ErrorBoundary} from '../common/ErrorBoundary'
 
 // react-joyride is only needed while a tour can run: users who dismissed it never download it.
 const Joyride = lazy(() =>
@@ -6,20 +7,8 @@ const Joyride = lazy(() =>
 )
 // The tour is optional: if its code cannot be loaded (a chunk gone after a
 // deploy, a network failure) it is left out instead of taking the page down
-// to the page error card. The root's onCaughtError still reports the error.
-// Error boundaries can only be class components
-// eslint-disable-next-line no-restricted-syntax
-class TourErrorBoundary extends React.Component {
-  state = {failed: false}
-
-  static getDerivedStateFromError() {
-    return {failed: true}
-  }
-
-  render() {
-    return this.state.failed ? null : this.props.children
-  }
-}
+// to the page error card. The root's onCaughtError still passes the error on to
+// error tracking, which may drop a network failure it is set to ignore.
 // react-joyride's STATUS.FINISHED and STATUS.SKIPPED, inlined so the library stays out of the page.
 const TOUR_DONE_STATUSES = ['finished', 'skipped']
 // react-joyride's EVENTS.TOOLTIP: a step's tooltip was shown to the user.
@@ -108,7 +97,7 @@ export const OnboardingTooltips = ({show, page}) => {
   }, [show])
 
   return !localStorageItem ? (
-    <TourErrorBoundary>
+    <ErrorBoundary fallback={null}>
       <Suspense fallback={null}>
         <Joyride
           onEvent={closeCallback}
@@ -131,6 +120,6 @@ export const OnboardingTooltips = ({show, page}) => {
           }}
         ></Joyride>
       </Suspense>
-    </TourErrorBoundary>
+    </ErrorBoundary>
   ) : null
 }
