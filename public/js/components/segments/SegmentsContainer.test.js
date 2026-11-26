@@ -711,4 +711,30 @@ describe('SegmentsContainer height measuring markup', () => {
     // the rows of the list are mocked and show no text: only leftover measuring markup would
     expect(screen.queryByText('Long source')).not.toBeInTheDocument()
   })
+
+  test('measures an opened segment past the first page against the segment right before it', async () => {
+    measureSectionsAs(() => 300)
+    const segments = [
+      makeSegment('1'),
+      makeSegment('2'),
+      makeSegment('3', {id_file: '2'}),
+      makeSegment('4', {id_file: '2', opened: true}),
+      makeSegment('5', {id_file: '2'}),
+    ]
+    // only rows up to the start segment are measured, plus the opened one
+    await renderSegments(segments, {startSegmentId: '2'})
+    // an opened row shows its rendered height: closing it shows the measured one
+    await act(async () => {
+      mockSegmentStoreListeners[SegmentConstants.RENDER_SEGMENTS](
+        fromJS(segments.map((segment) => segment.set('opened', false).toJS())),
+      )
+    })
+
+    const heightOf = (id) =>
+      mockCapturedItems.find((item) => item.id === id).height
+    // 4 continues the file of 3, as 2 continues the file of 1: no file header on either
+    expect(heightOf('4')).toBe(heightOf('2'))
+    // 1 starts its file and carries the file header
+    expect(heightOf('1')).toBeGreaterThan(heightOf('2'))
+  })
 })

@@ -639,15 +639,16 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
           : // default start index of virtual list component
             startIndex
 
+    // The previous segment is read before filtering: an opened segment past
+    // stopIndex must be measured against its real neighbour in the list.
     const rowsToMeasure = rows
-      .filter(
-        ({segImmutable}, index) =>
-          index <= stopIndex || segImmutable.get('opened'),
-      )
       .map((row, index) => ({
         row,
         previousSegment: index > 0 ? rows[index - 1].segImmutable : undefined,
       }))
+      .filter(
+        ({row}, index) => index <= stopIndex || row.segImmutable.get('opened'),
+      )
       .filter(({row}) => !cachedRowsHeightMap.current.get(row.id))
 
     // React cannot render the measuring markup synchronously from inside an
