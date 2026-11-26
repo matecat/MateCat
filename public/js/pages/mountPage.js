@@ -4,6 +4,7 @@ import {ApplicationWrapper} from '../components/common/ApplicationWrapper'
 import React from 'react'
 import NotificationBox from '../components/notificationsComponent/NotificationBox'
 import {ModalWindow} from '../components/modals/ModalWindow'
+import {PageErrorBoundary} from '../components/common/PageErrorBoundary/PageErrorBoundary'
 
 export const mountPage = ({Component, rootElement}) => {
   document.addEventListener('DOMContentLoaded', () => {
@@ -11,10 +12,12 @@ export const mountPage = ({Component, rootElement}) => {
 
     const Page = () => {
       return (
-        <ApplicationWrapper>
-          <Component />
-          <ModalWindow />
-        </ApplicationWrapper>
+        <PageErrorBoundary>
+          <ApplicationWrapper>
+            <Component />
+            <ModalWindow />
+          </ApplicationWrapper>
+        </PageErrorBoundary>
       )
     }
 

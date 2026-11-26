@@ -1,0 +1,18 @@
+@use 'tokens/colors';
+@use 'tokens/spacing';
+// The same card as the server status pages
+@use 'components/pages/statusCard';
+
+// Takes the place of the whole page: fills the cattool's full-height column
+// and at least the viewport on pages that scroll.
+.wrapper {
+  box-sizing: border-box;
+  flex: 1 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 100vh;
+  padding: spacing.$space-6 spacing.$space-4;
+  background: colors.$grey50;
+}

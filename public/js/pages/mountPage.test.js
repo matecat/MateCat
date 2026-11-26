@@ -1,5 +1,5 @@
 import React from 'react'
-import {render} from '@testing-library/react'
+import {render, screen} from '@testing-library/react'
 
 const mockRender = jest.fn()
 const mockCreateRoot = jest.fn(() => ({render: mockRender}))
@@ -72,6 +72,27 @@ describe('mountPage', () => {
     expect(
       container.querySelector('[data-testid="modal-window"]'),
     ).toBeInTheDocument()
+  })
+
+  test('a page that crashes while rendering is replaced by the error fallback', () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {})
+    const rootElement = document.createElement('div')
+    const CrashingPage = () => {
+      throw new Error('page crashed')
+    }
+
+    const handler = captureLatestDOMContentLoadedHandler(() =>
+      mountPage({Component: CrashingPage, rootElement}),
+    )
+    handler()
+    render(mockRender.mock.calls[0][0])
+    console.error.mockRestore()
+
+    expect(
+      screen.getByRole('heading', {name: 'Something went wrong'}),
+    ).toBeInTheDocument()
+    expect(screen.queryByTestId('application-wrapper')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('modal-window')).not.toBeInTheDocument()
   })
 
   test('mounts NotificationBox when a .notifications-wrapper element exists', () => {
