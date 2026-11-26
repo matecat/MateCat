@@ -81,8 +81,6 @@ describe('SegmentStore', () => {
     SegmentStore.currentInSearch = 0
     SegmentStore.searchParams = {}
     SegmentStore.nextUntranslatedFromServer = null
-    SegmentStore.clipboardFragment = ''
-    SegmentStore.clipboardPlainText = ''
     SegmentStore.sideOpen = false
     SegmentStore._aiSuggestions = []
     SegmentStore.currentSegmentId = undefined
@@ -998,18 +996,6 @@ describe('SegmentStore', () => {
   describe('clipboard / ai suggestions / misc', () => {
     beforeEach(() => render([makeSegment(1)]))
 
-    test('COPY_FRAGMENT_TO_CLIPBOARD stores fragment', () => {
-      dispatch({
-        actionType: EditAreaConstants.COPY_FRAGMENT_TO_CLIPBOARD,
-        fragment: 'frag',
-        plainText: 'plain',
-      })
-      expect(SegmentStore.getFragmentFromClipboard()).toEqual({
-        fragment: 'frag',
-        plainText: 'plain',
-      })
-    })
-
     test('COPY_GLOSSARY_IN_EDIT_AREA emits change', () => {
       dispatch({
         actionType: EditAreaConstants.COPY_GLOSSARY_IN_EDIT_AREA,
@@ -1267,14 +1253,6 @@ describe('SegmentStore', () => {
         .setIn([1, 'segment_hash'], 'h1')
       const result = SegmentStore.getSegmentsInPropagation('h1', true)
       expect(Array.isArray(result)).toBe(true)
-    })
-
-    test('copyFragmentToClipboard / getFragmentFromClipboard round-trips', () => {
-      SegmentStore.copyFragmentToClipboard('f', 'p')
-      expect(SegmentStore.getFragmentFromClipboard()).toEqual({
-        fragment: 'f',
-        plainText: 'p',
-      })
     })
 
     test('setLastTranslatedSegmentId stores id on the store', () => {

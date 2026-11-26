@@ -1,35 +1,16 @@
-import getFragmentFromSelection from './DraftSource/src/component/handlers/edit/getFragmentFromSelection'
 import encodeContent from './encodeContent'
 import {EditorState} from 'draft-js'
 
 /**
- *
- * @param plainText
- * @returns OrderedMap - the fragment created with the plainText
- *
- * Here we create a new EditorState just to exploit getFragmentFromSelection and be sure to have a full working fragment.
- *
+ * @param plainText a segment string
+ * @returns OrderedMap - the blocks of the segment, its tags as entities, ready
+ *   for Modifier.replaceWithFragment; null when there is no text. The content
+ *   is built fresh on every call, so its block keys are new.
  */
 const buildFragmentFromText = (plainText) => {
-  // encode plain text
-  const emptyEditorState = EditorState.createEmpty()
-  const plainEditorStateEncoded = encodeContent(emptyEditorState, plainText)
-  let {editorState: clipboardEditorState} = plainEditorStateEncoded
-  const contentState = clipboardEditorState.getCurrentContent()
-  // select all content
-  const selectAll = clipboardEditorState.getSelection().merge({
-    anchorKey: contentState.getFirstBlock().getKey(),
-    anchorOffset: 0,
-    focusOffset: contentState.getLastBlock().getText().length,
-    focusKey: contentState.getLastBlock().getKey(),
-  })
-  // force selection on all content
-  clipboardEditorState = EditorState.forceSelection(
-    clipboardEditorState,
-    selectAll,
-  )
-  // get fragment
-  return getFragmentFromSelection(clipboardEditorState)
+  const {editorState} = encodeContent(EditorState.createEmpty(), plainText)
+  const contentState = editorState.getCurrentContent()
+  return contentState.hasText() ? contentState.getBlockMap() : null
 }
 
 export default buildFragmentFromText

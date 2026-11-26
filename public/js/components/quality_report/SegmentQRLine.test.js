@@ -1,5 +1,5 @@
 import {render} from '@testing-library/react'
-import {screen} from '@testing-library/react'
+import {fireEvent, screen} from '@testing-library/react'
 import React from 'react'
 import {fromJS} from 'immutable'
 import SegmentQRLine from './SegmentQRLine'
@@ -123,4 +123,71 @@ test('omits the suggestion-match badge when suggestion_match is not a number', (
     />,
   )
   expect(screen.queryByText(/NaN/)).not.toBeInTheDocument()
+})
+
+test('shows markup carried by a string text as text, never as HTML', () => {
+  render(
+    <SegmentQRLine
+      classes="qr-line"
+      label="Target"
+      text="<img src=x onerror=alert(1)>"
+      segment={fromJS({})}
+    />,
+  )
+  expect(screen.getByText('<img src=x onerror=alert(1)>')).toBeInTheDocument()
+  expect(screen.queryByRole('img')).not.toBeInTheDocument()
+})
+
+describe('copying from the text', () => {
+  const selectText = (text) => {
+    const node = screen.getByText(text)
+    const range = document.createRange()
+    range.selectNodeContents(node)
+    const selection = document.getSelection()
+    selection.removeAllRanges()
+    selection.addRange(range)
+    return node
+  }
+
+  beforeEach(() => {
+    Object.defineProperty(navigator, 'clipboard', {
+      value: {writeText: jest.fn(() => Promise.resolve())},
+      configurable: true,
+    })
+  })
+
+  afterEach(() => document.getSelection().removeAllRanges())
+
+  test('writes the selection as plain text, without zero-width spaces and with · as spaces', () => {
+    render(
+      <SegmentQRLine
+        classes="qr-line"
+        label="Target"
+        text={'a​b·c'}
+        segment={fromJS({})}
+      />,
+    )
+    const node = selectText('a​b·c')
+
+    const notCancelled = fireEvent.copy(node)
+
+    expect(notCancelled).toBe(false)
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith('ab c')
+  })
+
+  test('leaves the clipboard alone when a child already wrote its own copy', () => {
+    render(
+      <SegmentQRLine
+        classes="qr-line"
+        label="Target"
+        text={<span onCopy={(e) => e.preventDefault()}>tagged text</span>}
+        segment={fromJS({})}
+      />,
+    )
+    const node = selectText('tagged text')
+
+    fireEvent.copy(node)
+
+    expect(navigator.clipboard.writeText).not.toHaveBeenCalled()
+  })
 })

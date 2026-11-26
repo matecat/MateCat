@@ -56,7 +56,7 @@ import {
 } from './segmentDispatchActions'
 import CatToolActions from './CatToolActions'
 import OfflineUtils from '../utils/offlineUtils'
-import DraftMatecatUtils from '../components/segments/utils/DraftMatecatUtils'
+import SegmentStringUtils from '../components/segments/utils/DraftMatecatUtils/segmentStringUtils'
 import SegmentUtils from '../utils/segmentUtils'
 import {getTranslationMismatches as getTranslationMismatchesApi} from '../api/getTranslationMismatches'
 import TextUtils from '../utils/textUtils'
@@ -932,8 +932,8 @@ const SegmentActions = {
     // refresh segment glossary already included: the terms changed, so a
     // result still pending for the old ones does not cover it
     if (shouldRefresh) {
-      const source = DraftMatecatUtils.removePlaceholdersForGlossary(
-        DraftMatecatUtils.removeTagsFromText(text),
+      const source = SegmentStringUtils.removePlaceholdersForGlossary(
+        SegmentStringUtils.removeTagsFromText(text),
       )
       if (source && source !== ' ') {
         requestGlossary(sid, source)
@@ -980,8 +980,8 @@ const SegmentActions = {
         !isGlossaryPending(request.sid) &&
         (typeof segment.glossary === 'undefined' || sid === request.sid)
       ) {
-        const source = DraftMatecatUtils.removePlaceholdersForGlossary(
-          DraftMatecatUtils.removeTagsFromText(request.text),
+        const source = SegmentStringUtils.removePlaceholdersForGlossary(
+          SegmentStringUtils.removeTagsFromText(request.text),
         )
 
         if (source && source !== ' ') {
@@ -1687,13 +1687,6 @@ const SegmentActions = {
   },
   setNextUntranslatedSegmentFromServer(sid) {
     SegmentStore.nextUntranslatedFromServer = sid
-  },
-  copyFragmentToClipboard: function (fragment, plainText) {
-    AppDispatcher.dispatch({
-      actionType: EditAreaConstants.COPY_FRAGMENT_TO_CLIPBOARD,
-      fragment,
-      plainText,
-    })
   },
   editAreaChanged: function (sid, isTarget) {
     AppDispatcher.dispatch({

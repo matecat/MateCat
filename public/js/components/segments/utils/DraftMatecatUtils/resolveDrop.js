@@ -1,15 +1,16 @@
 import {EditorState, Modifier} from 'draft-js'
 import DraftMatecatUtils from './index'
-import getFragmentFromSelection from './DraftSource/src/component/handlers/edit/getFragmentFromSelection'
+import {readSegmentClipboard} from '../../../segmentView/segmentModel'
 
 /**
  * Works out what a drop should do to the editor.
  *
- * Two cases, told apart by where the drag started. A drag from outside the
- * editor arrives as JSON on the dataTransfer and is duplicated in. A drag
- * within the editor has to be done by hand -- Draft's own behaviour does not
- * work here -- by cutting the dragged range out and putting the fragment back
- * at the drop point.
+ * A drag carries the raw segment slice in its html, as a copy does (see
+ * segmentView/README.md, Copy). A drag from outside the editor is inserted as
+ * a paste is. A drag within the editor has to be done by hand -- Draft's own
+ * behaviour does not work here -- by cutting the dragged range out and putting
+ * the slice back at the drop point. A drag that carries no slice (text from
+ * another page) is left to Draft.
  *
  * Nothing may be dropped onto an entity; that is reported as handled so the
  * editor is left alone.
@@ -23,35 +24,26 @@ import getFragmentFromSelection from './DraftSource/src/component/handlers/edit/
 export default function resolveDrop({
   editorState,
   selection,
-  text,
+  html,
   draggingFromEditArea,
 }) {
   const dragSelection = editorState.getSelection()
-  const dragSelectionLength =
-    dragSelection.focusOffset - dragSelection.anchorOffset
-  // Draft's own fragment does not survive this, so rebuild it
-  const tempFrag = DraftMatecatUtils.buildFragmentFromJson(
-    getFragmentFromSelection(editorState),
-  )
 
   let atDropPoint = EditorState.forceSelection(editorState, selection)
 
   const {entityKey} = DraftMatecatUtils.selectionIsEntity(atDropPoint)
   if (entityKey) return {outcome: 'handled'}
 
-  if (text && !draggingFromEditArea) {
-    try {
-      const fragmentContent = JSON.parse(text)
-      return {
-        outcome: 'handled',
-        editorState: DraftMatecatUtils.duplicateFragment(
-          DraftMatecatUtils.buildFragmentFromJson(fragmentContent.orderedMap),
-          atDropPoint,
-          fragmentContent.entitiesMap,
-        ),
-      }
-    } catch (err) {
-      return {outcome: 'not-handled'}
+  const slice = readSegmentClipboard(html)
+  if (slice === null) return {outcome: 'not-handled'}
+
+  const fragment = DraftMatecatUtils.buildFragmentFromText(slice)
+  if (!fragment) return {outcome: 'handled'}
+
+  if (!draggingFromEditArea) {
+    return {
+      outcome: 'handled',
+      editorState: DraftMatecatUtils.duplicateFragment(fragment, atDropPoint),
     }
   }
 
@@ -64,9 +56,11 @@ export default function resolveDrop({
 
     // Cutting the dragged range out shifts everything after it left, so a drop
     // further along the same block has to come back by the length removed.
+    const dragSelectionLength =
+      dragSelection.getEndOffset() - dragSelection.getStartOffset()
     const movedForwardInSameBlock =
-      dragSelection.anchorOffset < selection.anchorOffset &&
-      dragSelection.getAnchorKey() === selection.getAnchorKey()
+      dragSelection.getStartOffset() < selection.anchorOffset &&
+      dragSelection.getStartKey() === selection.getAnchorKey()
     const dropAt = movedForwardInSameBlock
       ? selection.merge({
           anchorOffset: selection.anchorOffset - dragSelectionLength,
@@ -74,17 +68,9 @@ export default function resolveDrop({
         })
       : selection
 
-    contentState = Modifier.replaceWithFragment(
-      contentState,
-      dropAt,
-      tempFrag,
-    )
+    contentState = Modifier.replaceWithFragment(contentState, dropAt, fragment)
 
-    atDropPoint = EditorState.push(
-      atDropPoint,
-      contentState,
-      'insert-fragment',
-    )
+    atDropPoint = EditorState.push(atDropPoint, contentState, 'insert-fragment')
     return {
       outcome: 'handled',
       editorState: EditorState.forceSelection(atDropPoint, dropAt),
