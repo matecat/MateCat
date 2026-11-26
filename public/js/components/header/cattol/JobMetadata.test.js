@@ -81,3 +81,14 @@ test('ignores files without instructions or references from the store', () => {
   })
   expect(screen.queryByRole('button')).not.toBeInTheDocument()
 })
+
+test('the instructions button is the onboarding tour target', () => {
+  render(
+    <JobMetadata metadata={{project: {project_info: {name: 'My project'}}}} />,
+  )
+
+  expect(screen.getByRole('button')).toHaveAttribute(
+    'data-onboarding',
+    'job-instructions',
+  )
+})
