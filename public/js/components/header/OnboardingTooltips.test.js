@@ -24,6 +24,10 @@ const waitForTourToSkip = async (stepsCount) => {
   })
 }
 
+// The tour loads react-joyride lazily. Loading it once here keeps the first
+// test from spending its wait on a cold import, which can take over a second in CI.
+beforeAll(() => import('react-joyride'))
+
 beforeEach(() => {
   localStorage.clear()
   document.body.innerHTML = ''
