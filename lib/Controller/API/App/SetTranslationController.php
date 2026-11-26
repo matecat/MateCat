@@ -1199,6 +1199,7 @@ class SetTranslationController extends AbstractStatefulKleinController
         $contributionStruct->translation = ($_Translation['translation'] !== null) ? $this->filter->fromLayer0ToLayer1($_Translation['translation']) : "";
         $contributionStruct->api_key = AppConfig::$MYMEMORY_API_KEY;
         $contributionStruct->uid = ($ownerUid !== null) ? $ownerUid : 0;
+        $contributionStruct->actingUid = $this->user->uid ?? 0;
         $contributionStruct->oldTranslationStatus = $old_translation['status'];
         $contributionStruct->oldSegment = $this->filter->fromLayer0ToLayer1($this->data['segment']['segment']); //
         $contributionStruct->oldTranslation = ($old_translation['translation'] !== null) ? $this->filter->fromLayer0ToLayer1($old_translation['translation']) : "";

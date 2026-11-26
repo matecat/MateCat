@@ -89,10 +89,19 @@ class SetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
     public string $job_password = "";
 
     /**
-     * User login info needed to get information about the tm keys of the job
+     * The job owner's uid, sent to the TM engine as `client_id`.
+     * It never decides which of the job's keys receive the contribution: see $actingUid.
      * @var int
      */
     public int $uid = 0;
+
+    /**
+     * The uid of the user who saved the translation.
+     * Selects the job's keys that user linked as translator or revisor, so their writes reach those keys.
+     * 0 (anonymous, or a queue element enqueued before this field existed) leaves only the owner's keys.
+     * @var int
+     */
+    public int $actingUid = 0;
 
     /**
      * @var string

@@ -2930,6 +2930,104 @@ class SetTranslationControllerTest extends AbstractTest
     }
 
     /**
+     * A translator who is not the job owner saves a segment: the contribution carries the owner as uid
+     * (MyMemory client_id) and the translator as actingUid, which the worker uses to pick the keys the
+     * translator linked to the job. With only the owner's uid, a key added from the editor by a
+     * non-owner never received a write.
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function evalSetContributionEnqueuesTheOwnerAsUidAndTheLoggedUserAsActingUid(): void
+    {
+        $projectId = 9027171;
+        $jobId = 9027172;
+        $jobPassword = 'pw9027172';
+        $segmentId = 9027173;
+        $fileId = 9027174;
+        $ownerUid = 9027175;
+        $translatorUid = 9027176;
+        $this->seedMinimalProjectJobAndSegment($projectId, $jobId, $jobPassword, $segmentId, $fileId, 'Source contribution', 2);
+        // seedMinimalProjectJobAndSegment() makes test@example.org the job owner
+        obtainTestDatabase()->getConnection()->exec(
+            "INSERT IGNORE INTO users (uid, email, salt, pass, create_date, first_name, last_name)
+             VALUES ({$ownerUid}, 'test@example.org', 'salt', 'pass', NOW(), 'Owner', 'User')"
+        );
+
+        $chunk = (new JobDao(obtainTestDatabase()))->getByIdAndPasswordOrFail($jobId, $jobPassword);
+        $project = $chunk->getProject(new ProjectDao(obtainTestDatabase()));
+        $segment = (new \Model\Segments\SegmentDao(obtainTestDatabase()))->fetchById($segmentId, SegmentStruct::class);
+
+        $published = [];
+        $amqStub = $this->getMockBuilder(AMQHandler::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['publishToQueues', 'close'])
+            ->getMock();
+        $amqStub->expects(self::atLeastOnce())->method('publishToQueues')->willReturnCallback(function (string $destination, $message) use (&$published) {
+            $published[$destination] = json_decode($message->body, true);
+
+            return true;
+        });
+
+        $handlerProp = new ReflectionProperty(WorkerClient::class, '_HANDLER');
+        $originalHandler = $handlerProp->isInitialized() ? WorkerClient::$_HANDLER : null;
+        WorkerClient::init($amqStub);
+
+        try {
+            $translator = new \Model\Users\UserStruct();
+            $translator->uid = $translatorUid;
+            $translator->email = 'translator-9027176@example.org';
+
+            $controller = $this->createControllerWithoutConstructor();
+            $this->setNamedProperty($controller, 'user', $translator);
+            $this->setNamedProperty($controller, 'chunk', $chunk);
+            $this->setNamedProperty($controller, 'segment', $segment);
+            $this->setNamedProperty($controller, 'filter', MateCatFilter::getInstance(new FeatureSet(obtainTestDatabase()), 'en-US', 'it-IT', []));
+            $this->setNamedProperty($controller, 'featureSet', new FeatureSet(obtainTestDatabase()));
+            $this->setNamedProperty($controller, 'id_job', $jobId);
+            $this->setProperty($controller, [
+                'status'         => TranslationStatus::STATUS_TRANSLATED,
+                'id_job'         => (string)$jobId,
+                'password'       => $jobPassword,
+                'id_segment'     => (string)$segmentId,
+                'segment'        => $segment,
+                'propagate'      => true,
+                'context_before' => '',
+                'context_after'  => '',
+                'project'        => $project,
+                'chunk'          => $chunk,
+            ]);
+
+            $new = new SegmentTranslationStruct();
+            $new->translation = 'nuova';
+            $new->status = TranslationStatus::STATUS_TRANSLATED;
+            $new->suggestions_array = '[]';
+            $new->suggestion_position = 0;
+
+            $old = new SegmentTranslationStruct();
+            $old->translation = 'vecchia';
+            $old->status = TranslationStatus::STATUS_DRAFT;
+
+            $this->getAccessibleMethod('evalSetContribution')->invoke($controller, $new, $old);
+        } finally {
+            if ($originalHandler !== null) {
+                WorkerClient::$_HANDLER = $originalHandler;
+            }
+        }
+
+        $contribution = null;
+        foreach ($published as $destination => $element) {
+            if (str_ends_with($destination, 'CONTRIBUTION') || ($element['classLoad'] ?? '') === \Utils\AsyncTasks\Workers\SetContributionWorker::class) {
+                $contribution = $element['params'];
+            }
+        }
+
+        self::assertNotNull($contribution, 'A CONTRIBUTION element must be enqueued');
+        self::assertSame($ownerUid, $contribution['uid'], 'uid stays the job owner: it is sent as client_id');
+        self::assertSame($translatorUid, $contribution['actingUid'], 'actingUid is the user who saved');
+    }
+
+    /**
      * suggestion_array JSON containing 4-byte UTF-8 characters (emojis, supplementary
      * Unicode) must be re-encoded to \uXXXX escape sequences so that the stored bytes
      * are ASCII-safe for MySQL utf8 connections. The semantic content (decoded values)
