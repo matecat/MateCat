@@ -712,6 +712,26 @@ describe('SegmentsContainer height measuring markup', () => {
     expect(screen.queryByText('Long source')).not.toBeInTheDocument()
   })
 
+  test('still shows the rows when measuring them fails', async () => {
+    const globalErrors = []
+    const onError = (event) => {
+      globalErrors.push(event.error?.message)
+      event.preventDefault()
+    }
+    window.addEventListener('error', onError)
+    clientHeightSpy.mockImplementation(function () {
+      if (this.tagName === 'SECTION') throw new Error('layout failed')
+      return 0
+    })
+    mockCapturedItems = []
+
+    await renderSegments([makeSegment('1'), makeSegment('2')])
+    window.removeEventListener('error', onError)
+
+    expect(globalErrors).toEqual(['layout failed'])
+    expect(mockCapturedItems.map(({id}) => id)).toEqual(['1', '2'])
+  })
+
   test('measures an opened segment past the first page against the segment right before it', async () => {
     measureSectionsAs(() => 300)
     const segments = [

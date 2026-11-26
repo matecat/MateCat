@@ -657,24 +657,30 @@ function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
     let cancelled = false
     queueMicrotask(() => {
       if (cancelled) return
-      const heights = measureSegmentStructures(
-        rowsToMeasure.map(({row}) => row.segImmutable.toJS()),
-        isSideOpen,
-      )
-      rowsToMeasure.forEach(({row, previousSegment}, index) => {
-        cachedRowsHeightMap.current.set(
-          row.id,
-          getRowHeightWithMargin({
-            id: row.id,
-            height: getSegmentRealHeight({
-              segment: row.segImmutable,
-              previousSegment,
-              height: heights[index],
-            }),
-          }),
+      // A microtask runs outside React, so no error boundary catches a failure here:
+      // the list is shown anyway, with the default height for every row not measured,
+      // and the error still reaches the page's global error handler.
+      try {
+        const heights = measureSegmentStructures(
+          rowsToMeasure.map(({row}) => row.segImmutable.toJS()),
+          isSideOpen,
         )
-      })
-      setHasCachedRows(true)
+        rowsToMeasure.forEach(({row, previousSegment}, index) => {
+          cachedRowsHeightMap.current.set(
+            row.id,
+            getRowHeightWithMargin({
+              id: row.id,
+              height: getSegmentRealHeight({
+                segment: row.segImmutable,
+                previousSegment,
+                height: heights[index],
+              }),
+            }),
+          )
+        })
+      } finally {
+        setHasCachedRows(true)
+      }
     })
     return () => {
       cancelled = true
