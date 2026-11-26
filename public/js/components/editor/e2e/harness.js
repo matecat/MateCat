@@ -3,6 +3,8 @@
 import {createSegmentEditor} from '../core/createSegmentEditor'
 import {tokenize} from '../../segmentView/segmentModel'
 import {SEGMENTS} from './fixtures'
+import {setLayer} from '../core/layers'
+import {chipTokens, setTagState} from '../core/tags'
 
 const params = new URLSearchParams(location.search)
 const segment = SEGMENTS[params.get('seg') || 'basic']
@@ -53,6 +55,21 @@ window.__editor = {
     const editor = pane === 'source' ? source : target
     editor.view.focus()
     editor.view.dispatch({selection: {anchor: from, head: to}})
+  },
+  /** Replaces a decoration layer of a pane: ranges `{from, to, className, tagName?}`. */
+  layer(pane, name, ranges) {
+    const editor = pane === 'source' ? source : target
+    editor.view.dispatch({effects: setLayer.of({name, ranges})})
+  },
+  /** Gives the n-th chips of a pane an extra class: `[[n, className]]`. */
+  tagState(pane, list) {
+    const editor = pane === 'source' ? source : target
+    const chips = chipTokens(editor.view.state)
+    editor.view.dispatch({
+      effects: setTagState.of(
+        list.map(([n, className]) => ({...chips[n], className})),
+      ),
+    })
   },
   doc: (pane) =>
     (pane === 'source' ? source : target).view.state.doc.toString(),

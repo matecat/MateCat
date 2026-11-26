@@ -1,6 +1,12 @@
 // Tag chips: one atomic replace widget per tag range, plain DOM with the classes and labels of the cattool tags
 // (segmentModel `tokenize`), plus the filter that keeps user edits from cutting through a tag.
-import {EditorState, Facet, StateField, Transaction} from '@codemirror/state'
+import {
+  EditorState,
+  Facet,
+  StateEffect,
+  StateField,
+  Transaction,
+} from '@codemirror/state'
 import {Decoration, EditorView, WidgetType} from '@codemirror/view'
 import {addTags, locateTags, serializeWithOffsets, tagRanges} from './docModel'
 
@@ -14,11 +20,47 @@ export const tagDirection = Facet.define({
 
 export const TAG_SELECTOR = '.tag'
 
+/**
+ * Replaces the extra classes of the chips (`tag-clicked`, `tag-focused`…): a list of `{from, to, className}`, one
+ * per chip, by the chip's document range. Kept until the next one, mapped through changes.
+ */
+export const setTagState = StateEffect.define()
+
+const stateMark = (className) => Decoration.mark({className})
+
+/** The extra classes of the chips, as marks on their ranges. */
+export const tagState = StateField.define({
+  create: () => Decoration.none,
+  update(value, tr) {
+    let next = value.map(tr.changes)
+    for (const effect of tr.effects) {
+      if (effect.is(setTagState)) {
+        next = Decoration.set(
+          effect.value
+            .filter((r) => r.to > r.from && r.className)
+            .map((r) => stateMark(r.className).range(r.from, r.to)),
+          true,
+        )
+      }
+    }
+    return next
+  },
+})
+
+const stateClassAt = (state, from, to) => {
+  const classes = []
+  state.field(tagState).between(from, to, (f, t, mark) => {
+    if (f === from && t === to) classes.push(mark.spec.className)
+  })
+  return classes.join(' ')
+}
+
 class TagWidget extends WidgetType {
-  constructor(token, length) {
+  constructor(token, length, stateClass = '') {
     super()
     this.token = token
     this.length = length
+    this.stateClass = stateClass
   }
 
   eq(other) {
@@ -29,14 +71,17 @@ class TagWidget extends WidgetType {
       a.label === b.label &&
       a.index === b.index &&
       a.className === b.className &&
-      this.length === other.length
+      this.length === other.length &&
+      this.stateClass === other.stateClass
     )
   }
 
   toDOM(view) {
     const {token} = this
     const el = document.createElement('span')
-    el.className = token.className
+    el.className = this.stateClass
+      ? `${token.className} ${this.stateClass}`
+      : token.className
     el.setAttribute('contenteditable', 'false')
     el.dataset.tagName = token.name
     if (token.index !== undefined && token.index !== null) {
@@ -84,8 +129,12 @@ export const selectTag = (view, from, to, token) => {
   })
 }
 
-// Chips are rebuilt from the serialised string, so labels, pair numbers and shapes are the ones tokenize() gives.
-const buildChips = (state) => {
+/**
+ * The tags of the document with the segmentModel token each one shows (an `unknown` token for XLIFF markup tokenize
+ * does not know), in document order.
+ * @returns {Array<{from: number, to: number, token: object}>}
+ */
+export const chipTokens = (state) => {
   const {raw, tagAt} = serializeWithOffsets(state)
   const isRtl = state.facet(tagDirection) === 'rtl'
   const byOffset = new Map(
@@ -93,26 +142,32 @@ const buildChips = (state) => {
       .filter(({token}) => token)
       .map(({token, from}) => [from, token]),
   )
-  return Decoration.set(
-    tagAt.map((tag) => {
-      const text = state.sliceDoc(tag.from, tag.to)
-      const token = byOffset.get(tag.raw) ?? {
-        name: 'unknown',
-        className: 'tag small tag-selfclosed tag-unknown',
-        label: text,
-        raw: text,
-      }
-      return Decoration.replace({
-        widget: new TagWidget(token, tag.to - tag.from),
-      }).range(tag.from, tag.to)
-    }),
-  )
+  return tagAt.map((tag) => {
+    const text = state.sliceDoc(tag.from, tag.to)
+    const token = byOffset.get(tag.raw) ?? {
+      name: 'unknown',
+      className: 'tag small tag-selfclosed tag-unknown',
+      label: text,
+      raw: text,
+    }
+    return {from: tag.from, to: tag.to, token}
+  })
 }
+
+// Chips are rebuilt from the serialised string, so labels, pair numbers and shapes are the ones tokenize() gives.
+const buildChips = (state) =>
+  Decoration.set(
+    chipTokens(state).map(({from, to, token}) =>
+      Decoration.replace({
+        widget: new TagWidget(token, to - from, stateClassAt(state, from, to)),
+      }).range(from, to),
+    ),
+  )
 
 export const chips = StateField.define({
   create: buildChips,
   update: (value, tr) =>
-    tr.docChanged || tr.effects.some((e) => e.is(addTags))
+    tr.docChanged || tr.effects.some((e) => e.is(addTags) || e.is(setTagState))
       ? buildChips(tr.state)
       : value,
   provide: (field) => [
@@ -142,6 +197,7 @@ export const protectTags = EditorState.transactionFilter.of((tr) => {
 export const tagExtensions = ({dir, onEvent}) => [
   tagDirection.of(dir),
   tagEventSink.of(onEvent),
+  tagState,
   chips,
   protectTags,
 ]

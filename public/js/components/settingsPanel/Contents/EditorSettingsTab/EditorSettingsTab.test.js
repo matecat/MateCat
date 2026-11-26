@@ -9,9 +9,12 @@ import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper/Appl
 import LXQ from '../../../../utils/lxq.main'
 import {getLexiqaSupportedLocales} from '../../../../api/getLexiqaSupportedLocales/getLexiqaSupportedLocales'
 
-jest.mock('../../../../api/getLexiqaSupportedLocales/getLexiqaSupportedLocales', () => ({
-  getLexiqaSupportedLocales: jest.fn(),
-}))
+jest.mock(
+  '../../../../api/getLexiqaSupportedLocales/getLexiqaSupportedLocales',
+  () => ({
+    getLexiqaSupportedLocales: jest.fn(),
+  }),
+)
 
 // lexiQA no longer reads config.lexiqa_languages — it fetches its supported
 // locales from the lexiQA server at runtime, so the test mocks that API call.
@@ -310,4 +313,24 @@ test('shows AiAssistant only when isOpenAiEnabled is set', () => {
   expect(screen.getByTestId('switch-ai-assistant')).toBeInTheDocument()
 
   config.isOpenAiEnabled = false
+})
+
+describe('new editor switch', () => {
+  const originalBuildFlag = process.env.ENABLE_NEW_EDITOR
+  afterEach(() => {
+    if (originalBuildFlag === undefined) delete process.env.ENABLE_NEW_EDITOR
+    else process.env.ENABLE_NEW_EDITOR = originalBuildFlag
+  })
+
+  test('is offered when the build ships the new editor', () => {
+    process.env.ENABLE_NEW_EDITOR = 'true'
+    renderWithContext()
+    expect(screen.getByTestId('switch-editor-engine')).toBeChecked()
+  })
+
+  test('is hidden when the build switches the new editor off', () => {
+    process.env.ENABLE_NEW_EDITOR = 'false'
+    renderWithContext()
+    expect(screen.queryByTestId('switch-editor-engine')).not.toBeInTheDocument()
+  })
 })
