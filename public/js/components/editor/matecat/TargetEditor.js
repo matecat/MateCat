@@ -212,8 +212,6 @@ const TargetEditor = forwardRef(
     const parentRef = useRef(null)
     const wrapperRef = useRef(null)
     const editorRef = useRef(null)
-    // Set while the editor changes for addMissingSourceTagsToTarget, which updates the store itself.
-    const silentRef = useRef(false)
     const highlightRef = useRef([])
     const focusRef = useRef([])
     const warningRef = useRef([])
@@ -256,13 +254,14 @@ const TargetEditor = forwardRef(
         updateCounter(0)
         return
       }
-      const {plainText, tagMap, missingTags, lxqDecodedTranslation} =
-        translationUpdate(str, segment.sourceTagMap)
+      const {plainText, missingTags, lxqDecodedTranslation} = translationUpdate(
+        str,
+        segment.sourceTagMap,
+      )
       SegmentActions.updateTranslation(
         segment.sid,
         str,
         plainText,
-        tagMap,
         missingTags,
         lxqDecodedTranslation,
       )
@@ -448,9 +447,7 @@ const TargetEditor = forwardRef(
         dir: config.isTargetRTL ? 'rtl' : 'ltr',
         readOnly,
         showWhitespace,
-        onChange: () => {
-          if (!silentRef.current) updateTranslationDebounced()
-        },
+        onChange: () => updateTranslationDebounced(),
         onEvent: (name, payload) => {
           tagTooltip.onEvent(name, payload)
           if (name === 'tagClick') eventsRef.current.onTagClick(payload)
@@ -683,36 +680,26 @@ const TargetEditor = forwardRef(
       if (wasOpened && !segment.opened) updateTranslationDebounced.flush()
     }, [segment.opened, updateTranslationDebounced])
 
-    // Appends the source tags missing from the target, then updates the store and runs the QA check.
+    // Appends the source tags missing from the target: an edit, which updates the store as any other does. The QA
+    // check runs on the new translation without waiting for the edit's own, delayed one.
     const addMissingSourceTagsToTarget = () => {
       const editor = editorRef.current
       if (!editor) return
-      const {segment} = latestRef.current
-      const missing = segment.missingTagsInTarget ?? []
+      const missing = latestRef.current.segment.missingTagsInTarget ?? []
       const raw = missing.map((tag) => tag.data.encodedText).join('')
       const end = editor.view.state.doc.length
-      silentRef.current = true
       editor.view.dispatch(insertRaw(editor.view.state, end, end, raw), {
         userEvent: 'input',
       })
-      silentRef.current = false
-      const newTranslation = segment.translation + raw
-      const newDecodedTranslation =
-        segment.decodedTranslation +
-        missing.map((tag) => tag.data.placeholder).join('')
-      setTimeout(() => {
-        SegmentActions.updateTranslation(
-          segment.sid,
-          newTranslation,
-          newDecodedTranslation,
-          [...(segment.targetTagMap ?? []), ...missing],
-          [],
-        )
-        SegmentActions.getSegmentsQa({
-          ...latestRef.current.segment,
-          translation: newTranslation,
-        })
-      }, 100)
+      const translation = editor.getValue()
+      setTimeout(
+        () =>
+          SegmentActions.getSegmentsQa({
+            ...latestRef.current.segment,
+            translation,
+          }),
+        100,
+      )
     }
 
     // The toolbar's upper case, lower case and capitalize, applied to the selected text and never to its tags.

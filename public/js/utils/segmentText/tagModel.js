@@ -12,6 +12,35 @@
     },
  */
 
+// A blank (white space but a line feed) outside `<...>`: neither inside an open `<` before it nor before a `>` that
+// closes one.
+const SPACE_REGEX = /(?<!<[^>]*)[^\S\n](?![^<]*>)/g
+const BLANK = /[^\S\n]/
+
+/**
+ * The matches of SPACE_REGEX in `text`, as `[{0: blank, index}]`, in linear time: a pass from the end notes which
+ * positions come before a `>` with no `<` in between, a pass from the start which come after a `<` with no `>`.
+ */
+const findSpaces = (text) => {
+  const beforeClose = new Uint8Array(text.length)
+  let closing = 0
+  for (let i = text.length - 1; i >= 0; i--) {
+    beforeClose[i] = closing
+    if (text[i] === '>') closing = 1
+    else if (text[i] === '<') closing = 0
+  }
+  const matches = []
+  let open = false
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i]
+    if (char === '<') open = true
+    else if (char === '>') open = false
+    else if (!open && !beforeClose[i] && BLANK.test(char))
+      matches.push({0: char, index: i})
+  }
+  return matches
+}
+
 const tagSignaturesMap = {
   ph: {
     type: 'ph',
@@ -234,7 +263,10 @@ const tagSignaturesMap = {
   },
   space: {
     type: 'space',
-    regex: /(?<!<[^>]*)[^\S\n](?![^<]*>)/g,
+    // For the code that needs a RegExp. The tag scan (tagScan.js) uses `find`: the lookarounds scan to the ends of the string
+    // for every blank, quadratic on a long segment.
+    regex: SPACE_REGEX,
+    find: findSpaces,
     selfClosing: true,
     isClosure: false,
     placeholder: '\u00b7',
@@ -282,25 +314,6 @@ const tagSignatures = new Proxy(tagSignaturesMap, {
 const initTagSignature = ({show_whitespace}) => {
   // check space placeholder is active on init
   setTagSignatureMiddleware('space', () => show_whitespace === 1)
-}
-
-function TagStruct(offset = -1, length = 0, type = null, name = null) {
-  this.offset = offset
-  this.length = length
-  this.type = type
-  this.mutability = 'IMMUTABLE'
-  this.data = {
-    id: null,
-    name: name,
-    encodedText: null,
-    decodedText: null,
-    openTagId: null,
-    closeTagId: null,
-    openTagKey: null,
-    closeTagKey: null,
-    placeholder: null,
-    originalOffset: -1,
-  }
 }
 
 const getSplitBlockTag = () => {
@@ -392,7 +405,8 @@ const getTagSignature = (tagType) => {
 
 export {
   tagSignatures,
-  TagStruct,
+  findSpaces,
+  SPACE_REGEX,
   getErrorCheckTag,
   getNoLexiqaTag,
   getNoGlossaryTag,

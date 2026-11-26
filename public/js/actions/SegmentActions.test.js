@@ -530,7 +530,7 @@ describe('SegmentActions — simple dispatch actions', () => {
   })
 
   test('updateTranslation dispatches full payload', () => {
-    SegmentActions.updateTranslation('1', 't', 'd', {}, [], 'l')
+    SegmentActions.updateTranslation('1', 't', 'd', [], 'l')
     expect(AppDispatcher.dispatch).toHaveBeenCalledWith(
       expect.objectContaining({id: '1', translation: 't'}),
     )

@@ -1,4 +1,5 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
+import {toDraftTranslation} from '../../utils/segmentText/draftTagTextCompat'
 /**
  * Set segment to translation on review extended issue panel
  *
@@ -7,7 +8,11 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  */
 export const setTranslation = async (objRequest) => {
   const dataParams = Object.fromEntries(
-    Object.entries(objRequest).filter(([_, v]) => v != null),
+    Object.entries({
+      ...objRequest,
+      // TEMPORARY, see draftTagTextCompat.js
+      translation: toDraftTranslation(objRequest.translation),
+    }).filter(([_, v]) => v != null),
   )
 
   const formData = new FormData()

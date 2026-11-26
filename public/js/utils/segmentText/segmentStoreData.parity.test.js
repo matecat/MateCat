@@ -1,7 +1,12 @@
 // Golden check: segmentStoreData must give the store exactly what the Draft bridges (sourceEditorBridge,
 // targetEditorBridge) gave it, for every segment string: the round-trip corpus and the edge cases below. What the
-// bridges gave is frozen in __golden__/segmentStoreData.json, as JSON: compared after the same JSON round trip, so tag
-// structs are compared by their fields. The edge cases marked below are the exceptions: there Draft was wrong.
+// bridges gave is frozen in __golden__/segmentStoreData.json, as JSON: compared after the same JSON round trip, so tags
+// are compared by their fields. A tag is frozen with the fields the store keeps (its offset, and id, name, encodedText,
+// decodedText, placeholder, index and tagRole of its data), taken from Draft's tag structs. The edge cases marked below
+// are the exceptions: there Draft was wrong. So is every segment with a carriage return (`##$_0D$##`, alone or before
+// a line feed): Draft wrote it as a line feed in the decoded segment and the Lexiqa text, which then had one line
+// break less than the editor text (the editor shows the CR as its own chip), so no Lexiqa warning lined up. Frozen
+// with the CR kept.
 import CORPUS from '../../components/editor/core/__fixtures__/roundTripCorpus.json'
 import {
   charactersCounter,
@@ -26,6 +31,10 @@ const EDGE_CASES = [
   'a##$_A0$##b##$_09$##c',
   '##$_A0$##',
   'Emoji \u{1F600} and \u{20000} astral',
+  // This case and the next are not Draft's values, on purpose: Draft decoded the entities before looking for tags, so
+  // tag markup typed as text (escaped in the segment string) became real <g> tags in the tag maps and raw markup in
+  // the decoded segment. Frozen with that text kept as text: no tags, the decoded segment still escaped. This case
+  // only changes where it is checked against the next one as its source, whose tags it no longer misses.
   '&lt;b&gt; &amp; &amp;lt; text',
   '&lt;g id="1"&gt;escaped&lt;/g&gt;',
   `<ph id="" equiv-text="base64:${b64('{1}')}"/> and <ph id="" equiv-text="base64:${b64('{2}')}"/>`,

@@ -381,7 +381,6 @@ describe('SegmentStore', () => {
         id: '1',
         translation: 'brand new',
         decodedTranslation: 'brand new',
-        tagMap: [],
         missingTagsInTarget: [],
         lxqDecodedTranslation: 'brand new',
       })
@@ -393,13 +392,13 @@ describe('SegmentStore', () => {
     test('updateTranslation marks not modified when equal to original', () => {
       const original =
         SegmentStore.getSegmentByIdToJS('1').originalDecodedTranslation
-      SegmentStore.updateTranslation('1', original, original, [], [], original)
+      SegmentStore.updateTranslation('1', original, original, [], original)
       expect(SegmentStore.getSegmentByIdToJS('1').modified).toBe(false)
     })
 
     test('updateTranslation no-op for unknown segment', () => {
       expect(() =>
-        SegmentStore.updateTranslation('999', 't', 't', [], [], 't'),
+        SegmentStore.updateTranslation('999', 't', 't', [], 't'),
       ).not.toThrow()
     })
 

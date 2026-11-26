@@ -3,6 +3,10 @@ import {createSegmentState} from '../../core/createSegmentEditor'
 import {serialize} from '../../core/docModel'
 import {initTagSignature} from '../../../../utils/segmentText/tagModel'
 import {
+  sourceStoreData,
+  translationUpdate,
+} from '../../../../utils/segmentText/segmentStoreData'
+import {
   alignLexiqaText,
   LEXIQA_CLASS,
   lexiqaDocRanges,
@@ -216,5 +220,39 @@ describe('lexiqaRanges (activateLexiqa on the target)', () => {
       lexiqaRanges(state, {...segment, lexiqa: {source: {a: [{}]}}}, false),
     ).toEqual([])
     expect(mockGetRanges).not.toHaveBeenCalled()
+  })
+})
+
+describe('a segment with a CR LF line break', () => {
+  // The store builds the Lexiqa text from the decoded segment. Turning the CR into a line feed there left the Lexiqa
+  // text one line break short of the editor text, which shows the CR as its own chip: no warning lined up.
+  const segment = 'First line##$_0D$####$_0A$##second wrng word'
+
+  beforeEach(() => {
+    Object.assign(global.config, {
+      lfPlaceholder: '##$_0A$##',
+      crPlaceholder: '##$_0D$##',
+      tabPlaceholder: '##$_09$##',
+      nbspPlaceholder: '##$_A0$##',
+    })
+  })
+
+  test.each([
+    ['source', () => sourceStoreData(segment).lxqText],
+    [
+      'target',
+      () =>
+        translationUpdate(segment, sourceStoreData(segment).tagRange)
+          .lxqDecodedTranslation,
+    ],
+  ])('shows a warning of the %s on its word', (_, storedLexiqaText) => {
+    const state = createSegmentState(segment)
+    const text = storedLexiqaText()
+
+    expect(
+      lexiqaDocRanges(state, [warningOn(text, 'wrng')], text).map(
+        ({from, to}) => state.sliceDoc(from, to),
+      ),
+    ).toEqual(['wrng'])
   })
 })
