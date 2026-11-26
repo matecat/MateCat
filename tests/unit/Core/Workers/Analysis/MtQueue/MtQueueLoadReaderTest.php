@@ -287,7 +287,7 @@ class MtQueueLoadReaderTest extends AbstractTest
         $loads = $this->reader([11])->read($this->amq($redis, ['analysis_queue_P4' => 500]), ['P4' => self::p4()]);
 
         $this->assertSame(1, $loads[0]->workers);
-        $this->assertTrue($loads[0]->isUsable());
+        $this->assertTrue($loads[0]->isAvailable());
         $this->assertSame(
             [['queue' => 'P4', 'part' => 'workers', 'error' => 'set read failed']],
             $this->loggedContexts('mt_queue_load_unreadable')

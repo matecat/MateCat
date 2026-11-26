@@ -34,8 +34,12 @@ final class MtQueueSelector
     }
 
     /**
-     * Chooses the queue for a project: the one already analysing it, else the lightest available queue,
-     * else the lightest usable queue, else the first queue.
+     * Chooses the queue for a project: the one already analysing it, else the lightest available queue, else
+     * the first queue.
+     *
+     * No queue is available only in a short race: the daemon checks the queues before it picks each project,
+     * and holds MT projects in NEW while every queue is unavailable. A project caught in that race goes to the
+     * first queue and waits there.
      *
      * Example: for pid 77, P4 at 5000 and P5 at 100 gives P5, unless P4 already lists pid 77 as live.
      *
@@ -57,11 +61,9 @@ final class MtQueueSelector
             }
         }
 
-        $usableQueues    = array_filter($loads, static fn(MtQueueLoad $load): bool => $load->isUsable());
-        $availableQueues = array_filter($usableQueues, static fn(MtQueueLoad $load): bool => $load->isAvailable());
+        $availableQueues = array_filter($loads, static fn(MtQueueLoad $load): bool => $load->isAvailable());
 
-        // Prefer an available queue, then any usable one, then the first queue (only when nothing is usable).
-        return self::lightest($availableQueues) ?? self::lightest($usableQueues) ?? $loads[0];
+        return self::lightest($availableQueues) ?? $loads[0];
     }
 
     /**

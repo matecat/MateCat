@@ -89,11 +89,12 @@ class MtQueueSelectorTest extends AbstractTest
                 [self::load('P4', 100, liveProjects: 80), self::load('P5', 30000, maxSegments: 50000)],
                 'P5',
             ],
-            'both full, lower load wins'      => [[self::load('P4', 30000), self::load('P5', 28000)], 'P5'],
+            // nothing available happens only in a race after the hold check: the project goes to the first queue
+            'both full, first wins'           => [[self::load('P4', 30000), self::load('P5', 28000)], 'P4'],
             'known load beats unknown'        => [[self::load('P4', 5000), self::load('P5', null)], 'P4'],
             'both unknown, first wins'        => [[self::load('P4', null), self::load('P5', null)], 'P4'],
             'queue with no worker is skipped' => [[self::load('P4', 9000), self::load('P5', 10, workers: 0)], 'P4'],
-            'nothing usable, first wins'      => [[self::load('P4', 9000, workers: 0), self::load('P5', 10, workers: 0)], 'P4'],
+            'no worker anywhere, first wins'  => [[self::load('P4', 9000, workers: 0), self::load('P5', 10, workers: 0)], 'P4'],
         ];
     }
 

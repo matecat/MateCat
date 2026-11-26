@@ -41,23 +41,14 @@ final readonly class MtQueueLoad
     }
 
     /**
-     * Tells whether the queue may take a new project: it has workers and is not being drained.
+     * Tells whether a new project can go here now: the queue has workers, is not being drained and is not full.
      *
-     * Example: 30 workers with `accept_new_projects` off is not usable.
-     */
-    public function isUsable(): bool
-    {
-        return $this->workers > 0 && $this->context->accept_new_projects;
-    }
-
-    /**
-     * Tells whether a new project can go here now: the queue is usable and not full.
-     *
-     * Example: P5 with 30 workers and 100 segments queued under a 25000 cap is available.
+     * Example: P5 with 30 workers and 100 segments queued under a 25000 cap is available; with
+     * `accept_new_projects` off, or with no worker, it is not.
      */
     public function isAvailable(): bool
     {
-        return $this->isUsable() && !$this->isFull();
+        return $this->workers > 0 && $this->context->accept_new_projects && !$this->isFull();
     }
 
     /**

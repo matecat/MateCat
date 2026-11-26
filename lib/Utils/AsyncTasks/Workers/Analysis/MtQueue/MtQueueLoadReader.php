@@ -89,7 +89,7 @@ final class MtQueueLoadReader
      *
      * The broker size, the live projects and the workers are read one by one. A part that cannot be read is
      * logged (at most once a minute) and stays unknown, and an unknown value never makes a queue full; unknown
-     * workers count as one, so the queue stays usable. Call it outside any open transaction: a failed DB read
+     * workers count as one, so a failed read alone never makes the queue unavailable. Call it outside any open transaction: a failed DB read
      * inside one would mark the caller's transaction unable to commit, even though this method catches it.
      *
      * Example: ['P4' => <P4 context>] with 500 messages in the broker gives one MtQueueLoad with segmentLoad 500.

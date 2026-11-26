@@ -975,7 +975,7 @@ class FastAnalysisTest extends AbstractTest
         // _fPid processing lock is NOT released.
         [$daemon, $redis] = $this->daemonLockingOneProject(fn () => 1);
 
-        $result = $this->invoke($daemon, '_getLockProjectForVolumeAnalysis', 5);
+        $result = $this->invoke($daemon, '_lockNextProjectToAnalyze');
 
         $this->assertCount(1, $result);
         $this->assertSame('42', array_values($result)[0]['id']);
@@ -992,7 +992,7 @@ class FastAnalysisTest extends AbstractTest
             fn () => throw new PDOException('master write failed')
         );
 
-        $result = $this->invoke($daemon, '_getLockProjectForVolumeAnalysis', 5);
+        $result = $this->invoke($daemon, '_lockNextProjectToAnalyze');
 
         $this->assertSame([], $result, 'the un-BUSYable project must not be returned to main()');
         $this->assertSame(
@@ -1012,7 +1012,7 @@ class FastAnalysisTest extends AbstractTest
             fn () => throw new \TypeError('unexpected type from DAO')
         );
 
-        $result = $this->invoke($daemon, '_getLockProjectForVolumeAnalysis', 5);
+        $result = $this->invoke($daemon, '_lockNextProjectToAnalyze');
 
         $this->assertSame([], $result);
         $this->assertSame([['_fPid:42', $this->acquiredToken($redis)]], $this->releasedLocks($redis));
@@ -1106,7 +1106,7 @@ class FastAnalysisTest extends AbstractTest
         // manual Redis delete).
         [$daemon, $redis] = $this->daemonLockingOneProject(fn () => 1); // acquired + BUSY ok
 
-        $this->invoke($daemon, '_getLockProjectForVolumeAnalysis', 5);
+        $this->invoke($daemon, '_lockNextProjectToAnalyze');
 
         $this->assertContains(['set', '_fPid:42', $this->acquiredToken($redis), 'EX', 86400, 'NX'], $redis->calls);
         foreach ($redis->calls as $call) {
@@ -1121,7 +1121,7 @@ class FastAnalysisTest extends AbstractTest
         [$daemon, $redis] = $this->daemonLockingOneProject(fn () => 1);
         $this->setProp($daemon, 'processingLockTokens', [7 => 'token-of-the-previous-batch']);
 
-        $this->invoke($daemon, '_getLockProjectForVolumeAnalysis', 5);
+        $this->invoke($daemon, '_lockNextProjectToAnalyze');
 
         $tokens = (new ReflectionClass(FastAnalysis::class))->getProperty('processingLockTokens')->getValue($daemon);
         $this->assertSame([42 => $this->acquiredToken($redis)], $tokens);
@@ -1135,7 +1135,7 @@ class FastAnalysisTest extends AbstractTest
         [$daemon, $redis] = $this->daemonLockingOneProject(fn () => 1);
         $redis->setReturn = null; // NX failed
 
-        $result = $this->invoke($daemon, '_getLockProjectForVolumeAnalysis', 5);
+        $result = $this->invoke($daemon, '_lockNextProjectToAnalyze');
 
         $this->assertSame([], $result);
         $this->assertSame([], $this->releasedLocks($redis));
@@ -1293,7 +1293,7 @@ class FastAnalysisTest extends AbstractTest
         [$daemon] = $this->daemonLockingOneProject(fn () => 1, $queues);
         $daemon->loadsScript = $loads === null ? null : [$loads];
 
-        $this->invoke($daemon, '_getLockProjectForVolumeAnalysis', 5);
+        $this->invoke($daemon, '_lockNextProjectToAnalyze');
 
         [$sql, $params] = self::pickQuery($daemon);
         $mtClassParams  = array_filter($params, fn (string $name): bool => str_starts_with($name, 'mt_class_'), ARRAY_FILTER_USE_KEY);
@@ -1316,10 +1316,24 @@ class FastAnalysisTest extends AbstractTest
     {
         [$daemon] = $this->daemonLockingOneProject(fn () => 1);
 
-        $this->invoke($daemon, '_getLockProjectForVolumeAnalysis', 5);
+        $this->invoke($daemon, '_lockNextProjectToAnalyze');
 
         // the routing log of a later task reads the project age
         $this->assertStringContainsString('p.create_date', self::pickQuery($daemon)[0]);
+    }
+
+    /**
+     * One project per pick: the MT queue hold check runs before each one, so a queue goes at most one project
+     * past its cap.
+     */
+    #[Test]
+    public function lockNextProjectToAnalyzeTakesOneProjectAtATime(): void
+    {
+        [$daemon] = $this->daemonLockingOneProject(fn () => 1);
+
+        $this->invoke($daemon, '_lockNextProjectToAnalyze');
+
+        $this->assertMatchesRegularExpression('/ORDER BY id LIMIT 1\s*$/', self::pickQuery($daemon)[0]);
     }
 
     #[Test]
@@ -1329,7 +1343,7 @@ class FastAnalysisTest extends AbstractTest
         [$daemon] = $this->daemonLockingOneProject(fn () => 1, ['P4' => $p4]);
         $daemon->loadsScript = [[self::mtLoad('P4', $p4, 25000)]];
 
-        $this->invoke($daemon, '_getLockProjectForVolumeAnalysis', 5);
+        $this->invoke($daemon, '_lockNextProjectToAnalyze');
 
         $this->assertSame(['loads', 'transaction', 'prepare'], array_slice(array_column($daemon->events, 0), 0, 3));
     }
@@ -2792,7 +2806,7 @@ class FastAnalysisMainProbe extends FastAnalysis
         }
     }
 
-    protected function _getLockProjectForVolumeAnalysis(int $limit = 1): array
+    protected function _lockNextProjectToAnalyze(): array
     {
         $batch = array_shift($this->lockBatches) ?? [];
 

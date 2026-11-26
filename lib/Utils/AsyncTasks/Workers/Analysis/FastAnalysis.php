@@ -211,7 +211,7 @@ class FastAnalysis extends AbstractDaemon
 
     /**
      * The release token of each processing lock taken by the current batch, keyed by project id.
-     * Example: [1606 => '9f86d081884c7d65...'] after _getLockProjectForVolumeAnalysis() locked project 1606.
+     * Example: [1606 => '9f86d081884c7d65...'] after _lockNextProjectToAnalyze() locked project 1606.
      *
      * @var array<int, string>
      */
@@ -416,7 +416,7 @@ class FastAnalysis extends AbstractDaemon
 
             try {
                 $this->_checkDatabaseConnection();
-                $projects_list = $this->_getLockProjectForVolumeAnalysis(5);
+                $projects_list = $this->_lockNextProjectToAnalyze();
             } catch (PDOException $e) {
                 $this->logger->debug($e->getMessage() . " - Error again. Try to reconnect in next cycle.");
                 sleep(3); // wait for reconnection
@@ -863,7 +863,7 @@ class FastAnalysis extends AbstractDaemon
     }
 
     /**
-     * Reverse the BUSY status + processing lock taken in _getLockProjectForVolumeAnalysis
+     * Reverse the BUSY status + processing lock taken in _lockNextProjectToAnalyze
      * so a project that failed mid-processing is not stranded forever. The picker selects
      * only STATUS_NEW and the _fPid lock would otherwise block re-pickup for its full 24h
      * TTL, so both must be undone here.
@@ -1804,12 +1804,19 @@ HD;
     }
 
     /**
-     * @param int $limit
+     * Picks the NEW project with the lowest id and takes its Redis processing lock; [] when none can be taken.
+     *
+     * It takes one project at a time on purpose. The MT queue hold check runs once per pick, before the
+     * project is chosen, so each Lara project is checked against fresh queue loads and a queue goes at most
+     * one project past its cap. With several projects per pick, all of them would go in on the same check.
+     * The result is still a list, empty or with one row, so main() keeps a single loop over it.
+     *
+     * Example: with NEW projects 11 and 12 waiting, it gives [<row of project 11>].
      *
      * @return array<int, array<string, mixed>>
      * @throws Throwable
      */
-    protected function _getLockProjectForVolumeAnalysis(int $limit = 1): array
+    protected function _lockNextProjectToAnalyze(): array
     {
         // Read the MT queue loads before the transaction opens. The read can wait on Jolokia up to 3 s per
         // queue, and a failed DB read inside an open transaction would mark it unable to commit.
@@ -1826,6 +1833,9 @@ HD;
         // While no MT queue can take a project, skip every project with a job on an MT engine; the others go on.
         // A skipped project stays NEW, so the next cycle tries it again. One MT job is enough to hold the whole
         // project: project creation gives every job the same engine, and holding a mixed one errs on the safe side.
+        // Cost: MySQL walks the NEW projects in id order and runs this check on each one until it finds a project
+        // it may pick, so every held Lara project older than that one is checked again on each pick. The work
+        // grows with the projects waiting in NEW, not with the projects table, and is paid only while held.
         $and_NotMtProject = null;
         if ($holdMtProjects) {
             $placeholders = [];
@@ -1845,7 +1855,7 @@ HD;
             INNER JOIN jobs j ON j.id_project=p.id
             WHERE status_analysis = :project_status $and_InstanceId $and_NotMtProject
             GROUP BY p.id
-        ORDER BY id LIMIT " . $limit;
+        ORDER BY id LIMIT 1";
 
         $db = $this->db();
         // Needed to address the query to the master database if exists

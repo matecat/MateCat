@@ -66,32 +66,27 @@ class MtQueueLoadTest extends AbstractTest
     }
 
     /**
-     * Rows: registered workers, accept_new_projects, expected verdict.
+     * Rows: registered workers, accept_new_projects, segment load under a 25000 cap, expected verdict.
      *
-     * @return array<string, array{int, bool, bool}>
+     * @return array<string, array{int, bool, int, bool}>
      */
-    public static function usableProvider(): array
+    public static function availableProvider(): array
     {
         return [
-            'no workers'         => [0, true, false],
-            'workers, draining'  => [30, false, false],
-            'workers, accepting' => [30, true, true],
+            'workers, accepting, room' => [30, true, 100, true],
+            'no workers'               => [0, true, 100, false],
+            'workers, draining'        => [30, false, 100, false],
+            'workers, accepting, full' => [30, true, 25000, false],
         ];
     }
 
     #[Test]
-    #[DataProvider('usableProvider')]
-    public function isUsableNeedsWorkersAndNewProjectsAccepted(int $workers, bool $acceptsNewProjects, bool $expected): void
+    #[DataProvider('availableProvider')]
+    public function isAvailableNeedsWorkersNewProjectsAcceptedAndRoom(int $workers, bool $acceptsNewProjects, int $segmentLoad, bool $expected): void
     {
-        $this->assertSame($expected, self::load(workers: $workers, acceptsNewProjects: $acceptsNewProjects)->isUsable());
-    }
+        $load = self::load(maxSegments: 25000, segmentLoad: $segmentLoad, workers: $workers, acceptsNewProjects: $acceptsNewProjects);
 
-    #[Test]
-    public function isAvailableNeedsAUsableQueueThatIsNotFull(): void
-    {
-        $this->assertTrue(self::load(maxSegments: 25000, segmentLoad: 100)->isAvailable());
-        $this->assertFalse(self::load(maxSegments: 25000, segmentLoad: 25000)->isAvailable());
-        $this->assertFalse(self::load(maxSegments: 25000, segmentLoad: 100, workers: 0)->isAvailable());
+        $this->assertSame($expected, $load->isAvailable());
     }
 
     #[Test]
