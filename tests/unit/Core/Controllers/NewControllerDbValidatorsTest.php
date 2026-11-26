@@ -112,7 +112,7 @@ class NewControllerDbValidatorsTest extends AbstractTest
         return $this->reflector->getMethod($name)->invokeArgs($this->controller, $args);
     }
 
-    private function mtEngine(int $ownerUid, bool $builtInQualityEstimation = false): AbstractEngine
+    private function mtEngine(int $ownerUid): AbstractEngine
     {
         $record = EngineStruct::getStruct();
         $record->id = self::BASE + 30;
@@ -120,9 +120,25 @@ class NewControllerDbValidatorsTest extends AbstractTest
 
         $engine = $this->createStub(AbstractEngine::class);
         $engine->method('getEngineRecord')->willReturn($record);
-        $engine->method('hasBuiltInQualityEstimation')->willReturn($builtInQualityEstimation);
 
         return $engine;
+    }
+
+    private function seedRetiredModernMtEngine(int $uid): int
+    {
+        $engine = new EngineStruct();
+        $engine->name = 'ctrltest modernmt engine';
+        $engine->type = EngineConstants::MT;
+        $engine->description = 'ctrltest modernmt engine';
+        $engine->base_url = 'https://example.invalid/api';
+        $engine->others = [];
+        $engine->extra_parameters = [];
+        $engine->class_load = 'MMT'; // the class was removed with ModernMT Full
+        $engine->penalty = 14;
+        $engine->active = true;
+        $engine->uid = $uid;
+
+        return (int)(new EngineDAO(obtainTestDatabase()))->create($engine)->id;
     }
 
     private function seedLaraEngine(int $uid): void
@@ -239,6 +255,31 @@ class NewControllerDbValidatorsTest extends AbstractTest
         $this->invokeMethod('validateQaModelTemplate', [(string)(self::BASE + 8)]);
     }
 
+    // ──────────────── validateEngines() ────────────────
+
+    /**
+     * A ModernMT Full engine id still sent by an API script: the row is there, the class is gone.
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function validateEngines_refuses_a_retired_modernmt_engine_with_a_clear_message(): void
+    {
+        $this->setLoggedIn();
+        $engineId = $this->seedRetiredModernMtEngine(self::BASE + 20);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Engine is no longer available');
+        $this->expectExceptionCode(-2);
+
+        $this->invokeMethod('validateEngines', [1, $engineId]);
+    }
+
+    private function setLoggedIn(): void
+    {
+        $this->reflector->getProperty('userIsLogged')->setValue($this->controller, true);
+    }
+
     // ──────────────── validateMtEvaluationLicense() ────────────────
 
     /**
@@ -272,22 +313,10 @@ class NewControllerDbValidatorsTest extends AbstractTest
      * @throws ReflectionException
      */
     #[Test]
-    public function validateMtEvaluationLicense_accepts_an_engine_with_its_own_score_without_a_lara_engine(): void
-    {
-        $engine = $this->mtEngine(self::BASE + 20, builtInQualityEstimation: true);
-
-        $this->assertNull($this->invokeMethod('validateMtEvaluationLicense', [$engine]));
-    }
-
-    /**
-     * @throws ReflectionException
-     */
-    #[Test]
     public function validateMtEvaluationLicense_accepts_a_lara_engine_without_looking_up_the_owner(): void
     {
         $engine = $this->createMock(Lara::class);
         $engine->expects($this->never())->method('getEngineRecord');
-        $engine->method('hasBuiltInQualityEstimation')->willReturn(false);
 
         $this->assertNull($this->invokeMethod('validateMtEvaluationLicense', [$engine]));
     }

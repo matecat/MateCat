@@ -33,7 +33,7 @@ class LaraQualityEstimator
     }
 
     /**
-     * Sets the Lara score on the first match, unless the engine computes its own score.
+     * Sets the Lara score on the first match.
      * An active Lara engine scores with its own client, the one that just translated; any other
      * engine is scored with its owner's active Lara engine. Without one, or when the lookup or Lara
      * fails, the score stays null and a warning is logged: this method never throws, so a failed
@@ -67,7 +67,7 @@ class LaraQualityEstimator
     /**
      * Returns the match to score, or null when no score is wanted or there is nothing to score.
      *
-     * Example: a 500 response, or an engine with its own score, gives null.
+     * Example: a 500 response, or a match with an empty translation, gives null.
      *
      * @param array<string, mixed> $engineConfig
      */
@@ -76,7 +76,6 @@ class LaraQualityEstimator
         $match = $response->matches[0] ?? null;
 
         if (empty($engineConfig['include_score'])
-            || $mtEngine->hasBuiltInQualityEstimation()
             || $response->responseStatus >= 400
             || $match === null
             || $match->raw_translation === ''

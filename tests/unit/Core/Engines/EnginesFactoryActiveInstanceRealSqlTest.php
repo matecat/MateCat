@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Matecat\Core\Engines;
 
+use DomainException;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\RealSqlDaoTestTrait;
 use Model\Engines\EngineDAO;
@@ -11,6 +12,7 @@ use Model\Engines\Structs\EngineStruct;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Utils\Constants\EngineConstants;
+use Utils\Engines\AbstractEngine;
 use Utils\Engines\DeepL;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\Lara;
@@ -94,6 +96,28 @@ class EnginesFactoryActiveInstanceRealSqlTest extends AbstractTest
         $this->createEngine($this->uid, Lara::class);
 
         self::assertNull(EnginesFactory::getActiveInstanceByUserAndClass(null, $this->realSqlDb(), Lara::class));
+    }
+
+    #[Test]
+    public function getInstanceByIdAndUserRefusesAnEngineWhoseClassWasRemoved(): void
+    {
+        // ModernMT Full: the row is still there, but its class is gone, so EngineDAO builds it as NONE.
+        $id = $this->createEngine($this->uid, 'MMT');
+
+        $this->expectException(DomainException::class);
+        $this->expectExceptionMessage('Engine is no longer available');
+
+        EnginesFactory::getInstanceByIdAndUser($id, $this->uid, $this->realSqlDb(), AbstractEngine::class);
+    }
+
+    #[Test]
+    public function getInstanceByIdAndUserStillReturnsTheUsersEngine(): void
+    {
+        $id = $this->createEngine($this->uid, Lara::class);
+
+        $engine = EnginesFactory::getInstanceByIdAndUser($id, $this->uid, $this->realSqlDb(), AbstractEngine::class);
+
+        self::assertSame($id, $engine->getEngineRecord()->id);
     }
 
     /**

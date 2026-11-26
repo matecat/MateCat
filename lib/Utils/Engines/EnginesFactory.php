@@ -108,6 +108,13 @@ class EnginesFactory
         $engine = self::getInstance($engineId, $database, $engineClass);
         $engineRecord = $engine->getEngineRecord();
 
+        // The row exists, but its class was removed (ModernMT Full): EngineDAO builds it as the
+        // NONE placeholder, whose id is 0 and uid null, so the ownership check below would blame
+        // the user for an engine that is simply gone.
+        if ($engineRecord->id !== $engineId) {
+            throw new DomainException("Engine is no longer available");
+        }
+
         if ($engineRecord->uid != $uid) {
             throw new AuthorizationError("Engine doesn't belong to the user");
         }

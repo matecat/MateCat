@@ -100,16 +100,6 @@ class LaraQualityEstimatorTest extends AbstractTest
     }
 
     #[Test]
-    public function scoreIfRequestedSkipsEnginesWithBuiltInQualityEstimation(): void
-    {
-        $this->response->matches = [$this->match(['score' => 0.95])];
-
-        $this->assertSkipped($this->mtEngine(builtInQualityEstimation: true));
-
-        self::assertSame(0.95, $this->response->matches[0]->score);
-    }
-
-    #[Test]
     public function scoreIfRequestedSkipsAnErrorResponse(): void
     {
         $this->response->responseStatus = 400;
@@ -260,10 +250,9 @@ class LaraQualityEstimatorTest extends AbstractTest
     /**
      * A non-Lara MT engine on the base record.
      */
-    private function mtEngine(bool $builtInQualityEstimation = false): EngineInterface
+    private function mtEngine(): EngineInterface
     {
         $mtEngine = $this->createStub(EngineInterface::class);
-        $mtEngine->method('hasBuiltInQualityEstimation')->willReturn($builtInQualityEstimation);
         $mtEngine->method('getEngineRecord')->willReturn($this->record);
 
         return $mtEngine;

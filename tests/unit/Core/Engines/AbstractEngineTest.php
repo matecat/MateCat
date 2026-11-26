@@ -285,12 +285,6 @@ class AbstractEngineTest extends AbstractTest
     }
 
     #[Test]
-    public function hasBuiltInQualityEstimationIsFalse(): void
-    {
-        self::assertFalse($this->engine->hasBuiltInQualityEstimation());
-    }
-
-    #[Test]
     public function getG2FallbackSecretKeyReturnsNullWhenFileMissingAndReadsIniWhenPresent(): void
     {
         $originalRoot = AppConfig::$ROOT;

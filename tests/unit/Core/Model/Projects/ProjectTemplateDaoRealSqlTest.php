@@ -522,6 +522,30 @@ class ProjectTemplateDaoRealSqlTest extends AbstractTest
         self::assertGreaterThan(0, $created->id);
     }
 
+    public function testCreateFromJSONThrowsOnAnEngineWhoseClassWasRemoved(): void
+    {
+        // ModernMT Full: the row is still there, but its class is gone, so it reads back as NONE (id 0).
+        $conn = $this->realSqlDb()->getConnection();
+        $conn->prepare(
+            "INSERT INTO engines (name, type, description, base_url, class_load, active, uid)
+             VALUES ('rsq retired', 'MT', 'retired', 'https://example.invalid', 'MMT', 1, ?)"
+        )->execute([$this->uid]);
+        $engineId = (int)$conn->lastInsertId();
+
+        $json = $this->newDecodedJson('retired mt');
+        $json->mt = (object)['id' => $engineId];
+
+        try {
+            $this->dao->createFromJSON($json, $this->user);
+            self::fail('A template on a retired engine was accepted');
+        } catch (Exception $e) {
+            self::assertSame('Engine is no longer available.', $e->getMessage());
+            self::assertSame(400, $e->getCode());
+        } finally {
+            $conn->prepare('DELETE FROM engines WHERE id = ?')->execute([$engineId]);
+        }
+    }
+
     public function testCreateFromJSONThrowsWhenTmKeyNotOwned(): void
     {
         $json = $this->newDecodedJson('with tm');
