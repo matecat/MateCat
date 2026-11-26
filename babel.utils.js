@@ -12,9 +12,9 @@ const targetsMap = {
 const getBabelPresets = (env = 'browser') => {
   return {
     presets: [
-      // Babel 8 defaults to the automatic runtime. Tests that mock `react`
-      // with only `createElement` need JSX compiled to React.createElement.
-      ['@babel/preset-react', {runtime: 'classic'}],
+      // The automatic runtime, as Vite builds the app: JSX imports
+      // react/jsx-runtime, so a test that mocks `react` must keep the real module.
+      ['@babel/preset-react', {runtime: 'automatic'}],
       ['@babel/preset-env', {targets: targetsMap[env]}],
     ],
     compact: true,

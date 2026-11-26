@@ -4,6 +4,7 @@
 // suggestions replace the warned text (in the target) and Ignore drops the warning (LXQ.ignoreError).
 import React from 'react'
 import {createRoot} from 'react-dom/client'
+import {rootErrorOptions} from '../../../utils/rootErrorOptions'
 import {EditorView} from '@codemirror/view'
 import {layerRangesAt, replaceLayerRange} from '../core/layers'
 import {layerHover} from '../core/layerHover'
@@ -81,7 +82,7 @@ export const createLayerTooltip =
     if (!content) return null
     const dom = document.createElement('div')
     dom.className = 'cm-layer-tooltip'
-    const root = createRoot(dom)
+    const root = createRoot(dom, rootErrorOptions)
     root.render(
       <Tooltip
         mode={TOOLTIP_MODE.STATIC}

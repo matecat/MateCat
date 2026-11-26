@@ -100,6 +100,9 @@ const OutsourceContainer = ({
       {openOutsource || showTranslatorBox ? (
         <CSSTransition
           key={idJobLabel}
+          // Without nodeRef the transition looks its node up with findDOMNode,
+          // which React 19 removed: opening the panel would throw.
+          nodeRef={containerRef}
           classNames="transitionOutsource"
           timeout={{enter: 500, exit: 300}}
         >

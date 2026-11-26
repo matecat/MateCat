@@ -100,7 +100,7 @@ module.exports = {
       // Injected by the server template, same as under public/js.
       globals: {config: 'readonly'},
       extends: ['plugin:react/recommended', 'plugin:react-hooks/recommended'],
-      settings: {react: {version: '16.9'}},
+      settings: {react: {version: 'detect'}},
       rules: {
         'react/prop-types': 'off',
         // @vitejs/plugin-react builds these with the automatic JSX runtime, so
@@ -131,7 +131,7 @@ module.exports = {
       parserOptions: babelParserOptions(browserEcmaVersion),
       extends: ['plugin:react/recommended', 'plugin:react-hooks/recommended'],
       settings: {
-        react: {version: '16.9'},
+        react: {version: 'detect'},
       },
       rules: {
         'react/prop-types': 'off',

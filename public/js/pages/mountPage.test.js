@@ -1,5 +1,5 @@
 import React from 'react'
-import {render} from '@testing-library/react'
+import {render, screen} from '@testing-library/react'
 
 const mockRender = jest.fn()
 const mockCreateRoot = jest.fn(() => ({render: mockRender}))
@@ -20,6 +20,7 @@ jest.mock('../components/notificationsComponent/NotificationBox', () => () => (
 ))
 
 import {mountPage} from './mountPage'
+import {rootErrorOptions} from '../utils/rootErrorOptions'
 
 // Captures and returns only the DOMContentLoaded handler just registered by
 // the mountPage() call under test, so tests don't trigger stale listeners
@@ -57,7 +58,7 @@ describe('mountPage', () => {
     )
     handler()
 
-    expect(mockCreateRoot).toHaveBeenCalledWith(rootElement)
+    expect(mockCreateRoot).toHaveBeenCalledWith(rootElement, rootErrorOptions)
     expect(mockRender).toHaveBeenCalledTimes(1)
 
     const renderedElement = mockRender.mock.calls[0][0]
@@ -73,6 +74,27 @@ describe('mountPage', () => {
     ).toBeInTheDocument()
   })
 
+  test('a page that crashes while rendering is replaced by the error fallback', () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {})
+    const rootElement = document.createElement('div')
+    const CrashingPage = () => {
+      throw new Error('page crashed')
+    }
+
+    const handler = captureLatestDOMContentLoadedHandler(() =>
+      mountPage({Component: CrashingPage, rootElement}),
+    )
+    handler()
+    render(mockRender.mock.calls[0][0])
+    console.error.mockRestore()
+
+    expect(
+      screen.getByRole('heading', {name: 'Something went wrong'}),
+    ).toBeInTheDocument()
+    expect(screen.queryByTestId('application-wrapper')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('modal-window')).not.toBeInTheDocument()
+  })
+
   test('mounts NotificationBox when a .notifications-wrapper element exists', () => {
     const rootElement = document.createElement('div')
     const notifWrapper = document.createElement('div')
@@ -85,7 +107,11 @@ describe('mountPage', () => {
     handler()
 
     expect(mockCreateRoot).toHaveBeenCalledTimes(2)
-    expect(mockCreateRoot).toHaveBeenNthCalledWith(2, notifWrapper)
+    expect(mockCreateRoot).toHaveBeenNthCalledWith(
+      2,
+      notifWrapper,
+      rootErrorOptions,
+    )
     expect(mockRender).toHaveBeenCalledTimes(2)
   })
 

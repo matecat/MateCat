@@ -1,9 +1,10 @@
-import React, {useContext, useEffect, useRef, useState} from 'react'
+import React, {useContext, useEffect, useRef} from 'react'
 import Switch from '../../../../common/Switch'
 import {WordsBadge} from '../../../../common/WordsBadge/WordsBadge'
 import {FiltersParamsContext} from './FiltersParamsContext'
 import {Controller, useForm} from 'react-hook-form'
 import {isEqual} from 'lodash'
+import {useWatchedFormValues} from '../../../../../hooks/useWatchedFormValues'
 
 export const MsWord = () => {
   const {
@@ -14,20 +15,10 @@ export const MsWord = () => {
 
   const {control, watch, setValue} = useForm()
 
-  const [formData, setFormData] = useState()
-
   const msWord = useRef()
   msWord.current = currentTemplate.msWord
 
-  const temporaryFormData = watch()
-  const previousData = useRef()
-
-  useEffect(() => {
-    if (!isEqual(temporaryFormData, previousData.current))
-      setFormData(temporaryFormData)
-
-    previousData.current = temporaryFormData
-  }, [temporaryFormData])
+  const formData = useWatchedFormValues(watch)
 
   useEffect(() => {
     if (typeof formData === 'undefined') return

@@ -1,7 +1,14 @@
 import React, {lazy, Suspense, useEffect, useRef, useState} from 'react'
+import {ErrorBoundary} from '../common/ErrorBoundary'
 
 // react-joyride is only needed while a tour can run: users who dismissed it never download it.
-const Joyride = lazy(() => import('react-joyride'))
+const Joyride = lazy(() =>
+  import('react-joyride').then(({Joyride}) => ({default: Joyride})),
+)
+// The tour is optional: if its code cannot be loaded (a chunk gone after a
+// deploy, a network failure) it is left out instead of taking the page down
+// to the page error card. The root's onCaughtError still passes the error on to
+// error tracking, which may drop a network failure it is set to ignore.
 // react-joyride's STATUS.FINISHED and STATUS.SKIPPED, inlined so the library stays out of the page.
 const TOUR_DONE_STATUSES = ['finished', 'skipped']
 // react-joyride's EVENTS.TOOLTIP: a step's tooltip was shown to the user.
@@ -30,7 +37,7 @@ export const OnboardingTooltips = ({show, page}) => {
             </p>
           </div>
         ),
-        disableBeacon: true,
+        skipBeacon: true,
         placement: 'bottom-end',
       },
     ],
@@ -49,7 +56,7 @@ export const OnboardingTooltips = ({show, page}) => {
             </ul>
           </div>
         ),
-        disableBeacon: true,
+        skipBeacon: true,
         placement: 'bottom-end',
       },
       {
@@ -63,7 +70,7 @@ export const OnboardingTooltips = ({show, page}) => {
             </p>
           </div>
         ),
-        disableBeacon: true,
+        skipBeacon: true,
         placement: 'bottom-end',
       },
     ],
@@ -90,20 +97,29 @@ export const OnboardingTooltips = ({show, page}) => {
   }, [show])
 
   return !localStorageItem ? (
-    <Suspense fallback={null}>
-      <Joyride
-        callback={closeCallback}
-        steps={steps[page]}
-        run={run}
-        styles={{
-          options: {
+    <ErrorBoundary fallback={null}>
+      <Suspense fallback={null}>
+        <Joyride
+          onEvent={closeCallback}
+          steps={steps[page]}
+          run={run}
+          // Text and overlay colours as react-joyride 2 drew them. With the
+          // target blocked, a click on the highlighted element is absorbed and
+          // does nothing, so the element cannot be used during the tour; only a
+          // click on the dark overlay around it closes the step.
+          options={{
             primaryColor: '#0099cc',
-          },
-          tooltipContainer: {
-            textAlign: 'left',
-          },
-        }}
-      ></Joyride>
-    </Suspense>
+            textColor: '#333',
+            overlayColor: 'rgba(0, 0, 0, 0.5)',
+            blockTargetInteraction: true,
+          }}
+          styles={{
+            tooltipContainer: {
+              textAlign: 'left',
+            },
+          }}
+        ></Joyride>
+      </Suspense>
+    </ErrorBoundary>
   ) : null
 }

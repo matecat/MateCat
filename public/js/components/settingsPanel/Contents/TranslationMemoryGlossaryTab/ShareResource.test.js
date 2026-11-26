@@ -45,8 +45,8 @@ test('submitting an invalid email shows a notification and disables the submit b
   const input = screen.getByPlaceholderText(
     'Enter email addresses separated by comma',
   )
-  await act(async () => user.type(input, 'not-an-email'))
-  await act(async () => user.click(screen.getByText('Share')))
+  await user.type(input, 'not-an-email')
+  await user.click(screen.getByText('Share'))
 
   expect(CatToolActions.addNotification).toHaveBeenCalledWith(
     expect.objectContaining({
@@ -70,8 +70,8 @@ test('submitting a valid email shares the resource and notifies success', async 
   const input = screen.getByPlaceholderText(
     'Enter email addresses separated by comma',
   )
-  await act(async () => user.type(input, 'valid@example.com'))
-  await act(async () => user.click(screen.getByText('Share')))
+  await user.type(input, 'valid@example.com')
+  await user.click(screen.getByText('Share'))
 
   expect(shareTmKey).toHaveBeenCalledWith({
     key: row.key,
@@ -95,8 +95,8 @@ test('shows an API error message when sharing fails', async () => {
   const input = screen.getByPlaceholderText(
     'Enter email addresses separated by comma',
   )
-  await act(async () => user.type(input, 'valid@example.com'))
-  await act(async () => user.click(screen.getByText('Share')))
+  await user.type(input, 'valid@example.com')
+  await user.click(screen.getByText('Share'))
 
   expect(CatToolActions.addNotification).toHaveBeenCalledWith(
     expect.objectContaining({
@@ -116,8 +116,8 @@ test('falls back to a generic error message when sharing fails without a payload
   const input = screen.getByPlaceholderText(
     'Enter email addresses separated by comma',
   )
-  await act(async () => user.type(input, 'valid@example.com'))
-  await act(async () => user.click(screen.getByText('Share')))
+  await user.type(input, 'valid@example.com')
+  await user.click(screen.getByText('Share'))
 
   expect(CatToolActions.addNotification).toHaveBeenCalledWith(
     expect.objectContaining({
@@ -136,7 +136,7 @@ test('resetting the form restores the default email and closes', async () => {
   await act(async () => Promise.resolve())
 
   const resetButton = container.querySelector('button[type="reset"]')
-  await act(async () => user.click(resetButton))
+  await user.click(resetButton)
 
   expect(onClose).toHaveBeenCalledTimes(1)
 })
@@ -160,7 +160,7 @@ test('shows co-owners and opens the share modal when the resource is already sha
   const emailSpan = screen.getByText(/Jane Doe/)
   expect(emailSpan).toHaveTextContent('and 1 others')
 
-  await act(async () => user.click(emailSpan))
+  await user.click(emailSpan)
 
   expect(ModalsActions.showModalComponent).toHaveBeenCalledWith(
     expect.anything(),

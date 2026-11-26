@@ -1,19 +1,23 @@
 import {createRoot} from 'react-dom/client'
+import {rootErrorOptions} from '../utils/rootErrorOptions'
 import {ApplicationWrapper} from '../components/common/ApplicationWrapper'
 import React from 'react'
 import NotificationBox from '../components/notificationsComponent/NotificationBox'
 import {ModalWindow} from '../components/modals/ModalWindow'
+import {PageErrorBoundary} from '../components/common/PageErrorBoundary/PageErrorBoundary'
 
 export const mountPage = ({Component, rootElement}) => {
   document.addEventListener('DOMContentLoaded', () => {
-    const pageRoot = createRoot(rootElement)
+    const pageRoot = createRoot(rootElement, rootErrorOptions)
 
     const Page = () => {
       return (
-        <ApplicationWrapper>
-          <Component />
-          <ModalWindow />
-        </ApplicationWrapper>
+        <PageErrorBoundary>
+          <ApplicationWrapper>
+            <Component />
+            <ModalWindow />
+          </ApplicationWrapper>
+        </PageErrorBoundary>
       )
     }
 
@@ -23,7 +27,10 @@ export const mountPage = ({Component, rootElement}) => {
       'notifications-wrapper',
     )[0]
     if (mountPointNotificationBox) {
-      const notificationBoxRoot = createRoot(mountPointNotificationBox)
+      const notificationBoxRoot = createRoot(
+        mountPointNotificationBox,
+        rootErrorOptions,
+      )
       notificationBoxRoot.render(<NotificationBox />)
     }
   })

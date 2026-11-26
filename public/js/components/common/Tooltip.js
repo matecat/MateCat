@@ -85,10 +85,10 @@ const Tooltip = ({
 
   // RENDER
   const getCoords = () => {
+    // The child's ref is a plain prop: React warns when element.ref is read
+    const childRef = children?.props?.ref
     const boundingRect =
-      children &&
-      children.ref?.current &&
-      children.ref.current.getBoundingClientRect()
+      childRef?.current && childRef.current.getBoundingClientRect()
     if (!boundingRect) return {}
     const top =
       position === TOOLTIP_POSITION.LEFT || position === TOOLTIP_POSITION.RIGHT

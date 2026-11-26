@@ -1,6 +1,7 @@
-import {useContext, useEffect, useRef, useState} from 'react'
+import {useContext, useEffect, useRef} from 'react'
 import {useForm} from 'react-hook-form'
 import {isEqual} from 'lodash'
+import {useWatchedFormValues} from '../../../../../hooks/useWatchedFormValues'
 import {FiltersParamsContext} from './FiltersParamsContext'
 
 /**
@@ -28,23 +29,13 @@ export const useTranslatableKeysSection = (
 
   const {control, watch, setValue} = useForm()
 
-  const [formData, setFormData] = useState()
-
   const section = useRef()
   section.current = currentTemplate[sectionKey] ?? {}
 
   const options = useRef()
   options.current = segmentedControlOptions
 
-  const temporaryFormData = watch()
-  const previousData = useRef()
-
-  useEffect(() => {
-    if (!isEqual(temporaryFormData, previousData.current))
-      setFormData(temporaryFormData)
-
-    previousData.current = temporaryFormData
-  }, [temporaryFormData])
+  const formData = useWatchedFormValues(watch)
 
   // write the form to the template, dropping the inactive key list and the
   // fields the stored template does not set (a registered but unset field is

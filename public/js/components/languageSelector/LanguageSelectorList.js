@@ -253,14 +253,6 @@ const LanguageSelectorList = forwardRef((props, ref) => {
 
 LanguageSelectorList.displayName = 'LanguageSelectorList'
 
-LanguageSelectorList.defaultProps = {
-  selectedLanguages: false,
-  languagesList: true,
-  onToggleLanguage: true,
-  querySearch: true,
-  onResetResults: () => {},
-}
-
 export default LanguageSelectorList
 
 export const chunk = (array, size) => {

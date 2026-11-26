@@ -1,5 +1,5 @@
 import React from 'react'
-import {act, render, screen} from '@testing-library/react'
+import {render, screen} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import {XliffRulesRow} from './XliffRulesRow'
 import xliffOptions from '../../defaultTemplates/xliffOptions.json'
@@ -46,6 +46,15 @@ const setup = (props = {}) => {
 }
 
 describe('XliffRulesRow', () => {
+  test.each([
+    ['pre-translated', preTranslatedRow],
+    ['new', newRow],
+  ])('does not report a change on mount for a %s row', (_, row) => {
+    const {onChange} = setup({value: row, currentXliffData: [row]})
+
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
   test('renders the row index', () => {
     setup()
 
@@ -91,7 +100,7 @@ describe('XliffRulesRow', () => {
     const user = userEvent.setup()
     setup()
 
-    await act(async () => user.click(screen.getByText("'Translated'")))
+    await user.click(screen.getByText("'Translated'"))
 
     expect(screen.getByText("'Draft'")).toBeInTheDocument()
     expect(screen.queryByText("'Draft' (locked)")).not.toBeInTheDocument()
@@ -104,8 +113,8 @@ describe('XliffRulesRow', () => {
     const user = userEvent.setup()
     const {onChange} = setup()
 
-    await act(async () => user.click(screen.getByText("'Translated'")))
-    await act(async () => user.click(screen.getByText("'Approved' (locked)")))
+    await user.click(screen.getByText("'Translated'"))
+    await user.click(screen.getByText("'Approved' (locked)"))
 
     expect(onChange).toHaveBeenLastCalledWith({
       ...preTranslatedRow,
@@ -129,8 +138,8 @@ describe('XliffRulesRow', () => {
       currentXliffData: [lockedRow],
     })
 
-    await act(async () => user.click(screen.getByText("'Approved' (locked)")))
-    await act(async () => user.click(screen.getByText("'Approved 2'")))
+    await user.click(screen.getByText("'Approved' (locked)"))
+    await user.click(screen.getByText("'Approved 2'"))
 
     const lastValue = onChange.mock.calls.at(-1)[0]
     expect(lastValue).toEqual({...preTranslatedRow, editor: 'approved2'})
@@ -145,8 +154,8 @@ describe('XliffRulesRow', () => {
       currentXliffData: [lockedRow],
     })
 
-    await act(async () => user.click(screen.getByText("'Approved' (locked)")))
-    await act(async () => user.click(screen.getByText("'Draft'")))
+    await user.click(screen.getByText("'Approved' (locked)"))
+    await user.click(screen.getByText("'Draft'"))
 
     const lastValue = onChange.mock.calls.at(-1)[0]
     expect(lastValue).toEqual({...preTranslatedRow, editor: 'draft'})
@@ -161,10 +170,8 @@ describe('XliffRulesRow', () => {
       currentXliffData: [lockedRow],
     })
 
-    await act(async () => user.click(screen.getByText("Map to 'TM 101%'")))
-    await act(async () =>
-      user.click(screen.getByText('Ignore target (run TM analysis)')),
-    )
+    await user.click(screen.getByText("Map to 'TM 101%'"))
+    await user.click(screen.getByText('Ignore target (run TM analysis)'))
 
     const lastValue = onChange.mock.calls.at(-1)[0]
     expect(lastValue).toEqual({

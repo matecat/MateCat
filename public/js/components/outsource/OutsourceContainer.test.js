@@ -98,6 +98,34 @@ describe('OutsourceContainer', () => {
     expect(screen.getByText('outsource-vendor')).toBeInTheDocument()
   })
 
+  test('runs the enter transition on the panel when it opens after mount', () => {
+    const {rerender} = render(
+      <OutsourceContainer
+        {...baseProps}
+        showTranslatorBox={false}
+        openOutsource={false}
+      />,
+    )
+    expect(screen.queryByText('outsource-vendor')).not.toBeInTheDocument()
+
+    rerender(
+      <OutsourceContainer
+        {...baseProps}
+        showTranslatorBox={false}
+        openOutsource={true}
+      />,
+    )
+
+    // A child that enters after mount is the only case where the transition
+    // has to find its DOM node; the enter classes prove it reached the panel.
+    // The panel is a plain div with no role, so it is reached from its content.
+    const vendorBox = screen.getByText('outsource-vendor')
+    // eslint-disable-next-line testing-library/no-node-access
+    const panel = vendorBox.closest('.outsource-container')
+    expect(panel).toHaveClass('transitionOutsource-enter')
+    expect(panel).toHaveClass('transitionOutsource-enter-active')
+  })
+
   test('calls onClickOutside when a mousedown happens outside the container', () => {
     jest.useFakeTimers()
     const onClickOutside = jest.fn()

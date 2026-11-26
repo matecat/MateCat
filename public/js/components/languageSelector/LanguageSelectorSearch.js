@@ -1,5 +1,4 @@
 import React, {useEffect, useRef, useState} from 'react'
-import TagsInput from 'react-tagsinput'
 
 const LanguageSelectorSearch = ({
   onQueryChange,
@@ -8,7 +7,7 @@ const LanguageSelectorSearch = ({
   onDeleteLanguage,
 }) => {
   const [highlightDelete, setHighlightDelete] = useState(false)
-  const tagsInputRef = useRef(null)
+  const inputRef = useRef(null)
 
   useEffect(() => {
     const handleMouseDown = () => {
@@ -17,7 +16,7 @@ const LanguageSelectorSearch = ({
 
     document.addEventListener('mousedown', handleMouseDown)
 
-    tagsInputRef.current.focus()
+    inputRef.current.focus()
 
     return () => {
       document.removeEventListener('mousedown', handleMouseDown)
@@ -33,70 +32,74 @@ const LanguageSelectorSearch = ({
     setHighlightDelete(false)
   }, [querySearch])
 
-  const handleChange = () => {
+  const languages = selectedLanguages ?? []
+
+  // Only Backspace on an empty search is handled here; every other key
+  // (Enter, Tab, arrows) must keep bubbling, because the modal confirms on
+  // Enter and moves through the language list on the arrow keys.
+  const handleKeyDown = (event) => {
+    if (
+      event.key !== 'Backspace' ||
+      event.target.value !== '' ||
+      !languages.length
+    ) {
+      return
+    }
+    event.preventDefault()
     if (highlightDelete) {
-      onDeleteLanguage(selectedLanguages[selectedLanguages.length - 1])
+      onDeleteLanguage(languages[languages.length - 1])
       setHighlightDelete(false)
     } else {
       setHighlightDelete(true)
     }
   }
 
-  const removeLanguageWithIconTag = (tagIndex) => {
-    onDeleteLanguage(selectedLanguages[tagIndex])
-  }
-
-  const defaultRenderTag = (props) => {
-    let {
-      tag,
-      key,
-      disabled,
-      classNameRemove,
-      getTagDisplayValue,
-      onRemove,
-      ...other
-    } = props
-    const highlight =
-      highlightDelete && key + 1 === selectedLanguages.length
-        ? 'highlightDelete'
-        : ''
-    return (
-      <span key={key} {...other} className={`tag ${highlight}`}>
-        {getTagDisplayValue(tag)}
-        {!disabled && (
-          <a
-            className={classNameRemove}
-            onClick={() => removeLanguageWithIconTag(key)}
-          >
-            {' '}
-            &times;
-          </a>
-        )}
-      </span>
-    )
+  // Enter on the remove button must only remove the language: the modal's
+  // own Enter listeners (confirm, pick the highlighted result) sit higher up
+  // and would otherwise run too. Stopping it while capturing keeps the
+  // button's native click, which is what removes the language.
+  const stopEnterPropagation = (event) => {
+    if (event.key === 'Enter') event.stopPropagation()
   }
 
   return (
-    <TagsInput
-      inputValue={querySearch}
-      addKeys={[]}
-      inputProps={{placeholder: 'Search...'}}
-      onChangeInput={onQueryChange}
-      renderTag={defaultRenderTag}
-      value={selectedLanguages ? selectedLanguages.map((e) => e.name) : []}
-      onChange={handleChange}
-      autofocus={true}
-      ref={tagsInputRef}
-    />
+    <div
+      className="language-search-tags"
+      onClick={() => inputRef.current.focus()}
+    >
+      <span>
+        {languages.map((language, index) => (
+          <span
+            key={language.code}
+            className={`language-search-tag${
+              highlightDelete && index === languages.length - 1
+                ? ' highlightDelete'
+                : ''
+            }`}
+          >
+            {language.name}{' '}
+            <button
+              type="button"
+              className="language-search-tag-remove"
+              aria-label={`Remove ${language.name}`}
+              onKeyDownCapture={stopEnterPropagation}
+              onClick={() => onDeleteLanguage(language)}
+            >
+              &times;
+            </button>
+          </span>
+        ))}
+        <input
+          ref={inputRef}
+          type="text"
+          placeholder="Search..."
+          value={querySearch}
+          onChange={(event) => onQueryChange(event.target.value)}
+          onKeyDown={handleKeyDown}
+        />
+      </span>
+    </div>
   )
-}
-
-LanguageSelectorSearch.defaultProps = {
-  selectedLanguages: false,
-  languagesList: true,
-  querySearch: true,
-  onDeleteLanguage: true,
-  onQueryChange: true,
 }
 
 export default LanguageSelectorSearch

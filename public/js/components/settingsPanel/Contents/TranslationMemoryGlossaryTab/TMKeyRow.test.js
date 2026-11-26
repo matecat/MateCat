@@ -106,10 +106,16 @@ test('activating a resource while already at the 10 active resources limit shows
   }))
   const setTmKeys = jest.fn()
 
-  render(<Wrapper row={row} tmKeys={[row, ...activeFillers]} setTmKeys={setTmKeys} />)
+  render(
+    <Wrapper
+      row={row}
+      tmKeys={[row, ...activeFillers]}
+      setTmKeys={setTmKeys}
+    />,
+  )
 
   const lookup = screen.getByTestId(`tmkey-lookup-${row.id}`)
-  await act(async () => user.click(lookup))
+  await user.click(lookup)
 
   expect(CatToolActions.addNotification).toHaveBeenCalledWith(
     expect.objectContaining({title: 'Resource cannot be activated'}),
@@ -134,7 +140,7 @@ test('toggling lookup on a normal key updates tmKeys and the current template', 
   )
 
   const lookup = screen.getByTestId(`tmkey-lookup-${row.id}`)
-  await act(async () => user.click(lookup))
+  await user.click(lookup)
 
   expect(setTmKeys).toHaveBeenCalledWith([
     expect.objectContaining({id: row.id, isActive: true, r: true}),
@@ -145,16 +151,19 @@ test('toggling lookup on a normal key updates tmKeys and the current template', 
 test('editing the name: blocks a duplicated name and reverts to the previous value', async () => {
   const user = userEvent.setup()
   const row = baseRow()
-  const otherRow = {...baseRow(), id: 'other', key: 'other', name: 'Existing Name'}
+  const otherRow = {
+    ...baseRow(),
+    id: 'other',
+    key: 'other',
+    name: 'Existing Name',
+  }
   const setTmKeys = jest.fn()
 
   render(<Wrapper row={row} tmKeys={[row, otherRow]} setTmKeys={setTmKeys} />)
 
   const nameInput = screen.getByTestId(`tmkey-row-name-${row.id}`)
-  await act(async () => {
-    await user.clear(nameInput)
-    await user.type(nameInput, 'Existing Name')
-  })
+  await user.clear(nameInput)
+  await user.type(nameInput, 'Existing Name')
   await act(async () => nameInput.blur())
 
   expect(CatToolActions.addNotification).toHaveBeenCalledWith(
@@ -170,7 +179,7 @@ test('editing the name: blocks an empty name and reverts', async () => {
   render(<Wrapper row={row} />)
 
   const nameInput = screen.getByTestId(`tmkey-row-name-${row.id}`)
-  await act(async () => user.clear(nameInput))
+  await user.clear(nameInput)
   await act(async () => nameInput.blur())
 
   expect(CatToolActions.addNotification).toHaveBeenCalledWith(
@@ -187,10 +196,8 @@ test('editing the name: successfully persists a new unique name on blur', async 
   render(<Wrapper row={row} />)
 
   const nameInput = screen.getByTestId(`tmkey-row-name-${row.id}`)
-  await act(async () => {
-    await user.clear(nameInput)
-    await user.type(nameInput, 'New Name')
-  })
+  await user.clear(nameInput)
+  await user.type(nameInput, 'New Name')
   await act(async () => nameInput.blur())
 
   expect(updateTmKey).toHaveBeenCalledWith({
@@ -208,10 +215,8 @@ test('editing the name: shows an error notification and reverts when the API rej
   render(<Wrapper row={row} />)
 
   const nameInput = screen.getByTestId(`tmkey-row-name-${row.id}`)
-  await act(async () => {
-    await user.clear(nameInput)
-    await user.type(nameInput, 'New Name')
-  })
+  await user.clear(nameInput)
+  await user.type(nameInput, 'New Name')
   await act(async () => nameInput.blur())
 
   expect(CatToolActions.addNotification).toHaveBeenCalledWith(
@@ -229,7 +234,7 @@ test('penalty: clicking "Add penalty" applies a penalty of 1 through updateRow',
 
   render(<Wrapper row={row} setTmKeys={setTmKeys} />)
 
-  await act(async () => user.click(screen.getByText('Add penalty')))
+  await user.click(screen.getByText('Add penalty'))
 
   expect(setTmKeys).toHaveBeenCalledWith([
     expect.objectContaining({id: row.id, penalty: 1}),
@@ -248,7 +253,7 @@ test('penalty: clicking the reset icon on an existing penalty sets it back to 0'
   )
   expect(buttons.length).toBe(3)
 
-  await act(async () => user.click(buttons[2]))
+  await user.click(buttons[2])
 
   expect(setTmKeys).toHaveBeenCalledWith([
     expect.objectContaining({id: row.id, penalty: 0}),
@@ -262,8 +267,8 @@ test('delete: with no other templates involved, expands the DeleteResource row d
 
   render(<Wrapper row={row} />)
 
-  await act(async () => user.click(screen.getByTestId('tm-row-menu')))
-  await act(async () => user.click(screen.getByTestId('delete-resource')))
+  await user.click(screen.getByTestId('tm-row-menu'))
+  await user.click(screen.getByTestId('delete-resource'))
 
   expect(getTmKeyEnginesInfo).toHaveBeenCalledWith(row.key)
   expect(ModalsActions.showModalComponent).not.toHaveBeenCalled()
@@ -280,13 +285,11 @@ test('delete: checking the ModernMT removal checkbox requests removal from Moder
 
   render(<Wrapper row={row} />)
 
-  await act(async () => user.click(screen.getByTestId('tm-row-menu')))
-  await act(async () => user.click(screen.getByTestId('delete-resource')))
+  await user.click(screen.getByTestId('tm-row-menu'))
+  await user.click(screen.getByTestId('delete-resource'))
 
-  await act(async () =>
-    user.click(screen.getByTestId('delete-remove-from-mmt')),
-  )
-  await act(async () => user.click(screen.getByText('Confirm')))
+  await user.click(screen.getByTestId('delete-remove-from-mmt'))
+  await user.click(screen.getByText('Confirm'))
 
   expect(deleteTmKey).toHaveBeenCalledWith({key: row.key, removeFrom: 'MMT'})
 })
@@ -299,13 +302,11 @@ test('delete: checking the Lara removal checkbox requests removal from Lara', as
 
   render(<Wrapper row={row} />)
 
-  await act(async () => user.click(screen.getByTestId('tm-row-menu')))
-  await act(async () => user.click(screen.getByTestId('delete-resource')))
+  await user.click(screen.getByTestId('tm-row-menu'))
+  await user.click(screen.getByTestId('delete-resource'))
 
-  await act(async () =>
-    user.click(screen.getByTestId('delete-remove-from-lara')),
-  )
-  await act(async () => user.click(screen.getByText('Confirm')))
+  await user.click(screen.getByTestId('delete-remove-from-lara'))
+  await user.click(screen.getByText('Confirm'))
 
   expect(deleteTmKey).toHaveBeenCalledWith({key: row.key, removeFrom: 'Lara'})
 })
@@ -318,16 +319,12 @@ test('delete: when both MMT and Lara are linked, checking both checkboxes reques
 
   render(<Wrapper row={row} />)
 
-  await act(async () => user.click(screen.getByTestId('tm-row-menu')))
-  await act(async () => user.click(screen.getByTestId('delete-resource')))
+  await user.click(screen.getByTestId('tm-row-menu'))
+  await user.click(screen.getByTestId('delete-resource'))
 
-  await act(async () =>
-    user.click(screen.getByTestId('delete-remove-from-lara')),
-  )
-  await act(async () =>
-    user.click(screen.getByTestId('delete-remove-from-mmt')),
-  )
-  await act(async () => user.click(screen.getByText('Confirm')))
+  await user.click(screen.getByTestId('delete-remove-from-lara'))
+  await user.click(screen.getByTestId('delete-remove-from-mmt'))
+  await user.click(screen.getByText('Confirm'))
 
   expect(deleteTmKey).toHaveBeenCalledWith({
     key: row.key,
@@ -348,8 +345,8 @@ test('delete: with other templates involved, opens the confirmation modal listin
     />,
   )
 
-  await act(async () => user.click(screen.getByTestId('tm-row-menu')))
-  await act(async () => user.click(screen.getByTestId('delete-resource')))
+  await user.click(screen.getByTestId('tm-row-menu'))
+  await user.click(screen.getByTestId('delete-resource'))
 
   expect(ModalsActions.showModalComponent).toHaveBeenCalledWith(
     expect.anything(),
@@ -371,11 +368,11 @@ test('onConfirmDeleteTmKey: removes the key and notifies on success (non-cattool
 
   render(<Wrapper row={row} setTmKeys={setTmKeys} />)
 
-  await act(async () => user.click(screen.getByTestId('tm-row-menu')))
-  await act(async () => user.click(screen.getByTestId('delete-resource')))
+  await user.click(screen.getByTestId('tm-row-menu'))
+  await user.click(screen.getByTestId('delete-resource'))
 
   const confirmButton = screen.getByText('Confirm')
-  await act(async () => user.click(confirmButton))
+  await user.click(confirmButton)
 
   expect(deleteTmKey).toHaveBeenCalledWith({key: row.key, removeFrom: ''})
   expect(setTmKeys).toHaveBeenCalled()
@@ -393,11 +390,11 @@ test('onConfirmDeleteTmKey: shows an error notification and closes the row on fa
 
   render(<Wrapper row={row} />)
 
-  await act(async () => user.click(screen.getByTestId('tm-row-menu')))
-  await act(async () => user.click(screen.getByTestId('delete-resource')))
+  await user.click(screen.getByTestId('tm-row-menu'))
+  await user.click(screen.getByTestId('delete-resource'))
 
   const confirmButton = screen.getByText('Confirm')
-  await act(async () => user.click(confirmButton))
+  await user.click(confirmButton)
 
   expect(CatToolActions.addNotification).toHaveBeenCalledWith(
     expect.objectContaining({title: 'Error deleting resource'}),
@@ -422,7 +419,7 @@ test('toggling update on a normal active key updates tmKeys accordingly', async 
   render(<Wrapper row={row} setTmKeys={setTmKeys} />)
 
   const update = screen.getByTestId(`tmkey-update-${row.id}`)
-  await act(async () => user.click(update))
+  await user.click(update)
 
   expect(setTmKeys).toHaveBeenCalledWith([
     expect.objectContaining({id: row.id, w: false}),
@@ -451,7 +448,7 @@ test('the MM shared key row updates specialRows (not tmKeys) when toggled', asyn
   )
 
   const lookup = screen.getByTestId(`tmkey-lookup-${row.id}`)
-  await act(async () => user.click(lookup))
+  await user.click(lookup)
 
   expect(setTmKeys).not.toHaveBeenCalled()
   expect(setSpecialRows).toHaveBeenCalled()
@@ -468,10 +465,8 @@ test('editing the name in cattool mode also triggers updateJobKeys', async () =>
   render(<Wrapper row={row} />)
 
   const nameInput = screen.getByTestId(`tmkey-row-name-${row.id}`)
-  await act(async () => {
-    await user.clear(nameInput)
-    await user.type(nameInput, 'New Name')
-  })
+  await user.clear(nameInput)
+  await user.type(nameInput, 'New Name')
   await act(async () => nameInput.blur())
 
   expect(updateJobKeys).toHaveBeenCalled()
@@ -488,11 +483,11 @@ test('onConfirmDeleteTmKey in cattool mode notifies the status change instead of
 
   render(<Wrapper row={row} />)
 
-  await act(async () => user.click(screen.getByTestId('tm-row-menu')))
-  await act(async () => user.click(screen.getByTestId('delete-resource')))
+  await user.click(screen.getByTestId('tm-row-menu'))
+  await user.click(screen.getByTestId('delete-resource'))
 
   const confirmButton = screen.getByText('Confirm')
-  await act(async () => user.click(confirmButton))
+  await user.click(confirmButton)
 
   expect(CatToolActions.onTMKeysChangeStatus).toHaveBeenCalled()
   expect(CreateProjectActions.updateProjectTemplates).not.toHaveBeenCalled()
@@ -507,12 +502,10 @@ test('delete: when neither MMT nor Lara are linked, no extra footer content is s
 
   render(<Wrapper row={row} />)
 
-  await act(async () => user.click(screen.getByTestId('tm-row-menu')))
-  await act(async () => user.click(screen.getByTestId('delete-resource')))
+  await user.click(screen.getByTestId('tm-row-menu'))
+  await user.click(screen.getByTestId('delete-resource'))
 
-  expect(
-    screen.queryByText(/also linked to your/),
-  ).not.toBeInTheDocument()
+  expect(screen.queryByText(/also linked to your/)).not.toBeInTheDocument()
   expect(screen.getByText('Confirm')).toBeInTheDocument()
 })
 
@@ -522,33 +515,33 @@ test('opening each menu item expands the corresponding row content', async () =>
 
   render(<Wrapper row={row} />)
 
-  await act(async () => user.click(screen.getByTestId('tm-row-import-tmx')))
+  await user.click(screen.getByTestId('tm-row-import-tmx'))
   expect(screen.getByText('Select a tmx file to import')).toBeInTheDocument()
 
-  await act(async () => user.click(screen.getByTestId('tm-row-menu')))
-  await act(async () => user.click(screen.getByTestId('import-glossary')))
+  await user.click(screen.getByTestId('tm-row-menu'))
+  await user.click(screen.getByTestId('import-glossary'))
   expect(
     screen.getByText('Select termbase in XLSX, XLS or ODS format'),
   ).toBeInTheDocument()
 
-  await act(async () => user.click(screen.getByTestId('tm-row-menu')))
-  await act(async () => user.click(screen.getByTestId('export-tmx')))
+  await user.click(screen.getByTestId('tm-row-menu'))
+  await user.click(screen.getByTestId('export-tmx'))
   expect(
     screen.getByText(
       'We will send a link to download the exported TM to your email.',
     ),
   ).toBeInTheDocument()
 
-  await act(async () => user.click(screen.getByTestId('tm-row-menu')))
-  await act(async () => user.click(screen.getByTestId('export-glossary')))
+  await user.click(screen.getByTestId('tm-row-menu'))
+  await user.click(screen.getByTestId('export-glossary'))
   expect(
     screen.getByText(
       'We will send a link to download the exported termbase to your email.',
     ),
   ).toBeInTheDocument()
 
-  await act(async () => user.click(screen.getByTestId('tm-row-menu')))
-  await act(async () => user.click(screen.getByTestId('share-resource')))
+  await user.click(screen.getByTestId('tm-row-menu'))
+  await user.click(screen.getByTestId('share-resource'))
   expect(screen.getByText('Share')).toBeInTheDocument()
 })
 
@@ -564,7 +557,7 @@ test('the MM shared key row shows the public translation memory icon and hides t
   expect(
     screen.queryByText(row.key, {selector: '.tm-key-row-key'}),
   ).not.toBeInTheDocument()
-  expect(
-    screen.getByTestId(`tmkey-row-name-${row.id}`),
-  ).toHaveClass('tm-key-row-name-disabled')
+  expect(screen.getByTestId(`tmkey-row-name-${row.id}`)).toHaveClass(
+    'tm-key-row-name-disabled',
+  )
 })

@@ -1,5 +1,5 @@
 import React from 'react'
-import {act, render, screen, within} from '@testing-library/react'
+import {render, screen, within} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {AdvancedSettings} from './AdvancedSettings'
@@ -40,9 +40,7 @@ test('Enabling a pre-confirm switch writes the default status and lock', async (
   const modifyingCurrentTemplate = jest.fn()
   renderAdvancedSettings({modifyingCurrentTemplate})
 
-  await act(async () =>
-    user.click(screen.getByTestId('pretranslate-match_100-switch')),
-  )
+  await user.click(screen.getByTestId('pretranslate-match_100-switch'))
 
   const updater = modifyingCurrentTemplate.mock.calls[0][0]
   expect(
@@ -83,14 +81,10 @@ test('Status select shows the default and is disabled while pre-confirm is off',
   expect(row100).toHaveTextContent('Approved (locked)')
   expect(row100).not.toHaveTextContent('Translated')
 
-  await act(async () =>
-    user.click(within(row100).getByText('Approved (locked)')),
-  )
+  await user.click(within(row100).getByText('Approved (locked)'))
   expect(screen.queryByText('Approved 2')).not.toBeInTheDocument()
 
-  await act(async () =>
-    user.click(within(row101).getByText('Approved (locked)')),
-  )
+  await user.click(within(row101).getByText('Approved (locked)'))
   expect(screen.getByText('Approved 2')).toBeInTheDocument()
 })
 
@@ -113,9 +107,7 @@ test('Switching pre-confirm off restores the saved status and lock', async () =>
     ],
   })
 
-  await act(async () =>
-    user.click(screen.getByTestId('pretranslate-match_100-switch')),
-  )
+  await user.click(screen.getByTestId('pretranslate-match_100-switch'))
 
   const updater = modifyingCurrentTemplate.mock.calls[0][0]
   expect(
@@ -134,10 +126,8 @@ test('Selecting a pre-confirm status writes status and lock', async () => {
   renderAdvancedSettings({modifyingCurrentTemplate})
 
   const row101 = screen.getByTestId('pretranslate-match_101')
-  await act(async () =>
-    user.click(within(row101).getByText('Approved (locked)')),
-  )
-  await act(async () => user.click(screen.getByText('Approved 2')))
+  await user.click(within(row101).getByText('Approved (locked)'))
+  await user.click(screen.getByText('Approved 2'))
 
   const updater = modifyingCurrentTemplate.mock.calls[0][0]
   expect(
@@ -163,7 +153,7 @@ test('Variant matching radios reflect and write dialect strict', async () => {
   expect(screen.getByTestId('variant-matching-all')).toBeChecked()
   expect(screen.getByTestId('variant-matching-exact')).not.toBeChecked()
 
-  await act(async () => user.click(screen.getByLabelText('Exact variant only')))
+  await user.click(screen.getByLabelText('Exact variant only'))
 
   const updater = modifyingCurrentTemplate.mock.calls[0][0]
   expect(updater({dialectStrict: false})).toEqual({dialectStrict: true})

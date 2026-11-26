@@ -12,16 +12,16 @@ const addTarget = (name) => {
   document.body.appendChild(target)
 }
 
-// react-joyride walks a missing step by warning and moving on: wait for every
-// step to be passed over, then let the tour reach its end.
+// react-joyride waits up to a second for a missing step's target, then passes
+// over the step: wait that long for every missing step, then let the tour end.
+const TARGET_WAIT_MS = 1000
 const waitForTourToSkip = async (stepsCount) => {
-  await act(async () => {
-    for (let attempt = 0; attempt < 50; attempt++) {
-      if (console.warn.mock.calls.length >= stepsCount) break
-      await new Promise((resolve) => setTimeout(resolve, 10))
-    }
-    await new Promise((resolve) => setTimeout(resolve, 50))
-  })
+  await act(
+    () =>
+      new Promise((resolve) =>
+        setTimeout(resolve, stepsCount * TARGET_WAIT_MS + 500),
+      ),
+  )
 }
 
 // The tour loads react-joyride lazily. Loading it once here keeps the first
@@ -99,10 +99,7 @@ test('A tour whose targets are all missing is not stored as seen', async () => {
 
   await waitForTourToSkip(2)
 
-  expect(console.warn).toHaveBeenCalledWith(
-    'Target not mounted',
-    expect.anything(),
-  )
+  expect(screen.queryByRole('heading')).not.toBeInTheDocument()
   expect(localStorage.getItem('onBoarding-tooltip-cattool')).toBeNull()
 })
 
@@ -139,4 +136,16 @@ test('Does not run the tour until show becomes true', async () => {
   expect(
     await screen.findByRole('heading', {name: 'Manage your projects'}),
   ).toBeInTheDocument()
+})
+
+test('renders the tooltip inside the element OnBoardingTooltip.scss targets', async () => {
+  addTarget('user-menu')
+  render(<OnboardingTooltips show page={ONBOARDING_PAGE.HOME} />)
+
+  const title = await screen.findByRole('heading', {
+    name: 'Manage your projects',
+  })
+  // the stylesheet hides the app-wide aria-label tooltip inside this element
+  // eslint-disable-next-line testing-library/no-node-access
+  expect(title.closest('.react-joyride__floater')).not.toBeNull()
 })
