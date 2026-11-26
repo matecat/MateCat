@@ -27,6 +27,18 @@ class MetaDataController extends KleinController
 {
     use ChunkNotFoundHandlerTrait;
 
+    /**
+     * The configuration of the retired ModernMT Full engine. Projects and jobs created with it still
+     * store these rows, but no engine declares them any more, so they would fall out of `mt_extra`
+     * and surface flat. They configure nothing now, so neither scope reports them.
+     */
+    private const array RETIRED_ENGINE_KEYS = [
+        'mmt_glossaries',
+        'mmt_ignore_glossary_case',
+        'mmt_activate_context_analyzer',
+        'mt_context',
+    ];
+
     protected function registerValidators(): void
     {
         $this->appendValidator(new LoginValidator($this));
@@ -153,6 +165,10 @@ class MetaDataController extends KleinController
         foreach ((new ProjectMetadataDao($this->getDatabase()))->setCacheTTL(3600)->allByProjectId((int) $project->id) as $metadatum) {
             $key = $metadatum->key;
 
+            if (in_array($key, self::RETIRED_ENGINE_KEYS, true)) {
+                continue;
+            }
+
             if (in_array($key, $myExtraKeys, true)) {
                 $metadata->mt_extra->$key = $metadatum->value;
             } else {
@@ -203,6 +219,10 @@ class MetaDataController extends KleinController
             60 * 5
         ) as $metadatum) {
             $key = $metadatum->key;
+
+            if (in_array($key, self::RETIRED_ENGINE_KEYS, true)) {
+                continue;
+            }
 
             if (in_array($key, $myExtraKeys, true)) {
                 // Created on the first engine key and not before: the container is absent when the

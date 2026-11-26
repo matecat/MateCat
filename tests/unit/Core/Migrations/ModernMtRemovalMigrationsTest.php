@@ -98,11 +98,56 @@ class ModernMtRemovalMigrationsTest extends AbstractTest
         $onDeepL = $this->job($deepL);
         $onLite = $this->job(1);
 
-        $this->runMigration('20261124120100_migrate_mmt_jobs_to_mymemory.php');
+        $this->moveJobs();
 
         self::assertSame(1, $this->jobEngine($onMmt));
         self::assertSame($deepL, $this->jobEngine($onDeepL));
         self::assertSame(1, $this->jobEngine($onLite));
+    }
+
+    /**
+     * One range per job: every range has to be visited, the jobs on either side of a gap too.
+     */
+    #[Test]
+    public function theJobsMigrationReachesEveryRangeOfIds(): void
+    {
+        $mmt = $this->engine('MMT');
+
+        $first = $this->job($mmt);
+        $this->job(1);
+        $last = $this->job($mmt);
+
+        $this->moveJobs(batchSize: 1);
+
+        self::assertSame(1, $this->jobEngine($first));
+        self::assertSame(1, $this->jobEngine($last));
+    }
+
+    /**
+     * `last_update` is ON UPDATE CURRENT_TIMESTAMP: an engine swap must not look like an edit.
+     */
+    #[Test]
+    public function theJobsMigrationKeepsLastUpdate(): void
+    {
+        $job = $this->job($this->engine('Utils\Engines\MMT'));
+        $this->pdo->exec("UPDATE jobs SET last_update = '2020-01-02 03:04:05' WHERE id = $job");
+
+        $this->moveJobs();
+
+        self::assertSame(1, $this->jobEngine($job));
+        self::assertSame(
+            '2020-01-02 03:04:05',
+            (string)$this->pdo->query("SELECT last_update FROM jobs WHERE id = $job")->fetchColumn()
+        );
+    }
+
+    #[Test]
+    public function aSecondRunOfTheJobsMigrationMovesNothing(): void
+    {
+        $this->job($this->engine('MMT'));
+
+        self::assertGreaterThan(0, $this->moveJobs());
+        self::assertSame(0, $this->moveJobs());
     }
 
     #[Test]
@@ -150,17 +195,22 @@ class ModernMtRemovalMigrationsTest extends AbstractTest
         self::assertSame('not json', $this->engineExtra($laraNotJson));
     }
 
-    /**
-     * Executes a migration's `sql_up` exactly as AbstractMatecatMigration::up() would, statement by
-     * statement, on the test connection.
-     */
-    private function runMigration(string $file): void
+    private function loadMigration(string $file): void
     {
         if (!class_exists('Phinx\Migration\AbstractMigration')) {
             require_once __DIR__ . '/PhinxAbstractMigrationStub.php';
         }
         require_once self::MIGRATIONS_DIR . 'AbstractMatecatMigration.php';
         require_once self::MIGRATIONS_DIR . $file;
+    }
+
+    /**
+     * Executes a migration's `sql_up` exactly as AbstractMatecatMigration::up() would, statement by
+     * statement, on the test connection.
+     */
+    private function runMigration(string $file): void
+    {
+        $this->loadMigration($file);
 
         $source = (string)file_get_contents(self::MIGRATIONS_DIR . $file);
         if (preg_match('/^class (\w+) extends/m', $source, $match) !== 1) {
@@ -174,6 +224,17 @@ class ModernMtRemovalMigrationsTest extends AbstractTest
         foreach ((array)$sqlUp as $sql) {
             $this->pdo->exec($sql);
         }
+    }
+
+    /**
+     * Runs the jobs migration on the test connection. It has no `sql_up`: it updates in batches.
+     */
+    private function moveJobs(?int $batchSize = null): int
+    {
+        // Loaded before the default is read: the class only exists once the file is required.
+        $this->loadMigration('20261124120100_migrate_mmt_jobs_to_mymemory.php');
+
+        return \MigrateMmtJobsToMymemory::moveJobs($this->pdo, $batchSize ?? \MigrateMmtJobsToMymemory::BATCH_SIZE);
     }
 
     /**

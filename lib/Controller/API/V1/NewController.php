@@ -717,8 +717,8 @@ class NewController extends KleinController
 
     /**
      * Refuses MT evaluation, which the QE workflow turns on too, when nothing can score the MT
-     * matches: the engine computes no score of its own and its owner has no active Lara engine.
-     * An active Lara MT engine scores with its own license.
+     * matches: the engine is not Lara and its owner has no active Lara engine. An active Lara MT
+     * engine scores with its own license.
      *
      * Example: $this->validateMtEvaluationLicense($engineStruct); // throws for a DeepL engine of a user without Lara
      *
@@ -727,7 +727,7 @@ class NewController extends KleinController
      */
     private function validateMtEvaluationLicense(?AbstractEngine $mtEngine): void
     {
-        if ($mtEngine === null || $mtEngine->hasBuiltInQualityEstimation() || $mtEngine instanceof Lara) {
+        if ($mtEngine === null || $mtEngine instanceof Lara) {
             return;
         }
 

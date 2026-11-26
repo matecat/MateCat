@@ -392,6 +392,48 @@ class MetaDataControllerTest extends AbstractTest
         $this->assertObjectNotHasProperty('lara_glossaries', $result);
     }
 
+    /**
+     * A project created with ModernMT Full keeps its `mmt_*` rows. No engine declares them any more,
+     * so without the skip they would surface flat, outside `mt_extra`.
+     *
+     * @throws \Throwable
+     */
+    #[Test]
+    public function getProjectInfo_omits_the_keys_of_the_retired_modernmt_engine(): void
+    {
+        $projectId = $this->projectId(self::BASE);
+        $this->seedConnection()->exec("INSERT IGNORE INTO project_metadata (id_project, `key`, value) VALUES ($projectId, 'mmt_glossaries', '[1]')");
+        (new ProjectMetadataDao(obtainTestDatabase()))->destroyMetadataCache($projectId);
+
+        $job     = $this->loadSeededJob();
+        $project = $job->getProject(new ProjectDao(obtainTestDatabase()));
+
+        /** @var stdClass $result */
+        $result = $this->invokePrivate('getProjectInfo', [$project]);
+
+        $this->assertObjectNotHasProperty('mmt_glossaries', $result);
+        $this->assertObjectNotHasProperty('mmt_glossaries', $result->mt_extra);
+        $this->assertSame(['g101'], $result->mt_extra->lara_glossaries);
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    #[Test]
+    public function getJobMetaData_omits_the_keys_of_the_retired_modernmt_engine(): void
+    {
+        $jobId = $this->jobId(self::BASE);
+        $this->seedConnection()->exec("INSERT IGNORE INTO job_metadata (id_job, password, `key`, value) VALUES ($jobId, '" . self::JOB_PASSWORD . "', 'mmt_ignore_glossary_case', '1')");
+        (new JobMetadataDao(obtainTestDatabase()))->destroyCacheForCredential($jobId, self::JOB_PASSWORD);
+
+        /** @var stdClass $result */
+        $result = $this->invokePrivate('getJobMetaData', [$this->loadSeededJob()]);
+
+        $this->assertObjectNotHasProperty('mmt_ignore_glossary_case', $result);
+        $this->assertObjectNotHasProperty('mmt_ignore_glossary_case', $result->mt_extra);
+        $this->assertSame('prefer_more', $result->mt_extra->deepl_formality);
+    }
+
     // ─── getJobMetaData() ───
 
     /**

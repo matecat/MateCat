@@ -1080,12 +1080,6 @@ class LaraEngineTest extends AbstractTest
         $this->expectException(InvalidArgumentException::class);
         Lara::validateLaraStyle('invalid-style');
     }
-
-    #[Test]
-    public function hasBuiltInQualityEstimationIsFalse(): void
-    {
-        self::assertFalse($this->engine->hasBuiltInQualityEstimation());
-    }
 }
 class TestHttpClient extends HttpClient implements HttpClientInterface
 {

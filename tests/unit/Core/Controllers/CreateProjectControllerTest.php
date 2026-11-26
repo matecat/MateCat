@@ -12,6 +12,8 @@ use Klein\Response;
 use Matecat\Locales\Languages;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
+use Model\Engines\EngineDAO;
+use Model\Engines\Structs\EngineStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Teams\TeamStruct;
@@ -24,6 +26,7 @@ use ReflectionClass;
 use ReflectionException;
 use Throwable;
 use Utils\Constants\Constants;
+use Utils\Constants\EngineConstants;
 use Utils\Logger\MatecatLogger;
 use Model\ConnectedServices\GDrive\Session;
 use Utils\Session\ArraySessionStore;
@@ -1153,5 +1156,38 @@ class CreateProjectControllerTest extends AbstractTest
     public function gdriveSessionData_is_null_when_this_is_not_a_drive_import(): void
     {
         $this->assertNull($this->invokePrivate('gdriveSessionData'));
+    }
+
+    /**
+     * A template cached before the ModernMT Full removal still sends that engine's id: the row is
+     * there, owned by this user, but its class is gone.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateMtEngine_refuses_a_retired_modernmt_engine_with_a_clear_message(): void
+    {
+        $engine = new EngineStruct();
+        $engine->name = 'ctrltest modernmt engine';
+        $engine->type = EngineConstants::MT;
+        $engine->description = 'ctrltest modernmt engine';
+        $engine->base_url = 'https://example.invalid/api';
+        $engine->others = [];
+        $engine->extra_parameters = [];
+        $engine->class_load = 'MMT';
+        $engine->penalty = 14;
+        $engine->active = true;
+        $engine->uid = $this->user->uid;
+
+        $engineId = (int)(new EngineDAO(obtainTestDatabase()))->create($engine)->id;
+
+        try {
+            $this->invokePrivate('validateMtEngine', [$engineId]);
+            self::fail('A retired ModernMT engine was accepted');
+        } catch (InvalidArgumentException $e) {
+            self::assertSame('Engine is no longer available', $e->getMessage());
+        } finally {
+            obtainTestDatabase()->getConnection()->prepare('DELETE FROM engines WHERE id = ?')->execute([$engineId]);
+        }
     }
 }

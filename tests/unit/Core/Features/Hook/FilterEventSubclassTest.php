@@ -6,7 +6,6 @@ namespace Matecat\Core\Features\Hook;
 
 use Matecat\TestHelpers\AbstractTest;
 use Model\ActivityLog\ActivityLogStruct;
-use Model\FeaturesBase\Hook\Event\Filter\AnalysisBeforeMTGetContributionEvent;
 use Model\FeaturesBase\Hook\Event\Filter\AppendFieldToAnalysisObjectEvent;
 use Model\FeaturesBase\Hook\Event\Filter\AppendInitialTemplateVarsEvent;
 use Model\FeaturesBase\Hook\Event\Filter\CharacterLengthCountEvent;
@@ -65,7 +64,6 @@ class FilterEventSubclassTest extends AbstractTest
     public static function hookNameProvider(): array
     {
         return [
-            'AnalysisBeforeMTGetContribution' => [AnalysisBeforeMTGetContributionEvent::class, 'analysisBeforeMTGetContribution'],
             'AppendFieldToAnalysisObject' => [AppendFieldToAnalysisObjectEvent::class, 'appendFieldToAnalysisObject'],
             'AppendInitialTemplateVars' => [AppendInitialTemplateVarsEvent::class, 'appendInitialTemplateVars'],
             'CharacterLengthCount' => [CharacterLengthCountEvent::class, 'characterLengthCount'],
@@ -373,22 +371,6 @@ class FilterEventSubclassTest extends AbstractTest
 
         $event->setParameters(['de' => 'it-IT']);
         self::assertSame(['de' => 'it-IT'], $event->getParameters());
-    }
-
-    #[Test]
-    public function analysisBeforeMTGetContributionEventGettersAndSetter(): void
-    {
-        $config = ['timeout' => 30];
-        $mtEngine = new \stdClass();
-        $queueElement = new \stdClass();
-        $event = new AnalysisBeforeMTGetContributionEvent($config, $mtEngine, $queueElement);
-
-        self::assertSame($config, $event->getConfig());
-        self::assertSame($mtEngine, $event->getMtEngine());
-        self::assertSame($queueElement, $event->getQueueElement());
-
-        $event->setConfig(['timeout' => 60]);
-        self::assertSame(['timeout' => 60], $event->getConfig());
     }
 
     #[Test]

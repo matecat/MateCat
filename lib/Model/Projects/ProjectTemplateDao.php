@@ -265,6 +265,12 @@ class ProjectTemplateDao extends AbstractDao
 
                 $engineRecord = $engine->getEngineRecord();
 
+                // A row whose class was removed (ModernMT Full) comes back as the NONE placeholder,
+                // id 0, which would otherwise slip past the ownership check below.
+                if ($engineRecord->id !== (int)$mt->id) {
+                    throw new Exception("Engine is no longer available.", 400);
+                }
+
                 if ($engineRecord->id > 1 and $engineRecord->uid != $projectTemplateStruct->uid) {
                     throw new Exception("Engine doesn't belong to the user.", 403);
                 }

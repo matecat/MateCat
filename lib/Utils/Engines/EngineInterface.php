@@ -111,12 +111,4 @@ interface EngineInterface
      * @throws Exception
      */
     public function getMemoryIfMine(MemoryKeyStruct $memoryKey): ?array;
-
-    /**
-     * Indicates whether the engine computes its own quality estimation score inside its translate call,
-     * so Lara must not score its matches.
-     *
-     * Example: $mtEngine->hasBuiltInQualityEstimation(); // false for Lara or DeepL
-     */
-    public function hasBuiltInQualityEstimation(): bool;
 }
