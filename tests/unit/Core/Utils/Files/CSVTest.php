@@ -3,6 +3,9 @@
 namespace Matecat\Core\Utils\Files;
 
 use Matecat\TestHelpers\AbstractTest;
+use Model\Conversion\UploadElement;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PHPUnit\Framework\Attributes\Test;
 use Utils\Files\CSV;
 
@@ -135,6 +138,80 @@ class CSVTest extends AbstractTest
         $this->assertFileExists($result);
         $this->assertSame($result, $uploadElement->file_path);
         $this->assertFalse(file_exists($path));
+
+        unlink($result);
+    }
+
+    #[Test]
+    public function headersKeepsAQuotedMultiLineHeaderCellWhole(): void
+    {
+        $path = $this->tmpDir . '/multiline.csv';
+        file_put_contents($path, "\"en-US\",\"it-IT\",\"Example\nof use\"\nhello,ciao,x\n");
+
+        $this->assertSame(['en-US', 'it-IT', "Example\nof use"], CSV::headers($path));
+    }
+
+    #[Test]
+    public function headersReturnsNullForAnEmptyFile(): void
+    {
+        $path = $this->tmpDir . '/empty.csv';
+        file_put_contents($path, '');
+
+        $this->assertNull(CSV::headers($path));
+    }
+
+    #[Test]
+    public function headersDoesNotLoadTheRestOfTheFile(): void
+    {
+        $path = $this->tmpDir . '/large.csv';
+        $handle = fopen($path, 'w');
+        $this->assertNotFalse($handle);
+        fwrite($handle, "en-US,it-IT,fr-FR\n");
+        $row = str_repeat('x', 200) . ',' . str_repeat('y', 200) . ',' . str_repeat('z', 200) . "\n";
+        for ($i = 0; $i < 50000; $i++) {
+            fwrite($handle, $row);
+        }
+        fclose($handle);
+        $fileSize = (int)filesize($path);
+
+        memory_reset_peak_usage();
+        $before = memory_get_peak_usage();
+        $headers = CSV::headers($path);
+        $growth = memory_get_peak_usage() - $before;
+
+        $this->assertSame(['en-US', 'it-IT', 'fr-FR'], $headers);
+        $this->assertLessThan(
+            intdiv($fileSize, 10),
+            $growth,
+            "Reading the headers of a {$fileSize}-byte file grew peak memory by {$growth} bytes"
+        );
+    }
+
+    #[Test]
+    public function extractConvertsAnXlsxKeepingFormattedValuesAndRemovesTheUpload(): void
+    {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->fromArray([['en-US', 'it-IT', 'Notes'], ['hello', 'ciao', null]]);
+        $sheet->setCellValue('C2', 0.5);
+        $sheet->getStyle('C2')->getNumberFormat()->setFormatCode('0.00%');
+        $source = $this->tmpDir . '/glossary.xlsx';
+        (new Xlsx($spreadsheet))->save($source);
+        $spreadsheet->disconnectWorksheets();
+
+        $uploadElement = new UploadElement();
+        $uploadElement->file_path = $source;
+
+        $result = CSV::extract($uploadElement, 'test_');
+
+        $this->assertIsString($result);
+        $this->assertSame($result, $uploadElement->file_path);
+        $this->assertFileDoesNotExist($source);
+        // The number format must survive the conversion: a data-only read would print 0.5.
+        $this->assertSame(
+            "\"en-US\",\"it-IT\",\"Notes\"\n\"hello\",\"ciao\",\"50.00%\"\n",
+            file_get_contents($result)
+        );
 
         unlink($result);
     }

@@ -5,7 +5,9 @@ namespace Utils\Files;
 use Model\Conversion\UploadElement;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Reader\Exception;
+use PhpOffice\PhpSpreadsheet\Writer\Csv as CsvWriter;
 use PhpOffice\PhpSpreadsheet\Writer\Exception as WriterException;
+use RuntimeException;
 
 class CSV
 {
@@ -16,6 +18,7 @@ class CSV
      * @return false|string
      * @throws Exception
      * @throws WriterException
+     * @throws RuntimeException
      */
     public static function extract(UploadElement $file, string $prefix = ''): false|string
     {
@@ -24,12 +27,25 @@ class CSV
         }
 
         $tmpFileName = tempnam("/tmp", $prefix);
+        if ($tmpFileName === false) {
+            throw new RuntimeException('Failed to create temporary file');
+        }
 
-        $objReader = IOFactory::createReaderForFile($file->file_path);
+        $reader = IOFactory::createReaderForFile($file->file_path);
+        // An empty cell writes an empty CSV field either way; skipping it only saves load time.
+        // Do not set readDataOnly: the CSV writer needs the number formats to print dates and numbers as shown.
+        $reader->setReadEmptyCells(false);
 
-        $objPHPExcel = $objReader->load($file->file_path);
-        $objWriter = new \PhpOffice\PhpSpreadsheet\Writer\Csv($objPHPExcel);
-        $objWriter->save($tmpFileName);
+        $spreadsheet = $reader->load($file->file_path);
+        try {
+            (new CsvWriter($spreadsheet))->save($tmpFileName);
+        } finally {
+            // Worksheets and the workbook reference each other, so the garbage collector never frees
+            // them on its own: a large glossary would otherwise keep close to 1 GB alive for the rest
+            // of the request.
+            $spreadsheet->disconnectWorksheets();
+            unset($spreadsheet);
+        }
 
         $oldPath = $file->file_path;
         $file->file_path = $tmpFileName;
@@ -40,18 +56,28 @@ class CSV
     }
 
     /**
+     * Reads only the first record, so the cost does not grow with the file.
+     *
      * @return list<string|null>|null
      */
     public static function headers(string $filepath): ?array
     {
-        $lines = file($filepath, FILE_SKIP_EMPTY_LINES);
-        if ($lines === false) {
+        if (!is_file($filepath) || !is_readable($filepath)) {
             return null;
         }
 
-        $csv = array_map("str_getcsv", $lines);
+        $handle = fopen($filepath, 'r');
+        if ($handle === false) {
+            return null;
+        }
 
-        return array_shift($csv);
+        try {
+            $headers = fgetcsv($handle, null, ',', '"', '\\');
+        } finally {
+            fclose($handle);
+        }
+
+        return $headers === false ? null : $headers;
     }
 
     /**

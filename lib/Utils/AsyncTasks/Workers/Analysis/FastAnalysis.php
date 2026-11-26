@@ -1822,13 +1822,13 @@ HD;
         // queue, and a failed DB read inside an open transaction would mark it unable to commit.
         $holdMtProjects = $this->_mtQueuesHold();
 
-        $bindParams = ['project_status' => ProjectStatus::STATUS_NEW];
-
-        $and_InstanceId = null;
-        if (AppConfig::$INSTANCE_ID !== 0) {
-            $and_InstanceId = ' AND instance_id = :instance_id ';
-            $bindParams['instance_id'] = AppConfig::$INSTANCE_ID;
-        }
+        // Every instance, 0 included, picks only the projects it created. Each instance keeps its processing
+        // locks in its own Redis database, so a daemon cannot see the lock another instance holds on a
+        // project: picking another instance's projects could analyse the same project twice.
+        $bindParams = [
+            'project_status' => ProjectStatus::STATUS_NEW,
+            'instance_id'    => AppConfig::$INSTANCE_ID,
+        ];
 
         // While no MT queue can take a project, skip every project with a job on an MT engine; the others go on.
         // A skipped project stays NEW, so the next cycle tries it again. One MT job is enough to hold the whole
@@ -1853,7 +1853,7 @@ HD;
         SELECT p.id, id_tms, id_mt_engine, tm_keys, p.pretranslate_100, GROUP_CONCAT( DISTINCT j.id ) AS jid_list, j.only_private_tm, p.id_customer, p.create_date
             FROM projects p
             INNER JOIN jobs j ON j.id_project=p.id
-            WHERE status_analysis = :project_status $and_InstanceId $and_NotMtProject
+            WHERE status_analysis = :project_status AND instance_id = :instance_id $and_NotMtProject
             GROUP BY p.id
         ORDER BY id LIMIT 1";
 

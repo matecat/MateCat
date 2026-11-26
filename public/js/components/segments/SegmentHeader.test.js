@@ -232,7 +232,7 @@ describe('SegmentHeader', () => {
     expect(container.querySelector('.segment-counter')).toBeInTheDocument()
   })
 
-  test('warns when the character count comes within 20 of the limit', () => {
+  test('warns when the character count reaches 85% of the limit', () => {
     const {container} = renderHeader(
       {segmentOpened: true},
       {userInfo: {metadata: {character_counter: true}}},
@@ -241,9 +241,9 @@ describe('SegmentHeader', () => {
     act(() => {
       getListenerCallback('CHARACTER_COUNTER')({
         sid: '10-1',
-        counter: 85,
+        counter: 86,
         limit: 100,
-        segmentCharacters: 85,
+        segmentCharacters: 86,
       })
     })
 
