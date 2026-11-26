@@ -27,9 +27,9 @@ export const clipboardSlice = (state) => {
   return {from, to, raw, plain: sliceSegment(raw, 0, Infinity).text}
 }
 
-/** External plain text -> document text: tag markup dropped, `°` an nbsp. */
+/** External plain text -> document text: tag markup dropped; a `°` stays a degree sign. */
 export const externalText = (plain) =>
-  stripTagMarkup(plain).replace(/\r\n?/g, '\n').replace(/°/g, '\u00a0')
+  stripTagMarkup(plain).replace(/\r\n?/g, '\n')
 
 /**
  * What a data transfer (clipboard or drop) inserts: the segment slice it carries, tags included, or else its plain

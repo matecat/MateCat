@@ -27,6 +27,7 @@ import SegmentView from '../segmentView/SegmentView'
 | `isRtl`     | bool   | `false` | Right-to-left language: swaps the open/close tag styles, as the cattool does                  |
 | `compareTo` | string | —       | Older text to diff from. Removed parts are wrapped in `span.deleted`, added parts in `span.added` |
 | `marks`     | array  | —       | `{start, end, className}` ranges of `markableText(segment)`, each wrapped in a `mark`. Ignored with `compareTo` |
+| `showWhitespace` | bool | the user's switch | Marks every space. Without it, the view follows `userInfo.metadata.show_whitespace` of `ApplicationWrapperContext` and re-renders when it changes; with no user in the context, the switch held by the tag signatures (`initTagSignature`) |
 | `as`        | elementType | `'span'` | Root element                                                                         |
 | …           |        |         | Any other prop (`className`, `id`, `lang`, `data-*`…) goes to the root element                |
 
@@ -40,9 +41,23 @@ The cattool segment string (layer 2): XLIFF tags as markup (`<g>`, `<x/>`,
 
 The same markup and classes as `transformTagsToHtml`, so `Tag.scss` applies:
 `span.tag.small.<style>` per tag signature, numbered (compressible) tags with
-`span.index-counter` and `span[data-text]`, `<g>` labelled with its id and each
-`</g>` with its opener's id (`?` when orphan). `SegmentView.parity.test.js`
-holds the two renderers to the same output.
+`span.index-counter` and `span[data-text]`, the label of every other chip in
+`span.tag-text`, `<g>` labelled with its id and each `</g>` with its opener's
+id (`?` when orphan). `SegmentView.parity.test.js` holds the two renderers to
+the same output, apart from the differences listed there.
+
+Special characters are drawn with the display-only marks of the CodeMirror
+editor, so a segment looks the same open and closed: one table
+(`utils/segmentText/specialChars.js`) and one stylesheet
+(`css/sass/components/segment/SpecialCharMarks.scss`, loaded by the cattool and
+quality report pages). The nbsp, tab, word joiner and line feed tags are marks,
+not chips (a line feed mark is followed by a `<br>`); so are the typographic
+and zero-width spaces, the soft hyphen and the line/paragraph separators in the
+text, and every space with `showWhitespace`. The carriage return stays a chip,
+as in the editor. A mark keeps the character it stands for as its text (hidden
+when it has no width of its own) and draws itself with child elements that hold
+no text, so offsets, search marks and copies count it as that one character.
+Inside the label of a chip nothing becomes a mark.
 
 Text is decoded and rendered by React as text: markup carried by the segment
 can never become HTML. The diff works on tokens, so a tag is never split.
@@ -95,5 +110,7 @@ exactly one of the segment's tags stays a tag, the rest becomes text.
   imported (`tagModel`, `compressibleTagUtils`), never that folder's `index.js`
   nor anything that pulls in draft-js.
 - The tag signatures are shared with the cattool, including the user's
-  show-whitespace switch (`initTagSignature`): the view follows it as
-  `transformTagsToHtml` does.
+  show-whitespace switch (`initTagSignature`): without `showWhitespace` the view
+  follows it. Pass the prop where the view must follow a change of the switch
+  at once (closed segments do).
+- Never import CodeMirror: the marks come from the shared table.

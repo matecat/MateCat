@@ -266,17 +266,19 @@ test.describe('keys', () => {
     )
   })
 
-  test('Ctrl/Cmd+Shift+Space inserts an nbsp, shown as a marked character', async ({
+  test('Ctrl+Shift+Space inserts an nbsp, shown as a marked character', async ({
     page,
   }) => {
     await open(page)
-    const marks = await page.locator(`${TARGET} .cm-nbsp`).count()
+    const marks = await page.locator(`${TARGET} .special-char-nbsp`).count()
     await caret(page, {before: 'Seconda'})
-    await page.keyboard.press('ControlOrMeta+Shift+Space')
+    await page.keyboard.press('Control+Shift+Space')
     expect(await value(page)).toBe(
       replaceOnce(target, 'Seconda', '##$_A0$##Seconda'),
     )
-    await expect(page.locator(`${TARGET} .cm-nbsp`)).toHaveCount(marks + 1)
+    await expect(page.locator(`${TARGET} .special-char-nbsp`)).toHaveCount(
+      marks + 1,
+    )
   })
 
   test('the read-only source refuses typing', async ({page}) => {
@@ -291,12 +293,48 @@ test.describe('keys', () => {
     page,
   }) => {
     await open(page)
-    await expect(page.locator(`${TARGET} .cm-highlightSpace`)).toHaveCount(0)
+    await expect(page.locator(`${TARGET} .special-char-space`)).toHaveCount(0)
     await open(page, 'basic', '&whitespace')
     expect(
-      await page.locator(`${TARGET} .cm-highlightSpace`).count(),
+      await page.locator(`${TARGET} .special-char-space`).count(),
     ).toBeGreaterThan(0)
     expect(await value(page)).toBe(target)
+  })
+
+  test('the whitespace option turns on and off in a live editor: one blue mark per space, as wide as the space', async ({
+    page,
+  }) => {
+    await open(page)
+    const marks = page.locator(`${TARGET} .special-char-space`)
+    await expect(marks).toHaveCount(0)
+
+    await page.evaluate(() => {
+      window.__editor.target.setValue('a b  c <x id="1"/>d')
+      window.__editor.target.setShowWhitespace(true)
+    })
+    // the space inside the tag markup is part of the chip, not a space of the text
+    await expect(marks).toHaveCount(4)
+    const drawn = await marks.first().evaluate((el) => {
+      const ctx = document.createElement('canvas').getContext('2d')
+      ctx.font = getComputedStyle(el).font
+      const label = getComputedStyle(
+        el.querySelector('.special-char-mark-label'),
+        '::before',
+      )
+      return {
+        glyph: label.content,
+        color: label.color,
+        width: el.getBoundingClientRect().width,
+        plain: ctx.measureText(' ').width,
+      }
+    })
+    expect(drawn.glyph).toBe('"·"')
+    expect(drawn.color).toBe('rgb(0, 153, 204)')
+    expect(Math.abs(drawn.width - drawn.plain)).toBeLessThan(0.5)
+
+    await page.evaluate(() => window.__editor.target.setShowWhitespace(false))
+    await expect(marks).toHaveCount(0)
+    expect(await value(page)).toBe('a b  c <x id="1"/>d')
   })
 })
 

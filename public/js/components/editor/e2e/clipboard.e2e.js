@@ -58,14 +58,14 @@ test.describe('copy and paste', () => {
     expect(await page.locator(`${TARGET} .tag`).count()).toBeGreaterThan(0)
   })
 
-  test('outside text pastes without tag markup, ° as an nbsp', async ({
+  test('outside text pastes without tag markup, ° as a degree sign', async ({
     page,
   }) => {
     await open(page)
     await caret(page, {before: 'Seconda'})
     await clipboardEvent(page, 'paste', {'text/plain': 'a<x id="1"/>b°c & d'})
     expect(await value(page)).toBe(
-      replaceOnce(target, 'Seconda', 'ab##$_A0$##c &amp; dSeconda'),
+      replaceOnce(target, 'Seconda', 'ab°c &amp; dSeconda'),
     )
   })
 

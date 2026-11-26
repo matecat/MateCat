@@ -83,10 +83,7 @@ describe('AiAlternatives', () => {
 
     const button = screen.getByRole('button')
     expect(button).toBeEnabled()
-    expect(button).toHaveAttribute(
-      'title',
-      'Alternative translations by Lara',
-    )
+    expect(button).toHaveAttribute('title', 'Alternative translations by Lara')
 
     fireEvent.click(button)
 
@@ -119,6 +116,36 @@ describe('AiAlternatives', () => {
       editAreaRef: {contains: () => false},
     }
     renderComponent({editArea})
+    expect(screen.getByRole('button')).toBeDisabled()
+  })
+
+  test('with the CodeMirror target, offers its selection with tags to Lara', () => {
+    const editArea = {
+      getSelection: () => ({
+        textWithTags: 'Hello <g id="1">world</g>',
+        textWithoutTags: 'Hello world',
+      }),
+      editAreaRef: {contains: () => true},
+    }
+
+    renderComponent({editArea})
+    fireEvent.click(screen.getByRole('button'))
+
+    expect(getSelectedTextWithTags).not.toHaveBeenCalled()
+    expect(SegmentActions.aiAlternativeTab).toHaveBeenCalledWith({
+      sid: '10',
+      text: 'Hello <g id="1">world</g>',
+    })
+  })
+
+  test('with nothing selected in the CodeMirror target the button is disabled', () => {
+    const editArea = {
+      getSelection: () => ({textWithTags: '', textWithoutTags: ''}),
+      editAreaRef: {contains: () => true},
+    }
+
+    renderComponent({editArea})
+
     expect(screen.getByRole('button')).toBeDisabled()
   })
 })

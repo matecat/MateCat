@@ -1,0 +1,142 @@
+@use '../../tokens/colors';
+
+// Display-only marks of special characters (utils/segmentText/specialChars.js): the same in the segment editor and in
+// every read-only view of a segment (SegmentView). The visual parts of a mark are child elements, never pseudo-elements
+// of the mark: the mark has an `aria-label`, and the cattool tooltip (commons/_aria-label-tooltip.scss) owns
+// `::before`/`::after` of every element that has one.
+
+$mark-color: colors.$blue500;
+
+// A zero-width mark is a 3px bar; each family has its own shape.
+@mixin bar($background) {
+  display: inline-block;
+  width: 3px;
+  height: 1em;
+  vertical-align: text-bottom;
+  box-sizing: border-box;
+  background: $background;
+}
+
+.special-char-mark-space,
+.special-char-mark-tab,
+.special-char-mark-line-break {
+  position: relative;
+}
+
+// the parts of a mark are drawing only: no selection, no hit target of their own (the mark gets the hover)
+.special-char-mark-label,
+.special-char-mark-bracket,
+.special-char-mark-box {
+  position: absolute;
+  user-select: none;
+  pointer-events: none;
+}
+
+.special-char-mark-label::before {
+  content: attr(data-label);
+  color: $mark-color;
+}
+
+// The character a mark stands for when it has no width of its own, or would break the line: kept in the text (offsets
+// and copies count it), never drawn.
+.special-char-mark-char {
+  display: none;
+}
+
+// The label sits over the character: the space keeps its own width.
+.special-char-mark-space > .special-char-mark-label {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.special-char-narrow-nbsp > .special-char-mark-label {
+  font-size: 0.7em;
+}
+
+// A bracket under the character: as wide as the space, never less than 2px.
+.special-char-mark-bracket {
+  left: 0;
+  right: 0;
+  bottom: 0.1em;
+  min-width: 2px;
+  height: 0.25em;
+  border: 1px solid $mark-color;
+  border-top: none;
+  box-sizing: border-box;
+}
+
+// The full-width square of the CJK space.
+.special-char-mark-box {
+  inset: 0.15em 0.1em;
+  border: 1px dashed $mark-color;
+  box-sizing: border-box;
+}
+
+// The tab arrow at the start of the tab's width (in the editor, CodeMirror's own `.cm-tab` draws it).
+.special-char-mark-tab {
+  white-space: pre;
+  tab-size: 4;
+
+  & > .special-char-mark-label {
+    left: 0;
+  }
+}
+
+// The line break: the glyph after the last character of its line, in the flow.
+.special-char-mark-line-break {
+  display: inline-block;
+  user-select: none;
+  padding: 0 2px;
+  font-size: 0.75em;
+  line-height: 1;
+
+  & > .special-char-mark-label {
+    position: static;
+  }
+}
+
+.special-char-word-joiner {
+  @include bar($mark-color);
+}
+
+.special-char-bom {
+  @include bar(
+    repeating-linear-gradient($mark-color 0 2px, transparent 2px 4px)
+  );
+}
+
+.special-char-zwsp {
+  @include bar(
+    linear-gradient($mark-color 35%, transparent 35% 65%, $mark-color 65%)
+  );
+}
+
+.special-char-zwnj {
+  @include bar(transparent);
+  border: 1px solid $mark-color;
+}
+
+.special-char-zwj {
+  @include bar(linear-gradient(transparent 50%, $mark-color 50%));
+}
+
+.special-char-soft-hyphen {
+  @include bar($mark-color);
+  width: 4px;
+  height: 2px;
+  vertical-align: middle;
+}
+
+.special-char-mark-separator {
+  display: inline-block;
+  padding: 0 2px;
+  border: 1px solid $mark-color;
+  border-radius: 2px;
+  font-size: 0.65em;
+  line-height: 1.2;
+  vertical-align: middle;
+
+  & > .special-char-mark-label {
+    position: static;
+  }
+}
