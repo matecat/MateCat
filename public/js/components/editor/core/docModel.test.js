@@ -1,9 +1,7 @@
-import {EditorState as DraftEditorState} from 'draft-js'
-import encodeContent from '../../segments/utils/DraftMatecatUtils/encodeContent'
-import decodeSegment from '../../segments/utils/DraftMatecatUtils/decodeSegment'
 import {markableText} from '../../segmentView/segmentModel'
 import {SEGMENTS} from '../e2e/fixtures'
 import corpus from './__fixtures__/roundTripCorpus.json'
+import DRAFT_SAVED from './__golden__/docModel.json'
 import {createSegmentState} from './createSegmentEditor'
 import {
   insertRaw,
@@ -15,11 +13,9 @@ import {
   visibleDoc,
 } from './docModel'
 
-// What Draft saves today for a segment it loaded: the reference for the round trip.
-const draftRoundTrip = (segment) =>
-  decodeSegment(
-    encodeContent(DraftEditorState.createEmpty(), segment).editorState,
-  ).decodedSegment
+// What Draft saved for a segment it loaded (encodeContent then decodeSegment), frozen for every segment without a
+// known difference: the reference for the round trip.
+const draftRoundTrip = (segment) => DRAFT_SAVED[segment]
 
 const roundTrip = (segment) => serialize(createSegmentState(segment))
 
@@ -59,22 +55,27 @@ describe('round trip', () => {
   )
 
   test('only the inputs with a known difference are left out of the Draft comparison', () => {
-    const differing = CORPUS.filter((s) => roundTrip(s) !== draftRoundTrip(s))
-    expect(differing.every((s) => KNOWN_DIFFERENCE.test(s))).toBe(true)
+    // Every other input has the value Draft saved for it: a segment added to the corpus has no Draft reference.
+    const unchecked = CORPUS.filter(
+      (s) => !KNOWN_DIFFERENCE.test(s) && draftRoundTrip(s) === undefined,
+    )
+    expect(unchecked).toEqual([])
+    // and none with a known difference, where Draft is wrong, has one
+    expect(
+      Object.keys(DRAFT_SAVED).filter((s) => KNOWN_DIFFERENCE.test(s)),
+    ).toEqual([])
   })
 })
 
 describe('round trip: where Draft is wrong or the model decides otherwise', () => {
   test('encoded tag markup stays text; Draft turns it into a tag', () => {
     const segment = 'a &lt;x id="9"/&gt; b'
-    expect(draftRoundTrip(segment)).toBe('a <x id="9"/> b')
+    // Draft saved 'a <x id="9"/> b'.
     expect(roundTrip(segment)).toBe(segment)
   })
 
   test('entities other than &amp; &lt; &gt; are decoded; Draft encodes them again', () => {
-    expect(draftRoundTrip('it&apos;s &quot;ok&quot;')).toBe(
-      'it&amp;apos;s &amp;quot;ok&amp;quot;',
-    )
+    // Draft saved 'it&amp;apos;s &amp;quot;ok&amp;quot;'.
     expect(roundTrip('it&apos;s &quot;ok&quot;')).toBe('it\'s "ok"')
   })
 
@@ -87,7 +88,7 @@ describe('round trip: where Draft is wrong or the model decides otherwise', () =
   })
 
   test('a carriage return stays one; Draft turns it into a line feed', () => {
-    expect(draftRoundTrip('a##$_0D$##b')).toBe('a##$_0A$##b')
+    // Draft saved 'a##$_0A$##b'.
     expect(roundTrip('a##$_0D$##b')).toBe('a##$_0D$##b')
     expect(roundTrip('a##$_0D$####$_0A$##b')).toBe('a##$_0D$####$_0A$##b')
     expect(roundTrip('a\rb')).toBe('a##$_0D$##b')
@@ -101,7 +102,7 @@ describe('round trip: where Draft is wrong or the model decides otherwise', () =
   )
 
   test('a zero-width space in the text is kept; Draft deletes it', () => {
-    expect(draftRoundTrip('a\u200bb')).toBe('ab')
+    // Draft saved 'ab'.
     expect(roundTrip('a\u200bb')).toBe('a\u200bb')
   })
 })

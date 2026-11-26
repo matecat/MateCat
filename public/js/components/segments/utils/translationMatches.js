@@ -5,7 +5,7 @@ import SegmentUtils from '../../../utils/segmentUtils'
 import CommonUtils from '../../../utils/commonUtils'
 import OfflineUtils from '../../../utils/offlineUtils'
 import Speech2Text from '../../../utils/speech2text'
-import SegmentStringUtils from './DraftMatecatUtils/segmentStringUtils'
+import SegmentStringUtils from '../../../utils/segmentText/segmentStringUtils'
 import {addClassToSegment} from '../../../actions/segmentClassActions'
 import {
   replaceEditAreaTextContent,
@@ -30,7 +30,7 @@ import CatToolStore from '../../../stores/CatToolStore'
 import {
   decodeTagsToUnicodeChar,
   encodeTagsFromUnicodeChar,
-} from './DraftMatecatUtils/tagUtils'
+} from '../../../utils/segmentText/tagUtils'
 
 // How long a requested segment waits for its SSE result before it can be
 // requested again. Under load the queue is slow, not empty: a short timeout

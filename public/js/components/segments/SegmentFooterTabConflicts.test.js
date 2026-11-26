@@ -1,7 +1,7 @@
 import React from 'react'
 import {render, fireEvent, screen} from '@testing-library/react'
 import SegmentFooterTabConflicts from './SegmentFooterTabConflicts'
-import {setTagSignatureMiddleware} from './utils/DraftMatecatUtils/tagModel'
+import {setTagSignatureMiddleware} from '../../utils/segmentText/tagModel'
 
 jest.mock('../../actions/SegmentActions', () => ({
   setFocusOnEditArea: jest.fn(),

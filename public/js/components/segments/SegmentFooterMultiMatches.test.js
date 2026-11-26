@@ -1,7 +1,7 @@
 import React from 'react'
 import {render, screen, fireEvent} from '@testing-library/react'
 import SegmentFooterMultiMatches from './SegmentFooterMultiMatches'
-import {setTagSignatureMiddleware} from './utils/DraftMatecatUtils/tagModel'
+import {setTagSignatureMiddleware} from '../../utils/segmentText/tagModel'
 import {SegmentContext} from './SegmentContext'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 

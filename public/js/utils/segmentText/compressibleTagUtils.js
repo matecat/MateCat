@@ -17,7 +17,7 @@ import {Base64} from 'js-base64'
  */
 
 // ctype -> {role, hasDataRef}. Anything not listed is a non-pc ph tag.
-export const PC_CTYPES = {
+const PC_CTYPES = {
   'x-original_pc_open': {role: 'open', hasDataRef: false},
   'x-original_pc_close': {role: 'close', hasDataRef: false},
   'x-pc_open_data_ref': {role: 'open', hasDataRef: true},

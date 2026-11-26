@@ -1,5 +1,5 @@
 import SegmentStore from '../stores/SegmentStore'
-import SegmentStringUtils from '../components/segments/utils/DraftMatecatUtils/segmentStringUtils'
+import SegmentStringUtils from './segmentText/segmentStringUtils'
 import {
   SEGMENTS_STATUS,
   splittedTranslationPlaceholder,

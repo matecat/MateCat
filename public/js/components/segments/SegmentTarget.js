@@ -1,10 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from 'react'
 import {isEmpty, isUndefined} from 'lodash'
 
-import EditArea from './Editarea'
 import TargetEditor from '../editor/matecat/TargetEditor'
-import {isNewEditorEnabled} from '../editor/matecat/editorEngine'
-import {targetEditorBridge} from './targetEditorBridge'
 import CursorUtils from '../../utils/cursorUtils'
 import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentStore from '../../stores/SegmentStore'
@@ -12,11 +9,11 @@ import SegmentButtons from './SegmentButtons'
 import SegmentWarnings from './SegmentWarnings'
 import SegmentActions from '../../actions/SegmentActions'
 import {SegmentContext} from './SegmentContext'
-import SegmentStringUtils from './utils/DraftMatecatUtils/segmentStringUtils'
+import SegmentStringUtils from '../../utils/segmentText/segmentStringUtils'
 import {
   removeTagsFromText as removeTagsFromTextUtil,
   textHasTags,
-} from './utils/DraftMatecatUtils/tagUtils'
+} from '../../utils/segmentText/tagUtils'
 import {Button, BUTTON_MODE, BUTTON_SIZE} from '../common/Button/Button'
 import ReviseLockIcon from '../../../img/icons/ReviseLockIcon'
 import OfflineUtils from '../../utils/offlineUtils'
@@ -47,9 +44,7 @@ const SegmentTarget = ({segment}) => {
   liveRef.current.segment = segment
 
   // Created once via useRef so its identity never changes across renders — required
-  // because updateCounter is passed down as a long-lived prop to <EditArea> and is also
-  // invoked directly through the imperative ref bridge, exactly like the class field's
-  // single stable per-instance identity.
+  // because updateCounter is passed down as a long-lived prop to <TargetEditor>.
   const updateCounterRef = useRef((value) => {
     const {segmentCharacters, unitCharacters} =
       SegmentUtils.getRelativeTransUnitCharactersCounter({
@@ -65,7 +60,7 @@ const SegmentTarget = ({segment}) => {
   const updateCounter = updateCounterRef.current
 
   // Created once via useRef for the same stable-identity reason as updateCounter — it is
-  // passed down as a long-lived prop to <EditArea> and invoked through the ref bridge.
+  // passed down as a long-lived prop to <TargetEditor>.
   const toggleFormatMenuRef = useRef((show) => {
     // Show/Hide Edit Toolbar
     clearTimeout(tmOutShowFormatMenuRef.current)
@@ -262,29 +257,18 @@ const SegmentTarget = ({segment}) => {
       //Text Area
       textAreaContainer = (
         <div className="textarea-container">
-          {isNewEditorEnabled() ? (
-            <TargetEditor
-              ref={(ref) => (editAreaRef.current = ref)}
-              segment={segment}
-              value={
-                SegmentUtils.checkCurrentSegmentTPEnabled(segment)
-                  ? removeTagsFromTextUtil(translation)
-                  : translation
-              }
-              translation={translation}
-              toggleFormatMenu={toggleFormatMenu}
-              updateCounter={updateCounter}
-              bridge={targetEditorBridge}
-            />
-          ) : (
-            <EditArea
-              ref={(ref) => (editAreaRef.current = ref)}
-              segment={segment}
-              translation={translation}
-              toggleFormatMenu={toggleFormatMenu}
-              updateCounter={updateCounter}
-            />
-          )}
+          <TargetEditor
+            ref={(ref) => (editAreaRef.current = ref)}
+            segment={segment}
+            value={
+              SegmentUtils.checkCurrentSegmentTPEnabled(segment)
+                ? removeTagsFromTextUtil(translation)
+                : translation
+            }
+            translation={translation}
+            toggleFormatMenu={toggleFormatMenu}
+            updateCounter={updateCounter}
+          />
           {s2tMicro}
           <div className="segment-actions-container">
             <SegmentTargetToolbar

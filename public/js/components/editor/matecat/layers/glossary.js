@@ -1,6 +1,6 @@
-// Glossary terms (activateGlossary) and termbase terms missing in the target (activateQaCheckGlossary), matched with
+// Glossary terms and termbase terms missing in the target, matched with
 // the cattool's glossary regex over the visible text. Each tag is one opaque character there, so a term never runs
-// across a tag; a match touching one is split around it, as Draft splits it around an entity.
+// across a tag; a match touching one is split around it.
 import TextUtils from '../../../../utils/textUtils'
 import {OPAQUE_TAG} from '../../../segmentView/segmentModel'
 import {visibleDoc} from '../../core/docModel'
@@ -9,7 +9,7 @@ import {visibleToDoc} from '../../core/layers'
 export const GLOSSARY_CLASS = 'glossaryItem'
 export const QA_GLOSSARY_CLASS = 'qaCheckGlossaryItem'
 
-// Longest first among words sharing a prefix (['Guest favorite', 'guest']), as the Draft decorators sort them.
+// Longest first among words sharing a prefix (['Guest favorite', 'guest']).
 const sortedWords = (terms) =>
   [...new Set(terms.flatMap(({matching_words: words = []}) => words))].sort(
     (a, b) => (a.toLowerCase() < b.toLowerCase() ? 1 : -1),

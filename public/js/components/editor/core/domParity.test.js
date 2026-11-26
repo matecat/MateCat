@@ -6,28 +6,27 @@
 // special-character marks, the same highlighted ranges with the same tooltips; on load, with the layer data of the
 // store, and after an edit and its undo (driven by the harness of editParity.test.js, __parity__/actions.js).
 //
-// jsdom has no layout, so this compares structure, classes and text, never pixels. drawnDraft() and drawnCm() reduce
-// each editor's DOM to a list of tokens; they are the spec of "what the user sees", CSS rules that draw something
-// (Tag.scss, SpecialCharMarks.scss) included. Where the two differ on purpose, the difference is listed in
-// INTENTIONAL (or EDIT_INTENTIONAL) with the reason, and the test checks it still differs.
-//
-// It imports Draft (only test files may), and goes away with Draft at M5.
+// jsdom has no layout, so this compares structure, classes and text, never pixels. drawnCm() reduces the CodeMirror
+// DOM to a list of tokens, the spec of "what the user sees", CSS rules that draw something (Tag.scss,
+// SpecialCharMarks.scss) included. What Draft drew, reduced the same way, is frozen in __golden__/domParity.json: the
+// expected tokens of each case. Where the two differ on purpose, the difference is listed in INTENTIONAL (or
+// EDIT_INTENTIONAL) with the reason. An INTENTIONAL rule rewrites the CodeMirror tokens here; where it corrected the
+// Draft side, the correction is in the golden already (each golden drawing lists the rules it needed), so the golden
+// never holds what Draft got wrong. For an EDIT_INTENTIONAL phase the golden holds what CodeMirror draws, checked to
+// differ from Draft when it was frozen.
 import React from 'react'
 import {act, fireEvent, render} from '@testing-library/react'
-import Editarea from '../../segments/Editarea'
-import SegmentSource from '../../segments/SegmentSource'
 import TargetEditor from '../matecat/TargetEditor'
 import SourceEditor from '../matecat/SourceEditor'
 import {SegmentContext} from '../../segments/SegmentContext'
 import {
-  targetEditorBridge,
+  sourceStoreData,
   translationUpdate,
-} from '../../segments/targetEditorBridge'
-import {sourceEditorBridge} from '../../segments/sourceEditorBridge'
+} from '../../../utils/segmentText/segmentStoreData'
 import {initTagSignature} from '../../../utils/segmentText/tagModel'
 import {SPECIAL_CHARS, TAB} from '../../../utils/segmentText/specialChars'
 import CORPUS from './__fixtures__/roundTripCorpus.json'
-import {EditorState as DraftState} from 'draft-js'
+import GOLDEN from './__golden__/domParity.json'
 import {EditorView} from '@codemirror/view'
 import {undo} from '@codemirror/commands'
 import {insertMenuTag} from './tagMenu'
@@ -39,34 +38,17 @@ import {
   REPLACE_TRANSLATION,
   clean,
   cmPoints,
-  draftLoad,
-  draftPoints,
-  draftSave,
-  draftSelection,
   lexiqaReplace,
   tagSuggestions,
   markNames,
   markedWith,
 } from './__parity__/actions'
-import DraftMatecatUtils from '../../segments/utils/DraftMatecatUtils'
 import SearchUtils from '../../header/cattol/search/searchUtils'
 import SegmentStore from '../../../stores/SegmentStore'
 import SegmentConstants from '../../../constants/SegmentConstants'
 
-// The Draft Editor Editarea renders, unchanged; the test keeps its props so an edit state can be handed to Editarea's
-// own onChange, the way Draft hands it every edit.
-const mockDraftEditor = {props: null}
 // The user's compressed tags option (CatToolStore.isTagsCompressed).
 const mockTagsCompressed = {on: false}
-jest.mock('draft-js', () => {
-  const actual = jest.requireActual('draft-js')
-  const {createElement, forwardRef} = jest.requireActual('react')
-  const Editor = forwardRef((props, ref) => {
-    mockDraftEditor.props = props
-    return createElement(actual.Editor, {...props, ref})
-  })
-  return {...actual, Editor}
-})
 jest.mock('../../../stores/SegmentStore', () => {
   const listeners = {}
   return {
@@ -83,24 +65,16 @@ jest.mock('../../../stores/SegmentStore', () => {
     },
   }
 })
-// Actions do nothing, except the ones whose store event an editor draws from: focusTags reaches the Draft chips as
-// FOCUS_TAGS (SegmentStore), as the dispatcher sends it.
-jest.mock('../../../actions/SegmentActions', () => {
-  const {FOCUS_TAGS} = jest.requireActual(
-    '../../../constants/SegmentConstants',
-  ).default
-  const store = jest.requireMock('../../../stores/SegmentStore').default
-  const actions = {
-    focusTags: (tagsSelected) =>
-      store.emit(FOCUS_TAGS, {actionType: FOCUS_TAGS, tagsSelected}),
-  }
-  return {
-    __esModule: true,
-    default: new Proxy(actions, {
+// Actions do nothing.
+jest.mock('../../../actions/SegmentActions', () => ({
+  __esModule: true,
+  default: new Proxy(
+    {},
+    {
       get: (all, name) => (all[name] ??= jest.fn()),
-    }),
-  }
-})
+    },
+  ),
+}))
 jest.mock('../../../stores/CatToolStore', () => ({
   __esModule: true,
   default: {
@@ -123,121 +97,56 @@ jest.mock('../../../utils/contextPreviewChannel', () => ({
 // ---------- what the user sees ----------
 
 const ZWSP = /\u200b/g
-// What a chip's text holds but nobody sees: Draft's word joiner chip holds the word joiner itself.
-const INVISIBLE = /[\u200b\u2060]/g
-
-// The special characters both editors show as a mark, by what each draws: Draft a tag chip, CodeMirror a display-only
+// The special characters the editor shows as a mark, by its class: Draft drew a tag chip, CodeMirror a display-only
 // mark (user decision: nbsp, tab and word joiner are characters with a mark, never tags). Same meaning, same symbol;
-// the classes differ by design, and are pinned here: a chip or a mark missing its class is not recognised as the
-// character and the comparison fails.
+// the classes are pinned here: a mark missing its class is not recognised as the character and the comparison fails.
 const CHAR_MARKS = [
-  {meaning: 'nbsp', draft: 'tag-nbsp', cm: 'special-char-nbsp'},
-  {meaning: 'tab', draft: 'tag-tab', cm: 'cm-tab'},
-  {
-    meaning: 'wordJoiner',
-    draft: 'tag-word-joiner',
-    cm: 'special-char-word-joiner',
-  },
-  {meaning: 'lineBreak', draft: 'tag-lf', cm: 'special-char-mark-line-break'},
+  {meaning: 'nbsp', cm: 'special-char-nbsp'},
+  {meaning: 'tab', cm: 'cm-tab'},
+  {meaning: 'wordJoiner', cm: 'special-char-word-joiner'},
+  {meaning: 'lineBreak', cm: 'special-char-mark-line-break'},
 ]
 
-// The highlight of a layer, by the element each editor wraps the text in. Draft's search highlight has no class, only
-// an inline background (SearchHighLight.component.js): yellow for a hit, orange for the current one.
+// The highlight of a layer, by the element the editor wraps the text in.
 const HIGHLIGHTS = [
-  {kind: 'lexiqa', draft: '.lexiqahighlight', cm: '.lexiqahighlight'},
-  {kind: 'glossary', draft: '.glossaryItem', cm: '.glossaryItem'},
-  {
-    kind: 'missingTerm',
-    draft: '.qaCheckGlossaryItem',
-    cm: '.qaCheckGlossaryItem',
-  },
-  {kind: 'blacklist', draft: '.blacklistItem', cm: '.blacklistItem'},
-  {kind: 'icu', draft: '.icuItem', cm: '.icuItem'},
-  {kind: 'icuError', draft: '.icuItem-error', cm: '.icuItem-error'},
-  {
-    kind: 'search',
-    draft:
-      'span[style*="background-color: rgb(255, 255, 0)"], span[style*="background-color: rgb(255, 210, 14)"]',
-    cm: 'mark.searchMarker',
-  },
-  {
-    kind: 'currentSearch',
-    draft: 'span[style*="rgb(255, 210, 14)"]',
-    cm: 'mark.currSearchItem',
-  },
+  {kind: 'lexiqa', cm: '.lexiqahighlight'},
+  {kind: 'glossary', cm: '.glossaryItem'},
+  {kind: 'missingTerm', cm: '.qaCheckGlossaryItem'},
+  {kind: 'blacklist', cm: '.blacklistItem'},
+  {kind: 'icu', cm: '.icuItem'},
+  {kind: 'icuError', cm: '.icuItem-error'},
+  {kind: 'search', cm: 'mark.searchMarker'},
+  {kind: 'currentSearch', cm: 'mark.currSearchItem'},
 ]
 
-const highlightsOf = (node, stop, side) => {
+const highlightsOf = (node, stop) => {
   const kinds = []
   for (let el = node.parentElement; el && el !== stop; el = el.parentElement)
-    HIGHLIGHTS.forEach((h) => el.matches(h[side]) && kinds.push(h.kind))
+    HIGHLIGHTS.forEach((h) => el.matches(h.cm) && kinds.push(h.kind))
   return [...new Set(kinds)].sort()
 }
 
-// A state of a chip that each editor shows its own way: CodeMirror with a class, Draft by what the chip holds.
-const CHIP_STATES = [
-  // TagEntity markSearch wraps the matching part of the label in a search highlight; the new editor marks the chip.
-  {
-    cm: 'tag-search-match',
-    draft: (el) =>
-      HIGHLIGHTS.filter((h) => h.kind === 'search').some((h) =>
-        el.querySelector(h.draft),
-      ),
-  },
-  // markSearch colours the matching part of the label as the current hit; the new editor marks the chip current.
-  {
-    cm: 'tag-search-current',
-    draft: (el) =>
-      Boolean(
-        el.querySelector(
-          HIGHLIGHTS.find((h) => h.kind === 'currentSearch').draft,
-        ),
-      ),
-  },
-]
-
 // A chip: its label as shown, its classes (what Tag.scss styles it by), its counter, and whether the label sits in the
-// element Tag.scss trims with an ellipsis (Draft `span[data-text]`, CodeMirror `.tag-text`).
-const chipToken = (el, ellipsis, hl, side) => {
-  let counter = el.querySelector('.index-counter')
+// element Tag.scss trims with an ellipsis (`.tag-text`).
+const chipToken = (el, hl) => {
+  const counter = el.querySelector('.index-counter')
   // Tag.scss hides the label of a compressed chip: one with `tag-compressed`, or any numbered chip while the body has
   // `tags-compressed` (CatToolStore sets it with the user's option). Only the number shows, but for a chip that holds a
-  // search hit in the new editor (`tag-search-match`), whose label shows again.
-  let hidden =
+  // search hit (`tag-search-match`), whose label shows again.
+  const hidden =
     el.classList.contains('tag-compressed') ||
     (document.body.classList.contains('tags-compressed') &&
       el.classList.contains('tag-numbered') &&
       !el.classList.contains('tag-search-match'))
-  // Draft, while its side is searched, draws the tag text with markSearch and moves the chip's own content (number and
-  // label) into a `display: none` span: a compressed chip then shows its text, unstyled by compaction, and no number.
-  const searchHidden =
-    side === 'draft' &&
-    [...el.children].find((child) => child.style.display === 'none')
-  let label
-  if (hidden && searchHidden) {
-    hidden = false
-    counter = null
-    label = [...el.childNodes]
-      .filter((node) => node !== searchHidden)
-      .map((node) => node.textContent)
-      .join('')
-      .replace(ZWSP, '')
-  }
-  const labelEl =
-    hidden || label !== undefined ? null : el.querySelector(ellipsis)
-  label ??= hidden
+  const labelEl = hidden ? null : el.querySelector('.tag-text')
+  const label = hidden
     ? counter.textContent
     : (labelEl ?? el).textContent.replace(ZWSP, '')
   return {
     t: 'chip',
     label,
     counter: counter ? counter.textContent : null,
-    classes: [
-      ...[...el.classList].filter((c) => c !== 'tag'),
-      ...(side === 'draft'
-        ? CHIP_STATES.filter((st) => st.draft(el)).map((st) => st.cm)
-        : []),
-    ].sort(),
+    classes: [...el.classList].filter((c) => c !== 'tag').sort(),
     ellipsis:
       Boolean(labelEl) && labelEl.textContent.replace(ZWSP, '') === label,
     hl,
@@ -252,8 +161,7 @@ const CHAR_OF = {
   lineBreak: '\n',
 }
 
-const markOf = (el, side) =>
-  CHAR_MARKS.find((m) => el.classList.contains(m[side]))
+const markOf = (el) => CHAR_MARKS.find((m) => el.classList.contains(m.cm))
 
 const pushText = (tokens, text, hl) => {
   if (!text) return
@@ -262,33 +170,31 @@ const pushText = (tokens, text, hl) => {
   else tokens.push({t: 'text', text, hl})
 }
 
-const walk = (node, stop, side, tokens) => {
+const walk = (node, stop, tokens) => {
   if (node.nodeType === Node.TEXT_NODE) {
     pushText(
       tokens,
       node.textContent.replace(ZWSP, ''),
-      highlightsOf(node, stop, side),
+      highlightsOf(node, stop),
     )
     return
   }
   if (node.nodeType !== Node.ELEMENT_NODE) return
   const el = node
   if (el.matches('img.cm-widgetBuffer, br')) return
-  const mark = markOf(el, side)
+  const mark = markOf(el)
   if (mark) {
-    // Draft shows the chip's label; CodeMirror draws the label of a mark with `::before` from `data-label`, and the
-    // tab's arrow from the editor theme (display.js), which is TAB.label.
+    // CodeMirror draws the label of a mark with `::before` from `data-label`, and the tab's arrow from the editor
+    // theme (display.js), which is TAB.label.
     const symbol =
-      side === 'draft'
-        ? el.textContent.replace(INVISIBLE, '')
-        : mark.meaning === 'tab'
-          ? TAB.label
-          : (el.querySelector('[data-label]')?.dataset.label ?? '')
+      mark.meaning === 'tab'
+        ? TAB.label
+        : (el.querySelector('[data-label]')?.dataset.label ?? '')
     tokens.push({
       t: 'mark',
       meaning: mark.meaning,
       symbol,
-      hl: highlightsOf(el, stop, side),
+      hl: highlightsOf(el, stop),
     })
     return
   }
@@ -302,38 +208,15 @@ const walk = (node, stop, side, tokens) => {
       meaning: el.className,
       symbol: el.querySelector('[data-label]')?.dataset.label ?? '',
       char: code ? String.fromCharCode(parseInt(code, 16)) : el.textContent,
-      hl: highlightsOf(el, stop, side),
+      hl: highlightsOf(el, stop),
     })
     return
   }
   if (el.classList.contains('tag')) {
-    tokens.push(
-      chipToken(
-        el,
-        side === 'draft' ? 'span[data-text="true"]' : '.tag-text',
-        highlightsOf(el, stop, side),
-        side,
-      ),
-    )
+    tokens.push(chipToken(el, highlightsOf(el, stop)))
     return
   }
-  el.childNodes.forEach((child) => walk(child, stop, side, tokens))
-}
-
-/** The tokens the user sees in a Draft editor rendered in `container`, in document order. */
-const drawnDraft = (container) => {
-  const tokens = []
-  const blocks = [
-    ...container.querySelectorAll('[data-contents] > [data-block]'),
-  ]
-  blocks.forEach((block, i) => {
-    if (i > 0) tokens.push({t: 'break'})
-    walk(block, block, 'draft', tokens)
-    // Tag.scss: every block but the last ends with a `\21B5` drawn by `:last-child::after`.
-    if (i < blocks.length - 1)
-      tokens.push({t: 'mark', meaning: 'lineBreak', symbol: '\u21b5', hl: []})
-  })
-  return tokens
+  el.childNodes.forEach((child) => walk(child, stop, tokens))
 }
 
 /** The tokens the user sees in a CodeMirror editor rendered in `container`, in document order. */
@@ -341,7 +224,7 @@ const drawnCm = (container) => {
   const tokens = []
   container.querySelectorAll('.cm-content > .cm-line').forEach((line, i) => {
     if (i > 0) tokens.push({t: 'break'})
-    walk(line, line, 'cm', tokens)
+    walk(line, line, tokens)
   })
   return tokens
 }
@@ -367,8 +250,6 @@ beforeAll(() => {
   const rect = {left: 0, right: 0, top: 0, bottom: 0, width: 0, height: 0}
   Range.prototype.getClientRects = () => []
   Range.prototype.getBoundingClientRect = () => rect
-  // the Draft editors scroll to the caret when they focus
-  window.scrollTo = () => {}
   // Visible spaces off: the default user settings, as the app sets them at load.
   initTagSignature({show_whitespace: 0})
 })
@@ -440,54 +321,29 @@ const mount = (element, read, segment, update, events = [], hover) => {
 
 const ELEMENTS = {
   target: {
-    draft: (seg) => (
-      <Editarea
-        segment={seg}
-        translation={seg.translation}
-        updateCounter={() => {}}
-        toggleFormatMenu={() => {}}
-      />
-    ),
     cm: (seg) => (
       <TargetEditor
         segment={seg}
         value={seg.translation}
         translation={seg.translation}
-        bridge={targetEditorBridge}
         updateCounter={() => {}}
         toggleFormatMenu={() => {}}
       />
     ),
   },
   source: {
-    draft: (seg) => <SegmentSource segment={seg} />,
-    cm: (seg) => (
-      <SourceEditor
-        segment={seg}
-        value={seg.segment}
-        bridge={sourceEditorBridge}
-      />
-    ),
+    cm: (seg) => <SourceEditor segment={seg} value={seg.segment} />,
   },
 }
 
-/** The tokens each editor of `side` draws for `segment` (then `update`): `{draft, cm}`. */
-const drawBoth = (side, segment, update, events, hover) => ({
-  draft: mount(
-    ELEMENTS[side].draft,
-    drawnDraft,
-    segment,
-    update,
-    events,
-    hover?.draft,
-  ),
-  cm: mount(ELEMENTS[side].cm, drawnCm, segment, update, events, hover?.cm),
-})
+/** The tokens the CodeMirror editor of `side` draws for `segment` (then `update`). */
+const draw = (side, segment, update, events, hover) =>
+  mount(ELEMENTS[side].cm, drawnCm, segment, update, events, hover)
 
 // ---------- tooltips ----------
-// What hovering the first highlight of each kind shows. Both editors show it with Matecat's common/Tooltip: Draft
-// through the Tooltip wrapping the highlight (portalled into the body), the new editor through layerHover, which renders
-// common/Tooltip into its own element (layerTooltip.js) — never CodeMirror's `.cm-tooltip`.
+// What hovering the first highlight of each kind shows. Draft showed it with Matecat's common/Tooltip wrapping the
+// highlight; the new editor shows it through layerHover, which renders common/Tooltip into its own element
+// (layerTooltip.js) — never CodeMirror's `.cm-tooltip`.
 
 const TOOLTIP_KINDS = [
   'lexiqa',
@@ -497,29 +353,6 @@ const TOOLTIP_KINDS = [
   'missingTerm',
 ]
 const textOf = (el) => (el?.textContent ?? '').replace(ZWSP, '').trim()
-
-const hoverDraft = (container) =>
-  Object.fromEntries(
-    TOOLTIP_KINDS.flatMap((kind) => {
-      const el = container.querySelector(
-        HIGHLIGHTS.find((h) => h.kind === kind).draft,
-      )
-      if (!el) return []
-      // the element common/Tooltip listens on: around the highlight, or inside it (IcuHighlight)
-      const wrapper = el.querySelector(':scope > div') ?? el.parentElement
-      fireEvent.pointerEnter(wrapper)
-      settle()
-      // common/Tooltip portals its content into a `.portal-container` of the body (hooks/usePortal.js)
-      const shown = [
-        ...document.body.querySelectorAll(':scope > .portal-container'),
-      ]
-        .map(textOf)
-        .join('')
-      fireEvent.pointerLeave(wrapper)
-      settle()
-      return [[kind, shown]]
-    }),
-  )
 
 const hoverCm = (container) =>
   Object.fromEntries(
@@ -543,24 +376,11 @@ const hoverCm = (container) =>
   )
 
 // The tooltip of the first numbered opening chip, which both editors show while the tags are compressed (the chip
-// then shows only its number): its text and the classes of the chip copy it holds. Draft: TagEntity's common/Tooltip
-// (portalled into the body); the new editor: segmentView/tagTooltip.js, common/Tooltip in `.tag-full-text-tooltip`.
+// then shows only its number): its text and the classes of the chip copy it holds. Draft: TagEntity's common/Tooltip;
+// the new editor: segmentView/tagTooltip.js, common/Tooltip in `.tag-full-text-tooltip`.
 const chipCopy = (root) => {
   const chip = root?.querySelector('.tag')
   return chip ? {text: textOf(chip), classes: [...chip.classList].sort()} : null
-}
-const hoverChipDraft = (container) => {
-  const chip = container.querySelector('.tag.tag-paired-open')
-  const wrapper = chip.closest('.tag-container').parentElement
-  fireEvent.pointerEnter(wrapper)
-  settle()
-  const portals = [
-    ...document.body.querySelectorAll(':scope > .portal-container'),
-  ]
-  const shown = chipCopy(portals.find((p) => p.querySelector('.tag')))
-  fireEvent.pointerLeave(wrapper)
-  settle()
-  return shown
 }
 const hoverChipCm = (container) => {
   const chip = container.querySelector('.cm-content .tag.tag-paired-open')
@@ -576,9 +396,11 @@ const hoverChipCm = (container) => {
 
 // ---------- intentional differences ----------
 
-// Each entry rewrites both token lists so that one known difference no longer shows; everything else must still be
-// equal. A case checks that every entry that changed its tokens was needed (without it the two still differ), and the
-// last test that every entry is needed by some case.
+// Each entry is one known difference. It rewrote both token lists so that the difference no longer showed, and the
+// rewritten Draft list is the golden: an entry that only corrected Draft (no `cm`) lives on in the golden alone. The
+// `cm` rewrite still runs here. Each golden drawing lists the entries it needed when it was frozen (without them the
+// two differed); a case checks that each `cm` rewrite it lists is still needed, and the last test that every entry is
+// needed by some case.
 
 const ENTITY = /&(?!(?:amp|lt|gt);)#?[a-z0-9]+;/gi
 const decodeEntities = (text) =>
@@ -617,12 +439,6 @@ const INTENTIONAL = [
     // written; the closed segment shows the character, and so does the new editor (docModel.test.js).
     reason: 'Draft shows XML entities other than &amp; &lt; &gt; as written',
     applies: (raw) => new RegExp(ENTITY.source, 'i').test(raw),
-    draft: (tokens) =>
-      mergeTexts(
-        tokens.map((t) =>
-          t.t === 'text' ? {...t, text: decodeEntities(t.text)} : t,
-        ),
-      ),
   },
   {
     name: 'carriage return',
@@ -651,7 +467,6 @@ const INTENTIONAL = [
       'the new editor marks the special characters of the text, Draft only its tags',
     applies: (raw) =>
       SPECIAL_CHAR.test(decodeEntities(raw.replace(PLACEHOLDER, ''))),
-    draft: (tokens) => mergeTexts(tokens.map(asCharacter)),
     cm: (tokens) => mergeTexts(tokens.map(asCharacter)),
   },
   {
@@ -675,12 +490,6 @@ const INTENTIONAL = [
     // out; the new editor keeps the label and Tag.scss hides it under `body.tags-compressed`. Both show the number.
     reason:
       'Draft marks compressed chips with a class, the new editor relies on body.tags-compressed',
-    draft: (tokens) =>
-      tokens.map((t) =>
-        t.classes
-          ? {...t, classes: t.classes.filter((k) => k !== 'tag-compressed')}
-          : t,
-      ),
   },
   {
     name: 'chips of a searched side with the tags compressed',
@@ -692,7 +501,6 @@ const INTENTIONAL = [
     // and the label shown for them.
     reason:
       'while searching, Draft shows every chip as its text with no number; the new editor un-compresses a chip with a hit',
-    draft: (tokens) => tokens.map(searchedChip),
     cm: (tokens) => tokens.map(searchedChip),
   },
   {
@@ -703,7 +511,6 @@ const INTENTIONAL = [
     // a selected one; after a drop the new editor keeps the dropped text selected, focusing a chip in it.
     reason:
       'the focused chip follows the selection each editor leaves after an undo or a drop',
-    draft: (tokens) => tokens.map(unfocus),
     cm: (tokens) => tokens.map(unfocus),
   },
 ]
@@ -721,42 +528,44 @@ const searchedChip = (t) =>
 const unfocus = (t) =>
   t.classes ? {...t, classes: t.classes.filter((k) => k !== 'tag-focused')} : t
 
-const rewrite = (rules, id, raw, draft, cm) =>
-  rules
-    .filter(
-      (rule) =>
-        (!rule.applies || rule.applies(raw)) && (!rule.id || rule.id.test(id)),
-    )
-    .reduce(
-      ([d, c], rule) => [
-        rule.draft ? rule.draft(d) : d,
-        rule.cm ? rule.cm(c) : c,
-      ],
-      [draft, cm],
-    )
+// The INTENTIONAL entries that apply to the case `id` of the segment `raw`.
+const applying = (id, raw) =>
+  INTENTIONAL.filter(
+    (rule) =>
+      (!rule.applies || rule.applies(raw)) && (!rule.id || rule.id.test(id)),
+  )
+
+const rewrite = (rules, cm) =>
+  rules.reduce((c, rule) => (rule.cm ? rule.cm(c) : c), cm)
 
 const lines = (tokens) => tokens.map(show)
 const neededRules = new Set()
 
-/** Equal to Draft once the intentional differences are rewritten, each of them needed. */
-const expectSameDrawing = (id, raw, draft, cm) => {
-  const [d, c] = rewrite(INTENTIONAL, id, raw, draft, cm)
-  expect(lines(c)).toEqual(lines(d))
-  INTENTIONAL.forEach((rule) => {
-    const others = INTENTIONAL.filter((r) => r !== rule)
-    const [d2, c2] = rewrite(others, id, raw, draft, cm)
-    const changed =
-      lines(d2).join('\n') !== lines(d).join('\n') ||
-      lines(c2).join('\n') !== lines(c).join('\n')
-    if (!changed) return
-    neededRules.add(rule.name)
-    expect({
-      rule: rule.name,
-      differsWithout: lines(c2).join('\n') !== lines(d2).join('\n'),
-    }).toEqual({
-      rule: rule.name,
-      differsWithout: true,
-    })
+/**
+ * Draws what Draft drew (`golden`) once the intentional differences are rewritten. A `cm` rewrite that changes what is
+ * drawn must be one the golden needed when it was frozen; an entry the golden needed counts as still needed when it
+ * only corrected Draft, or when its `cm` rewrite still changes something.
+ */
+const expectSameDrawing = (id, raw, cm, golden) => {
+  const rules = applying(id, raw)
+  const drawnLines = lines(rewrite(rules, cm))
+  expect(drawnLines).toEqual(golden.lines)
+  const drawn = drawnLines.join('\n')
+  rules.forEach((rule) => {
+    const without = lines(
+      rewrite(
+        rules.filter((r) => r !== rule),
+        cm,
+      ),
+    ).join('\n')
+    const changes = Boolean(rule.cm) && without !== drawn
+    if (changes)
+      expect({
+        rule: rule.name,
+        needed: golden.rules.includes(rule.name),
+      }).toEqual({rule: rule.name, needed: true})
+    if (golden.rules.includes(rule.name) && (!rule.cm || changes))
+      neededRules.add(rule.name)
   })
 }
 
@@ -777,8 +586,9 @@ describe.each([
 ])('the %s draws what Draft draws', (side, segments) => {
   // eslint-disable-next-line jest/expect-expect -- expectSameDrawing asserts
   test.each([...new Set(segments)].map((s) => [s]))('%s', (raw) => {
-    const {draft, cm} = drawBoth(side, makeSegment(raw))
-    expectSameDrawing(`${side} | ${raw}`, raw, draft, cm)
+    const cm = draw(side, makeSegment(raw))
+    const id = `${side} | ${raw}`
+    expectSameDrawing(id, raw, cm, GOLDEN.draws[id])
   })
 })
 
@@ -813,7 +623,7 @@ const LEXIQA_MODULES = [
 ]
 // Lexiqa's results on the text the store keeps for Lexiqa (prepareTextForLexiqa of the saved segment).
 const lexiqa = (raw, words, side) => {
-  const text = DraftMatecatUtils.prepareTextForLexiqa(draftSave(draftLoad(raw)))
+  const text = sourceStoreData(raw).lxqText
   const results = {
     ...Object.fromEntries(LEXIQA_MODULES.map((m) => [m, []])),
     spelling: words.map(([word, index]) =>
@@ -991,19 +801,20 @@ describe('highlights', () => {
       // built here: the Lexiqa text depends on the tag signatures set up in beforeAll
       const layerData =
         typeof c.segment === 'function' ? c.segment() : c.segment
-      const {draft, cm} = drawBoth(
+      const cm = draw(
         c.side,
         makeSegment(c.raw, c.open),
         makeSegment(c.raw, {...c.open, ...layerData, ...c.search?.segment}),
         c.events ??
           (c.search ? [[SegmentConstants.ADD_SEARCH_RESULTS, '1']] : []),
-        {draft: hoverDraft, cm: hoverCm},
+        hoverCm,
       )
-      expectSameDrawing(id, c.raw, draft.tokens, cm.tokens)
-      expect(cm.tooltips).toEqual(draft.tooltips)
+      const golden = GOLDEN.highlights[id]
+      expectSameDrawing(id, c.raw, cm.tokens, golden)
+      expect(cm.tooltips).toEqual(golden.tooltips)
       // the case highlights something, or it compares nothing
       expect(
-        draft.tokens.some(
+        cm.tokens.some(
           (t) =>
             t.hl?.length ||
             t.classes?.some((k) => k.startsWith('tag-mismatch')),
@@ -1029,27 +840,18 @@ describe('compressed tags', () => {
   ])(
     '%s: the numbered chips show their number, the hovered one its text',
     (side, raw) => {
-      const seg = makeSegment(raw)
-      const draft = mount(
-        ELEMENTS[side].draft,
-        drawnDraft,
-        seg,
-        null,
-        [],
-        hoverChipDraft,
-      )
-      const cm = mount(ELEMENTS[side].cm, drawnCm, seg, null, [], hoverChipCm)
-      expectSameDrawing(
-        `${side} | compressed | ${raw}`,
-        raw,
-        draft.tokens,
-        cm.tokens,
-      )
+      const cm = draw(side, makeSegment(raw), null, [], hoverChipCm)
+      const id = `${side} | compressed | ${raw}`
+      const golden = GOLDEN.compressed[id]
+      expectSameDrawing(id, raw, cm.tokens, golden)
+      // some chip shows only its number
       expect(
-        draft.tokens.some((t) => t.classes?.includes('tag-compressed')),
+        cm.tokens.some(
+          (t) => t.t === 'chip' && t.counter !== null && t.label === t.counter,
+        ),
       ).toBe(true)
-      expect(cm.tooltips).toEqual(draft.tooltips)
-      expect(draft.tooltips).not.toBeNull()
+      expect(cm.tooltips).toEqual(golden.tooltips)
+      expect(cm.tooltips).not.toBeNull()
     },
   )
 
@@ -1064,23 +866,17 @@ describe('compressed tags', () => {
       // Draft's block text is `a ⁠<b class="name">…`, the chip from 3: markSearch finds the current hit in it there.
       const s = search(side, 'name', 2, 0, [3, 40])
       Object.assign(SearchUtils, s.searchUtils)
-      const {draft, cm} = drawBoth(
+      const cm = draw(
         side,
         makeSegment(searchedRaw),
         makeSegment(searchedRaw, s.segment),
         [[SegmentConstants.ADD_SEARCH_RESULTS, '1']],
       )
-      expectSameDrawing(
-        `${side} | compressed search | ${searchedRaw}`,
-        searchedRaw,
-        draft,
-        cm,
-      )
-      // Both show the label of the chip holding the hit, and colour the hit as the current one.
-      const hit = (tokens) =>
-        tokens.find((t) => t.classes?.includes('tag-search-current'))
-      expect(hit(draft).label).toBe('<b class="name">')
-      expect(hit(cm).label).toBe('<b class="name">')
+      const id = `${side} | compressed search | ${searchedRaw}`
+      expectSameDrawing(id, searchedRaw, cm, GOLDEN.compressed[id])
+      // It shows the label of the chip holding the hit, and colours the hit as the current one.
+      const hit = cm.find((t) => t.classes?.includes('tag-search-current'))
+      expect(hit.label).toBe('<b class="name">')
       Object.assign(SearchUtils, {
         occurrencesList: [],
         searchResultsDictionary: {},
@@ -1090,9 +886,9 @@ describe('compressed tags', () => {
 })
 
 // ---------- after an edit ----------
-// The same edit in both editors, mounted as above: Draft through Editarea's own onChange with the state the edit
-// harness computes (the pure calls Editarea makes), CodeMirror through TargetEditor's view, keymap, DOM handlers and
-// store events. What each draws is compared after the edit and again after one undo.
+// The edit, in CodeMirror mounted as above: through TargetEditor's view, keymap, DOM handlers and store events. What
+// it draws is compared after the edit and again after one undo with what Draft drew for the same edit (made through
+// Editarea's own onChange with the pure calls Editarea makes).
 
 const editsOf = (f) => {
   const names = markNames(f.target)
@@ -1112,7 +908,7 @@ const editsOf = (f) => {
       at,
       impl: DROP_ACTIONS['drag and drop (move)'],
     })),
-    ...(tagSuggestions(f, draftLoad(clean(f.target))).missingTags.length
+    ...(tagSuggestions(f).missingTags.length
       ? [
           {
             action: 'add all missing source tags',
@@ -1189,42 +985,6 @@ const drawEdit = (element, read, segment, update, edit, undo) => {
   return {loaded, edited, undone}
 }
 
-const editareaRef = React.createRef()
-const draftEdit = (c) => {
-  const f = c.f
-  const lexiqaData = c.lexiqa ? editLexiqa(f) : undefined
-  const element = (seg) => (
-    <Editarea
-      ref={editareaRef}
-      segment={seg}
-      translation={seg.translation}
-      updateCounter={() => {}}
-      toggleFormatMenu={() => {}}
-    />
-  )
-  const fx = {...f, clean: clean(f.target)}
-  const change = (state) => mockDraftEditor.props.onChange(state)
-  return drawEdit(
-    element,
-    drawnDraft,
-    editSegment(f),
-    lexiqaData && editSegment(f, lexiqaData),
-    () => {
-      let state = editareaRef.current.state.editorState
-      const p = c.at.length
-        ? draftPoints(markedWith(f.target, c.at), state)
-        : []
-      if (p.length)
-        state = DraftState.acceptSelection(
-          state,
-          draftSelection(state, p[0], p[1]),
-        )
-      change(c.impl.draft(state, p, fx))
-    },
-    () => change(DraftState.undo(editareaRef.current.state.editorState)),
-  )
-}
-
 const cmEdit = (c) => {
   const f = c.f
   const lexiqaData = c.lexiqa ? editLexiqa(f) : undefined
@@ -1261,7 +1021,8 @@ const cmEdit = (c) => {
   )
 }
 
-// Edits after which the two editors draw something else on purpose, in `phases` (`edited`, `undone`).
+// Edits after which the two editors draw something else on purpose, in `phases` (`edited`, `undone`). For these the
+// golden holds what CodeMirror draws (INTENTIONAL rewrites applied), checked to differ from Draft when it was frozen.
 const EDIT_INTENTIONAL = [
   {
     // fixtures with no source tags never open the menu
@@ -1296,24 +1057,13 @@ describe('after an edit, both editors draw the same', () => {
   })
   test.each(EDIT_CASES)('%s', (id, c) => {
     global.config.isTargetRTL = Boolean(c.f.rtl)
-    const draft = draftEdit(c)
     const cm = cmEdit(c)
-    const rule = (phase) =>
-      EDIT_INTENTIONAL.find((r) => r.phases.includes(phase) && r.id.test(id))
     const raw = clean(c.f.target)
-    ;['loaded', 'edited', 'undone'].forEach((phase) => {
-      if (!rule(phase)) {
-        expectSameDrawing(id, raw, draft[phase], cm[phase])
-        return
-      }
-      const [d, m] = rewrite(INTENTIONAL, id, raw, draft[phase], cm[phase])
-      expect({
-        phase,
-        differs: lines(m).join('\n') !== lines(d).join('\n'),
-      }).toEqual({phase, differs: true})
-    })
+    ;['loaded', 'edited', 'undone'].forEach((phase) =>
+      expectSameDrawing(id, raw, cm[phase], GOLDEN.edits[id][phase]),
+    )
     // the edit changed what is drawn, or there is nothing to compare
-    expect(lines(draft.edited)).not.toEqual(lines(draft.loaded))
+    expect(lines(cm.edited)).not.toEqual(lines(cm.loaded))
   })
 
   test('every intentional difference after an edit still matches a case', () => {

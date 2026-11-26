@@ -4,7 +4,6 @@ import {AiAlternatives} from './AiAlternatives'
 import SegmentActions from '../../../../actions/SegmentActions'
 import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper/ApplicationWrapperContext'
 import CommonUtils from '../../../../utils/commonUtils'
-import {getSelectedTextWithTags} from '../../utils/DraftMatecatUtils/getSelectedTextWithTags'
 
 jest.mock('../../../../actions/SegmentActions', () => ({
   aiAlternativeTab: jest.fn(),
@@ -12,10 +11,6 @@ jest.mock('../../../../actions/SegmentActions', () => ({
 
 jest.mock('../../../../utils/commonUtils', () => ({
   dispatchTrackingEvents: jest.fn(),
-}))
-
-jest.mock('../../utils/DraftMatecatUtils/getSelectedTextWithTags', () => ({
-  getSelectedTextWithTags: jest.fn(),
 }))
 
 beforeAll(() => {
@@ -62,20 +57,11 @@ describe('AiAlternatives', () => {
   })
 
   test('renders enabled with selected text and focused editArea, then opens the tab', () => {
-    getSelectedTextWithTags.mockReturnValue([
-      {value: 'Hello'},
-      {value: ' world'},
-    ])
-    const editAreaRef = document.createElement('div')
-    document.body.appendChild(editAreaRef)
-    editAreaRef.focus = () => {}
-    Object.defineProperty(document, 'activeElement', {
-      value: editAreaRef,
-      configurable: true,
-    })
-
     const editArea = {
-      state: {editorState: {}},
+      getSelection: () => ({
+        textWithTags: 'Hello world',
+        textWithoutTags: 'Hello world',
+      }),
       editAreaRef: {contains: () => true},
     }
 
@@ -100,8 +86,6 @@ describe('AiAlternatives', () => {
         selectedText: 'Hello world',
       }),
     )
-
-    document.body.removeChild(editAreaRef)
   })
 
   test('renders bundled label and classnames when isIconsBundled is true', () => {
@@ -110,16 +94,15 @@ describe('AiAlternatives', () => {
   })
 
   test('is disabled when selected text exists but editArea is not focused', () => {
-    getSelectedTextWithTags.mockReturnValue([{value: 'Hello'}])
     const editArea = {
-      state: {editorState: {}},
+      getSelection: () => ({textWithTags: 'Hello', textWithoutTags: 'Hello'}),
       editAreaRef: {contains: () => false},
     }
     renderComponent({editArea})
     expect(screen.getByRole('button')).toBeDisabled()
   })
 
-  test('with the CodeMirror target, offers its selection with tags to Lara', () => {
+  test('offers the selection with its tags to Lara', () => {
     const editArea = {
       getSelection: () => ({
         textWithTags: 'Hello <g id="1">world</g>',
@@ -131,14 +114,13 @@ describe('AiAlternatives', () => {
     renderComponent({editArea})
     fireEvent.click(screen.getByRole('button'))
 
-    expect(getSelectedTextWithTags).not.toHaveBeenCalled()
     expect(SegmentActions.aiAlternativeTab).toHaveBeenCalledWith({
       sid: '10',
       text: 'Hello <g id="1">world</g>',
     })
   })
 
-  test('with nothing selected in the CodeMirror target the button is disabled', () => {
+  test('with nothing selected in the target the button is disabled', () => {
     const editArea = {
       getSelection: () => ({textWithTags: '', textWithoutTags: ''}),
       editAreaRef: {contains: () => true},

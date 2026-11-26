@@ -28,7 +28,7 @@ jest.mock('../../../utils/speech2text', () => ({
   isContributionToBeAllowed: jest.fn(() => true),
 }))
 
-jest.mock('./DraftMatecatUtils/segmentStringUtils', () => ({
+jest.mock('../../../utils/segmentText/segmentStringUtils', () => ({
   removeTagsFromText: jest.fn((text) => text),
 }))
 
@@ -93,7 +93,7 @@ jest.mock('../../../stores/CatToolStore', () => ({
   getJobMetadata: jest.fn(),
 }))
 
-jest.mock('./DraftMatecatUtils/tagUtils', () => ({
+jest.mock('../../../utils/segmentText/tagUtils', () => ({
   decodeTagsToUnicodeChar: jest.fn((text) => text),
   encodeTagsFromUnicodeChar: jest.fn((text) => text),
 }))
@@ -106,7 +106,7 @@ import SegmentUtils from '../../../utils/segmentUtils'
 import CommonUtils from '../../../utils/commonUtils'
 import OfflineUtils from '../../../utils/offlineUtils'
 import Speech2Text from '../../../utils/speech2text'
-import SegmentStringUtils from './DraftMatecatUtils/segmentStringUtils'
+import SegmentStringUtils from '../../../utils/segmentText/segmentStringUtils'
 import CatToolStore from '../../../stores/CatToolStore'
 import {JobMetadataProxy} from '../../../stores/JobMetadataProxy'
 import CatToolActions from '../../../actions/CatToolActions'

@@ -181,7 +181,7 @@ const mountEditor = (value, options = {}) =>
     ...options,
   })
 
-describe('replaceLayerRange (a Lexiqa suggestion, Editarea.replaceWordAt)', () => {
+describe('replaceLayerRange (a Lexiqa suggestion)', () => {
   test('replaces the warned text on its own line of a multi-line target, as one user edit', () => {
     const editor = mountEditor('tow one##$_0A$##two tow<x id="1"/>')
     const second = editor.view.state.doc.toString().lastIndexOf('tow')

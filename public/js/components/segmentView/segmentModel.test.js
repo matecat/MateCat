@@ -15,7 +15,7 @@ import {
 import {
   initTagSignature,
   setTagSignatureMiddleware,
-} from '../segments/utils/DraftMatecatUtils/tagModel'
+} from '../../utils/segmentText/tagModel'
 
 // The space placeholder is a user option (show_whitespace), off by default.
 const showWhitespace = (on) => initTagSignature({show_whitespace: on ? 1 : 0})

@@ -79,7 +79,7 @@ jest.mock('../components/segments/utils/translationMatches', () => ({
   },
 }))
 
-jest.mock('../components/segments/utils/DraftMatecatUtils/segmentStringUtils', () => ({
+jest.mock('../utils/segmentText/segmentStringUtils', () => ({
   __esModule: true,
   default: {
     removePlaceholdersForGlossary: jest.fn((t) => t),
@@ -684,7 +684,7 @@ describe('SegmentActions — simple dispatch actions', () => {
 
   test('editarea / misc dispatchers', () => {
     SegmentActions.editAreaChanged('1', true)
-    SegmentActions.highlightTags('t', 'p', 'k', true)
+    SegmentActions.highlightTags('t', 'p', 'k')
     SegmentActions.hideAiAssistant()
     SegmentActions.characterCounter({
       sid: '1',
@@ -701,7 +701,6 @@ describe('SegmentActions — simple dispatch actions', () => {
       hasError: false,
     })
     SegmentActions.setIsCurrentSearchOccurrenceTag(true)
-    SegmentActions.focusTags(['a'])
     SegmentActions.aiAlternativeSuggestion({sid: '1', data: {}})
     SegmentActions.aiFeedbackSuggestion({sid: '1', data: {}})
     SegmentActions.changeCharactersCounterRules()

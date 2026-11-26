@@ -1,0 +1,6289 @@
+{
+  "draws": {
+    "target | &lt;br/&gt;": {
+      "lines": ["text \"<br/>\""],
+      "rules": []
+    },
+    "target | x##$_A0$##y##$_09$##": {
+      "lines": [
+        "text \"x\"",
+        "mark nbsp \"°\"",
+        "text \"y\"",
+        "mark tab \"⇥\""
+      ],
+      "rules": []
+    },
+    "target | ax##$_A0$##y##$_09$##b": {
+      "lines": [
+        "text \"ax\"",
+        "mark nbsp \"°\"",
+        "text \"y\"",
+        "mark tab \"⇥\"",
+        "text \"b\""
+      ],
+      "rules": []
+    },
+    "target | <img src=x onerror=alert(1)><x id=\"1\"/>": {
+      "lines": [
+        "text \"<img src=x onerror=alert(1)>\"",
+        "chip \"1\" tag-selfclosed"
+      ],
+      "rules": []
+    },
+    "target | <x id=\"1\"/>": {
+      "lines": ["chip \"1\" tag-selfclosed"],
+      "rules": []
+    },
+    "target | a<x id=\"1\"/>b": {
+      "lines": ["text \"a\"", "chip \"1\" tag-selfclosed", "text \"b\""],
+      "rules": []
+    },
+    "target | ciao <g id=\"1\">mondo</g>": {
+      "lines": [
+        "text \"ciao \"",
+        "chip \"1\" tag-open",
+        "text \"mondo\"",
+        "chip \"1\" tag-close"
+      ],
+      "rules": []
+    },
+    "target | a°b\tc": {
+      "lines": ["text \"a°b\\tc\""],
+      "rules": ["special characters in the text"]
+    },
+    "target | <g id=\"1\"></g>": {
+      "lines": ["chip \"1\" tag-open", "chip \"1\" tag-close"],
+      "rules": []
+    },
+    "target | <ph id=\"mtc_1\" ctype=\"x-original_pc_open\" equiv-text=\"base64:AAA\"/>": {
+      "lines": [
+        "chip \"\\u0000\\u0000\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1"
+      ],
+      "rules": []
+    },
+    "target | <ph id=\"mtc_2\" ctype=\"x-original_pc_close\" equiv-text=\"base64:BBB\"/>": {
+      "lines": [
+        "chip \"1\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #1 NO-ELLIPSIS"
+      ],
+      "rules": []
+    },
+    "target | <ph id=\"source1_1\" ctype=\"x-pc_open_data_ref\" equiv-text=\"base64:CCC\" x-orig=\"base64:DDD\"/>": {
+      "lines": [
+        "chip \"\\b \" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1"
+      ],
+      "rules": []
+    },
+    "target | <ph id=\"source1_2\" ctype=\"x-pc_close_data_ref\" equiv-text=\"base64:EEE\" x-orig=\"base64:FFF\"/>": {
+      "lines": [
+        "chip \"1\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #1 NO-ELLIPSIS"
+      ],
+      "rules": []
+    },
+    "target | <ph id=\"source2_1\" ctype=\"x-pc_open_data_ref\" equiv-text=\"base64:GGG\" x-orig=\"base64:HHH\"/>": {
+      "lines": [
+        "chip \"\\u0018a\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1"
+      ],
+      "rules": []
+    },
+    "target | <ph id=\"source2_2\" ctype=\"x-pc_close_data_ref\" equiv-text=\"base64:III\" x-orig=\"base64:JJJ\"/>": {
+      "lines": [
+        "chip \"1\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #1 NO-ELLIPSIS"
+      ],
+      "rules": []
+    },
+    "target | <ph id=\"mtc_3\" ctype=\"x-html\" equiv-text=\"base64:KKK\"/>": {
+      "lines": ["chip \"(�\" tag-ph.tag-selfclosed"],
+      "rules": []
+    },
+    "target | <ph id=\"mtc_9\" equiv-text=\"base64:LLL\"/>": {
+      "lines": ["chip \",�\" tag-ph.tag-selfclosed"],
+      "rules": []
+    },
+    "target | <g id=\"1\" equiv-text=\"base64:WyMkZHA0XQ==\">": {
+      "lines": [
+        "chip \"[#$dp4]\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1"
+      ],
+      "rules": []
+    },
+    "target | <g id=\"2\" equiv-text=\"base64:WyMkZHA0XQ==\">": {
+      "lines": [
+        "chip \"[#$dp4]\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1"
+      ],
+      "rules": []
+    },
+    "target | <g id=\"3\">": {
+      "lines": ["chip \"3\" tag-open"],
+      "rules": []
+    },
+    "target | <g id=\"4\" equiv-text=\"base64:WyMkZHA0XQ==\"/>": {
+      "lines": ["chip \"4\" tag-selfclosed"],
+      "rules": []
+    },
+    "target | </g>": {
+      "lines": ["chip \"?\" tag-close"],
+      "rules": []
+    },
+    "target | <ph id=\"mtc_1\" ctype=\"x-original_x\" x-orig=\"AAA\" equiv-text=\"base64:e3sjJmd0OyBlbWFpbC1zdWJqZWN0fX0=\"/>": {
+      "lines": ["chip \"{{#> email-subject}}\" tag-ph.tag-selfclosed"],
+      "rules": []
+    },
+    "target | <ph id=\"mtc_2\" ctype=\"x-original_x\" x-orig=\"AAA\"/>": {
+      "lines": [
+        "text \"<ph id=\\\"mtc_2\\\" ctype=\\\"x-original_x\\\" x-orig=\\\"AAA\\\"/>\""
+      ],
+      "rules": ["unknown markup"]
+    },
+    "target | plain g, self-closing g, </g> and x without equiv-text are not compressible": {
+      "lines": [
+        "text \"plain g, self-closing g, \"",
+        "chip \"?\" tag-close",
+        "text \" and x without equiv-text are not compressible\""
+      ],
+      "rules": []
+    },
+    "target | a g pair shares one number; its </g> is the close": {
+      "lines": [
+        "text \"a g pair shares one number; its \"",
+        "chip \"?\" tag-close",
+        "text \" is the close\""
+      ],
+      "rules": []
+    },
+    "target | a plain g nested in an equiv-text g does not steal its </g>": {
+      "lines": [
+        "text \"a plain g nested in an equiv-text g does not steal its \"",
+        "chip \"?\" tag-close"
+      ],
+      "rules": []
+    },
+    "target | an orphan </g> is not numbered": {
+      "lines": [
+        "text \"an orphan \"",
+        "chip \"?\" tag-close",
+        "text \" is not numbered\""
+      ],
+      "rules": []
+    },
+    "target | <g id=\"7\">Reset</g>": {
+      "lines": [
+        "chip \"7\" tag-open",
+        "text \"Reset\"",
+        "chip \"7\" tag-close"
+      ],
+      "rules": []
+    },
+    "target | <g id=\"1\">x</g>": {
+      "lines": ["chip \"1\" tag-open", "text \"x\"", "chip \"1\" tag-close"],
+      "rules": []
+    },
+    "target | <g id=\"1\">": {
+      "lines": ["chip \"1\" tag-open"],
+      "rules": []
+    },
+    "target | hello <g id=\"1\">": {
+      "lines": ["text \"hello \"", "chip \"1\" tag-open"],
+      "rules": []
+    },
+    "target | <ph id=\"mtc_1\" ctype=\"x-original_pc_open\" equiv-text=\"base64:aGVsbG8=\"/>": {
+      "lines": [
+        "chip \"hello\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1"
+      ],
+      "rules": []
+    },
+    "target | <g id=\"2\">": {
+      "lines": ["chip \"2\" tag-open"],
+      "rules": []
+    },
+    "target | &lt;p&gt;\n": {
+      "lines": ["text \"<p>\"", "mark lineBreak \"↵\"", "break"],
+      "rules": []
+    },
+    "target | ##$_0A$##": {
+      "lines": ["mark lineBreak \"↵\"", "break"],
+      "rules": []
+    },
+    "target | a <g id=\"1\">b</g> c <g id=\"2\">d</g> e": {
+      "lines": [
+        "text \"a \"",
+        "chip \"1\" tag-open",
+        "text \"b\"",
+        "chip \"1\" tag-close",
+        "text \" c \"",
+        "chip \"2\" tag-open",
+        "text \"d\"",
+        "chip \"2\" tag-close",
+        "text \" e\""
+      ],
+      "rules": []
+    },
+    "target | <bx id=\"9\"/>": {
+      "lines": ["chip \"9\" tag-selfclosed"],
+      "rules": []
+    },
+    "target | one##$_0A$##two": {
+      "lines": [
+        "text \"one\"",
+        "mark lineBreak \"↵\"",
+        "break",
+        "text \"two\""
+      ],
+      "rules": []
+    },
+    "target | ab<x id=\"1\"/>cd": {
+      "lines": ["text \"ab\"", "chip \"1\" tag-selfclosed", "text \"cd\""],
+      "rules": []
+    },
+    "target | b<x id=\"1\"/>": {
+      "lines": ["text \"b\"", "chip \"1\" tag-selfclosed"],
+      "rules": []
+    },
+    "target | a &lt;b&gt; c": {
+      "lines": ["text \"a <b> c\""],
+      "rules": []
+    },
+    "target | <g id=\"mtc_1\">": {
+      "lines": ["chip \"mtc_1\" tag-open"],
+      "rules": []
+    },
+    "target | <g id=\"-1\">": {
+      "lines": ["chip \"-1\" tag-open"],
+      "rules": []
+    },
+    "target | &lt;p&gt;": {
+      "lines": ["text \"<p>\""],
+      "rules": []
+    },
+    "target | &amp;amp;": {
+      "lines": ["text \"&amp;\""],
+      "rules": []
+    },
+    "target | &amp;": {
+      "lines": ["text \"&\""],
+      "rules": []
+    },
+    "target | &nbsp;": {
+      "lines": ["text \" \""],
+      "rules": ["entities", "special characters in the text"]
+    },
+    "target | &apos;": {
+      "lines": ["text \"'\""],
+      "rules": ["entities"]
+    },
+    "target | &quot;": {
+      "lines": ["text \"\\\"\""],
+      "rules": ["entities"]
+    },
+    "target | &amp;lt;p&amp;gt;": {
+      "lines": ["text \"&lt;p&gt;\""],
+      "rules": []
+    },
+    "target | test <g id=\"1\">tag</g> end": {
+      "lines": [
+        "text \"test \"",
+        "chip \"1\" tag-open",
+        "text \"tag\"",
+        "chip \"1\" tag-close",
+        "text \" end\""
+      ],
+      "rules": []
+    },
+    "target | test </g> end": {
+      "lines": ["text \"test \"", "chip \"?\" tag-close", "text \" end\""],
+      "rules": []
+    },
+    "target | value ##$_A0$## end": {
+      "lines": ["text \"value \"", "mark nbsp \"°\"", "text \" end\""],
+      "rules": []
+    },
+    "target | <g id=\"1\">a</g> <g id=\"2\">b</g> <g id=\"3\">c</g>": {
+      "lines": [
+        "chip \"1\" tag-open",
+        "text \"a\"",
+        "chip \"1\" tag-close",
+        "text \" \"",
+        "chip \"2\" tag-open",
+        "text \"b\"",
+        "chip \"2\" tag-close",
+        "text \" \"",
+        "chip \"3\" tag-open",
+        "text \"c\"",
+        "chip \"3\" tag-close"
+      ],
+      "rules": []
+    },
+    "target | foo##$_0A$##bar": {
+      "lines": [
+        "text \"foo\"",
+        "mark lineBreak \"↵\"",
+        "break",
+        "text \"bar\""
+      ],
+      "rules": []
+    },
+    "target | foo##$_0D$##bar": {
+      "lines": [
+        "text \"foo\"",
+        "mark lineBreak \"↵\"",
+        "break",
+        "text \"bar\""
+      ],
+      "rules": ["carriage return"]
+    },
+    "target | foo##$_0D$####$_0A$##bar": {
+      "lines": [
+        "text \"foo\"",
+        "mark lineBreak \"↵\"",
+        "break",
+        "text \"bar\""
+      ],
+      "rules": ["carriage return"]
+    },
+    "target | a##$_0A$##b##$_0A$##c": {
+      "lines": [
+        "text \"a\"",
+        "mark lineBreak \"↵\"",
+        "break",
+        "text \"b\"",
+        "mark lineBreak \"↵\"",
+        "break",
+        "text \"c\""
+      ],
+      "rules": []
+    },
+    "target | helloab<x id=\"1\"/> world": {
+      "lines": [
+        "text \"helloab\"",
+        "chip \"1\" tag-selfclosed",
+        "text \" world\""
+      ],
+      "rules": []
+    },
+    "target | ab<x id=\"1\"/>cd efgh": {
+      "lines": ["text \"ab\"", "chip \"1\" tag-selfclosed", "text \"cd efgh\""],
+      "rules": []
+    },
+    "target | cd efghab<x id=\"1\"/>": {
+      "lines": ["text \"cd efghab\"", "chip \"1\" tag-selfclosed"],
+      "rules": []
+    },
+    "target | abc<x id=\"1\"/>xyz": {
+      "lines": ["text \"abc\"", "chip \"1\" tag-selfclosed", "text \"xyz\""],
+      "rules": []
+    },
+    "target | axyzbc<x id=\"1\"/>": {
+      "lines": ["text \"axyzbc\"", "chip \"1\" tag-selfclosed"],
+      "rules": []
+    },
+    "target | foo##$_0A$##bar##$_0A$##baz": {
+      "lines": [
+        "text \"foo\"",
+        "mark lineBreak \"↵\"",
+        "break",
+        "text \"bar\"",
+        "mark lineBreak \"↵\"",
+        "break",
+        "text \"baz\""
+      ],
+      "rules": []
+    },
+    "target | ##$_A0$##": {
+      "lines": ["mark nbsp \"°\""],
+      "rules": []
+    },
+    "target | <g id=\"1\">tag</g>": {
+      "lines": ["chip \"1\" tag-open", "text \"tag\"", "chip \"1\" tag-close"],
+      "rules": []
+    },
+    "target | <ph id=\"mtc_1\" ctype=\"x-original_pc_open\" equiv-text=\"base64:Jmx0O3AmZ3Q7\"/>": {
+      "lines": [
+        "chip \"<p>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1"
+      ],
+      "rules": []
+    },
+    "target | <ph id=\"mtc_2\" ctype=\"x-original_pc_close\" equiv-text=\"base64:Jmx0Oy9wJmd0Ow==\"/>": {
+      "lines": [
+        "chip \"1\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #1 NO-ELLIPSIS"
+      ],
+      "rules": []
+    },
+    "target | <ph id=\"source1_1\" ctype=\"x-pc_open_data_ref\" equiv-text=\"base64:Jmx0O3AmZ3Q7\" x-orig=\"base64:Jmx0O3AmZ3Q7\"/>": {
+      "lines": [
+        "chip \"<p>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1"
+      ],
+      "rules": []
+    },
+    "target | <ph id=\"source1_2\" ctype=\"x-pc_close_data_ref\" equiv-text=\"base64:Jmx0Oy9wJmd0Ow==\" x-orig=\"base64:Jmx0Oy9wJmd0Ow==\"/>": {
+      "lines": [
+        "chip \"1\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #1 NO-ELLIPSIS"
+      ],
+      "rules": []
+    },
+    "target | <ph id=\"mtc_3\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O3AmZ3Q7\"/>": {
+      "lines": ["chip \"<p>\" tag-ph.tag-selfclosed"],
+      "rules": []
+    },
+    "target | <span data-text=\"true\">&lt;p&gt;</span>": {
+      "lines": ["text \"<span data-text=\\\"true\\\"><p></span>\""],
+      "rules": []
+    },
+    "target | &lt;p&gt;</span>": {
+      "lines": ["text \"<p></span>\""],
+      "rules": []
+    },
+    "target | <g id=\"1\">content</g>": {
+      "lines": [
+        "chip \"1\" tag-open",
+        "text \"content\"",
+        "chip \"1\" tag-close"
+      ],
+      "rules": []
+    },
+    "target | <g id=\"2\" equiv-text=\"base64:PGI+\">": {
+      "lines": [
+        "chip \"<b>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1"
+      ],
+      "rules": []
+    },
+    "target | <ph id=\"mtc_1\" ctype=\"x-original_x\" x-orig=\"AAA\" equiv-text=\"base64:WyMkZHA0XQ==\"/>": {
+      "lines": ["chip \"[#$dp4]\" tag-ph.tag-selfclosed"],
+      "rules": []
+    },
+    "target | a</g>": {
+      "lines": ["text \"a\"", "chip \"?\" tag-close"],
+      "rules": []
+    },
+    "target | a<g id=\"7\">b</g>c</g>": {
+      "lines": [
+        "text \"a\"",
+        "chip \"7\" tag-open",
+        "text \"b\"",
+        "chip \"7\" tag-close",
+        "text \"c\"",
+        "chip \"?\" tag-close"
+      ],
+      "rules": []
+    },
+    "target | test <g id=\"1\">tag</g> ph con &lt; &gt; &amp;lt; &amp;gt; <g id=\"2\"/> <ph id=\"mtc_1\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O3AmZ3Q7\"/> <ph id=\"mtc_2\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O3N0cm9uZyZndDs=\"/> <ph id=\"mtc_3\" ctype=\"x-html\" equiv-text=\"base64:Jmx0Oy9zdHJvbmcmZ3Q7\"/>pippoL&apos; placeholder &nbsp; elle-même": {
+      "lines": [
+        "text \"test \"",
+        "chip \"1\" tag-open",
+        "text \"tag\"",
+        "chip \"1\" tag-close",
+        "text \" ph con < > &lt; &gt; \"",
+        "chip \"2\" tag-selfclosed",
+        "text \" \"",
+        "chip \"<p>\" tag-ph.tag-selfclosed",
+        "text \" \"",
+        "chip \"<strong>\" tag-ph.tag-selfclosed",
+        "text \" \"",
+        "chip \"</strong>\" tag-ph.tag-selfclosed",
+        "text \"pippoL' placeholder   elle-même\""
+      ],
+      "rules": ["entities", "special characters in the text"]
+    },
+    "target | test <span contenteditable=\"false\" class=\"tag small tag-open\">​1​</span>tag<span contenteditable=\"false\" class=\"tag small tag-close\">​1​</span> ph con &lt; &gt; &amp;lt; &amp;gt; <span contenteditable=\"false\" class=\"tag small tag-selfclosed\">2</span> <span contenteditable=\"false\" class=\"tag small tag-selfclosed tag-ph\">&lt;p&gt;</span> <span contenteditable=\"false\" class=\"tag small tag-selfclosed tag-ph\">&lt;strong&gt;</span> <span contenteditable=\"false\" class=\"tag small tag-selfclosed tag-ph\">&lt;/strong&gt;</span>pippoL&apos; placeholder &nbsp; elle-même": {
+      "lines": [
+        "text \"test <span contenteditable=\\\"false\\\" class=\\\"tag small tag-open\\\">1</span>tag<span contenteditable=\\\"false\\\" class=\\\"tag small tag-close\\\">1</span> ph con < > &lt; &gt; <span contenteditable=\\\"false\\\" class=\\\"tag small tag-selfclosed\\\">2</span> <span contenteditable=\\\"false\\\" class=\\\"tag small tag-selfclosed tag-ph\\\"><p></span> <span contenteditable=\\\"false\\\" class=\\\"tag small tag-selfclosed tag-ph\\\"><strong></span> <span contenteditable=\\\"false\\\" class=\\\"tag small tag-selfclosed tag-ph\\\"></strong></span>pippoL' placeholder   elle-même\""
+      ],
+      "rules": ["entities", "special characters in the text"]
+    },
+    "target | test <g id=\"1\">tag</g> ph con &lt; &gt; &amp;lt; <g id=\"2\"></g> &amp;gt; <ph id=\"mtc_1\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O3AmZ3Q7\"/> <ph id=\"mtc_2\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O3N0cm9uZyZndDs=\"/> <ph id=\"mtc_3\" ctype=\"x-html\" equiv-text=\"base64:Jmx0Oy9zdHJvbmcmZ3Q7\"/>pippoL&apos; placeholder &nbsp; elle-même": {
+      "lines": [
+        "text \"test \"",
+        "chip \"1\" tag-open",
+        "text \"tag\"",
+        "chip \"1\" tag-close",
+        "text \" ph con < > &lt; \"",
+        "chip \"2\" tag-open",
+        "chip \"2\" tag-close",
+        "text \" &gt; \"",
+        "chip \"<p>\" tag-ph.tag-selfclosed",
+        "text \" \"",
+        "chip \"<strong>\" tag-ph.tag-selfclosed",
+        "text \" \"",
+        "chip \"</strong>\" tag-ph.tag-selfclosed",
+        "text \"pippoL' placeholder   elle-même\""
+      ],
+      "rules": ["entities", "special characters in the text"]
+    },
+    "target | test <g id=\"1\">tag</g> ph con &lt; &gt; &amp;lt; <g id=\"2\"></g> &amp;gt; <p> <strong> </strong>pippoL&apos; placeholder &nbsp; elle-même": {
+      "lines": [
+        "text \"test \"",
+        "chip \"1\" tag-open",
+        "text \"tag\"",
+        "chip \"1\" tag-close",
+        "text \" ph con < > &lt; \"",
+        "chip \"2\" tag-open",
+        "chip \"2\" tag-close",
+        "text \" &gt; <p> <strong> </strong>pippoL' placeholder   elle-même\""
+      ],
+      "rules": ["entities", "special characters in the text"]
+    },
+    "target | test tag ph con ##$_SPLIT$## &lt; &gt; ##$_0A$## &amp;lt; ##$_09$## &amp;gt; ##$_A0$## ##$_0D$## <ph id=\"mtc_1\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O3AmZ3Q7\"/> <ph id=\"mtc_2\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O3N0cm9uZyZndDs=\"/> <ph id=\"mtc_3\" ctype=\"x-html\" equiv-text=\"base64:Jmx0Oy9zdHJvbmcmZ3Q7\"/>pippoL&apos; placeholder &nbsp; ##$_A0$##elle-même": {
+      "lines": [
+        "text \"test tag ph con \"",
+        "chip \"\" tag-split",
+        "text \" < > \\n\"",
+        "break",
+        "text \" &lt; \\t &gt;   \\n\"",
+        "break",
+        "text \" \"",
+        "chip \"<p>\" tag-ph.tag-selfclosed",
+        "text \" \"",
+        "chip \"<strong>\" tag-ph.tag-selfclosed",
+        "text \" \"",
+        "chip \"</strong>\" tag-ph.tag-selfclosed",
+        "text \"pippoL' placeholder    elle-même\""
+      ],
+      "rules": ["entities", "carriage return", "special characters in the text"]
+    },
+    "target | test tag ph con  &lt; &gt; \n &amp;lt; ⇥ &amp;gt; ° \r <p> <strong> </strong>pippoL&apos; placeholder &nbsp; °elle-même": {
+      "lines": [
+        "text \"test tag ph con  < > \\n\"",
+        "break",
+        "text \" &lt; ⇥ &gt; ° \\n\"",
+        "break",
+        "text \" <p> <strong> </strong>pippoL' placeholder   °elle-même\""
+      ],
+      "rules": ["entities", "carriage return", "special characters in the text"]
+    },
+    "target | test tag ph con &lt; &gt; &amp;lt;  &amp;gt; <p> <strong> </strong>pippoL&apos; placeholder &nbsp; elle-même": {
+      "lines": [
+        "text \"test tag ph con < > &lt;  &gt; <p> <strong> </strong>pippoL' placeholder   elle-même\""
+      ],
+      "rules": ["entities", "special characters in the text"]
+    },
+    "target | a##$_A0$##b": {
+      "lines": ["text \"a\"", "mark nbsp \"°\"", "text \"b\""],
+      "rules": []
+    },
+    "target | a &lt;b&gt; c &amp; d": {
+      "lines": ["text \"a <b> c & d\""],
+      "rules": []
+    },
+    "target | translated end<g id=\"1\"></g>": {
+      "lines": [
+        "text \"translated end\"",
+        "chip \"1\" tag-open",
+        "chip \"1\" tag-close"
+      ],
+      "rules": []
+    },
+    "target | translated <g id=\"1\">tag</g> end": {
+      "lines": [
+        "text \"translated \"",
+        "chip \"1\" tag-open",
+        "text \"tag\"",
+        "chip \"1\" tag-close",
+        "text \" end\""
+      ],
+      "rules": []
+    },
+    "target | a##$_0A$##b##$_0D$##c##$_09$##d##$_A0$##e": {
+      "lines": [
+        "text \"a\"",
+        "mark lineBreak \"↵\"",
+        "break",
+        "text \"b\"",
+        "mark lineBreak \"↵\"",
+        "break",
+        "text \"c\"",
+        "mark tab \"⇥\"",
+        "text \"d\"",
+        "mark nbsp \"°\"",
+        "text \"e\""
+      ],
+      "rules": ["carriage return"]
+    },
+    "target | a\nb\rc\td e": {
+      "lines": [
+        "text \"a\\n\"",
+        "break",
+        "text \"b\\n\"",
+        "break",
+        "text \"c\\td e\""
+      ],
+      "rules": ["carriage return", "special characters in the text"]
+    },
+    "target | a\\u000Ab\\u000Dc\\u0009d e": {
+      "lines": ["text \"a\\\\u000Ab\\\\u000Dc\\\\u0009d e\""],
+      "rules": ["special characters in the text"]
+    },
+    "target | They started booking stays through Airbnb.&amp;nbsp;&amp;nbsp;<ph id=\"mtc_1\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O2JyIC8mZ3Q7\"/><ph id=\"mtc_2\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O2JyIC8mZ3Q7\"/>At first, Maria paid for these out of her own pocket, and it was putting a strain on her already limited finances—until Aladina Fundación connected her with Airbnb.org.": {
+      "lines": [
+        "text \"They started booking stays through Airbnb.&nbsp;&nbsp;\"",
+        "chip \"<br />\" tag-ph.tag-selfclosed",
+        "chip \"<br />\" tag-ph.tag-selfclosed",
+        "text \"At first, Maria paid for these out of her own pocket, and it was putting a strain on her already limited finances—until Aladina Fundación connected her with Airbnb.org.\""
+      ],
+      "rules": []
+    },
+    "target | Airbnb.&nbsp;&nbsp;<<br />><<br />>At first, Maria paid for these out of her own pocket, and it was putting a strain on her already limited finances—until Aladina Fundación connected her with Airbnb.org.": {
+      "lines": [
+        "text \"Airbnb.  <<br />><<br />>At first, Maria paid for these out of her own pocket, and it was putting a strain on her already limited finances—until Aladina Fundación connected her with Airbnb.org.\""
+      ],
+      "rules": ["entities", "special characters in the text"]
+    },
+    "target | foo##$_A0$##bar": {
+      "lines": ["text \"foo\"", "mark nbsp \"°\"", "text \"bar\""],
+      "rules": []
+    },
+    "target | Opt-in##$_SPLIT$## data": {
+      "lines": ["text \"Opt-in\"", "chip \"\" tag-split", "text \" data\""],
+      "rules": []
+    },
+    "target | Em space, line separator, 全角　空白, soft­hyphen, para graph": {
+      "lines": [
+        "text \"Em space, line separator, 全角　空白, soft­hyphen, para graph\""
+      ],
+      "rules": ["special characters in the text"]
+    },
+    "target | zero​width em space <x id=\"1\"/>ideo　graphic LS  shy­ wj⁠ bom﻿ nnbsp  thin  hair  zwnj‌ zwj‍ en  fig  math ": {
+      "lines": [
+        "text \"zerowidth em space \"",
+        "chip \"1\" tag-selfclosed",
+        "text \"ideo　graphic LS  shy­ wj⁠ bom﻿ nnbsp  thin  hair  zwnj‌ zwj‍ en  fig  math \""
+      ],
+      "rules": ["special characters in the text"]
+    },
+    "target | Hello world": {
+      "lines": ["text \"Hello world\""],
+      "rules": []
+    },
+    "target | Click <g id=\"1\">Save</g> now": {
+      "lines": [
+        "text \"Click \"",
+        "chip \"1\" tag-open",
+        "text \"Save\"",
+        "chip \"1\" tag-close",
+        "text \" now\""
+      ],
+      "rules": []
+    },
+    "target | Ka<g id=\"1\">rl</g>sson and<x id=\"2\"/> co": {
+      "lines": [
+        "text \"Ka\"",
+        "chip \"1\" tag-open",
+        "text \"rl\"",
+        "chip \"1\" tag-close",
+        "text \"sson and\"",
+        "chip \"2\" tag-selfclosed",
+        "text \" co\""
+      ],
+      "rules": []
+    },
+    "target | <g id=\"1\">A <g id=\"2\">b</g></g><x id=\"3\"/> c": {
+      "lines": [
+        "chip \"1\" tag-open",
+        "text \"A \"",
+        "chip \"2\" tag-open",
+        "text \"b\"",
+        "chip \"2\" tag-close",
+        "chip \"1\" tag-close",
+        "chip \"3\" tag-selfclosed",
+        "text \" c\""
+      ],
+      "rules": []
+    },
+    "target | <bx id=\"1\"/>Start text<ex id=\"2\"/>": {
+      "lines": [
+        "chip \"1\" tag-selfclosed",
+        "text \"Start text\"",
+        "chip \"2\" tag-selfclosed"
+      ],
+      "rules": []
+    },
+    "target | You have <ph id=\"mtc_1\" ctype=\"x-percent-s\" equiv-text=\"base64:JXM=\"/> new messages": {
+      "lines": [
+        "text \"You have \"",
+        "chip \"%s\" tag-ph.tag-selfclosed",
+        "text \" new messages\""
+      ],
+      "rules": []
+    },
+    "target | Ciao<ph id=\"mtc_1\" ctype=\"x-html\" equiv-text=\"base64:PGJyLz4=\"/>hai <ph id=\"mtc_2\" ctype=\"x-percent-s\" equiv-text=\"base64:JXM=\"/> nuovi messaggi da <ph id=\"mtc_3\" ctype=\"x-original_pc_open\" equiv-text=\"base64:PGI+\"/>Anna <ph id=\"mtc_4\" ctype=\"x-original_pc_open\" equiv-text=\"base64:PGk+\"/>Rossi<ph id=\"mtc_5\" ctype=\"x-original_pc_close\" equiv-text=\"base64:PC9pPg==\"/><ph id=\"mtc_6\" ctype=\"x-original_pc_close\" equiv-text=\"base64:PC9iPg==\"/> &amp; <ph id=\"source1_1\" ctype=\"x-pc_open_data_ref\" equiv-text=\"base64:PGEgaHJlZj0iIyI+\" x-orig=\"base64:PGE+\"/>Bob<ph id=\"source1_2\" ctype=\"x-pc_close_data_ref\" equiv-text=\"base64:PC9hPg==\" x-orig=\"base64:PC9hPg==\"/> (<ph id=\"mtc_7\" ctype=\"x-mustache\" equiv-text=\"base64:e3tjb3VudH19\"/> &lt; 5) <g id=\"9\" equiv-text=\"base64:PHNwYW4+\">ok</g>⁠!": {
+      "lines": [
+        "text \"Ciao\"",
+        "chip \"<br/>\" tag-ph.tag-selfclosed",
+        "text \"hai \"",
+        "chip \"%s\" tag-ph.tag-selfclosed",
+        "text \" nuovi messaggi da \"",
+        "chip \"<b>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1",
+        "text \"Anna \"",
+        "chip \"<i>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #2",
+        "text \"Rossi\"",
+        "chip \"2\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #2 NO-ELLIPSIS",
+        "chip \"1\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #1 NO-ELLIPSIS",
+        "text \" & \"",
+        "chip \"<a href=\\\"#\\\">\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #3",
+        "text \"Bob\"",
+        "chip \"3\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #3 NO-ELLIPSIS",
+        "text \" (\"",
+        "chip \"{{count}}\" tag-ph.tag-selfclosed",
+        "text \" < 5) \"",
+        "chip \"<span>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #4",
+        "text \"ok\"",
+        "chip \"4\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #4 NO-ELLIPSIS",
+        "mark wordJoiner \"\"",
+        "text \"!\""
+      ],
+      "rules": []
+    },
+    "target | one##$_A0$##two##$_09$##three##$_0A$##line two": {
+      "lines": [
+        "text \"one\"",
+        "mark nbsp \"°\"",
+        "text \"two\"",
+        "mark tab \"⇥\"",
+        "text \"three\"",
+        "mark lineBreak \"↵\"",
+        "break",
+        "text \"line two\""
+      ],
+      "rules": []
+    },
+    "target | R&amp;D &lt;b&gt; 5 &gt; 3": {
+      "lines": ["text \"R&D <b> 5 > 3\""],
+      "rules": []
+    },
+    "target | שלום <g id=\"1\">עולם</g> טוב": {
+      "lines": [
+        "text \"שלום \"",
+        "chip \"1\" tag-open",
+        "text \"עולם\"",
+        "chip \"1\" tag-close",
+        "text \" טוב\""
+      ],
+      "rules": []
+    },
+    "target | 你好<x id=\"1\"/>世界 😀 ok": {
+      "lines": [
+        "text \"你好\"",
+        "chip \"1\" tag-selfclosed",
+        "text \"世界 😀 ok\""
+      ],
+      "rules": []
+    },
+    "target | line one##$_0A$##line <g id=\"1\">two</g> end": {
+      "lines": [
+        "text \"line one\"",
+        "mark lineBreak \"↵\"",
+        "break",
+        "text \"line \"",
+        "chip \"1\" tag-open",
+        "text \"two\"",
+        "chip \"1\" tag-close",
+        "text \" end\""
+      ],
+      "rules": []
+    },
+    "source | &lt;br/&gt;": {
+      "lines": ["text \"<br/>\""],
+      "rules": []
+    },
+    "source | x##$_A0$##y##$_09$##": {
+      "lines": [
+        "text \"x\"",
+        "mark nbsp \"°\"",
+        "text \"y\"",
+        "mark tab \"⇥\""
+      ],
+      "rules": []
+    },
+    "source | ax##$_A0$##y##$_09$##b": {
+      "lines": [
+        "text \"ax\"",
+        "mark nbsp \"°\"",
+        "text \"y\"",
+        "mark tab \"⇥\"",
+        "text \"b\""
+      ],
+      "rules": []
+    },
+    "source | <img src=x onerror=alert(1)><x id=\"1\"/>": {
+      "lines": [
+        "text \"<img src=x onerror=alert(1)>\"",
+        "chip \"1\" tag-selfclosed"
+      ],
+      "rules": []
+    },
+    "source | <x id=\"1\"/>": {
+      "lines": ["chip \"1\" tag-selfclosed"],
+      "rules": []
+    },
+    "source | a<x id=\"1\"/>b": {
+      "lines": ["text \"a\"", "chip \"1\" tag-selfclosed", "text \"b\""],
+      "rules": []
+    },
+    "source | ciao <g id=\"1\">mondo</g>": {
+      "lines": [
+        "text \"ciao \"",
+        "chip \"1\" tag-open",
+        "text \"mondo\"",
+        "chip \"1\" tag-close"
+      ],
+      "rules": []
+    },
+    "source | a°b\tc": {
+      "lines": ["text \"a°b\\tc\""],
+      "rules": ["special characters in the text"]
+    },
+    "source | <g id=\"1\"></g>": {
+      "lines": ["chip \"1\" tag-open", "chip \"1\" tag-close"],
+      "rules": []
+    },
+    "source | <ph id=\"mtc_1\" ctype=\"x-original_pc_open\" equiv-text=\"base64:AAA\"/>": {
+      "lines": [
+        "chip \"\\u0000\\u0000\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1"
+      ],
+      "rules": []
+    },
+    "source | <ph id=\"mtc_2\" ctype=\"x-original_pc_close\" equiv-text=\"base64:BBB\"/>": {
+      "lines": [
+        "chip \"1\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #1 NO-ELLIPSIS"
+      ],
+      "rules": []
+    },
+    "source | <ph id=\"source1_1\" ctype=\"x-pc_open_data_ref\" equiv-text=\"base64:CCC\" x-orig=\"base64:DDD\"/>": {
+      "lines": [
+        "chip \"\\b \" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1"
+      ],
+      "rules": []
+    },
+    "source | <ph id=\"source1_2\" ctype=\"x-pc_close_data_ref\" equiv-text=\"base64:EEE\" x-orig=\"base64:FFF\"/>": {
+      "lines": [
+        "chip \"1\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #1 NO-ELLIPSIS"
+      ],
+      "rules": []
+    },
+    "source | <ph id=\"source2_1\" ctype=\"x-pc_open_data_ref\" equiv-text=\"base64:GGG\" x-orig=\"base64:HHH\"/>": {
+      "lines": [
+        "chip \"\\u0018a\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1"
+      ],
+      "rules": []
+    },
+    "source | <ph id=\"source2_2\" ctype=\"x-pc_close_data_ref\" equiv-text=\"base64:III\" x-orig=\"base64:JJJ\"/>": {
+      "lines": [
+        "chip \"1\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #1 NO-ELLIPSIS"
+      ],
+      "rules": []
+    },
+    "source | <ph id=\"mtc_3\" ctype=\"x-html\" equiv-text=\"base64:KKK\"/>": {
+      "lines": ["chip \"(�\" tag-ph.tag-selfclosed"],
+      "rules": []
+    },
+    "source | <ph id=\"mtc_9\" equiv-text=\"base64:LLL\"/>": {
+      "lines": ["chip \",�\" tag-ph.tag-selfclosed"],
+      "rules": []
+    },
+    "source | <g id=\"1\" equiv-text=\"base64:WyMkZHA0XQ==\">": {
+      "lines": [
+        "chip \"[#$dp4]\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1"
+      ],
+      "rules": []
+    },
+    "source | <g id=\"2\" equiv-text=\"base64:WyMkZHA0XQ==\">": {
+      "lines": [
+        "chip \"[#$dp4]\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1"
+      ],
+      "rules": []
+    },
+    "source | <g id=\"3\">": {
+      "lines": ["chip \"3\" tag-open"],
+      "rules": []
+    },
+    "source | <g id=\"4\" equiv-text=\"base64:WyMkZHA0XQ==\"/>": {
+      "lines": ["chip \"4\" tag-selfclosed"],
+      "rules": []
+    },
+    "source | </g>": {
+      "lines": ["chip \"?\" tag-close"],
+      "rules": []
+    },
+    "source | <ph id=\"mtc_1\" ctype=\"x-original_x\" x-orig=\"AAA\" equiv-text=\"base64:e3sjJmd0OyBlbWFpbC1zdWJqZWN0fX0=\"/>": {
+      "lines": ["chip \"{{#> email-subject}}\" tag-ph.tag-selfclosed"],
+      "rules": []
+    },
+    "source | <ph id=\"mtc_2\" ctype=\"x-original_x\" x-orig=\"AAA\"/>": {
+      "lines": [
+        "text \"<ph id=\\\"mtc_2\\\" ctype=\\\"x-original_x\\\" x-orig=\\\"AAA\\\"/>\""
+      ],
+      "rules": ["unknown markup"]
+    },
+    "source | plain g, self-closing g, </g> and x without equiv-text are not compressible": {
+      "lines": [
+        "text \"plain g, self-closing g, \"",
+        "chip \"?\" tag-close",
+        "text \" and x without equiv-text are not compressible\""
+      ],
+      "rules": []
+    },
+    "source | a g pair shares one number; its </g> is the close": {
+      "lines": [
+        "text \"a g pair shares one number; its \"",
+        "chip \"?\" tag-close",
+        "text \" is the close\""
+      ],
+      "rules": []
+    },
+    "source | a plain g nested in an equiv-text g does not steal its </g>": {
+      "lines": [
+        "text \"a plain g nested in an equiv-text g does not steal its \"",
+        "chip \"?\" tag-close"
+      ],
+      "rules": []
+    },
+    "source | an orphan </g> is not numbered": {
+      "lines": [
+        "text \"an orphan \"",
+        "chip \"?\" tag-close",
+        "text \" is not numbered\""
+      ],
+      "rules": []
+    },
+    "source | <g id=\"7\">Reset</g>": {
+      "lines": [
+        "chip \"7\" tag-open",
+        "text \"Reset\"",
+        "chip \"7\" tag-close"
+      ],
+      "rules": []
+    },
+    "source | <g id=\"1\">x</g>": {
+      "lines": ["chip \"1\" tag-open", "text \"x\"", "chip \"1\" tag-close"],
+      "rules": []
+    },
+    "source | <g id=\"1\">": {
+      "lines": ["chip \"1\" tag-open"],
+      "rules": []
+    },
+    "source | hello <g id=\"1\">": {
+      "lines": ["text \"hello \"", "chip \"1\" tag-open"],
+      "rules": []
+    },
+    "source | <ph id=\"mtc_1\" ctype=\"x-original_pc_open\" equiv-text=\"base64:aGVsbG8=\"/>": {
+      "lines": [
+        "chip \"hello\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1"
+      ],
+      "rules": []
+    },
+    "source | <g id=\"2\">": {
+      "lines": ["chip \"2\" tag-open"],
+      "rules": []
+    },
+    "source | &lt;p&gt;\n": {
+      "lines": ["text \"<p>\"", "mark lineBreak \"↵\"", "break"],
+      "rules": []
+    },
+    "source | ##$_0A$##": {
+      "lines": ["mark lineBreak \"↵\"", "break"],
+      "rules": []
+    },
+    "source | a <g id=\"1\">b</g> c <g id=\"2\">d</g> e": {
+      "lines": [
+        "text \"a \"",
+        "chip \"1\" tag-open",
+        "text \"b\"",
+        "chip \"1\" tag-close",
+        "text \" c \"",
+        "chip \"2\" tag-open",
+        "text \"d\"",
+        "chip \"2\" tag-close",
+        "text \" e\""
+      ],
+      "rules": []
+    },
+    "source | <bx id=\"9\"/>": {
+      "lines": ["chip \"9\" tag-selfclosed"],
+      "rules": []
+    },
+    "source | one##$_0A$##two": {
+      "lines": [
+        "text \"one\"",
+        "mark lineBreak \"↵\"",
+        "break",
+        "text \"two\""
+      ],
+      "rules": []
+    },
+    "source | ab<x id=\"1\"/>cd": {
+      "lines": ["text \"ab\"", "chip \"1\" tag-selfclosed", "text \"cd\""],
+      "rules": []
+    },
+    "source | b<x id=\"1\"/>": {
+      "lines": ["text \"b\"", "chip \"1\" tag-selfclosed"],
+      "rules": []
+    },
+    "source | a &lt;b&gt; c": {
+      "lines": ["text \"a <b> c\""],
+      "rules": []
+    },
+    "source | <g id=\"mtc_1\">": {
+      "lines": ["chip \"mtc_1\" tag-open"],
+      "rules": []
+    },
+    "source | <g id=\"-1\">": {
+      "lines": ["chip \"-1\" tag-open"],
+      "rules": []
+    },
+    "source | &lt;p&gt;": {
+      "lines": ["text \"<p>\""],
+      "rules": []
+    },
+    "source | &amp;amp;": {
+      "lines": ["text \"&amp;\""],
+      "rules": []
+    },
+    "source | &amp;": {
+      "lines": ["text \"&\""],
+      "rules": []
+    },
+    "source | &nbsp;": {
+      "lines": ["text \" \""],
+      "rules": ["entities", "special characters in the text"]
+    },
+    "source | &apos;": {
+      "lines": ["text \"'\""],
+      "rules": ["entities"]
+    },
+    "source | &quot;": {
+      "lines": ["text \"\\\"\""],
+      "rules": ["entities"]
+    },
+    "source | &amp;lt;p&amp;gt;": {
+      "lines": ["text \"&lt;p&gt;\""],
+      "rules": []
+    },
+    "source | test <g id=\"1\">tag</g> end": {
+      "lines": [
+        "text \"test \"",
+        "chip \"1\" tag-open",
+        "text \"tag\"",
+        "chip \"1\" tag-close",
+        "text \" end\""
+      ],
+      "rules": []
+    },
+    "source | test </g> end": {
+      "lines": ["text \"test \"", "chip \"?\" tag-close", "text \" end\""],
+      "rules": []
+    },
+    "source | value ##$_A0$## end": {
+      "lines": ["text \"value \"", "mark nbsp \"°\"", "text \" end\""],
+      "rules": []
+    },
+    "source | <g id=\"1\">a</g> <g id=\"2\">b</g> <g id=\"3\">c</g>": {
+      "lines": [
+        "chip \"1\" tag-open",
+        "text \"a\"",
+        "chip \"1\" tag-close",
+        "text \" \"",
+        "chip \"2\" tag-open",
+        "text \"b\"",
+        "chip \"2\" tag-close",
+        "text \" \"",
+        "chip \"3\" tag-open",
+        "text \"c\"",
+        "chip \"3\" tag-close"
+      ],
+      "rules": []
+    },
+    "source | foo##$_0A$##bar": {
+      "lines": [
+        "text \"foo\"",
+        "mark lineBreak \"↵\"",
+        "break",
+        "text \"bar\""
+      ],
+      "rules": []
+    },
+    "source | foo##$_0D$##bar": {
+      "lines": [
+        "text \"foo\"",
+        "mark lineBreak \"↵\"",
+        "break",
+        "text \"bar\""
+      ],
+      "rules": ["carriage return"]
+    },
+    "source | foo##$_0D$####$_0A$##bar": {
+      "lines": [
+        "text \"foo\"",
+        "mark lineBreak \"↵\"",
+        "break",
+        "text \"bar\""
+      ],
+      "rules": ["carriage return"]
+    },
+    "source | a##$_0A$##b##$_0A$##c": {
+      "lines": [
+        "text \"a\"",
+        "mark lineBreak \"↵\"",
+        "break",
+        "text \"b\"",
+        "mark lineBreak \"↵\"",
+        "break",
+        "text \"c\""
+      ],
+      "rules": []
+    },
+    "source | helloab<x id=\"1\"/> world": {
+      "lines": [
+        "text \"helloab\"",
+        "chip \"1\" tag-selfclosed",
+        "text \" world\""
+      ],
+      "rules": []
+    },
+    "source | ab<x id=\"1\"/>cd efgh": {
+      "lines": ["text \"ab\"", "chip \"1\" tag-selfclosed", "text \"cd efgh\""],
+      "rules": []
+    },
+    "source | cd efghab<x id=\"1\"/>": {
+      "lines": ["text \"cd efghab\"", "chip \"1\" tag-selfclosed"],
+      "rules": []
+    },
+    "source | abc<x id=\"1\"/>xyz": {
+      "lines": ["text \"abc\"", "chip \"1\" tag-selfclosed", "text \"xyz\""],
+      "rules": []
+    },
+    "source | axyzbc<x id=\"1\"/>": {
+      "lines": ["text \"axyzbc\"", "chip \"1\" tag-selfclosed"],
+      "rules": []
+    },
+    "source | foo##$_0A$##bar##$_0A$##baz": {
+      "lines": [
+        "text \"foo\"",
+        "mark lineBreak \"↵\"",
+        "break",
+        "text \"bar\"",
+        "mark lineBreak \"↵\"",
+        "break",
+        "text \"baz\""
+      ],
+      "rules": []
+    },
+    "source | ##$_A0$##": {
+      "lines": ["mark nbsp \"°\""],
+      "rules": []
+    },
+    "source | <g id=\"1\">tag</g>": {
+      "lines": ["chip \"1\" tag-open", "text \"tag\"", "chip \"1\" tag-close"],
+      "rules": []
+    },
+    "source | <ph id=\"mtc_1\" ctype=\"x-original_pc_open\" equiv-text=\"base64:Jmx0O3AmZ3Q7\"/>": {
+      "lines": [
+        "chip \"<p>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1"
+      ],
+      "rules": []
+    },
+    "source | <ph id=\"mtc_2\" ctype=\"x-original_pc_close\" equiv-text=\"base64:Jmx0Oy9wJmd0Ow==\"/>": {
+      "lines": [
+        "chip \"1\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #1 NO-ELLIPSIS"
+      ],
+      "rules": []
+    },
+    "source | <ph id=\"source1_1\" ctype=\"x-pc_open_data_ref\" equiv-text=\"base64:Jmx0O3AmZ3Q7\" x-orig=\"base64:Jmx0O3AmZ3Q7\"/>": {
+      "lines": [
+        "chip \"<p>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1"
+      ],
+      "rules": []
+    },
+    "source | <ph id=\"source1_2\" ctype=\"x-pc_close_data_ref\" equiv-text=\"base64:Jmx0Oy9wJmd0Ow==\" x-orig=\"base64:Jmx0Oy9wJmd0Ow==\"/>": {
+      "lines": [
+        "chip \"1\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #1 NO-ELLIPSIS"
+      ],
+      "rules": []
+    },
+    "source | <ph id=\"mtc_3\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O3AmZ3Q7\"/>": {
+      "lines": ["chip \"<p>\" tag-ph.tag-selfclosed"],
+      "rules": []
+    },
+    "source | <span data-text=\"true\">&lt;p&gt;</span>": {
+      "lines": ["text \"<span data-text=\\\"true\\\"><p></span>\""],
+      "rules": []
+    },
+    "source | &lt;p&gt;</span>": {
+      "lines": ["text \"<p></span>\""],
+      "rules": []
+    },
+    "source | <g id=\"1\">content</g>": {
+      "lines": [
+        "chip \"1\" tag-open",
+        "text \"content\"",
+        "chip \"1\" tag-close"
+      ],
+      "rules": []
+    },
+    "source | <g id=\"2\" equiv-text=\"base64:PGI+\">": {
+      "lines": [
+        "chip \"<b>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1"
+      ],
+      "rules": []
+    },
+    "source | <ph id=\"mtc_1\" ctype=\"x-original_x\" x-orig=\"AAA\" equiv-text=\"base64:WyMkZHA0XQ==\"/>": {
+      "lines": ["chip \"[#$dp4]\" tag-ph.tag-selfclosed"],
+      "rules": []
+    },
+    "source | a</g>": {
+      "lines": ["text \"a\"", "chip \"?\" tag-close"],
+      "rules": []
+    },
+    "source | a<g id=\"7\">b</g>c</g>": {
+      "lines": [
+        "text \"a\"",
+        "chip \"7\" tag-open",
+        "text \"b\"",
+        "chip \"7\" tag-close",
+        "text \"c\"",
+        "chip \"?\" tag-close"
+      ],
+      "rules": []
+    },
+    "source | test <g id=\"1\">tag</g> ph con &lt; &gt; &amp;lt; &amp;gt; <g id=\"2\"/> <ph id=\"mtc_1\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O3AmZ3Q7\"/> <ph id=\"mtc_2\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O3N0cm9uZyZndDs=\"/> <ph id=\"mtc_3\" ctype=\"x-html\" equiv-text=\"base64:Jmx0Oy9zdHJvbmcmZ3Q7\"/>pippoL&apos; placeholder &nbsp; elle-même": {
+      "lines": [
+        "text \"test \"",
+        "chip \"1\" tag-open",
+        "text \"tag\"",
+        "chip \"1\" tag-close",
+        "text \" ph con < > &lt; &gt; \"",
+        "chip \"2\" tag-selfclosed",
+        "text \" \"",
+        "chip \"<p>\" tag-ph.tag-selfclosed",
+        "text \" \"",
+        "chip \"<strong>\" tag-ph.tag-selfclosed",
+        "text \" \"",
+        "chip \"</strong>\" tag-ph.tag-selfclosed",
+        "text \"pippoL' placeholder   elle-même\""
+      ],
+      "rules": ["entities", "special characters in the text"]
+    },
+    "source | test <span contenteditable=\"false\" class=\"tag small tag-open\">​1​</span>tag<span contenteditable=\"false\" class=\"tag small tag-close\">​1​</span> ph con &lt; &gt; &amp;lt; &amp;gt; <span contenteditable=\"false\" class=\"tag small tag-selfclosed\">2</span> <span contenteditable=\"false\" class=\"tag small tag-selfclosed tag-ph\">&lt;p&gt;</span> <span contenteditable=\"false\" class=\"tag small tag-selfclosed tag-ph\">&lt;strong&gt;</span> <span contenteditable=\"false\" class=\"tag small tag-selfclosed tag-ph\">&lt;/strong&gt;</span>pippoL&apos; placeholder &nbsp; elle-même": {
+      "lines": [
+        "text \"test <span contenteditable=\\\"false\\\" class=\\\"tag small tag-open\\\">1</span>tag<span contenteditable=\\\"false\\\" class=\\\"tag small tag-close\\\">1</span> ph con < > &lt; &gt; <span contenteditable=\\\"false\\\" class=\\\"tag small tag-selfclosed\\\">2</span> <span contenteditable=\\\"false\\\" class=\\\"tag small tag-selfclosed tag-ph\\\"><p></span> <span contenteditable=\\\"false\\\" class=\\\"tag small tag-selfclosed tag-ph\\\"><strong></span> <span contenteditable=\\\"false\\\" class=\\\"tag small tag-selfclosed tag-ph\\\"></strong></span>pippoL' placeholder   elle-même\""
+      ],
+      "rules": ["entities", "special characters in the text"]
+    },
+    "source | test <g id=\"1\">tag</g> ph con &lt; &gt; &amp;lt; <g id=\"2\"></g> &amp;gt; <ph id=\"mtc_1\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O3AmZ3Q7\"/> <ph id=\"mtc_2\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O3N0cm9uZyZndDs=\"/> <ph id=\"mtc_3\" ctype=\"x-html\" equiv-text=\"base64:Jmx0Oy9zdHJvbmcmZ3Q7\"/>pippoL&apos; placeholder &nbsp; elle-même": {
+      "lines": [
+        "text \"test \"",
+        "chip \"1\" tag-open",
+        "text \"tag\"",
+        "chip \"1\" tag-close",
+        "text \" ph con < > &lt; \"",
+        "chip \"2\" tag-open",
+        "chip \"2\" tag-close",
+        "text \" &gt; \"",
+        "chip \"<p>\" tag-ph.tag-selfclosed",
+        "text \" \"",
+        "chip \"<strong>\" tag-ph.tag-selfclosed",
+        "text \" \"",
+        "chip \"</strong>\" tag-ph.tag-selfclosed",
+        "text \"pippoL' placeholder   elle-même\""
+      ],
+      "rules": ["entities", "special characters in the text"]
+    },
+    "source | test <g id=\"1\">tag</g> ph con &lt; &gt; &amp;lt; <g id=\"2\"></g> &amp;gt; <p> <strong> </strong>pippoL&apos; placeholder &nbsp; elle-même": {
+      "lines": [
+        "text \"test \"",
+        "chip \"1\" tag-open",
+        "text \"tag\"",
+        "chip \"1\" tag-close",
+        "text \" ph con < > &lt; \"",
+        "chip \"2\" tag-open",
+        "chip \"2\" tag-close",
+        "text \" &gt; <p> <strong> </strong>pippoL' placeholder   elle-même\""
+      ],
+      "rules": ["entities", "special characters in the text"]
+    },
+    "source | test tag ph con ##$_SPLIT$## &lt; &gt; ##$_0A$## &amp;lt; ##$_09$## &amp;gt; ##$_A0$## ##$_0D$## <ph id=\"mtc_1\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O3AmZ3Q7\"/> <ph id=\"mtc_2\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O3N0cm9uZyZndDs=\"/> <ph id=\"mtc_3\" ctype=\"x-html\" equiv-text=\"base64:Jmx0Oy9zdHJvbmcmZ3Q7\"/>pippoL&apos; placeholder &nbsp; ##$_A0$##elle-même": {
+      "lines": [
+        "text \"test tag ph con \"",
+        "chip \"\" tag-split",
+        "text \" < > \\n\"",
+        "break",
+        "text \" &lt; \\t &gt;   \\n\"",
+        "break",
+        "text \" \"",
+        "chip \"<p>\" tag-ph.tag-selfclosed",
+        "text \" \"",
+        "chip \"<strong>\" tag-ph.tag-selfclosed",
+        "text \" \"",
+        "chip \"</strong>\" tag-ph.tag-selfclosed",
+        "text \"pippoL' placeholder    elle-même\""
+      ],
+      "rules": ["entities", "carriage return", "special characters in the text"]
+    },
+    "source | test tag ph con  &lt; &gt; \n &amp;lt; ⇥ &amp;gt; ° \r <p> <strong> </strong>pippoL&apos; placeholder &nbsp; °elle-même": {
+      "lines": [
+        "text \"test tag ph con  < > \\n\"",
+        "break",
+        "text \" &lt; ⇥ &gt; ° \\n\"",
+        "break",
+        "text \" <p> <strong> </strong>pippoL' placeholder   °elle-même\""
+      ],
+      "rules": ["entities", "carriage return", "special characters in the text"]
+    },
+    "source | test tag ph con &lt; &gt; &amp;lt;  &amp;gt; <p> <strong> </strong>pippoL&apos; placeholder &nbsp; elle-même": {
+      "lines": [
+        "text \"test tag ph con < > &lt;  &gt; <p> <strong> </strong>pippoL' placeholder   elle-même\""
+      ],
+      "rules": ["entities", "special characters in the text"]
+    },
+    "source | a##$_A0$##b": {
+      "lines": ["text \"a\"", "mark nbsp \"°\"", "text \"b\""],
+      "rules": []
+    },
+    "source | a &lt;b&gt; c &amp; d": {
+      "lines": ["text \"a <b> c & d\""],
+      "rules": []
+    },
+    "source | translated end<g id=\"1\"></g>": {
+      "lines": [
+        "text \"translated end\"",
+        "chip \"1\" tag-open",
+        "chip \"1\" tag-close"
+      ],
+      "rules": []
+    },
+    "source | translated <g id=\"1\">tag</g> end": {
+      "lines": [
+        "text \"translated \"",
+        "chip \"1\" tag-open",
+        "text \"tag\"",
+        "chip \"1\" tag-close",
+        "text \" end\""
+      ],
+      "rules": []
+    },
+    "source | a##$_0A$##b##$_0D$##c##$_09$##d##$_A0$##e": {
+      "lines": [
+        "text \"a\"",
+        "mark lineBreak \"↵\"",
+        "break",
+        "text \"b\"",
+        "mark lineBreak \"↵\"",
+        "break",
+        "text \"c\"",
+        "mark tab \"⇥\"",
+        "text \"d\"",
+        "mark nbsp \"°\"",
+        "text \"e\""
+      ],
+      "rules": ["carriage return"]
+    },
+    "source | a\nb\rc\td e": {
+      "lines": [
+        "text \"a\\n\"",
+        "break",
+        "text \"b\\n\"",
+        "break",
+        "text \"c\\td e\""
+      ],
+      "rules": ["carriage return", "special characters in the text"]
+    },
+    "source | a\\u000Ab\\u000Dc\\u0009d e": {
+      "lines": ["text \"a\\\\u000Ab\\\\u000Dc\\\\u0009d e\""],
+      "rules": ["special characters in the text"]
+    },
+    "source | They started booking stays through Airbnb.&amp;nbsp;&amp;nbsp;<ph id=\"mtc_1\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O2JyIC8mZ3Q7\"/><ph id=\"mtc_2\" ctype=\"x-html\" equiv-text=\"base64:Jmx0O2JyIC8mZ3Q7\"/>At first, Maria paid for these out of her own pocket, and it was putting a strain on her already limited finances—until Aladina Fundación connected her with Airbnb.org.": {
+      "lines": [
+        "text \"They started booking stays through Airbnb.&nbsp;&nbsp;\"",
+        "chip \"<br />\" tag-ph.tag-selfclosed",
+        "chip \"<br />\" tag-ph.tag-selfclosed",
+        "text \"At first, Maria paid for these out of her own pocket, and it was putting a strain on her already limited finances—until Aladina Fundación connected her with Airbnb.org.\""
+      ],
+      "rules": []
+    },
+    "source | Airbnb.&nbsp;&nbsp;<<br />><<br />>At first, Maria paid for these out of her own pocket, and it was putting a strain on her already limited finances—until Aladina Fundación connected her with Airbnb.org.": {
+      "lines": [
+        "text \"Airbnb.  <<br />><<br />>At first, Maria paid for these out of her own pocket, and it was putting a strain on her already limited finances—until Aladina Fundación connected her with Airbnb.org.\""
+      ],
+      "rules": ["entities", "special characters in the text"]
+    },
+    "source | foo##$_A0$##bar": {
+      "lines": ["text \"foo\"", "mark nbsp \"°\"", "text \"bar\""],
+      "rules": []
+    },
+    "source | Opt-in##$_SPLIT$## data": {
+      "lines": ["text \"Opt-in\"", "chip \"\" tag-split", "text \" data\""],
+      "rules": []
+    },
+    "source | Em space, line separator, 全角　空白, soft­hyphen, para graph": {
+      "lines": [
+        "text \"Em space, line separator, 全角　空白, soft­hyphen, para graph\""
+      ],
+      "rules": ["special characters in the text"]
+    },
+    "source | zero​width em space <x id=\"1\"/>ideo　graphic LS  shy­ wj⁠ bom﻿ nnbsp  thin  hair  zwnj‌ zwj‍ en  fig  math ": {
+      "lines": [
+        "text \"zerowidth em space \"",
+        "chip \"1\" tag-selfclosed",
+        "text \"ideo　graphic LS  shy­ wj⁠ bom﻿ nnbsp  thin  hair  zwnj‌ zwj‍ en  fig  math \""
+      ],
+      "rules": ["special characters in the text"]
+    },
+    "source | Hello world": {
+      "lines": ["text \"Hello world\""],
+      "rules": []
+    },
+    "source | Click <g id=\"1\">Save</g> now <x id=\"2\"/>": {
+      "lines": [
+        "text \"Click \"",
+        "chip \"1\" tag-open",
+        "text \"Save\"",
+        "chip \"1\" tag-close",
+        "text \" now \"",
+        "chip \"2\" tag-selfclosed"
+      ],
+      "rules": []
+    },
+    "source | Ka<g id=\"1\">rl</g>sson and<x id=\"2\"/> co": {
+      "lines": [
+        "text \"Ka\"",
+        "chip \"1\" tag-open",
+        "text \"rl\"",
+        "chip \"1\" tag-close",
+        "text \"sson and\"",
+        "chip \"2\" tag-selfclosed",
+        "text \" co\""
+      ],
+      "rules": []
+    },
+    "source | <g id=\"1\">A <g id=\"2\">b</g></g><x id=\"3\"/> c": {
+      "lines": [
+        "chip \"1\" tag-open",
+        "text \"A \"",
+        "chip \"2\" tag-open",
+        "text \"b\"",
+        "chip \"2\" tag-close",
+        "chip \"1\" tag-close",
+        "chip \"3\" tag-selfclosed",
+        "text \" c\""
+      ],
+      "rules": []
+    },
+    "source | <bx id=\"1\"/>Start text<ex id=\"2\"/><x id=\"3\"/>": {
+      "lines": [
+        "chip \"1\" tag-selfclosed",
+        "text \"Start text\"",
+        "chip \"2\" tag-selfclosed",
+        "chip \"3\" tag-selfclosed"
+      ],
+      "rules": []
+    },
+    "source | You have <ph id=\"mtc_1\" ctype=\"x-percent-s\" equiv-text=\"base64:JXM=\"/> new <ph id=\"mtc_2\" ctype=\"x-mustache\" equiv-text=\"base64:e3tjb3VudH19\"/> messages": {
+      "lines": [
+        "text \"You have \"",
+        "chip \"%s\" tag-ph.tag-selfclosed",
+        "text \" new \"",
+        "chip \"{{count}}\" tag-ph.tag-selfclosed",
+        "text \" messages\""
+      ],
+      "rules": []
+    },
+    "source | Hello<ph id=\"mtc_1\" ctype=\"x-html\" equiv-text=\"base64:PGJyLz4=\"/>you have <ph id=\"mtc_2\" ctype=\"x-percent-s\" equiv-text=\"base64:JXM=\"/> new messages from <ph id=\"mtc_3\" ctype=\"x-original_pc_open\" equiv-text=\"base64:PGI+\"/>Anna <ph id=\"mtc_4\" ctype=\"x-original_pc_open\" equiv-text=\"base64:PGk+\"/>Rossi<ph id=\"mtc_5\" ctype=\"x-original_pc_close\" equiv-text=\"base64:PC9pPg==\"/><ph id=\"mtc_6\" ctype=\"x-original_pc_close\" equiv-text=\"base64:PC9iPg==\"/> &amp; <ph id=\"source1_1\" ctype=\"x-pc_open_data_ref\" equiv-text=\"base64:PGEgaHJlZj0iIyI+\" x-orig=\"base64:PGE+\"/>Bob<ph id=\"source1_2\" ctype=\"x-pc_close_data_ref\" equiv-text=\"base64:PC9hPg==\" x-orig=\"base64:PC9hPg==\"/> (<ph id=\"mtc_7\" ctype=\"x-mustache\" equiv-text=\"base64:e3tjb3VudH19\"/> &lt; 5) <g id=\"9\" equiv-text=\"base64:PHNwYW4+\">ok</g>⁠!": {
+      "lines": [
+        "text \"Hello\"",
+        "chip \"<br/>\" tag-ph.tag-selfclosed",
+        "text \"you have \"",
+        "chip \"%s\" tag-ph.tag-selfclosed",
+        "text \" new messages from \"",
+        "chip \"<b>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1",
+        "text \"Anna \"",
+        "chip \"<i>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #2",
+        "text \"Rossi\"",
+        "chip \"2\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #2 NO-ELLIPSIS",
+        "chip \"1\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #1 NO-ELLIPSIS",
+        "text \" & \"",
+        "chip \"<a href=\\\"#\\\">\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #3",
+        "text \"Bob\"",
+        "chip \"3\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #3 NO-ELLIPSIS",
+        "text \" (\"",
+        "chip \"{{count}}\" tag-ph.tag-selfclosed",
+        "text \" < 5) \"",
+        "chip \"<span>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #4",
+        "text \"ok\"",
+        "chip \"4\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #4 NO-ELLIPSIS",
+        "mark wordJoiner \"\"",
+        "text \"!\""
+      ],
+      "rules": []
+    },
+    "source | one two three line two": {
+      "lines": ["text \"one two three line two\""],
+      "rules": []
+    },
+    "source | R&amp;D &lt;b&gt; 5 &gt; 3": {
+      "lines": ["text \"R&D <b> 5 > 3\""],
+      "rules": []
+    },
+    "source | Hello <g id=\"1\">world</g> good": {
+      "lines": [
+        "text \"Hello \"",
+        "chip \"1\" tag-open",
+        "text \"world\"",
+        "chip \"1\" tag-close",
+        "text \" good\""
+      ],
+      "rules": []
+    },
+    "source | Hello <x id=\"1\"/>world 😀 ok": {
+      "lines": [
+        "text \"Hello \"",
+        "chip \"1\" tag-selfclosed",
+        "text \"world 😀 ok\""
+      ],
+      "rules": []
+    },
+    "source | line one line <g id=\"1\">two</g> end": {
+      "lines": [
+        "text \"line one line \"",
+        "chip \"1\" tag-open",
+        "text \"two\"",
+        "chip \"1\" tag-close",
+        "text \" end\""
+      ],
+      "rules": []
+    }
+  },
+  "highlights": {
+    "target | lexiqa plain": {
+      "lines": ["text \"Hello \"", "text \"world\" @lexiqa"],
+      "rules": [],
+      "tooltips": {
+        "lexiqa": "x"
+      }
+    },
+    "source | lexiqa plain": {
+      "lines": ["text \"Hello \"", "text \"world\" @lexiqa"],
+      "rules": [],
+      "tooltips": {
+        "lexiqa": ""
+      }
+    },
+    "target | lexiqa g": {
+      "lines": [
+        "text \"Click \"",
+        "chip \"1\" tag-open",
+        "text \"Save\" @lexiqa",
+        "chip \"1\" tag-close",
+        "text \" \"",
+        "text \"now\" @lexiqa"
+      ],
+      "rules": [],
+      "tooltips": {
+        "lexiqa": "x"
+      }
+    },
+    "source | lexiqa g": {
+      "lines": [
+        "text \"Click \"",
+        "chip \"1\" tag-open",
+        "text \"Save\"",
+        "chip \"1\" tag-close",
+        "text \" \"",
+        "text \"now\" @lexiqa",
+        "text \" \"",
+        "chip \"2\" tag-selfclosed"
+      ],
+      "rules": [],
+      "tooltips": {
+        "lexiqa": ""
+      }
+    },
+    "target | lexiqa nbsp tab line feed": {
+      "lines": [
+        "text \"one\"",
+        "mark nbsp \"°\"",
+        "text \"two\" @lexiqa",
+        "mark tab \"⇥\"",
+        "text \"three\" @lexiqa",
+        "mark lineBreak \"↵\"",
+        "break",
+        "text \"line \"",
+        "text \"two\" @lexiqa"
+      ],
+      "rules": [],
+      "tooltips": {
+        "lexiqa": "x"
+      }
+    },
+    "source | lexiqa nbsp tab line feed": {
+      "lines": [
+        "text \"one \"",
+        "text \"two\" @lexiqa",
+        "text \" three line two\""
+      ],
+      "rules": [],
+      "tooltips": {
+        "lexiqa": ""
+      }
+    },
+    "target | lexiqa cjk emoji": {
+      "lines": [
+        "text \"你好\"",
+        "chip \"1\" tag-selfclosed",
+        "text \"世界\" @lexiqa",
+        "text \" 😀 \"",
+        "text \"ok\" @lexiqa"
+      ],
+      "rules": [],
+      "tooltips": {
+        "lexiqa": "x"
+      }
+    },
+    "source | lexiqa cjk emoji": {
+      "lines": [
+        "text \"Hello \"",
+        "chip \"1\" tag-selfclosed",
+        "text \"world 😀 \"",
+        "text \"ok\" @lexiqa"
+      ],
+      "rules": [],
+      "tooltips": {
+        "lexiqa": ""
+      }
+    },
+    "target | lexiqa rtl": {
+      "lines": [
+        "text \"שלום \"",
+        "chip \"1\" tag-close",
+        "text \"עולם\"",
+        "chip \"1\" tag-open",
+        "text \" \"",
+        "text \"טוב\" @lexiqa"
+      ],
+      "rules": [],
+      "tooltips": {
+        "lexiqa": "x"
+      }
+    },
+    "source | lexiqa rtl": {
+      "lines": [
+        "text \"Hello \"",
+        "chip \"1\" tag-open",
+        "text \"world\"",
+        "chip \"1\" tag-close",
+        "text \" \"",
+        "text \"good\" @lexiqa"
+      ],
+      "rules": [],
+      "tooltips": {
+        "lexiqa": ""
+      }
+    },
+    "target | lexiqa multi-line g": {
+      "lines": [
+        "text \"line \"",
+        "text \"one\" @lexiqa",
+        "mark lineBreak \"↵\"",
+        "break",
+        "text \"line\" @lexiqa",
+        "text \" \"",
+        "chip \"1\" tag-open",
+        "text \"two\" @lexiqa",
+        "chip \"1\" tag-close",
+        "text \" \"",
+        "text \"end\" @lexiqa"
+      ],
+      "rules": [],
+      "tooltips": {
+        "lexiqa": "x"
+      }
+    },
+    "source | lexiqa multi-line g": {
+      "lines": [
+        "text \"line one line \"",
+        "chip \"1\" tag-open",
+        "text \"two\"",
+        "chip \"1\" tag-close",
+        "text \" \"",
+        "text \"end\" @lexiqa"
+      ],
+      "rules": [],
+      "tooltips": {
+        "lexiqa": ""
+      }
+    },
+    "target | lexiqa bx ex": {
+      "lines": [
+        "chip \"1\" tag-selfclosed",
+        "text \"Start\" @lexiqa",
+        "text \" text\"",
+        "chip \"2\" tag-selfclosed"
+      ],
+      "rules": [],
+      "tooltips": {
+        "lexiqa": "x"
+      }
+    },
+    "source | lexiqa bx ex": {
+      "lines": [
+        "chip \"1\" tag-selfclosed",
+        "text \"Start \"",
+        "text \"text\" @lexiqa",
+        "chip \"2\" tag-selfclosed",
+        "chip \"3\" tag-selfclosed"
+      ],
+      "rules": [],
+      "tooltips": {
+        "lexiqa": ""
+      }
+    },
+    "target | blacklist": {
+      "lines": [
+        "text \"Click \"",
+        "chip \"1\" tag-open",
+        "text \"Save\"",
+        "chip \"1\" tag-close",
+        "text \" \"",
+        "text \"now\" @blacklist"
+      ],
+      "rules": [],
+      "tooltips": {
+        "blacklist": "now is flagged as a forbidden translation for now"
+      }
+    },
+    "target | blacklist after a line break": {
+      "lines": [
+        "text \"line one\"",
+        "mark lineBreak \"↵\"",
+        "break",
+        "text \"line \"",
+        "chip \"1\" tag-open",
+        "text \"two\"",
+        "chip \"1\" tag-close",
+        "text \" \"",
+        "text \"end\" @blacklist"
+      ],
+      "rules": [],
+      "tooltips": {
+        "blacklist": "end is flagged as a forbidden translation for end"
+      }
+    },
+    "source | glossary and missing term": {
+      "lines": [
+        "text \"Click\" @missingTerm",
+        "text \" \"",
+        "chip \"1\" tag-open",
+        "text \"Save\"",
+        "chip \"1\" tag-close",
+        "text \" \"",
+        "text \"now\" @glossary",
+        "text \" \"",
+        "chip \"2\" tag-selfclosed"
+      ],
+      "rules": [],
+      "tooltips": {
+        "glossary": "Termbase entry",
+        "missingTerm": "Termbase translation not found in target"
+      }
+    },
+    "source | glossary after an emoji": {
+      "lines": [
+        "text \"Hello \"",
+        "chip \"1\" tag-selfclosed",
+        "text \"world 😀 \"",
+        "text \"ok\" @glossary"
+      ],
+      "rules": [],
+      "tooltips": {
+        "glossary": "Termbase entry"
+      }
+    },
+    "target | tag mismatch error": {
+      "lines": [
+        "text \"a \"",
+        "chip \"1\" tag-open",
+        "text \"b\"",
+        "chip \"1\" tag-close",
+        "text \" \"",
+        "chip \"2\" tag-mismatch-error.tag-selfclosed"
+      ],
+      "rules": [],
+      "tooltips": {}
+    },
+    "target | tag order warning": {
+      "lines": [
+        "text \"a \"",
+        "chip \"1\" tag-open",
+        "text \"b\"",
+        "chip \"1\" tag-close",
+        "text \" \"",
+        "chip \"2\" tag-mismatch-warning.tag-selfclosed"
+      ],
+      "rules": [],
+      "tooltips": {}
+    },
+    "target | search": {
+      "lines": [
+        "text \"One\" @search",
+        "text \" \"",
+        "chip \"1\" tag-open",
+        "text \"two\"",
+        "chip \"1\" tag-close",
+        "text \" \"",
+        "text \"one\" @currentSearch+search",
+        "text \", \"",
+        "text \"ONE\" @search"
+      ],
+      "rules": [],
+      "tooltips": {}
+    },
+    "target | search after a line break": {
+      "lines": [
+        "text \"line\" @currentSearch+search",
+        "text \" one\"",
+        "mark lineBreak \"↵\"",
+        "break",
+        "text \"line\" @search",
+        "text \" \"",
+        "chip \"1\" tag-open",
+        "text \"two\"",
+        "chip \"1\" tag-close",
+        "text \" end\""
+      ],
+      "rules": [],
+      "tooltips": {}
+    },
+    "target | search in a tag label": {
+      "lines": [
+        "text \"a \"",
+        "chip \"%name%\" tag-ph.tag-search-match.tag-selfclosed",
+        "text \" \"",
+        "text \"name\" @currentSearch+search"
+      ],
+      "rules": [],
+      "tooltips": {}
+    },
+    "target | current search hit in a tag label": {
+      "lines": [
+        "text \"a \"",
+        "chip \"%name%\" tag-ph.tag-search-current.tag-search-match.tag-selfclosed",
+        "text \" \"",
+        "text \"name\" @search"
+      ],
+      "rules": [],
+      "tooltips": {}
+    },
+    "target | icu": {
+      "lines": [
+        "text \"{count, \" @icu",
+        "text \"plural\" @icu+icuError",
+        "text \", one {#\" @icu",
+        "text \" file\"",
+        "text \"} other {#\" @icu",
+        "text \" files\"",
+        "text \"}}\" @icu"
+      ],
+      "rules": [],
+      "tooltips": {
+        "icuError": "ICU syntax errorMissing required category 'many' in plural block for locale 'it-IT'."
+      }
+    },
+    "target | icu error": {
+      "lines": [
+        "text \"{count, plural, one {#\" @icu",
+        "text \" file\"",
+        "text \"} other {#\" @icu",
+        "text \" files\"",
+        "text \"}\" @icu+icuError"
+      ],
+      "rules": [],
+      "tooltips": {
+        "icuError": "ICU syntax errorExpected } but found end of message pattern in {count, plural, one {# file} other {# files}"
+      }
+    },
+    "source | search": {
+      "lines": [
+        "text \"One\" @search",
+        "text \" \"",
+        "chip \"1\" tag-open",
+        "text \"two\"",
+        "chip \"1\" tag-close",
+        "text \" \"",
+        "text \"one\" @currentSearch+search",
+        "text \", \"",
+        "text \"ONE\" @search"
+      ],
+      "rules": [],
+      "tooltips": {}
+    },
+    "source | search after a line break": {
+      "lines": [
+        "text \"line\" @currentSearch+search",
+        "text \" one\"",
+        "mark lineBreak \"↵\"",
+        "break",
+        "text \"line\" @search",
+        "text \" \"",
+        "chip \"1\" tag-open",
+        "text \"two\"",
+        "chip \"1\" tag-close",
+        "text \" end\""
+      ],
+      "rules": [],
+      "tooltips": {}
+    },
+    "source | search in a tag label": {
+      "lines": [
+        "text \"a \"",
+        "chip \"%name%\" tag-ph.tag-search-match.tag-selfclosed",
+        "text \" \"",
+        "text \"name\" @currentSearch+search"
+      ],
+      "rules": [],
+      "tooltips": {}
+    },
+    "source | current search hit in a tag label": {
+      "lines": [
+        "text \"a \"",
+        "chip \"%name%\" tag-ph.tag-search-current.tag-search-match.tag-selfclosed",
+        "text \" \"",
+        "text \"name\" @search"
+      ],
+      "rules": [],
+      "tooltips": {}
+    },
+    "source | icu": {
+      "lines": [
+        "text \"{count, plural, one {#\" @icu",
+        "text \" file\"",
+        "text \"} other {#\" @icu",
+        "text \" files\"",
+        "text \"}}\" @icu"
+      ],
+      "rules": [],
+      "tooltips": {}
+    },
+    "source | icu error": {
+      "lines": [
+        "text \"{count, plural, one {#\" @icu",
+        "text \" file\"",
+        "text \"} other {#\" @icu",
+        "text \" files\"",
+        "text \"}\" @icu"
+      ],
+      "rules": [],
+      "tooltips": {}
+    }
+  },
+  "compressed": {
+    "target | compressed | Ciao<ph id=\"mtc_1\" ctype=\"x-html\" equiv-text=\"base64:PGJyLz4=\"/>hai <ph id=\"mtc_2\" ctype=\"x-percent-s\" equiv-text=\"base64:JXM=\"/> nuovi messaggi da <ph id=\"mtc_3\" ctype=\"x-original_pc_open\" equiv-text=\"base64:PGI+\"/>Anna <ph id=\"mtc_4\" ctype=\"x-original_pc_open\" equiv-text=\"base64:PGk+\"/>Rossi<ph id=\"mtc_5\" ctype=\"x-original_pc_close\" equiv-text=\"base64:PC9pPg==\"/><ph id=\"mtc_6\" ctype=\"x-original_pc_close\" equiv-text=\"base64:PC9iPg==\"/> &amp; <ph id=\"source1_1\" ctype=\"x-pc_open_data_ref\" equiv-text=\"base64:PGEgaHJlZj0iIyI+\" x-orig=\"base64:PGE+\"/>Bob<ph id=\"source1_2\" ctype=\"x-pc_close_data_ref\" equiv-text=\"base64:PC9hPg==\" x-orig=\"base64:PC9hPg==\"/> (<ph id=\"mtc_7\" ctype=\"x-mustache\" equiv-text=\"base64:e3tjb3VudH19\"/> &lt; 5) <g id=\"9\" equiv-text=\"base64:PHNwYW4+\">ok</g>⁠!": {
+      "lines": [
+        "text \"Ciao\"",
+        "chip \"<br/>\" tag-ph.tag-selfclosed",
+        "text \"hai \"",
+        "chip \"%s\" tag-ph.tag-selfclosed",
+        "text \" nuovi messaggi da \"",
+        "chip \"1\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1 NO-ELLIPSIS",
+        "text \"Anna \"",
+        "chip \"2\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #2 NO-ELLIPSIS",
+        "text \"Rossi\"",
+        "chip \"2\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #2 NO-ELLIPSIS",
+        "chip \"1\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #1 NO-ELLIPSIS",
+        "text \" & \"",
+        "chip \"3\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #3 NO-ELLIPSIS",
+        "text \"Bob\"",
+        "chip \"3\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #3 NO-ELLIPSIS",
+        "text \" (\"",
+        "chip \"{{count}}\" tag-ph.tag-selfclosed",
+        "text \" < 5) \"",
+        "chip \"4\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #4 NO-ELLIPSIS",
+        "text \"ok\"",
+        "chip \"4\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #4 NO-ELLIPSIS",
+        "mark wordJoiner \"\"",
+        "text \"!\""
+      ],
+      "rules": ["compressed chips"],
+      "tooltips": {
+        "text": "<b>",
+        "classes": ["tag", "tag-ph", "tag-selfclosed"]
+      }
+    },
+    "source | compressed | Hello<ph id=\"mtc_1\" ctype=\"x-html\" equiv-text=\"base64:PGJyLz4=\"/>you have <ph id=\"mtc_2\" ctype=\"x-percent-s\" equiv-text=\"base64:JXM=\"/> new messages from <ph id=\"mtc_3\" ctype=\"x-original_pc_open\" equiv-text=\"base64:PGI+\"/>Anna <ph id=\"mtc_4\" ctype=\"x-original_pc_open\" equiv-text=\"base64:PGk+\"/>Rossi<ph id=\"mtc_5\" ctype=\"x-original_pc_close\" equiv-text=\"base64:PC9pPg==\"/><ph id=\"mtc_6\" ctype=\"x-original_pc_close\" equiv-text=\"base64:PC9iPg==\"/> &amp; <ph id=\"source1_1\" ctype=\"x-pc_open_data_ref\" equiv-text=\"base64:PGEgaHJlZj0iIyI+\" x-orig=\"base64:PGE+\"/>Bob<ph id=\"source1_2\" ctype=\"x-pc_close_data_ref\" equiv-text=\"base64:PC9hPg==\" x-orig=\"base64:PC9hPg==\"/> (<ph id=\"mtc_7\" ctype=\"x-mustache\" equiv-text=\"base64:e3tjb3VudH19\"/> &lt; 5) <g id=\"9\" equiv-text=\"base64:PHNwYW4+\">ok</g>⁠!": {
+      "lines": [
+        "text \"Hello\"",
+        "chip \"<br/>\" tag-ph.tag-selfclosed",
+        "text \"you have \"",
+        "chip \"%s\" tag-ph.tag-selfclosed",
+        "text \" new messages from \"",
+        "chip \"1\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1 NO-ELLIPSIS",
+        "text \"Anna \"",
+        "chip \"2\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #2 NO-ELLIPSIS",
+        "text \"Rossi\"",
+        "chip \"2\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #2 NO-ELLIPSIS",
+        "chip \"1\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #1 NO-ELLIPSIS",
+        "text \" & \"",
+        "chip \"3\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #3 NO-ELLIPSIS",
+        "text \"Bob\"",
+        "chip \"3\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #3 NO-ELLIPSIS",
+        "text \" (\"",
+        "chip \"{{count}}\" tag-ph.tag-selfclosed",
+        "text \" < 5) \"",
+        "chip \"4\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #4 NO-ELLIPSIS",
+        "text \"ok\"",
+        "chip \"4\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #4 NO-ELLIPSIS",
+        "mark wordJoiner \"\"",
+        "text \"!\""
+      ],
+      "rules": ["compressed chips"],
+      "tooltips": {
+        "text": "<b>",
+        "classes": ["tag", "tag-ph", "tag-selfclosed"]
+      }
+    },
+    "target | compressed search | a <ph id=\"mtc_1\" ctype=\"x-original_pc_open\" equiv-text=\"base64:PGIgY2xhc3M9Im5hbWUiPg==\"/>x<ph id=\"mtc_2\" ctype=\"x-original_pc_close\" equiv-text=\"base64:PC9iPg==\"/> name": {
+      "lines": [
+        "text \"a \"",
+        "chip \"<b class=\\\"name\\\">\" tag-numbered.tag-paired-open.tag-ph.tag-search-current.tag-search-match.tag-selfclosed",
+        "text \"x\"",
+        "chip \"\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed",
+        "text \" \"",
+        "text \"name\" @search"
+      ],
+      "rules": [
+        "compressed chips",
+        "chips of a searched side with the tags compressed"
+      ]
+    },
+    "source | compressed search | a <ph id=\"mtc_1\" ctype=\"x-original_pc_open\" equiv-text=\"base64:PGIgY2xhc3M9Im5hbWUiPg==\"/>x<ph id=\"mtc_2\" ctype=\"x-original_pc_close\" equiv-text=\"base64:PC9iPg==\"/> name": {
+      "lines": [
+        "text \"a \"",
+        "chip \"<b class=\\\"name\\\">\" tag-numbered.tag-paired-open.tag-ph.tag-search-current.tag-search-match.tag-selfclosed",
+        "text \"x\"",
+        "chip \"\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed",
+        "text \" \"",
+        "text \"name\" @search"
+      ],
+      "rules": [
+        "compressed chips",
+        "chips of a searched side with the tags compressed"
+      ]
+    }
+  },
+  "edits": {
+    "plain | paste a segment slice with tags @ m": {
+      "loaded": {
+        "lines": ["text \"Hello world\""],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Hello X\"",
+          "chip \"1\" tag-open",
+          "text \"Y\"",
+          "chip \"1\" tag-close",
+          "text \"&world\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": ["text \"Hello world\""],
+        "rules": []
+      }
+    },
+    "plain | tag menu: < then Enter (first entry) @ m": {
+      "loaded": {
+        "lines": ["text \"Hello world\""],
+        "rules": []
+      },
+      "edited": {
+        "lines": ["text \"Hello <world\""],
+        "rules": []
+      },
+      "undone": {
+        "lines": ["text \"Hello world\""],
+        "rules": []
+      }
+    },
+    "plain | REPLACE_TRANSLATION": {
+      "loaded": {
+        "lines": ["text \"Hello world\""],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Nuova \"",
+          "chip \"1\" tag-open",
+          "text \"traduzione\"",
+          "chip \"1\" tag-close",
+          "mark nbsp \"°\"",
+          "text \"ok\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": ["text \"Hello world\""],
+        "rules": []
+      }
+    },
+    "plain | lexiqa replace occurrence 0 of \"world\"": {
+      "loaded": {
+        "lines": ["text \"Hello \"", "text \"world\" @lexiqa"],
+        "rules": []
+      },
+      "edited": {
+        "lines": ["text \"Hello earth\""],
+        "rules": []
+      },
+      "undone": {
+        "lines": ["text \"Hello world\""],
+        "rules": []
+      }
+    },
+    "plain | type before the Lexiqa warnings @ s": {
+      "loaded": {
+        "lines": ["text \"Hello \"", "text \"world\" @lexiqa"],
+        "rules": []
+      },
+      "edited": {
+        "lines": ["text \"xHello \"", "text \"world\" @lexiqa"],
+        "rules": []
+      },
+      "undone": {
+        "lines": ["text \"Hello \"", "text \"world\" @lexiqa"],
+        "rules": []
+      }
+    },
+    "g | type a character @ bt": {
+      "loaded": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Save\"",
+          "chip \"1\" tag-close",
+          "text \" now\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Click x\"",
+          "chip \"1\" tag-open",
+          "text \"Save\"",
+          "chip \"1\" tag-close",
+          "text \" now\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Save\"",
+          "chip \"1\" tag-close",
+          "text \" now\""
+        ],
+        "rules": []
+      }
+    },
+    "g | type a character @ at": {
+      "loaded": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Save\"",
+          "chip \"1\" tag-close",
+          "text \" now\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Save\"",
+          "chip \"1\" tag-close",
+          "text \"x now\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Save\"",
+          "chip \"1\" tag-close",
+          "text \" now\""
+        ],
+        "rules": []
+      }
+    },
+    "g | backspace @ at": {
+      "loaded": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Save\"",
+          "chip \"1\" tag-close",
+          "text \" now\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Save now\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Save\"",
+          "chip \"1\" tag-close",
+          "text \" now\""
+        ],
+        "rules": ["focused chip after an undo or a drop"]
+      }
+    },
+    "g | delete @ bt": {
+      "loaded": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Save\"",
+          "chip \"1\" tag-close",
+          "text \" now\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Click Save\"",
+          "chip \"?\" tag-close",
+          "text \" now\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Save\"",
+          "chip \"1\" tag-close",
+          "text \" now\""
+        ],
+        "rules": ["focused chip after an undo or a drop"]
+      }
+    },
+    "g | paste a segment slice with tags @ bt": {
+      "loaded": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Save\"",
+          "chip \"1\" tag-close",
+          "text \" now\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Click X\"",
+          "chip \"1\" tag-open",
+          "text \"Y\"",
+          "chip \"1\" tag-close",
+          "text \"&\"",
+          "chip \"1\" tag-open",
+          "text \"Save\"",
+          "chip \"1\" tag-close",
+          "text \" now\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Save\"",
+          "chip \"1\" tag-close",
+          "text \" now\""
+        ],
+        "rules": []
+      }
+    },
+    "g | tag menu: < then Enter (first entry) @ at": {
+      "loaded": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Save\"",
+          "chip \"1\" tag-close",
+          "text \" now\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Save\"",
+          "chip \"1\" tag-close",
+          "chip \"2\" tag-selfclosed",
+          "text \" now\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Save\"",
+          "chip \"1\" tag-close",
+          "text \"< now\""
+        ],
+        "rules": ["unknown markup"]
+      }
+    },
+    "g | drag and drop (move) @ gi..ge..e": {
+      "loaded": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Save\"",
+          "chip \"1\" tag-close",
+          "text \" now\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "chip \"1\" tag-close",
+          "text \" nowSave\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Save\"",
+          "chip \"1\" tag-close",
+          "text \" now\""
+        ],
+        "rules": []
+      }
+    },
+    "g | drag and drop (move) @ gm..at..s": {
+      "loaded": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Save\"",
+          "chip \"1\" tag-close",
+          "text \" now\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"ve\"",
+          "chip \"?\" tag-close",
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Sa now\""
+        ],
+        "rules": ["focused chip after an undo or a drop"]
+      },
+      "undone": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Save\"",
+          "chip \"1\" tag-close",
+          "text \" now\""
+        ],
+        "rules": ["focused chip after an undo or a drop"]
+      }
+    },
+    "g | add all missing source tags": {
+      "loaded": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Save\"",
+          "chip \"1\" tag-close",
+          "text \" now\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Save\"",
+          "chip \"1\" tag-close",
+          "text \" now\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Save\"",
+          "chip \"1\" tag-close",
+          "text \" now\""
+        ],
+        "rules": []
+      }
+    },
+    "g | REPLACE_TRANSLATION": {
+      "loaded": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Save\"",
+          "chip \"1\" tag-close",
+          "text \" now\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Nuova \"",
+          "chip \"1\" tag-open",
+          "text \"traduzione\"",
+          "chip \"1\" tag-close",
+          "mark nbsp \"°\"",
+          "text \"ok\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Save\"",
+          "chip \"1\" tag-close",
+          "text \" now\""
+        ],
+        "rules": []
+      }
+    },
+    "g | lexiqa replace occurrence 0 of \"Save\"": {
+      "loaded": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Save\" @lexiqa",
+          "chip \"1\" tag-close",
+          "text \" \"",
+          "text \"now\" @lexiqa"
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Store\"",
+          "chip \"1\" tag-close",
+          "text \" now\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Save\"",
+          "chip \"1\" tag-close",
+          "text \" now\""
+        ],
+        "rules": []
+      }
+    },
+    "g | lexiqa replace occurrence 0 of \"now\"": {
+      "loaded": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Save\" @lexiqa",
+          "chip \"1\" tag-close",
+          "text \" \"",
+          "text \"now\" @lexiqa"
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Save\"",
+          "chip \"1\" tag-close",
+          "text \" then\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Save\"",
+          "chip \"1\" tag-close",
+          "text \" now\""
+        ],
+        "rules": []
+      }
+    },
+    "g | type before the Lexiqa warnings @ s": {
+      "loaded": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Save\" @lexiqa",
+          "chip \"1\" tag-close",
+          "text \" \"",
+          "text \"now\" @lexiqa"
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"xClick \"",
+          "chip \"1\" tag-open",
+          "text \"Save\" @lexiqa",
+          "chip \"1\" tag-close",
+          "text \" \"",
+          "text \"now\" @lexiqa"
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"Click \"",
+          "chip \"1\" tag-open",
+          "text \"Save\" @lexiqa",
+          "chip \"1\" tag-close",
+          "text \" \"",
+          "text \"now\" @lexiqa"
+        ],
+        "rules": []
+      }
+    },
+    "g inside a word | type a character @ bt": {
+      "loaded": {
+        "lines": [
+          "text \"Ka\"",
+          "chip \"1\" tag-open",
+          "text \"rl\"",
+          "chip \"1\" tag-close",
+          "text \"sson and\"",
+          "chip \"2\" tag-selfclosed",
+          "text \" co\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Kax\"",
+          "chip \"1\" tag-open",
+          "text \"rl\"",
+          "chip \"1\" tag-close",
+          "text \"sson and\"",
+          "chip \"2\" tag-selfclosed",
+          "text \" co\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"Ka\"",
+          "chip \"1\" tag-open",
+          "text \"rl\"",
+          "chip \"1\" tag-close",
+          "text \"sson and\"",
+          "chip \"2\" tag-selfclosed",
+          "text \" co\""
+        ],
+        "rules": []
+      }
+    },
+    "g inside a word | type a character @ at": {
+      "loaded": {
+        "lines": [
+          "text \"Ka\"",
+          "chip \"1\" tag-open",
+          "text \"rl\"",
+          "chip \"1\" tag-close",
+          "text \"sson and\"",
+          "chip \"2\" tag-selfclosed",
+          "text \" co\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Ka\"",
+          "chip \"1\" tag-open",
+          "text \"rl\"",
+          "chip \"1\" tag-close",
+          "text \"xsson and\"",
+          "chip \"2\" tag-selfclosed",
+          "text \" co\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"Ka\"",
+          "chip \"1\" tag-open",
+          "text \"rl\"",
+          "chip \"1\" tag-close",
+          "text \"sson and\"",
+          "chip \"2\" tag-selfclosed",
+          "text \" co\""
+        ],
+        "rules": []
+      }
+    },
+    "g inside a word | backspace @ at": {
+      "loaded": {
+        "lines": [
+          "text \"Ka\"",
+          "chip \"1\" tag-open",
+          "text \"rl\"",
+          "chip \"1\" tag-close",
+          "text \"sson and\"",
+          "chip \"2\" tag-selfclosed",
+          "text \" co\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Ka\"",
+          "chip \"1\" tag-open",
+          "text \"rlsson and\"",
+          "chip \"2\" tag-selfclosed",
+          "text \" co\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"Ka\"",
+          "chip \"1\" tag-open",
+          "text \"rl\"",
+          "chip \"1\" tag-close",
+          "text \"sson and\"",
+          "chip \"2\" tag-selfclosed",
+          "text \" co\""
+        ],
+        "rules": ["focused chip after an undo or a drop"]
+      }
+    },
+    "g inside a word | delete @ bt": {
+      "loaded": {
+        "lines": [
+          "text \"Ka\"",
+          "chip \"1\" tag-open",
+          "text \"rl\"",
+          "chip \"1\" tag-close",
+          "text \"sson and\"",
+          "chip \"2\" tag-selfclosed",
+          "text \" co\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Karl\"",
+          "chip \"?\" tag-close",
+          "text \"sson and\"",
+          "chip \"2\" tag-selfclosed",
+          "text \" co\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"Ka\"",
+          "chip \"1\" tag-open",
+          "text \"rl\"",
+          "chip \"1\" tag-close",
+          "text \"sson and\"",
+          "chip \"2\" tag-selfclosed",
+          "text \" co\""
+        ],
+        "rules": ["focused chip after an undo or a drop"]
+      }
+    },
+    "g inside a word | paste a segment slice with tags @ bt": {
+      "loaded": {
+        "lines": [
+          "text \"Ka\"",
+          "chip \"1\" tag-open",
+          "text \"rl\"",
+          "chip \"1\" tag-close",
+          "text \"sson and\"",
+          "chip \"2\" tag-selfclosed",
+          "text \" co\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"KaX\"",
+          "chip \"1\" tag-open",
+          "text \"Y\"",
+          "chip \"1\" tag-close",
+          "text \"&\"",
+          "chip \"1\" tag-open",
+          "text \"rl\"",
+          "chip \"1\" tag-close",
+          "text \"sson and\"",
+          "chip \"2\" tag-selfclosed",
+          "text \" co\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"Ka\"",
+          "chip \"1\" tag-open",
+          "text \"rl\"",
+          "chip \"1\" tag-close",
+          "text \"sson and\"",
+          "chip \"2\" tag-selfclosed",
+          "text \" co\""
+        ],
+        "rules": []
+      }
+    },
+    "g inside a word | paste a segment slice with tags @ m": {
+      "loaded": {
+        "lines": [
+          "text \"Ka\"",
+          "chip \"1\" tag-open",
+          "text \"rl\"",
+          "chip \"1\" tag-close",
+          "text \"sson and\"",
+          "chip \"2\" tag-selfclosed",
+          "text \" co\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Ka\"",
+          "chip \"1\" tag-open",
+          "text \"rl\"",
+          "chip \"1\" tag-close",
+          "text \"sson X\"",
+          "chip \"1\" tag-open",
+          "text \"Y\"",
+          "chip \"1\" tag-close",
+          "text \"&and\"",
+          "chip \"2\" tag-selfclosed",
+          "text \" co\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"Ka\"",
+          "chip \"1\" tag-open",
+          "text \"rl\"",
+          "chip \"1\" tag-close",
+          "text \"sson and\"",
+          "chip \"2\" tag-selfclosed",
+          "text \" co\""
+        ],
+        "rules": []
+      }
+    },
+    "g inside a word | tag menu: < then Enter (first entry) @ m": {
+      "loaded": {
+        "lines": [
+          "text \"Ka\"",
+          "chip \"1\" tag-open",
+          "text \"rl\"",
+          "chip \"1\" tag-close",
+          "text \"sson and\"",
+          "chip \"2\" tag-selfclosed",
+          "text \" co\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Ka\"",
+          "chip \"1\" tag-open",
+          "text \"rl\"",
+          "chip \"1\" tag-close",
+          "text \"sson \"",
+          "chip \"1\" tag-open",
+          "text \"and\"",
+          "chip \"2\" tag-selfclosed",
+          "text \" co\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"Ka\"",
+          "chip \"1\" tag-open",
+          "text \"rl\"",
+          "chip \"1\" tag-close",
+          "text \"sson <and\"",
+          "chip \"2\" tag-selfclosed",
+          "text \" co\""
+        ],
+        "rules": ["unknown markup"]
+      }
+    },
+    "g inside a word | tag menu: < then Enter (first entry) @ at": {
+      "loaded": {
+        "lines": [
+          "text \"Ka\"",
+          "chip \"1\" tag-open",
+          "text \"rl\"",
+          "chip \"1\" tag-close",
+          "text \"sson and\"",
+          "chip \"2\" tag-selfclosed",
+          "text \" co\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Ka\"",
+          "chip \"1\" tag-open",
+          "text \"rl\"",
+          "chip \"1\" tag-close",
+          "chip \"1\" tag-open",
+          "text \"sson and\"",
+          "chip \"2\" tag-selfclosed",
+          "text \" co\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"Ka\"",
+          "chip \"1\" tag-open",
+          "text \"rl\"",
+          "chip \"1\" tag-close",
+          "text \"<sson and\"",
+          "chip \"2\" tag-selfclosed",
+          "text \" co\""
+        ],
+        "rules": ["unknown markup"]
+      }
+    },
+    "g inside a word | REPLACE_TRANSLATION": {
+      "loaded": {
+        "lines": [
+          "text \"Ka\"",
+          "chip \"1\" tag-open",
+          "text \"rl\"",
+          "chip \"1\" tag-close",
+          "text \"sson and\"",
+          "chip \"2\" tag-selfclosed",
+          "text \" co\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Nuova \"",
+          "chip \"1\" tag-open",
+          "text \"traduzione\"",
+          "chip \"1\" tag-close",
+          "mark nbsp \"°\"",
+          "text \"ok\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"Ka\"",
+          "chip \"1\" tag-open",
+          "text \"rl\"",
+          "chip \"1\" tag-close",
+          "text \"sson and\"",
+          "chip \"2\" tag-selfclosed",
+          "text \" co\""
+        ],
+        "rules": []
+      }
+    },
+    "g inside a word | lexiqa replace occurrence 0 of \"sson\"": {
+      "loaded": {
+        "lines": [
+          "text \"Ka\"",
+          "chip \"1\" tag-open",
+          "text \"rl\"",
+          "chip \"1\" tag-close",
+          "text \"sson\" @lexiqa",
+          "text \" and\"",
+          "chip \"2\" tag-selfclosed",
+          "text \" co\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Ka\"",
+          "chip \"1\" tag-open",
+          "text \"rl\"",
+          "chip \"1\" tag-close",
+          "text \"sen and\"",
+          "chip \"2\" tag-selfclosed",
+          "text \" co\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"Ka\"",
+          "chip \"1\" tag-open",
+          "text \"rl\"",
+          "chip \"1\" tag-close",
+          "text \"sson and\"",
+          "chip \"2\" tag-selfclosed",
+          "text \" co\""
+        ],
+        "rules": []
+      }
+    },
+    "g inside a word | type before the Lexiqa warnings @ s": {
+      "loaded": {
+        "lines": [
+          "text \"Ka\"",
+          "chip \"1\" tag-open",
+          "text \"rl\"",
+          "chip \"1\" tag-close",
+          "text \"sson\" @lexiqa",
+          "text \" and\"",
+          "chip \"2\" tag-selfclosed",
+          "text \" co\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"xKa\"",
+          "chip \"1\" tag-open",
+          "text \"rl\"",
+          "chip \"1\" tag-close",
+          "text \"sson\" @lexiqa",
+          "text \" and\"",
+          "chip \"2\" tag-selfclosed",
+          "text \" co\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"Ka\"",
+          "chip \"1\" tag-open",
+          "text \"rl\"",
+          "chip \"1\" tag-close",
+          "text \"sson\" @lexiqa",
+          "text \" and\"",
+          "chip \"2\" tag-selfclosed",
+          "text \" co\""
+        ],
+        "rules": []
+      }
+    },
+    "nested g and x | type a character @ bt": {
+      "loaded": {
+        "lines": [
+          "chip \"1\" tag-open",
+          "text \"A \"",
+          "chip \"2\" tag-open",
+          "text \"b\"",
+          "chip \"2\" tag-close",
+          "chip \"1\" tag-close",
+          "chip \"3\" tag-selfclosed",
+          "text \" c\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "chip \"1\" tag-open",
+          "text \"A x\"",
+          "chip \"2\" tag-open",
+          "text \"b\"",
+          "chip \"2\" tag-close",
+          "chip \"1\" tag-close",
+          "chip \"3\" tag-selfclosed",
+          "text \" c\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "chip \"1\" tag-open",
+          "text \"A \"",
+          "chip \"2\" tag-open",
+          "text \"b\"",
+          "chip \"2\" tag-close",
+          "chip \"1\" tag-close",
+          "chip \"3\" tag-selfclosed",
+          "text \" c\""
+        ],
+        "rules": []
+      }
+    },
+    "nested g and x | type a character @ at": {
+      "loaded": {
+        "lines": [
+          "chip \"1\" tag-open",
+          "text \"A \"",
+          "chip \"2\" tag-open",
+          "text \"b\"",
+          "chip \"2\" tag-close",
+          "chip \"1\" tag-close",
+          "chip \"3\" tag-selfclosed",
+          "text \" c\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "chip \"1\" tag-open",
+          "text \"A \"",
+          "chip \"2\" tag-open",
+          "text \"b\"",
+          "chip \"2\" tag-close",
+          "chip \"1\" tag-close",
+          "text \"x\"",
+          "chip \"3\" tag-selfclosed",
+          "text \" c\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "chip \"1\" tag-open",
+          "text \"A \"",
+          "chip \"2\" tag-open",
+          "text \"b\"",
+          "chip \"2\" tag-close",
+          "chip \"1\" tag-close",
+          "chip \"3\" tag-selfclosed",
+          "text \" c\""
+        ],
+        "rules": []
+      }
+    },
+    "nested g and x | backspace @ at": {
+      "loaded": {
+        "lines": [
+          "chip \"1\" tag-open",
+          "text \"A \"",
+          "chip \"2\" tag-open",
+          "text \"b\"",
+          "chip \"2\" tag-close",
+          "chip \"1\" tag-close",
+          "chip \"3\" tag-selfclosed",
+          "text \" c\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "chip \"1\" tag-open",
+          "text \"A \"",
+          "chip \"2\" tag-open",
+          "text \"b\"",
+          "chip \"2\" tag-close",
+          "chip \"3\" tag-selfclosed",
+          "text \" c\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "chip \"1\" tag-open",
+          "text \"A \"",
+          "chip \"2\" tag-open",
+          "text \"b\"",
+          "chip \"2\" tag-close",
+          "chip \"1\" tag-close",
+          "chip \"3\" tag-selfclosed",
+          "text \" c\""
+        ],
+        "rules": ["focused chip after an undo or a drop"]
+      }
+    },
+    "nested g and x | delete @ bt": {
+      "loaded": {
+        "lines": [
+          "chip \"1\" tag-open",
+          "text \"A \"",
+          "chip \"2\" tag-open",
+          "text \"b\"",
+          "chip \"2\" tag-close",
+          "chip \"1\" tag-close",
+          "chip \"3\" tag-selfclosed",
+          "text \" c\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "chip \"1\" tag-open",
+          "text \"A b\"",
+          "chip \"1\" tag-close",
+          "chip \"?\" tag-close",
+          "chip \"3\" tag-selfclosed",
+          "text \" c\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "chip \"1\" tag-open",
+          "text \"A \"",
+          "chip \"2\" tag-open",
+          "text \"b\"",
+          "chip \"2\" tag-close",
+          "chip \"1\" tag-close",
+          "chip \"3\" tag-selfclosed",
+          "text \" c\""
+        ],
+        "rules": ["focused chip after an undo or a drop"]
+      }
+    },
+    "nested g and x | paste a segment slice with tags @ bt": {
+      "loaded": {
+        "lines": [
+          "chip \"1\" tag-open",
+          "text \"A \"",
+          "chip \"2\" tag-open",
+          "text \"b\"",
+          "chip \"2\" tag-close",
+          "chip \"1\" tag-close",
+          "chip \"3\" tag-selfclosed",
+          "text \" c\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "chip \"1\" tag-open",
+          "text \"A X\"",
+          "chip \"1\" tag-open",
+          "text \"Y\"",
+          "chip \"1\" tag-close",
+          "text \"&\"",
+          "chip \"2\" tag-open",
+          "text \"b\"",
+          "chip \"2\" tag-close",
+          "chip \"1\" tag-close",
+          "chip \"3\" tag-selfclosed",
+          "text \" c\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "chip \"1\" tag-open",
+          "text \"A \"",
+          "chip \"2\" tag-open",
+          "text \"b\"",
+          "chip \"2\" tag-close",
+          "chip \"1\" tag-close",
+          "chip \"3\" tag-selfclosed",
+          "text \" c\""
+        ],
+        "rules": []
+      }
+    },
+    "nested g and x | tag menu: < then Enter (first entry) @ at": {
+      "loaded": {
+        "lines": [
+          "chip \"1\" tag-open",
+          "text \"A \"",
+          "chip \"2\" tag-open",
+          "text \"b\"",
+          "chip \"2\" tag-close",
+          "chip \"1\" tag-close",
+          "chip \"3\" tag-selfclosed",
+          "text \" c\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "chip \"1\" tag-open",
+          "text \"A \"",
+          "chip \"2\" tag-open",
+          "text \"b\"",
+          "chip \"2\" tag-close",
+          "chip \"1\" tag-close",
+          "chip \"1\" tag-open",
+          "chip \"3\" tag-selfclosed",
+          "text \" c\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "chip \"1\" tag-open",
+          "text \"A \"",
+          "chip \"2\" tag-open",
+          "text \"b\"",
+          "chip \"2\" tag-close",
+          "chip \"1\" tag-close",
+          "text \"<\"",
+          "chip \"3\" tag-selfclosed",
+          "text \" c\""
+        ],
+        "rules": ["unknown markup"]
+      }
+    },
+    "nested g and x | drag and drop (move) @ ax..e..gi": {
+      "loaded": {
+        "lines": [
+          "chip \"1\" tag-open",
+          "text \"A \"",
+          "chip \"2\" tag-open",
+          "text \"b\"",
+          "chip \"2\" tag-close",
+          "chip \"1\" tag-close",
+          "chip \"3\" tag-selfclosed",
+          "text \" c\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "chip \"1\" tag-open",
+          "text \"A \"",
+          "chip \"2\" tag-open",
+          "text \" cb\"",
+          "chip \"2\" tag-close",
+          "chip \"1\" tag-close",
+          "chip \"3\" tag-selfclosed"
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "chip \"1\" tag-open",
+          "text \"A \"",
+          "chip \"2\" tag-open",
+          "text \"b\"",
+          "chip \"2\" tag-close",
+          "chip \"1\" tag-close",
+          "chip \"3\" tag-selfclosed",
+          "text \" c\""
+        ],
+        "rules": []
+      }
+    },
+    "nested g and x | REPLACE_TRANSLATION": {
+      "loaded": {
+        "lines": [
+          "chip \"1\" tag-open",
+          "text \"A \"",
+          "chip \"2\" tag-open",
+          "text \"b\"",
+          "chip \"2\" tag-close",
+          "chip \"1\" tag-close",
+          "chip \"3\" tag-selfclosed",
+          "text \" c\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Nuova \"",
+          "chip \"1\" tag-open",
+          "text \"traduzione\"",
+          "chip \"1\" tag-close",
+          "mark nbsp \"°\"",
+          "text \"ok\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "chip \"1\" tag-open",
+          "text \"A \"",
+          "chip \"2\" tag-open",
+          "text \"b\"",
+          "chip \"2\" tag-close",
+          "chip \"1\" tag-close",
+          "chip \"3\" tag-selfclosed",
+          "text \" c\""
+        ],
+        "rules": []
+      }
+    },
+    "bx ex | type a character @ bt": {
+      "loaded": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"Start text\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"Start textx\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"Start text\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": []
+      }
+    },
+    "bx ex | type a character @ at": {
+      "loaded": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"Start text\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"xStart text\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"Start text\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": []
+      }
+    },
+    "bx ex | backspace @ at": {
+      "loaded": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"Start text\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": ["text \"Start text\"", "chip \"2\" tag-selfclosed"],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"Start text\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": ["focused chip after an undo or a drop"]
+      }
+    },
+    "bx ex | delete @ bt": {
+      "loaded": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"Start text\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": ["chip \"1\" tag-selfclosed", "text \"Start text\""],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"Start text\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": ["focused chip after an undo or a drop"]
+      }
+    },
+    "bx ex | paste a segment slice with tags @ bt": {
+      "loaded": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"Start text\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"Start textX\"",
+          "chip \"1\" tag-open",
+          "text \"Y\"",
+          "chip \"1\" tag-close",
+          "text \"&\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"Start text\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": []
+      }
+    },
+    "bx ex | paste a segment slice with tags @ m": {
+      "loaded": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"Start text\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"Start X\"",
+          "chip \"1\" tag-open",
+          "text \"Y\"",
+          "chip \"1\" tag-close",
+          "text \"&text\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"Start text\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": []
+      }
+    },
+    "bx ex | tag menu: < then Enter (first entry) @ m": {
+      "loaded": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"Start text\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"Start \"",
+          "chip \"3\" tag-selfclosed",
+          "text \"text\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"Start <text\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": ["unknown markup"]
+      }
+    },
+    "bx ex | tag menu: < then Enter (first entry) @ at": {
+      "loaded": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"Start text\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "chip \"3\" tag-selfclosed",
+          "text \"Start text\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"<Start text\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": ["unknown markup"]
+      }
+    },
+    "bx ex | drag and drop (move) @ at..m..e": {
+      "loaded": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"Start text\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"text\"",
+          "chip \"2\" tag-selfclosed",
+          "text \"Start \""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"Start text\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": []
+      }
+    },
+    "bx ex | add all missing source tags": {
+      "loaded": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"Start text\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"Start text\"",
+          "chip \"2\" tag-selfclosed",
+          "chip \"3\" tag-selfclosed"
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"Start text\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": []
+      }
+    },
+    "bx ex | REPLACE_TRANSLATION": {
+      "loaded": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"Start text\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Nuova \"",
+          "chip \"1\" tag-open",
+          "text \"traduzione\"",
+          "chip \"1\" tag-close",
+          "mark nbsp \"°\"",
+          "text \"ok\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"Start text\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": []
+      }
+    },
+    "bx ex | lexiqa replace occurrence 0 of \"Start\"": {
+      "loaded": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"Start\" @lexiqa",
+          "text \" text\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"Begin text\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"Start text\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": []
+      }
+    },
+    "bx ex | type before the Lexiqa warnings @ s": {
+      "loaded": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"Start\" @lexiqa",
+          "text \" text\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"x\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"Start\" @lexiqa",
+          "text \" text\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "chip \"1\" tag-selfclosed",
+          "text \"Start\" @lexiqa",
+          "text \" text\"",
+          "chip \"2\" tag-selfclosed"
+        ],
+        "rules": []
+      }
+    },
+    "ph equiv-text | type a character @ bt": {
+      "loaded": {
+        "lines": [
+          "text \"You have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" new messages\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"You have x\"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" new messages\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"You have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" new messages\""
+        ],
+        "rules": []
+      }
+    },
+    "ph equiv-text | type a character @ at": {
+      "loaded": {
+        "lines": [
+          "text \"You have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" new messages\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"You have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \"x new messages\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"You have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" new messages\""
+        ],
+        "rules": []
+      }
+    },
+    "ph equiv-text | backspace @ at": {
+      "loaded": {
+        "lines": [
+          "text \"You have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" new messages\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": ["text \"You have  new messages\""],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"You have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" new messages\""
+        ],
+        "rules": ["focused chip after an undo or a drop"]
+      }
+    },
+    "ph equiv-text | delete @ bt": {
+      "loaded": {
+        "lines": [
+          "text \"You have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" new messages\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": ["text \"You have  new messages\""],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"You have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" new messages\""
+        ],
+        "rules": ["focused chip after an undo or a drop"]
+      }
+    },
+    "ph equiv-text | paste a segment slice with tags @ bt": {
+      "loaded": {
+        "lines": [
+          "text \"You have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" new messages\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"You have X\"",
+          "chip \"1\" tag-open",
+          "text \"Y\"",
+          "chip \"1\" tag-close",
+          "text \"&\"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" new messages\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"You have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" new messages\""
+        ],
+        "rules": []
+      }
+    },
+    "ph equiv-text | paste a segment slice with tags @ m": {
+      "loaded": {
+        "lines": [
+          "text \"You have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" new messages\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"You have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" new X\"",
+          "chip \"1\" tag-open",
+          "text \"Y\"",
+          "chip \"1\" tag-close",
+          "text \"&messages\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"You have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" new messages\""
+        ],
+        "rules": []
+      }
+    },
+    "ph equiv-text | tag menu: < then Enter (first entry) @ m": {
+      "loaded": {
+        "lines": [
+          "text \"You have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" new messages\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"You have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" new \"",
+          "chip \"{{count}}\" tag-ph.tag-selfclosed",
+          "text \"messages\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"You have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" new <messages\""
+        ],
+        "rules": ["unknown markup"]
+      }
+    },
+    "ph equiv-text | tag menu: < then Enter (first entry) @ at": {
+      "loaded": {
+        "lines": [
+          "text \"You have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" new messages\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"You have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "chip \"{{count}}\" tag-ph.tag-selfclosed",
+          "text \" new messages\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"You have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \"< new messages\""
+        ],
+        "rules": ["unknown markup"]
+      }
+    },
+    "ph equiv-text | drag and drop (move) @ m..e..s": {
+      "loaded": {
+        "lines": [
+          "text \"You have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" new messages\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"messagesYou have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" new \""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"You have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" new messages\""
+        ],
+        "rules": []
+      }
+    },
+    "ph equiv-text | add all missing source tags": {
+      "loaded": {
+        "lines": [
+          "text \"You have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" new messages\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"You have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" new messages\"",
+          "chip \"{{count}}\" tag-ph.tag-selfclosed"
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"You have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" new messages\""
+        ],
+        "rules": []
+      }
+    },
+    "ph equiv-text | REPLACE_TRANSLATION": {
+      "loaded": {
+        "lines": [
+          "text \"You have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" new messages\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Nuova \"",
+          "chip \"1\" tag-open",
+          "text \"traduzione\"",
+          "chip \"1\" tag-close",
+          "mark nbsp \"°\"",
+          "text \"ok\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"You have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" new messages\""
+        ],
+        "rules": []
+      }
+    },
+    "ph equiv-text | lexiqa replace occurrence 0 of \"new\"": {
+      "loaded": {
+        "lines": [
+          "text \"You have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" \"",
+          "text \"new\" @lexiqa",
+          "text \" messages\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"You have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" fresh messages\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"You have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" new messages\""
+        ],
+        "rules": []
+      }
+    },
+    "ph equiv-text | type before the Lexiqa warnings @ s": {
+      "loaded": {
+        "lines": [
+          "text \"You have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" \"",
+          "text \"new\" @lexiqa",
+          "text \" messages\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"xYou have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" \"",
+          "text \"new\" @lexiqa",
+          "text \" messages\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"You have \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" \"",
+          "text \"new\" @lexiqa",
+          "text \" messages\""
+        ],
+        "rules": []
+      }
+    },
+    "pc, dataRef and compressed g (e2e ph) | type a character @ at": {
+      "loaded": {
+        "lines": [
+          "text \"Ciao\"",
+          "chip \"<br/>\" tag-ph.tag-selfclosed",
+          "text \"hai \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" nuovi messaggi da \"",
+          "chip \"<b>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1",
+          "text \"Anna \"",
+          "chip \"<i>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #2",
+          "text \"Rossi\"",
+          "chip \"2\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #2 NO-ELLIPSIS",
+          "chip \"1\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #1 NO-ELLIPSIS",
+          "text \" & \"",
+          "chip \"<a href=\\\"#\\\">\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #3",
+          "text \"Bob\"",
+          "chip \"3\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #3 NO-ELLIPSIS",
+          "text \" (\"",
+          "chip \"{{count}}\" tag-ph.tag-selfclosed",
+          "text \" < 5) \"",
+          "chip \"<span>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #4",
+          "text \"ok\"",
+          "chip \"4\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #4 NO-ELLIPSIS",
+          "mark wordJoiner \"\"",
+          "text \"!\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Ciao\"",
+          "chip \"<br/>\" tag-ph.tag-selfclosed",
+          "text \"xhai \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" nuovi messaggi da \"",
+          "chip \"<b>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1",
+          "text \"Anna \"",
+          "chip \"<i>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #2",
+          "text \"Rossi\"",
+          "chip \"2\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #2 NO-ELLIPSIS",
+          "chip \"1\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #1 NO-ELLIPSIS",
+          "text \" & \"",
+          "chip \"<a href=\\\"#\\\">\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #3",
+          "text \"Bob\"",
+          "chip \"3\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #3 NO-ELLIPSIS",
+          "text \" (\"",
+          "chip \"{{count}}\" tag-ph.tag-selfclosed",
+          "text \" < 5) \"",
+          "chip \"<span>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #4",
+          "text \"ok\"",
+          "chip \"4\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #4 NO-ELLIPSIS",
+          "mark wordJoiner \"\"",
+          "text \"!\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"Ciao\"",
+          "chip \"<br/>\" tag-ph.tag-selfclosed",
+          "text \"hai \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" nuovi messaggi da \"",
+          "chip \"<b>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1",
+          "text \"Anna \"",
+          "chip \"<i>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #2",
+          "text \"Rossi\"",
+          "chip \"2\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #2 NO-ELLIPSIS",
+          "chip \"1\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #1 NO-ELLIPSIS",
+          "text \" & \"",
+          "chip \"<a href=\\\"#\\\">\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #3",
+          "text \"Bob\"",
+          "chip \"3\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #3 NO-ELLIPSIS",
+          "text \" (\"",
+          "chip \"{{count}}\" tag-ph.tag-selfclosed",
+          "text \" < 5) \"",
+          "chip \"<span>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #4",
+          "text \"ok\"",
+          "chip \"4\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #4 NO-ELLIPSIS",
+          "mark wordJoiner \"\"",
+          "text \"!\""
+        ],
+        "rules": []
+      }
+    },
+    "pc, dataRef and compressed g (e2e ph) | backspace @ at": {
+      "loaded": {
+        "lines": [
+          "text \"Ciao\"",
+          "chip \"<br/>\" tag-ph.tag-selfclosed",
+          "text \"hai \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" nuovi messaggi da \"",
+          "chip \"<b>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1",
+          "text \"Anna \"",
+          "chip \"<i>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #2",
+          "text \"Rossi\"",
+          "chip \"2\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #2 NO-ELLIPSIS",
+          "chip \"1\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #1 NO-ELLIPSIS",
+          "text \" & \"",
+          "chip \"<a href=\\\"#\\\">\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #3",
+          "text \"Bob\"",
+          "chip \"3\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #3 NO-ELLIPSIS",
+          "text \" (\"",
+          "chip \"{{count}}\" tag-ph.tag-selfclosed",
+          "text \" < 5) \"",
+          "chip \"<span>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #4",
+          "text \"ok\"",
+          "chip \"4\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #4 NO-ELLIPSIS",
+          "mark wordJoiner \"\"",
+          "text \"!\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Ciaohai \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" nuovi messaggi da \"",
+          "chip \"<b>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1",
+          "text \"Anna \"",
+          "chip \"<i>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #2",
+          "text \"Rossi\"",
+          "chip \"2\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #2 NO-ELLIPSIS",
+          "chip \"1\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #1 NO-ELLIPSIS",
+          "text \" & \"",
+          "chip \"<a href=\\\"#\\\">\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #3",
+          "text \"Bob\"",
+          "chip \"3\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #3 NO-ELLIPSIS",
+          "text \" (\"",
+          "chip \"{{count}}\" tag-ph.tag-selfclosed",
+          "text \" < 5) \"",
+          "chip \"<span>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #4",
+          "text \"ok\"",
+          "chip \"4\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #4 NO-ELLIPSIS",
+          "mark wordJoiner \"\"",
+          "text \"!\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"Ciao\"",
+          "chip \"<br/>\" tag-ph.tag-selfclosed",
+          "text \"hai \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" nuovi messaggi da \"",
+          "chip \"<b>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1",
+          "text \"Anna \"",
+          "chip \"<i>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #2",
+          "text \"Rossi\"",
+          "chip \"2\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #2 NO-ELLIPSIS",
+          "chip \"1\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #1 NO-ELLIPSIS",
+          "text \" & \"",
+          "chip \"<a href=\\\"#\\\">\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #3",
+          "text \"Bob\"",
+          "chip \"3\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #3 NO-ELLIPSIS",
+          "text \" (\"",
+          "chip \"{{count}}\" tag-ph.tag-selfclosed",
+          "text \" < 5) \"",
+          "chip \"<span>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #4",
+          "text \"ok\"",
+          "chip \"4\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #4 NO-ELLIPSIS",
+          "mark wordJoiner \"\"",
+          "text \"!\""
+        ],
+        "rules": ["focused chip after an undo or a drop"]
+      }
+    },
+    "pc, dataRef and compressed g (e2e ph) | paste a segment slice with tags @ m": {
+      "loaded": {
+        "lines": [
+          "text \"Ciao\"",
+          "chip \"<br/>\" tag-ph.tag-selfclosed",
+          "text \"hai \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" nuovi messaggi da \"",
+          "chip \"<b>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1",
+          "text \"Anna \"",
+          "chip \"<i>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #2",
+          "text \"Rossi\"",
+          "chip \"2\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #2 NO-ELLIPSIS",
+          "chip \"1\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #1 NO-ELLIPSIS",
+          "text \" & \"",
+          "chip \"<a href=\\\"#\\\">\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #3",
+          "text \"Bob\"",
+          "chip \"3\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #3 NO-ELLIPSIS",
+          "text \" (\"",
+          "chip \"{{count}}\" tag-ph.tag-selfclosed",
+          "text \" < 5) \"",
+          "chip \"<span>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #4",
+          "text \"ok\"",
+          "chip \"4\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #4 NO-ELLIPSIS",
+          "mark wordJoiner \"\"",
+          "text \"!\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Ciao\"",
+          "chip \"<br/>\" tag-ph.tag-selfclosed",
+          "text \"hai \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \"X\"",
+          "chip \"1\" tag-open",
+          "text \"Y\"",
+          "chip \"1\" tag-close",
+          "text \"& nuovi messaggi da \"",
+          "chip \"<b>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1",
+          "text \"Anna \"",
+          "chip \"<i>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #2",
+          "text \"Rossi\"",
+          "chip \"2\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #2 NO-ELLIPSIS",
+          "chip \"1\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #1 NO-ELLIPSIS",
+          "text \" & \"",
+          "chip \"<a href=\\\"#\\\">\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #3",
+          "text \"Bob\"",
+          "chip \"3\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #3 NO-ELLIPSIS",
+          "text \" (\"",
+          "chip \"{{count}}\" tag-ph.tag-selfclosed",
+          "text \" < 5) \"",
+          "chip \"<span>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #4",
+          "text \"ok\"",
+          "chip \"4\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #4 NO-ELLIPSIS",
+          "mark wordJoiner \"\"",
+          "text \"!\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"Ciao\"",
+          "chip \"<br/>\" tag-ph.tag-selfclosed",
+          "text \"hai \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" nuovi messaggi da \"",
+          "chip \"<b>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1",
+          "text \"Anna \"",
+          "chip \"<i>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #2",
+          "text \"Rossi\"",
+          "chip \"2\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #2 NO-ELLIPSIS",
+          "chip \"1\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #1 NO-ELLIPSIS",
+          "text \" & \"",
+          "chip \"<a href=\\\"#\\\">\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #3",
+          "text \"Bob\"",
+          "chip \"3\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #3 NO-ELLIPSIS",
+          "text \" (\"",
+          "chip \"{{count}}\" tag-ph.tag-selfclosed",
+          "text \" < 5) \"",
+          "chip \"<span>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #4",
+          "text \"ok\"",
+          "chip \"4\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #4 NO-ELLIPSIS",
+          "mark wordJoiner \"\"",
+          "text \"!\""
+        ],
+        "rules": []
+      }
+    },
+    "pc, dataRef and compressed g (e2e ph) | tag menu: < then Enter (first entry) @ m": {
+      "loaded": {
+        "lines": [
+          "text \"Ciao\"",
+          "chip \"<br/>\" tag-ph.tag-selfclosed",
+          "text \"hai \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" nuovi messaggi da \"",
+          "chip \"<b>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1",
+          "text \"Anna \"",
+          "chip \"<i>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #2",
+          "text \"Rossi\"",
+          "chip \"2\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #2 NO-ELLIPSIS",
+          "chip \"1\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #1 NO-ELLIPSIS",
+          "text \" & \"",
+          "chip \"<a href=\\\"#\\\">\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #3",
+          "text \"Bob\"",
+          "chip \"3\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #3 NO-ELLIPSIS",
+          "text \" (\"",
+          "chip \"{{count}}\" tag-ph.tag-selfclosed",
+          "text \" < 5) \"",
+          "chip \"<span>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #4",
+          "text \"ok\"",
+          "chip \"4\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #4 NO-ELLIPSIS",
+          "mark wordJoiner \"\"",
+          "text \"!\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Ciao\"",
+          "chip \"<br/>\" tag-ph.tag-selfclosed",
+          "text \"hai \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "chip \"<br/>\" tag-ph.tag-selfclosed",
+          "text \" nuovi messaggi da \"",
+          "chip \"<b>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1",
+          "text \"Anna \"",
+          "chip \"<i>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #2",
+          "text \"Rossi\"",
+          "chip \"2\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #2 NO-ELLIPSIS",
+          "chip \"1\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #1 NO-ELLIPSIS",
+          "text \" & \"",
+          "chip \"<a href=\\\"#\\\">\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #3",
+          "text \"Bob\"",
+          "chip \"3\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #3 NO-ELLIPSIS",
+          "text \" (\"",
+          "chip \"{{count}}\" tag-ph.tag-selfclosed",
+          "text \" < 5) \"",
+          "chip \"<span>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #4",
+          "text \"ok\"",
+          "chip \"4\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #4 NO-ELLIPSIS",
+          "mark wordJoiner \"\"",
+          "text \"!\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"Ciao\"",
+          "chip \"<br/>\" tag-ph.tag-selfclosed",
+          "text \"hai \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \"< nuovi messaggi da \"",
+          "chip \"<b>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1",
+          "text \"Anna \"",
+          "chip \"<i>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #2",
+          "text \"Rossi\"",
+          "chip \"2\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #2 NO-ELLIPSIS",
+          "chip \"1\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #1 NO-ELLIPSIS",
+          "text \" & \"",
+          "chip \"<a href=\\\"#\\\">\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #3",
+          "text \"Bob\"",
+          "chip \"3\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #3 NO-ELLIPSIS",
+          "text \" (\"",
+          "chip \"{{count}}\" tag-ph.tag-selfclosed",
+          "text \" < 5) \"",
+          "chip \"<span>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #4",
+          "text \"ok\"",
+          "chip \"4\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #4 NO-ELLIPSIS",
+          "mark wordJoiner \"\"",
+          "text \"!\""
+        ],
+        "rules": ["unknown markup"]
+      }
+    },
+    "pc, dataRef and compressed g (e2e ph) | tag menu: < then Enter (first entry) @ at": {
+      "loaded": {
+        "lines": [
+          "text \"Ciao\"",
+          "chip \"<br/>\" tag-ph.tag-selfclosed",
+          "text \"hai \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" nuovi messaggi da \"",
+          "chip \"<b>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1",
+          "text \"Anna \"",
+          "chip \"<i>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #2",
+          "text \"Rossi\"",
+          "chip \"2\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #2 NO-ELLIPSIS",
+          "chip \"1\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #1 NO-ELLIPSIS",
+          "text \" & \"",
+          "chip \"<a href=\\\"#\\\">\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #3",
+          "text \"Bob\"",
+          "chip \"3\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #3 NO-ELLIPSIS",
+          "text \" (\"",
+          "chip \"{{count}}\" tag-ph.tag-selfclosed",
+          "text \" < 5) \"",
+          "chip \"<span>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #4",
+          "text \"ok\"",
+          "chip \"4\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #4 NO-ELLIPSIS",
+          "mark wordJoiner \"\"",
+          "text \"!\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Ciao\"",
+          "chip \"<br/>\" tag-ph.tag-selfclosed",
+          "chip \"<br/>\" tag-ph.tag-selfclosed",
+          "text \"hai \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" nuovi messaggi da \"",
+          "chip \"<b>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1",
+          "text \"Anna \"",
+          "chip \"<i>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #2",
+          "text \"Rossi\"",
+          "chip \"2\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #2 NO-ELLIPSIS",
+          "chip \"1\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #1 NO-ELLIPSIS",
+          "text \" & \"",
+          "chip \"<a href=\\\"#\\\">\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #3",
+          "text \"Bob\"",
+          "chip \"3\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #3 NO-ELLIPSIS",
+          "text \" (\"",
+          "chip \"{{count}}\" tag-ph.tag-selfclosed",
+          "text \" < 5) \"",
+          "chip \"<span>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #4",
+          "text \"ok\"",
+          "chip \"4\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #4 NO-ELLIPSIS",
+          "mark wordJoiner \"\"",
+          "text \"!\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"Ciao\"",
+          "chip \"<br/>\" tag-ph.tag-selfclosed",
+          "text \"<hai \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" nuovi messaggi da \"",
+          "chip \"<b>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1",
+          "text \"Anna \"",
+          "chip \"<i>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #2",
+          "text \"Rossi\"",
+          "chip \"2\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #2 NO-ELLIPSIS",
+          "chip \"1\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #1 NO-ELLIPSIS",
+          "text \" & \"",
+          "chip \"<a href=\\\"#\\\">\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #3",
+          "text \"Bob\"",
+          "chip \"3\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #3 NO-ELLIPSIS",
+          "text \" (\"",
+          "chip \"{{count}}\" tag-ph.tag-selfclosed",
+          "text \" < 5) \"",
+          "chip \"<span>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #4",
+          "text \"ok\"",
+          "chip \"4\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #4 NO-ELLIPSIS",
+          "mark wordJoiner \"\"",
+          "text \"!\""
+        ],
+        "rules": ["unknown markup"]
+      }
+    },
+    "pc, dataRef and compressed g (e2e ph) | REPLACE_TRANSLATION": {
+      "loaded": {
+        "lines": [
+          "text \"Ciao\"",
+          "chip \"<br/>\" tag-ph.tag-selfclosed",
+          "text \"hai \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" nuovi messaggi da \"",
+          "chip \"<b>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1",
+          "text \"Anna \"",
+          "chip \"<i>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #2",
+          "text \"Rossi\"",
+          "chip \"2\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #2 NO-ELLIPSIS",
+          "chip \"1\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #1 NO-ELLIPSIS",
+          "text \" & \"",
+          "chip \"<a href=\\\"#\\\">\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #3",
+          "text \"Bob\"",
+          "chip \"3\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #3 NO-ELLIPSIS",
+          "text \" (\"",
+          "chip \"{{count}}\" tag-ph.tag-selfclosed",
+          "text \" < 5) \"",
+          "chip \"<span>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #4",
+          "text \"ok\"",
+          "chip \"4\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #4 NO-ELLIPSIS",
+          "mark wordJoiner \"\"",
+          "text \"!\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Nuova \"",
+          "chip \"1\" tag-open",
+          "text \"traduzione\"",
+          "chip \"1\" tag-close",
+          "mark nbsp \"°\"",
+          "text \"ok\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"Ciao\"",
+          "chip \"<br/>\" tag-ph.tag-selfclosed",
+          "text \"hai \"",
+          "chip \"%s\" tag-ph.tag-selfclosed",
+          "text \" nuovi messaggi da \"",
+          "chip \"<b>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #1",
+          "text \"Anna \"",
+          "chip \"<i>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #2",
+          "text \"Rossi\"",
+          "chip \"2\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #2 NO-ELLIPSIS",
+          "chip \"1\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #1 NO-ELLIPSIS",
+          "text \" & \"",
+          "chip \"<a href=\\\"#\\\">\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #3",
+          "text \"Bob\"",
+          "chip \"3\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #3 NO-ELLIPSIS",
+          "text \" (\"",
+          "chip \"{{count}}\" tag-ph.tag-selfclosed",
+          "text \" < 5) \"",
+          "chip \"<span>\" tag-numbered.tag-paired-open.tag-ph.tag-selfclosed #4",
+          "text \"ok\"",
+          "chip \"4\" tag-numbered.tag-paired-close.tag-ph.tag-selfclosed #4 NO-ELLIPSIS",
+          "mark wordJoiner \"\"",
+          "text \"!\""
+        ],
+        "rules": []
+      }
+    },
+    "nbsp tab line feed | type a character @ bt": {
+      "loaded": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\"",
+          "mark tab \"⇥\"",
+          "text \"three\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line two\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"onex\"",
+          "mark nbsp \"°\"",
+          "text \"two\"",
+          "mark tab \"⇥\"",
+          "text \"three\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line two\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\"",
+          "mark tab \"⇥\"",
+          "text \"three\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line two\""
+        ],
+        "rules": []
+      }
+    },
+    "nbsp tab line feed | type a character @ at": {
+      "loaded": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\"",
+          "mark tab \"⇥\"",
+          "text \"three\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line two\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\"",
+          "mark tab \"⇥\"",
+          "text \"xthree\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line two\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\"",
+          "mark tab \"⇥\"",
+          "text \"three\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line two\""
+        ],
+        "rules": []
+      }
+    },
+    "nbsp tab line feed | backspace @ at": {
+      "loaded": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\"",
+          "mark tab \"⇥\"",
+          "text \"three\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line two\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"twothree\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line two\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\"",
+          "mark tab \"⇥\"",
+          "text \"three\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line two\""
+        ],
+        "rules": []
+      }
+    },
+    "nbsp tab line feed | delete @ bt": {
+      "loaded": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\"",
+          "mark tab \"⇥\"",
+          "text \"three\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line two\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"onetwo\"",
+          "mark tab \"⇥\"",
+          "text \"three\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line two\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\"",
+          "mark tab \"⇥\"",
+          "text \"three\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line two\""
+        ],
+        "rules": []
+      }
+    },
+    "nbsp tab line feed | paste a segment slice with tags @ bt": {
+      "loaded": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\"",
+          "mark tab \"⇥\"",
+          "text \"three\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line two\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"oneX\"",
+          "chip \"1\" tag-open",
+          "text \"Y\"",
+          "chip \"1\" tag-close",
+          "text \"&\"",
+          "mark nbsp \"°\"",
+          "text \"two\"",
+          "mark tab \"⇥\"",
+          "text \"three\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line two\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\"",
+          "mark tab \"⇥\"",
+          "text \"three\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line two\""
+        ],
+        "rules": []
+      }
+    },
+    "nbsp tab line feed | paste a segment slice with tags @ m": {
+      "loaded": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\"",
+          "mark tab \"⇥\"",
+          "text \"three\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line two\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\"",
+          "mark tab \"⇥\"",
+          "text \"three\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line X\"",
+          "chip \"1\" tag-open",
+          "text \"Y\"",
+          "chip \"1\" tag-close",
+          "text \"&two\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\"",
+          "mark tab \"⇥\"",
+          "text \"three\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line two\""
+        ],
+        "rules": []
+      }
+    },
+    "nbsp tab line feed | tag menu: < then Enter (first entry) @ m": {
+      "loaded": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\"",
+          "mark tab \"⇥\"",
+          "text \"three\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line two\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\"",
+          "mark tab \"⇥\"",
+          "text \"three\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line <two\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\"",
+          "mark tab \"⇥\"",
+          "text \"three\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line two\""
+        ],
+        "rules": []
+      }
+    },
+    "nbsp tab line feed | tag menu: < then Enter (first entry) @ at": {
+      "loaded": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\"",
+          "mark tab \"⇥\"",
+          "text \"three\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line two\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\"",
+          "mark tab \"⇥\"",
+          "text \"<three\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line two\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\"",
+          "mark tab \"⇥\"",
+          "text \"three\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line two\""
+        ],
+        "rules": []
+      }
+    },
+    "nbsp tab line feed | drag and drop (move) @ l2..m..an": {
+      "loaded": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\"",
+          "mark tab \"⇥\"",
+          "text \"three\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line two\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"line two\"",
+          "mark tab \"⇥\"",
+          "text \"three\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"two\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\"",
+          "mark tab \"⇥\"",
+          "text \"three\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line two\""
+        ],
+        "rules": []
+      }
+    },
+    "nbsp tab line feed | REPLACE_TRANSLATION": {
+      "loaded": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\"",
+          "mark tab \"⇥\"",
+          "text \"three\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line two\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Nuova \"",
+          "chip \"1\" tag-open",
+          "text \"traduzione\"",
+          "chip \"1\" tag-close",
+          "mark nbsp \"°\"",
+          "text \"ok\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\"",
+          "mark tab \"⇥\"",
+          "text \"three\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line two\""
+        ],
+        "rules": []
+      }
+    },
+    "nbsp tab line feed | lexiqa replace occurrence 0 of \"two\"": {
+      "loaded": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\" @lexiqa",
+          "mark tab \"⇥\"",
+          "text \"three\" @lexiqa",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line \"",
+          "text \"two\" @lexiqa"
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"deux\"",
+          "mark tab \"⇥\"",
+          "text \"three\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line two\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\"",
+          "mark tab \"⇥\"",
+          "text \"three\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line two\""
+        ],
+        "rules": []
+      }
+    },
+    "nbsp tab line feed | lexiqa replace occurrence 1 of \"two\"": {
+      "loaded": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\" @lexiqa",
+          "mark tab \"⇥\"",
+          "text \"three\" @lexiqa",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line \"",
+          "text \"two\" @lexiqa"
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\"",
+          "mark tab \"⇥\"",
+          "text \"three\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line zwei\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\"",
+          "mark tab \"⇥\"",
+          "text \"three\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line two\""
+        ],
+        "rules": []
+      }
+    },
+    "nbsp tab line feed | lexiqa replace occurrence 0 of \"three\"": {
+      "loaded": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\" @lexiqa",
+          "mark tab \"⇥\"",
+          "text \"three\" @lexiqa",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line \"",
+          "text \"two\" @lexiqa"
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\"",
+          "mark tab \"⇥\"",
+          "text \"3\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line two\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\"",
+          "mark tab \"⇥\"",
+          "text \"three\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line two\""
+        ],
+        "rules": []
+      }
+    },
+    "nbsp tab line feed | type before the Lexiqa warnings @ s": {
+      "loaded": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\" @lexiqa",
+          "mark tab \"⇥\"",
+          "text \"three\" @lexiqa",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line \"",
+          "text \"two\" @lexiqa"
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"xone\"",
+          "mark nbsp \"°\"",
+          "text \"two\" @lexiqa",
+          "mark tab \"⇥\"",
+          "text \"three\" @lexiqa",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line \"",
+          "text \"two\" @lexiqa"
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"one\"",
+          "mark nbsp \"°\"",
+          "text \"two\" @lexiqa",
+          "mark tab \"⇥\"",
+          "text \"three\" @lexiqa",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line \"",
+          "text \"two\" @lexiqa"
+        ],
+        "rules": []
+      }
+    },
+    "entities | paste a segment slice with tags @ m": {
+      "loaded": {
+        "lines": ["text \"R&D <b> 5 > 3\""],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"R&D X\"",
+          "chip \"1\" tag-open",
+          "text \"Y\"",
+          "chip \"1\" tag-close",
+          "text \"&<b> 5 > 3\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": ["text \"R&D <b> 5 > 3\""],
+        "rules": []
+      }
+    },
+    "entities | tag menu: < then Enter (first entry) @ m": {
+      "loaded": {
+        "lines": ["text \"R&D <b> 5 > 3\""],
+        "rules": []
+      },
+      "edited": {
+        "lines": ["text \"R&D <<b> 5 > 3\""],
+        "rules": []
+      },
+      "undone": {
+        "lines": ["text \"R&D <b> 5 > 3\""],
+        "rules": []
+      }
+    },
+    "entities | drag and drop (move) @ s..m..e": {
+      "loaded": {
+        "lines": ["text \"R&D <b> 5 > 3\""],
+        "rules": []
+      },
+      "edited": {
+        "lines": ["text \"<b> 5 > 3R&D \""],
+        "rules": []
+      },
+      "undone": {
+        "lines": ["text \"R&D <b> 5 > 3\""],
+        "rules": []
+      }
+    },
+    "entities | REPLACE_TRANSLATION": {
+      "loaded": {
+        "lines": ["text \"R&D <b> 5 > 3\""],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Nuova \"",
+          "chip \"1\" tag-open",
+          "text \"traduzione\"",
+          "chip \"1\" tag-close",
+          "mark nbsp \"°\"",
+          "text \"ok\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": ["text \"R&D <b> 5 > 3\""],
+        "rules": []
+      }
+    },
+    "entities | lexiqa replace occurrence 0 of \"5\"": {
+      "loaded": {
+        "lines": ["text \"R&D <b> \"", "text \"5\" @lexiqa", "text \" > 3\""],
+        "rules": []
+      },
+      "edited": {
+        "lines": ["text \"R&D <b> five > 3\""],
+        "rules": []
+      },
+      "undone": {
+        "lines": ["text \"R&D <b> 5 > 3\""],
+        "rules": []
+      }
+    },
+    "entities | type before the Lexiqa warnings @ s": {
+      "loaded": {
+        "lines": ["text \"R&D <b> \"", "text \"5\" @lexiqa", "text \" > 3\""],
+        "rules": []
+      },
+      "edited": {
+        "lines": ["text \"xR&D <b> \"", "text \"5\" @lexiqa", "text \" > 3\""],
+        "rules": []
+      },
+      "undone": {
+        "lines": ["text \"R&D <b> \"", "text \"5\" @lexiqa", "text \" > 3\""],
+        "rules": []
+      }
+    },
+    "rtl | type a character @ bt": {
+      "loaded": {
+        "lines": [
+          "text \"שלום \"",
+          "chip \"1\" tag-close",
+          "text \"עולם\"",
+          "chip \"1\" tag-open",
+          "text \" טוב\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"שלום x\"",
+          "chip \"1\" tag-close",
+          "text \"עולם\"",
+          "chip \"1\" tag-open",
+          "text \" טוב\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"שלום \"",
+          "chip \"1\" tag-close",
+          "text \"עולם\"",
+          "chip \"1\" tag-open",
+          "text \" טוב\""
+        ],
+        "rules": []
+      }
+    },
+    "rtl | type a character @ at": {
+      "loaded": {
+        "lines": [
+          "text \"שלום \"",
+          "chip \"1\" tag-close",
+          "text \"עולם\"",
+          "chip \"1\" tag-open",
+          "text \" טוב\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"שלום \"",
+          "chip \"1\" tag-close",
+          "text \"עולם\"",
+          "chip \"1\" tag-open",
+          "text \"x טוב\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"שלום \"",
+          "chip \"1\" tag-close",
+          "text \"עולם\"",
+          "chip \"1\" tag-open",
+          "text \" טוב\""
+        ],
+        "rules": []
+      }
+    },
+    "rtl | backspace @ at": {
+      "loaded": {
+        "lines": [
+          "text \"שלום \"",
+          "chip \"1\" tag-close",
+          "text \"עולם\"",
+          "chip \"1\" tag-open",
+          "text \" טוב\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"שלום \"",
+          "chip \"1\" tag-close",
+          "text \"עולם טוב\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"שלום \"",
+          "chip \"1\" tag-close",
+          "text \"עולם\"",
+          "chip \"1\" tag-open",
+          "text \" טוב\""
+        ],
+        "rules": ["focused chip after an undo or a drop"]
+      }
+    },
+    "rtl | delete @ bt": {
+      "loaded": {
+        "lines": [
+          "text \"שלום \"",
+          "chip \"1\" tag-close",
+          "text \"עולם\"",
+          "chip \"1\" tag-open",
+          "text \" טוב\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": ["text \"שלום עולם\"", "chip \"?\" tag-open", "text \" טוב\""],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"שלום \"",
+          "chip \"1\" tag-close",
+          "text \"עולם\"",
+          "chip \"1\" tag-open",
+          "text \" טוב\""
+        ],
+        "rules": ["focused chip after an undo or a drop"]
+      }
+    },
+    "rtl | paste a segment slice with tags @ bt": {
+      "loaded": {
+        "lines": [
+          "text \"שלום \"",
+          "chip \"1\" tag-close",
+          "text \"עולם\"",
+          "chip \"1\" tag-open",
+          "text \" טוב\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"שלום X\"",
+          "chip \"1\" tag-close",
+          "text \"Y\"",
+          "chip \"1\" tag-open",
+          "text \"&\"",
+          "chip \"1\" tag-close",
+          "text \"עולם\"",
+          "chip \"1\" tag-open",
+          "text \" טוב\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"שלום \"",
+          "chip \"1\" tag-close",
+          "text \"עולם\"",
+          "chip \"1\" tag-open",
+          "text \" טוב\""
+        ],
+        "rules": []
+      }
+    },
+    "rtl | tag menu: < then Enter (first entry) @ at": {
+      "loaded": {
+        "lines": [
+          "text \"שלום \"",
+          "chip \"1\" tag-close",
+          "text \"עולם\"",
+          "chip \"1\" tag-open",
+          "text \" טוב\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"שלום \"",
+          "chip \"1\" tag-close",
+          "text \"עולם\"",
+          "chip \"1\" tag-open",
+          "chip \"1\" tag-close",
+          "text \" טוב\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"שלום \"",
+          "chip \"1\" tag-close",
+          "text \"עולם\"",
+          "chip \"1\" tag-open",
+          "text \"< טוב\""
+        ],
+        "rules": ["unknown markup"]
+      }
+    },
+    "rtl | REPLACE_TRANSLATION": {
+      "loaded": {
+        "lines": [
+          "text \"שלום \"",
+          "chip \"1\" tag-close",
+          "text \"עולם\"",
+          "chip \"1\" tag-open",
+          "text \" טוב\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Nuova \"",
+          "chip \"1\" tag-close",
+          "text \"traduzione\"",
+          "chip \"1\" tag-open",
+          "mark nbsp \"°\"",
+          "text \"ok\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"שלום \"",
+          "chip \"1\" tag-close",
+          "text \"עולם\"",
+          "chip \"1\" tag-open",
+          "text \" טוב\""
+        ],
+        "rules": []
+      }
+    },
+    "rtl | lexiqa replace occurrence 0 of \"טוב\"": {
+      "loaded": {
+        "lines": [
+          "text \"שלום \"",
+          "chip \"1\" tag-close",
+          "text \"עולם\"",
+          "chip \"1\" tag-open",
+          "text \" \"",
+          "text \"טוב\" @lexiqa"
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"שלום \"",
+          "chip \"1\" tag-close",
+          "text \"עולם\"",
+          "chip \"1\" tag-open",
+          "text \" רע\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"שלום \"",
+          "chip \"1\" tag-close",
+          "text \"עולם\"",
+          "chip \"1\" tag-open",
+          "text \" טוב\""
+        ],
+        "rules": []
+      }
+    },
+    "rtl | type before the Lexiqa warnings @ s": {
+      "loaded": {
+        "lines": [
+          "text \"שלום \"",
+          "chip \"1\" tag-close",
+          "text \"עולם\"",
+          "chip \"1\" tag-open",
+          "text \" \"",
+          "text \"טוב\" @lexiqa"
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"xשלום \"",
+          "chip \"1\" tag-close",
+          "text \"עולם\"",
+          "chip \"1\" tag-open",
+          "text \" \"",
+          "text \"טוב\" @lexiqa"
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"שלום \"",
+          "chip \"1\" tag-close",
+          "text \"עולם\"",
+          "chip \"1\" tag-open",
+          "text \" \"",
+          "text \"טוב\" @lexiqa"
+        ],
+        "rules": []
+      }
+    },
+    "cjk emoji | type a character @ bt": {
+      "loaded": {
+        "lines": [
+          "text \"你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"世界 😀 ok\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"你好x\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"世界 😀 ok\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"世界 😀 ok\""
+        ],
+        "rules": []
+      }
+    },
+    "cjk emoji | type a character @ at": {
+      "loaded": {
+        "lines": [
+          "text \"你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"世界 😀 ok\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"x世界 😀 ok\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"世界 😀 ok\""
+        ],
+        "rules": []
+      }
+    },
+    "cjk emoji | backspace @ at": {
+      "loaded": {
+        "lines": [
+          "text \"你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"世界 😀 ok\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": ["text \"你好世界 😀 ok\""],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"世界 😀 ok\""
+        ],
+        "rules": ["focused chip after an undo or a drop"]
+      }
+    },
+    "cjk emoji | delete @ bt": {
+      "loaded": {
+        "lines": [
+          "text \"你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"世界 😀 ok\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": ["text \"你好世界 😀 ok\""],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"世界 😀 ok\""
+        ],
+        "rules": ["focused chip after an undo or a drop"]
+      }
+    },
+    "cjk emoji | paste a segment slice with tags @ bt": {
+      "loaded": {
+        "lines": [
+          "text \"你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"世界 😀 ok\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"你好X\"",
+          "chip \"1\" tag-open",
+          "text \"Y\"",
+          "chip \"1\" tag-close",
+          "text \"&\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"世界 😀 ok\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"世界 😀 ok\""
+        ],
+        "rules": []
+      }
+    },
+    "cjk emoji | paste a segment slice with tags @ m": {
+      "loaded": {
+        "lines": [
+          "text \"你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"世界 😀 ok\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"世界 😀X\"",
+          "chip \"1\" tag-open",
+          "text \"Y\"",
+          "chip \"1\" tag-close",
+          "text \"& ok\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"世界 😀 ok\""
+        ],
+        "rules": []
+      }
+    },
+    "cjk emoji | tag menu: < then Enter (first entry) @ m": {
+      "loaded": {
+        "lines": [
+          "text \"你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"世界 😀 ok\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"世界 😀\"",
+          "chip \"1\" tag-selfclosed",
+          "text \" ok\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"世界 😀< ok\""
+        ],
+        "rules": ["unknown markup"]
+      }
+    },
+    "cjk emoji | tag menu: < then Enter (first entry) @ at": {
+      "loaded": {
+        "lines": [
+          "text \"你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"世界 😀 ok\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"你好\"",
+          "chip \"1\" tag-selfclosed",
+          "chip \"1\" tag-selfclosed",
+          "text \"世界 😀 ok\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"<世界 😀 ok\""
+        ],
+        "rules": ["unknown markup"]
+      }
+    },
+    "cjk emoji | drag and drop (move) @ at..m..s": {
+      "loaded": {
+        "lines": [
+          "text \"你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"世界 😀 ok\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"世界 😀你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \" ok\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"世界 😀 ok\""
+        ],
+        "rules": []
+      }
+    },
+    "cjk emoji | REPLACE_TRANSLATION": {
+      "loaded": {
+        "lines": [
+          "text \"你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"世界 😀 ok\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Nuova \"",
+          "chip \"1\" tag-open",
+          "text \"traduzione\"",
+          "chip \"1\" tag-close",
+          "mark nbsp \"°\"",
+          "text \"ok\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"世界 😀 ok\""
+        ],
+        "rules": []
+      }
+    },
+    "cjk emoji | lexiqa replace occurrence 0 of \"世界\"": {
+      "loaded": {
+        "lines": [
+          "text \"你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"世界\" @lexiqa",
+          "text \" 😀 \"",
+          "text \"ok\" @lexiqa"
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"地球 😀 ok\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"世界 😀 ok\""
+        ],
+        "rules": []
+      }
+    },
+    "cjk emoji | lexiqa replace occurrence 0 of \"ok\"": {
+      "loaded": {
+        "lines": [
+          "text \"你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"世界\" @lexiqa",
+          "text \" 😀 \"",
+          "text \"ok\" @lexiqa"
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"世界 😀 okay\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"世界 😀 ok\""
+        ],
+        "rules": []
+      }
+    },
+    "cjk emoji | type before the Lexiqa warnings @ s": {
+      "loaded": {
+        "lines": [
+          "text \"你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"世界\" @lexiqa",
+          "text \" 😀 \"",
+          "text \"ok\" @lexiqa"
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"x你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"世界\" @lexiqa",
+          "text \" 😀 \"",
+          "text \"ok\" @lexiqa"
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"你好\"",
+          "chip \"1\" tag-selfclosed",
+          "text \"世界\" @lexiqa",
+          "text \" 😀 \"",
+          "text \"ok\" @lexiqa"
+        ],
+        "rules": []
+      }
+    },
+    "multi-line g | type a character @ at": {
+      "loaded": {
+        "lines": [
+          "text \"line one\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line \"",
+          "chip \"1\" tag-open",
+          "text \"two\"",
+          "chip \"1\" tag-close",
+          "text \" end\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"line one\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line \"",
+          "chip \"1\" tag-open",
+          "text \"two\"",
+          "chip \"1\" tag-close",
+          "text \"x end\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"line one\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line \"",
+          "chip \"1\" tag-open",
+          "text \"two\"",
+          "chip \"1\" tag-close",
+          "text \" end\""
+        ],
+        "rules": []
+      }
+    },
+    "multi-line g | backspace @ at": {
+      "loaded": {
+        "lines": [
+          "text \"line one\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line \"",
+          "chip \"1\" tag-open",
+          "text \"two\"",
+          "chip \"1\" tag-close",
+          "text \" end\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"line one\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line \"",
+          "chip \"1\" tag-open",
+          "text \"two end\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"line one\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line \"",
+          "chip \"1\" tag-open",
+          "text \"two\"",
+          "chip \"1\" tag-close",
+          "text \" end\""
+        ],
+        "rules": ["focused chip after an undo or a drop"]
+      }
+    },
+    "multi-line g | tag menu: < then Enter (first entry) @ at": {
+      "loaded": {
+        "lines": [
+          "text \"line one\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line \"",
+          "chip \"1\" tag-open",
+          "text \"two\"",
+          "chip \"1\" tag-close",
+          "text \" end\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"line one\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line \"",
+          "chip \"1\" tag-open",
+          "text \"two\"",
+          "chip \"1\" tag-close",
+          "chip \"1\" tag-open",
+          "text \" end\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"line one\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line \"",
+          "chip \"1\" tag-open",
+          "text \"two\"",
+          "chip \"1\" tag-close",
+          "text \"< end\""
+        ],
+        "rules": ["unknown markup"]
+      }
+    },
+    "multi-line g | drag and drop (move) @ gi..at..s": {
+      "loaded": {
+        "lines": [
+          "text \"line one\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line \"",
+          "chip \"1\" tag-open",
+          "text \"two\"",
+          "chip \"1\" tag-close",
+          "text \" end\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"two\"",
+          "chip \"?\" tag-close",
+          "text \"line one\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line \"",
+          "chip \"1\" tag-open",
+          "text \" end\""
+        ],
+        "rules": ["focused chip after an undo or a drop"]
+      },
+      "undone": {
+        "lines": [
+          "text \"line one\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line \"",
+          "chip \"1\" tag-open",
+          "text \"two\"",
+          "chip \"1\" tag-close",
+          "text \" end\""
+        ],
+        "rules": ["focused chip after an undo or a drop"]
+      }
+    },
+    "multi-line g | REPLACE_TRANSLATION": {
+      "loaded": {
+        "lines": [
+          "text \"line one\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line \"",
+          "chip \"1\" tag-open",
+          "text \"two\"",
+          "chip \"1\" tag-close",
+          "text \" end\""
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"Nuova \"",
+          "chip \"1\" tag-open",
+          "text \"traduzione\"",
+          "chip \"1\" tag-close",
+          "mark nbsp \"°\"",
+          "text \"ok\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"line one\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line \"",
+          "chip \"1\" tag-open",
+          "text \"two\"",
+          "chip \"1\" tag-close",
+          "text \" end\""
+        ],
+        "rules": []
+      }
+    },
+    "multi-line g | lexiqa replace occurrence 0 of \"one\"": {
+      "loaded": {
+        "lines": [
+          "text \"line \"",
+          "text \"one\" @lexiqa",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line\" @lexiqa",
+          "text \" \"",
+          "chip \"1\" tag-open",
+          "text \"two\" @lexiqa",
+          "chip \"1\" tag-close",
+          "text \" \"",
+          "text \"end\" @lexiqa"
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"line uno\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line \"",
+          "chip \"1\" tag-open",
+          "text \"two\"",
+          "chip \"1\" tag-close",
+          "text \" end\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"line one\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line \"",
+          "chip \"1\" tag-open",
+          "text \"two\"",
+          "chip \"1\" tag-close",
+          "text \" end\""
+        ],
+        "rules": []
+      }
+    },
+    "multi-line g | lexiqa replace occurrence 1 of \"line\"": {
+      "loaded": {
+        "lines": [
+          "text \"line \"",
+          "text \"one\" @lexiqa",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line\" @lexiqa",
+          "text \" \"",
+          "chip \"1\" tag-open",
+          "text \"two\" @lexiqa",
+          "chip \"1\" tag-close",
+          "text \" \"",
+          "text \"end\" @lexiqa"
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"line one\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"row \"",
+          "chip \"1\" tag-open",
+          "text \"two\"",
+          "chip \"1\" tag-close",
+          "text \" end\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"line one\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line \"",
+          "chip \"1\" tag-open",
+          "text \"two\"",
+          "chip \"1\" tag-close",
+          "text \" end\""
+        ],
+        "rules": []
+      }
+    },
+    "multi-line g | lexiqa replace occurrence 0 of \"two\"": {
+      "loaded": {
+        "lines": [
+          "text \"line \"",
+          "text \"one\" @lexiqa",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line\" @lexiqa",
+          "text \" \"",
+          "chip \"1\" tag-open",
+          "text \"two\" @lexiqa",
+          "chip \"1\" tag-close",
+          "text \" \"",
+          "text \"end\" @lexiqa"
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"line one\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line \"",
+          "chip \"1\" tag-open",
+          "text \"three\"",
+          "chip \"1\" tag-close",
+          "text \" end\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"line one\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line \"",
+          "chip \"1\" tag-open",
+          "text \"two\"",
+          "chip \"1\" tag-close",
+          "text \" end\""
+        ],
+        "rules": []
+      }
+    },
+    "multi-line g | lexiqa replace occurrence 0 of \"end\"": {
+      "loaded": {
+        "lines": [
+          "text \"line \"",
+          "text \"one\" @lexiqa",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line\" @lexiqa",
+          "text \" \"",
+          "chip \"1\" tag-open",
+          "text \"two\" @lexiqa",
+          "chip \"1\" tag-close",
+          "text \" \"",
+          "text \"end\" @lexiqa"
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"line one\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line \"",
+          "chip \"1\" tag-open",
+          "text \"two\"",
+          "chip \"1\" tag-close",
+          "text \" fin\""
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"line one\"",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line \"",
+          "chip \"1\" tag-open",
+          "text \"two\"",
+          "chip \"1\" tag-close",
+          "text \" end\""
+        ],
+        "rules": []
+      }
+    },
+    "multi-line g | type before the Lexiqa warnings @ s": {
+      "loaded": {
+        "lines": [
+          "text \"line \"",
+          "text \"one\" @lexiqa",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line\" @lexiqa",
+          "text \" \"",
+          "chip \"1\" tag-open",
+          "text \"two\" @lexiqa",
+          "chip \"1\" tag-close",
+          "text \" \"",
+          "text \"end\" @lexiqa"
+        ],
+        "rules": []
+      },
+      "edited": {
+        "lines": [
+          "text \"xline \"",
+          "text \"one\" @lexiqa",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line\" @lexiqa",
+          "text \" \"",
+          "chip \"1\" tag-open",
+          "text \"two\" @lexiqa",
+          "chip \"1\" tag-close",
+          "text \" \"",
+          "text \"end\" @lexiqa"
+        ],
+        "rules": []
+      },
+      "undone": {
+        "lines": [
+          "text \"line \"",
+          "text \"one\" @lexiqa",
+          "mark lineBreak \"↵\"",
+          "break",
+          "text \"line\" @lexiqa",
+          "text \" \"",
+          "chip \"1\" tag-open",
+          "text \"two\" @lexiqa",
+          "chip \"1\" tag-close",
+          "text \" \"",
+          "text \"end\" @lexiqa"
+        ],
+        "rules": []
+      }
+    }
+  }
+}

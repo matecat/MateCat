@@ -46,7 +46,7 @@ jest.mock('../common/DropdownMenu/DropdownMenu', () => ({
   DROPDOWN_SEPARATOR: 'separator',
 }))
 
-jest.mock('./utils/DraftMatecatUtils/compressibleTagUtils', () => ({
+jest.mock('../../utils/segmentText/compressibleTagUtils', () => ({
   hasCompressibleTags: () => mockHasCompressiblePhTags,
 }))
 

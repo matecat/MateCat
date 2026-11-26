@@ -1,7 +1,7 @@
 import React, {useContext, useState} from 'react'
 import Switch from '../../../common/Switch'
 import SegmentActions from '../../../../actions/SegmentActions'
-import {setTagSignatureMiddleware} from '../../../segments/utils/DraftMatecatUtils/tagModel'
+import {setTagSignatureMiddleware} from '../../../../utils/segmentText/tagModel'
 import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper/ApplicationWrapperContext'
 
 const METADATA_KEY = 'show_whitespace'

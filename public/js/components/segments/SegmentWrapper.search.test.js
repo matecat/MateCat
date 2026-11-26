@@ -5,10 +5,9 @@ import SegmentWrapper from './SegmentWrapper'
 import {SegmentContext} from './SegmentContext'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import SearchUtils from '../header/cattol/search/searchUtils'
-import {setTagSignatureMiddleware} from './utils/DraftMatecatUtils/tagModel'
+import {setTagSignatureMiddleware} from '../../utils/segmentText/tagModel'
 
 // Closed segments only: the editors are never rendered here.
-jest.mock('./SegmentSource', () => () => null)
 jest.mock('./SegmentTarget', () => () => null)
 jest.mock('../../actions/CatToolActions')
 jest.mock('../../actions/ModalsActions')

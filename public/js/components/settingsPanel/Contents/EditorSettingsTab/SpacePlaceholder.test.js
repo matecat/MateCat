@@ -4,13 +4,13 @@ import userEvent from '@testing-library/user-event'
 import {SpacePlaceholder} from './SpacePlaceholder'
 import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper/ApplicationWrapperContext'
 import SegmentActions from '../../../../actions/SegmentActions'
-import {setTagSignatureMiddleware} from '../../../segments/utils/DraftMatecatUtils/tagModel'
+import {setTagSignatureMiddleware} from '../../../../utils/segmentText/tagModel'
 
 jest.mock('../../../../actions/SegmentActions', () => ({
   refreshTagMap: jest.fn(),
 }))
 
-jest.mock('../../../segments/utils/DraftMatecatUtils/tagModel', () => ({
+jest.mock('../../../../utils/segmentText/tagModel', () => ({
   setTagSignatureMiddleware: jest.fn(),
 }))
 

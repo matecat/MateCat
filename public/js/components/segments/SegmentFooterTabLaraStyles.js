@@ -5,7 +5,7 @@ import SegmentConstants from '../../constants/SegmentConstants'
 import {
   decodePlaceholdersToPlainText,
   encodePlaceholdersToTags,
-} from './utils/DraftMatecatUtils/tagUtils'
+} from '../../utils/segmentText/tagUtils'
 import CatToolStore from '../../stores/CatToolStore'
 import {laraTranslate} from '../../api/laraTranslate'
 import {laraAuthJob} from '../../api/laraAuth'

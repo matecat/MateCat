@@ -56,7 +56,7 @@ import {
 } from './segmentDispatchActions'
 import CatToolActions from './CatToolActions'
 import OfflineUtils from '../utils/offlineUtils'
-import SegmentStringUtils from '../components/segments/utils/DraftMatecatUtils/segmentStringUtils'
+import SegmentStringUtils from '../utils/segmentText/segmentStringUtils'
 import SegmentUtils from '../utils/segmentUtils'
 import {getTranslationMismatches as getTranslationMismatchesApi} from '../api/getTranslationMismatches'
 import TextUtils from '../utils/textUtils'
@@ -1695,13 +1695,12 @@ const SegmentActions = {
       isTarget,
     })
   },
-  highlightTags: function (tagId, tagPlaceholder, entityKey, isTarget) {
+  highlightTags: function (tagId, tagPlaceholder, chipKey) {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.HIGHLIGHT_TAGS,
       tagId,
       tagPlaceholder,
-      entityKey,
-      isTarget,
+      chipKey,
     })
   },
   hideAiAssistant: () => {
@@ -1771,12 +1770,6 @@ const SegmentActions = {
       actionType: SegmentConstants.OPEN_GLOSSARY_FORM_PREFILL,
       sid,
       ...filledFields,
-    })
-  },
-  focusTags: function (tagsSelected) {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.FOCUS_TAGS,
-      tagsSelected,
     })
   },
   setCurrentSegment: function (id_segment) {

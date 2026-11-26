@@ -14,7 +14,7 @@ jest.mock('./AppDispatcher', () => ({
   default: {register: jest.fn(), dispatch: jest.fn()},
 }))
 
-jest.mock('../components/segments/utils/DraftMatecatUtils/tagUtils', () => ({
+jest.mock('../utils/segmentText/tagUtils', () => ({
   transformTagsToText: (t) => (t === undefined || t === null ? '' : t),
   removeTagsFromText: (t) => t,
   checkXliffTagsInText: () => false,
@@ -1146,7 +1146,6 @@ describe('SegmentStore', () => {
           sid: '1',
         },
         {actionType: SegmentConstants.OPEN_GLOSSARY_FORM_PREFILL, sid: '1'},
-        {actionType: SegmentConstants.FOCUS_TAGS, sid: '1'},
         {actionType: SegmentConstants.REFRESH_TAG_MAP},
         {actionType: SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES},
         {actionType: SegmentConstants.LARA_STYLES, data: {}},
@@ -1158,8 +1157,7 @@ describe('SegmentStore', () => {
           actionType: SegmentConstants.HIGHLIGHT_TAGS,
           tagId: 't',
           tagPlaceholder: 'p',
-          entityKey: 'e',
-          isTarget: true,
+          chipKey: 'e',
         },
         {actionType: 'UNKNOWN_ACTION_TYPE', sid: '1', data: 'x'},
       ]

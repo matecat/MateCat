@@ -1,8 +1,5 @@
 import UserStore from '../stores/UserStore'
-import {
-  removeTagsFromText,
-  hasDataOriginalTags,
-} from '../components/segments/utils/DraftMatecatUtils/tagUtils'
+import {removeTagsFromText, hasDataOriginalTags} from './segmentText/tagUtils'
 
 export const checkTPSupportedLanguage = () => {
   const languagesKey = `${config.source_code.split('-')[0]}-${config.target_code.split('-')[0]}`

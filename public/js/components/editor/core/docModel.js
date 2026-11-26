@@ -18,9 +18,9 @@ import {
 } from '../../segmentView/segmentModel'
 import {CHARACTER_TAGS} from '../../../utils/segmentText/specialChars'
 
-export const LF = '##$_0A$##'
-export const NBSP = '##$_A0$##'
-export const TAB = '##$_09$##'
+const LF = '##$_0A$##'
+const NBSP = '##$_A0$##'
+const TAB = '##$_09$##'
 export const CR = '##$_0D$##'
 
 // Placeholders the document holds as the character they stand for. The word joiner is already that character in the
@@ -32,8 +32,7 @@ const WORD_JOINER = CHAR_FOR_TAG.wordJoiner
 
 /**
  * The tags of a segment string with their raw offsets, in document order. XLIFF markup that `tokenize` does not
- * know (a `<ph>` without equiv-text, `<bpt>`, `<mrk>`…) is a tag too, with no token: it is kept as it is, as Draft
- * does. `space` tokens are not tags here: a space is text, shown by the display layer only.
+ * know (a `<ph>` without equiv-text, `<bpt>`, `<mrk>`…) is a tag too, with no token: it is kept as it is. `space` tokens are not tags here: a space is text, shown by the display layer only.
  * @returns {Array<{token: object|null, from: number, to: number}>}
  */
 export const locateTags = (raw, {isRtl = false} = {}) => {

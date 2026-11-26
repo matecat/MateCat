@@ -6,7 +6,7 @@ jest.mock('../stores/SegmentStore', () => ({
   getStartEditTime: jest.fn(),
   getSegmentByIdToJS: jest.fn(),
 }))
-jest.mock('../components/segments/utils/DraftMatecatUtils/segmentStringUtils', () => ({
+jest.mock('./segmentText/segmentStringUtils', () => ({
   removeTagsFromText: jest.fn((text) => text),
   hasDataOriginalTags: jest.fn(),
   excludeSomeTagsTransformToText: jest.fn((text) => text),
@@ -18,7 +18,7 @@ jest.mock('../stores/UserStore', () => ({
 }))
 
 import SegmentStore from '../stores/SegmentStore'
-import SegmentStringUtils from '../components/segments/utils/DraftMatecatUtils/segmentStringUtils'
+import SegmentStringUtils from './segmentText/segmentStringUtils'
 import UserStore from '../stores/UserStore'
 import {SEGMENTS_STATUS} from '../constants/Constants'
 import SegmentUtils from './segmentUtils'
