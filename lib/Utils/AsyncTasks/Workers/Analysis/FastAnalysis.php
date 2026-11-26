@@ -1576,19 +1576,19 @@ HD;
      */
     protected function _getLockProjectForVolumeAnalysis(int $limit = 1): array
     {
-        $bindParams = ['project_status' => ProjectStatus::STATUS_NEW];
-
-        $and_InstanceId = null;
-        if (AppConfig::$INSTANCE_ID !== 0) {
-            $and_InstanceId = ' AND instance_id = :instance_id ';
-            $bindParams['instance_id'] = AppConfig::$INSTANCE_ID;
-        }
+        // Every instance, 0 included, picks only the projects it created. Each instance keeps its processing
+        // locks in its own Redis database, so a daemon cannot see the lock another instance holds on a
+        // project: picking another instance's projects could analyse the same project twice.
+        $bindParams = [
+            'project_status' => ProjectStatus::STATUS_NEW,
+            'instance_id'    => AppConfig::$INSTANCE_ID,
+        ];
 
         $query = "
         SELECT p.id, id_tms, id_mt_engine, tm_keys, p.pretranslate_100, GROUP_CONCAT( DISTINCT j.id ) AS jid_list, j.only_private_tm, p.id_customer
             FROM projects p
             INNER JOIN jobs j ON j.id_project=p.id
-            WHERE status_analysis = :project_status $and_InstanceId
+            WHERE status_analysis = :project_status AND instance_id = :instance_id
             GROUP BY p.id
         ORDER BY id LIMIT " . $limit;
 
