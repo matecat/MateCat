@@ -264,18 +264,30 @@ final class MtQueueLoadReader
     /**
      * Ids, among the given ones, of the projects not finished yet (NEW, BUSY or FAST_OK), read on the master.
      *
-     * Example: [11, 15] with project 15 DONE gives [11].
+     * The query never lists the ids. It asks for every unfinished project from the smallest given id up, and
+     * PHP keeps the given ones. Two reasons:
+     * - a list of ids grows with the hash. Past a size that depends on the server settings, MySQL stops
+     *   planning a list that long through an index and reads the whole projects table instead, on the master,
+     *   on every load read. The hash can hold a day of published projects, so the list has no safe bound.
+     * - the index on `status_analysis` keeps its rows ordered by status, then by id. "status X and id from N
+     *   up" is therefore one short slice of the index for each status, and the query text stays the same for
+     *   three ids or for thousands.
+     * The extra rows it reads are the projects newer than the oldest field that are unfinished but were not
+     * published to this queue, such as projects on another queue or stuck ones. Old stuck projects are never
+     * read: hash fields expire after a day, so the smallest id is at most a day old.
      *
-     * @param list<int> $pids
+     * Example: [11, 15] with project 15 DONE and project 13 BUSY on another queue reads ids 11 and 13, and
+     * gives [11].
      *
-     * @return list<int>
+     * @param non-empty-list<int> $pids
+     *
+     * @return list<int> the unfinished ones, in the order of $pids
      * @throws Throwable
      */
     private function selectUnfinishedProjects(array $pids): array
     {
-        $placeholders = implode(',', array_fill(0, count($pids), '?'));
-        $query        = "SELECT id FROM projects WHERE id IN ($placeholders) AND status_analysis IN (?, ?, ?)";
-        $params       = [...$pids, ProjectStatus::STATUS_NEW, ProjectStatus::STATUS_BUSY, ProjectStatus::STATUS_FAST_OK];
+        $query  = 'SELECT id FROM projects WHERE status_analysis IN (?, ?, ?) AND id >= ?';
+        $params = [ProjectStatus::STATUS_NEW, ProjectStatus::STATUS_BUSY, ProjectStatus::STATUS_FAST_OK, min($pids)];
 
         // Inside a transaction the read goes to the master, as the pick query does
         $ids = $this->db->transaction(function () use ($query, $params): array {
@@ -285,7 +297,10 @@ final class MtQueueLoadReader
             return $stmt->fetchAll(PDO::FETCH_COLUMN);
         });
 
-        return array_values(array_map('intval', $ids));
+        // Keep only the projects of this queue: PHP turns the numeric string ids into int keys
+        $isUnfinished = array_fill_keys($ids, true);
+
+        return array_values(array_filter($pids, fn (int $pid): bool => isset($isUnfinished[$pid])));
     }
 
     /**

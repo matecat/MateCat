@@ -37,6 +37,7 @@ use Utils\Registry\AppConfig;
 use Utils\Constants\TranslationStatus;
 use Utils\Engines\AbstractEngine;
 use Utils\Engines\DeepL;
+use Utils\Engines\EnginesFactory;
 use Utils\Engines\Lara;
 use Utils\Engines\MyMemory;
 use Utils\Engines\NONE;
@@ -58,14 +59,20 @@ use Utils\Logger\MatecatLogger;
 class FastAnalysisTest extends AbstractTest
 {
     /**
-     * Build a FastAnalysis with no constructor and the given IDatabase seeded
+     * Build a FastAnalysis, or one of its probe subclasses, with no constructor and the given IDatabase seeded
      * into its private $db composition-root property.
+     *
+     * @template T of FastAnalysis
+     *
+     * @param class-string<T> $class
+     *
+     * @return T
      */
-    private function daemonWithDb(IDatabase $db): FastAnalysis
+    private function daemonWithDb(IDatabase $db, string $class = FastAnalysis::class): FastAnalysis
     {
-        $ref    = new ReflectionClass(FastAnalysis::class);
-        $daemon = $ref->newInstanceWithoutConstructor();
+        $daemon = (new ReflectionClass($class))->newInstanceWithoutConstructor();
 
+        $ref = new ReflectionClass(FastAnalysis::class);
         $ref->getProperty('db')->setValue($daemon, $db);
         // The constructor normally wires the logger; seed a no-op stub so the
         // methods under test can log without a NullPointer on the typed property.
@@ -1137,12 +1144,14 @@ class FastAnalysisTest extends AbstractTest
     /**
      * Seed the lock picker so its master-routed SELECT returns exactly one NEW project, backed by
      * a ProjectDao whose changeProjectStatusIfNotDone() runs $onBusyUpdate (return a row count, or throw).
+     * The daemon records in its `events` the transaction, each prepared SQL and its bound params, in order.
      *
-     * @param callable $onBusyUpdate invoked as the BUSY write inside _updateProject
+     * @param callable                            $onBusyUpdate invoked as the BUSY write inside _updateProject
+     * @param array<string, array<string, mixed>> $queues       context list settings; none leaves the list unset
      *
-     * @return array{0: FastAnalysis, 1: FastAnalysisFakeRedis}
+     * @return array{0: FastAnalysisMtQueueProbe, 1: FastAnalysisFakeRedis}
      */
-    private function daemonLockingOneProject(callable $onBusyUpdate): array
+    private function daemonLockingOneProject(callable $onBusyUpdate, array $queues = []): array
     {
         $rows = [[
             'id'               => '42',
@@ -1155,12 +1164,23 @@ class FastAnalysisTest extends AbstractTest
             'id_customer'      => 'c1',
         ]];
 
+        // The stubs below record into the daemon, which is built last: they capture it by reference
+        $daemon = null;
+
         $stmt = $this->createStub(PDOStatement::class);
-        $stmt->method('execute')->willReturn(true);
+        $stmt->method('execute')->willReturnCallback(function (array $params) use (&$daemon): bool {
+            $daemon->events[] = ['execute', $params];
+
+            return true;
+        });
         $stmt->method('fetchAll')->willReturn($rows);
 
         $pdo = $this->createStub(PDO::class);
-        $pdo->method('prepare')->willReturn($stmt);
+        $pdo->method('prepare')->willReturnCallback(function (string $sql) use (&$daemon, $stmt): PDOStatement {
+            $daemon->events[] = ['prepare', $sql];
+
+            return $stmt;
+        });
 
         $project                  = new ProjectStruct();
         $project->status_analysis = ProjectStatus::STATUS_NEW; // != DONE → the BUSY update runs
@@ -1172,14 +1192,203 @@ class FastAnalysisTest extends AbstractTest
         $injected = $this->createStub(IDatabase::class);
         $injected->method('getConnection')->willReturn($pdo);
         // pass-through: both the picker SELECT and _updateProject route through transaction()
-        $injected->method('transaction')->willReturnCallback(fn (callable $cb) => $cb());
+        $injected->method('transaction')->willReturnCallback(function (callable $cb) use (&$daemon) {
+            $daemon->events[] = ['transaction'];
 
-        $daemon = $this->daemonWithDb($injected);
+            return $cb();
+        });
+
+        $daemon = $this->daemonWithDb($injected, FastAnalysisMtQueueProbe::class);
+        if ($queues !== []) {
+            (new ReflectionClass(FastAnalysis::class))->getProperty('_queueContextList')->setValue($daemon, ContextList::get($queues));
+        }
         $this->setProp($daemon, 'projectDao', $projectDao);
         $redis            = $this->seedQueueHandlerWithRedis($daemon);
         $redis->setReturn = 'OK'; // lock acquired (atomic SET NX EX)
 
         return [$daemon, $redis];
+    }
+
+    /**
+     * The SQL of the first statement the picker prepared, and the params it bound.
+     *
+     * The picker SELECT is the first statement: the BUSY update of each picked project runs after it.
+     *
+     * @return array{0: string, 1: array<string, mixed>}
+     */
+    private static function pickQuery(FastAnalysisMtQueueProbe $daemon): array
+    {
+        $sql    = null;
+        $params = null;
+        foreach ($daemon->events as $event) {
+            if ($event[0] === 'prepare' && $sql === null) {
+                $sql = $event[1];
+            } elseif ($event[0] === 'execute' && $params === null) {
+                $params = $event[1];
+            }
+        }
+
+        return [(string)$sql, $params ?? []];
+    }
+
+    /**
+     * Load of an MT queue built from the given settings.
+     *
+     * @param array<string, mixed> $settings context settings of the queue
+     */
+    private static function mtLoad(string $key, array $settings, ?int $segmentLoad, int $workers = 30): MtQueueLoad
+    {
+        return new MtQueueLoad($key, Context::buildFromArray($settings), $segmentLoad, 0, $workers, []);
+    }
+
+    /**
+     * Rows: context list settings, the loads _readMtQueueLoads() returns (null: it must not be called),
+     * whether the pick query holds MT projects back.
+     *
+     * @return array<string, array{array<string, array<string, mixed>>, list<MtQueueLoad>|null, bool}>
+     */
+    public static function mtQueueHoldProvider(): array
+    {
+        $p4 = ['queue_name' => 'analysis_queue_P4', 'max_executors' => 30, 'max_queued_segments' => 25000];
+        $p5 = ['queue_name' => 'analysis_queue_P5', 'max_executors' => 10, 'max_queued_segments' => 25000];
+        $p1 = ['queue_name' => 'analysis_queue_P1', 'max_executors' => 1];
+        $p4NoCaps = ['queue_name' => 'analysis_queue_P4', 'max_executors' => 30];
+        $p4Drain  = ['queue_name' => 'analysis_queue_P4', 'max_executors' => 30, 'accept_new_projects' => false];
+        $p5Drain  = ['queue_name' => 'analysis_queue_P5', 'max_executors' => 10, 'accept_new_projects' => false];
+        $p4ProjectCap = ['queue_name' => 'analysis_queue_P4', 'max_executors' => 30, 'max_queued_projects' => 80];
+
+        return [
+            'caps off, every queue accepts'  => [['P1' => $p1, 'P4' => $p4NoCaps], null, false],
+            'caps on, P4 open'               => [['P1' => $p1, 'P4' => $p4], [self::mtLoad('P4', $p4, 100)], false],
+            // a queue that refuses new projects is a limit even with every cap off
+            'caps off, P4 and P5 drained'    => [
+                ['P1' => $p1, 'P4' => $p4Drain, 'P5' => $p5Drain],
+                [self::mtLoad('P4', $p4Drain, 0), self::mtLoad('P5', $p5Drain, 0)],
+                true,
+            ],
+            // the project cap alone turns the load read on
+            'project cap only, P4 open'      => [['P1' => $p1, 'P4' => $p4ProjectCap], [self::mtLoad('P4', $p4ProjectCap, 0)], false],
+            'P4 and P5 full'                 => [
+                ['P1' => $p1, 'P4' => $p4, 'P5' => $p5],
+                [self::mtLoad('P4', $p4, 25000), self::mtLoad('P5', $p5, 30000)],
+                true,
+            ],
+            'P5 absent, P4 full'             => [['P1' => $p1, 'P4' => $p4], [self::mtLoad('P4', $p4, 25000)], true],
+            'P4 full, P5 open with no worker' => [
+                ['P1' => $p1, 'P4' => $p4, 'P5' => $p5],
+                [self::mtLoad('P4', $p4, 25000), self::mtLoad('P5', $p5, segmentLoad: 0, workers: 0)],
+                true,
+            ],
+        ];
+    }
+
+    /**
+     * @param array<string, array<string, mixed>> $queues
+     * @param list<MtQueueLoad>|null              $loads
+     */
+    #[Test]
+    #[DataProvider('mtQueueHoldProvider')]
+    public function lockProjectHoldsMtProjectsOnlyWhenNoMtQueueCanTakeThem(array $queues, ?array $loads, bool $holds): void
+    {
+        [$daemon] = $this->daemonLockingOneProject(fn () => 1, $queues);
+        $daemon->loadsScript = $loads === null ? null : [$loads];
+
+        $this->invoke($daemon, '_getLockProjectForVolumeAnalysis', 5);
+
+        [$sql, $params] = self::pickQuery($daemon);
+        $mtClassParams  = array_filter($params, fn (string $name): bool => str_starts_with($name, 'mt_class_'), ARRAY_FILTER_USE_KEY);
+        $loadReads      = count(array_keys(array_column($daemon->events, 0), 'loads', true));
+        $this->assertSame($loads === null ? 0 : 1, $loadReads);
+        if ($holds) {
+            $this->assertStringContainsString('NOT EXISTS', $sql);
+            $this->assertStringContainsString('engines', $sql);
+            $this->assertStringContainsString(':mt_class_0', $sql);
+            $this->assertStringContainsString(':mt_class_1', $sql);
+            $this->assertEqualsCanonicalizing(FastAnalysis::mtQueueEngineClassLoads(), array_values($mtClassParams));
+        } else {
+            $this->assertStringNotContainsString('NOT EXISTS', $sql);
+            $this->assertSame([], $mtClassParams);
+        }
+    }
+
+    #[Test]
+    public function lockProjectSelectsTheProjectCreateDate(): void
+    {
+        [$daemon] = $this->daemonLockingOneProject(fn () => 1);
+
+        $this->invoke($daemon, '_getLockProjectForVolumeAnalysis', 5);
+
+        // the routing log of a later task reads the project age
+        $this->assertStringContainsString('p.create_date', self::pickQuery($daemon)[0]);
+    }
+
+    #[Test]
+    public function lockProjectReadsTheMtQueueLoadsBeforeItsTransaction(): void
+    {
+        $p4 = ['queue_name' => 'analysis_queue_P4', 'max_executors' => 30, 'max_queued_segments' => 25000];
+        [$daemon] = $this->daemonLockingOneProject(fn () => 1, ['P4' => $p4]);
+        $daemon->loadsScript = [[self::mtLoad('P4', $p4, 25000)]];
+
+        $this->invoke($daemon, '_getLockProjectForVolumeAnalysis', 5);
+
+        $this->assertSame(['loads', 'transaction', 'prepare'], array_slice(array_column($daemon->events, 0), 0, 3));
+    }
+
+    #[Test]
+    public function mtQueueEngineClassLoadsNamesEachEngineAsTheEnginesTableMayStoreIt(): void
+    {
+        $this->assertEqualsCanonicalizing(['Utils\Engines\Lara', 'Lara'], FastAnalysis::mtQueueEngineClassLoads());
+    }
+
+    /**
+     * The SQL hold and the routing must agree: each name the pick query skips loads an engine routed to the MT queues.
+     */
+    #[Test]
+    public function eachMtQueueEngineClassLoadLoadsAnEngineRoutedToTheMtQueues(): void
+    {
+        $daemon = $this->daemonWithDb($this->createStub(IDatabase::class));
+
+        foreach (FastAnalysis::mtQueueEngineClassLoads() as $classLoad) {
+            $className = EnginesFactory::getFullyQualifiedClassName($classLoad);
+            $engine    = (new ReflectionClass($className))->newInstanceWithoutConstructor();
+
+            $this->assertTrue($this->invoke($daemon, '_usesMtQueue', $engine), "$classLoad must route to the MT queues");
+        }
+    }
+
+    #[Test]
+    public function mtQueuesHoldLogsTheFullStateOncePerMinuteAndTheReopeningOnce(): void
+    {
+        $p4 = ['queue_name' => 'analysis_queue_P4', 'max_executors' => 30, 'max_queued_segments' => 25000];
+        $logged = [];
+        [$daemon] = $this->mtQueueDaemon(['P4' => $p4], [], $logged);
+        $full = [self::mtLoad('P4', $p4, 25000)];
+        $open = [self::mtLoad('P4', $p4, 10)];
+        $daemon->loadsScript = [$open, $full, $full, $full, $open];
+
+        // At each time: what _mtQueuesHold() returned, and the messages it logged
+        $observed = [];
+        foreach ([990, 1000, 1030, 1060, 1070] as $now) {
+            $daemon->now    = $now;
+            $before         = count($logged);
+            $observed[$now] = [$this->invoke($daemon, '_mtQueuesHold'), array_column(array_slice($logged, $before), 'message')];
+        }
+
+        $this->assertSame([
+            990  => [false, []], // open and never held: nothing to report
+            1000 => [true, ['mt_queues_full']],
+            1030 => [true, []],
+            1060 => [true, ['mt_queues_full']], // exactly 60 s after the last log
+            1070 => [false, ['mt_queues_open']],
+        ], $observed);
+        $this->assertSame(
+            ['queues' => ['P4' => $full[0]->toLogArray()]],
+            self::loggedContexts($logged, 'mt_queues_full')[0]
+        );
+        $this->assertSame(
+            ['queues' => ['P4' => $open[0]->toLogArray()]],
+            self::loggedContexts($logged, 'mt_queues_open')[0]
+        );
     }
 
     // ────────────────────────────────────────────────────────────────────────
@@ -2678,8 +2887,30 @@ class FastAnalysisMtQueueProbe extends FastAnalysis
 {
     public int $now = 1000;
 
+    /** @var list<list<MtQueueLoad>>|null loads returned by each _readMtQueueLoads() call in turn; null reads them for real */
+    public ?array $loadsScript = null;
+
+    /**
+     * What the daemon did, in order. Each event is a list: its name first, then its data.
+     * ['loads'] a load read, ['transaction'] a transaction opened, ['prepare', <sql>], ['execute', <params>].
+     *
+     * @var list<array<int, mixed>>
+     */
+    public array $events = [];
+
     protected function _now(): int
     {
         return $this->now;
+    }
+
+    protected function _readMtQueueLoads(): array
+    {
+        // Recorded before the real read too, so a test can prove that no read happened at all
+        $this->events[] = ['loads'];
+        if ($this->loadsScript === null) {
+            return parent::_readMtQueueLoads();
+        }
+
+        return array_shift($this->loadsScript) ?? [];
     }
 }

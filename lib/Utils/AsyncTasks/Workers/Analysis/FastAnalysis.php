@@ -38,6 +38,7 @@ use UnexpectedValueException;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\Analysis\MtQueue\MtQueueLoad;
 use Utils\AsyncTasks\Workers\Analysis\MtQueue\MtQueueLoadReader;
+use Utils\AsyncTasks\Workers\Analysis\MtQueue\MtQueueSelector;
 use Utils\AsyncTasks\Workers\Traits\ProjectWordCount;
 use Utils\Constants\ProjectStatus as ProjectStatus;
 use Utils\Engines\AbstractEngine;
@@ -1571,6 +1572,31 @@ HD;
         return false;
     }
 
+    /**
+     * Names of the MT queue engines as the `engines.class_load` column may hold them: full class name and short name.
+     *
+     * Each engines row keeps `class_load` as it was written when the engine was added: older rows hold the
+     * short name, newer ones the full class name, and EnginesFactory loads the same engine from both. The pick
+     * query compares the column as text, so it must list both forms.
+     *
+     * Note: a subclass of an engine must be listed in MT_QUEUE_ENGINES by its own name. `_usesMtQueue()`
+     * matches it through `instanceof`; this list matches only the names written here.
+     *
+     * Example: [Lara::class] gives ['Utils\Engines\Lara', 'Lara'].
+     *
+     * @return list<string>
+     */
+    public static function mtQueueEngineClassLoads(): array
+    {
+        $names = [];
+        foreach (self::MT_QUEUE_ENGINES as $class) {
+            $names[] = $class;
+            $names[] = basename(str_replace('\\', '/', $class));
+        }
+
+        return $names;
+    }
+
     /** Reads the MT queue loads; built on first use, then kept for its warning rate limit. */
     private ?MtQueueLoadReader $mtQueueLoadReader = null;
 
@@ -1643,6 +1669,91 @@ HD;
         return $this->_mtQueueLoadReader()->read($this->requireQueueHandler(), $this->_mtQueueContexts());
     }
 
+    /** Seconds between two `mt_queues_full` logs while the MT queues stay full. */
+    private const int MT_QUEUES_FULL_LOG_INTERVAL_SECONDS = 60;
+
+    /**
+     * When `mt_queues_full` was last logged; null while the MT queues are not holding projects back.
+     *
+     * Example: queues full since 1000 and logged then gives 1000; once a queue opens again it goes back to null.
+     */
+    private ?int $mtQueuesFullLoggedAt = null;
+
+    /**
+     * Tells whether Lara projects must wait in NEW because no MT queue can take a project now.
+     *
+     * NEW is the waiting room: when no MT queue can take a project, Lara projects stay NEW in id order and
+     * projects with other engines are still picked. With every cap off and every MT queue accepting new
+     * projects it reads nothing and never holds. It logs `mt_queues_full` when the queues fill up, then at most
+     * once a minute while they stay full, and `mt_queues_open` once when a queue can take projects again. Every
+     * change is logged at once, so queues that open and fill again on each published project log each change.
+     *
+     * Example: P4 and P5 both at their segment cap gives true.
+     *
+     * @throws RuntimeException
+     */
+    protected function _mtQueuesHold(): bool
+    {
+        // With no limit set, no MT queue can be full: skip the load read and its Jolokia and Redis calls
+        if (!$this->_mtQueueLimitsInUse()) {
+            return false;
+        }
+
+        $loads = $this->_readMtQueueLoads();
+        $hold  = MtQueueSelector::holds($loads);
+
+        $wasHolding = $this->mtQueuesFullLoggedAt !== null;
+        if ($hold) {
+            // Log when the queues fill up, then at most once a minute while they stay full
+            $now        = $this->_now();
+            $fullLogDue = !$wasHolding || $now - $this->mtQueuesFullLoggedAt >= self::MT_QUEUES_FULL_LOG_INTERVAL_SECONDS;
+            if ($fullLogDue) {
+                $this->logger->info('mt_queues_full', ['queues' => $this->_mtQueuesForLog($loads)]);
+                $this->mtQueuesFullLoggedAt = $now;
+            }
+        } elseif ($wasHolding) {
+            $this->logger->info('mt_queues_open', ['queues' => $this->_mtQueuesForLog($loads)]);
+            $this->mtQueuesFullLoggedAt = null;
+        }
+
+        return $hold;
+    }
+
+    /**
+     * Tells whether any MT queue has a cap set or refuses new projects, the only cases where a queue can be full.
+     *
+     * Example: P4 and P5 with both caps at 0 and accept_new_projects on give false.
+     */
+    private function _mtQueueLimitsInUse(): bool
+    {
+        foreach ($this->_mtQueueContexts() as $context) {
+            if ($context->max_queued_segments > 0 || $context->max_queued_projects > 0 || !$context->accept_new_projects) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * The loads of the MT queues by queue key, for the `mt_queues_full` and `mt_queues_open` logs.
+     *
+     * Example: one P4 load gives ['P4' => ['segment_load' => 500, ...]].
+     *
+     * @param list<MtQueueLoad> $loads
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    private function _mtQueuesForLog(array $loads): array
+    {
+        $queues = [];
+        foreach ($loads as $load) {
+            $queues[$load->key] = $load->toLogArray();
+        }
+
+        return $queues;
+    }
+
     /**
      * Records a project published to an MT queue, so the queue counts it as live; other queues are skipped.
      *
@@ -1700,6 +1811,10 @@ HD;
      */
     protected function _getLockProjectForVolumeAnalysis(int $limit = 1): array
     {
+        // Read the MT queue loads before the transaction opens. The read can wait on Jolokia up to 3 s per
+        // queue, and a failed DB read inside an open transaction would mark it unable to commit.
+        $holdMtProjects = $this->_mtQueuesHold();
+
         $bindParams = ['project_status' => ProjectStatus::STATUS_NEW];
 
         $and_InstanceId = null;
@@ -1708,11 +1823,27 @@ HD;
             $bindParams['instance_id'] = AppConfig::$INSTANCE_ID;
         }
 
+        // While no MT queue can take a project, skip every project with a job on an MT engine; the others go on.
+        // A skipped project stays NEW, so the next cycle tries it again. One MT job is enough to hold the whole
+        // project: project creation gives every job the same engine, and holding a mixed one errs on the safe side.
+        $and_NotMtProject = null;
+        if ($holdMtProjects) {
+            $placeholders = [];
+            foreach (self::mtQueueEngineClassLoads() as $i => $classLoad) {
+                $placeholders[]            = ":mt_class_$i";
+                $bindParams["mt_class_$i"] = $classLoad;
+            }
+            $and_NotMtProject = ' AND NOT EXISTS (
+                SELECT 1 FROM jobs mt_jobs INNER JOIN engines mt_engines ON mt_engines.id = mt_jobs.id_mt_engine
+                WHERE mt_jobs.id_project = p.id AND mt_engines.class_load IN (' . implode(', ', $placeholders) . ')
+            ) ';
+        }
+
         $query = "
-        SELECT p.id, id_tms, id_mt_engine, tm_keys, p.pretranslate_100, GROUP_CONCAT( DISTINCT j.id ) AS jid_list, j.only_private_tm, p.id_customer
+        SELECT p.id, id_tms, id_mt_engine, tm_keys, p.pretranslate_100, GROUP_CONCAT( DISTINCT j.id ) AS jid_list, j.only_private_tm, p.id_customer, p.create_date
             FROM projects p
             INNER JOIN jobs j ON j.id_project=p.id
-            WHERE status_analysis = :project_status $and_InstanceId
+            WHERE status_analysis = :project_status $and_InstanceId $and_NotMtProject
             GROUP BY p.id
         ORDER BY id LIMIT " . $limit;
 

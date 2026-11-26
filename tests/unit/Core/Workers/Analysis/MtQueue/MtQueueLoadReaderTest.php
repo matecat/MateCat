@@ -169,8 +169,8 @@ class MtQueueLoadReaderTest extends AbstractTest
         ];
         $redis->sets['analysis_queue_P4_pid_set'] = array_map(fn (int $i): string => "worker-$i", range(1, 30));
 
-        // 15 is DONE, so the SELECT leaves it out
-        $loads = $this->reader([11, 12, 13, 14, 16])->read($this->amq($redis, ['analysis_queue_P4' => 500]), ['P4' => self::p4()]);
+        // 15 is DONE, so the SELECT leaves it out; 20 is unfinished but was never published to this queue
+        $loads = $this->reader([11, 12, 13, 14, 16, 20])->read($this->amq($redis, ['analysis_queue_P4' => 500]), ['P4' => self::p4()]);
 
         $this->assertCount(1, $loads);
         $this->assertInstanceOf(MtQueueLoad::class, $loads[0]);
@@ -180,15 +180,16 @@ class MtQueueLoadReaderTest extends AbstractTest
         $this->assertSame(500, $loads[0]->segmentLoad);
         $this->assertSame(30, $loads[0]->workers);
 
-        // one master read of the statuses, for the numeric fields only
+        // one master read of the unfinished projects from the smallest numeric field up
         $this->assertCount(1, $this->queries);
         $this->assertStringContainsString('status_analysis IN', $this->queries[0][0]);
+        $this->assertStringContainsString('id >= ?', $this->queries[0][0]);
         $this->assertEqualsCanonicalizing(
-            [11, 12, 13, 14, 15, 16, ProjectStatus::STATUS_NEW, ProjectStatus::STATUS_BUSY, ProjectStatus::STATUS_FAST_OK],
+            [11, ProjectStatus::STATUS_NEW, ProjectStatus::STATUS_BUSY, ProjectStatus::STATUS_FAST_OK],
             array_values($this->queries[0][1])
         );
 
-        // counters read once, for the unfinished projects
+        // counters read once, for the unfinished projects of this queue only (20 is not in the hash)
         $mgets = array_values(array_filter($redis->calls, fn (array $call): bool => $call[0] === 'mget'));
         $this->assertSame([['mget', [
             'p_tot_seg:11', 'p_num_done:11', 'p_tot_seg:12', 'p_num_done:12', 'p_tot_seg:13', 'p_num_done:13',
@@ -199,6 +200,27 @@ class MtQueueLoadReaderTest extends AbstractTest
         $this->assertContains(['hdel', 'analysis_queue_P4_live_pids', ['12', '14', '15', 'junk']], $redis->calls);
         $this->assertSame(['11', '13', '16'], $redis->hashes['analysis_queue_P4_live_pids']);
         $this->assertSame([], $this->logged);
+    }
+
+    /**
+     * A long id list would grow the SELECT with the hash, and past a size the DB stops using its indexes.
+     */
+    #[Test]
+    public function theStatusReadIsTheSameQueryWhateverTheNumberOfRegisteredPids(): void
+    {
+        $sqlFor = function (array $fields): string {
+            $this->queries = [];
+            $redis         = new MtQueueLoadReaderFakeRedis();
+            $redis->hashes['analysis_queue_P4_live_pids'] = $fields;
+            $this->reader()->read($this->amq($redis, []), ['P4' => self::p4()]);
+
+            return $this->queries[0][0];
+        };
+
+        $this->assertSame(
+            $sqlFor(['11', '12', '13']),
+            $sqlFor(array_map('strval', range(11, 5010)))
+        );
     }
 
     #[Test]
