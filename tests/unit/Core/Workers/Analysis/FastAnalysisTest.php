@@ -1288,10 +1288,11 @@ class FastAnalysisTest extends AbstractTest
      * Load of an MT queue built from the given settings.
      *
      * @param array<string, mixed> $settings context settings of the queue
+     * @param list<int>            $livePids projects the queue is analysing now
      */
-    private static function mtLoad(string $key, array $settings, ?int $segmentLoad, int $workers = 30): MtQueueLoad
+    private static function mtLoad(string $key, array $settings, ?int $segmentLoad, int $workers = 30, array $livePids = []): MtQueueLoad
     {
-        return new MtQueueLoad($key, Context::buildFromArray($settings), $segmentLoad, 0, $workers, []);
+        return new MtQueueLoad($key, Context::buildFromArray($settings), $segmentLoad, count($livePids), $workers, $livePids);
     }
 
     /**
@@ -2314,10 +2315,10 @@ class FastAnalysisTest extends AbstractTest
     // ─── _getQueueAddressesByPriority ────────────────────────────────────
 
     /**
-     * Lara is the only adaptive engine left, so it alone takes the P4 queue; any other MT engine, or an
-     * engine that cannot be built, still goes to P3; NONE goes to P1, or to P2 from 10000 queued segments.
-     * Each case installs a real engine row and removes it afterwards, evicting the EngineDAO cache on
-     * both sides so no neighbouring test reads it.
+     * Lara is the only adaptive engine left, so it alone takes the P4 queue; any other MT engine still goes
+     * to P3; NONE goes to P1, or to P2 from 10000 queued segments. Each case installs a real engine row, builds
+     * its engine as main() does, and removes the row afterwards, evicting the EngineDAO cache on both sides so
+     * no neighbouring test reads it.
      */
     #[Test]
     #[DataProvider('queuePriorityByEngineProvider')]
@@ -2342,8 +2343,11 @@ class FastAnalysisTest extends AbstractTest
                 'P3' => ['queue_name' => 'p3', 'max_executors' => 1],
                 'P4' => ['queue_name' => 'p4', 'max_executors' => 1],
             ]));
+            // main() sets the project being published before it chooses the queue; an MT route logs its id
+            $this->setProp($daemon, 'actual_project_row', ['id' => 301]);
 
-            $context = $this->invoke($daemon, '_getQueueAddressesByPriority', $queueLen, $struct->id);
+            $engine  = EnginesFactory::getInstance($struct->id, $database, AbstractEngine::class);
+            $context = $this->invoke($daemon, '_getQueueAddressesByPriority', $queueLen, $engine);
 
             $this->assertInstanceOf(Context::class, $context);
             $this->assertSame($expectedQueue, $context->queue_name);
@@ -2367,9 +2371,180 @@ class FastAnalysisTest extends AbstractTest
             'no engine, short queue'          => ['NONE', 9999, 'p1'],
             'no engine, long queue'           => ['NONE', 10000, 'p2'],
             'unknown class reads as NONE'     => ['NoSuchEngineClass', 0, 'p1'],
-            // The fixture row is type MT, so the MyMemory constructor throws and no engine is built
-            'engine that cannot be built'     => ['MyMemory', 0, 'p3'],
         ];
+    }
+
+    // ─── Routing MT projects between P4 and P5 ───────────────────────────
+
+    /** The project being published in the routing tests: created 300 s before the daemon's clock of 10:05:00. */
+    private const array ROUTED_ROW = ['id' => 301, 'create_date' => '2026-11-18 10:00:00'];
+
+    /**
+     * Context list settings for the routing tests: P1 to P4, plus P5 when asked; P4 and P5 cap 25000 segments.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    private static function routingSettings(bool $withP5): array
+    {
+        $settings = [];
+        foreach ($withP5 ? ['P1', 'P2', 'P3', 'P4', 'P5'] : ['P1', 'P2', 'P3', 'P4'] as $key) {
+            $settings[$key] = ['queue_name' => 'analysis_queue_' . $key, 'max_executors' => 30]
+                + (in_array($key, ['P4', 'P5'], true) ? ['max_queued_segments' => 25000] : []);
+        }
+
+        return $settings;
+    }
+
+    /**
+     * A daemon publishing $row at 10:05:00, whose single load read gives $loads.
+     *
+     * @param list<MtQueueLoad>|null                                         $loads  what the load read gives; null when none is expected
+     * @param list<array{level: string, message: mixed, context: array<mixed>}> $logged
+     * @param array<string, mixed>                                           $row    the project row being published
+     */
+    private function routingDaemon(
+        bool $withP5,
+        ?array $loads,
+        array &$logged,
+        array $row = self::ROUTED_ROW
+    ): FastAnalysisMtQueueProbe {
+        [$daemon]            = $this->mtQueueDaemon(self::routingSettings($withP5), [], $logged);
+        $daemon->now         = (int)strtotime('2026-11-18 10:05:00');
+        $daemon->loadsScript = $loads === null ? null : [$loads];
+        $this->setProp($daemon, 'actual_project_row', $row);
+
+        return $daemon;
+    }
+
+    /**
+     * An engine built without its constructor: routing only checks its class.
+     *
+     * @param class-string<AbstractEngine> $class
+     */
+    private static function engineOfClass(string $class): AbstractEngine
+    {
+        return (new ReflectionClass($class))->newInstanceWithoutConstructor();
+    }
+
+    /**
+     * Rows: whether P5 is configured, the loads read (null: no read expected), the queue the project goes to.
+     *
+     * @return array<string, array{bool, list<MtQueueLoad>|null, string}>
+     */
+    public static function mtRoutingProvider(): array
+    {
+        $settings = self::routingSettings(true);
+
+        return [
+            'no P5 configured: P4, no load read'          => [false, null, 'P4'],
+            'P5 has fewer segments queued: P5'            => [true, [self::mtLoad('P4', $settings['P4'], 5000), self::mtLoad('P5', $settings['P5'], 100)], 'P5'],
+            'retried project live on P4: stays on P4'     => [true, [self::mtLoad('P4', $settings['P4'], 5000, livePids: [301]), self::mtLoad('P5', $settings['P5'], 0)], 'P4'],
+            // Reachable only in a race: the daemon holds Lara projects in NEW while both queues are full
+            'both queues over the cap: the first, P4'     => [true, [self::mtLoad('P4', $settings['P4'], 30000), self::mtLoad('P5', $settings['P5'], 28000)], 'P4'],
+            'P5 lighter but with no worker: P4'           => [true, [self::mtLoad('P4', $settings['P4'], 5000), self::mtLoad('P5', $settings['P5'], 100, 0)], 'P4'],
+            'both loads unknown: the first, P4'           => [true, [self::mtLoad('P4', $settings['P4'], null), self::mtLoad('P5', $settings['P5'], null)], 'P4'],
+        ];
+    }
+
+    /**
+     * @param list<MtQueueLoad>|null $loads
+     */
+    #[Test]
+    #[DataProvider('mtRoutingProvider')]
+    public function getQueueAddressesByPrioritySendsALaraProjectToItsMtQueue(bool $withP5, ?array $loads, string $expectedKey): void
+    {
+        $logged = [];
+        $daemon = $this->routingDaemon($withP5, $loads, $logged);
+
+        $context = $this->invoke($daemon, '_getQueueAddressesByPriority', 42, self::engineOfClass(Lara::class));
+
+        $this->assertSame($this->invoke($daemon, '_mtQueueContexts')[$expectedKey], $context);
+        $this->assertSame($loads === null ? [] : [['loads']], $daemon->events);
+    }
+
+    #[Test]
+    public function getQueueAddressesByPriorityGivesNoQueueToALaraProjectWithoutAnMtQueue(): void
+    {
+        $logged   = [];
+        $settings = self::routingSettings(false);
+        unset($settings['P4']);
+        [$daemon] = $this->mtQueueDaemon($settings, [], $logged);
+        $this->setProp($daemon, 'actual_project_row', self::ROUTED_ROW);
+
+        // main() skips the publish on null, as it does for any queue missing from the config
+        $this->assertNull($this->invoke($daemon, '_getQueueAddressesByPriority', 42, self::engineOfClass(Lara::class)));
+        $this->assertSame([], $daemon->events);
+        $this->assertSame([], self::loggedContexts($logged, 'mt_project_routed'));
+    }
+
+    /**
+     * Rows: whether P5 is configured, the loads read, the project row, the expected `mt_project_routed` context.
+     *
+     * @return array<string, array{bool, list<MtQueueLoad>|null, array<string, mixed>, array<string, mixed>}>
+     */
+    public static function mtRoutedLogProvider(): array
+    {
+        $settings = self::routingSettings(true);
+        $p4       = self::mtLoad('P4', $settings['P4'], 5000);
+        $p5       = self::mtLoad('P5', $settings['P5'], 100);
+        $route    = ['pid' => 301, 'queue' => 'P4', 'age_seconds' => 300, 'segments_to_publish' => 42];
+
+        return [
+            'two queues: the route and both loads' => [true, [$p4, $p5], self::ROUTED_ROW, array_replace($route, ['queue' => 'P5'])
+                + ['queues' => ['P4' => $p4->toLogArray(), 'P5' => $p5->toLogArray()]]],
+            'one queue: no load to log'            => [false, null, self::ROUTED_ROW, $route],
+            'no create_date: no age'               => [false, null, ['id' => 301], array_replace($route, ['age_seconds' => null])],
+            'create_date after the clock: age 0'   => [false, null, ['id' => 301, 'create_date' => '2026-11-18 10:06:00'], array_replace($route, ['age_seconds' => 0])],
+        ];
+    }
+
+    /**
+     * @param list<MtQueueLoad>|null $loads
+     * @param array<string, mixed>   $row
+     * @param array<string, mixed>   $expectedLog
+     */
+    #[Test]
+    #[DataProvider('mtRoutedLogProvider')]
+    public function getQueueAddressesByPriorityLogsTheRouteOfALaraProject(bool $withP5, ?array $loads, array $row, array $expectedLog): void
+    {
+        $logged = [];
+        $daemon = $this->routingDaemon($withP5, $loads, $logged, $row);
+
+        $this->invoke($daemon, '_getQueueAddressesByPriority', 42, self::engineOfClass(Lara::class));
+
+        $this->assertSame([$expectedLog], self::loggedContexts($logged, 'mt_project_routed'));
+    }
+
+    /**
+     * Rows: engine class, queue length, expected queue.
+     *
+     * @return array<string, array{class-string<AbstractEngine>, int, string}>
+     */
+    public static function notMtRoutingProvider(): array
+    {
+        return [
+            'MyMemory with 20000 segments: P2'  => [MyMemory::class, 20000, 'P2'],
+            'DeepL: P3'                         => [DeepL::class, 0, 'P3'],
+            'no engine with 9999 segments: P1'  => [NONE::class, 9999, 'P1'],
+        ];
+    }
+
+    /**
+     * @param class-string<AbstractEngine> $engineClass
+     */
+    #[Test]
+    #[DataProvider('notMtRoutingProvider')]
+    public function getQueueAddressesByPriorityRoutesOtherEnginesWithoutAnMtRouteLog(string $engineClass, int $queueLen, string $expectedKey): void
+    {
+        $logged = [];
+        $daemon = $this->routingDaemon(true, null, $logged);
+
+        $context = $this->invoke($daemon, '_getQueueAddressesByPriority', $queueLen, self::engineOfClass($engineClass));
+
+        $contextList = (new ReflectionClass(FastAnalysis::class))->getProperty('_queueContextList')->getValue($daemon);
+        $this->assertSame($contextList->list[$expectedKey], $context);
+        $this->assertSame([], $daemon->events, 'no MT queue load is read for another engine');
+        $this->assertSame([], self::loggedContexts($logged, 'mt_project_routed'));
     }
 
     // ─── Engines that use the MT queues ──────────────────────────────────
@@ -2382,7 +2557,7 @@ class FastAnalysisTest extends AbstractTest
     public function usesMtQueueMatchesTheMtQueueEngines(?string $engineClass, bool $expected): void
     {
         // instanceof needs no engine settings, so the constructor is skipped.
-        $engine = $engineClass === null ? null : (new ReflectionClass($engineClass))->newInstanceWithoutConstructor();
+        $engine = $engineClass === null ? null : self::engineOfClass($engineClass);
         $daemon = $this->daemonWithDb($this->stubDatabase());
 
         $this->assertSame($expected, $this->invoke($daemon, '_usesMtQueue', $engine));
@@ -2760,7 +2935,7 @@ class FastAnalysisPublishProbe extends FastAnalysis
     {
     }
 
-    protected function _getQueueAddressesByPriority(int $queueLen, int $id_mt_engine): ?Context
+    protected function _getQueueAddressesByPriority(int $queueLen, AbstractEngine $mtEngine): ?Context
     {
         return $this->_queueContextList->list['P4']
             ?? Context::buildFromArray(['queue_name' => 'fast_analysis_test_queue', 'max_executors' => 1]);
@@ -2948,7 +3123,7 @@ class FastAnalysisMainProbe extends FastAnalysis
 }
 
 /**
- * Probe subclass with a settable clock, for the rate-limited MT queue warnings.
+ * Probe subclass for the MT queue tests: a settable clock, scripted load reads, and a record of what it did.
  */
 class FastAnalysisMtQueueProbe extends FastAnalysis
 {

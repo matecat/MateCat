@@ -2,8 +2,6 @@
 
 namespace Utils\AsyncTasks\Workers\Analysis\MtQueue;
 
-use InvalidArgumentException;
-
 /**
  * Decides whether MT projects must wait, and which MT queue takes a project.
  *
@@ -43,16 +41,10 @@ final class MtQueueSelector
      *
      * Example: for pid 77, P4 at 5000 and P5 at 100 gives P5, unless P4 already lists pid 77 as live.
      *
-     * @param list<MtQueueLoad> $loads MT queues in context list order, P4 first.
-     *
-     * @throws InvalidArgumentException When there is no MT queue at all.
+     * @param non-empty-list<MtQueueLoad> $loads MT queues in context list order, P4 first.
      */
     public static function pick(array $loads, int $pid): MtQueueLoad
     {
-        if ($loads === []) {
-            throw new InvalidArgumentException('No MT queue to pick from.');
-        }
-
         // A retried project stays on its queue even when that queue is full or drained,
         // so its segments are not split across two queues.
         foreach ($loads as $load) {

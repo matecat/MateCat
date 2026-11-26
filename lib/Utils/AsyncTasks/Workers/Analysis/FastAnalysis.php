@@ -1240,13 +1240,7 @@ class FastAnalysis extends AbstractDaemon
             $engine->syncMemories($this->actual_project_row, array_values($this->segments));
         }
 
-        /*
-         * The $fastResultData[0]['id_mt_engine'] is the index of the MT engine we must use.
-         *
-         * I take the value from the first element of the list (the last one is the same for the project),
-         * because surely this value is equal for all the record of the project.
-         */
-        $queueInfo = $this->_getQueueAddressesByPriority($totalSegmentsToAnalyze, $this->actual_project_row['id_mt_engine']);
+        $queueInfo = $this->_getQueueAddressesByPriority($totalSegmentsToAnalyze, $engine);
 
         if ($queueInfo === null) {
             $this->logger->debug("No queue address found for project $pid. Skipping enqueue.");
@@ -1775,28 +1769,71 @@ HD;
     }
 
     /**
-     * Select the right Queue (and the associated redis Key) by its length (simplest implementation simple)
+     * Chooses the MT queue for the project being published and logs the choice as `mt_project_routed`.
      *
-     * @param $queueLen     int
-     * @param $id_mt_engine int
+     * With a single MT queue there is nothing to choose, so it reads no load. With P4 and P5 it reads both
+     * loads, and MtQueueSelector::pick() keeps a retried project on its queue, else takes the lightest
+     * available queue. The log's `age_seconds` counts from the project's creation, so it includes the wait in
+     * NEW and the fast analysis, and on a retry the earlier publish too; null when create_date is missing.
+     * `segments_to_publish` is the caller's count: one per segment and job, taken before 0-word segments are
+     * dropped, so it can be a little above the messages actually sent.
      *
-     * @return Context|null
+     * Example: P4 at 5000 segments and P5 at 100 sends project 301 to P5 and logs
+     * ['pid' => 301, 'queue' => 'P5', 'age_seconds' => 300, 'segments_to_publish' => 42, 'queues' => [...]].
+     *
+     * @throws RuntimeException
      */
-    protected function _getQueueAddressesByPriority(int $queueLen, int $id_mt_engine): ?Context
+    protected function _routeMtProject(int $segmentsToPublish): ?Context
     {
-        $mtEngine = null;
-        try {
-            $mtEngine = EnginesFactory::getInstance($id_mt_engine, $this->db(), AbstractEngine::class);
-        } catch (Exception $e) {
-            $this->logger->debug("Caught Exception: " . $e->getMessage());
+        $contexts = $this->_mtQueueContexts();
+        if ($contexts === []) {
+            // No MT queue in the config: null makes the caller skip the publish, as for any missing queue
+            return null;
         }
 
-        //anyway, take the defaults
+        $pid = (int)$this->actual_project_row['id'];
+
+        // With one MT queue there is nothing to choose, so no load is read and $loads stays []. With two, the
+        // reader gives one load per queue, so pick() never gets an empty list.
+        $loads = count($contexts) > 1 ? $this->_readMtQueueLoads() : [];
+        $key   = $loads === [] ? array_key_first($contexts) : MtQueueSelector::pick($loads, $pid)->key;
+
+        // PHP writes create_date with date(), in the time zone strtotime() parses it in, so the difference is
+        // real seconds; max(0, ...) hides a clock that went back
+        $created = strtotime((string)($this->actual_project_row['create_date'] ?? ''));
+
+        $log = [
+            'pid'                 => $pid,
+            'queue'               => $key,
+            'age_seconds'         => $created === false ? null : max(0, $this->_now() - $created),
+            'segments_to_publish' => $segmentsToPublish,
+        ];
+        if ($loads !== []) {
+            $log['queues'] = $this->_mtQueuesForLog($loads);
+        }
+        $this->logger->info('mt_project_routed', $log);
+
+        // The context list's own object: _registerOnMtQueue() finds the queue by identity
+        return $contexts[$key];
+    }
+
+    /**
+     * Chooses the queue for the project being published, from its engine and the number of segments to publish.
+     *
+     * Lara projects go to an MT queue, chosen by _routeMtProject(); other MT engines go to P3; projects with no
+     * MT engine go to P1, or to P2 from 10000 segments.
+     *
+     * Example: a DeepL project gives P3; a project with no engine and 20000 segments gives P2.
+     *
+     * @throws RuntimeException
+     */
+    protected function _getQueueAddressesByPriority(int $queueLen, AbstractEngine $mtEngine): ?Context
+    {
         $contextList = $this->_queueContextList->list;
 
         //use this kind of construct to easily add/remove queues and to disable feature by: comment rows or change the switch flag to false
         return match (true) {
-            $this->_usesMtQueue($mtEngine) => $contextList['P4'],
+            $this->_usesMtQueue($mtEngine) => $this->_routeMtProject($queueLen),
             !$mtEngine instanceof MyMemory && !$mtEngine instanceof NONE => $contextList['P3'],
             $queueLen >= 10000 => $contextList['P2'],
             default => $contextList['P1'],
@@ -1808,7 +1845,9 @@ HD;
      *
      * It takes one project at a time on purpose. The MT queue hold check runs once per pick, before the
      * project is chosen, so each Lara project is checked against fresh queue loads and a queue goes at most
-     * one project past its cap. With several projects per pick, all of them would go in on the same check.
+     * one project past its cap for each fast daemon of the instance: two daemons on two machines can both
+     * see room and publish one project each. With several projects per pick, all of them would go in on the
+     * same check.
      * The result is still a list, empty or with one row, so main() keeps a single loop over it.
      *
      * Example: with NEW projects 11 and 12 waiting, it gives [<row of project 11>].

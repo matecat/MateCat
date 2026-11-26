@@ -2,7 +2,6 @@
 
 namespace Matecat\Core\Workers\Analysis\MtQueue;
 
-use InvalidArgumentException;
 use Matecat\TestHelpers\AbstractTest;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -69,7 +68,7 @@ class MtQueueSelectorTest extends AbstractTest
     /**
      * Rows: MT queue loads, key of the queue expected for the project.
      *
-     * @return array<string, array{list<MtQueueLoad>, string}>
+     * @return array<string, array{non-empty-list<MtQueueLoad>, string}>
      */
     public static function pickProvider(): array
     {
@@ -99,20 +98,12 @@ class MtQueueSelectorTest extends AbstractTest
     }
 
     /**
-     * @param list<MtQueueLoad> $loads
+     * @param non-empty-list<MtQueueLoad> $loads
      */
     #[Test]
     #[DataProvider('pickProvider')]
     public function pickChoosesTheQueueForTheProject(array $loads, string $expectedKey): void
     {
         $this->assertSame($expectedKey, MtQueueSelector::pick($loads, self::PID)->key);
-    }
-
-    #[Test]
-    public function pickRefusesAnEmptyList(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-
-        MtQueueSelector::pick([], self::PID);
     }
 }
