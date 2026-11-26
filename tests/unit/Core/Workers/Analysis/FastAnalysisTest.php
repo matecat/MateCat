@@ -2026,13 +2026,14 @@ class FastAnalysisTest extends AbstractTest
     // ─── _getQueueAddressesByPriority ────────────────────────────────────
 
     /**
-     * Lara is the only adaptive engine left, so it alone takes the P4 queue; any other MT engine
-     * still goes to P3. Each case installs a real engine row and removes it afterwards, evicting the
-     * EngineDAO cache on both sides so no neighbouring test reads it.
+     * Lara is the only adaptive engine left, so it alone takes the P4 queue; any other MT engine, or an
+     * engine that cannot be built, still goes to P3; NONE goes to P1, or to P2 from 10000 queued segments.
+     * Each case installs a real engine row and removes it afterwards, evicting the EngineDAO cache on
+     * both sides so no neighbouring test reads it.
      */
     #[Test]
     #[DataProvider('queuePriorityByEngineProvider')]
-    public function getQueueAddressesByPriorityRoutesTheEngineToItsQueue(string $classLoad, string $expectedQueue): void
+    public function getQueueAddressesByPriorityRoutesTheEngineToItsQueue(string $classLoad, int $queueLen, string $expectedQueue): void
     {
         $database   = obtainTestDatabase();
         $connection = $database->getConnection();
@@ -2054,7 +2055,7 @@ class FastAnalysisTest extends AbstractTest
                 'P4' => ['queue_name' => 'p4', 'max_executors' => 1],
             ]));
 
-            $context = $this->invoke($daemon, '_getQueueAddressesByPriority', 0, $struct->id);
+            $context = $this->invoke($daemon, '_getQueueAddressesByPriority', $queueLen, $struct->id);
 
             $this->assertInstanceOf(Context::class, $context);
             $this->assertSame($expectedQueue, $context->queue_name);
@@ -2065,14 +2066,21 @@ class FastAnalysisTest extends AbstractTest
     }
 
     /**
-     * @return array<string, array{string, string}>
+     * Rows: engines.class_load, queue length, expected queue name.
+     *
+     * @return array<string, array{string, int, string}>
      */
     public static function queuePriorityByEngineProvider(): array
     {
         return [
-            'Lara is adaptive'         => ['Lara', 'p4'],
-            'Lara by its full name'    => ['Utils\Engines\Lara', 'p4'],
-            'DeepL is a plain MT'      => ['DeepL', 'p3'],
+            'Lara is adaptive'                => ['Lara', 0, 'p4'],
+            'Lara by its full name'           => ['Utils\Engines\Lara', 0, 'p4'],
+            'DeepL is a plain MT'             => ['DeepL', 0, 'p3'],
+            'no engine, short queue'          => ['NONE', 9999, 'p1'],
+            'no engine, long queue'           => ['NONE', 10000, 'p2'],
+            'unknown class reads as NONE'     => ['NoSuchEngineClass', 0, 'p1'],
+            // The fixture row is type MT, so the MyMemory constructor throws and no engine is built
+            'engine that cannot be built'     => ['MyMemory', 0, 'p3'],
         ];
     }
 
