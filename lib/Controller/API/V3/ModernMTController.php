@@ -8,8 +8,6 @@ use CURLFile;
 use Exception;
 use Model\Conversion\Upload;
 use Model\Conversion\UploadElement;
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use PhpOffice\PhpSpreadsheet\Writer\Csv;
 use RuntimeException;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MMT;
@@ -364,23 +362,8 @@ class ModernMTController extends KleinController
      */
     protected function extractCSV(UploadElement $glossary): string
     {
-        $tmpFileName = tempnam("/tmp", "MMT_EXCEL_GLOSS_");
-        if ($tmpFileName === false) {
-            throw new RuntimeException('Failed to create temporary file');
-        }
-
-        $objReader = IOFactory::createReaderForFile($glossary->file_path);
-
-        $objPHPExcel = $objReader->load($glossary->file_path);
-        $objWriter = new Csv($objPHPExcel);
-        $objWriter->save($tmpFileName);
-
-        $oldPath = $glossary->file_path;
-        $glossary->file_path = $tmpFileName;
-
-        unlink($oldPath);
-
-        return $glossary->file_path;
+        return CSVParser::extract($glossary, "MMT_EXCEL_GLOSS_")
+            ?: throw new RuntimeException('Unable to read the uploaded glossary file');
     }
 
     /**

@@ -1,8 +1,16 @@
+@use 'commons/variables';
+
 .__floater__open {
   [aria-label]::after,[aria-label]::before {
     display: none
   }
   .onboarding-tooltip {
+    // The tour renders inside the page, so without this its heading takes the page's h3 size.
+    h3 {
+      margin: 0 0 8px;
+      font-size: variables.$font-size-big;
+      line-height: variables.$line-height-big;
+    }
     ul {
       margin: 10px;
     }

@@ -89,6 +89,7 @@ export const JobMetadata = ({metadata}) => {
         mode={BUTTON_MODE.GHOST}
         onClick={openModal}
         size={BUTTON_SIZE.ICON_STANDARD}
+        data-onboarding="job-instructions"
       >
         <FileAttachment size={24} />
       </Button>
