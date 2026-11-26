@@ -158,6 +158,16 @@ describe('ProjectsBulkActions selection', () => {
     expect(screen.getByTestId('jobs-bulk')).toHaveTextContent(/^1,2$/)
   })
 
+  test('shift-clicking a project after a later job selects up to its last job', () => {
+    renderComponent()
+    fireEvent.click(screen.getByText('check-job-3'))
+    fireEvent.keyDown(document, {key: 'Shift'})
+    fireEvent.click(screen.getByText('check-project-100'))
+    fireEvent.keyUp(document, {key: 'Shift'})
+
+    expect(screen.getByTestId('jobs-bulk')).toHaveTextContent('3,2')
+  })
+
   test('checking a project selects every job belonging to it', () => {
     renderComponent()
     fireEvent.click(screen.getByText('check-project-100'))
