@@ -3,6 +3,7 @@
 // read-only segment view; no CodeMirror here.
 import React from 'react'
 import {createRoot} from 'react-dom/client'
+import {rootErrorOptions} from '../../utils/rootErrorOptions'
 import Tooltip, {TOOLTIP_MODE} from '../common/Tooltip'
 import {getTooltipTag} from '../../utils/segmentText/tagModel'
 
@@ -65,7 +66,7 @@ export const createTagTooltip = ({isCompressed}) => {
     container = document.createElement('div')
     container.className = 'tag-full-text-tooltip'
     document.body.appendChild(container)
-    root = createRoot(container)
+    root = createRoot(container, rootErrorOptions)
     root.render(
       <Tooltip
         mode={TOOLTIP_MODE.STATIC}

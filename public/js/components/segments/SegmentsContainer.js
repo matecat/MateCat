@@ -12,6 +12,7 @@ import PropTypes from 'prop-types'
 import {fromJS} from 'immutable'
 import {flushSync} from 'react-dom'
 import {createRoot} from 'react-dom/client'
+import {rootErrorOptions} from '../../utils/rootErrorOptions'
 import {useHotkeys} from 'react-hotkeys-hook'
 import {Shortcuts} from '../../utils/shortcuts'
 import VirtualList from '../common/VirtualList/VirtualList'
@@ -1139,7 +1140,7 @@ const measureSegmentStructures = (segments, sideOpen) => {
   if (!segments.length) return []
   const container = document.createElement('div')
   document.getElementById('outer').appendChild(container)
-  const root = createRoot(container)
+  const root = createRoot(container, rootErrorOptions)
   try {
     flushSync(() =>
       root.render(

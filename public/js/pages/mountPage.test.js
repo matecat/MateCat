@@ -20,6 +20,7 @@ jest.mock('../components/notificationsComponent/NotificationBox', () => () => (
 ))
 
 import {mountPage} from './mountPage'
+import {rootErrorOptions} from '../utils/rootErrorOptions'
 
 // Captures and returns only the DOMContentLoaded handler just registered by
 // the mountPage() call under test, so tests don't trigger stale listeners
@@ -57,7 +58,7 @@ describe('mountPage', () => {
     )
     handler()
 
-    expect(mockCreateRoot).toHaveBeenCalledWith(rootElement)
+    expect(mockCreateRoot).toHaveBeenCalledWith(rootElement, rootErrorOptions)
     expect(mockRender).toHaveBeenCalledTimes(1)
 
     const renderedElement = mockRender.mock.calls[0][0]
@@ -85,7 +86,11 @@ describe('mountPage', () => {
     handler()
 
     expect(mockCreateRoot).toHaveBeenCalledTimes(2)
-    expect(mockCreateRoot).toHaveBeenNthCalledWith(2, notifWrapper)
+    expect(mockCreateRoot).toHaveBeenNthCalledWith(
+      2,
+      notifWrapper,
+      rootErrorOptions,
+    )
     expect(mockRender).toHaveBeenCalledTimes(2)
   })
 
