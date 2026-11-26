@@ -107,15 +107,21 @@ class CommentDaoTest extends AbstractTest
         $pdoMock  = $this->createMock(PDO::class);
         $stmtMock = $this->createMock(PDOStatement::class);
 
+        // The project of the comment is looked up first, so its open-threads count can be evicted
+        // once the row is gone; this one has no job any more, so nothing is evicted.
+        $lookupStmt = $this->createMock(PDOStatement::class);
+        $lookupStmt->expects($this->once())->method('execute')->with(['id_comment' => 42])->willReturn(true);
+        $lookupStmt->expects($this->once())->method('fetchColumn')->willReturn(false);
+
         $dbMock
-            ->expects($this->once())
+            ->expects($this->exactly(2))
             ->method('getConnection')
             ->willReturn($pdoMock);
 
         $pdoMock
-            ->expects($this->once())
+            ->expects($this->exactly(2))
             ->method('prepare')
-            ->willReturn($stmtMock);
+            ->willReturnOnConsecutiveCalls($lookupStmt, $stmtMock);
 
         $stmtMock
             ->expects($this->once())
@@ -141,8 +147,11 @@ class CommentDaoTest extends AbstractTest
         $pdoMock  = $this->createStub(PDO::class);
         $stmtMock = $this->createStub(PDOStatement::class);
 
+        $lookupStmt = $this->createStub(PDOStatement::class);
+        $lookupStmt->method('fetchColumn')->willReturn(false);
+
         $dbMock->method('getConnection')->willReturn($pdoMock);
-        $pdoMock->method('prepare')->willReturn($stmtMock);
+        $pdoMock->method('prepare')->willReturnOnConsecutiveCalls($lookupStmt, $stmtMock);
         $stmtMock->method('execute')->willReturn(false);
 
         $dao = new TestCommentDao($dbMock);

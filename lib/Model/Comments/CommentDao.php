@@ -50,9 +50,21 @@ class CommentDao extends AbstractDao
         }
 
         $ids = array_map(fn($id): int => (int)$id, array_values($projectIds));
-        $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
-        $sql = "
+        $stmt = $this->_getStatementForQuery(self::openThreadsForProjectsQuery(count($ids)));
+
+        return array_values($this->_fetchObjectMap($stmt, OpenThreadsStruct::class, $ids));
+    }
+
+    /**
+     * The query text is half the cache key, so the read and its eviction build it here: one
+     * placeholder per project id.
+     */
+    private static function openThreadsForProjectsQuery(int $projectCount): string
+    {
+        $placeholders = implode(',', array_fill(0, $projectCount, '?'));
+
+        return "
         SELECT id_project, jobs.password, id_job, COUNT( DISTINCT id_segment ) AS count
             FROM projects
             JOIN jobs ON jobs.id_project = projects.id
@@ -65,11 +77,55 @@ class CommentDao extends AbstractDao
 
         GROUP BY id_project, id_job, jobs.password
  ";
+    }
 
-        $con = $this->database->getConnection();
-        $stmt = $con->prepare($sql);
+    /**
+     * Evict getOpenThreadsForProjects() for one project, the only shape it is read in (the job rows
+     * of the projects page). Every write that opens or closes a thread calls it, so the comments
+     * alert on that page follows the editor without waiting for the TTL.
+     *
+     * @throws ReflectionException
+     * @throws PDOException
+     */
+    private function destroyCacheOpenThreadsForProjects(?int $id_project): bool
+    {
+        if ($id_project === null) {
+            return false;
+        }
 
-        return array_values($this->_fetchObjectMap($stmt, OpenThreadsStruct::class, $ids));
+        $stmt = $this->_getStatementForQuery(self::openThreadsForProjectsQuery(1));
+
+        return $this->_destroyObjectCache($stmt, OpenThreadsStruct::class, [$id_project]);
+    }
+
+    /**
+     * Read live and uncached: it feeds a cache eviction.
+     *
+     * @throws PDOException
+     */
+    private function getProjectIdByJobId(int $id_job): ?int
+    {
+        $stmt = $this->database->getConnection()->prepare("SELECT id_project FROM jobs WHERE id = :id_job LIMIT 1");
+        $stmt->execute(['id_job' => $id_job]);
+        $id_project = $stmt->fetchColumn();
+
+        return $id_project === false ? null : (int)$id_project;
+    }
+
+    /**
+     * Read live and uncached, before the row is gone: it feeds a cache eviction.
+     *
+     * @throws PDOException
+     */
+    private function getProjectIdByCommentId(int $id_comment): ?int
+    {
+        $stmt = $this->database->getConnection()->prepare(
+            "SELECT jobs.id_project FROM comments JOIN jobs ON jobs.id = comments.id_job WHERE comments.id = :id_comment LIMIT 1"
+        );
+        $stmt->execute(['id_comment' => $id_comment]);
+        $id_project = $stmt->fetchColumn();
+
+        return $id_project === false ? null : (int)$id_project;
     }
 
     /**
@@ -81,15 +137,21 @@ class CommentDao extends AbstractDao
      */
     public function deleteComment(BaseCommentStruct $comment): bool
     {
+        $id_project = $this->getProjectIdByCommentId($comment->id);
+
         $sql = "DELETE from comments WHERE id = :id";
         $con = $this->database->getConnection();
         $stmt = $con->prepare($sql);
 
-        $this->destroySegmentIdSegmentCache($comment->id_segment);
-
-        return $stmt->execute([
+        $deleted = $stmt->execute([
             'id' => $comment->id
         ]);
+
+        // After the DELETE: evicting first would let a concurrent read cache the row again.
+        $this->destroySegmentIdSegmentCache($comment->id_segment);
+        $this->destroyCacheOpenThreadsForProjects($id_project);
+
+        return $deleted;
     }
 
     /**
@@ -169,6 +231,8 @@ class CommentDao extends AbstractDao
         $obj->id = (int)$id;
 
         $this->destroySegmentIdSegmentCache($obj->id_segment);
+        // A new comment opens a thread, or reopens a resolved one.
+        $this->destroyCacheOpenThreadsForProjects($this->getProjectIdByJobId($obj->id_job));
 
         return $obj;
     }
@@ -186,6 +250,8 @@ class CommentDao extends AbstractDao
         $obj->message_type = self::TYPE_RESOLVE;
         $obj->resolve_date = date('Y-m-d H:i:s');
 
+        // saveComment() runs inside this scope, so its open-threads eviction is held until the
+        // commit, after the resolve_date stamp below that closes the thread.
         $comment = $this->database->transaction(function () use ($obj): CommentStruct {
             $comment = $this->saveComment($obj);
 

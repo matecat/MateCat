@@ -470,6 +470,85 @@ class CommentDaoRealSqlTest extends AbstractTest
     }
 
     // -----------------------------------------------------------------------------------------
+    // getOpenThreadsForProjects cache: every write that opens or closes a thread evicts it
+    // -----------------------------------------------------------------------------------------
+
+    /**
+     * The cached read the projects page makes for one job row.
+     */
+    private function cachedOpenThreadsCount(int $idProject): int
+    {
+        $rows = $this->dao->setCacheTTL(600)->getOpenThreadsForProjects([$idProject]);
+
+        return isset($rows[0]) ? (int)$rows[0]->count : 0;
+    }
+
+    public function testSaveCommentEvictsCachedOpenThreads(): void
+    {
+        $this->flushDaoCache();
+        $ctx = $this->makeJobWithSegment();
+        $this->assertSame(0, $this->cachedOpenThreadsCount($ctx['id_project']));
+
+        $saved = $this->dao->saveComment($this->newCommentStruct($ctx['id_job'], $ctx['id_segment']));
+        $this->fixtures->trackExisting('comments', ['id' => (int)$saved->id]);
+
+        $this->assertSame(1, $this->cachedOpenThreadsCount($ctx['id_project']));
+    }
+
+    public function testResolveThreadEvictsCachedOpenThreads(): void
+    {
+        $this->flushDaoCache();
+        $ctx = $this->makeJobWithSegment();
+        $this->fixtures->makeComment($ctx['id_job'], $ctx['id_segment'], ['message_type' => CommentDao::TYPE_COMMENT]);
+        $this->assertSame(1, $this->cachedOpenThreadsCount($ctx['id_project']));
+
+        $resolved = $this->dao->resolveThread($this->newCommentStruct($ctx['id_job'], $ctx['id_segment']));
+        $this->fixtures->trackExisting('comments', ['id' => (int)$resolved->id]);
+
+        $this->assertSame(0, $this->cachedOpenThreadsCount($ctx['id_project']));
+    }
+
+    public function testCommentOnResolvedThreadEvictsCachedOpenThreads(): void
+    {
+        $this->flushDaoCache();
+        $ctx = $this->makeJobWithSegment();
+        $this->fixtures->makeComment($ctx['id_job'], $ctx['id_segment'], [
+            'message_type' => CommentDao::TYPE_COMMENT,
+            'resolve_date' => date('Y-m-d H:i:s'),
+        ]);
+        $this->assertSame(0, $this->cachedOpenThreadsCount($ctx['id_project']));
+
+        $reopened = $this->dao->saveComment($this->newCommentStruct($ctx['id_job'], $ctx['id_segment']));
+        $this->fixtures->trackExisting('comments', ['id' => (int)$reopened->id]);
+
+        $this->assertSame(1, $this->cachedOpenThreadsCount($ctx['id_project']));
+    }
+
+    public function testDeleteCommentEvictsCachedOpenThreads(): void
+    {
+        $this->flushDaoCache();
+        $ctx = $this->makeJobWithSegment();
+        $made = $this->fixtures->makeComment($ctx['id_job'], $ctx['id_segment'], ['message_type' => CommentDao::TYPE_COMMENT]);
+        $this->assertSame(1, $this->cachedOpenThreadsCount($ctx['id_project']));
+
+        $toDelete = new CommentStruct();
+        $toDelete->id = $made['id'];
+        $toDelete->id_segment = $ctx['id_segment'];
+        $this->assertTrue($this->dao->deleteComment($toDelete));
+
+        $this->assertSame(0, $this->cachedOpenThreadsCount($ctx['id_project']));
+    }
+
+    public function testDeleteOfAMissingCommentEvictsNothingAndStillSucceeds(): void
+    {
+        $toDelete = new CommentStruct();
+        $toDelete->id = 2_000_000_999;
+        $toDelete->id_segment = 2_000_000_999;
+
+        $this->assertTrue($this->dao->deleteComment($toDelete));
+    }
+
+    // -----------------------------------------------------------------------------------------
     // getUsersIdFromContent (pure regex helper — no SQL)
     // -----------------------------------------------------------------------------------------
 
