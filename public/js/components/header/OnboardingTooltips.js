@@ -1,4 +1,4 @@
-import React, {lazy, Suspense, useEffect, useState} from 'react'
+import React, {lazy, Suspense, useEffect, useRef, useState} from 'react'
 
 // react-joyride is only needed while a tour can run: users who dismissed it never download it.
 const Joyride = lazy(() =>
@@ -22,6 +22,8 @@ class TourErrorBoundary extends React.Component {
 }
 // react-joyride's STATUS.FINISHED and STATUS.SKIPPED, inlined so the library stays out of the page.
 const TOUR_DONE_STATUSES = ['finished', 'skipped']
+// react-joyride's EVENTS.TOOLTIP: a step's tooltip was shown to the user.
+const TOOLTIP_SHOWN_EVENT = 'tooltip'
 export const ONBOARDING_PAGE = {
   HOME: 'home',
   CATTOOL: 'cattool',
@@ -29,13 +31,14 @@ export const ONBOARDING_PAGE = {
 const onBoardingLocalStorageName = 'onBoarding-tooltip-'
 export const OnboardingTooltips = ({show, page}) => {
   const [run, setRun] = useState(false)
+  const tooltipShownRef = useRef(false)
   const localStorageItem = localStorage.getItem(
     onBoardingLocalStorageName + page,
   )
   const steps = {
     home: [
       {
-        target: '.popover-component-container',
+        target: '[data-onboarding="user-menu"]',
         content: (
           <div className={'onboarding-tooltip'}>
             <h3 className="header">Manage your projects</h3>
@@ -51,7 +54,7 @@ export const OnboardingTooltips = ({show, page}) => {
     ],
     cattool: [
       {
-        target: '#action-three-dots',
+        target: '[data-onboarding="cattool-actions-menu"]',
         content: (
           <div className={'onboarding-tooltip'}>
             <h3>Easier tool navigation and new shortcuts</h3>
@@ -68,7 +71,7 @@ export const OnboardingTooltips = ({show, page}) => {
         placement: 'bottom-end',
       },
       {
-        target: '#files-instructions',
+        target: '[data-onboarding="job-instructions"]',
         content: (
           <div className={'onboarding-tooltip'}>
             <h3>Instructions and references</h3>
@@ -85,9 +88,16 @@ export const OnboardingTooltips = ({show, page}) => {
   }
   const closeCallback = (data) => {
     const {status, type} = data
+    if (type === TOOLTIP_SHOWN_EVENT) {
+      tooltipShownRef.current = true
+    }
     if (TOUR_DONE_STATUSES.includes(status)) {
       setRun(false)
-      localStorage.setItem(onBoardingLocalStorageName + page, 1)
+      // A tour also ends when every target is missing: it was never seen, so
+      // leave it to run again on a page that has them.
+      if (tooltipShownRef.current) {
+        localStorage.setItem(onBoardingLocalStorageName + page, 1)
+      }
     }
   }
 
