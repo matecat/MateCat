@@ -31,6 +31,7 @@ use Stomp\Exception\ConnectionException;
 use Stomp\Transport\Message;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\Analysis\FastAnalysis;
+use Utils\AsyncTasks\Workers\Analysis\MtQueue\MtQueueLoad;
 use Utils\Constants\ProjectStatus;
 use Utils\Registry\AppConfig;
 use Utils\Constants\TranslationStatus;
@@ -1083,6 +1084,8 @@ class FastAnalysisTest extends AbstractTest
             };
         };
         $logger->method('debug')->willReturnCallback($capture('debug'));
+        $logger->method('info')->willReturnCallback($capture('info'));
+        $logger->method('warning')->willReturnCallback($capture('warning'));
         $logger->method('error')->willReturnCallback($capture('error'));
 
         return $logger;
@@ -1208,6 +1211,7 @@ class FastAnalysisTest extends AbstractTest
         $fa->getProperty('logger')->setValue($probe, $this->createStub(MatecatLogger::class));
         $fa->getProperty('myProcessPid')->setValue($probe, 4242);
         $fa->getProperty('RUNNING')->setValue($probe, true);
+        $fa->getProperty('_queueContextList')->setValue($probe, ContextList::get([]));
 
         $filesStorage = $this->createStub(AbstractFilesStorage::class);
         $fa->getProperty('files_storage')->setValue($probe, $filesStorage);
@@ -1869,11 +1873,18 @@ class FastAnalysisTest extends AbstractTest
      * @param array<int, mixed>  $pretranslateArgs
      * @param int                $wordCount        the fast analysis word count of the segment; 0 skips it
      * @param MatecatLogger|null $logger           where the daemon logs; a silent stub when null
+     * @param array<string, array<string, mixed>> $queues context list settings; with a P4 entry the probe routes to P4
+     * @param FastAnalysisFakeRedis|null $redis    the Redis the daemon writes to, to inspect it afterwards
      *
      * @return list<array<string, mixed>>
      */
-    private function publishedParams(array $pretranslateArgs, int $wordCount = 2, ?MatecatLogger $logger = null): array
-    {
+    private function publishedParams(
+        array $pretranslateArgs,
+        int $wordCount = 2,
+        ?MatecatLogger $logger = null,
+        array $queues = [],
+        ?FastAnalysisFakeRedis $redis = null
+    ): array {
         $ref    = new ReflectionClass(FastAnalysisPublishProbe::class);
         $daemon = $ref->newInstanceWithoutConstructor();
         $this->setProp($daemon, 'db', obtainTestDatabase());
@@ -1882,7 +1893,7 @@ class FastAnalysisTest extends AbstractTest
 
         $published = [];
         $amq       = $this->createStub(AMQHandler::class);
-        $amq->method('getRedisClient')->willReturn(new FastAnalysisFakeRedis());
+        $amq->method('getRedisClient')->willReturn($redis ?? new FastAnalysisFakeRedis());
         $amq->method('publishToQueues')->willReturnCallback(
             function (string $queue, Message $message) use (&$published): bool {
                 $published[] = json_decode($message->getBody(), true)['params'];
@@ -1891,6 +1902,7 @@ class FastAnalysisTest extends AbstractTest
             }
         );
         $this->setProp($daemon, 'queueHandler', $amq);
+        $this->setProp($daemon, '_queueContextList', ContextList::get($queues));
 
         $this->setProp($daemon, 'actual_project_row', [
             'id_mt_engine' => 0,
@@ -2113,6 +2125,219 @@ class FastAnalysisTest extends AbstractTest
             'no engine' => [null, false],
         ];
     }
+
+    // ─── MT queue loads ──────────────────────────────────────────────────
+
+    /**
+     * Settings of the queues used by the MT load tests: P4 capped at 25000 segments and 80 projects.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    private static function mtQueueSettings(): array
+    {
+        return [
+            'P1' => ['queue_name' => 'analysis_queue_P1', 'max_executors' => 1],
+            'P3' => ['queue_name' => 'analysis_queue_P3', 'max_executors' => 1],
+            'P4' => ['queue_name' => 'analysis_queue_P4', 'max_executors' => 30, 'max_queued_segments' => 25000, 'max_queued_projects' => 80],
+        ];
+    }
+
+    /**
+     * Builds a daemon that reads the MT queue loads with no broker or Redis: Jolokia answers from $queueSizes
+     * and Redis is the recording fake.
+     *
+     * Example: mtQueueDaemon(self::mtQueueSettings(), ['analysis_queue_P4' => 500], $logged).
+     *
+     * @param array<string, array<string, mixed>>                           $settings   context list settings, keyed 'P1'..'P5'
+     * @param array<string, int|null>                                       $queueSizes readQueueSize() result per queue name
+     * @param list<array{level: string, message: mixed, context: array<mixed>}> $logged
+     *
+     * @return array{0: FastAnalysisMtQueueProbe, 1: FastAnalysisFakeRedis}
+     */
+    private function mtQueueDaemon(array $settings, array $queueSizes, array &$logged): array
+    {
+        $probe = (new ReflectionClass(FastAnalysisMtQueueProbe::class))->newInstanceWithoutConstructor();
+
+        $redis = new FastAnalysisFakeRedis();
+        $amq   = $this->createStub(AMQHandler::class);
+        $amq->method('getRedisClient')->willReturn($redis);
+        $amq->method('readQueueSize')->willReturnCallback(fn (string $queueName): ?int => $queueSizes[$queueName] ?? null);
+
+        $fa = new ReflectionClass(FastAnalysis::class);
+        $fa->getProperty('db')->setValue($probe, $this->createStub(IDatabase::class));
+        $fa->getProperty('logger')->setValue($probe, $this->capturingStructuredLogger($logged));
+        $fa->getProperty('queueHandler')->setValue($probe, $amq);
+        $fa->getProperty('_queueContextList')->setValue($probe, ContextList::get($settings));
+
+        return [$probe, $redis];
+    }
+
+    /**
+     * @param list<array{level: string, message: mixed, context: array<mixed>}> $logged
+     *
+     * @return list<array<mixed>> the context of each entry logged with this message
+     */
+    private static function loggedContexts(array $logged, string $message): array
+    {
+        $contexts = [];
+        foreach ($logged as $entry) {
+            if ($entry['message'] === $message) {
+                $contexts[] = $entry['context'];
+            }
+        }
+
+        return $contexts;
+    }
+
+    /**
+     * Rows: context list settings, expected MT queue keys in order.
+     *
+     * @return array<string, array{array<string, array<string, mixed>>, list<string>}>
+     */
+    public static function mtQueueContextsProvider(): array
+    {
+        $queue = fn (string $key): array => ['queue_name' => 'analysis_queue_' . $key, 'max_executors' => 1];
+
+        return [
+            'P4 among other queues' => [['P1' => $queue('P1'), 'P3' => $queue('P3'), 'P4' => $queue('P4')], ['P4']],
+            'P5 written before P4'  => [['P5' => $queue('P5'), 'P1' => $queue('P1'), 'P4' => $queue('P4')], ['P4', 'P5']],
+            'no MT queue'           => [['P1' => $queue('P1'), 'P2' => $queue('P2'), 'P3' => $queue('P3')], []],
+        ];
+    }
+
+    /**
+     * @param array<string, array<string, mixed>> $settings
+     * @param list<string>                        $expectedKeys
+     */
+    #[Test]
+    #[DataProvider('mtQueueContextsProvider')]
+    public function mtQueueContextsAreP4ThenP5WhenConfigured(array $settings, array $expectedKeys): void
+    {
+        $logged = [];
+        [$daemon] = $this->mtQueueDaemon($settings, [], $logged);
+
+        $contexts = $this->invoke($daemon, '_mtQueueContexts');
+
+        $this->assertSame($expectedKeys, array_keys($contexts));
+        foreach ($contexts as $key => $context) {
+            $this->assertSame((new ReflectionClass(FastAnalysis::class))->getProperty('_queueContextList')->getValue($daemon)->list[$key], $context);
+        }
+    }
+
+    #[Test]
+    public function readMtQueueLoadsReadsEachMtQueueOnTheDaemonClock(): void
+    {
+        $logged   = [];
+        $settings = self::mtQueueSettings();
+        $settings['P5'] = ['queue_name' => 'analysis_queue_P5', 'max_executors' => 10];
+        [$daemon, $redis] = $this->mtQueueDaemon($settings, ['analysis_queue_P4' => 500], $logged);
+        $redis->sets['analysis_queue_P4_pid_set'] = ['worker-1', 'worker-2'];
+
+        $unreadableWarnings = [];
+        foreach ([1000, 1030] as $now) {
+            $daemon->now = $now;
+            $logged      = [];
+            $loads       = $this->invoke($daemon, '_readMtQueueLoads');
+            $unreadableWarnings[$now] = array_column(self::loggedContexts($logged, 'mt_queue_load_unreadable'), 'part', 'queue');
+        }
+
+        // both reads return the same loads; the assertions check the second one
+        $this->assertSame(['P4', 'P5'], array_map(fn (MtQueueLoad $load): string => $load->key, $loads));
+        $this->assertSame([500, 0], array_map(fn (MtQueueLoad $load): ?int => $load->segmentLoad, $loads));
+        $this->assertSame([2, 0], array_map(fn (MtQueueLoad $load): int => $load->workers, $loads));
+        // P5 QueueSize is unreadable on both reads; 30 seconds later the warning is not repeated
+        $this->assertSame([1000 => ['P5' => 'queue_size'], 1030 => []], $unreadableWarnings);
+    }
+
+    #[Test]
+    public function publishingToAnMtQueueRecordsTheProjectAsLive(): void
+    {
+        $redis = new FastAnalysisFakeRedis();
+
+        $published = $this->publishedParams([], 2, null, self::mtQueueSettings(), $redis);
+
+        $this->assertCount(1, $published);
+        $this->assertContains(['hsetex', 'analysis_queue_P4_live_pids', [99999990 => '1'], '', 'ex', 86400], $redis->calls);
+    }
+
+    #[Test]
+    public function publishingToAnotherQueueRecordsNothing(): void
+    {
+        $redis = new FastAnalysisFakeRedis();
+
+        $this->publishedParams([], 2, null, [], $redis);
+
+        $this->assertSame([], array_filter($redis->calls, fn (array $call): bool => $call[0] === 'hsetex'));
+    }
+
+    #[Test]
+    public function registerOnMtQueueRecordsOnlyProjectsPublishedToAnMtQueue(): void
+    {
+        $logged = [];
+        [$daemon, $redis] = $this->mtQueueDaemon(self::mtQueueSettings(), [], $logged);
+        $contexts = (new ReflectionClass(FastAnalysis::class))->getProperty('_queueContextList')->getValue($daemon)->list;
+
+        $this->invoke($daemon, '_registerOnMtQueue', 11, $contexts['P4']);
+        $this->invoke($daemon, '_registerOnMtQueue', 12, $contexts['P1']);
+
+        $this->assertSame([['hsetex', 'analysis_queue_P4_live_pids', [11 => '1'], '', 'ex', 86400]], $redis->calls);
+    }
+
+    #[Test]
+    public function logMtQueueSettingsReportsTheMtQueueSettingsAndEachRejectedValue(): void
+    {
+        $logged = [];
+        $settings = self::mtQueueSettings();
+        $settings['P5'] = ['queue_name' => 'analysis_queue_P5', 'max_executors' => 10, 'max_queued_segments' => '25.000', 'accept_new_projects' => false];
+        $settings['P1']['max_queued_projects'] = '-1';
+        [$daemon] = $this->mtQueueDaemon($settings, [], $logged);
+
+        $this->invoke($daemon, '_logMtQueueSettings');
+
+        $this->assertSame([[
+            'P4' => ['max_queued_segments' => 25000, 'max_queued_projects' => 80, 'accept_new_projects' => true, 'max_executors' => 30],
+            'P5' => ['max_queued_segments' => 0, 'max_queued_projects' => 0, 'accept_new_projects' => false, 'max_executors' => 10],
+        ]], self::loggedContexts($logged, 'mt_queue_settings'));
+        // only MT queues read the caps, so a rejected P1 value is not reported
+        $this->assertSame(
+            [['queue' => 'P5', 'key' => 'max_queued_segments', 'value' => '25.000']],
+            self::loggedContexts($logged, 'mt_queue_setting_invalid')
+        );
+    }
+
+    #[Test]
+    public function logMtQueueSettingsLogsNoSettingsWithoutAnMtQueue(): void
+    {
+        $logged = [];
+        [$daemon] = $this->mtQueueDaemon(['P1' => ['queue_name' => 'analysis_queue_P1', 'max_executors' => 1]], [], $logged);
+
+        $this->invoke($daemon, '_logMtQueueSettings');
+
+        $this->assertSame([], $logged);
+    }
+
+    #[Test]
+    public function mainLogsTheMtQueueSettingsOnceBeforeItsLoop(): void
+    {
+        [$probe, $redis] = $this->wireMainProbe();
+        $logged = [];
+        $this->setProp($probe, 'logger', $this->capturingStructuredLogger($logged));
+        $this->setProp($probe, '_queueContextList', ContextList::get(self::mtQueueSettings()));
+        $redis->sismemberReturns = [false]; // the loop stops on its first check
+
+        $probe->main();
+
+        $this->assertCount(1, self::loggedContexts($logged, 'mt_queue_settings'));
+    }
+
+    #[Test]
+    public function nowIsTheCurrentUnixTime(): void
+    {
+        $fa  = new ReflectionClass(FastAnalysis::class);
+        $now = $fa->getMethod('_now')->invoke($fa->newInstanceWithoutConstructor());
+
+        $this->assertEqualsWithDelta(time(), $now, 2);
+    }
 }
 
 /**
@@ -2186,11 +2411,41 @@ class FastAnalysisFakeRedis extends PredisClient
         return 'OK';
     }
 
+    /** @var array<string, list<string>> set key => members, counted by scard */
+    public array $sets = [];
+
     public function lrem($key, $count, $value): int
     {
         $this->calls[] = ['lrem', $key, $count, $value];
 
         return 0;
+    }
+
+    public function scard($key): int
+    {
+        $this->calls[] = ['scard', $key];
+
+        return count($this->sets[$key] ?? []);
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function hkeys($key): array
+    {
+        $this->calls[] = ['hkeys', $key];
+
+        return [];
+    }
+
+    /**
+     * @param array<int|string, string> $fieldValueMap
+     */
+    public function hsetex($key, array $fieldValueMap, $setModifier = '', $ttlModifier = '', $ttlModifierValue = false): int
+    {
+        $this->calls[] = ['hsetex', $key, $fieldValueMap, $setModifier, $ttlModifier, $ttlModifierValue];
+
+        return 1;
     }
 
     public function rpush($key, $values): int
@@ -2216,7 +2471,8 @@ class FastAnalysisPdoFailingProbe extends FastAnalysis
 
 /**
  * Lets _insertFastAnalysis() reach the publish loop without a broker: the segment_translations
- * insert and the queue-total bookkeeping do nothing, and every segment routes to one fixed queue.
+ * insert and the queue-total bookkeeping do nothing, and every segment routes to P4 when the context list
+ * has it, otherwise to one fixed queue.
  */
 class FastAnalysisPublishProbe extends FastAnalysis
 {
@@ -2230,7 +2486,8 @@ class FastAnalysisPublishProbe extends FastAnalysis
 
     protected function _getQueueAddressesByPriority(int $queueLen, int $id_mt_engine): ?Context
     {
-        return Context::buildFromArray(['queue_name' => 'fast_analysis_test_queue', 'max_executors' => 1]);
+        return $this->_queueContextList->list['P4']
+            ?? Context::buildFromArray(['queue_name' => 'fast_analysis_test_queue', 'max_executors' => 1]);
     }
 }
 
@@ -2411,5 +2668,18 @@ class FastAnalysisMainProbe extends FastAnalysis
     public function cleanShutDown(): void
     {
         // no-op: skip the real broker/Redis teardown in unit tests
+    }
+}
+
+/**
+ * Probe subclass with a settable clock, for the rate-limited MT queue warnings.
+ */
+class FastAnalysisMtQueueProbe extends FastAnalysis
+{
+    public int $now = 1000;
+
+    protected function _now(): int
+    {
+        return $this->now;
     }
 }

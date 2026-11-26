@@ -36,6 +36,8 @@ use Throwable;
 use TypeError;
 use UnexpectedValueException;
 use Utils\ActiveMQ\AMQHandler;
+use Utils\AsyncTasks\Workers\Analysis\MtQueue\MtQueueLoad;
+use Utils\AsyncTasks\Workers\Analysis\MtQueue\MtQueueLoadReader;
 use Utils\AsyncTasks\Workers\Traits\ProjectWordCount;
 use Utils\Constants\ProjectStatus as ProjectStatus;
 use Utils\Engines\AbstractEngine;
@@ -318,7 +320,9 @@ class FastAnalysis extends AbstractDaemon
     const int PROCESSING_LOCK_TTL_SECONDS = 60 * 60 * 24;
 
     /**
-     * Reload Configuration every cycle
+     * Loads the queue settings from the task manager config; it runs once, in the constructor.
+     *
+     * Example: an ini with P1, P3 and P4 gives a context list with those three queues.
      *
      * @throws Exception
      * @throws TypeError
@@ -400,6 +404,8 @@ class FastAnalysis extends AbstractDaemon
      */
     public function main(array $args = null): void
     {
+        $this->_logMtQueueSettings();
+
         do {
             if (!$this->requireQueueHandler()->getRedisClient()->sismember(RedisKeys::FAST_PID_SET, $this->myProcessPid . ":" . gethostname() . ":" . AppConfig::$INSTANCE_ID)) {
                 // suicide gracefully
@@ -1258,6 +1264,8 @@ class FastAnalysis extends AbstractDaemon
                 throw $e;
             }
 
+            $this->_registerOnMtQueue((int)$pid, $queueInfo);
+
             $time_start = microtime(true);
 
             /**
@@ -1561,6 +1569,98 @@ HD;
         }
 
         return false;
+    }
+
+    /** Reads the MT queue loads; built on first use, then kept for its warning rate limit. */
+    private ?MtQueueLoadReader $mtQueueLoadReader = null;
+
+    /**
+     * Current Unix time; tests replace it to move the clock.
+     */
+    protected function _now(): int
+    {
+        return time();
+    }
+
+    /**
+     * MT analysis queues in the context list, P4 then P5, whatever their order in the config.
+     *
+     * Example: a list with P1, P3 and P4 gives ['P4' => <P4 context>].
+     *
+     * @return array<string, Context>
+     */
+    protected function _mtQueueContexts(): array
+    {
+        $contexts = [];
+        foreach (['P4', 'P5'] as $key) {
+            if (isset($this->_queueContextList->list[$key])) {
+                $contexts[$key] = $this->_queueContextList->list[$key];
+            }
+        }
+
+        return $contexts;
+    }
+
+    /**
+     * Logs the caps of the MT queues once at start, and each MT queue setting the config rejected.
+     *
+     * Example: `P5[max_queued_segments] = 25.000` logs `mt_queue_setting_invalid` and P5 runs with no segment cap.
+     */
+    protected function _logMtQueueSettings(): void
+    {
+        $settings = [];
+        foreach ($this->_mtQueueContexts() as $key => $context) {
+            $settings[$key] = [
+                'max_queued_segments' => $context->max_queued_segments,
+                'max_queued_projects' => $context->max_queued_projects,
+                'accept_new_projects' => $context->accept_new_projects,
+                'max_executors'       => $context->max_executors,
+            ];
+
+            foreach ($context->invalid_settings as $setting => $value) {
+                $this->logger->error('mt_queue_setting_invalid', ['queue' => $key, 'key' => $setting, 'value' => $value]);
+            }
+        }
+
+        if ($settings !== []) {
+            $this->logger->info('mt_queue_settings', $settings);
+        }
+    }
+
+    /**
+     * How busy each MT queue is now, P4 first, for the hold and routing decisions.
+     *
+     * Unknown values never make a queue full. _setTotal() still needs Jolokia, so during a Jolokia outage
+     * publishing fails exactly as it did before this check.
+     *
+     * Example: P4 with 500 messages in the broker and 60 segments left in its live projects gives segmentLoad 500.
+     *
+     * @return list<MtQueueLoad>
+     * @throws RuntimeException
+     */
+    protected function _readMtQueueLoads(): array
+    {
+        return $this->_mtQueueLoadReader()->read($this->requireQueueHandler(), $this->_mtQueueContexts());
+    }
+
+    /**
+     * Records a project published to an MT queue, so the queue counts it as live; other queues are skipped.
+     *
+     * Example: pid 11 published to P4 becomes a field of 'analysis_queue_P4_live_pids'; on P1 nothing happens.
+     *
+     * @throws RuntimeException
+     */
+    protected function _registerOnMtQueue(int $pid, Context $queueInfo): void
+    {
+        $key = array_search($queueInfo, $this->_mtQueueContexts(), true);
+        if ($key !== false) {
+            $this->_mtQueueLoadReader()->register($this->requireQueueHandler(), $key, $queueInfo, $pid);
+        }
+    }
+
+    private function _mtQueueLoadReader(): MtQueueLoadReader
+    {
+        return $this->mtQueueLoadReader ??= new MtQueueLoadReader($this->db(), $this->logger, fn (): int => $this->_now());
     }
 
     /**
