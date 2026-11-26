@@ -12,6 +12,7 @@ use Model\DataAccess\Database;
 use Model\Engines\Structs\EngineStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionMethod;
 use Utils\ActiveMQ\AMQHandler;
@@ -327,6 +328,7 @@ class SetContributionWorkerTest extends AbstractTest
         $contributionMockQueueObject->translation = $this->contributionStruct->translation;
         $contributionMockQueueObject->api_key = $this->contributionStruct->api_key;
         $contributionMockQueueObject->uid = $this->contributionStruct->uid;
+        $contributionMockQueueObject->actingUid = 1234; // the revisor who owns REVISORKEY
         $contributionMockQueueObject->oldTranslationStatus = $this->contributionStruct->oldTranslationStatus;
         $contributionMockQueueObject->oldSegment = $this->contributionStruct->oldSegment;
         $contributionMockQueueObject->oldTranslation = $this->contributionStruct->oldTranslation;
@@ -337,6 +339,101 @@ class SetContributionWorkerTest extends AbstractTest
         $inspector = new InvocationInspector($stubEngineParameterSpy);
         $config = $inspector->getInvocations()[0]->parameters()[0];
         $this->assertEquals(['OWNERKEY', 'REVISORKEY'], $config['id_user']);
+        $this->assertEquals(['OWNERKEY'], $config['mt_key']);
+    }
+
+    /**
+     * @return array<string, array{bool, int, list<string>}>
+     */
+    public static function actingUserKeysProvider(): array
+    {
+        return [
+            // The card's case: a non-owner translator linked a key from the editor.
+            'translator who is not the owner writes to their own key' => [false, 200, ['OWNERKEY', 'TRANSLATORKEY']],
+            'revisor who is not the owner writes to their own key' => [true, 300, ['OWNERKEY', 'REVISORKEY']],
+            // Another user's key never receives the write.
+            'a different translator does not write to that key' => [false, 999, ['OWNERKEY']],
+            // A queue element enqueued before actingUid existed: owner keys only, as before the fix.
+            'no acting user keeps only the owner keys' => [false, 0, ['OWNERKEY']],
+        ];
+    }
+
+    /**
+     * The contribution's uid is the job owner (sent as client_id). The keys a non-owner linked to the job
+     * must be selected by the user who saved, or that user's writes never reach their own key.
+     *
+     * @param list<string> $expectedKeys
+     *
+     * @throws Exception
+     */
+    #[Test]
+    #[DataProvider('actingUserKeysProvider')]
+    public function execContribution_writes_to_the_keys_of_the_user_who_saved_not_of_the_owner(bool $fromRevision, int $actingUid, array $expectedKeys): void
+    {
+        $ownerUid = 100;
+
+        $_worker = new $this->queueElement->classLoad($this->getStubBuilder(AMQHandler::class)->getStub(), obtainTestDatabase());
+
+        $stubEngine = $this
+            ->getMockBuilder(MyMemory::class)
+            ->onlyMethods(['update'])
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $stubEngine->expects($stubEngineParameterSpy = $this->once())
+            ->method('update')
+            ->with($this->anything())
+            ->willReturn(
+                UpdateContributionResponse::getInstance(
+                    json_decode('{"responseData":"OK","responseStatus":200,"responseDetails":[545482283]}', true),
+                    $this->featureSet
+                )
+            );
+
+        $_worker->setEngine($stubEngine);
+
+        $contributionMockQueueObject = $this
+            ->getMockBuilder(SetContributionRequest::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getProp', 'getJobStruct'])
+            ->getMock();
+        $contributionMockQueueObject->expects($this->once())->method('getProp')->willReturn([]);
+        $contributionMockQueueObject->expects($this->atLeastOnce())->method('getJobStruct')
+            ->willReturn(
+                new JobStruct(
+                    [
+                        'id' => $this->contributionStruct->id_job,
+                        'password' => $this->contributionStruct->job_password,
+                        'source' => 'it-IT',
+                        'target' => 'es-ES',
+                        'id_tms' => 1,
+                        // the owner's key, a key translator 200 linked in the editor, a key revisor 300 linked
+                        'tm_keys' => '[{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"","key":"OWNERKEY","r":true,"w":true,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null},'
+                            . '{"tm":true,"glos":true,"owner":false,"uid_transl":200,"uid_rev":null,"name":"test aggiunta TM","key":"TRANSLATORKEY","r":null,"w":null,"r_transl":true,"w_transl":true,"r_rev":null,"w_rev":null,"source":null,"target":null},'
+                            . '{"tm":true,"glos":true,"owner":false,"uid_transl":null,"uid_rev":300,"name":"","key":"REVISORKEY","r":null,"w":null,"r_transl":null,"w_transl":null,"r_rev":true,"w_rev":true,"source":null,"target":null}]'
+                    ]
+                )
+            );
+
+        $contributionMockQueueObject->fromRevision = $fromRevision;
+        $contributionMockQueueObject->id_job = $this->contributionStruct->id_job;
+        $contributionMockQueueObject->job_password = $this->contributionStruct->job_password;
+        $contributionMockQueueObject->segment = $this->contributionStruct->segment;
+        $contributionMockQueueObject->id_segment = $this->contributionStruct->id_segment;
+        $contributionMockQueueObject->translation = $this->contributionStruct->translation;
+        $contributionMockQueueObject->api_key = $this->contributionStruct->api_key;
+        $contributionMockQueueObject->uid = $ownerUid;
+        $contributionMockQueueObject->actingUid = $actingUid;
+        $contributionMockQueueObject->oldTranslationStatus = $this->contributionStruct->oldTranslationStatus;
+        $contributionMockQueueObject->oldSegment = $this->contributionStruct->oldSegment;
+        $contributionMockQueueObject->oldTranslation = $this->contributionStruct->oldTranslation;
+
+        $reflectedMethod = new ReflectionMethod($_worker, '_execContribution');
+        $reflectedMethod->invokeArgs($_worker, [$contributionMockQueueObject]);
+
+        $config = (new InvocationInspector($stubEngineParameterSpy))->getInvocations()[0]->parameters()[0];
+        $this->assertEquals($expectedKeys, $config['id_user']);
+        $this->assertSame($ownerUid, $config['uid'], 'client_id must stay the job owner');
         $this->assertEquals(['OWNERKEY'], $config['mt_key']);
     }
 

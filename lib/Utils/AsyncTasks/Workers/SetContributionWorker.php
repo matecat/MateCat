@@ -233,8 +233,9 @@ class SetContributionWorker extends AbstractWorker
             $userRole = Filter::ROLE_TRANSLATOR;
         }
 
-        //find all the job's TMs with write grants and make a contribution to them
-        $tm_keys = TmKeyManager::getJobTmKeys($jobStruct->tm_keys, 'w', 'tm', $contributionStruct->uid, $userRole);
+        // Find the job's TMs with write grants for the user who saved: the owner's keys plus the ones
+        // that user linked as translator/revisor. Not $contributionStruct->uid, which is the job owner.
+        $tm_keys = TmKeyManager::getJobTmKeys($jobStruct->tm_keys, 'w', 'tm', $contributionStruct->actingUid, $userRole);
 
         $config = [];
         if (!empty($tm_keys)) {
