@@ -51,25 +51,6 @@ class BaseFeatureTest extends AbstractTest
             @unlink($configPath);
         }
 
-        $buildDir = $this->buildDirPath();
-        if ($buildDir !== '' && is_dir($buildDir)) {
-            $files = scandir($buildDir);
-            if (is_array($files)) {
-                foreach ($files as $file) {
-                    if ($file === '.' || $file === '..') {
-                        continue;
-                    }
-                    @unlink($buildDir . '/' . $file);
-                }
-            }
-            @rmdir($buildDir);
-        }
-
-        $staticDir = dirname($buildDir);
-        if (is_dir($staticDir)) {
-            @rmdir($staticDir);
-        }
-
         self::setStaticProperty(TestFeature::class, 'dependencies', []);
         self::setStaticProperty(TestFeature::class, 'conflictingDependencies', []);
     }
@@ -182,30 +163,6 @@ class BaseFeatureTest extends AbstractTest
     }
 
     #[Test]
-    public function getBuildFilesReturnsNullWhenBuildDirectoryDoesNotExist(): void
-    {
-        self::assertNull($this->feature->getBuildFiles());
-    }
-
-    #[Test]
-    public function getBuildFilesReturnsDirectoryListingWhenBuildDirectoryExists(): void
-    {
-        $buildDir = $this->buildDirPath();
-        self::assertNotSame('', $buildDir);
-
-        if (!is_dir($buildDir)) {
-            mkdir($buildDir, 0777, true);
-        }
-
-        file_put_contents($buildDir . '/asset.js', 'console.log(1);');
-
-        $files = $this->feature->getBuildFiles();
-
-        self::assertIsArray($files);
-        self::assertContains('asset.js', $files);
-    }
-
-    #[Test]
     public function loadRoutesIsCallableAndReturnsVoid(): void
     {
         $result = TestFeature::loadRoutes(new Klein());
@@ -226,16 +183,6 @@ class BaseFeatureTest extends AbstractTest
         }
 
         return $basePath . '/../config.ini';
-    }
-
-    private function buildDirPath(): string
-    {
-        $basePath = $this->feature->getPluginBasePath();
-        if (!is_string($basePath)) {
-            return '';
-        }
-
-        return $basePath . '/../static/build';
     }
 
     private function invokeProtectedMethod(BaseFeature $feature, string $methodName): string

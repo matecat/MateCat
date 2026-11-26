@@ -116,7 +116,7 @@ class ChunkTest extends AbstractTest
                 $this->chunkReviewDao = $chunkReviewDao;
             }
 
-            protected function fillUrls(array $result, JobStruct $chunk, ProjectStruct $project, FeatureSet $featureSet): array
+            protected function fillUrls(array $result, JobStruct $chunk, ProjectStruct $project): array
             {
                 $result['urls'] = [];
                 return $result;
