@@ -3,7 +3,10 @@
 
 namespace Matecat\Core\Utils\ActiveMQ;
 
+use Closure;
+use Exception;
 use Matecat\TestHelpers\AbstractTest;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Stomp\Client;
 use Stomp\StatefulStomp;
@@ -12,6 +15,7 @@ use Stomp\Transport\Message;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\Logger\MatecatLogger;
 use Utils\Redis\RedisHandler;
+use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\Context;
 use Utils\TaskRunner\Commons\QueueElement;
 
@@ -263,6 +267,175 @@ class UtilsActiveMQAMQHandlerTest extends AbstractTest
         $this->expectException(\Exception::class);
 
         $this->handler->callAmqJmx('http://127.0.0.1:4/api/');
+    }
+
+    /**
+     * Rows: the value Jolokia answers, expected size.
+     *
+     * @return array<string, array{int|string, int}>
+     */
+    public static function readableQueueSizeProvider(): array
+    {
+        return [
+            'int value'    => [1234, 1234],
+            'digit string' => ['1234', 1234],
+            'empty queue'  => [0, 0],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('readableQueueSizeProvider')]
+    public function readQueueSizeReturnsTheSizeReadWithTheGivenTimeout(int|string $value, int $expected): void
+    {
+        $calls = [];
+        $handler = $this->handlerAnswering(['value' => $value, 'status' => 200], $calls);
+
+        $this->assertSame($expected, $handler->readQueueSize('analysis_queue_P5', 3));
+        $this->assertCount(1, $calls);
+        $this->assertStringEndsWith(self::urlTail('analysis_queue_P5', 'QueueSize'), $calls[0][0]);
+        $this->assertSame(3, $calls[0][1]);
+    }
+
+    /**
+     * Rows: what Jolokia answers, or the exception its call throws.
+     *
+     * @return array<string, array{mixed}>
+     */
+    public static function unreadableQueueSizeProvider(): array
+    {
+        return [
+            'Jolokia error body'         => [['error' => 'javax.management.InstanceNotFoundException', 'status' => 404]],
+            'value not a number'         => [['value' => 'abc']],
+            'negative value'             => [['value' => -1]],
+            'value too large for an int' => [['value' => '99999999999999999999']],
+            'body not a JSON object'     => [5],
+            'Jolokia call throws'        => [new Exception('Failed to get response from AMQ JMX')],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('unreadableQueueSizeProvider')]
+    public function readQueueSizeReturnsNullWhenTheSizeCannotBeRead(mixed $reply): void
+    {
+        $this->assertNull($this->handlerAnswering($reply)->readQueueSize('analysis_queue_P5', 3));
+    }
+
+    #[Test]
+    public function getQueueLengthReadsTheQueueSizeUrlWithoutATotalTimeout(): void
+    {
+        $calls = [];
+        $handler = $this->handlerAnswering(['value' => 42, 'status' => 200], $calls);
+
+        $this->assertSame(42, $handler->getQueueLength('analysis_queue_P4'));
+        $this->assertStringEndsWith(self::urlTail('analysis_queue_P4', 'QueueSize'), $calls[0][0]);
+        $this->assertSame(0, $calls[0][1]);
+    }
+
+    #[Test]
+    public function getConsumerCountReadsTheConsumerCountUrlWithoutATotalTimeout(): void
+    {
+        $calls = [];
+        $handler = $this->handlerAnswering(['value' => 30, 'status' => 200], $calls);
+
+        $this->assertSame(30, $handler->getConsumerCount('analysis_queue_P4'));
+        $this->assertStringEndsWith(self::urlTail('analysis_queue_P4', 'ConsumerCount'), $calls[0][0]);
+        $this->assertSame(0, $calls[0][1]);
+    }
+
+    #[Test]
+    public function queueReadsFallBackToTheSubscribedQueue(): void
+    {
+        $this->stompStub->method('subscribe')->willReturn(1);
+        $calls = [];
+        $handler = $this->handlerAnswering(['value' => 5, 'status' => 200], $calls);
+        $handler->subscribe('analysis_queue_P4');
+
+        $this->assertSame(5, $handler->getQueueLength());
+        $this->assertSame(5, $handler->getConsumerCount());
+        $this->assertStringEndsWith(self::urlTail('analysis_queue_P4', 'QueueSize'), $calls[0][0]);
+        $this->assertStringEndsWith(self::urlTail('analysis_queue_P4', 'ConsumerCount'), $calls[1][0]);
+    }
+
+    /**
+     * Rows: total timeout in seconds passed to the read (0 sets none).
+     *
+     * @return array<string, array{int}>
+     */
+    public static function jolokiaTimeoutProvider(): array
+    {
+        return [
+            'with a total timeout' => [2],
+            'no total timeout'     => [0],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('jolokiaTimeoutProvider')]
+    public function jolokiaReadDecodesTheJsonItReceives(int $timeoutSeconds): void
+    {
+        $handler = new class ($this->stompStub) extends AMQHandler {
+            public function __construct(StatefulStomp $stomp)
+            {
+                parent::__construct(preconfiguredStomp: $stomp);
+            }
+
+            public function readUrl(string $url, int $timeoutSeconds): mixed
+            {
+                return $this->_jolokiaRead($url, $timeoutSeconds);
+            }
+        };
+        $answer = (string)tempnam(sys_get_temp_dir(), 'jolokia');
+        file_put_contents($answer, '{"value":7,"status":200}');
+
+        try {
+            $this->assertSame(['value' => 7, 'status' => 200], $handler->readUrl('file://' . $answer, $timeoutSeconds));
+        } finally {
+            unlink($answer);
+        }
+    }
+
+    /**
+     * End of the Jolokia URL of a queue attribute.
+     *
+     * Example: ('analysis_queue_P4', 'QueueSize') gives 'destinationName=<INSTANCE_ID>_analysis_queue_P4/QueueSize'.
+     */
+    private static function urlTail(string $queueName, string $attribute): string
+    {
+        return 'destinationName=' . AppConfig::$INSTANCE_ID . '_' . $queueName . '/' . $attribute;
+    }
+
+    /**
+     * Builds a handler whose Jolokia reads answer $reply (or throw it) with no HTTP call,
+     * and records each call's URL and timeout in $calls.
+     *
+     * @param list<array{string, int}> $calls
+     * @param-out list<array{string, int}> $calls
+     */
+    private function handlerAnswering(mixed $reply, array &$calls = []): AMQHandler
+    {
+        $jolokia = function (string $url, int $timeoutSeconds) use ($reply, &$calls): mixed {
+            $calls[] = [$url, $timeoutSeconds];
+            if ($reply instanceof Exception) {
+                throw $reply;
+            }
+
+            return $reply;
+        };
+
+        return new class ($this->stompStub, $jolokia) extends AMQHandler {
+            /**
+             * @param Closure(string, int): mixed $jolokia
+             */
+            public function __construct(StatefulStomp $stomp, private readonly Closure $jolokia)
+            {
+                parent::__construct(preconfiguredStomp: $stomp);
+            }
+
+            protected function _jolokiaRead(string $url, int $timeoutSeconds): mixed
+            {
+                return ($this->jolokia)($url, $timeoutSeconds);
+            }
+        };
     }
 
     private function setRedisHandler(RedisHandler $redisHandler): void

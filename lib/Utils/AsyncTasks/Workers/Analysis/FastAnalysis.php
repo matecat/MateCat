@@ -5,6 +5,7 @@ namespace Utils\AsyncTasks\Workers\Analysis;
 use DateTime;
 use Exception;
 use InvalidArgumentException;
+use LogicException;
 use Model\Analysis\AnalysisDao;
 use Model\Analysis\PayableRates as PayableRates;
 use Model\DataAccess\Database;
@@ -36,6 +37,9 @@ use Throwable;
 use TypeError;
 use UnexpectedValueException;
 use Utils\ActiveMQ\AMQHandler;
+use Utils\AsyncTasks\Workers\Analysis\MtQueue\MtQueueLoad;
+use Utils\AsyncTasks\Workers\Analysis\MtQueue\MtQueueLoadReader;
+use Utils\AsyncTasks\Workers\Analysis\MtQueue\MtQueueSelector;
 use Utils\AsyncTasks\Workers\Traits\ProjectWordCount;
 use Utils\Constants\ProjectStatus as ProjectStatus;
 use Utils\Engines\AbstractEngine;
@@ -48,6 +52,7 @@ use Utils\Logger\LoggerFactory;
 use Utils\Redis\RedisLock;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractDaemon;
+use Utils\TaskRunner\Commons\Configuration;
 use Utils\TaskRunner\Commons\Context;
 use Utils\TaskRunner\Commons\Params;
 use Utils\TaskRunner\Commons\QueueElement;
@@ -208,7 +213,7 @@ class FastAnalysis extends AbstractDaemon
 
     /**
      * The release token of each processing lock taken by the current batch, keyed by project id.
-     * Example: [1606 => '9f86d081884c7d65...'] after _getLockProjectForVolumeAnalysis() locked project 1606.
+     * Example: [1606 => '9f86d081884c7d65...'] after _lockNextProjectToAnalyze() locked project 1606.
      *
      * @var array<int, string>
      */
@@ -318,17 +323,55 @@ class FastAnalysis extends AbstractDaemon
     const int PROCESSING_LOCK_TTL_SECONDS = 60 * 60 * 24;
 
     /**
-     * Reload Configuration every cycle
+     * The queues of the projects that do not use an MT queue, in fallback order: a project whose queue is
+     * missing goes to the first one the config has. Every queue runs the same TM analysis worker.
+     */
+    const array ANALYSIS_QUEUE_KEYS = ['P1', 'P2', 'P3'];
+
+    /**
+     * Loads the queue settings from the task manager config: in the constructor, then in main() each time the
+     * file changed, so a new cap, a queue drain or a removed queue needs no restart. See
+     * _readChangedConfiguration() for when a version is used.
+     *
+     * Example: `P4[max_queued_segments]` changed from 25000 to 30000 is used from the pick after the save held
+     * still for one check.
      *
      * @throws Exception
      * @throws TypeError
      */
     protected function _updateConfiguration(): void
     {
-        $configuration = $this->getConfiguration();
+        $configuration = $this->_readChangedConfiguration();
+        if ($configuration === null) {
+            return;
+        }
 
-        //First Execution, load build object
         $this->_queueContextList = $configuration->getContextList();
+        $this->_logMtQueueSettings();
+
+        // Projects meant for a missing queue go to another one meanwhile, which is slower: whoever changed the file
+        // must see it
+        $missing = array_values(array_diff(self::ANALYSIS_QUEUE_KEYS, array_keys($this->_queueContextList->list)));
+        if ($missing !== []) {
+            $this->logger->error('analysis_queues_missing', ['queues' => $missing]);
+        }
+    }
+
+    /**
+     * Refuses a config with none of P1, P2 and P3: projects that do not use an MT queue would have nowhere to go.
+     * One of them is enough, as the others fall back to it.
+     *
+     * Example: a file with only P4 and P5 stops the daemon at start, and is skipped by a reload. The TaskManager
+     * still applies such a file and stops the P1 to P3 workers: the messages fast keeps sending there wait in
+     * the broker until the queue is back.
+     *
+     * @throws UnexpectedValueException
+     */
+    protected function _validateConfiguration(Configuration $configuration): void
+    {
+        if (array_intersect(self::ANALYSIS_QUEUE_KEYS, array_keys($configuration->getContextList()->list)) === []) {
+            throw new UnexpectedValueException('The config has none of the analysis queues P1, P2 and P3');
+        }
     }
 
     /**
@@ -407,9 +450,12 @@ class FastAnalysis extends AbstractDaemon
                 continue;
             }
 
+            // One md5 when the file is unchanged, so it runs at every cycle: a new cap or a drain applies to the next pick
+            $this->_updateConfiguration();
+
             try {
                 $this->_checkDatabaseConnection();
-                $projects_list = $this->_getLockProjectForVolumeAnalysis(5);
+                $projects_list = $this->_lockNextProjectToAnalyze();
             } catch (PDOException $e) {
                 $this->logger->debug($e->getMessage() . " - Error again. Try to reconnect in next cycle.");
                 sleep(3); // wait for reconnection
@@ -856,7 +902,7 @@ class FastAnalysis extends AbstractDaemon
     }
 
     /**
-     * Reverse the BUSY status + processing lock taken in _getLockProjectForVolumeAnalysis
+     * Reverse the BUSY status + processing lock taken in _lockNextProjectToAnalyze
      * so a project that failed mid-processing is not stranded forever. The picker selects
      * only STATUS_NEW and the _fPid lock would otherwise block re-pickup for its full 24h
      * TTL, so both must be undone here.
@@ -996,9 +1042,9 @@ class FastAnalysis extends AbstractDaemon
                                  ) VALUES "
             . implode(", ", $tuple_list) .
             " ON DUPLICATE KEY UPDATE
-                        match_type          = IF( tm_analysis_status = 'SKIPPED', match_type, VALUES( match_type ) ),
-                        eq_word_count       = IF( tm_analysis_status = 'SKIPPED', eq_word_count, VALUES( eq_word_count ) ),
-                        standard_word_count = IF( tm_analysis_status = 'SKIPPED', standard_word_count, VALUES( standard_word_count ) )
+                        match_type          = IF( tm_analysis_status IN ( 'SKIPPED', 'DONE' ), match_type, VALUES( match_type ) ),
+                        eq_word_count       = IF( tm_analysis_status IN ( 'SKIPPED', 'DONE' ), eq_word_count, VALUES( eq_word_count ) ),
+                        standard_word_count = IF( tm_analysis_status IN ( 'SKIPPED', 'DONE' ), standard_word_count, VALUES( standard_word_count ) )
                 ";
 
         $this->logger->debug("Executed " . (count($tuple_list)));
@@ -1233,21 +1279,9 @@ class FastAnalysis extends AbstractDaemon
             $engine->syncMemories($this->actual_project_row, array_values($this->segments));
         }
 
-        /*
-         * The $fastResultData[0]['id_mt_engine'] is the index of the MT engine we must use.
-         *
-         * I take the value from the first element of the list (the last one is the same for the project),
-         * because surely this value is equal for all the record of the project.
-         */
-        $queueInfo = $this->_getQueueAddressesByPriority($totalSegmentsToAnalyze, $this->actual_project_row['id_mt_engine']);
-
-        if ($queueInfo === null) {
-            $this->logger->debug("No queue address found for project $pid. Skipping enqueue.");
-
-            return $project_creation_success;
-        }
-
         if ($totalSegmentsToAnalyze) {
+            $queueInfo = $this->_getQueueAddressesByPriority($totalSegmentsToAnalyze, $engine);
+
             $this->logger->debug("Publish Segment Translations to the queue --> $queueInfo->queue_name: $totalSegmentsToAnalyze");
             $this->logger->debug("Elements: $totalSegmentsToAnalyze");
 
@@ -1258,6 +1292,10 @@ class FastAnalysis extends AbstractDaemon
                 throw $e;
             }
 
+            // Marked as still publishing until the loop ends, so a publish that stops part way does not make the
+            // queue look full with segments never sent
+            $this->_registerOnMtQueue($pid, $queueInfo, MtQueueLoadReader::PUBLISHING);
+
             $time_start = microtime(true);
 
             /**
@@ -1267,11 +1305,12 @@ class FastAnalysis extends AbstractDaemon
 
             /**
              * Idempotent publish (cheap): on the first attempt this is empty and we publish
-             * the whole .ser; only on a retry does it hold the id_segments already analyzed
-             * (read once from the TM worker's Redis set — no DB query), so a partial-publish
-             * crash does not re-queue segments that were already processed.
+             * the whole .ser; only when an earlier attempt counted a failure does it hold the
+             * (segment, job) pairs the TM workers already analysed (DONE or SKIPPED rows, read from
+             * the DB), so a partial-publish crash does not re-queue segments that were already
+             * processed. A retry after an infra failure republishes them, and the worker skips them.
              */
-            $alreadyAnalyzed = $this->_getAlreadyAnalyzedSegments((int)$pid);
+            $alreadyAnalyzed = $this->_getAlreadyAnalyzedSegments($pid);
 
             // Pre-fetch metadata cache — values are per (id_job, password) pair,
             // identical across all segments of the same job/language
@@ -1376,6 +1415,8 @@ class FastAnalysis extends AbstractDaemon
                     throw $e;
                 }
             }
+
+            $this->_registerOnMtQueue($pid, $queueInfo, MtQueueLoadReader::PUBLISHED);
 
             $this->logger->debug('Done in ' . (microtime(true) - $time_start) . " seconds.");
         }
@@ -1539,57 +1580,419 @@ HD;
     }
 
     /**
-     * Select the right Queue (and the associated redis Key) by its length (simplest implementation simple)
+     * Engines whose projects are analysed on the MT queue.
      *
-     * @param $queueLen     int
-     * @param $id_mt_engine int
+     * Example: a project with a Lara job goes to P4.
      *
-     * @return Context|null
+     * @var list<class-string<AbstractEngine>>
      */
-    protected function _getQueueAddressesByPriority(int $queueLen, int $id_mt_engine): ?Context
+    private const array MT_QUEUE_ENGINES = [Lara::class];
+
+    /**
+     * Tells whether the engine's projects go to the MT queues.
+     *
+     * Example: a Lara engine gives true; DeepL, MyMemory or no engine at all gives false.
+     */
+    protected function _usesMtQueue(?AbstractEngine $engine): bool
     {
-        $mtEngine = null;
-        try {
-            $mtEngine = EnginesFactory::getInstance($id_mt_engine, $this->db(), AbstractEngine::class);
-        } catch (Exception $e) {
-            $this->logger->debug("Caught Exception: " . $e->getMessage());
+        foreach (self::MT_QUEUE_ENGINES as $class) {
+            if ($engine instanceof $class) {
+                return true;
+            }
         }
 
-        //anyway, take the defaults
-        $contextList = $this->_queueContextList->list;
+        return false;
+    }
 
-        //use this kind of construct to easily add/remove queues and to disable feature by: comment rows or change the switch flag to false
+    /**
+     * Names of the MT queue engines as the `engines.class_load` column may hold them: full class name and short name.
+     *
+     * Each engines row keeps `class_load` as it was written when the engine was added: older rows hold the
+     * short name, newer ones the full class name, and EnginesFactory loads the same engine from both. The pick
+     * query compares the column as text, so it must list both forms.
+     *
+     * Note: a subclass of an engine must be listed in MT_QUEUE_ENGINES by its own name. `_usesMtQueue()`
+     * matches it through `instanceof`; this list matches only the names written here.
+     *
+     * Example: [Lara::class] gives ['Utils\Engines\Lara', 'Lara'].
+     *
+     * @return list<string>
+     */
+    public static function mtQueueEngineClassLoads(): array
+    {
+        $names = [];
+        foreach (self::MT_QUEUE_ENGINES as $class) {
+            $names[] = $class;
+            $names[] = basename(str_replace('\\', '/', $class));
+        }
+
+        return $names;
+    }
+
+    /** Reads the MT queue loads; built on first use, then kept for its warning rate limit. */
+    private ?MtQueueLoadReader $mtQueueLoadReader = null;
+
+    /**
+     * Current Unix time; tests replace it to move the clock.
+     */
+    protected function _now(): int
+    {
+        return time();
+    }
+
+    /**
+     * MT analysis queues in the context list, P4 then P5, whatever their order in the config.
+     *
+     * Example: a list with P1, P3 and P4 gives ['P4' => <P4 context>].
+     *
+     * @return array<string, Context>
+     */
+    protected function _mtQueueContexts(): array
+    {
+        $contexts = [];
+        foreach (['P4', 'P5'] as $key) {
+            if (isset($this->_queueContextList->list[$key])) {
+                $contexts[$key] = $this->_queueContextList->list[$key];
+            }
+        }
+
+        return $contexts;
+    }
+
+    /**
+     * Logs the caps of the MT queues at start and after each config reload, plus each setting the config rejected.
+     *
+     * Example: `P5[max_queued_segments] = 25.000` logs `mt_queue_setting_invalid` and P5 runs with no segment cap.
+     */
+    protected function _logMtQueueSettings(): void
+    {
+        $settings = [];
+        foreach ($this->_mtQueueContexts() as $key => $context) {
+            $settings[$key] = [
+                'max_queued_segments' => $context->max_queued_segments,
+                'max_queued_projects' => $context->max_queued_projects,
+                'accept_new_projects' => $context->accept_new_projects,
+                'max_executors'       => $context->max_executors,
+            ];
+
+            foreach ($context->invalid_settings as $setting => $value) {
+                $this->logger->error('mt_queue_setting_invalid', ['queue' => $key, 'key' => $setting, 'value' => $value]);
+            }
+        }
+
+        if ($settings !== []) {
+            $this->logger->info('mt_queue_settings', $settings);
+        }
+    }
+
+    /**
+     * How busy each MT queue is now, P4 first, for the hold and routing decisions.
+     *
+     * Unknown values never make a queue full. _setTotal() still needs Jolokia, so during a Jolokia outage
+     * publishing fails exactly as it did before this check.
+     *
+     * Example: P4 with 500 messages in the broker and 60 segments left in its live projects gives segmentLoad 500.
+     *
+     * @return list<MtQueueLoad>
+     * @throws RuntimeException
+     */
+    protected function _readMtQueueLoads(): array
+    {
+        return $this->_mtQueueLoadReader()->read($this->requireQueueHandler(), $this->_mtQueueContexts());
+    }
+
+    /** Seconds between two `mt_queues_full` logs while the MT queues stay full. */
+    private const int MT_QUEUES_FULL_LOG_INTERVAL_SECONDS = 60;
+
+    /**
+     * When `mt_queues_full` was last logged; null while the MT queues are not holding projects back.
+     *
+     * Example: queues full since 1000 and logged then gives 1000; once a queue opens again it goes back to null.
+     */
+    private ?int $mtQueuesFullLoggedAt = null;
+
+    /**
+     * Tells whether Lara projects must wait in NEW because no MT queue can take a project now.
+     *
+     * NEW is the waiting room: when no MT queue can take a project, Lara projects stay NEW in id order and
+     * projects with other engines are still picked. With every cap off and every MT queue accepting new
+     * projects it reads nothing and never holds. It logs `mt_queues_full` when the queues fill up, then at most
+     * once a minute while they stay full, and `mt_queues_open` once when a queue can take projects again. Every
+     * change is logged at once, so queues that open and fill again on each published project log each change.
+     * With no MT queue in the config it holds too, and `mt_queues_full` says `reason: no_mt_queue`.
+     *
+     * Example: P4 and P5 both at their segment cap gives true.
+     *
+     * @throws RuntimeException
+     */
+    protected function _mtQueuesHold(): bool
+    {
+        $wasHolding = $this->mtQueuesFullLoggedAt !== null;
+
+        // P4 and P5 both removed from the config: a Lara project picked now would have no queue, fail each of its
+        // attempts within seconds and be parked for good, so it waits in NEW until a queue is back
+        if ($this->_mtQueueContexts() === []) {
+            $this->_logMtQueuesFull(['queues' => [], 'reason' => 'no_mt_queue']);
+
+            return true;
+        }
+
+        // With no limit set, no MT queue can be full: skip the load read and its Jolokia and Redis calls
+        if (!$this->_mtQueueLimitsInUse()) {
+            // A config reload turned the limits off while the queues were full: the held projects go now
+            if ($wasHolding) {
+                $this->logger->info('mt_queues_open', ['queues' => [], 'reason' => 'limits_off']);
+                $this->mtQueuesFullLoggedAt = null;
+            }
+
+            return false;
+        }
+
+        $loads = $this->_readMtQueueLoads();
+        $hold  = MtQueueSelector::holds($loads);
+
+        if ($hold) {
+            $this->_logMtQueuesFull(['queues' => $this->_mtQueuesForLog($loads)]);
+        } elseif ($wasHolding) {
+            $this->logger->info('mt_queues_open', ['queues' => $this->_mtQueuesForLog($loads)]);
+            $this->mtQueuesFullLoggedAt = null;
+        }
+
+        return $hold;
+    }
+
+    /**
+     * Logs `mt_queues_full` when the hold starts, then at most once a minute while it lasts.
+     *
+     * Example: a hold seen at 1000, 1010 and 1060 logs at 1000 and 1060.
+     *
+     * @param array<string, mixed> $context
+     */
+    private function _logMtQueuesFull(array $context): void
+    {
+        $now = $this->_now();
+        if ($this->mtQueuesFullLoggedAt === null || $now - $this->mtQueuesFullLoggedAt >= self::MT_QUEUES_FULL_LOG_INTERVAL_SECONDS) {
+            $this->logger->info('mt_queues_full', $context);
+            $this->mtQueuesFullLoggedAt = $now;
+        }
+    }
+
+    /**
+     * Tells whether any MT queue has a cap set or refuses new projects, the only cases where a queue can be full.
+     *
+     * Example: P4 and P5 with both caps at 0 and accept_new_projects on give false.
+     */
+    private function _mtQueueLimitsInUse(): bool
+    {
+        foreach ($this->_mtQueueContexts() as $context) {
+            if ($context->max_queued_segments > 0 || $context->max_queued_projects > 0 || !$context->accept_new_projects) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * The loads of the MT queues by queue key, for the `mt_queues_full` and `mt_queues_open` logs.
+     *
+     * Example: one P4 load gives ['P4' => ['segment_load' => 500, ...]].
+     *
+     * @param list<MtQueueLoad> $loads
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    private function _mtQueuesForLog(array $loads): array
+    {
+        $queues = [];
+        foreach ($loads as $load) {
+            $queues[$load->key] = $load->toLogArray();
+        }
+
+        return $queues;
+    }
+
+    /**
+     * Records a project being published, or published, to an MT queue, so the queue counts it as live; other
+     * queues are skipped.
+     *
+     * Example: pid 11 published to P4 becomes a field of 'analysis_queue_P4_live_pids'; on P1 nothing happens.
+     *
+     * @param int $pid
+     * @param Context $queueInfo
+     * @param MtQueueLoadReader::PUBLISHING|MtQueueLoadReader::PUBLISHED $state
+     *
+     * @throws RuntimeException
+     */
+    protected function _registerOnMtQueue(int $pid, Context $queueInfo, string $state): void
+    {
+        $key = array_search($queueInfo, $this->_mtQueueContexts(), true);
+        if ($key !== false) {
+            $this->_mtQueueLoadReader()->register($this->requireQueueHandler(), $key, $queueInfo, $pid, $state);
+        }
+    }
+
+    private function _mtQueueLoadReader(): MtQueueLoadReader
+    {
+        return $this->mtQueueLoadReader ??= new MtQueueLoadReader($this->db(), $this->logger, fn (): int => $this->_now());
+    }
+
+    /**
+     * Chooses the MT queue for the project being published and logs the choice as `mt_project_routed`.
+     *
+     * With a single MT queue there is nothing to choose, so it reads no load. With P4 and P5 it reads both
+     * loads, and MtQueueSelector::pick() keeps a retried project on its queue, else takes the lightest
+     * available queue. The log's `age_seconds` counts from the project's creation, so it includes the wait in
+     * NEW and the fast analysis, and on a retry the earlier publish too; null when create_date is missing.
+     * `segments_to_publish` is the caller's count: one per segment and job, taken before 0-word segments are
+     * dropped, so it can be a little above the messages actually sent.
+     *
+     * Example: P4 at 5000 segments and P5 at 100 sends project 301 to P5 and logs
+     * ['pid' => 301, 'queue' => 'P5', 'age_seconds' => 300, 'segments_to_publish' => 42, 'queues' => [...]].
+     *
+     * @throws RuntimeException
+     * @throws LogicException
+     */
+    protected function _routeMtProject(int $segmentsToPublish): Context
+    {
+        $contexts = $this->_mtQueueContexts();
+        if ($contexts === []) {
+            // Never reached: _mtQueuesHold() keeps Lara projects in NEW while the config has no MT queue
+            throw new LogicException('No MT queue for a Lara project');
+        }
+
+        $pid = (int)$this->actual_project_row['id'];
+
+        // With one MT queue there is nothing to choose, so no load is read and $loads stays []. With two, the
+        // reader gives one load per queue, so pick() never gets an empty list.
+        $loads = count($contexts) > 1 ? $this->_readMtQueueLoads() : [];
+        $key   = $loads === [] ? array_key_first($contexts) : MtQueueSelector::pick($loads, $pid)->key;
+
+        // PHP writes create_date with date(), in the time zone strtotime() parses it in, so the difference is
+        // real seconds; max(0, ...) hides a clock that went back
+        $created = strtotime((string)($this->actual_project_row['create_date'] ?? ''));
+
+        $log = [
+            'pid'                 => $pid,
+            'queue'               => $key,
+            'age_seconds'         => $created === false ? null : max(0, $this->_now() - $created),
+            'segments_to_publish' => $segmentsToPublish,
+        ];
+        if ($loads !== []) {
+            $log['queues'] = $this->_mtQueuesForLog($loads);
+        }
+        $this->logger->info('mt_project_routed', $log);
+
+        // The context list's own object: _registerOnMtQueue() finds the queue by identity
+        return $contexts[$key];
+    }
+
+    /**
+     * Chooses the queue for the project being published, from its engine and the number of segments to publish.
+     *
+     * Lara projects go to an MT queue, chosen by _routeMtProject(); other MT engines go to P3; projects with no
+     * MT engine go to P1, or to P2 from 10000 segments.
+     *
+     * When the config lacks P1, P2 or P3, the project goes to another of them (see _analysisQueue()).
+     *
+     * Example: a DeepL project gives P3; a project with no engine and 20000 segments gives P2.
+     *
+     * @throws RuntimeException
+     * @throws LogicException
+     */
+    protected function _getQueueAddressesByPriority(int $queueLen, AbstractEngine $mtEngine): Context
+    {
         return match (true) {
-            $mtEngine instanceof Lara => $contextList['P4'],
-            !$mtEngine instanceof MyMemory && !$mtEngine instanceof NONE => $contextList['P3'],
-            $queueLen >= 10000 => $contextList['P2'],
-            default => $contextList['P1'],
+            $this->_usesMtQueue($mtEngine) => $this->_routeMtProject($queueLen),
+            !$mtEngine instanceof MyMemory && !$mtEngine instanceof NONE => $this->_analysisQueue('P3'),
+            $queueLen >= 10000 => $this->_analysisQueue('P2'),
+            default => $this->_analysisQueue('P1'),
         };
     }
 
     /**
-     * @param int $limit
+     * The queue $wanted, or when the config lacks it, the first of P1, P2 and P3 it has, logged as
+     * `analysis_queue_fallback`. Any of them analyses the project, as they all run the same worker: only
+     * the workers that share the load change.
+     *
+     * Example: with no P3 in the config, a DeepL project goes to P1.
+     *
+     * @throws LogicException
+     */
+    private function _analysisQueue(string $wanted): Context
+    {
+        $contextList = $this->_queueContextList->list;
+        if (isset($contextList[$wanted])) {
+            return $contextList[$wanted];
+        }
+
+        foreach (self::ANALYSIS_QUEUE_KEYS as $key) {
+            if (isset($contextList[$key])) {
+                $this->logger->warning('analysis_queue_fallback', ['pid' => (int)$this->actual_project_row['id'], 'queue' => $wanted, 'used' => $key]);
+
+                return $contextList[$key];
+            }
+        }
+
+        // Never reached: _validateConfiguration() refuses a config with none of them
+        throw new LogicException('None of the analysis queues P1, P2 and P3 in the config');
+    }
+
+    /**
+     * Picks the NEW project with the lowest id and takes its Redis processing lock; [] when none can be taken.
+     *
+     * It takes one project at a time on purpose. The MT queue hold check runs once per pick, before the
+     * project is chosen, so each Lara project is checked against fresh queue loads and a queue goes at most
+     * one project past its cap for each fast daemon of the instance: two daemons on two machines can both
+     * see room and publish one project each. With several projects per pick, all of them would go in on the
+     * same check.
+     * The result is still a list, empty or with one row, so main() keeps a single loop over it.
+     *
+     * Example: with NEW projects 11 and 12 waiting, it gives [<row of project 11>].
      *
      * @return array<int, array<string, mixed>>
      * @throws Throwable
      */
-    protected function _getLockProjectForVolumeAnalysis(int $limit = 1): array
+    protected function _lockNextProjectToAnalyze(): array
     {
-        $bindParams = ['project_status' => ProjectStatus::STATUS_NEW];
+        // Read the MT queue loads before the transaction opens. The read can wait on Jolokia up to 3 s per
+        // queue, and a failed DB read inside an open transaction would mark it unable to commit.
+        $holdMtProjects = $this->_mtQueuesHold();
 
-        $and_InstanceId = null;
-        if (AppConfig::$INSTANCE_ID !== 0) {
-            $and_InstanceId = ' AND instance_id = :instance_id ';
-            $bindParams['instance_id'] = AppConfig::$INSTANCE_ID;
+        // Every instance, 0 included, picks only the projects it created. Each instance keeps its processing
+        // locks in its own Redis database, so a daemon cannot see the lock another instance holds on a
+        // project: picking another instance's projects could analyse the same project twice.
+        $bindParams = [
+            'project_status' => ProjectStatus::STATUS_NEW,
+            'instance_id'    => AppConfig::$INSTANCE_ID,
+        ];
+
+        // While no MT queue can take a project, skip every project with a job on an MT engine; the others go on.
+        // A skipped project stays NEW, so the next cycle tries it again. One MT job is enough to hold the whole
+        // project: project creation gives every job the same engine, and holding a mixed one errs on the safe side.
+        // Cost: MySQL walks the NEW projects in id order and runs this check on each one until it finds a project
+        // it may pick, so every held Lara project older than that one is checked again on each pick. The work
+        // grows with the projects waiting in NEW, not with the projects table, and is paid only while held.
+        $and_NotMtProject = null;
+        if ($holdMtProjects) {
+            $placeholders = [];
+            foreach (self::mtQueueEngineClassLoads() as $i => $classLoad) {
+                $placeholders[]            = ":mt_class_$i";
+                $bindParams["mt_class_$i"] = $classLoad;
+            }
+            $and_NotMtProject = ' AND NOT EXISTS (
+                SELECT 1 FROM jobs mt_jobs INNER JOIN engines mt_engines ON mt_engines.id = mt_jobs.id_mt_engine
+                WHERE mt_jobs.id_project = p.id AND mt_engines.class_load IN (' . implode(', ', $placeholders) . ')
+            ) ';
         }
 
         $query = "
-        SELECT p.id, id_tms, id_mt_engine, tm_keys, p.pretranslate_100, GROUP_CONCAT( DISTINCT j.id ) AS jid_list, j.only_private_tm, p.id_customer
+        SELECT p.id, id_tms, id_mt_engine, tm_keys, p.pretranslate_100, GROUP_CONCAT( DISTINCT j.id ) AS jid_list, j.only_private_tm, p.id_customer, p.create_date
             FROM projects p
             INNER JOIN jobs j ON j.id_project=p.id
-            WHERE status_analysis = :project_status $and_InstanceId
+            WHERE status_analysis = :project_status AND instance_id = :instance_id $and_NotMtProject
             GROUP BY p.id
-        ORDER BY id LIMIT " . $limit;
+        ORDER BY id LIMIT 1";
 
         $db = $this->db();
         // Needed to address the query to the master database if exists

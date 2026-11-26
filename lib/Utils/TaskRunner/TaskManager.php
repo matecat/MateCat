@@ -412,14 +412,21 @@ class TaskManager extends AbstractDaemon
     }
 
     /**
-     * Reload Configuration every cycle
+     * Applies the config file at start, then each time it changed: starts new queues, resizes the others and
+     * stops the queues removed from it.
+     *
+     * Example: P5 added to the ini gets its workers on the cycle after the save held still.
      *
      * @throws Exception
      * @throws TypeError
      */
     protected function _updateConfiguration(): void
     {
-        $configuration = $this->getConfiguration();
+        $configuration = $this->_readChangedConfiguration();
+        if ($configuration === null) {
+            return;
+        }
+
         $this->logger = LoggerFactory::getLogger('task_manager', $configuration->getLoggerName());
         if (AppConfig::$DEBUG) {
             $this->logger->pushHandler((new StreamHandler('php://stdout'))->setFormatter(new LineFormatter("[%datetime%] %channel%.%level_name%: %message% %context%\n")));

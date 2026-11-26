@@ -237,9 +237,46 @@ class AMQHandler
             throw new Exception('No queue name provided.');
         }
 
-        $queue_interface_url = AppConfig::$QUEUE_JMX_ADDRESS . "/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=" . AppConfig::$INSTANCE_ID . "_" . $queue . "/QueueSize";
+        return (int)$this->callAmqJmx($this->_queueAttributeUrl($queue, 'QueueSize'));
+    }
 
-        return (int)$this->callAmqJmx($queue_interface_url);
+    /**
+     * Reads how many messages wait in a queue; returns null when Jolokia fails, times out or answers
+     * with no size, so the caller can treat the size as unknown.
+     *
+     * Example: readQueueSize('analysis_queue_P4', 3) gives 1200, or null when Jolokia is down.
+     *
+     * @param int $timeoutSeconds Seconds allowed for the whole call, connection included.
+     */
+    public function readQueueSize(string $queueName, int $timeoutSeconds): ?int
+    {
+        try {
+            $value = $this->_jolokiaRead($this->_queueAttributeUrl($queueName, 'QueueSize'), $timeoutSeconds)['value'] ?? null;
+        } catch (Exception) {
+            return null;
+        }
+
+        if (!is_int($value) && !is_string($value)) {
+            return null;
+        }
+
+        $size = filter_var($value, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
+
+        return $size === false ? null : $size;
+    }
+
+    /**
+     * Jolokia URL of one attribute of a queue.
+     *
+     * Example: ('analysis_queue_P4', 'QueueSize') gives '.../destinationName=<INSTANCE_ID>_analysis_queue_P4/QueueSize'.
+     */
+    private function _queueAttributeUrl(string $queueName, string $attribute): string
+    {
+        $destination = AppConfig::$INSTANCE_ID . '_' . $queueName;
+
+        return AppConfig::$QUEUE_JMX_ADDRESS
+            . '/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue'
+            . ',destinationName=' . $destination . '/' . $attribute;
     }
 
     /**
@@ -260,9 +297,7 @@ class AMQHandler
             throw new Exception('No queue name provided.');
         }
 
-        $queue_interface_url = AppConfig::$QUEUE_JMX_ADDRESS . "/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=" . AppConfig::$INSTANCE_ID . "_" . $queue . "/ConsumerCount";
-
-        return (int)$this->callAmqJmx($queue_interface_url);
+        return (int)$this->callAmqJmx($this->_queueAttributeUrl($queue, 'ConsumerCount'));
     }
 
     /**
@@ -347,6 +382,23 @@ class AMQHandler
      */
     public function callAmqJmx(string $queue_interface_url): mixed
     {
+        return $this->_jolokiaRead($queue_interface_url, 0)['value'];
+    }
+
+    /**
+     * Calls a Jolokia read URL and decodes its JSON answer.
+     *
+     * Example: the QueueSize URL of analysis_queue_P4 gives ['value' => 1200, 'status' => 200, ...].
+     *
+     * @param int $timeoutSeconds Seconds allowed for the whole call; 0 means no total limit (the 5 s connect timeout still applies).
+     *
+     * @return mixed The decoded JSON, an array for every Jolokia answer.
+     * @throws JsonException
+     * @throws RuntimeException
+     * @throws Exception
+     */
+    protected function _jolokiaRead(string $url, int $timeoutSeconds): mixed
+    {
         $mHandler = new MultiCurlHandler();
 
         $options = [
@@ -358,17 +410,18 @@ class AMQHandler
             CURLOPT_SSL_VERIFYHOST => 2,
             CURLOPT_HTTPHEADER => ['Authorization: Basic ' . base64_encode(AppConfig::$QUEUE_CREDENTIALS)]
         ];
+        if ($timeoutSeconds > 0) {
+            $options[CURLOPT_TIMEOUT] = $timeoutSeconds;
+        }
 
-        $resource = $mHandler->createResource($queue_interface_url, $options);
+        $resource = $mHandler->createResource($url, $options);
         $mHandler->multiExec();
         $result = $mHandler->getSingleContent($resource);
         $mHandler->multiCurlCloseAll();
         if (!is_string($result)) {
             throw new Exception('Failed to get response from AMQ JMX');
         }
-        $result = json_decode($result, true, 512, JSON_THROW_ON_ERROR);
-
-        return $result['value'];
+        return json_decode($result, true, 512, JSON_THROW_ON_ERROR);
     }
 
 }
