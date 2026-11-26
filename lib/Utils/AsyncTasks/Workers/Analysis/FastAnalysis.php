@@ -1042,9 +1042,9 @@ class FastAnalysis extends AbstractDaemon
                                  ) VALUES "
             . implode(", ", $tuple_list) .
             " ON DUPLICATE KEY UPDATE
-                        match_type          = IF( tm_analysis_status = 'SKIPPED', match_type, VALUES( match_type ) ),
-                        eq_word_count       = IF( tm_analysis_status = 'SKIPPED', eq_word_count, VALUES( eq_word_count ) ),
-                        standard_word_count = IF( tm_analysis_status = 'SKIPPED', standard_word_count, VALUES( standard_word_count ) )
+                        match_type          = IF( tm_analysis_status IN ( 'SKIPPED', 'DONE' ), match_type, VALUES( match_type ) ),
+                        eq_word_count       = IF( tm_analysis_status IN ( 'SKIPPED', 'DONE' ), eq_word_count, VALUES( eq_word_count ) ),
+                        standard_word_count = IF( tm_analysis_status IN ( 'SKIPPED', 'DONE' ), standard_word_count, VALUES( standard_word_count ) )
                 ";
 
         $this->logger->debug("Executed " . (count($tuple_list)));
@@ -1292,7 +1292,9 @@ class FastAnalysis extends AbstractDaemon
                 throw $e;
             }
 
-            $this->_registerOnMtQueue((int)$pid, $queueInfo);
+            // Marked as still publishing until the loop ends, so a publish that stops part way does not make the
+            // queue look full with segments never sent
+            $this->_registerOnMtQueue($pid, $queueInfo, MtQueueLoadReader::PUBLISHING);
 
             $time_start = microtime(true);
 
@@ -1303,11 +1305,12 @@ class FastAnalysis extends AbstractDaemon
 
             /**
              * Idempotent publish (cheap): on the first attempt this is empty and we publish
-             * the whole .ser; only on a retry does it hold the id_segments already analyzed
-             * (read once from the TM worker's Redis set — no DB query), so a partial-publish
-             * crash does not re-queue segments that were already processed.
+             * the whole .ser; only when an earlier attempt counted a failure does it hold the
+             * (segment, job) pairs the TM workers already analysed (DONE or SKIPPED rows, read from
+             * the DB), so a partial-publish crash does not re-queue segments that were already
+             * processed. A retry after an infra failure republishes them, and the worker skips them.
              */
-            $alreadyAnalyzed = $this->_getAlreadyAnalyzedSegments((int)$pid);
+            $alreadyAnalyzed = $this->_getAlreadyAnalyzedSegments($pid);
 
             // Pre-fetch metadata cache — values are per (id_job, password) pair,
             // identical across all segments of the same job/language
@@ -1412,6 +1415,8 @@ class FastAnalysis extends AbstractDaemon
                     throw $e;
                 }
             }
+
+            $this->_registerOnMtQueue($pid, $queueInfo, MtQueueLoadReader::PUBLISHED);
 
             $this->logger->debug('Done in ' . (microtime(true) - $time_start) . " seconds.");
         }
@@ -1808,17 +1813,22 @@ HD;
     }
 
     /**
-     * Records a project published to an MT queue, so the queue counts it as live; other queues are skipped.
+     * Records a project being published, or published, to an MT queue, so the queue counts it as live; other
+     * queues are skipped.
      *
      * Example: pid 11 published to P4 becomes a field of 'analysis_queue_P4_live_pids'; on P1 nothing happens.
      *
+     * @param int $pid
+     * @param Context $queueInfo
+     * @param MtQueueLoadReader::PUBLISHING|MtQueueLoadReader::PUBLISHED $state
+     *
      * @throws RuntimeException
      */
-    protected function _registerOnMtQueue(int $pid, Context $queueInfo): void
+    protected function _registerOnMtQueue(int $pid, Context $queueInfo, string $state): void
     {
         $key = array_search($queueInfo, $this->_mtQueueContexts(), true);
         if ($key !== false) {
-            $this->_mtQueueLoadReader()->register($this->requireQueueHandler(), $key, $queueInfo, $pid);
+            $this->_mtQueueLoadReader()->register($this->requireQueueHandler(), $key, $queueInfo, $pid, $state);
         }
     }
 

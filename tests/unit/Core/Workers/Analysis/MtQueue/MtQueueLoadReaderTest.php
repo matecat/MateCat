@@ -97,7 +97,7 @@ class MtQueueLoadReaderTest extends AbstractTest
      */
     private static function seedOneLiveProject(MtQueueLoadReaderFakeRedis $redis): void
     {
-        $redis->hashes['analysis_queue_P4_live_pids'] = ['11'];
+        $redis->hashes['analysis_queue_P4_live_pids'] = ['11' => MtQueueLoadReader::PUBLISHED];
         $redis->values['p_tot_seg:11']                = '100';
         $redis->values['p_num_done:11']               = '40';
         $redis->sets['analysis_queue_P4_pid_set']     = array_map(fn (int $i): string => "worker-$i", range(1, 30));
@@ -124,15 +124,75 @@ class MtQueueLoadReaderTest extends AbstractTest
         $this->assertSame('analysis_queue_P4_live_pids', MtQueueLoadReader::livePidsKey(self::p4()));
     }
 
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function publishStateProvider(): array
+    {
+        return [
+            'before the publish loop' => [MtQueueLoadReader::PUBLISHING],
+            'after the publish loop'  => [MtQueueLoadReader::PUBLISHED],
+        ];
+    }
+
     #[Test]
-    public function registerRecordsThePidInTheQueueHashForOneDay(): void
+    #[DataProvider('publishStateProvider')]
+    public function registerRecordsThePidAndItsPublishStateInTheQueueHashForOneDay(string $state): void
     {
         $redis = new MtQueueLoadReaderFakeRedis();
 
-        $this->reader()->register($this->amq($redis, []), 'P4', self::p4(), 11);
+        $this->reader()->register($this->amq($redis, []), 'P4', self::p4(), 11, $state);
 
-        $this->assertSame([['hsetex', 'analysis_queue_P4_live_pids', [11 => '1'], '', 'ex', 86400]], $redis->calls);
+        $this->assertSame([['hsetex', 'analysis_queue_P4_live_pids', [11 => $state], '', 'ex', 86400]], $redis->calls);
         $this->assertSame([], $this->logged);
+    }
+
+    /**
+     * A publish that stopped part way (broker error, daemon killed) leaves counters for segments never sent:
+     * counting them would show the queue full for a day and hold every Lara project, the retry included.
+     */
+    #[Test]
+    public function readCountsAProjectStillPublishingAsLiveWithNoSegmentsLeft(): void
+    {
+        $redis = new MtQueueLoadReaderFakeRedis();
+        $redis->hashes['analysis_queue_P4_live_pids'] = [
+            '11' => MtQueueLoadReader::PUBLISHED,  // 60 segments left
+            '12' => MtQueueLoadReader::PUBLISHING, // stopped after 1000 of 40000 messages
+            '13' => MtQueueLoadReader::PUBLISHING, // stopped before any worker started it
+            '14' => MtQueueLoadReader::PUBLISHING, // finished since: DONE in the DB
+        ];
+        $redis->values = [
+            'p_tot_seg:11'  => '100',
+            'p_num_done:11' => '40',
+            'p_tot_seg:12'  => '40000',
+            'p_num_done:12' => '1000',
+        ];
+
+        $loads = $this->reader([11, 12, 13])->read($this->amq($redis, ['analysis_queue_P4' => 10]), ['P4' => self::p4()]);
+
+        // still live, so the project cap counts them and a retry goes back to this queue
+        $this->assertSame([11, 12, 13], $loads[0]->livePids);
+        $this->assertSame(3, $loads[0]->liveProjects);
+        // only the published project adds remaining work; the broker size covers the messages already sent
+        $this->assertSame(60, $loads[0]->segmentLoad);
+        $this->assertSame(['11', '12', '13'], array_map('strval', array_keys($redis->hashes['analysis_queue_P4_live_pids'])));
+    }
+
+    /**
+     * The code before the publish state wrote the value '1'. During a rolling deploy those fields must keep
+     * counting their remaining work, as they did.
+     */
+    #[Test]
+    public function readCountsAFieldWrittenBeforeThePublishStateAsPublished(): void
+    {
+        $redis = new MtQueueLoadReaderFakeRedis();
+        $redis->hashes['analysis_queue_P4_live_pids'] = ['11' => '1'];
+        $redis->values = ['p_tot_seg:11' => '100', 'p_num_done:11' => '40'];
+
+        $loads = $this->reader([11])->read($this->amq($redis, ['analysis_queue_P4' => 10]), ['P4' => self::p4()]);
+
+        $this->assertSame([11], $loads[0]->livePids);
+        $this->assertSame(60, $loads[0]->segmentLoad);
     }
 
     #[Test]
@@ -144,7 +204,7 @@ class MtQueueLoadReaderTest extends AbstractTest
 
         foreach ([1000, 1030, 1061] as $now) {
             $this->now = $now;
-            $reader->register($this->amq($redis, []), 'P4', self::p4(), 11);
+            $reader->register($this->amq($redis, []), 'P4', self::p4(), 11, MtQueueLoadReader::PUBLISHING);
         }
 
         $warnings = $this->loggedContexts('mt_queue_live_pid_unrecorded');
@@ -156,7 +216,7 @@ class MtQueueLoadReaderTest extends AbstractTest
     public function readCountsOnlyLiveProjectsAndForgetsTheOthers(): void
     {
         $redis = new MtQueueLoadReaderFakeRedis();
-        $redis->hashes['analysis_queue_P4_live_pids'] = ['11', '12', '13', '14', '15', '16', 'junk'];
+        $redis->hashes['analysis_queue_P4_live_pids'] = array_fill_keys(['11', '12', '13', '14', '15', '16', 'junk'], MtQueueLoadReader::PUBLISHED);
         $redis->values = [
             'p_tot_seg:11'  => '100', // 60 segments left: live
             'p_num_done:11' => '40',
@@ -198,7 +258,7 @@ class MtQueueLoadReaderTest extends AbstractTest
 
         // every field that is not live leaves the hash in one command
         $this->assertContains(['hdel', 'analysis_queue_P4_live_pids', ['12', '14', '15', 'junk']], $redis->calls);
-        $this->assertSame(['11', '13', '16'], $redis->hashes['analysis_queue_P4_live_pids']);
+        $this->assertSame(['11', '13', '16'], array_map('strval', array_keys($redis->hashes['analysis_queue_P4_live_pids'])));
         $this->assertSame([], $this->logged);
     }
 
@@ -211,7 +271,7 @@ class MtQueueLoadReaderTest extends AbstractTest
         $sqlFor = function (array $fields): string {
             $this->queries = [];
             $redis         = new MtQueueLoadReaderFakeRedis();
-            $redis->hashes['analysis_queue_P4_live_pids'] = $fields;
+            $redis->hashes['analysis_queue_P4_live_pids'] = array_fill_keys($fields, MtQueueLoadReader::PUBLISHED);
             $this->reader()->read($this->amq($redis, []), ['P4' => self::p4()]);
 
             return $this->queries[0][0];
@@ -234,7 +294,7 @@ class MtQueueLoadReaderTest extends AbstractTest
         $this->assertSame(0, $loads[0]->liveProjects);
         $this->assertSame(0, $loads[0]->segmentLoad);
         $this->assertSame([], $this->queries);
-        $this->assertSame(['hkeys', 'scard'], array_column($redis->calls, 0));
+        $this->assertSame(['hgetall', 'scard'], array_column($redis->calls, 0));
     }
 
     #[Test]
@@ -328,7 +388,9 @@ class MtQueueLoadReaderTest extends AbstractTest
         $key     = MtQueueLoadReader::livePidsKey($context);
 
         try {
-            $this->reader()->register($this->amq($redis, []), 'P4', $context, 77);
+            $this->reader()->register($this->amq($redis, []), 'P4', $context, 77, MtQueueLoadReader::PUBLISHING);
+            $this->reader()->register($this->amq($redis, []), 'P4', $context, 77, MtQueueLoadReader::PUBLISHED);
+            $this->assertSame(['77' => MtQueueLoadReader::PUBLISHED], $redis->hgetall($key));
 
             $ttl = $redis->httl($key, ['77'])[0];
             $this->assertGreaterThan(86000, $ttl);
@@ -355,7 +417,7 @@ class MtQueueLoadReaderFakeRedis extends PredisClient
     /** @var list<array<int, mixed>> ordered [command, ...args] tuples */
     public array $calls = [];
 
-    /** @var array<string, list<string>> field names per hash */
+    /** @var array<string, array<string, string>> field => value per hash */
     public array $hashes = [];
 
     /** @var array<string, list<string>> members per set */
@@ -387,11 +449,11 @@ class MtQueueLoadReaderFakeRedis extends PredisClient
     }
 
     /**
-     * @return list<string>
+     * @return array<string, string>
      */
-    public function hkeys(string $key): array
+    public function hgetall(string $key): array
     {
-        $this->calls[] = ['hkeys', $key];
+        $this->calls[] = ['hgetall', $key];
         if ($this->failHashes) {
             throw new RuntimeException('Redis down');
         }
@@ -405,7 +467,7 @@ class MtQueueLoadReaderFakeRedis extends PredisClient
     public function hdel(string $key, array $fields): int
     {
         $this->calls[] = ['hdel', $key, $fields];
-        $this->hashes[$key] = array_values(array_diff($this->hashes[$key] ?? [], $fields));
+        $this->hashes[$key] = array_diff_key($this->hashes[$key] ?? [], array_flip($fields));
 
         return count($fields);
     }

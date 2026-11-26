@@ -30,10 +30,12 @@ use ReflectionClass;
 use RuntimeException;
 use Stomp\Exception\ConnectionException;
 use Stomp\Transport\Message;
+use Throwable;
 use UnexpectedValueException;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\Analysis\FastAnalysis;
 use Utils\AsyncTasks\Workers\Analysis\MtQueue\MtQueueLoad;
+use Utils\AsyncTasks\Workers\Analysis\MtQueue\MtQueueLoadReader;
 use Utils\Constants\ProjectStatus;
 use Utils\Registry\AppConfig;
 use Utils\Constants\TranslationStatus;
@@ -185,6 +187,47 @@ class FastAnalysisTest extends AbstractTest
         $daemon = $this->daemonWithDb($injected);
 
         $this->invoke($daemon, '_executeInsert', ['(:a,:b,:c,:d,:e,:f)'], ['x']);
+    }
+
+    /**
+     * A retry inserts the fast analysis rows again. A row the TM workers already analysed keeps its values: the
+     * workers never update a DONE row again, so the values written here would be summed at completion.
+     */
+    #[Test]
+    public function executeInsertKeepsTheValuesOfTheRowsTheTmWorkersAlreadyAnalysed(): void
+    {
+        $database = obtainTestDatabase();
+        $pdo      = $database->getConnection();
+        $idJob    = 99999993;
+        $rows     = ['DONE' => 4711001, 'SKIPPED' => 4711002, 'UNDONE' => 4711003];
+        $insert   = $pdo->prepare(
+            'INSERT INTO segment_translations (id_segment, id_job, segment_hash, match_type, eq_word_count, standard_word_count, tm_analysis_status)'
+            . " VALUES (?, ?, 'hash', '100%', 3, 4, ?)"
+        );
+
+        try {
+            foreach ($rows as $status => $idSegment) {
+                $insert->execute([$idSegment, $idJob, $status]);
+            }
+
+            $tuples = [];
+            $binds  = [];
+            foreach ($rows as $idSegment) {
+                $tuples[] = '(?, ?, ?, ?, ?, ?)';
+                array_push($binds, $idJob, $idSegment, 'hash', 'NO_MATCH', 10, 12);
+            }
+            $this->invoke($this->daemonWithDb($database), '_executeInsert', $tuples, $binds);
+
+            $select = $pdo->prepare('SELECT tm_analysis_status, match_type, eq_word_count, standard_word_count FROM segment_translations WHERE id_job = ? ORDER BY id_segment');
+            $select->execute([$idJob]);
+            $this->assertEquals([
+                ['tm_analysis_status' => 'DONE', 'match_type' => '100%', 'eq_word_count' => 3, 'standard_word_count' => 4],
+                ['tm_analysis_status' => 'SKIPPED', 'match_type' => '100%', 'eq_word_count' => 3, 'standard_word_count' => 4],
+                ['tm_analysis_status' => 'UNDONE', 'match_type' => 'NO_MATCH', 'eq_word_count' => 10, 'standard_word_count' => 12],
+            ], $select->fetchAll(PDO::FETCH_ASSOC));
+        } finally {
+            $pdo->prepare('DELETE FROM segment_translations WHERE id_job = ?')->execute([$idJob]);
+        }
     }
 
     /**
@@ -2188,7 +2231,8 @@ class FastAnalysisTest extends AbstractTest
         int $wordCount = 2,
         ?MatecatLogger $logger = null,
         array $queues = [],
-        ?FastAnalysisFakeRedis $redis = null
+        ?FastAnalysisFakeRedis $redis = null,
+        ?Throwable $publishFailure = null
     ): array {
         $ref    = new ReflectionClass(FastAnalysisPublishProbe::class);
         $daemon = $ref->newInstanceWithoutConstructor();
@@ -2197,10 +2241,16 @@ class FastAnalysisTest extends AbstractTest
         $this->setProp($daemon, 'projectDao', $this->createStub(ProjectDao::class));
 
         $published = [];
+        $redis   ??= new FastAnalysisFakeRedis();
         $amq       = $this->createStub(AMQHandler::class);
-        $amq->method('getRedisClient')->willReturn($redis ?? new FastAnalysisFakeRedis());
+        $amq->method('getRedisClient')->willReturn($redis);
         $amq->method('publishToQueues')->willReturnCallback(
-            function (string $queue, Message $message) use (&$published): bool {
+            function (string $queue, Message $message) use (&$published, $redis, $publishFailure): bool {
+                // In the Redis log too, so a test can check what was written before and after each publish
+                $redis->calls[] = ['publish', $queue];
+                if ($publishFailure !== null) {
+                    throw $publishFailure;
+                }
                 $published[] = json_decode($message->getBody(), true)['params'];
 
                 return true;
@@ -2794,7 +2844,29 @@ class FastAnalysisTest extends AbstractTest
         $published = $this->publishedParams([], 2, null, self::mtQueueSettings(), $redis);
 
         $this->assertCount(1, $published);
-        $this->assertContains(['hsetex', 'analysis_queue_P4_live_pids', [99999990 => '1'], '', 'ex', 86400], $redis->calls);
+        // publishing before the loop, published once every message is sent
+        $this->assertSame([
+            ['hsetex', 'analysis_queue_P4_live_pids', [99999990 => MtQueueLoadReader::PUBLISHING], '', 'ex', 86400],
+            ['publish', 'analysis_queue_P4'],
+            ['hsetex', 'analysis_queue_P4_live_pids', [99999990 => MtQueueLoadReader::PUBLISHED], '', 'ex', 86400],
+        ], array_values(array_filter($redis->calls, fn (array $call): bool => in_array($call[0], ['hsetex', 'publish'], true))));
+    }
+
+    #[Test]
+    public function aPublishThatStopsLeavesTheProjectMarkedAsStillPublishing(): void
+    {
+        $redis = new FastAnalysisFakeRedis();
+
+        try {
+            $this->publishedParams([], 2, null, self::mtQueueSettings(), $redis, new ConnectionException('Broker gone'));
+            $this->fail('the publish failure must reach main(), which releases the project');
+        } catch (ConnectionException) {
+        }
+
+        $this->assertSame(
+            [['hsetex', 'analysis_queue_P4_live_pids', [99999990 => MtQueueLoadReader::PUBLISHING], '', 'ex', 86400]],
+            array_values(array_filter($redis->calls, fn (array $call): bool => $call[0] === 'hsetex'))
+        );
     }
 
     #[Test]
@@ -2814,10 +2886,10 @@ class FastAnalysisTest extends AbstractTest
         [$daemon, $redis] = $this->mtQueueDaemon(self::mtQueueSettings(), [], $logged);
         $contexts = $this->getProp($daemon, '_queueContextList')->list;
 
-        $this->invoke($daemon, '_registerOnMtQueue', 11, $contexts['P4']);
-        $this->invoke($daemon, '_registerOnMtQueue', 12, $contexts['P1']);
+        $this->invoke($daemon, '_registerOnMtQueue', 11, $contexts['P4'], MtQueueLoadReader::PUBLISHED);
+        $this->invoke($daemon, '_registerOnMtQueue', 12, $contexts['P1'], MtQueueLoadReader::PUBLISHED);
 
-        $this->assertSame([['hsetex', 'analysis_queue_P4_live_pids', [11 => '1'], '', 'ex', 86400]], $redis->calls);
+        $this->assertSame([['hsetex', 'analysis_queue_P4_live_pids', [11 => MtQueueLoadReader::PUBLISHED], '', 'ex', 86400]], $redis->calls);
     }
 
     #[Test]
@@ -3214,11 +3286,11 @@ class FastAnalysisFakeRedis extends PredisClient
     }
 
     /**
-     * @return list<string>
+     * @return array<string, string>
      */
-    public function hkeys($key): array
+    public function hgetall($key): array
     {
-        $this->calls[] = ['hkeys', $key];
+        $this->calls[] = ['hgetall', $key];
 
         return [];
     }

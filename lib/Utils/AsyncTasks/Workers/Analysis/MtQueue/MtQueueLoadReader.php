@@ -23,6 +23,15 @@ use Utils\TaskRunner\Commons\Context;
  */
 final class MtQueueLoadReader
 {
+    /**
+     * Hash value of a project whose messages are being sent. A publish that stops part way (broker error, daemon
+     * killed) leaves it so: the worker counters then include segments never sent, so they are not counted.
+     */
+    public const string PUBLISHING = 'publishing';
+
+    /** Hash value of a project whose messages were all sent: its worker counters show the work left. */
+    public const string PUBLISHED = 'published';
+
     /** Seconds a published project counts as live at most, so a project that never finishes stops counting. */
     private const int LIVE_PID_TTL_SECONDS = 86400;
 
@@ -60,19 +69,23 @@ final class MtQueueLoadReader
     }
 
     /**
-     * Records that a project was published to an MT queue; a failure is logged and never stops publishing.
+     * Records that a project is being published to an MT queue, or was, as $state; a failure is logged and never
+     * stops publishing.
      *
      * HSETEX needs Valkey 9 or Redis 8.0. On an older server every call fails: the hash stays empty, so the
      * project cap of the queue never triggers and a retried project is not kept on its queue. Throwing here
      * would instead release every Lara project after each publish attempt, so it would never be analyzed.
      * The `mt_queue_live_pid_unrecorded` warning is the only sign that the project cap is off.
      *
-     * Example: register($amq, 'P4', $p4, 11) adds field 11 to 'analysis_queue_P4_live_pids' for 24 hours.
+     * Example: register($amq, 'P4', $p4, 11, self::PUBLISHING) sets field 11 of 'analysis_queue_P4_live_pids' to
+     * 'publishing' for 24 hours.
+     *
+     * @param self::PUBLISHING|self::PUBLISHED $state
      */
-    public function register(AMQHandler $amq, string $key, Context $context, int $pid): void
+    public function register(AMQHandler $amq, string $key, Context $context, int $pid, string $state): void
     {
         try {
-            $amq->getRedisClient()->hsetex(self::livePidsKey($context), [$pid => '1'], '', 'ex', self::LIVE_PID_TTL_SECONDS);
+            $amq->getRedisClient()->hsetex(self::livePidsKey($context), [$pid => $state], '', 'ex', self::LIVE_PID_TTL_SECONDS);
         } catch (Throwable $e) {
             // Usually "ERR unknown command 'HSETEX'" on a server older than Valkey 9 or Redis 8.0.
             // Publishing goes on; only the project cap and the sticky retry of this queue stay off.
@@ -159,8 +172,10 @@ final class MtQueueLoadReader
      * A pid is live when its hash field has not expired, its project is not finished yet (NEW, BUSY or
      * FAST_OK), and it still has work: its counters show segments left, or no worker has written them yet.
      * A published project is NEW again only when it was released for a retry, and it stays live so the retry
-     * goes back to the same queue. A project that never reaches
-     * DONE stops counting when its field expires, 24 hours after its last publish.
+     * goes back to the same queue. A project still marked PUBLISHING is live while unfinished, with no remaining
+     * work: its counters cover segments that may never have been sent, and the broker size already counts the
+     * messages that were. A project that never reaches DONE stops counting when its field expires, 24 hours
+     * after its last publish.
      *
      * Example: fields [11, 12], pid 11 with 60 segments left, pid 12 with none: pids [11], remaining 60, 12 removed.
      *
@@ -171,8 +186,10 @@ final class MtQueueLoadReader
     {
         $hashKey = self::livePidsKey($context);
 
-        // Step 1: the projects published to this queue. Valkey has already dropped the fields older than 24 hours.
-        $fields = $redis->hkeys($hashKey);
+        // Step 1: the projects published to this queue, with their publish state. Valkey has already dropped the
+        // fields older than 24 hours. PHP turns a numeric field such as "11" into the int key 11.
+        $states = $redis->hgetall($hashKey);
+        $fields = array_map('strval', array_keys($states));
 
         // Step 2: keep the projects the DB does not show as finished (NEW, BUSY or FAST_OK).
         // NEW means published once and released for a retry: the retry must go back to this queue.
@@ -192,8 +209,11 @@ final class MtQueueLoadReader
         foreach ($this->segmentsLeft($redis, $unfinishedPids) as $pid => $left) {
             $waitingForFirstWorker = $left === null;
             $hasWorkLeft           = $left !== null && $left > 0;
+            $stillPublishing       = ($states[$pid] ?? null) === self::PUBLISHING;
 
-            if ($waitingForFirstWorker || $hasWorkLeft) {
+            if ($stillPublishing) {
+                $livePids[] = $pid;
+            } elseif ($waitingForFirstWorker || $hasWorkLeft) {
                 $livePids[]   = $pid;
                 $segmentsLeft += $left ?? 0;
             }
