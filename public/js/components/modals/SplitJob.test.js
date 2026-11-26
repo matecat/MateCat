@@ -99,6 +99,28 @@ test('shows the "too few segments" message and disables split when the API retur
   expect(screen.getByText('Check split')).toBeDisabled()
 })
 
+test.each([
+  ['without an errors list', {response: {ok: false}}],
+  ['with no value', null],
+])(
+  'shows the fallback message and stops loading when the API rejects %s',
+  async (_, rejection) => {
+    checkSplitRequest.mockRejectedValue(rejection)
+    render(
+      <SplitJobModal
+        job={baseJob}
+        project={baseProject}
+        callback={jest.fn()}
+      />,
+    )
+
+    expect(
+      await screen.findByText('Something went wrong. Please try again.'),
+    ).toBeInTheDocument()
+    expect(screen.getByText('Check split')).toBeEnabled()
+  },
+)
+
 test('shows a generic error message for other API errors', async () => {
   checkSplitRequest.mockRejectedValue({
     errors: [{code: -1, message: 'generic failure'}],
