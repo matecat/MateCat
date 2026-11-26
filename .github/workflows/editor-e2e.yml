@@ -1,0 +1,49 @@
+name: Editor E2E
+
+# The acceptance suite of the segment editor core, in Chromium, against a test page that needs no backend.
+# Firefox and WebKit run locally: yarn test:editor-e2e --project=firefox
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+    paths:
+      - 'public/js/components/editor/**'
+      - 'public/js/components/segmentView/**'
+      - 'package.json'
+      - 'yarn.lock'
+      - '.github/workflows/editor-e2e.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  chromium:
+    name: Editor acceptance suite (Chromium)
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    steps:
+      - name: Checkout
+        # Submodules are not fetched: the editor does not import any plugin.
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --ignore-scripts
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run the suite
+        run: yarn test:editor-e2e --project=chromium
+
+      - name: Upload traces of failed tests
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: editor-e2e-traces
+          path: test-results/editor-e2e
+          retention-days: 7
