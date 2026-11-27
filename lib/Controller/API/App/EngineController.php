@@ -16,7 +16,6 @@ use Model\Engines\Structs\EngineStruct;
 use Model\Engines\Structs\GoogleTranslateStruct;
 use Model\Engines\Structs\IntentoStruct;
 use Model\Engines\Structs\LaraStruct;
-use Model\Engines\Structs\MMTStruct;
 use Model\Engines\Structs\SmartMATEStruct;
 use Model\Engines\Structs\YandexTranslateStruct;
 use Model\Users\MetadataDao;
@@ -31,7 +30,6 @@ use Utils\Engines\Validators\DeepLEngineValidator;
 use Utils\Engines\Validators\GoogleTranslateEngineValidator;
 use Utils\Engines\Validators\IntentoEngineValidator;
 use Utils\Engines\Validators\LaraEngineValidator;
-use Utils\Engines\Validators\MMTEngineValidator;
 use Utils\Validation\UserSuppliedName;
 
 class EngineController extends KleinController
@@ -192,25 +190,8 @@ class EngineController extends KleinController
                 $newEngineStruct->type = EngineConstants::MT;
                 $newEngineStruct->extra_parameters['Lara-AccessKeyId'] = $engineData['lara-access-key-id'];
                 $newEngineStruct->extra_parameters['Lara-AccessKeySecret'] = $engineData['secret'];
-                $newEngineStruct->extra_parameters['MMT-License'] = $engineData['mmt-license'];
 
                 (new LaraEngineValidator($this->getDatabase()))->validate(EngineValidatorObject::fromArray(['engineStruct' => $newEngineStruct]));
-
-                break;
-
-            case strtolower(EngineConstants::MMT):
-                /**
-                 * Create a record of type MMT
-                 */
-                $newEngineStruct = MMTStruct::getStruct();
-
-                $newEngineStruct->uid = $this->user->uid;
-                $newEngineStruct->type = EngineConstants::MT;
-                assert(is_array($newEngineStruct->extra_parameters));
-                $newEngineStruct->extra_parameters['MMT-License'] = $engineData['secret'];
-                $newEngineStruct->extra_parameters['MMT-context-analyzer'] = true;
-
-                (new MMTEngineValidator($this->getDatabase()))->validate(EngineValidatorObject::fromArray(['engineStruct' => $newEngineStruct]));
 
                 break;
 
@@ -242,9 +223,6 @@ class EngineController extends KleinController
         }
 
         if ($newEngineStruct instanceof LaraStruct) {
-            $UserMetadataDao = new MetadataDao($this->getDatabase());
-            $UserMetadataDao->set($uid, $newCreatedDbRowStruct->class_load ?? throw new RuntimeException('Missing class_load'), (string)$newCreatedDbRowStruct->id);
-        } elseif ($newEngineStruct instanceof MMTStruct) {
             $UserMetadataDao = new MetadataDao($this->getDatabase());
             $UserMetadataDao->set($uid, $newCreatedDbRowStruct->class_load ?? throw new RuntimeException('Missing class_load'), (string)$newCreatedDbRowStruct->id);
         }

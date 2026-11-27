@@ -2,11 +2,6 @@ import React from 'react'
 import {render, screen, fireEvent} from '@testing-library/react'
 import {OptionsContainer} from './OptionsContainer'
 
-jest.mock('./MMTOptions', () => ({
-  MMTOptions: (props) => (
-    <div data-testid="mmt-options">{JSON.stringify(props)}</div>
-  ),
-}))
 jest.mock('./LaraOptions', () => ({
   LaraOptions: (props) => (
     <div data-testid="lara-options">{JSON.stringify(props)}</div>
@@ -31,7 +26,7 @@ jest.mock('./BasicOptions', () => ({
 const renderComponent = (props = {}) =>
   render(
     <OptionsContainer
-      activeMTEngineData={{id: 42, engine_type: 'MMT'}}
+      activeMTEngineData={{id: 42, engine_type: 'Lara'}}
       {...props}
     />,
   )
@@ -45,7 +40,7 @@ describe('OptionsContainer', () => {
     renderComponent()
 
     expect(screen.getByTitle('Glossary options')).not.toHaveClass('rotate')
-    expect(screen.queryByTestId('mmt-options')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('lara-options')).not.toBeInTheDocument()
   })
 
   test('renders the toggle button', () => {
@@ -77,7 +72,7 @@ describe('OptionsContainer', () => {
     fireEvent.click(screen.getByTitle('Glossary options'))
 
     expect(screen.getByTitle('Glossary options')).toHaveClass('rotate')
-    expect(screen.getByTestId('mmt-options')).toBeInTheDocument()
+    expect(screen.getByTestId('lara-options')).toBeInTheDocument()
   })
 
   test('collapses and hides the options content on a second click', () => {
@@ -88,11 +83,10 @@ describe('OptionsContainer', () => {
     fireEvent.click(button)
 
     expect(button).not.toHaveClass('rotate')
-    expect(screen.queryByTestId('mmt-options')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('lara-options')).not.toBeInTheDocument()
   })
 
   test.each([
-    ['MMT', 'mmt-options'],
     ['Lara', 'lara-options'],
     ['DeepL', 'deepl-options'],
     ['Intento', 'intento-options'],
@@ -114,6 +108,14 @@ describe('OptionsContainer', () => {
     expect(screen.getByTestId('basic-options')).toBeInTheDocument()
   })
 
+  test('falls back to BasicOptions for the retired ModernMT engine_type', () => {
+    renderComponent({activeMTEngineData: {id: 1, engine_type: 'MMT'}})
+
+    fireEvent.click(screen.getByTitle('Glossary options'))
+
+    expect(screen.getByTestId('basic-options')).toBeInTheDocument()
+  })
+
   test('falls back to BasicOptions when engine_type is missing', () => {
     renderComponent({activeMTEngineData: {id: 1}})
 
@@ -124,13 +126,13 @@ describe('OptionsContainer', () => {
 
   test('forwards the engine id and isCattoolPage to the options content', () => {
     renderComponent({
-      activeMTEngineData: {id: 7, engine_type: 'MMT'},
+      activeMTEngineData: {id: 7, engine_type: 'Lara'},
       isCattoolPage: true,
     })
 
     fireEvent.click(screen.getByTitle('Glossary options'))
 
-    expect(screen.getByTestId('mmt-options')).toHaveTextContent(
+    expect(screen.getByTestId('lara-options')).toHaveTextContent(
       JSON.stringify({id: 7, isCattoolPage: true}),
     )
   })

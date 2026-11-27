@@ -1,6 +1,5 @@
 import React, {useContext, useEffect, useRef, useState} from 'react'
 import {Select} from '../../../common/Select'
-import {ModernMt} from './MtEngines/ModernMt'
 import {AltLang} from './MtEngines/AltLang'
 import {Apertium} from './MtEngines/Apertium'
 import {GoogleTranslate} from './MtEngines/GoogleTranslate'
@@ -48,11 +47,6 @@ export const MachineTranslationTab = () => {
       name: 'Lara',
       id: 'Lara',
       component: Lara,
-    },
-    {
-      name: 'ModernMT',
-      id: 'mmt',
-      component: ModernMt,
     },
     {name: 'AltLang', id: 'altlang', component: AltLang},
     {name: 'Apertium', id: 'apertium', component: Apertium},

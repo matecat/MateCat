@@ -5658,6 +5658,5 @@ export default {
     coupon_value: '100',
     gplus_picture:
       'https://lh3.googleusercontent.com/a/ACg8ocLDB74rYR4_ozaSV0g7Iev2cOmsf3rOzGMza8Ne_OaKPyn4cik=s96-c',
-    mmt: '8680',
   },
 }

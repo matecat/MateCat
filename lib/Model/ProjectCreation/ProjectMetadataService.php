@@ -106,8 +106,8 @@ readonly class ProjectMetadataService
             $engineValue = $projectStructure->$extraKey;
 
             if (isset($jobScopedKeys[$extraKey])) {
-                // 0 and false are answers the owner chose for these keys — a threshold of 0, or
-                // mmt_ignore_glossary_case turned off — so !empty() would silently drop them. The
+                // 0 and false are answers the owner chose for these keys — a threshold of 0, for
+                // example — so !empty() would silently drop them. The
                 // project-wide params below are the opposite case: there, falsy *is* the default.
                 if (!is_scalar($engineValue) || $engineValue === '') {
                     continue;

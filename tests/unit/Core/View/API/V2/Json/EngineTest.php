@@ -55,13 +55,13 @@ class EngineTest extends AbstractTest
 
     public function testRenderReturnsArrayRepresentationForEachEngine(): void
     {
-        $struct = $this->makeEngineStruct(5, 'MMT');
+        $struct = $this->makeEngineStruct(5, 'DeepL');
         $view   = new Engine([$struct]);
         $result = $view->render();
 
         $this->assertArrayHasKey('id', $result[0]);
         $this->assertSame(5, $result[0]['id']);
-        $this->assertSame('MMT', $result[0]['name']);
+        $this->assertSame('DeepL', $result[0]['name']);
     }
 
     public function testRenderWithMultipleEngines(): void

@@ -12,6 +12,8 @@ use Klein\Response;
 use Matecat\Locales\Languages;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\ControllerSeedFragments;
+use Model\Engines\EngineDAO;
+use Model\Engines\Structs\EngineStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Projects\ProjectsMetadataMarshaller;
 use Model\Teams\TeamStruct;
@@ -24,6 +26,7 @@ use ReflectionClass;
 use ReflectionException;
 use Throwable;
 use Utils\Constants\Constants;
+use Utils\Constants\EngineConstants;
 use Utils\Logger\MatecatLogger;
 use Model\ConnectedServices\GDrive\Session;
 use Utils\Session\ArraySessionStore;
@@ -353,6 +356,7 @@ class CreateProjectControllerTest extends AbstractTest
             'mine'       => [['key' => 'aaaaaaaaaaaaaaaa']],
             'anonymous'  => [['key' => 'bbbbbbbbbbbbbbbb']],
         ]);
+        // A client still sending the retired ModernMT parameter gets it ignored, not rejected.
         $params['mmt_glossaries']  = '[1,2]';
         $params['lara_glossaries'] = '["g1"]';
         $this->setRequestParams($params);
@@ -361,7 +365,7 @@ class CreateProjectControllerTest extends AbstractTest
         $data = $this->invokePrivate('validateTheRequest');
 
         $this->assertCount(2, $data['private_tm_key']);
-        $this->assertSame('[1,2]', $data['mmt_glossaries']);
+        $this->assertArrayNotHasKey('mmt_glossaries', $data);
         $this->assertSame('["g1"]', $data['lara_glossaries']);
     }
 
@@ -777,16 +781,7 @@ class CreateProjectControllerTest extends AbstractTest
         $this->invokePrivate('validateTargetLangs', [Languages::getInstance(), 'zz-ZZ']);
     }
 
-    // ─── validateMMTGlossaries / validateLaraGlossaries ───
-
-    /**
-     * @throws Throwable
-     */
-    #[Test]
-    public function validateMMTGlossaries_returns_null_when_empty(): void
-    {
-        $this->assertNull($this->invokePrivate('validateMMTGlossaries', [null]));
-    }
+    // ─── validateLaraGlossaries ───
 
     /**
      * @throws Throwable
@@ -795,29 +790,6 @@ class CreateProjectControllerTest extends AbstractTest
     public function validateLaraGlossaries_returns_null_when_empty(): void
     {
         $this->assertNull($this->invokePrivate('validateLaraGlossaries', [null]));
-    }
-
-    /**
-     * @throws Throwable
-     */
-    #[Test]
-    public function validateMMTGlossaries_returns_decoded_string_for_valid_json(): void
-    {
-        $result = $this->invokePrivate('validateMMTGlossaries', ['[1,2]']);
-
-        $this->assertSame('[1,2]', $result);
-    }
-
-    /**
-     * @throws Throwable
-     */
-    #[Test]
-    public function validateMMTGlossaries_throws_for_invalid_json(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionCode(-6);
-
-        $this->invokePrivate('validateMMTGlossaries', ['not-json']);
     }
 
     /**
@@ -1184,5 +1156,71 @@ class CreateProjectControllerTest extends AbstractTest
     public function gdriveSessionData_is_null_when_this_is_not_a_drive_import(): void
     {
         $this->assertNull($this->invokePrivate('gdriveSessionData'));
+    }
+
+    /**
+     * A template cached before the ModernMT Full removal still sends that engine's id: the row is
+     * there, owned by this user, but its class is gone.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateMtEngine_refuses_a_retired_modernmt_engine_with_a_clear_message(): void
+    {
+        $engine = new EngineStruct();
+        $engine->name = 'ctrltest modernmt engine';
+        $engine->type = EngineConstants::MT;
+        $engine->description = 'ctrltest modernmt engine';
+        $engine->base_url = 'https://example.invalid/api';
+        $engine->others = [];
+        $engine->extra_parameters = [];
+        $engine->class_load = 'MMT';
+        $engine->penalty = 14;
+        $engine->active = true;
+        $engine->uid = $this->user->uid;
+
+        $engineId = (int)(new EngineDAO(obtainTestDatabase()))->create($engine)->id;
+
+        try {
+            $this->invokePrivate('validateMtEngine', [$engineId]);
+            self::fail('A retired ModernMT engine was accepted');
+        } catch (InvalidArgumentException $e) {
+            self::assertSame('Engine is no longer available', $e->getMessage());
+        } finally {
+            obtainTestDatabase()->getConnection()->prepare('DELETE FROM engines WHERE id = ?')->execute([$engineId]);
+        }
+    }
+
+    /**
+     * Another user's retired engine answers like any engine of another user, so the reply never
+     * depends on an engine the caller does not own.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateMtEngine_gives_the_ownership_error_for_a_retired_engine_of_another_user(): void
+    {
+        $engine = new EngineStruct();
+        $engine->name = 'ctrltest modernmt engine';
+        $engine->type = EngineConstants::MT;
+        $engine->description = 'ctrltest modernmt engine';
+        $engine->base_url = 'https://example.invalid/api';
+        $engine->others = [];
+        $engine->extra_parameters = [];
+        $engine->class_load = 'MMT';
+        $engine->penalty = 14;
+        $engine->active = true;
+        $engine->uid = (int)$this->user->uid + 1;
+
+        $engineId = (int)(new EngineDAO(obtainTestDatabase()))->create($engine)->id;
+
+        try {
+            $this->invokePrivate('validateMtEngine', [$engineId]);
+            self::fail("Another user's retired ModernMT engine was accepted");
+        } catch (InvalidArgumentException $e) {
+            self::assertSame("Engine doesn't belong to the user", $e->getMessage());
+        } finally {
+            obtainTestDatabase()->getConnection()->prepare('DELETE FROM engines WHERE id = ?')->execute([$engineId]);
+        }
     }
 }

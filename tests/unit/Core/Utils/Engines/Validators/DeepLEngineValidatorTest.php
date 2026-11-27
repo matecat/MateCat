@@ -12,7 +12,9 @@ use Utils\Engines\Validators\DeepLEngineValidator;
 
 /**
  * Covers the injected-IDatabase plumbing in DeepLEngineValidator without hitting
- * external services (see MMTEngineValidatorTest for the strategy rationale).
+ * external services: validate() hands $this->database to
+ * EnginesFactory::createTempInstance(), and a struct with no class_load makes the
+ * factory throw before any network call.
  */
 class DeepLEngineValidatorTest extends AbstractTest
 {

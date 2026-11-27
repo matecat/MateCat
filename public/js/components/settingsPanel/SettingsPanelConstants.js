@@ -1,4 +1,3 @@
-import React from 'react'
 import {SCHEMA_KEYS} from '../../hooks/useProjectTemplates'
 
 export const SETTINGS_PANEL_TABS = {
@@ -54,14 +53,8 @@ export const TEMPLATE_PROPS_BY_TAB = {
 export const DEFAULT_ENGINE_MEMORY = {
   id: 1,
   name: 'ModernMT Lite',
-  description: (
-    <div
-      dangerouslySetInnerHTML={{
-        __html:
-          'Smart machine translation that learns from your corrections for enhanced quality and productivity thanks to ModernMT\'s basic features. To unlock all features, <a target="_blank" href="https://www.modernmt.com/pricing#translators">click here</a>.',
-      }}
-    />
-  ),
+  description:
+    "Smart machine translation that learns from your corrections for enhanced quality and productivity thanks to ModernMT's basic features.",
   default: true,
   engine_type: 'MMTLite',
 }

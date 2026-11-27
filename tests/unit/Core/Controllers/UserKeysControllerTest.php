@@ -222,7 +222,7 @@ class UserKeysControllerTest extends AbstractTest
 
     /**
      * Seeds the user_metadata row that removeKeyFromEngines() reads to determine which
-     * adaptive engine instance the current user owns for the "MMT" engine class.
+     * adaptive engine instance the current user owns for the "Lara" engine class.
      *
      * @throws Throwable
      */
@@ -233,7 +233,7 @@ class UserKeysControllerTest extends AbstractTest
         );
         $stmt->execute([
             'uid'   => $this->userId(self::BASE),
-            'key'   => 'Utils\Engines\MMT',
+            'key'   => 'Utils\Engines\Lara',
             'value' => $value,
         ]);
     }
@@ -249,10 +249,10 @@ class UserKeysControllerTest extends AbstractTest
 
         // MetadataDao::get() caches by (uid, key) for 30 days (see removeKeyFromEngines()); bust
         // it on both sides of every test so no test's result leaks into a sibling test that reads
-        // the same (uid, 'Utils\Engines\MMT') pair with a different seeded value.
+        // the same (uid, 'Utils\Engines\Lara') pair with a different seeded value.
         (new MetadataDao(obtainTestDatabase()))->destroyCache(new MetadataStruct([
             'uid' => $this->userId(self::BASE),
-            'key' => 'Utils\Engines\MMT',
+            'key' => 'Utils\Engines\Lara',
         ]));
     }
 
@@ -828,11 +828,11 @@ class UserKeysControllerTest extends AbstractTest
         $memoryKey->uid    = $this->userId(self::BASE);
         $memoryKey->tm_key = $tmKey;
 
-        // "MMT" is a real, adaptive engine (isAdaptiveMT() === true): createTempInstance
+        // "Lara" is a real, adaptive engine (isAdaptiveMT() === true): createTempInstance
         // succeeds, the adaptive branch is entered, and MetadataDao::get() runs a real
         // (empty-result) lookup for this uid, so the inner deletion block is skipped and
         // the key struct is left intact.
-        $this->invokePrivate('removeKeyFromEngines', [$memoryKey, 'MMT']);
+        $this->invokePrivate('removeKeyFromEngines', [$memoryKey, 'Lara']);
 
         $this->assertSame('abcdef1234567890', $memoryKey->tm_key->key);
     }
@@ -857,7 +857,7 @@ class UserKeysControllerTest extends AbstractTest
         $memoryKey->uid    = $this->userId(self::BASE);
         $memoryKey->tm_key = $tmKey;
 
-        $this->invokePrivate('removeKeyFromEngines', [$memoryKey, 'MMT']);
+        $this->invokePrivate('removeKeyFromEngines', [$memoryKey, 'Lara']);
 
         $this->assertTrue(RecordingFakeEngine::$getMemoryIfMineCalled);
         $this->assertTrue(RecordingFakeEngine::$deleteMemoryCalled);
@@ -882,7 +882,7 @@ class UserKeysControllerTest extends AbstractTest
         $memoryKey->uid    = $this->userId(self::BASE);
         $memoryKey->tm_key = $tmKey;
 
-        $this->invokePrivate('removeKeyFromEngines', [$memoryKey, 'MMT']);
+        $this->invokePrivate('removeKeyFromEngines', [$memoryKey, 'Lara']);
 
         $this->assertFalse(RecordingFakeEngine::$getMemoryIfMineCalled);
         $this->assertFalse(RecordingFakeEngine::$deleteMemoryCalled);

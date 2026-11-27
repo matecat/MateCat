@@ -9,6 +9,7 @@ use Matecat\Locales\Languages;
 use Matecat\SubFiltering\Enum\InjectableFiltersTags;
 use Matecat\SubFiltering\HandlersSorter;
 use Model\DataAccess\AbstractDao;
+use Model\Engines\EngineDAO;
 use Model\Filters\FiltersConfigTemplateDao;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
@@ -264,6 +265,17 @@ class ProjectTemplateDao extends AbstractDao
                 $engine = EnginesFactory::getInstance($mt->id, $this->database, AbstractEngine::class);
 
                 $engineRecord = $engine->getEngineRecord();
+
+                // A row whose class was removed (ModernMT Full) comes back as the NONE placeholder,
+                // id 0, which would otherwise slip past the ownership check below. Its owner is read
+                // off the stored row: only the owner learns the engine is gone, anyone else gets 403.
+                if ($engineRecord->id !== (int)$mt->id) {
+                    if ((new EngineDAO($this->database))->getStoredOwnerUid((int)$mt->id) === (int)$projectTemplateStruct->uid) {
+                        throw new Exception("Engine is no longer available.", 400);
+                    }
+
+                    throw new Exception("Engine doesn't belong to the user.", 403);
+                }
 
                 if ($engineRecord->id > 1 and $engineRecord->uid != $projectTemplateStruct->uid) {
                     throw new Exception("Engine doesn't belong to the user.", 403);
@@ -721,6 +733,32 @@ class ProjectTemplateDao extends AbstractDao
     private function destroyQueryPaginated(int $uid): void
     {
         $this->_deleteCacheByKey(self::paginated_map_key . ":" . $uid, false);
+    }
+
+    /**
+     * Every cached read of one user's templates: the list and the default, both kept for a day, and
+     * each template by id. For a write made outside this DAO, such as a migration rewriting `mt`
+     * with plain SQL, which leaves all of them serving the rows it replaced.
+     *
+     * Example: $dao->destroyCachesByUid(42);
+     *
+     * @throws PDOException
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function destroyCachesByUid(int $uid): void
+    {
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare("SELECT id FROM " . self::TABLE . " WHERE uid = :uid ");
+        $stmt->execute(['uid' => $uid]);
+
+        foreach ($stmt->fetchAll(PDO::FETCH_COLUMN) as $id) {
+            $this->destroyFetchByIdCache((int)$id, ProjectTemplateStruct::class);
+            $this->destroyQueryByIdAndUserCache($conn, (int)$id, $uid);
+        }
+
+        $this->destroyDefaultTemplateCache($conn, $uid);
+        $this->destroyQueryPaginated($uid);
     }
 
     /**

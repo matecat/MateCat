@@ -70,7 +70,6 @@ class LaraStruct extends EngineStruct
     public string|array|null $extra_parameters = [
         'Lara-AccessKeyId' => "",
         'Lara-AccessKeySecret' => "",
-        'MMT-License' => ""
     ];
 
     /**

@@ -32,7 +32,6 @@ use Utils\Engines\Lara\HeaderField;
 use Utils\Engines\Lara\Headers;
 use Utils\Engines\Lara\HttpClientInterface;
 use Utils\Engines\Lara\LaraClient;
-use Utils\Engines\MMT;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectsMetadataMarshaller;
@@ -56,7 +55,6 @@ class LaraEngineTest extends AbstractTest
         $struct->extra_parameters = [
             'Lara-AccessKeyId' => 'id',
             'Lara-AccessKeySecret' => 'secret',
-            'MMT-License' => 'license',
         ];
         $this->engine = new TestLara($struct, obtainTestDatabase());
     }
@@ -697,6 +695,30 @@ class LaraEngineTest extends AbstractTest
         self::assertNotContains('fr', $languages);
     }
     /**
+     * A Lara engine saved with the retired ModernMT license, before the migration strips it, still
+     * builds its client: the license is ignored instead of reaching for the removed MMT engine.
+     *
+     * @throws Exception
+     */
+    #[Test]
+    public function aLegacyModernMtLicenseIsIgnoredWhenTheClientIsBuilt(): void
+    {
+        $struct = EngineStruct::getStruct();
+        $struct->class_load = Lara::class;
+        $struct->name = 'Lara';
+        $struct->type = EngineConstants::MT;
+        $struct->extra_parameters = [
+            'Lara-AccessKeyId' => 'id',
+            'Lara-AccessKeySecret' => 'secret',
+            'MMT-License' => 'legacy-license',
+        ];
+
+        $engine = new Lara($struct, obtainTestDatabase());
+
+        self::assertInstanceOf(LaraClient::class, $engine->getLaraClient());
+    }
+
+    /**
      * @throws Exception
      */
     #[Test]
@@ -744,7 +766,7 @@ class LaraEngineTest extends AbstractTest
      * @throws Exception
      */
     #[Test]
-    public function updateSuccessDelegatesToLaraAndPrivateMmt(): void
+    public function updateSuccessDelegatesToLara(): void
     {
         $httpClient = new TestHttpClient();
         $memories = $this->getMockBuilder(Memories::class)
@@ -771,9 +793,6 @@ class LaraEngineTest extends AbstractTest
         $client->method('getHttpClient')->willReturn($httpClient);
         $client->memories = $memories;
         $this->engine->setMockClient($client);
-        $privateMmt = $this->createMock(MMT::class);
-        $privateMmt->expects(self::once())->method('update')->willReturn(true);
-        $this->engine->setMmtPrivateLicense($privateMmt);
         $result = $this->engine->update([
             'keys' => ['k1'],
             'source' => 'en-US',
@@ -787,67 +806,6 @@ class LaraEngineTest extends AbstractTest
         ]);
         self::assertTrue($result);
         self::assertSame('ext_my_k1', $httpClient->capturedHeaders[Headers::LARA_MEMORIES_IDS] ?? null);
-    }
-    /**
-     * @throws Exception
-     */
-    #[Test]
-    public function updateSuccessWithoutPrivateMmtReturnsTrue(): void
-    {
-        $httpClient = new TestHttpClient();
-        $memories = $this->getMockBuilder(Memories::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['addTranslation'])
-            ->getMock();
-        $memories->expects(self::once())->method('addTranslation');
-        $client = $this->createStub(LaraClient::class);
-        $client->method('getHttpClient')->willReturn($httpClient);
-        $client->memories = $memories;
-        $this->engine->setMockClient($client);
-        $result = $this->engine->update([
-            'keys' => ['k1'],
-            'source' => 'en-US',
-            'target' => 'it-IT',
-            'segment' => 'source segment',
-            'translation' => 'translated segment',
-            'tuid' => 'tuid-1',
-            'context_before' => 'before',
-            'context_after' => 'after',
-            'translation_origin' => 'matecat',
-        ]);
-        self::assertTrue($result);
-    }
-    /**
-     * @throws Exception
-     */
-    #[Test]
-    public function updateReturnsFalseWhenPrivateMmtReturnsFalse(): void
-    {
-        $httpClient = new TestHttpClient();
-        $memories = $this->getMockBuilder(Memories::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['addTranslation'])
-            ->getMock();
-        $memories->expects(self::once())->method('addTranslation');
-        $client = $this->createStub(LaraClient::class);
-        $client->method('getHttpClient')->willReturn($httpClient);
-        $client->memories = $memories;
-        $this->engine->setMockClient($client);
-        $privateMmt = $this->createMock(MMT::class);
-        $privateMmt->expects(self::once())->method('update')->willReturn(false);
-        $this->engine->setMmtPrivateLicense($privateMmt);
-        $result = $this->engine->update([
-            'keys' => ['k1'],
-            'source' => 'en-US',
-            'target' => 'it-IT',
-            'segment' => 'source segment',
-            'translation' => 'translated segment',
-            'tuid' => 'tuid-1',
-            'context_before' => 'before',
-            'context_after' => 'after',
-            'translation_origin' => 'matecat',
-        ]);
-        self::assertFalse($result);
     }
     /**
      * @throws Exception
@@ -1008,50 +966,6 @@ class LaraEngineTest extends AbstractTest
      * @throws Exception
      */
     #[Test]
-    public function deleteMemoryWithPrivateMmtDeletesBothSides(): void
-    {
-        $deleted = new Memory('id-del', '2026-01-01', '2026-01-01', '2026-01-01', 'name', 'owner', 1, 'ext', 'sec');
-        $memories = $this->getMockBuilder(Memories::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['delete'])
-            ->getMock();
-        $memories->expects(self::once())->method('delete')->willReturn($deleted);
-        $client = $this->createStub(LaraClient::class);
-        $client->memories = $memories;
-        $this->engine->setMockClient($client);
-        $privateMmt = $this->createMock(MMT::class);
-        $privateMmt->expects(self::once())->method('getMemoryIfMine')->willReturn(['id' => 1]);
-        $privateMmt->expects(self::once())->method('deleteMemory');
-        $this->engine->setMmtPrivateLicense($privateMmt);
-        $this->engine->deleteMemory(['id' => 'mem-1', 'externalId' => 'ext_my_abc']);
-    }
-    /**
-     * @throws LaraException
-     * @throws Exception
-     */
-    #[Test]
-    public function deleteMemoryWithPrivateMmtSkipsDeleteWhenMemoryIsMissingInMmt(): void
-    {
-        $deleted = new Memory('id-del', '2026-01-01', '2026-01-01', '2026-01-01', 'name', 'owner', 1, 'ext', 'sec');
-        $memories = $this->getMockBuilder(Memories::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['delete'])
-            ->getMock();
-        $memories->expects(self::once())->method('delete')->willReturn($deleted);
-        $client = $this->createStub(LaraClient::class);
-        $client->memories = $memories;
-        $this->engine->setMockClient($client);
-        $privateMmt = $this->createMock(MMT::class);
-        $privateMmt->expects(self::once())->method('getMemoryIfMine')->willReturn([]);
-        $privateMmt->expects(self::never())->method('deleteMemory');
-        $this->engine->setMmtPrivateLicense($privateMmt);
-        $this->engine->deleteMemory(['id' => 'mem-1', 'externalId' => 'ext_my_abc']);
-    }
-    /**
-     * @throws LaraException
-     * @throws Exception
-     */
-    #[Test]
     public function getMemoryIfMineAliasesMemoryExists(): void
     {
         $memory = new Memory('id1', '2026-01-01', '2026-01-01', '2026-01-01', 'name', 'owner', 1, 'ext1', 'sec');
@@ -1073,7 +987,7 @@ class LaraEngineTest extends AbstractTest
      * @throws Exception
      */
     #[Test]
-    public function importMemoryImportsToLaraAndPrivateMmt(): void
+    public function importMemoryImportsToLara(): void
     {
         $memory = new Memory('id1', '2026-01-01', '2026-01-01', '2026-01-01', 'name', 'owner', 1, 'ext1', 'sec');
         $memories = $this->getMockBuilder(Memories::class)
@@ -1091,9 +1005,6 @@ class LaraEngineTest extends AbstractTest
         $client = $this->createStub(LaraClient::class);
         $client->memories = $memories;
         $this->engine->setMockClient($client);
-        $privateMmt = $this->createMock(MMT::class);
-        $privateMmt->expects(self::once())->method('importMemory');
-        $this->engine->setMmtPrivateLicense($privateMmt);
         $tmp = tempnam(sys_get_temp_dir(), 'lara_');
         self::assertIsString($tmp);
         file_put_contents($tmp, "<tmx>test</tmx>\n");
@@ -1169,12 +1080,6 @@ class LaraEngineTest extends AbstractTest
         $this->expectException(InvalidArgumentException::class);
         Lara::validateLaraStyle('invalid-style');
     }
-
-    #[Test]
-    public function hasBuiltInQualityEstimationIsFalse(): void
-    {
-        self::assertFalse($this->engine->hasBuiltInQualityEstimation());
-    }
 }
 class TestHttpClient extends HttpClient implements HttpClientInterface
 {
@@ -1212,11 +1117,6 @@ class TestLara extends Lara
         return $this->googleFallbackResponse ?? new GetMemoryResponse(null);
     }
 
-    public function setMmtPrivateLicense(MMT $private): void
-    {
-        $prop = new ReflectionProperty(Lara::class, 'mmt_SET_PrivateLicense');
-        $prop->setValue($this, $private);
-    }
     protected function _getClient(): LaraClient
     {
         return $this->mockClient;

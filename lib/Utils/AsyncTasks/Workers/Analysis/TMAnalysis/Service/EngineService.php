@@ -6,7 +6,6 @@ use Exception;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\DataAccess\IDatabase;
 use Model\FeaturesBase\FeatureSet;
-use Model\FeaturesBase\Hook\Event\Filter\AnalysisBeforeMTGetContributionEvent;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Jobs\JobSettingsResolver;
 use Model\Jobs\JobsMetadataMarshaller;
@@ -136,10 +135,6 @@ class EngineService
             if (!isset($engineConfig['job_id'])) {
                 $engineConfig['job_id'] = $queueElement->params->id_job;
             }
-
-            $analysisEvent = new AnalysisBeforeMTGetContributionEvent($engineConfig, $mtEngine, $queueElement);
-            $featureSet->dispatch($analysisEvent);
-            $engineConfig = $analysisEvent->getConfig();
 
             $engineResponse = $mtEngine->get($engineConfig);
             $this->qualityEstimator->scoreIfRequested($mtEngine, $engineResponse, $engineConfig);

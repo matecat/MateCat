@@ -258,7 +258,7 @@ test('penalty: clicking the reset icon on an existing penalty sets it back to 0'
 test('delete: with no other templates involved, expands the DeleteResource row directly', async () => {
   const user = userEvent.setup()
   const row = baseRow()
-  getTmKeyEnginesInfo.mockResolvedValue(['MMT'])
+  getTmKeyEnginesInfo.mockResolvedValue(['Lara'])
 
   render(<Wrapper row={row} />)
 
@@ -268,27 +268,8 @@ test('delete: with no other templates involved, expands the DeleteResource row d
   expect(getTmKeyEnginesInfo).toHaveBeenCalledWith(row.key)
   expect(ModalsActions.showModalComponent).not.toHaveBeenCalled()
   expect(
-    screen.getByText(/also linked to your ModernMT account/),
+    screen.getByText(/also linked to your Lara account/),
   ).toBeInTheDocument()
-})
-
-test('delete: checking the ModernMT removal checkbox requests removal from ModernMT', async () => {
-  const user = userEvent.setup()
-  const row = baseRow()
-  deleteTmKey.mockResolvedValue({})
-  getTmKeyEnginesInfo.mockResolvedValue(['MMT'])
-
-  render(<Wrapper row={row} />)
-
-  await act(async () => user.click(screen.getByTestId('tm-row-menu')))
-  await act(async () => user.click(screen.getByTestId('delete-resource')))
-
-  await act(async () =>
-    user.click(screen.getByTestId('delete-remove-from-mmt')),
-  )
-  await act(async () => user.click(screen.getByText('Confirm')))
-
-  expect(deleteTmKey).toHaveBeenCalledWith({key: row.key, removeFrom: 'MMT'})
 })
 
 test('delete: checking the Lara removal checkbox requests removal from Lara', async () => {
@@ -310,29 +291,18 @@ test('delete: checking the Lara removal checkbox requests removal from Lara', as
   expect(deleteTmKey).toHaveBeenCalledWith({key: row.key, removeFrom: 'Lara'})
 })
 
-test('delete: when both MMT and Lara are linked, checking both checkboxes requests removal from both', async () => {
+test('delete: never offers a ModernMT removal option', async () => {
   const user = userEvent.setup()
   const row = baseRow()
-  deleteTmKey.mockResolvedValue({})
-  getTmKeyEnginesInfo.mockResolvedValue(['MMT', 'Lara'])
+  getTmKeyEnginesInfo.mockResolvedValue(['Lara'])
 
   render(<Wrapper row={row} />)
 
   await act(async () => user.click(screen.getByTestId('tm-row-menu')))
   await act(async () => user.click(screen.getByTestId('delete-resource')))
 
-  await act(async () =>
-    user.click(screen.getByTestId('delete-remove-from-lara')),
-  )
-  await act(async () =>
-    user.click(screen.getByTestId('delete-remove-from-mmt')),
-  )
-  await act(async () => user.click(screen.getByText('Confirm')))
-
-  expect(deleteTmKey).toHaveBeenCalledWith({
-    key: row.key,
-    removeFrom: 'Lara,MMT',
-  })
+  expect(screen.queryByTestId('delete-remove-from-mmt')).not.toBeInTheDocument()
+  expect(screen.queryByText(/ModernMT/)).not.toBeInTheDocument()
 })
 
 test('delete: with other templates involved, opens the confirmation modal listing them', async () => {
@@ -389,7 +359,7 @@ test('onConfirmDeleteTmKey: shows an error notification and closes the row on fa
   const user = userEvent.setup()
   const row = baseRow()
   deleteTmKey.mockRejectedValue()
-  getTmKeyEnginesInfo.mockResolvedValue(['MMT'])
+  getTmKeyEnginesInfo.mockResolvedValue(['Lara'])
 
   render(<Wrapper row={row} />)
 
@@ -500,7 +470,7 @@ test('onConfirmDeleteTmKey in cattool mode notifies the status change instead of
   global.config = {...config, is_cattool: false}
 })
 
-test('delete: when neither MMT nor Lara are linked, no extra footer content is shown', async () => {
+test('delete: when Lara is not linked, no extra footer content is shown', async () => {
   const user = userEvent.setup()
   const row = baseRow()
   getTmKeyEnginesInfo.mockResolvedValue([])

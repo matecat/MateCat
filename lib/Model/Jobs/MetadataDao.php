@@ -14,40 +14,8 @@ class MetadataDao extends AbstractDao
 
     const string TABLE = 'job_metadata';
 
-    const string _query_metadata_by_job_id_key = "SELECT * FROM job_metadata WHERE id_job = :id_job AND `key` = :key ";
     const string _query_metadata_by_job_password = "SELECT * FROM job_metadata WHERE id_job = :id_job AND password = :password ";
     const string _query_metadata_by_job_password_key = "SELECT * FROM job_metadata WHERE id_job = :id_job AND password = :password AND `key` = :key ";
-
-    /**
-     * @param int $id_job
-     * @param string $key
-     * @param int $ttl
-     *
-     * @return MetadataStruct[]
-     * @throws Exception
-     * @throws PDOException
-     * @throws ReflectionException
-     */
-    public function getByIdJob(int $id_job, string $key, int $ttl = 0): array
-    {
-        $stmt = $this->_getStatementForQuery(self::_query_metadata_by_job_id_key);
-
-        return $this->setCacheTTL($ttl)->_fetchObjectMap($stmt, MetadataStruct::class, [
-            'id_job' => $id_job,
-            'key' => $key
-        ]);
-    }
-
-    /**
-     * @throws PDOException
-     * @throws ReflectionException
-     */
-    private function destroyCacheByIdJob(int $id_job, string $key): bool
-    {
-        $stmt = $this->_getStatementForQuery(self::_query_metadata_by_job_id_key);
-
-        return $this->_destroyObjectCache($stmt, MetadataStruct::class, ['id_job' => $id_job, 'key' => $key]);
-    }
 
     /**
      * @param int $id_job
@@ -128,11 +96,11 @@ class MetadataDao extends AbstractDao
     }
 
     /**
-     * The one eviction a caller needs. A metadata row answers three reads, and the struct names the
-     * address of all three: getByIdJob() binds id_job and key alone, so a write that only clears the
-     * two password-bound addresses leaves it serving the value it replaced for the whole TTL.
+     * The one eviction a caller needs. A metadata row answers two reads, and the struct names the
+     * address of both: the chunk's whole map and the single key.
      *
-     * An empty password is a real address here, not a missing one: MMT stores the MT context under it.
+     * An empty password is a real address here, not a missing one: the retired ModernMT engine stored
+     * its MT context under it, and those rows are still in the table.
      *
      * @throws PDOException
      * @throws ReflectionException
@@ -144,7 +112,6 @@ class MetadataDao extends AbstractDao
             throw new TypeError('MetadataStruct must carry id_job, password and key');
         }
 
-        $this->destroyCacheByIdJob($metadata->id_job, $metadata->key);
         $this->destroyCacheByJobAndPassword($metadata->id_job, $metadata->password);
         $this->destroyCacheByJobAndPasswordAndKey($metadata->id_job, $metadata->password, $metadata->key);
     }
@@ -159,9 +126,9 @@ class MetadataDao extends AbstractDao
      * where the read named three. The key list is the enum's, so a key added later cannot be
      * forgotten here.
      *
-     * The two key-bound addresses are named per key, but the credential-bound one is named once
-     * rather than through destroyCache(): a merge sweeps every chunk it folds in, so repeating one
-     * identical eviction per key would triple the round trips for nothing.
+     * The key-bound address is named per key, but the credential-bound one is named once rather
+     * than through destroyCache(): a merge sweeps every chunk it folds in, so repeating one
+     * identical eviction per key would double the round trips for nothing.
      *
      * @throws PDOException
      * @throws ReflectionException
@@ -171,7 +138,6 @@ class MetadataDao extends AbstractDao
         $this->destroyCacheByJobAndPassword($id_job, $password);
 
         foreach (JobsMetadataMarshaller::cases() as $case) {
-            $this->destroyCacheByIdJob($id_job, $case->value);
             $this->destroyCacheByJobAndPasswordAndKey($id_job, $password, $case->value);
         }
     }
@@ -306,9 +272,9 @@ class MetadataDao extends AbstractDao
      * array. Writing that back would store `1` or `Array` in place of the text every reader parses.
      * The statement is the same one, so this shares its cache address and adds no read of its own.
      *
-     * The empty password is an address like any other here, and it is not this one: MMT stores the
-     * MT context under it and reads it with getByIdJob(), which ignores the password, so that row is
-     * already shared by every chunk of the job. Binding the password is what keeps it out of a copy.
+     * The empty password is an address like any other here, and it is not this one: the retired
+     * ModernMT engine stored its MT context under it, shared by every chunk of the job. Binding the
+     * password is what keeps those rows out of a copy.
      *
      * @return array<string, string>
      * @throws Exception
@@ -392,9 +358,9 @@ class MetadataDao extends AbstractDao
      */
     public function movePassword(int $id_job, string $old_password, string $new_password): int
     {
-        // The empty password is not a chunk credential and nothing renames it: it is the address MMT
-        // stores the MT context under, shared by every chunk of the job. A rotation that swept it up
-        // would take the context away from the chunks that did not rotate.
+        // The empty password is not a chunk credential and nothing renames it: the retired ModernMT
+        // engine stored its MT context under it, shared by every chunk of the job, and a rotation
+        // has no reason to move those rows.
         if ($old_password === '' || $old_password === $new_password) {
             return 0;
         }

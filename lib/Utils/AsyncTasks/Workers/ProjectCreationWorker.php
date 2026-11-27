@@ -29,6 +29,14 @@ use Utils\Tools\Utils;
 
 class ProjectCreationWorker extends AbstractWorker
 {
+    /**
+     * The three keys of the retired ModernMT Full engine. A payload queued before that removal was
+     * deployed still carries them, and ProjectStructure throws on a property it does not declare.
+     *
+     * Remove once the queue has drained after the ModernMT Full removal deploy.
+     */
+    private const array RETIRED_MMT_PAYLOAD_KEYS = ['mmt_glossaries', 'mmt_activate_context_analyzer', 'mmt_ignore_glossary_case'];
+
 
     protected ProjectStructure $projectStructure;
 
@@ -100,7 +108,9 @@ class ProjectCreationWorker extends AbstractWorker
             throw new EndQueueException("--- (Worker " . $this->_workerPid . ") :  empty params found.", self::ERR_REQUEUE_END);
         }
 
-        $this->projectStructure = new ProjectStructure($queueElement->params->toArray());
+        $params = array_diff_key($queueElement->params->toArray(), array_flip(self::RETIRED_MMT_PAYLOAD_KEYS));
+
+        $this->projectStructure = new ProjectStructure($params);
         $projectManager = $this->createProjectManager($this->projectStructure);
         $projectManager->createProject();
     }

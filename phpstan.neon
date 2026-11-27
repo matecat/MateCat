@@ -13,6 +13,8 @@ services:
                 - internal_scripts/tasks/tasks.php
                 - lib/View/templates/_APIDoc.php
                 - router.php
+                # A one-off CLI task: an entry point, so it reads the connection once like the ones above.
+                - support_scripts/tasks/evict-retired-modernmt-caches.php
 
     -
         class: Matecat\PhpStan\Rules\NoManualTransactionControlRule

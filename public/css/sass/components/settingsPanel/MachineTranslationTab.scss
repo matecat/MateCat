@@ -195,11 +195,6 @@
     height: 37px;
   }
 
-  .provider-license-label-with-icon {
-    display: flex;
-    gap: 5px;
-  }
-
   .provider-data-lara {
     .button {
       margin-top: 62px !important;
@@ -225,7 +220,6 @@
     text-align: center;
   }
 
-  .active-table-ModernMT,
   .active-table-DeepL,
   .active-table-Lara {
     .settings-panel-row-extra-content {
@@ -344,11 +338,6 @@
 .glossary-row-name {
   display: flex;
   gap: 10px;
-
-  .editing-buttons {
-    display: flex;
-    gap: 10px;
-  }
 
   .tooltip-input-name {
     min-width: 75%;

@@ -391,45 +391,6 @@ class NewControllerValidationMethodsTest extends AbstractTest
         $this->assertArrayHasKey('key', $result);
     }
 
-    // ──────────────────────────────────────────────────────────────────
-    // validateMMTGlossaries()
-    // ──────────────────────────────────────────────────────────────────
-
-    #[Test]
-    public function validateMMTGlossaries_null_returns_null(): void
-    {
-        $result = $this->invokeMethod('validateMMTGlossaries', [null]);
-        $this->assertNull($result);
-    }
-
-    #[Test]
-    public function validateMMTGlossaries_empty_returns_null(): void
-    {
-        $result = $this->invokeMethod('validateMMTGlossaries', ['']);
-        $this->assertNull($result);
-    }
-
-    #[Test]
-    public function validateMMTGlossaries_valid_int_array_returns_string(): void
-    {
-        $result = $this->invokeMethod('validateMMTGlossaries', ['[1,2,3]']);
-        $this->assertSame('[1,2,3]', $result);
-    }
-
-    #[Test]
-    public function validateMMTGlossaries_non_array_json_throws(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-        $this->invokeMethod('validateMMTGlossaries', ['"hello"']);
-    }
-
-    #[Test]
-    public function validateMMTGlossaries_array_with_non_int_throws(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-        $this->invokeMethod('validateMMTGlossaries', ['["abc"]']);
-    }
-
     // ──────────────── validateEngines() ────────────────
 
     #[Test]

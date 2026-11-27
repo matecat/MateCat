@@ -9,7 +9,6 @@ use Utils\Engines\DeepL;
 use Utils\Engines\GoogleTranslate;
 use Utils\Engines\Intento;
 use Utils\Engines\Lara;
-use Utils\Engines\MMT;
 use Utils\Engines\MyMemory;
 use Utils\Engines\SmartMATE;
 use Utils\Engines\YandexTranslate;
@@ -32,7 +31,6 @@ class EngineConstants
     const string ALTLANG = 'Altlang';
     const string SMART_MATE = 'SmartMATE';
     const string YANDEX_TRANSLATE = 'YandexTranslate';
-    const string MMT = 'MMT';
     const string LARA = 'Lara';
     const string DEEPL = 'DeepL';
     const string GOOGLE_TRANSLATE = 'GoogleTranslate';
@@ -47,7 +45,6 @@ class EngineConstants
         YandexTranslate::class => YandexTranslate::class,
         GoogleTranslate::class => GoogleTranslate::class,
         Intento::class => Intento::class,
-        MMT::class => MMT::class,
         DeepL::class => DeepL::class,
         Lara::class => Lara::class, // new namespaced engine classes must be loaded by fully qualified class name
     ];

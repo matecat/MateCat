@@ -465,8 +465,8 @@ class JobSplitMergeService
 
         // Read once, before the loop. job_metadata is keyed by (id_job, password, key), so a chunk
         // that gets a fresh password gets an empty address: whatever is not copied onto it is gone.
-        // The read binds the password of the job being split, which is what leaves MMT's mt_context
-        // row out — it lives under the empty password and is already shared by every chunk.
+        // The read binds the password of the job being split, which leaves out the rows under the
+        // empty password: the retired ModernMT engine wrote its MT context there, shared by every chunk.
         $sourceMetadata = $this->inheritableMetadata(
             $jobToSplit->id ?? throw new RuntimeException('Missing job id'),
             $jobsMetadataDao->getRawMapByJobIdAndPassword(

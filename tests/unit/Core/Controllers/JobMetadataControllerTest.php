@@ -364,12 +364,10 @@ class JobMetadataControllerTest extends AbstractTest
             'lara style guideline'    => ['lara_style_guideline_id', 'guideline-3', 'guideline-3'],
             // Arrays are JSON-encoded by the controller before they reach the DAO.
             'lara glossaries'         => ['lara_glossaries', ['a', 'b'], '["a","b"]'],
-            'mmt glossaries'          => ['mmt_glossaries', [1, 2], '[1,2]'],
             // An empty list is an answer, not an absence: it is how a job says "no glossary here"
             // over a project that has one, and the job scope wins. delete() is the other operation,
             // dropping the job row so the project value is inherited again.
             'empty lara glossaries'   => ['lara_glossaries', [], '[]'],
-            'empty mmt glossaries'    => ['mmt_glossaries', [], '[]'],
             'intento provider'        => ['intento_provider', 'ai.text.translate.google', 'ai.text.translate.google'],
             'intento routing'         => ['intento_routing', 'best_quality', 'best_quality'],
             // These two accept null and nothing else — the empty string above is refused for them.
@@ -523,7 +521,7 @@ class JobMetadataControllerTest extends AbstractTest
     public function save_answers_with_un_marshalled_values(): void
     {
         $body = (string)json_encode([
-            ['key' => 'mmt_glossaries', 'value' => [12, 34]],
+            ['key' => 'lara_glossaries', 'value' => ['g1', 'g2']],
             ['key' => 'lara_glossaries', 'value' => []],
             ['key' => 'mt_quality_value_in_editor', 'value' => 90],
             ['key' => 'tm_prioritization', 'value' => true],
@@ -538,7 +536,7 @@ class JobMetadataControllerTest extends AbstractTest
             ->method('json')
             ->with($this->callback(function (array $data): bool {
                 $this->assertCount(4, $data);
-                $this->assertSame([12, 34], $data[0]->value);
+                $this->assertSame(['g1', 'g2'], $data[0]->value);
                 $this->assertSame([], $data[1]->value);
                 $this->assertSame(90, $data[2]->value);
                 $this->assertTrue($data[3]->value);
@@ -590,16 +588,15 @@ class JobMetadataControllerTest extends AbstractTest
             // the null above is accepted.
             'empty intento provider' => ['intento_provider', ''],
             'empty intento routing'  => ['intento_routing', ''],
-            // mmt_glossaries holds MyMemory numeric ids, lara_glossaries opaque string ids.
-            'mmt glossary strings' => ['mmt_glossaries', ['12']],
+            // lara_glossaries holds opaque string ids.
             'lara glossary ints'   => ['lara_glossaries', [12]],
-            // A MyMemory glossary id is a positive integer.
-            'zero mmt glossary id'  => ['mmt_glossaries', [0]],
-            'negative mmt glossary id' => ['mmt_glossaries', [-1]],
+            // The ModernMT Full settings were retired with the engine: a client still sending them
+            // gets a refusal instead of a row nothing reads.
+            'retired mmt glossaries'      => ['mmt_glossaries', [1, 2]],
+            'retired mmt glossary case'   => ['mmt_ignore_glossary_case', true],
             // Only the engine-tunable settings are job-scoped: the analysis was priced on this one.
             'enable_mt_analysis'   => ['enable_mt_analysis', true],
-            // Consumed once at creation by MMT::syncMemories(), which has no job context.
-            'context analyzer'     => ['mmt_activate_context_analyzer', true],
+            'retired context analyzer'    => ['mmt_activate_context_analyzer', true],
         ];
     }
 

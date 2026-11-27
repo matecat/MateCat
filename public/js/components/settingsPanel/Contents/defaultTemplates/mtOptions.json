@@ -1,10 +1,4 @@
 {
-  "MMT": {
-    "mmt_activate_context_analyzer": false,
-    "enable_mt_analysis": true,
-    "mmt_ignore_glossary_case": true,
-    "mmt_glossaries": []
-  },
   "Lara": {
     "enable_mt_analysis": true,
     "lara_glossaries": []

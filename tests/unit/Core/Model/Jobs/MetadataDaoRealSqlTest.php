@@ -114,17 +114,6 @@ class MetadataDaoRealSqlTest extends AbstractTest
         self::assertNull($this->dao->get($this->idJob, $this->password, 'nope'));
     }
 
-    public function testGetByIdJobReturnsRowsForKey(): void
-    {
-        $this->dao->set($this->idJob, $this->password, 'colour', 'blue');
-        $this->track('colour');
-
-        $rows = $this->dao->getByIdJob($this->idJob, 'colour');
-
-        self::assertCount(1, $rows);
-        self::assertSame('blue', $rows[0]->value);
-    }
-
     public function testGetByJobIdAndPasswordReturnsUnmarshalledRows(): void
     {
         $this->dao->set($this->idJob, $this->password, JobsMetadataMarshaller::PUBLIC_TM_PENALTY->value, '25');
@@ -167,19 +156,18 @@ class MetadataDaoRealSqlTest extends AbstractTest
         self::assertNull($this->dao->get($this->idJob, $this->password, 'temp'));
     }
 
-    public function testDestroyCacheEvictsTheThreeReadsAMetadataRowAddresses(): void
+    public function testDestroyCacheEvictsTheTwoReadsAMetadataRowAddresses(): void
     {
         $this->flushDaoCache();
         $this->dao->set($this->idJob, $this->password, 'cachekey', 'v');
         $this->track('cachekey');
 
-        $this->dao->getByIdJob($this->idJob, 'cachekey', 3600);
         $this->dao->getByJobIdAndPassword($this->idJob, $this->password, 3600);
         $this->dao->get($this->idJob, $this->password, 'cachekey', 3600);
 
         $this->writeBehindTheCache('cachekey', 'w');
-        // all three still answer with the value they cached, which is what the door has to undo
-        self::assertSame('v', $this->dao->getByIdJob($this->idJob, 'cachekey', 3600)[0]->value);
+        // both still answer with the value they cached, which is what the door has to undo
+        self::assertSame('v', $this->dao->get($this->idJob, $this->password, 'cachekey', 3600)->value);
 
         $this->dao->destroyCache(new MetadataStruct([
             'id_job'   => $this->idJob,
@@ -187,30 +175,8 @@ class MetadataDaoRealSqlTest extends AbstractTest
             'key'      => 'cachekey',
         ]));
 
-        self::assertSame('w', $this->dao->getByIdJob($this->idJob, 'cachekey', 3600)[0]->value);
         self::assertSame('w', $this->dao->getByJobIdAndPassword($this->idJob, $this->password, 3600)[0]->value);
         self::assertSame('w', $this->dao->get($this->idJob, $this->password, 'cachekey', 3600)->value);
-    }
-
-    /**
-     * MMT reads the MT context by (id_job, key) alone, with no password, and caches it for a month.
-     * A write has to reach that address too, or the engine keeps sending the context it replaced.
-     *
-     * The entry is primed at a real TTL first: with nothing cached the assertion below holds for the
-     * wrong reason.
-     */
-    public function testSetEvictsThePasswordLessAddress(): void
-    {
-        $this->flushDaoCache();
-        $this->dao->set($this->idJob, $this->password, 'mt_context', 'ctx-1');
-        $this->track('mt_context');
-
-        self::assertSame('ctx-1', $this->dao->getByIdJob($this->idJob, 'mt_context', 3600)[0]->value);
-        self::assertNotSame([], $this->daoCacheRedis()->keys('*'), 'the read has to be cached for this to prove anything');
-
-        $this->dao->set($this->idJob, $this->password, 'mt_context', 'ctx-2');
-
-        self::assertSame('ctx-2', $this->dao->getByIdJob($this->idJob, 'mt_context', 3600)[0]->value);
     }
 
     /**
@@ -222,7 +188,7 @@ class MetadataDaoRealSqlTest extends AbstractTest
         $this->flushDaoCache();
         $this->dao->set($this->idJob, $this->password, 'colour', 'blue');
         $this->track('colour');
-        self::assertSame('blue', $this->dao->getByIdJob($this->idJob, 'colour', 3600)[0]->value);
+        self::assertSame('blue', $this->dao->get($this->idJob, $this->password, 'colour', 3600)->value);
 
         $this->writeBehindTheCache('colour', 'red');
 
@@ -232,7 +198,7 @@ class MetadataDaoRealSqlTest extends AbstractTest
             'key'      => 'unrelated',
         ]));
 
-        self::assertSame('blue', $this->dao->getByIdJob($this->idJob, 'colour', 3600)[0]->value);
+        self::assertSame('blue', $this->dao->get($this->idJob, $this->password, 'colour', 3600)->value);
     }
 
     public function testDestroyCacheRefusesAStructThatNamesNoKey(): void
@@ -318,9 +284,8 @@ class MetadataDaoRealSqlTest extends AbstractTest
     }
 
     /**
-     * The read binds the password, which is what keeps MMT's MT context out of a copy: it is stored
-     * under the empty password and read back by (id_job, key) alone, so it already belongs to every
-     * chunk of the job. Duplicating it per chunk would leave getByIdJob() picking from N rows.
+     * The read binds the password, which is what keeps the retired ModernMT engine's MT context out
+     * of a copy: it is stored under the empty password, shared by every chunk of the job.
      */
     public function testGetRawMapByJobIdAndPasswordIgnoresOtherChunksAndThePasswordLessRow(): void
     {
@@ -363,13 +328,13 @@ class MetadataDaoRealSqlTest extends AbstractTest
         $this->track('colour');
 
         self::assertSame('blue', $this->dao->get($this->idJob, $this->password, 'colour', 3600)->value);
-        self::assertSame('blue', $this->dao->getByIdJob($this->idJob, 'colour', 3600)[0]->value);
+        self::assertSame('blue', $this->dao->getByJobIdAndPassword($this->idJob, $this->password, 3600)[0]->value);
         self::assertNotSame([], $this->daoCacheRedis()->keys('*'), 'the reads have to be cached for this to prove anything');
 
         $this->dao->deleteByJobIdAndPassword($this->idJob, $this->password);
 
         self::assertNull($this->dao->get($this->idJob, $this->password, 'colour', 3600));
-        self::assertSame([], $this->dao->getByIdJob($this->idJob, 'colour', 3600));
+        self::assertSame([], $this->dao->getByJobIdAndPassword($this->idJob, $this->password, 3600));
     }
 
     /**
@@ -454,8 +419,8 @@ class MetadataDaoRealSqlTest extends AbstractTest
     }
 
     /**
-     * The empty password is not a credential anything rotates: it is where MMT keeps the MT context,
-     * shared by every chunk. Moving it would take the context away from the chunks that stayed put.
+     * The empty password is not a credential anything rotates: it is where the retired ModernMT
+     * engine kept the MT context, shared by every chunk. Moving it would take the context away from the chunks that stayed put.
      */
     public function testMovePasswordRefusesToMoveTheEmptyPasswordAddress(): void
     {

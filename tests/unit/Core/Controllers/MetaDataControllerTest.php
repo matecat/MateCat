@@ -140,7 +140,7 @@ class MetaDataControllerTest extends AbstractTest
         $conn->exec("INSERT IGNORE INTO files_job (id_job, id_file) VALUES ($jobId, $fileId)");
 
         // project_metadata: one engine config key (-> mt_extra) + one plain key
-        $conn->exec("INSERT IGNORE INTO project_metadata (id_project, `key`, value) VALUES ($projectId, 'mmt_glossaries', '[101]')");
+        $conn->exec("INSERT IGNORE INTO project_metadata (id_project, `key`, value) VALUES ($projectId, 'lara_glossaries', '[\"g101\"]')");
         $conn->exec("INSERT IGNORE INTO project_metadata (id_project, `key`, value) VALUES ($projectId, 'ctrl_plain_key', 'plain_value')");
 
         // job_metadata keyed by (id_job, password)
@@ -256,7 +256,7 @@ class MetaDataControllerTest extends AbstractTest
 
         // project: engine-config key routed to mt_extra, plain key stays top-level
         $this->assertObjectHasProperty('mt_extra', $captured->project);
-        $this->assertSame([101], $captured->project->mt_extra->mmt_glossaries);
+        $this->assertSame(['g101'], $captured->project->mt_extra->lara_glossaries);
         $this->assertSame('plain_value', $captured->project->ctrl_plain_key);
 
         // job metadata key present + marshaller default subfiltering_handlers
@@ -387,9 +387,73 @@ class MetaDataControllerTest extends AbstractTest
         $result = $this->invokePrivate('getProjectInfo', [$project]);
 
         $this->assertObjectHasProperty('mt_extra', $result);
-        $this->assertSame([101], $result->mt_extra->mmt_glossaries);
+        $this->assertSame(['g101'], $result->mt_extra->lara_glossaries);
         $this->assertSame('plain_value', $result->ctrl_plain_key);
+        $this->assertObjectNotHasProperty('lara_glossaries', $result);
+    }
+
+    /**
+     * A project created with ModernMT Full keeps its `mmt_*` rows. No engine declares them any more,
+     * so without the skip they would surface flat, outside `mt_extra`.
+     *
+     * @throws \Throwable
+     */
+    #[Test]
+    public function getProjectInfo_omits_the_keys_of_the_retired_modernmt_engine(): void
+    {
+        $projectId = $this->projectId(self::BASE);
+        $this->seedConnection()->exec("INSERT IGNORE INTO project_metadata (id_project, `key`, value) VALUES ($projectId, 'mmt_glossaries', '[1]')");
+        (new ProjectMetadataDao(obtainTestDatabase()))->destroyMetadataCache($projectId);
+
+        $job     = $this->loadSeededJob();
+        $project = $job->getProject(new ProjectDao(obtainTestDatabase()));
+
+        /** @var stdClass $result */
+        $result = $this->invokePrivate('getProjectInfo', [$project]);
+
         $this->assertObjectNotHasProperty('mmt_glossaries', $result);
+        $this->assertObjectNotHasProperty('mmt_glossaries', $result->mt_extra);
+        $this->assertSame(['g101'], $result->mt_extra->lara_glossaries);
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    #[Test]
+    public function getJobMetaData_omits_the_keys_of_the_retired_modernmt_engine(): void
+    {
+        $jobId = $this->jobId(self::BASE);
+        $this->seedConnection()->exec("INSERT IGNORE INTO job_metadata (id_job, password, `key`, value) VALUES ($jobId, '" . self::JOB_PASSWORD . "', 'mmt_ignore_glossary_case', '1')");
+        (new JobMetadataDao(obtainTestDatabase()))->destroyCacheForCredential($jobId, self::JOB_PASSWORD);
+
+        /** @var stdClass $result */
+        $result = $this->invokePrivate('getJobMetaData', [$this->loadSeededJob()]);
+
+        $this->assertObjectNotHasProperty('mmt_ignore_glossary_case', $result);
+        $this->assertObjectNotHasProperty('mmt_ignore_glossary_case', $result->mt_extra);
+        $this->assertSame('prefer_more', $result->mt_extra->deepl_formality);
+    }
+
+    /**
+     * A job whose only engine rows are retired ones overrides nothing, so it answers like a job with
+     * no engine settings at all: no `mt_extra`, which tells the client to read `project.mt_extra`.
+     *
+     * @throws \Throwable
+     */
+    #[Test]
+    public function getJobMetaData_omits_mt_extra_when_the_only_engine_keys_are_retired(): void
+    {
+        $this->dropTheOnlyJobScopedEngineSetting();
+
+        $jobId = $this->jobId(self::BASE);
+        $this->seedConnection()->exec("INSERT IGNORE INTO job_metadata (id_job, password, `key`, value) VALUES ($jobId, '" . self::JOB_PASSWORD . "', 'mmt_ignore_glossary_case', '1')");
+        (new JobMetadataDao(obtainTestDatabase()))->destroyCacheForCredential($jobId, self::JOB_PASSWORD);
+
+        /** @var stdClass $result */
+        $result = $this->invokePrivate('getJobMetaData', [$this->loadSeededJob()]);
+
+        $this->assertObjectNotHasProperty('mt_extra', $result);
+        $this->assertObjectNotHasProperty('mmt_ignore_glossary_case', $result);
     }
 
     // ─── getJobMetaData() ───
@@ -519,7 +583,7 @@ class MetaDataControllerTest extends AbstractTest
 
         $this->assertInstanceOf(stdClass::class, $captured);
         $this->assertObjectNotHasProperty('mt_extra', $captured->job);
-        $this->assertSame([101], $captured->project->mt_extra->mmt_glossaries);
+        $this->assertSame(['g101'], $captured->project->mt_extra->lara_glossaries);
     }
 
     /**
@@ -550,8 +614,8 @@ class MetaDataControllerTest extends AbstractTest
         $this->assertSame(90, $captured->job->mt_quality_value_in_editor);
 
         // ...and the project keeps answering for the one only it has, the way it did before the move.
-        $this->assertSame([101], $captured->project->mt_extra->mmt_glossaries);
-        $this->assertObjectNotHasProperty('mmt_glossaries', $captured->job->mt_extra);
+        $this->assertSame(['g101'], $captured->project->mt_extra->lara_glossaries);
+        $this->assertObjectNotHasProperty('lara_glossaries', $captured->job->mt_extra);
     }
 
     // ─── getJobFilesMetaData() ───

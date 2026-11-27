@@ -353,6 +353,38 @@ class ProjectTemplateDaoRealSqlTest extends AbstractTest
         self::assertSame($struct->id, $this->dao->getTheDefaultProject($this->uid)->id);
     }
 
+    // ---- destroyCachesByUid ----------------------------------------------------------------------
+
+    /**
+     * A migration rewrites `mt` with plain SQL, so no DAO write evicts anything. The list and the
+     * default are cached for a day, and both must serve the new value once the caches are cleared.
+     */
+    public function testDestroyCachesByUidEvictsEveryReadOfTheUsersTemplates(): void
+    {
+        $struct = $this->newStruct('rewritten by sql', true);
+        $struct->mt = '{"id":9999,"extra":{}}';
+        $saved = $this->dao->save($struct);
+        $this->trackTemplate($saved->id);
+
+        $this->dao->getAllPaginated($this->uid, '/api/v3/project-template?page=', 1, 20, 3600);
+        $this->dao->getTheDefaultProject($this->uid, 3600);
+        $this->dao->getByIdAndUser($saved->id, $this->uid, 3600);
+
+        $this->realSqlDb()->getConnection()
+            ->prepare("UPDATE project_templates SET mt = '{\"id\":1,\"extra\":{}}' WHERE id = :id")
+            ->execute(['id' => $saved->id]);
+
+        $this->dao->destroyCachesByUid($this->uid);
+
+        $listed = array_values(array_filter(
+            $this->dao->getAllPaginated($this->uid, '/api/v3/project-template?page=', 1, 20, 3600)['items'],
+            fn(ProjectTemplateStruct $template): bool => $template->id === $saved->id
+        ));
+        self::assertSame(1, $listed[0]->getMt()->id);
+        self::assertSame(1, $this->dao->getTheDefaultProject($this->uid, 3600)->getMt()->id);
+        self::assertSame(1, $this->dao->getByIdAndUser($saved->id, $this->uid, 3600)->getMt()->id);
+    }
+
     // ---- getDefaultTemplate ----------------------------------------------------------------------
 
     public function testGetDefaultTemplateBuildsSyntheticDefault(): void
@@ -488,6 +520,54 @@ class ProjectTemplateDaoRealSqlTest extends AbstractTest
         $this->trackTemplate($created->id);
 
         self::assertGreaterThan(0, $created->id);
+    }
+
+    public function testCreateFromJSONThrowsOnAnEngineWhoseClassWasRemoved(): void
+    {
+        // ModernMT Full: the row is still there, but its class is gone, so it reads back as NONE (id 0).
+        $conn = $this->realSqlDb()->getConnection();
+        $conn->prepare(
+            "INSERT INTO engines (name, type, description, base_url, class_load, active, uid)
+             VALUES ('rsq retired', 'MT', 'retired', 'https://example.invalid', 'MMT', 1, ?)"
+        )->execute([$this->uid]);
+        $engineId = (int)$conn->lastInsertId();
+
+        $json = $this->newDecodedJson('retired mt');
+        $json->mt = (object)['id' => $engineId];
+
+        try {
+            $this->dao->createFromJSON($json, $this->user);
+            self::fail('A template on a retired engine was accepted');
+        } catch (Exception $e) {
+            self::assertSame('Engine is no longer available.', $e->getMessage());
+            self::assertSame(400, $e->getCode());
+        } finally {
+            $conn->prepare('DELETE FROM engines WHERE id = ?')->execute([$engineId]);
+        }
+    }
+
+    public function testCreateFromJSONGivesTheOwnershipErrorForARemovedEngineOfAnotherUser(): void
+    {
+        // A retired engine of someone else must answer like any engine of someone else: 403.
+        $conn = $this->realSqlDb()->getConnection();
+        $conn->prepare(
+            "INSERT INTO engines (name, type, description, base_url, class_load, active, uid)
+             VALUES ('rsq retired', 'MT', 'retired', 'https://example.invalid', 'MMT', 1, ?)"
+        )->execute([$this->uid + 1]);
+        $engineId = (int)$conn->lastInsertId();
+
+        $json = $this->newDecodedJson('retired mt of another user');
+        $json->mt = (object)['id' => $engineId];
+
+        try {
+            $this->dao->createFromJSON($json, $this->user);
+            self::fail("A template on another user's retired engine was accepted");
+        } catch (Exception $e) {
+            self::assertSame("Engine doesn't belong to the user.", $e->getMessage());
+            self::assertSame(403, $e->getCode());
+        } finally {
+            $conn->prepare('DELETE FROM engines WHERE id = ?')->execute([$engineId]);
+        }
     }
 
     public function testCreateFromJSONThrowsWhenTmKeyNotOwned(): void

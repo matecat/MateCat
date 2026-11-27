@@ -114,7 +114,7 @@ readonly class JobSettingsResolver
      * Resolve a setting from an engine `$_config` array.
      *
      * The engines disagree on how the project id reaches them — DeepL and Intento read `pid`,
-     * Lara and MMT read `id_project` — so both are accepted here and a caller that populates
+     * Lara reads `id_project` — so both are accepted here and a caller that populates
      * only one of them no longer silently loses half of the settings.
      *
      * @param array<string, mixed> $config
