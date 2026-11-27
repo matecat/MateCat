@@ -18,9 +18,8 @@ use Klein\Exceptions\ResponseAlreadySentException;
 use Klein\Request;
 use Model\Conversion\Upload;
 use Model\Conversion\UploadElement;
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use PhpOffice\PhpSpreadsheet\Writer\Csv;
 use RuntimeException;
+use Utils\Files\CSV;
 use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TMS\TMSFile;
 use Utils\TMS\TMSService;
@@ -256,22 +255,13 @@ class GlossaryFilesController extends KleinController
      */
     protected function extractCSV(UploadElement $stdResult): UploadElement
     {
-        $tmpFileName = tempnam("/tmp", "MAT_EXCEL_GLOSS_");
-
         try {
             //$stdResult in this case handle every time only a file,
             // this cycle is needed to make this method not dependent on the FORM key name
             foreach ($stdResult as $fileInfo) {
-                $objReader = IOFactory::createReaderForFile($fileInfo->file_path);
-
-                $objPHPExcel = $objReader->load($fileInfo->file_path);
-                $objWriter = new Csv($objPHPExcel);
-                $objWriter->save($tmpFileName);
-
-                $oldPath = $fileInfo->file_path;
-                $fileInfo->file_path = $tmpFileName;
-
-                unlink($oldPath);
+                if (CSV::extract($fileInfo, "MAT_EXCEL_GLOSS_") === false) {
+                    throw new ValidationError("Unable to read the uploaded glossary file");
+                }
             }
 
             return $stdResult;

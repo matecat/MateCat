@@ -497,6 +497,18 @@ test('replaces in a locked segment once it has been unlocked', async () => {
   expect(segmentTranslation).toHaveBeenCalled()
 })
 
+test('still saves the replaced segment when its original id is not among the search results', async () => {
+  await replaceFirstOccurrence({
+    id: 1,
+    original_sid: 99,
+    status: 'TRANSLATED',
+    occurrences: [1],
+  })
+
+  expect(SegmentActions.replaceCurrentSearch).toHaveBeenCalledWith('new')
+  expect(segmentTranslation).toHaveBeenCalled()
+})
+
 // The confirm/execute/success/error flow used to live here, but Search.js now
 // just opens the registered ReplaceAllModal (see modalRegistry.js) and hands
 // it the current search state — that modal owns the rest, and already has

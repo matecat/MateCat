@@ -304,7 +304,11 @@ function SegmentQR({segment, urls, secondPassReviewEnabled, revisionToShow}) {
   const renderSegmentHistory = () => {
     return segmentHistory.map((elem, index) => {
       return (
-        <div key={elem.date} className="qr-history-item">
+        // Two confirmations can land in the same second, so the date alone is not a unique key.
+        <div
+          key={`${elem.version_number}-${elem.source_page}-${elem.date}-${index}`}
+          className="qr-history-item"
+        >
           <div
             className={`qr-history-status qr-history-status_${elem.status.toLowerCase()}`}
           >

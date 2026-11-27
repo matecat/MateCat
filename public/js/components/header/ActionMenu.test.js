@@ -304,3 +304,18 @@ test('Clicking Shortcuts opens the shortcuts modal', async () => {
     'Shortcuts',
   )
 })
+
+test('The cattool menu toggle is the onboarding tour target', () => {
+  render(<ActionMenu cattoolMenu jobUrls={{}} />)
+
+  expect(screen.getByRole('button')).toHaveAttribute(
+    'data-onboarding',
+    'cattool-actions-menu',
+  )
+})
+
+test('The quality report menu toggle is not an onboarding tour target', () => {
+  render(<ActionMenu jobUrls={{translate_url: 'https://dev.matecat.com/1'}} />)
+
+  expect(screen.getByRole('button')).not.toHaveAttribute('data-onboarding')
+})

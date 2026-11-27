@@ -11,7 +11,11 @@ import {Checkbox, CHECKBOX_SIZE, CHECKBOX_STATE} from '../common/Checkbox'
 export const ReplaceAllModal = ({search}) => {
   const [includeLockedSegments, setIncludeLockedSegments] = useState(false)
   const successCallback = () => {
-    SearchUtils.execReplaceAll(search, includeLockedSegments)
+    const request = SearchUtils.execReplaceAll(search, includeLockedSegments)
+    // A missing target or replacement returns false: it has already shown
+    // its own alert and sent no request
+    if (!request) return
+    request
       .then((response) => {
         // The unlock lives in localStorage; the reload below rebuilds
         // segment.unlocked from it, so it has to be written first.

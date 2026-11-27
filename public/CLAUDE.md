@@ -6,10 +6,6 @@ Guidance for working in the `public/` frontend source tree (React/Vite, plain JS
 
 Flux (AppDispatcher) — not Redux, not Zustand.
 
-- Actions live in `js/actions/`, constants in `js/constants/`
-- Stores in `js/stores/` subscribe to dispatcher and emit change events
-- Components read from stores via hooks or direct store subscriptions
-
 ## Component Conventions
 
 - **PascalCase** filenames for components (`Accordion.js`, `SegmentBody.js`)
@@ -43,11 +39,9 @@ terminal, including for a single file (`yarn test --watchAll=false public/js/pat
 
 ### Test conventions
 
-- Tests are **colocated** with source: `Component.js` → `Component.test.js` in the same directory
-- Framework: Jest + `@testing-library/react` + MSW for API mocking
 - Mock data lives in `public/mocks/` (languagesMock, segmentsMock, userMock, etc.)
-- Test blocks use `describe`/`test` with `expect` assertions
 - MSW server is set up in `setupFilesAfterEnv.jest.js` — use it for API mocking instead of manual fetch mocks
+- For frontend PRs, also state in the PR's Testing section that `yarn test --watchAll=false` passes
 
 ## Build & Dev
 
@@ -58,14 +52,3 @@ Build output goes to `public/build/`. Vite also injects asset tags into PHP/PHPT
 ## Git
 
 Commit rules are in the root `CLAUDE.md`. Common scopes for frontend work: `cattool`, `dashboard`, `segments`, `modals`, `header`, `analyze`, `contextPreview`, `settingsPanel`, `api`, `hooks`, `stores`.
-
-## Pull Requests
-
-Follow `.github/PULL_REQUEST_TEMPLATE.md` when opening PRs. Key sections:
-
-- **Summary** — what the PR does and why, briefly
-- **Type** — check exactly one (`feat`, `fix`, `refactor`, `chore`, `perf`, `test`)
-- **Changes** — one line per file or logical group in the table
-- **Migration Notes** — only if DB migrations are involved (omit the section otherwise)
-- **Testing** — check which of `phpunit`, `phpstan`, manual testing, new tests apply; for frontend PRs, also confirm `yarn test` passes
-- **AI Disclosure** — disclose if Claude Code or any other AI tool was used
