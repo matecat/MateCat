@@ -7479,6 +7479,10 @@
         "suggestion_match": {
           "type": "string"
         },
+        "suggestion_ice": {
+          "type": "boolean",
+          "description": "The suggestion the translation started from was an in-context (101%) match. When the translator picked a suggestion in the editor, this describes that suggestion; otherwise it follows match_type."
+        },
         "suggestion_source": {
           "type": "string"
         },

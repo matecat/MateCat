@@ -53,10 +53,16 @@ const SegmentQRLine = ({
   }
   let suggestionMatch, suggestionMatchClass
   if (showSuggestionSource) {
-    suggestionMatch =
-      segment.get('match_type').toUpperCase() === 'ICE'
-        ? 101
-        : parseInt(segment.get('suggestion_match'))
+    // suggestion_ice tells whether the suggestion the translator started from was an
+    // in-context match; match_type is the analysis result, kept as a fallback for
+    // payloads without the field.
+    const suggestionIce =
+      typeof segment.get('suggestion_ice') === 'boolean'
+        ? segment.get('suggestion_ice')
+        : segment.get('match_type').toUpperCase() === 'ICE'
+    suggestionMatch = suggestionIce
+      ? 101
+      : parseInt(segment.get('suggestion_match'))
     suggestionMatchClass =
       segment.get('suggestion_source') === 'MT'
         ? BADGE_TYPE.YELLOW

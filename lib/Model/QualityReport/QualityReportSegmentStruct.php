@@ -64,6 +64,12 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
 
     public ?string $suggestion;
 
+    /** JSON list of the suggestions offered when the translation was saved */
+    public ?string $suggestions_array = null;
+
+    /** 1-based index of the suggestion the translator picked; 0 or null when none was */
+    public ?int $suggestion_position = null;
+
     public ?int $edit_distance;
 
     public bool $locked;
@@ -140,6 +146,33 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
     public function isICE(): bool
     {
         return $this->match_type == InternalMatchesConstants::TM_ICE;
+    }
+
+    /**
+     * Whether the suggestion the translation started from was an in-context (101%) match.
+     *
+     * `match_type` is set by the analysis, and `suggestion_match` stores an ICE as 100 like the
+     * analysis does: neither tells what the translator picked in the editor. When they picked a
+     * suggestion, its ICE flag survives only in the saved suggestions list, at the 1-based
+     * `suggestion_position` (0 or null means none was picked). Without a pick, the analysis
+     * match type is the answer.
+     */
+    public function isSuggestionICE(): bool
+    {
+        if ($this->suggestion_source === InternalMatchesConstants::MT) {
+            return false;
+        }
+
+        if (!empty($this->suggestion_position) && !empty($this->suggestions_array)) {
+            $suggestions = json_decode($this->suggestions_array, true);
+            $chosen = is_array($suggestions) ? ($suggestions[$this->suggestion_position - 1] ?? null) : null;
+
+            if (is_array($chosen)) {
+                return !empty($chosen['ICE']);
+            }
+        }
+
+        return $this->isICE();
     }
 
     /**

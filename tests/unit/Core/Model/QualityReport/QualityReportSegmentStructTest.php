@@ -473,4 +473,104 @@ class QualityReportSegmentStructTest extends AbstractTest
 
         $this->assertCount(3, $result['details']['issues_info']['ERROR']['Categories']['TAGS']);
     }
+
+    // ─── isSuggestionICE ───
+
+    /**
+     * @param list<array<string, mixed>> $suggestions
+     */
+    private function suggestionsJson(array $suggestions): string
+    {
+        return (string)json_encode($suggestions);
+    }
+
+    #[Test]
+    public function IsSuggestionICEIsTrueForAnIceMatchPickedByHandOnAnMtSegment(): void
+    {
+        $struct = $this->createStruct([
+            'match_type' => 'MT',
+            'suggestion_match' => 100,
+            'suggestion_source' => 'TM',
+            'suggestions_array' => $this->suggestionsJson([['match' => '100%', 'ICE' => true]]),
+            'suggestion_position' => 1,
+        ]);
+
+        $this->assertTrue($struct->isSuggestionICE());
+    }
+
+    #[Test]
+    public function IsSuggestionICEReadsTheChosenOneBasedPosition(): void
+    {
+        $struct = $this->createStruct([
+            'match_type' => 'MT',
+            'suggestions_array' => $this->suggestionsJson([
+                ['match' => '100%', 'ICE' => false],
+                ['match' => '100%', 'ICE' => true],
+            ]),
+            'suggestion_position' => 2,
+        ]);
+
+        $this->assertTrue($struct->isSuggestionICE());
+    }
+
+    #[Test]
+    public function IsSuggestionICEIsFalseWhenAnotherMatchWasPickedOnAnIceSegment(): void
+    {
+        $struct = $this->createStruct([
+            'match_type' => 'ICE',
+            'suggestion_match' => 85,
+            'suggestions_array' => $this->suggestionsJson([
+                ['match' => '100%', 'ICE' => true],
+                ['match' => '85%', 'ICE' => false],
+            ]),
+            'suggestion_position' => 2,
+        ]);
+
+        $this->assertFalse($struct->isSuggestionICE());
+    }
+
+    #[Test]
+    public function IsSuggestionICEIsFalseForAnMtSuggestion(): void
+    {
+        $struct = $this->createStruct([
+            'match_type' => 'ICE',
+            'suggestion_source' => 'MT',
+            'suggestions_array' => $this->suggestionsJson([['match' => 'MT', 'ICE' => true]]),
+            'suggestion_position' => 1,
+        ]);
+
+        $this->assertFalse($struct->isSuggestionICE());
+    }
+
+    #[Test]
+    public function IsSuggestionICEFallsBackToTheAnalysisWhenNothingWasPicked(): void
+    {
+        $ice = $this->createStruct([
+            'match_type' => 'ICE',
+            'suggestions_array' => $this->suggestionsJson([['match' => '85%', 'ICE' => false]]),
+            'suggestion_position' => 0,
+        ]);
+        $notIce = $this->createStruct(['match_type' => '100%', 'suggestion_position' => null]);
+
+        $this->assertTrue($ice->isSuggestionICE());
+        $this->assertFalse($notIce->isSuggestionICE());
+    }
+
+    #[Test]
+    public function IsSuggestionICEFallsBackOnInvalidJsonOrAMissingPosition(): void
+    {
+        $invalidJson = $this->createStruct([
+            'match_type' => 'ICE',
+            'suggestions_array' => '{not json',
+            'suggestion_position' => 1,
+        ]);
+        $outOfRange = $this->createStruct([
+            'match_type' => 'MT',
+            'suggestions_array' => $this->suggestionsJson([['match' => '100%', 'ICE' => true]]),
+            'suggestion_position' => 3,
+        ]);
+
+        $this->assertTrue($invalidJson->isSuggestionICE());
+        $this->assertFalse($outOfRange->isSuggestionICE());
+    }
 }

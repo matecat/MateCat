@@ -124,3 +124,58 @@ test('omits the suggestion-match badge when suggestion_match is not a number', (
   )
   expect(screen.queryByText(/NaN/)).not.toBeInTheDocument()
 })
+
+// Regression: a 101% match picked by hand in the editor is stored as suggestion_match 100,
+// and match_type stays the analysis result (here MT), so the badge read "TM - 100%".
+test('renders 101% when the chosen suggestion was an in-context match', () => {
+  render(
+    <SegmentQRLine
+      classes="qr-line"
+      label="Suggestion"
+      text="hi"
+      segment={fromJS({
+        match_type: 'MT',
+        suggestion_match: 100,
+        suggestion_source: 'TM',
+        suggestion_ice: true,
+      })}
+      showSuggestionSource
+    />,
+  )
+  expect(screen.getByText('TM - 101%')).toBeInTheDocument()
+})
+
+test('renders the chosen match when the analysis was ICE but another suggestion was picked', () => {
+  render(
+    <SegmentQRLine
+      classes="qr-line"
+      label="Suggestion"
+      text="hi"
+      segment={fromJS({
+        match_type: 'ICE',
+        suggestion_match: 85,
+        suggestion_source: 'TM',
+        suggestion_ice: false,
+      })}
+      showSuggestionSource
+    />,
+  )
+  expect(screen.getByText('TM - 85%')).toBeInTheDocument()
+})
+
+test('falls back to the analysis match type when suggestion_ice is missing', () => {
+  render(
+    <SegmentQRLine
+      classes="qr-line"
+      label="Suggestion"
+      text="hi"
+      segment={fromJS({
+        match_type: 'ICE',
+        suggestion_match: 100,
+        suggestion_source: 'TM',
+      })}
+      showSuggestionSource
+    />,
+  )
+  expect(screen.getByText('TM - 101%')).toBeInTheDocument()
+})

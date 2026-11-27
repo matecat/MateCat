@@ -245,6 +245,7 @@ class DownloadQRController extends KleinController
                 $segment->is_pre_translated,
                 $issues,
                 $comments,
+                $segment->isSuggestionICE(),
             ];
         }
 
@@ -301,6 +302,7 @@ class DownloadQRController extends KleinController
             "version_number",
             "source_page",
             "is_pre_translated",
+            "suggestion_ice",
         ];
 
         foreach ($categoryIssues as $categoryIssue) {
@@ -440,6 +442,7 @@ class DownloadQRController extends KleinController
             $xml .= '<version_number>' . $datum[27] . '</version_number>';
             $xml .= '<source_page>' . $datum[28] . '</source_page>';
             $xml .= '<is_pre_translated>' . $datum[29] . '</is_pre_translated>';
+            $xml .= '<suggestion_ice>' . $datum[32] . '</suggestion_ice>';
 
             //$issueValues
             $xml .= '<issues>';
@@ -542,6 +545,7 @@ class DownloadQRController extends KleinController
                 "version_number" => $datum[27],
                 "source_page" => $datum[28],
                 "is_pre_translated" => $datum[29],
+                "suggestion_ice" => $datum[32],
                 "issues" => $issueValues
             ];
         }
