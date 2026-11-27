@@ -434,6 +434,28 @@ class MetaDataControllerTest extends AbstractTest
         $this->assertSame('prefer_more', $result->mt_extra->deepl_formality);
     }
 
+    /**
+     * A job whose only engine rows are retired ones overrides nothing, so it answers like a job with
+     * no engine settings at all: no `mt_extra`, which tells the client to read `project.mt_extra`.
+     *
+     * @throws \Throwable
+     */
+    #[Test]
+    public function getJobMetaData_omits_mt_extra_when_the_only_engine_keys_are_retired(): void
+    {
+        $this->dropTheOnlyJobScopedEngineSetting();
+
+        $jobId = $this->jobId(self::BASE);
+        $this->seedConnection()->exec("INSERT IGNORE INTO job_metadata (id_job, password, `key`, value) VALUES ($jobId, '" . self::JOB_PASSWORD . "', 'mmt_ignore_glossary_case', '1')");
+        (new JobMetadataDao(obtainTestDatabase()))->destroyCacheForCredential($jobId, self::JOB_PASSWORD);
+
+        /** @var stdClass $result */
+        $result = $this->invokePrivate('getJobMetaData', [$this->loadSeededJob()]);
+
+        $this->assertObjectNotHasProperty('mt_extra', $result);
+        $this->assertObjectNotHasProperty('mmt_ignore_glossary_case', $result);
+    }
+
     // ─── getJobMetaData() ───
 
     /**

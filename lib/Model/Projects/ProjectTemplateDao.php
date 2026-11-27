@@ -9,6 +9,7 @@ use Matecat\Locales\Languages;
 use Matecat\SubFiltering\Enum\InjectableFiltersTags;
 use Matecat\SubFiltering\HandlersSorter;
 use Model\DataAccess\AbstractDao;
+use Model\Engines\EngineDAO;
 use Model\Filters\FiltersConfigTemplateDao;
 use Model\Jobs\JobsMetadataMarshaller;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
@@ -266,9 +267,14 @@ class ProjectTemplateDao extends AbstractDao
                 $engineRecord = $engine->getEngineRecord();
 
                 // A row whose class was removed (ModernMT Full) comes back as the NONE placeholder,
-                // id 0, which would otherwise slip past the ownership check below.
+                // id 0, which would otherwise slip past the ownership check below. Its owner is read
+                // off the stored row: only the owner learns the engine is gone, anyone else gets 403.
                 if ($engineRecord->id !== (int)$mt->id) {
-                    throw new Exception("Engine is no longer available.", 400);
+                    if ((new EngineDAO($this->database))->getStoredOwnerUid((int)$mt->id) === (int)$projectTemplateStruct->uid) {
+                        throw new Exception("Engine is no longer available.", 400);
+                    }
+
+                    throw new Exception("Engine doesn't belong to the user.", 403);
                 }
 
                 if ($engineRecord->id > 1 and $engineRecord->uid != $projectTemplateStruct->uid) {

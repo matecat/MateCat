@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Matecat\Core\Engines;
 
+use Controller\API\Commons\Exceptions\AuthorizationError;
 use DomainException;
 use Matecat\TestHelpers\AbstractTest;
 use Matecat\TestHelpers\RealSqlDaoTestTrait;
@@ -108,6 +109,28 @@ class EnginesFactoryActiveInstanceRealSqlTest extends AbstractTest
         $this->expectExceptionMessage('Engine is no longer available');
 
         EnginesFactory::getInstanceByIdAndUser($id, $this->uid, $this->realSqlDb(), AbstractEngine::class);
+    }
+
+    #[Test]
+    public function getInstanceByIdAndUserGivesTheOwnershipErrorForARemovedEngineOfAnotherUser(): void
+    {
+        // The reply must not tell another user's retired engine apart from any other engine they own.
+        $id = $this->createEngine($this->uid + 1, 'MMT');
+
+        $this->expectException(AuthorizationError::class);
+        $this->expectExceptionMessage("Engine doesn't belong to the user");
+
+        EnginesFactory::getInstanceByIdAndUser($id, $this->uid, $this->realSqlDb(), AbstractEngine::class);
+    }
+
+    #[Test]
+    public function getStoredOwnerUidReadsTheUidOfARowBuiltAsNone(): void
+    {
+        $id = $this->createEngine($this->uid, 'MMT');
+        $dao = new EngineDAO($this->realSqlDb());
+
+        self::assertSame($this->uid, $dao->getStoredOwnerUid($id));
+        self::assertNull($dao->getStoredOwnerUid(PHP_INT_MAX));
     }
 
     #[Test]

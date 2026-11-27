@@ -46,7 +46,7 @@ class LaraQualityEstimator
      */
     public function scoreIfRequested(EngineInterface $mtEngine, GetMemoryResponse $response, array $engineConfig): void
     {
-        $match = $this->matchToScore($mtEngine, $response, $engineConfig);
+        $match = $this->matchToScore($response, $engineConfig);
         if ($match === null) {
             return;
         }
@@ -71,7 +71,7 @@ class LaraQualityEstimator
      *
      * @param array<string, mixed> $engineConfig
      */
-    private function matchToScore(EngineInterface $mtEngine, GetMemoryResponse $response, array $engineConfig): ?Matches
+    private function matchToScore(GetMemoryResponse $response, array $engineConfig): ?Matches
     {
         $match = $response->matches[0] ?? null;
 

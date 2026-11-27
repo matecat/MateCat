@@ -546,6 +546,30 @@ class ProjectTemplateDaoRealSqlTest extends AbstractTest
         }
     }
 
+    public function testCreateFromJSONGivesTheOwnershipErrorForARemovedEngineOfAnotherUser(): void
+    {
+        // A retired engine of someone else must answer like any engine of someone else: 403.
+        $conn = $this->realSqlDb()->getConnection();
+        $conn->prepare(
+            "INSERT INTO engines (name, type, description, base_url, class_load, active, uid)
+             VALUES ('rsq retired', 'MT', 'retired', 'https://example.invalid', 'MMT', 1, ?)"
+        )->execute([$this->uid + 1]);
+        $engineId = (int)$conn->lastInsertId();
+
+        $json = $this->newDecodedJson('retired mt of another user');
+        $json->mt = (object)['id' => $engineId];
+
+        try {
+            $this->dao->createFromJSON($json, $this->user);
+            self::fail("A template on another user's retired engine was accepted");
+        } catch (Exception $e) {
+            self::assertSame("Engine doesn't belong to the user.", $e->getMessage());
+            self::assertSame(403, $e->getCode());
+        } finally {
+            $conn->prepare('DELETE FROM engines WHERE id = ?')->execute([$engineId]);
+        }
+    }
+
     public function testCreateFromJSONThrowsWhenTmKeyNotOwned(): void
     {
         $json = $this->newDecodedJson('with tm');

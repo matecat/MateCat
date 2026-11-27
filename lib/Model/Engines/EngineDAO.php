@@ -430,4 +430,23 @@ class EngineDAO extends AbstractDao
             throw new Exception("A user can have only one $obj->name engine");
         }
     }
+
+    /**
+     * Returns the uid stored on the engine row, or null when there is no such row or it has no owner.
+     *
+     * read() cannot answer this for an engine whose class was removed (ModernMT Full): it builds that
+     * row as the NONE placeholder, whose uid is null. Not cached: it is read only on that rare path.
+     *
+     * Example: $dao->getStoredOwnerUid(42) gives 7 for an engine of user 7, null for a missing id.
+     *
+     * @throws Exception
+     */
+    public function getStoredOwnerUid(int $id): ?int
+    {
+        $stmt = $this->database->getConnection()->prepare("SELECT uid FROM " . self::TABLE . " WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+        $uid = $stmt->fetchColumn();
+
+        return ($uid === false || $uid === null) ? null : (int)$uid;
+    }
 }

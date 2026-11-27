@@ -1190,4 +1190,37 @@ class CreateProjectControllerTest extends AbstractTest
             obtainTestDatabase()->getConnection()->prepare('DELETE FROM engines WHERE id = ?')->execute([$engineId]);
         }
     }
+
+    /**
+     * Another user's retired engine answers like any engine of another user, so the reply never
+     * depends on an engine the caller does not own.
+     *
+     * @throws Throwable
+     */
+    #[Test]
+    public function validateMtEngine_gives_the_ownership_error_for_a_retired_engine_of_another_user(): void
+    {
+        $engine = new EngineStruct();
+        $engine->name = 'ctrltest modernmt engine';
+        $engine->type = EngineConstants::MT;
+        $engine->description = 'ctrltest modernmt engine';
+        $engine->base_url = 'https://example.invalid/api';
+        $engine->others = [];
+        $engine->extra_parameters = [];
+        $engine->class_load = 'MMT';
+        $engine->penalty = 14;
+        $engine->active = true;
+        $engine->uid = (int)$this->user->uid + 1;
+
+        $engineId = (int)(new EngineDAO(obtainTestDatabase()))->create($engine)->id;
+
+        try {
+            $this->invokePrivate('validateMtEngine', [$engineId]);
+            self::fail("Another user's retired ModernMT engine was accepted");
+        } catch (InvalidArgumentException $e) {
+            self::assertSame("Engine doesn't belong to the user", $e->getMessage());
+        } finally {
+            obtainTestDatabase()->getConnection()->prepare('DELETE FROM engines WHERE id = ?')->execute([$engineId]);
+        }
+    }
 }

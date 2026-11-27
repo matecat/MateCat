@@ -81,7 +81,7 @@ class NewControllerDbValidatorsTest extends AbstractTest
     private function cleanDb(): void
     {
         $c = $this->seedConnection();
-        $c->exec("DELETE FROM engines WHERE uid IN (" . (self::BASE + 20) . ", " . (self::BASE + 21) . ")");
+        $c->exec("DELETE FROM engines WHERE uid IN (" . $this->userId(self::BASE) . ", " . (self::BASE + 20) . ", " . (self::BASE + 21) . ")");
         $c->exec("DELETE FROM qa_models WHERE id = " . $this->qaModelId(self::BASE));
         $c->exec("DELETE FROM teams_users WHERE id = " . $this->teamUserId(self::BASE));
         $c->exec("DELETE FROM teams WHERE id = " . $this->teamId(self::BASE));
@@ -266,10 +266,29 @@ class NewControllerDbValidatorsTest extends AbstractTest
     public function validateEngines_refuses_a_retired_modernmt_engine_with_a_clear_message(): void
     {
         $this->setLoggedIn();
-        $engineId = $this->seedRetiredModernMtEngine(self::BASE + 20);
+        $engineId = $this->seedRetiredModernMtEngine($this->userId(self::BASE));
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Engine is no longer available');
+        $this->expectExceptionCode(-2);
+
+        $this->invokeMethod('validateEngines', [1, $engineId]);
+    }
+
+    /**
+     * Another user's ModernMT Full id answers like any engine of another user, so probing ids
+     * one by one cannot tell which ones were ModernMT Full engines.
+     *
+     * @throws ReflectionException
+     */
+    #[Test]
+    public function validateEngines_gives_the_ownership_error_for_a_retired_engine_of_another_user(): void
+    {
+        $this->setLoggedIn();
+        $engineId = $this->seedRetiredModernMtEngine(self::BASE + 21);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("Engine doesn't belong to the user");
         $this->expectExceptionCode(-2);
 
         $this->invokeMethod('validateEngines', [1, $engineId]);

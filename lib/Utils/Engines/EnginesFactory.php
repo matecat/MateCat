@@ -109,10 +109,15 @@ class EnginesFactory
         $engineRecord = $engine->getEngineRecord();
 
         // The row exists, but its class was removed (ModernMT Full): EngineDAO builds it as the
-        // NONE placeholder, whose id is 0 and uid null, so the ownership check below would blame
-        // the user for an engine that is simply gone.
+        // NONE placeholder, whose id is 0 and uid null, so the owner is read off the stored row.
+        // Only the owner learns the engine is gone; anyone else gets the ownership error, so the
+        // reply never depends on an engine the caller does not own.
         if ($engineRecord->id !== $engineId) {
-            throw new DomainException("Engine is no longer available");
+            if ((new EngineDAO($database))->getStoredOwnerUid($engineId) === $uid) {
+                throw new DomainException("Engine is no longer available");
+            }
+
+            throw new AuthorizationError("Engine doesn't belong to the user");
         }
 
         if ($engineRecord->uid != $uid) {
