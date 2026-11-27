@@ -472,6 +472,7 @@ class QualityReportControllerAPITest extends AbstractTest
         $this->assertSame('ice', $first['match_type']);
         $this->assertTrue($first['locked']);
         $this->assertTrue($first['ice_locked'], 'ice_locked is the deprecated alias of locked');
+        $this->assertTrue($first['suggestion_ice'], 'no suggestion picked: the analysis ICE answers');
         $this->assertSame(['id' => 1, 'filename' => 'test.xliff'], $first['file']);
         $this->assertSame(5000, $first['time_to_edit']);
         $this->assertSame(5000, $first['time_to_edit_translation']);

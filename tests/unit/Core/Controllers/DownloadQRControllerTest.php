@@ -132,7 +132,7 @@ class DownloadQRControllerTest extends AbstractTest
 
     /**
      * One fully-populated data row in the indexed format produced by
-     * buildFileContentFromArrayOfSegmentIds(). Index 30 = issues map, 31 = comments map.
+     * buildFileContentFromArrayOfSegmentIds(). Index 30 = issues map, 31 = comments map, 32 = suggestion_ice.
      *
      * @return array<int, mixed>
      */
@@ -182,6 +182,7 @@ class DownloadQRControllerTest extends AbstractTest
                     ],
                 ],
             ],
+            true,               // 32 suggestion_ice
         ];
     }
 
@@ -430,6 +431,25 @@ class DownloadQRControllerTest extends AbstractTest
 
         self::assertTrue($result[0][16]); // locked
         self::assertTrue($result[0][6]); // ice_locked, deprecated alias of locked
+    }
+
+    #[Test]
+    public function buildFileContent_appends_suggestion_ice_after_the_comments_map(): void
+    {
+        $segment = $this->makeSegmentStruct();
+        $segment->match_type = 'MT';
+        $segment->suggestion_match = 100;
+        $segment->suggestions_array = (string)json_encode([['match' => '100%', 'ICE' => true]]);
+        $segment->suggestion_position = 1;
+
+        $model = $this->createStub(QualityReportSegmentModel::class);
+        $model->method('getSegmentsForQR')->willReturn([$segment]);
+
+        /** @var array<int, array<int, mixed>> $result */
+        $result = $this->invoke('buildFileContentFromArrayOfSegmentIds', [$model, [1]]);
+
+        self::assertSame('MT', $result[0][17]); // match_type is still the analysis result
+        self::assertTrue($result[0][32]);       // suggestion_ice
     }
 
     // ── composeFileContent (DI: injected model + chunk) ──────────────────

@@ -413,6 +413,8 @@ class SegmentDao extends AbstractDao
                 st.suggestion_match as suggestion_match,
                 st.suggestion_source,
                 st.suggestion,
+                st.suggestions_array,
+                st.suggestion_position,
                 st.edit_distance,
                 st.locked,
                 st.match_type,

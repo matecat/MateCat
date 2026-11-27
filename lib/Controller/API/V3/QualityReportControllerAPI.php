@@ -242,6 +242,7 @@ class QualityReportControllerAPI extends KleinController
             $seg['suggestion'] = $segment->suggestion;
             $seg['suggestion_match'] = $segment->suggestion_match;
             $seg['suggestion_source'] = $segment->suggestion_source;
+            $seg['suggestion_ice'] = $segment->isSuggestionICE();
             $seg['target'] = $segment->target;
             $seg['translation'] = $segment->translation;
             $seg['version'] = $segment->version;
