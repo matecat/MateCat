@@ -306,43 +306,46 @@ const Editarea = forwardRef(
       } = propsRef.current
       const {decodedSegment, entitiesRange} =
         DraftMatecatUtils.decodeSegment(editorState)
-      if (decodedSegment !== '') {
-        const contentState = editorState.getCurrentContent()
-        const plainText = removeZeroWidthSpace(contentState.getPlainText())
-
-        // Matches tag without compute tag id
-        const currentTagRange = DraftMatecatUtils.matchTagInEditor(
-          editorState,
-          entitiesRange,
-        )
-        // Add missing tag to store for highlight warnings on tags
-        const {missingTags} = checkForMissingTags(sourceTagMap, currentTagRange)
-
-        const lxqDecodedTranslation =
-          DraftMatecatUtils.prepareTextForLexiqa(decodedSegment)
-
-        SegmentActions.updateTranslation(
-          segment.sid,
-          decodedSegment,
-          plainText,
-          currentTagRange,
-          missingTags,
-          lxqDecodedTranslation,
-        )
-        ContextPreviewChannel.sendMessage({
-          type: 'updateTranslation',
-          sid: segment.sid,
-          target: decodedSegment,
-        })
-        propsRef.current.updateCounter(
-          DraftMatecatUtils.getCharactersCounter(
-            getTextToApplyCounter(decodedSegment),
-          ),
-        )
-        SegmentActions.startSegmentQACheck()
-      } else {
+      // Nothing to tell the store when both are empty (a segment opened without a translation). An
+      // emptied target must reach it, though: skipping every empty editor left the last character
+      // in the store, so the confirm buttons stayed enabled and confirming saved that character.
+      if (decodedSegment === '' && !segment.translation) {
         propsRef.current.updateCounter(0)
+        return
       }
+      const contentState = editorState.getCurrentContent()
+      const plainText = removeZeroWidthSpace(contentState.getPlainText())
+
+      // Matches tag without compute tag id
+      const currentTagRange = DraftMatecatUtils.matchTagInEditor(
+        editorState,
+        entitiesRange,
+      )
+      // Add missing tag to store for highlight warnings on tags
+      const {missingTags} = checkForMissingTags(sourceTagMap, currentTagRange)
+
+      const lxqDecodedTranslation =
+        DraftMatecatUtils.prepareTextForLexiqa(decodedSegment)
+
+      SegmentActions.updateTranslation(
+        segment.sid,
+        decodedSegment,
+        plainText,
+        currentTagRange,
+        missingTags,
+        lxqDecodedTranslation,
+      )
+      ContextPreviewChannel.sendMessage({
+        type: 'updateTranslation',
+        sid: segment.sid,
+        target: decodedSegment,
+      })
+      propsRef.current.updateCounter(
+        DraftMatecatUtils.getCharactersCounter(
+          getTextToApplyCounter(decodedSegment),
+        ),
+      )
+      SegmentActions.startSegmentQACheck()
     })
 
     const checkDecoratorsRef = useRef((prevProps) => {

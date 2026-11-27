@@ -12,6 +12,7 @@ jest.mock('./actions/SegmentActions', () => ({
     getSegmentVersionsIssues: jest.fn(),
     getTranslationMismatches: jest.fn(),
     setStatus: jest.fn(),
+    setSavedTranslation: jest.fn(),
     removeClassToSegment: jest.fn(),
     propagateTranslation: jest.fn(),
     setSegmentPropagation: jest.fn(),
@@ -268,10 +269,6 @@ describe('setTranslationUtil', () => {
 
       SetTranslationUtil.segmentTranslation(segment, 'DRAFT', callback, false)
 
-      expect(SegmentActions.addClassToSegment).toHaveBeenCalledWith(
-        1,
-        'setTranslationPending',
-      )
       expect(SegmentActions.setSegmentSaving).toHaveBeenCalledWith(1, true)
       expect(OfflineUtils.decrementOfflineCacheRemaining).toHaveBeenCalled()
       expect(OfflineUtils.failedConnection).toHaveBeenCalled()
@@ -282,16 +279,400 @@ describe('setTranslationUtil', () => {
       expect(SetTranslationUtil.isTranslationTailEmpty()).toBe(false)
     })
 
-    test('does not decrement offline cache when translation is not newly saved (empty translation)', () => {
+    test('a segment saved again while queued replaces its queued save and takes one cache slot', () => {
       OfflineUtils.offline = true
-      const segment = buildSegment({translation: ''})
+      const SegmentUtils = require('./utils/segmentUtils').default
+      SegmentUtils.createSetTranslationRequest.mockImplementation(
+        (segment, status) => ({translation: segment.translation, status}),
+      )
 
-      SetTranslationUtil.segmentTranslation(segment, 'DRAFT', jest.fn(), false)
+      SetTranslationUtil.segmentTranslation(
+        buildSegment({translation: 'first'}),
+        'DRAFT',
+        jest.fn(),
+        false,
+      )
+      SetTranslationUtil.segmentTranslation(
+        buildSegment({translation: 'second'}),
+        'TRANSLATED',
+        jest.fn(),
+        false,
+      )
+      expect(OfflineUtils.decrementOfflineCacheRemaining).toHaveBeenCalledTimes(
+        1,
+      )
 
-      // translationIsToSave is false (empty translation), so decrement/failedConnection are skipped
+      OfflineUtils.offline = false
+      SetTranslationUtil.execSetTranslationTail()
+
+      expect(setTranslationApi).toHaveBeenCalledTimes(1)
+      expect(setTranslationApi).toHaveBeenCalledWith({
+        translation: 'second',
+        status: 'TRANSLATED',
+      })
+    })
+
+    test('a save queued offline does not move the translator again when it is sent', () => {
+      OfflineUtils.offline = true
+      const callback = jest.fn()
+
+      SetTranslationUtil.segmentTranslation(
+        buildSegment(),
+        'TRANSLATED',
+        callback,
+        false,
+      )
+      expect(callback).toHaveBeenCalledTimes(1)
+
+      OfflineUtils.offline = false
+      SetTranslationUtil.execSetTranslationTail()
+
+      expect(setTranslationApi).toHaveBeenCalledTimes(1)
+      expect(callback).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('sending the queue', () => {
+    const flush = () => new Promise((resolve) => setTimeout(resolve, 0))
+    const deferred = () => {
+      let resolve, reject
+      const promise = new Promise((res, rej) => {
+        resolve = res
+        reject = rej
+      })
+      return {promise, resolve, reject}
+    }
+    const save = (overrides, status = 'TRANSLATED', errorCallback) =>
+      SetTranslationUtil.segmentTranslation(
+        buildSegment(overrides),
+        status,
+        jest.fn(),
+        false,
+        errorCallback,
+      )
+
+    let SegmentUtils
+    beforeEach(() => {
+      OfflineUtils.offline = false
+      SegmentUtils = require('./utils/segmentUtils').default
+      SegmentUtils.createSetTranslationRequest.mockImplementation(
+        (segment, status) => ({
+          sid: segment.sid,
+          translation: segment.translation,
+          status,
+        }),
+      )
+    })
+
+    test('sends one save at a time, in the order they were made', async () => {
+      const first = deferred()
+      setTranslationApi
+        .mockReturnValueOnce(first.promise)
+        .mockResolvedValue({data: 'OK'})
+
+      save({sid: 1, translation: 'one'}, 'DRAFT')
+      save({sid: 1, translation: 'one, edited'}, 'TRANSLATED')
+      save({sid: 2, translation: 'two'})
+
+      expect(setTranslationApi).toHaveBeenCalledTimes(1)
+
+      first.resolve({data: 'OK'})
+      await flush()
+
+      expect(setTranslationApi.mock.calls.map(([request]) => request)).toEqual([
+        {sid: 1, translation: 'one', status: 'DRAFT'},
+        {sid: 1, translation: 'one, edited', status: 'TRANSLATED'},
+        {sid: 2, translation: 'two', status: 'TRANSLATED'},
+      ])
+    })
+
+    test('builds the request when the save is made, not when it is sent', () => {
+      setTranslationApi.mockReturnValue(new Promise(() => {}))
+
+      save({sid: 1})
+      save({sid: 2})
+
+      expect(setTranslationApi).toHaveBeenCalledTimes(1)
+      expect(SegmentUtils.createSetTranslationRequest).toHaveBeenCalledTimes(2)
+    })
+
+    test('counts a save on its way as not saved yet', async () => {
+      const pending = deferred()
+      setTranslationApi.mockReturnValue(pending.promise)
+
+      save({sid: 1})
+      expect(SetTranslationUtil.isTranslationTailEmpty()).toBe(false)
+
+      pending.resolve({data: 'OK'})
+      await flush()
+      expect(SetTranslationUtil.isTranslationTailEmpty()).toBe(true)
+    })
+
+    test.each([
+      ['an answer without OK', () => Promise.resolve({data: 'KO'})],
+      ['a server failure', () => Promise.reject({response: {status: 500}})],
+    ])(
+      'reports %s once, without retrying it, and sends the next save',
+      async (_, answer) => {
+        setTranslationApi
+          .mockImplementationOnce(answer)
+          .mockResolvedValue({data: 'OK'})
+        const errorCallback = jest.fn()
+
+        save({sid: 1}, 'TRANSLATED', errorCallback)
+        save({sid: 2})
+        await flush()
+
+        expect(CatToolActions.processErrors).toHaveBeenCalledTimes(1)
+        expect(errorCallback).toHaveBeenCalledTimes(1)
+        expect(SegmentActions.setStatus).not.toHaveBeenCalledWith(
+          1,
+          null,
+          'TRANSLATED',
+        )
+        expect(OfflineUtils.startOfflineMode).not.toHaveBeenCalled()
+        expect(setTranslationApi).toHaveBeenCalledTimes(2)
+        expect(SegmentActions.setSegmentSaving).toHaveBeenCalledWith(1, false)
+        expect(SetTranslationUtil.isTranslationTailEmpty()).toBe(true)
+      },
+    )
+
+    test('reports a refusal with the server errors and sends the next save', async () => {
+      const errors = [{code: -5, message: 'disabled'}]
+      setTranslationApi
+        .mockRejectedValueOnce({response: {status: 200}, errors})
+        .mockResolvedValue({data: 'OK'})
+      const errorCallback = jest.fn()
+
+      save({sid: 1}, 'TRANSLATED', errorCallback)
+      save({sid: 2})
+      await flush()
+
+      expect(CatToolActions.processErrors).toHaveBeenCalledWith(
+        errors,
+        'setTranslation',
+      )
+      expect(errorCallback).toHaveBeenCalledWith(errors)
+      expect(setTranslationApi).toHaveBeenCalledTimes(2)
+    })
+
+    test('a throw while updating the page after a save neither stops the queue nor sends the save again', async () => {
+      setTranslationApi.mockResolvedValue({data: 'OK'})
+      SegmentActions.setStatus.mockImplementationOnce(() => {
+        throw new Error('render failed')
+      })
+      // Queued offline, then sent here, so the test holds the promise the throw rejects
+      OfflineUtils.offline = true
+      save({sid: 1})
+      save({sid: 2})
+      OfflineUtils.offline = false
+
+      await expect(SetTranslationUtil.execSetTranslationTail()).rejects.toThrow(
+        'render failed',
+      )
+      await flush()
+
+      expect(setTranslationApi).toHaveBeenCalledTimes(2)
+      expect(OfflineUtils.startOfflineMode).not.toHaveBeenCalled()
+      expect(SetTranslationUtil.isTranslationTailEmpty()).toBe(true)
+    })
+
+    test('a throw in the caller error handling does not stop the queue', async () => {
+      setTranslationApi
+        .mockRejectedValueOnce({response: {status: 500}})
+        .mockResolvedValue({data: 'OK'})
+
+      // Queued offline, then sent here, so the test holds the promise the throw rejects
+      OfflineUtils.offline = true
+      save({sid: 1}, 'TRANSLATED', () => {
+        throw new Error('restore failed')
+      })
+      save({sid: 2})
+      OfflineUtils.offline = false
+
+      await expect(SetTranslationUtil.execSetTranslationTail()).rejects.toThrow(
+        'restore failed',
+      )
+      await flush()
+
+      expect(setTranslationApi).toHaveBeenCalledTimes(2)
+      expect(SetTranslationUtil.isTranslationTailEmpty()).toBe(true)
+    })
+
+    test('a throw in the navigation callback does not keep the save from being sent', () => {
+      setTranslationApi.mockReturnValue(new Promise(() => {}))
+
+      expect(() =>
+        SetTranslationUtil.segmentTranslation(
+          buildSegment(),
+          'TRANSLATED',
+          () => {
+            throw new Error('open failed')
+          },
+          false,
+        ),
+      ).toThrow('open failed')
+      expect(setTranslationApi).toHaveBeenCalledTimes(1)
+    })
+
+    test('a segment saved again goes after the saves made before it', async () => {
+      const first = deferred()
+      setTranslationApi
+        .mockReturnValueOnce(first.promise)
+        .mockResolvedValue({data: 'OK'})
+
+      save({sid: 9, translation: 'sent'})
+      save({sid: 1, translation: 'one'})
+      save({sid: 2, translation: 'two'})
+      save({sid: 1, translation: 'one, edited'})
+      first.resolve({data: 'OK'})
+      await flush()
+
+      expect(
+        setTranslationApi.mock.calls.map(([request]) => request.translation),
+      ).toEqual(['sent', 'two', 'one, edited'])
+    })
+
+    test('a segment keeps showing as saving while a newer save of it waits', async () => {
+      const first = deferred()
+      const second = deferred()
+      setTranslationApi
+        .mockReturnValueOnce(first.promise)
+        .mockReturnValueOnce(second.promise)
+
+      save({sid: 1, translation: 'one'})
+      save({sid: 1, translation: 'one, edited'})
+      first.resolve({data: 'OK'})
+      await flush()
+      expect(SegmentActions.setSegmentSaving).not.toHaveBeenCalledWith(1, false)
+
+      second.resolve({data: 'OK'})
+      await flush()
+      expect(SegmentActions.setSegmentSaving).toHaveBeenLastCalledWith(1, false)
+    })
+
+    describe('a lost connection', () => {
+      const lost = () => Promise.reject(new TypeError('Failed to fetch'))
+      const settle = () => jest.advanceTimersByTimeAsync(0)
+
+      beforeEach(() => {
+        jest.useFakeTimers()
+        global.config.offlineModeEnabled = true
+      })
+      afterEach(() => {
+        jest.useRealTimers()
+      })
+
+      test('sends the save again, ahead of the later saves, while the server is reachable', async () => {
+        setTranslationApi
+          .mockImplementationOnce(lost)
+          .mockResolvedValue({data: 'OK'})
+
+        save({sid: 1})
+        save({sid: 2})
+        await settle()
+        expect(OfflineUtils.startOfflineMode).toHaveBeenCalledTimes(1)
+        expect(SegmentActions.setSegmentSaving).not.toHaveBeenCalledWith(
+          1,
+          false,
+        )
+
+        await jest.advanceTimersByTimeAsync(2000)
+
+        expect(
+          setTranslationApi.mock.calls.map(([request]) => request.sid),
+        ).toEqual([1, 1, 2])
+        expect(CatToolActions.processErrors).not.toHaveBeenCalled()
+        expect(SetTranslationUtil.isTranslationTailEmpty()).toBe(true)
+      })
+
+      test('waits for the connection to come back while offline', async () => {
+        setTranslationApi.mockImplementationOnce(lost)
+        OfflineUtils.startOfflineMode.mockImplementation(() => {
+          OfflineUtils.offline = true
+        })
+
+        save({sid: 1})
+        await settle()
+        await jest.advanceTimersByTimeAsync(10000)
+
+        expect(setTranslationApi).toHaveBeenCalledTimes(1)
+        expect(SetTranslationUtil.isTranslationTailEmpty()).toBe(false)
+      })
+
+      test('reports the save as not saved after the third attempt and sends the next one', async () => {
+        setTranslationApi
+          .mockImplementationOnce(lost)
+          .mockImplementationOnce(lost)
+          .mockImplementationOnce(lost)
+          .mockResolvedValue({data: 'OK'})
+        const errorCallback = jest.fn()
+
+        save({sid: 1}, 'TRANSLATED', errorCallback)
+        save({sid: 2})
+        await jest.advanceTimersByTimeAsync(10000)
+
+        expect(
+          setTranslationApi.mock.calls.map(([request]) => request.sid),
+        ).toEqual([1, 1, 1, 2])
+        expect(CatToolActions.processErrors).toHaveBeenCalledTimes(1)
+        expect(errorCallback).toHaveBeenCalledTimes(1)
+        expect(SegmentActions.setSegmentSaving).toHaveBeenCalledWith(1, false)
+        expect(SetTranslationUtil.isTranslationTailEmpty()).toBe(true)
+      })
+
+      test('drops the save when the segment was saved again meanwhile', async () => {
+        const first = deferred()
+        setTranslationApi
+          .mockReturnValueOnce(first.promise)
+          .mockResolvedValue({data: 'OK'})
+
+        save({sid: 1, translation: 'old'})
+        save({sid: 1, translation: 'new'})
+        first.reject(new TypeError('Failed to fetch'))
+        await jest.advanceTimersByTimeAsync(2000)
+
+        expect(
+          setTranslationApi.mock.calls.slice(1).map(([request]) => request),
+        ).toEqual([{sid: 1, translation: 'new', status: 'TRANSLATED'}])
+      })
+    })
+  })
+
+  describe('empty target', () => {
+    test.each([
+      ['online', false],
+      ['offline', true],
+    ])('is refused %s without being marked as saving', (_, offline) => {
+      OfflineUtils.offline = offline
+      const callback = jest.fn()
+      const errorCallback = jest.fn()
+
+      SetTranslationUtil.segmentTranslation(
+        buildSegment({translation: ''}),
+        'TRANSLATED',
+        callback,
+        false,
+        errorCallback,
+      )
+
+      expect(SegmentActions.setSegmentSaving).not.toHaveBeenCalled()
+      expect(setTranslationApi).not.toHaveBeenCalled()
       expect(OfflineUtils.decrementOfflineCacheRemaining).not.toHaveBeenCalled()
-      expect(OfflineUtils.failedConnection).not.toHaveBeenCalled()
-      expect(OfflineUtils.changeStatusOffline).toHaveBeenCalledWith(1)
+      expect(SetTranslationUtil.isTranslationTailEmpty()).toBe(true)
+      expect(callback).not.toHaveBeenCalled()
+      expect(errorCallback).toHaveBeenCalledTimes(1)
+    })
+
+    test('a target made only of tags is saved', () => {
+      SetTranslationUtil.segmentTranslation(
+        buildSegment({translation: '&lt;g id="1"&gt;&lt;/g&gt;'}),
+        'TRANSLATED',
+        jest.fn(),
+        false,
+      )
+
+      expect(setTranslationApi).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -306,7 +687,12 @@ describe('setTranslationUtil', () => {
       const segment = buildSegment()
       const callback = jest.fn()
 
-      SetTranslationUtil.segmentTranslation(segment, 'TRANSLATED', callback, false)
+      SetTranslationUtil.segmentTranslation(
+        segment,
+        'TRANSLATED',
+        callback,
+        false,
+      )
 
       expect(setTranslationApi).toHaveBeenCalledTimes(1)
       expect(callback).toHaveBeenCalledTimes(1)
@@ -330,14 +716,15 @@ describe('setTranslationUtil', () => {
       expect(SegmentActions.setChoosenSuggestion).toHaveBeenCalledWith(1, null)
       expect(SegmentActions.setSegmentSaving).toHaveBeenCalledWith(1, false)
       expect(SegmentActions.setStatus).toHaveBeenCalledWith(1, null, 'DRAFT')
+      // What the server now holds, shown again if the target is later left empty
+      expect(SegmentActions.setSavedTranslation).toHaveBeenCalledWith(
+        1,
+        'hello',
+      )
       expect(CatToolActions.setProgress).toHaveBeenCalledWith({
         data: 'OK',
         propagation: null,
       })
-      expect(SegmentActions.removeClassToSegment).toHaveBeenCalledWith(
-        1,
-        'setTranslationPending',
-      )
       expect(CatToolActions.checkWarnings).toHaveBeenCalledWith(false)
       expect(CommonUtils.dispatchCustomEvent).toHaveBeenCalledWith(
         'setTranslation:success',
@@ -354,7 +741,7 @@ describe('setTranslationUtil', () => {
       expect(SetTranslationUtil.isTranslationTailEmpty()).toBe(true)
     })
 
-    test('does nothing further when the response data is not OK', async () => {
+    test('does not show the segment as saved when the response data is not OK', async () => {
       setTranslationApi.mockResolvedValue({data: 'KO'})
       const segment = buildSegment()
 
@@ -422,9 +809,7 @@ describe('setTranslationUtil', () => {
       const {container} = render(
         CatToolActions.addNotification.mock.calls[0][0].text,
       )
-      expect(container).toHaveTextContent(
-        /locked segments have been excluded/,
-      )
+      expect(container).toHaveTextContent(/locked segments have been excluded/)
       expect(container).not.toHaveTextContent(
         /non-locked segments have been excluded/,
       )
@@ -493,7 +878,8 @@ describe('setTranslationUtil', () => {
     })
 
     test('re-queues the item and switches to offline mode on a network error', async () => {
-      setTranslationApi.mockRejectedValue({errors: []})
+      // What fetch rejects with when the connection is lost
+      setTranslationApi.mockRejectedValue(new TypeError('Failed to fetch'))
       const segment = buildSegment()
 
       SetTranslationUtil.segmentTranslation(segment, 'DRAFT', jest.fn(), false)
@@ -503,9 +889,8 @@ describe('setTranslationUtil', () => {
 
       expect(OfflineUtils.changeStatusOffline).toHaveBeenCalledWith(1)
       expect(OfflineUtils.startOfflineMode).toHaveBeenCalled()
-      // The saving flag has to be cleared on the way out, otherwise the segment
-      // keeps spinning forever after a failed save.
-      expect(SegmentActions.setSegmentSaving).toHaveBeenLastCalledWith(1, false)
+      // Still saving: it is sent again, and reported once the attempts run out
+      expect(SegmentActions.setSegmentSaving).not.toHaveBeenCalledWith(1, false)
       expect(CatToolActions.processErrors).not.toHaveBeenCalled()
       expect(SetTranslationUtil.isTranslationTailEmpty()).toBe(false)
     })
@@ -545,6 +930,24 @@ describe('setTranslationUtil', () => {
         status: 'NEW',
         modified: true,
         translation: '',
+      })
+      expect(SetTranslationUtil.translationIsToSaveBeforeClose(segment)).toBe(
+        false,
+      )
+    })
+
+    test('is false when the segment is already waiting in the queue', () => {
+      OfflineUtils.offline = true
+      SetTranslationUtil.segmentTranslation(
+        buildSegment({translation: 'queued'}),
+        'DRAFT',
+        jest.fn(),
+        false,
+      )
+      const segment = buildSegment({
+        status: 'DRAFT',
+        modified: true,
+        translation: 'edited after',
       })
       expect(SetTranslationUtil.translationIsToSaveBeforeClose(segment)).toBe(
         false,

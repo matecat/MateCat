@@ -373,6 +373,40 @@ describe('Editarea lifecycle', () => {
 
     expect(updateCounter).toHaveBeenCalledWith(0)
   })
+
+  test('does not push an empty translation to the store on mount', () => {
+    mountEditarea({
+      segment: makeSegment({translation: '', decodedTranslation: ''}),
+    })
+
+    expect(SegmentActions.updateTranslation).not.toHaveBeenCalled()
+  })
+
+  test('pushes an emptied target to the store', () => {
+    mountEditarea({
+      segment: makeSegment({translation: 'a', decodedTranslation: 'a'}),
+    })
+    SegmentActions.updateTranslation.mockClear()
+    const [, replaceTranslation] = SegmentStore.addListener.mock.calls.find(
+      ([event]) => event === SegmentConstants.REPLACE_TRANSLATION,
+    )
+
+    act(() => {
+      replaceTranslation('12-1', '')
+    })
+    flush()
+
+    // Left out, the store kept the last character: the confirm buttons stayed enabled and
+    // confirming saved that character
+    expect(SegmentActions.updateTranslation).toHaveBeenLastCalledWith(
+      '12-1',
+      '',
+      '',
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+    )
+  })
 })
 
 // ---------------------------------------------------------------------------

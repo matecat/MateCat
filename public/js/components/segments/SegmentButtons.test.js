@@ -1,5 +1,5 @@
 import React from 'react'
-import {render, fireEvent, waitFor, act} from '@testing-library/react'
+import {render, screen, fireEvent, waitFor, act} from '@testing-library/react'
 import '@testing-library/jest-dom'
 
 import SegmentButton from './SegmentButtons'
@@ -100,12 +100,12 @@ describe('SegmentButtons', () => {
 
   test('renders the translate confirm button by default', () => {
     const {container} = renderButton()
-    expect(
-      container.querySelector('#segment-1-buttons'),
-    ).toBeInTheDocument()
+    expect(container.querySelector('#segment-1-buttons')).toBeInTheDocument()
     expect(container).toHaveTextContent(/Translate/)
     expect(
-      container.querySelector('[title="Translate and go to next untranslated"]'),
+      container.querySelector(
+        '[title="Translate and go to next untranslated"]',
+      ),
     ).not.toBeInTheDocument()
   })
 
@@ -276,6 +276,22 @@ describe('SegmentButtons', () => {
     expect(SegmentActions.clickOnTranslatedButton).not.toHaveBeenCalled()
     jest.useRealTimers()
   })
+
+  test.each([
+    ['translate', false, 'Translate'],
+    ['revise', true, 'Approve'],
+  ])(
+    'the %s confirm button is disabled while the target cannot be confirmed',
+    (_, isReview, label) => {
+      window.config.isReview = isReview
+      renderButton({disabled: true, isReview})
+
+      // The accessible name is the shortcut, from the tooltip
+      const confirmButton = screen.getByRole('button', {name: 'CTRL+ENTER'})
+      expect(confirmButton).toHaveTextContent(label)
+      expect(confirmButton).toBeDisabled()
+    },
+  )
 
   test('confirms approval via the nextUntranslated hotkey when in review mode', () => {
     jest.useFakeTimers()

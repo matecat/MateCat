@@ -15,7 +15,10 @@ import CatToolActions from './actions/CatToolActions'
 import CommonUtils from './utils/commonUtils'
 import {setTranslation} from './api/setTranslation'
 
+// Saves not sent yet, in the order they were made; a segment has at most one
 let setTranslationQueue = []
+// The save whose request is on its way, if any
+let inFlightItem = null
 export const segmentTranslation = (
   segment,
   status,
@@ -160,110 +163,174 @@ const setTranslationTail = ({
   callback,
   errorCallback,
 }) => {
+  // An empty target is never sent. Refuse it here, before the segment is marked as saving: only the
+  // answer to a request clears that state, so a segment marked and never sent stays saving forever.
+  if (!segment.translation) {
+    errorCallback?.()
+    return
+  }
+  // Built now, while this is still the segment being edited: the request carries the editing time
+  // and the context of this moment, and it may be sent after the translator has moved on
+  const request = SegmentUtils.createSetTranslationRequest(
+    segment,
+    status,
+    propagate,
+  )
+  SegmentStore.setLastTranslatedSegmentId(segment.sid)
   const queueItem = {
     segment,
     status,
     propagate,
     autoPropagate,
-    callback,
+    request,
     errorCallback,
   }
-  //Check if the translation is not already in the tail
-  const saveTranslation = translationIsToSave(segment)
-  // If not save it or update
-  if (saveTranslation) {
-    SegmentActions.addClassToSegment(
-      queueItem.segment.sid,
-      'setTranslationPending',
-    )
-    setTranslationQueue.push(queueItem)
-  } else {
-    SegmentActions.addClassToSegment(
-      queueItem.segment.sid,
-      'setTranslationPending',
-    )
-    setTranslationQueue[
-      setTranslationQueue.findIndex(
-        (current) => current.segment.sid === queueItem.segment.sid,
-      )
-    ] = queueItem
-  }
+  // A segment saved again while its previous save is still queued replaces it: only the latest
+  // version is sent, and offline it does not take another slot of the cache. It goes to the end, as
+  // the latest save: a save of a repetition made earlier must not propagate over it.
+  const alreadyQueued = alreadyInSetTranslationTail(segment.sid)
+  setTranslationQueue = setTranslationQueue.filter(
+    (current) => current.segment.sid !== segment.sid,
+  )
+  setTranslationQueue.push(queueItem)
   SegmentActions.setSegmentSaving(segment.sid, true)
-  // If is offline and is in the tail I decrease the counter
-  // else I execute the tail
-  if (OfflineUtils.offline && config.offlineModeEnabled) {
-    if (saveTranslation) {
+  const offline = OfflineUtils.offline && config.offlineModeEnabled
+  if (offline) {
+    if (!alreadyQueued) {
       OfflineUtils.decrementOfflineCacheRemaining()
       OfflineUtils.failedConnection()
     }
     OfflineUtils.changeStatusOffline(segment.sid)
     OfflineUtils.checkConnection()
-    if (callback) {
-      callback.call(this)
-    }
-  } else {
-    return execSetTranslationTail()
+  }
+  try {
+    // The translator moves on as soon as the save is queued and keeps working while it is sent; a
+    // save that fails is reported through errorCallback
+    callback?.()
+  } finally {
+    // Offline, the queue is sent when the connection is back (OfflineUtils.checkConnection)
+    if (!offline) execSetTranslationTail()
   }
 }
 
+// Shown for a save the server did not refuse but did not complete either
+const SAVE_FAILED_ERRORS = [
+  {code: -1, message: 'The translation was not saved'},
+]
+// A save that got no answer is sent again, this many times in all, then reported as not saved. The
+// same request failing again and again is not a lost connection but something on the way (a proxy
+// dropping it), and it must not hold back the saves queued after it.
+const MAX_CONNECTION_ATTEMPTS = 3
+const CONNECTION_RETRY_DELAY_MS = 2000
+
+/**
+ * Sends the next queued save, unless one is already on its way. Saves go out one at a time, so two
+ * saves of the same segment reach the server in the order they were made; each answer sends the
+ * next one.
+ */
 export const execSetTranslationTail = () => {
-  if (!setTranslationQueue.length) return
+  if (inFlightItem || !setTranslationQueue.length) return
   const item = setTranslationQueue.shift()
-  const {segment, status, propagate, callback, errorCallback} = item
+  inFlightItem = item
+  const {segment, request, errorCallback} = item
   const idSegment = segment.sid
-  SegmentStore.setLastTranslatedSegmentId(segment.sid)
-  const translateRequest = SegmentUtils.createSetTranslationRequest(
-    segment,
-    status,
-    propagate,
-  )
-  // Move on as soon as the request is built: translators keep working while it is in flight
-  // and come back to any segment that failed. A refusal is reported through errorCallback.
-  if (callback) {
-    callback.call(this)
+
+  const sendNext = () => {
+    inFlightItem = null
+    execSetTranslationTail()
   }
-  setTranslation(translateRequest)
-    .then((data) => {
-      SegmentActions.setChoosenSuggestion(idSegment, null)
+  const reportFailure = (errors) => {
+    CatToolActions.processErrors(errors, 'setTranslation')
+    errorCallback?.(errors)
+  }
+
+  // The segment stops showing as saving only once no newer save of it is waiting
+  const doneSaving = () => {
+    if (!alreadyInSetTranslationTail(idSegment)) {
       SegmentActions.setSegmentSaving(idSegment, false)
-      setTranslation_success(data, item)
-      //Review
-      if (config.isReview) {
-        SegmentActions.getSegmentVersionsIssues(idSegment)
-        CatToolActions.reloadQualityReport()
+    }
+  }
+
+  // Returned so a throw while handling an answer stays visible: it rejects this promise and nothing
+  // handles it, so it is reported as any unhandled error is. Whatever throws, the next save is sent
+  // (finally): a throw must never stop the queue.
+  return setTranslation(request).then(
+    (data) => {
+      try {
+        doneSaving()
+        if (data?.data !== 'OK') {
+          reportFailure(SAVE_FAILED_ERRORS)
+          return
+        }
+        // The server has the save: from here a throw is the page failing to show it, not a failed save
+        SegmentActions.setChoosenSuggestion(idSegment, null)
+        setTranslation_success(data, item)
+        if (config.isReview) {
+          SegmentActions.getSegmentVersionsIssues(idSegment)
+          CatToolActions.reloadQualityReport()
+        }
+        CommonUtils.dispatchCustomEvent('setTranslation:success', {segment})
+        if (config.alternativesEnabled) {
+          SegmentActions.getTranslationMismatches(idSegment)
+        }
+      } finally {
+        sendNext()
       }
-      CommonUtils.dispatchCustomEvent('setTranslation:success', {segment})
-      if (config.alternativesEnabled) {
-        SegmentActions.getTranslationMismatches(idSegment)
+    },
+    (error) => {
+      item.attempts = (item.attempts ?? 0) + 1
+      if (isConnectionLost(error) && item.attempts < MAX_CONNECTION_ATTEMPTS) {
+        retryAfterConnectionLoss(item)
+        return
       }
-      execSetTranslationTail()
-    })
-    .catch(({errors}) => {
-      if (errors && errors.length) {
-        CatToolActions.processErrors(errors, 'setTranslation')
-        // The server refused the translation: it will not be retried
-        errorCallback?.(errors)
-      } else {
-        //Add to setTranslation tail
-        setTranslationQueue.push(item)
-        OfflineUtils.changeStatusOffline(idSegment)
-        OfflineUtils.startOfflineMode()
+      try {
+        doneSaving()
+        // The server refused the save (its errors), failed it, or it never got an answer however
+        // many times it was sent. None is retried: the translator saves the segment again.
+        reportFailure(
+          Array.isArray(error?.errors) && error.errors.length
+            ? error.errors
+            : SAVE_FAILED_ERRORS,
+        )
+      } finally {
+        sendNext()
       }
-      SegmentActions.setSegmentSaving(idSegment, false)
-    })
+    },
+  )
 }
+
+const retryAfterConnectionLoss = (item) => {
+  const idSegment = item.segment.sid
+  inFlightItem = null
+  // Back at the head of the queue, so the saves still go out in the order they were made, unless
+  // the segment was saved again meanwhile: the newer save replaces it. Still saving either way.
+  if (!alreadyInSetTranslationTail(idSegment)) {
+    setTranslationQueue.unshift(item)
+  }
+  OfflineUtils.changeStatusOffline(idSegment)
+  // Pings the server: when it is unreachable this turns offline mode on, and the queue is sent when
+  // the connection is back (OfflineUtils.checkConnection)
+  OfflineUtils.startOfflineMode()
+  // When it is reachable nothing else would send the queue again before the next save
+  setTimeout(() => {
+    if (!(OfflineUtils.offline && config.offlineModeEnabled)) {
+      execSetTranslationTail()
+    }
+  }, CONNECTION_RETRY_DELAY_MS * item.attempts)
+}
+
+// The request never got an answer: setTranslation rejects with the response whenever the server
+// answered, and fetch rejects without one when the connection is lost
+const isConnectionLost = (error) => !error?.response && !error?.errors
+
 const setTranslation_success = (response, item) => {
   const {segment, status} = item
 
-  if (response.data === 'OK') {
-    SegmentActions.setStatus(segment.sid, null, status)
-    CatToolActions.setProgress(response)
-    SegmentActions.removeClassToSegment(segment.sid, 'setTranslationPending')
-
-    CatToolActions.checkWarnings(false)
-
-    checkSegmentsPropagation(item, response.propagation)
-  }
+  SegmentActions.setStatus(segment.sid, null, status)
+  SegmentActions.setSavedTranslation(segment.sid, segment.translation)
+  CatToolActions.setProgress(response)
+  CatToolActions.checkWarnings(false)
+  checkSegmentsPropagation(item, response.propagation)
 }
 
 const checkSegmentsPropagation = (item, propagationData) => {
@@ -363,20 +430,9 @@ export const translationIsToSaveBeforeClose = (segment) => {
       segment.status === config.status_labels.DRAFT.toUpperCase())
   )
 }
-const translationIsToSave = (segment) => {
-  // add to setTranslation tail
-  const alreadySet = alreadyInSetTranslationTail(segment.sid)
-  const emptyTranslation = segment && segment.translation.length === 0
-
-  return !alreadySet && !emptyTranslation
-}
-const alreadyInSetTranslationTail = (sid) => {
-  let alreadySet = false
-  setTranslationQueue.forEach((item) => {
-    if (item.id_segment === sid) alreadySet = true
-  })
-  return alreadySet
-}
+const alreadyInSetTranslationTail = (sid) =>
+  setTranslationQueue.some((item) => item.segment.sid === sid)
 export const isTranslationTailEmpty = () => {
-  return setTranslationQueue.length === 0
+  // A save on its way is not saved yet: leaving the page now would lose it
+  return !inFlightItem && setTranslationQueue.length === 0
 }
