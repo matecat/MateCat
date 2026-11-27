@@ -4,6 +4,7 @@ import {
   orderTmKeys,
   getTmDataStructureToSendServer,
   toTemplateTmEntry,
+  mergeJobAndUserTmKeys,
 } from './TranslationMemoryGlossaryTabUtils'
 
 describe('TranslationMemoryGlossaryTabUtils', () => {
@@ -156,5 +157,59 @@ describe('toTemplateTmEntry', () => {
       w: true,
       penalty: 0,
     })
+  })
+})
+
+describe('mergeJobAndUserTmKeys', () => {
+  const ownerJobKey = {key: 'ownerkey', owner: true, r: 1, w: 0}
+  const translatorJobKey = {key: 'mykey', owner: false, r: 1, w: 1}
+  const keyringOnly = {key: 'keyringonly', owner: true, r: 0, w: 0}
+
+  test('marks the owner job keys as locked for someone who is not the job owner', () => {
+    const rows = mergeJobAndUserTmKeys({
+      jobKeys: [ownerJobKey, translatorJobKey],
+      userKeys: [keyringOnly],
+      ownerIsMe: false,
+    })
+
+    expect(rows.map(({key, isJobOwnerKey}) => [key, isJobOwnerKey])).toEqual([
+      ['ownerkey', true],
+      ['mykey', false],
+      ['keyringonly', undefined],
+    ])
+  })
+
+  test('leaves every key editable for the job owner', () => {
+    const rows = mergeJobAndUserTmKeys({
+      jobKeys: [ownerJobKey],
+      userKeys: [keyringOnly],
+      ownerIsMe: true,
+    })
+
+    expect(rows.some(({isJobOwnerKey}) => isJobOwnerKey)).toBe(false)
+  })
+
+  test('keeps the job copy of a key that is also in the keyring', () => {
+    const rows = mergeJobAndUserTmKeys({
+      jobKeys: [ownerJobKey],
+      userKeys: [{...ownerJobKey, r: 0, w: 0}],
+      ownerIsMe: false,
+    })
+
+    expect(rows).toEqual([
+      {
+        ...ownerJobKey,
+        id: 'ownerkey',
+        isActive: true,
+        isLocked: false,
+        isJobOwnerKey: true,
+      },
+    ])
+  })
+
+  test('toTemplateTmEntry leaves the flag out of the template', () => {
+    expect(
+      toTemplateTmEntry({key: 'k', r: true, w: false, isJobOwnerKey: true}),
+    ).toEqual({key: 'k', r: true, w: false})
   })
 })

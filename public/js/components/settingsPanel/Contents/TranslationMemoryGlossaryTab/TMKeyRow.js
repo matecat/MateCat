@@ -86,6 +86,12 @@ export const TMKeyRow = ({row, onExpandRow}) => {
 
   const isMMSharedKey = row.id === SPECIAL_ROWS_ID.defaultTranslationMemory
   const isOwner = isOwnerOfKey(row.key)
+  // A key the job owner chose, seen by someone else who has it in their keyring:
+  // only the owner can change how the job uses it
+  const isJobOwnerKey = Boolean(row.isJobOwnerKey)
+  const jobOwnerKeyTitle = isJobOwnerKey
+    ? {title: 'Set by the project owner'}
+    : {}
   const getPublicMatches = currentProjectTemplate.get_public_matches
   const publicTmPenalty = currentProjectTemplate.public_tm_penalty
 
@@ -532,7 +538,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
 
   return (
     <Fragment>
-      <div className="tm-key-lookup align-center">
+      <div className="tm-key-lookup align-center" {...jobOwnerKeyTitle}>
         <Checkbox
           value={isLookup ? CHECKBOX_STATE.CHECKED : CHECKBOX_STATE.UNCHECKED}
           size={CHECKBOX_SIZE.SMALL}
@@ -540,12 +546,13 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           disabled={
             (!isOwner && !isMMSharedKey) ||
             (isMMSharedKey && !config.ownerIsMe) ||
-            row.isTmFromFile
+            row.isTmFromFile ||
+            isJobOwnerKey
           }
           testId={`tmkey-lookup-${row.id}`}
         />
       </div>
-      <div className="tm-key-update align-center">
+      <div className="tm-key-update align-center" {...jobOwnerKeyTitle}>
         {row.isActive && (
           <Checkbox
             value={
@@ -555,7 +562,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             }
             size={CHECKBOX_SIZE.SMALL}
             onChange={onChangeIsUpdating}
-            disabled={isMMSharedKey || !isOwner}
+            disabled={isMMSharedKey || !isOwner || isJobOwnerKey}
             {...(isMMSharedKey &&
               isMMSharedUpdateChecked && {
                 title: 'Add a private resource to disable updating',
@@ -584,6 +591,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         </div>
       </Tooltip>
       {isOwner &&
+        !isJobOwnerKey &&
         row.isActive &&
         isLookup &&
         ((isMMSharedKey && config.ownerIsMe) || !isMMSharedKey) && (

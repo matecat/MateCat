@@ -1257,12 +1257,13 @@ class TmKeyManagementTest extends AbstractTest
          *
          *   [
          *
-         *   {"tm":true,"glos":false,"owner":true,"key":"0000123ABC","name":"My ABC","r":"1","w":"1","uid_transl":123,"uid_rev":null,"r_transl":1,"w_transl":1,"r_rev":null,"w_rev":null,"source":null,"target":null},
+         *   {"tm":true,"glos":false,"owner":true,"key":"0000123ABC","name":"","r":"1","w":"1","uid_transl":123,"uid_rev":null,"r_transl":1,"w_transl":0,"r_rev":null,"w_rev":null,"source":null,"target":null},
          *
          *   {"tm":true,"glos":false,"owner":false,"key":"0000123DEF","name":"My DEF","r":null,"w":null,"uid_transl":123,"uid_rev":null,"r_transl":1,"w_transl":0,"r_rev":null,"w_rev":null,"source":null,"target":null}
          *
          *   ]
          *
+         * ABC is an owner key: a translator cannot change it, so it comes back as stored.
          */
 
         $this->assertCount(2, $resultMerge);
@@ -1280,7 +1281,7 @@ class TmKeyManagementTest extends AbstractTest
         $this->assertEquals("0000123ABC", $firstKey->key);
         $this->assertEquals(123, $firstKey->uid_transl);
         $this->assertEquals(1, $firstKey->r_transl);
-        $this->assertEquals(1, $firstKey->w_transl);
+        $this->assertEquals(0, $firstKey->w_transl);
         $this->assertEquals(1, $firstKey->owner);
         $this->assertEquals(1, $firstKey->r);
         $this->assertEquals(1, $firstKey->w);
@@ -1313,10 +1314,11 @@ class TmKeyManagementTest extends AbstractTest
          *
          *   [
          *
-         *   {"tm":true,"glos":false,"owner":true,"key":"0000123GHI","name":"My GHI","r":"1","w":"1","uid_transl":null,"uid_rev":null,"r_transl":false,"w_transl":true,"r_rev":null,"w_rev":null,"source":null,"target":null}
+         *   {"tm":true,"glos":false,"owner":true,"key":"0000123GHI","name":"My GHI","r":"1","w":"1","uid_transl":null,"uid_rev":null,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}
          *
          *   ]
          *
+         * GHI is an owner key: an anonymous translator cannot change it, so it comes back as stored.
          */
 
         $this->assertCount(1, $resultMerge);
@@ -1328,8 +1330,8 @@ class TmKeyManagementTest extends AbstractTest
 
         $this->assertEquals("0000123GHI", $firstKey->key);
         $this->assertNull($firstKey->uid_transl);
-        $this->assertEquals(0, $firstKey->r_transl);
-        $this->assertEquals(1, $firstKey->w_transl);
+        $this->assertNull($firstKey->r_transl);
+        $this->assertNull($firstKey->w_transl);
         $this->assertEquals(1, $firstKey->owner);
         $this->assertEquals(1, $firstKey->r);
         $this->assertEquals(1, $firstKey->w);
@@ -1515,9 +1517,11 @@ class TmKeyManagementTest extends AbstractTest
          */
         $firstKey = $resultMerge[0];
 
+        // ABC is an owner key: the translator's w=1 and new name are not stored
         $this->assertEquals("0000123ABC", $firstKey->key);
         $this->assertEquals(1, $firstKey->r_transl);
-        $this->assertEquals(1, $firstKey->w_transl);
+        $this->assertEquals(0, $firstKey->w_transl);
+        $this->assertEquals("", $firstKey->name);
         $this->assertEquals(1, $firstKey->owner);
         $this->assertEquals(1, $firstKey->r);
         $this->assertEquals(1, $firstKey->w);
@@ -1607,7 +1611,7 @@ class TmKeyManagementTest extends AbstractTest
          *
          *   [
          *
-         *   {"tm":true,"glos":false,"owner":true,"key":"0000123ABC","name":"My ABC","r":"1","w":"1","uid_transl":123,"uid_rev":null,"r_transl":1,"w_transl":1,"r_rev":null,"w_rev":null,"source":null,"target":null},
+         *   {"tm":true,"glos":false,"owner":true,"key":"0000123ABC","name":"My ABC","r":"1","w":"1","uid_transl":123,"uid_rev":null,"r_transl":1,"w_transl":0,"r_rev":null,"w_rev":null,"source":null,"target":null},
          *
          *   {"tm":true,"glos":false,"owner":true,"key":"0000123GHI","name":"My GHI","r":"1","w":"1","uid_transl":null,"uid_rev":null,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null},
          *
@@ -1635,9 +1639,10 @@ class TmKeyManagementTest extends AbstractTest
         $thirdKey = $resultMerge[2];
 
 
+        // ABC is an owner key: the translator's w=1 is not stored
         $this->assertEquals("0000123ABC", $firstKey->key);
-        $this->assertTrue($firstKey->r_transl);
-        $this->assertTrue($firstKey->w_transl);
+        $this->assertEquals(1, $firstKey->r_transl);
+        $this->assertEquals(0, $firstKey->w_transl);
         $this->assertEquals(123, $firstKey->uid_transl);
         $this->assertEquals(1, $firstKey->owner);
         $this->assertEquals(1, $firstKey->r);
@@ -1725,13 +1730,10 @@ class TmKeyManagementTest extends AbstractTest
          */
         $thirdKey = $resultMerge[2];
 
+        // MNO is an owner key: it keeps its stored grants and keeps its place on top
         $this->assertEquals("0000123MNO", $firstKey->key);
-        $this->assertTrue($firstKey->r_transl);
-        if (version_compare(PHP_VERSION, 5.4) >= 0) {
-            $this->assertFalse($firstKey->w_transl);
-        } else {
-            $this->assertNull($firstKey->w_transl);
-        }
+        $this->assertEquals(0, $firstKey->r_transl);
+        $this->assertEquals(1, $firstKey->w_transl);
         $this->assertEquals("My MNO", $firstKey->name);
         $this->assertEquals(123, $firstKey->uid_transl);
         $this->assertEquals(1, $firstKey->owner);

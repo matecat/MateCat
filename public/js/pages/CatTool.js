@@ -27,6 +27,7 @@ import {
   SETTINGS_PANEL_TABS,
 } from '../components/settingsPanel/SettingsPanelConstants'
 import {getTmKeysJob} from '../api/getTmKeysJob'
+import {mergeJobAndUserTmKeys} from '../components/settingsPanel/Contents/TranslationMemoryGlossaryTab/TranslationMemoryGlossaryTabUtils'
 import {getSupportedLanguages} from '../api/getSupportedLanguages'
 import ApplicationStore from '../stores/ApplicationStore'
 import useProjectTemplates from '../hooks/useProjectTemplates'
@@ -248,21 +249,11 @@ function CatTool() {
     const promises = [getTmKeysJob(), getTmKeysUser()]
     let modifiedTemplate = {}
     Promise.all(promises)
-      .then((values) => {
-        const uniqueKeys = values
-          .flatMap((item) => [...item.tm_keys])
-          .reduce(
-            (acc, cur) =>
-              !acc.some(({key}) => key === cur.key) ? [...acc, cur] : acc,
-            [],
-          )
-        const updatedTmKeys = uniqueKeys.map((key) => {
-          return {
-            ...key,
-            id: key.key,
-            isActive: Boolean(key.r || key.w),
-            isLocked: !key.owner,
-          }
+      .then(([jobKeys, userKeys]) => {
+        const updatedTmKeys = mergeJobAndUserTmKeys({
+          jobKeys: jobKeys.tm_keys,
+          userKeys: userKeys.tm_keys,
+          ownerIsMe: config.ownerIsMe,
         })
         setTmKeys(updatedTmKeys)
         modifyingCurrentTemplate((prevTemplate) => {

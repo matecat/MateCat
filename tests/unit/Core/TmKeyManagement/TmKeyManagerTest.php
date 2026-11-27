@@ -206,4 +206,90 @@ class TmKeyManagerTest extends AbstractTest
 
         $this->assertSame($expected, TmKeyManager::getNewKeys($clientJson, $jobJson));
     }
+
+    /**
+     * A key the job owner chose, as stored in the job: lookup only, with a penalty.
+     */
+    private const string OWNER_JOB_KEY_JSON = '[{"key":"0123456789abcdef0123","name":"Owner key","owner":true,"tm":true,"glos":true,'
+    . '"r":true,"w":false,"uid_transl":null,"uid_rev":null,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"penalty":10}]';
+
+    /**
+     * The same key sent back by a client that turned on Update, changed the penalty, the name and the type flags.
+     */
+    private const string EDITED_CLIENT_KEY_JSON = '[{"key":"0123456789abcdef0123","name":"Renamed","tm":false,"glos":false,'
+    . '"r":true,"w":true,"penalty":50}]';
+
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function nonOwnerRoles(): array
+    {
+        return [
+            'translator' => [Filter::ROLE_TRANSLATOR],
+            'revisor'    => [Filter::ROLE_REVISOR],
+        ];
+    }
+
+    /**
+     * A non-owner cannot change a key the job owner chose: the stored key comes back unchanged.
+     *
+     * Before, the request wrote r_transl/w_transl (r_rev/w_rev), which nothing reads for an owner key, and
+     * overwrote the owner's penalty, name and type flags.
+     *
+     * @throws Exception
+     * @throws MockObjectException
+     */
+    #[Test]
+    #[DataProvider('nonOwnerRoles')]
+    public function mergeJsonKeysLeavesAnOwnerKeyUnchangedForANonOwner(string $role): void
+    {
+        $merged = TmKeyManager::mergeJsonKeys(
+            self::EDITED_CLIENT_KEY_JSON,
+            self::OWNER_JOB_KEY_JSON,
+            $this->createStub(IDatabase::class),
+            $role,
+            9_937_002
+        );
+
+        $this->assertCount(1, $merged);
+        $key = $merged[0];
+        $this->assertTrue($key->owner);
+        $this->assertTrue($key->r);
+        $this->assertFalse($key->w);
+        $this->assertNull($key->r_transl);
+        $this->assertNull($key->w_transl);
+        $this->assertNull($key->r_rev);
+        $this->assertNull($key->w_rev);
+        $this->assertSame(10, $key->penalty);
+        $this->assertSame('Owner key', $key->name);
+        $this->assertTrue($key->tm);
+        $this->assertTrue($key->glos);
+    }
+
+    /**
+     * The owner still changes its own key.
+     *
+     * @throws Exception
+     * @throws MockObjectException
+     */
+    #[Test]
+    public function mergeJsonKeysLetsTheOwnerChangeItsKey(): void
+    {
+        $merged = TmKeyManager::mergeJsonKeys(
+            self::EDITED_CLIENT_KEY_JSON,
+            self::OWNER_JOB_KEY_JSON,
+            $this->createStub(IDatabase::class),
+            Filter::OWNER,
+            9_937_003
+        );
+
+        $this->assertCount(1, $merged);
+        $key = $merged[0];
+        $this->assertTrue($key->r);
+        $this->assertTrue($key->w);
+        $this->assertSame(50, $key->penalty);
+        $this->assertSame('Renamed', $key->name);
+        $this->assertFalse($key->tm);
+        $this->assertFalse($key->glos);
+    }
 }
