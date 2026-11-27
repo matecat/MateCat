@@ -575,6 +575,66 @@ class UpdateJobKeysControllerTest extends AbstractTest
     }
 
     /**
+     * A translator who has the owner's key in their keyring gets it unmasked, so the TM panel sends it back
+     * with whatever they changed. Only the owner sets that key: its grants, penalty and name stay as stored.
+     *
+     * Uses its own uid (BASE+14) for the same Redis keyring-cache reason as the test above.
+     *
+     * @throws \Throwable
+     */
+    #[Test]
+    public function update_leaves_an_owner_key_unchanged_for_a_translator_who_has_it_in_their_keyring(): void
+    {
+        $keyUid = self::BASE + 14;
+
+        $this->seedConnection()->exec(
+            'INSERT IGNORE INTO memory_keys (uid, key_value, key_name, key_tm, key_glos, creation_date) '
+            . "VALUES ($keyUid, " . $this->seedConnection()->quote(self::OWNED_KEY) . ", 'Translator copy', 1, 1, NOW())"
+        );
+
+        try {
+            $user             = new UserStruct();
+            $user->uid        = $keyUid;
+            $user->email      = 'not-the-owner_' . self::BASE . '@example.org';
+            $user->first_name = 'Other';
+            $user->last_name  = 'User';
+            $this->setProp('user', $user);
+            $this->setProp('userIsLogged', true);
+
+            $ownerKey = [
+                'tm' => true, 'glos' => true, 'owner' => true,
+                'uid_transl' => null, 'uid_rev' => null,
+                'name' => 'Owned', 'key' => self::OWNED_KEY,
+                'r' => true, 'w' => false, 'r_transl' => null, 'w_transl' => null,
+                'r_rev' => null, 'w_rev' => null, 'penalty' => 10,
+            ];
+            $this->seedConnection()->exec(
+                'UPDATE jobs SET tm_keys = ' . $this->seedConnection()->quote((string) json_encode([$ownerKey]))
+                . ' WHERE id = ' . $this->jobId(self::BASE)
+            );
+
+            $this->seedChunk();
+            $this->sendKeys([['penalty' => 50] + $this->clientKey(self::OWNED_KEY, 'Renamed')]);
+            $this->expectOkResponse();
+
+            $this->controller->update();
+
+            $stored = json_decode($this->storedJobTmKeys(), true);
+            $this->assertCount(1, $stored);
+            $this->assertSame(self::OWNED_KEY, $stored[0]['key']);
+            $this->assertTrue($stored[0]['owner']);
+            $this->assertSame(1, $stored[0]['r']);
+            $this->assertSame(0, $stored[0]['w']);
+            $this->assertNull($stored[0]['r_transl']);
+            $this->assertNull($stored[0]['w_transl']);
+            $this->assertSame(10, $stored[0]['penalty']);
+            $this->assertSame('Owned', $stored[0]['name']);
+        } finally {
+            $this->seedConnection()->exec('DELETE FROM memory_keys WHERE uid = ' . $keyUid);
+        }
+    }
+
+    /**
      * A client key entry, as the TM panel sends it in `mine`.
      *
      * @return array<string, mixed>

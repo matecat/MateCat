@@ -27,6 +27,32 @@ export const orderTmKeys = (tmKeys, keysOrdered) => {
     : tmKeys
 }
 
+// The editor's key rows: the job keys first, then the user's keyring keys the job does not use.
+// A job key the owner chose is marked for everyone but the owner, who alone can change how the job uses it
+export const mergeJobAndUserTmKeys = ({
+  jobKeys = [],
+  userKeys = [],
+  ownerIsMe = false,
+}) =>
+  [
+    ...jobKeys.map((key) => ({
+      ...key,
+      isJobOwnerKey: Boolean(key.owner) && !ownerIsMe,
+    })),
+    ...userKeys,
+  ]
+    .reduce(
+      (acc, cur) =>
+        !acc.some(({key}) => key === cur.key) ? [...acc, cur] : acc,
+      [],
+    )
+    .map((key) => ({
+      ...key,
+      id: key.key,
+      isActive: Boolean(key.r || key.w),
+      isLocked: !key.owner,
+    }))
+
 export const getTmDataStructureToSendServer = ({tmKeys = [], keysOrdered}) => {
   const mine = tmKeys
     .filter(({key, isActive}) => isOwnerOfKey(key) && isActive)
@@ -57,7 +83,7 @@ export const getSavedTemplateTm = (projectTemplates = []) =>
 // is left out when the saved entry has none, so undoing a change gives back the
 // saved entry and the template is no longer shown as modified
 export const toTemplateTmEntry = (tmKey, savedTm = []) => {
-  const entry = omit(tmKey, ['id', 'isActive'])
+  const entry = omit(tmKey, ['id', 'isActive', 'isJobOwnerKey'])
   const saved = savedTm.find(({key}) => key === entry.key)
 
   return entry.penalty || !saved || 'penalty' in saved

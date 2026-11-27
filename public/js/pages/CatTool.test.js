@@ -586,6 +586,29 @@ describe('CatTool', () => {
       expect(result.getPublicMatches).toBe(true)
     })
 
+    test('marks the job owner keys as locked for someone who is not the job owner', async () => {
+      getTmKeysJob.mockResolvedValueOnce({
+        tm_keys: [
+          {key: 'owner1', owner: true, r: 1, w: 0, name: 'Owner TM'},
+          {key: 'mine1', owner: false, r: 1, w: 1, name: 'My TM'},
+        ],
+      })
+      getTmKeysUser.mockResolvedValueOnce({
+        tm_keys: [{key: 'owner1', owner: true, r: 0, w: 0, name: 'Owner TM'}],
+      })
+      renderCatTool()
+      await flush()
+      const updaterCall = mockModifyingCurrentTemplate.mock.calls.find((c) => {
+        const r = c[0]?.({})
+        return r && 'getPublicMatches' in r
+      })
+      const {tm} = updaterCall[0]({})
+      expect(tm.map(({key, isJobOwnerKey}) => [key, isJobOwnerKey])).toEqual([
+        ['owner1', true],
+        ['mine1', false],
+      ])
+    })
+
     test('fetches MT engines and applies active engine when owner', async () => {
       config.ownerIsMe = true
       config.active_engine = {id: 'mt-1', name: 'Engine'}

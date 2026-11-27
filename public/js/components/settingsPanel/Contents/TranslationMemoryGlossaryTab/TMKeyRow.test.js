@@ -568,3 +568,41 @@ test('the MM shared key row shows the public translation memory icon and hides t
     screen.getByTestId(`tmkey-row-name-${row.id}`),
   ).toHaveClass('tm-key-row-name-disabled')
 })
+
+test('a key the job owner chose is locked for someone else: no lookup, update or penalty change', async () => {
+  const user = userEvent.setup()
+  const row = {...baseRow(), owner: true, isJobOwnerKey: true, w: false}
+  const setTmKeys = jest.fn()
+
+  render(<Wrapper row={row} setTmKeys={setTmKeys} />)
+
+  const lookup = screen.getByTestId(`tmkey-lookup-${row.id}`)
+  const update = screen.getByTestId(`tmkey-update-${row.id}`)
+  expect(lookup).toBeDisabled()
+  expect(update).toBeDisabled()
+  expect(lookup).toBeChecked()
+  expect(update).not.toBeChecked()
+  // the lookup and update cells explain why
+  expect(screen.getAllByTitle('Set by the project owner')).toHaveLength(2)
+  expect(screen.queryByText('Add penalty')).not.toBeInTheDocument()
+
+  await user.click(update)
+  expect(setTmKeys).not.toHaveBeenCalled()
+
+  // The name and TMX import stay available to a keyring owner
+  expect(screen.getByTestId(`tmkey-row-name-${row.id}`)).toBeEnabled()
+  expect(screen.getByTestId('tm-row-import-tmx')).toBeInTheDocument()
+})
+
+test('the job owner keeps full control of the same key', () => {
+  const row = {...baseRow(), owner: true, isJobOwnerKey: false}
+
+  render(<Wrapper row={row} />)
+
+  expect(screen.getByTestId(`tmkey-lookup-${row.id}`)).toBeEnabled()
+  expect(screen.getByTestId(`tmkey-update-${row.id}`)).toBeEnabled()
+  expect(
+    screen.queryByTitle('Set by the project owner'),
+  ).not.toBeInTheDocument()
+  expect(screen.getByText('Add penalty')).toBeInTheDocument()
+})

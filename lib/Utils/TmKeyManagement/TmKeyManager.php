@@ -467,6 +467,19 @@ class TmKeyManager
                     }
                 }
 
+                // A key the job owner chose, sent back by someone else who has it in their keyring.
+                // Only the owner sets its grants, penalty, name and type: the role grants a non-owner
+                // would write here are never read for an owner key (see Filter), so the key is kept as it is.
+                if ($_job_Key->owner && $userRole !== Filter::OWNER) {
+                    unset($reverse_lookup_client_json['pos'][$_index_position]);
+                    unset($reverse_lookup_client_json['elements'][$_index_position]);
+
+                    //take the new order
+                    $server_reorder_position[$_index_position] = $_job_Key;
+
+                    continue;
+                }
+
                 //override the static values
                 $_job_key_element = $reverse_lookup_client_json['elements'][$_index_position];
                 $_job_Key->tm = filter_var($_job_key_element->tm, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
